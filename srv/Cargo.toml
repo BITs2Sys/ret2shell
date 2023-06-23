@@ -91,7 +91,7 @@ lettre = { version = "0.10", features = [
     "tokio1-rustls-tls",
     "hostname",
     "builder",
-], default-features = false } # Email client
+], default-features = false }
 # Git
 gix = "0.47"
 gix-worktree = "0.20"
