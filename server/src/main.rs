@@ -1,14 +1,14 @@
 //! # Intro
-//! 
+//!
 //! `ret2shell`: a feature-riched CTF challenge platform. This website contains the
 //! implemention details of `ret2shell`, not the user manual.
-//! 
+//!
 //! This documentation is generated from the source code of `ret2shell`.
 //! If you want to contribute to this project, refer this.
-//! 
+//!
 //! > **DO NOT USE THIS PROJECT AS A LIBRARY IN YOUR PROJECT.
 //! ALL THE MEMBERS ARE PRIVATE AND WILL CHANGE WITHOUT NOTICE.**
-//! 
+//!
 
 #![warn(missing_docs)]
 

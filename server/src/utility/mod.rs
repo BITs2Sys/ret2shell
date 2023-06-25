@@ -1,3 +1,3 @@
 //! Some utility functions.
-//! 
-//! 
+//!
+//!
