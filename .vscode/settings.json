@@ -2,5 +2,16 @@
     "i18n-ally.localesPaths": [
         "web/src/lib/i18n"
     ],
-    "i18n-ally.keystyle": "nested"
+    "i18n-ally.keystyle": "nested",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "ret2shell",
+            "database": "ret2shell",
+            "username": "ret2shell"
+        }
+    ]
 }

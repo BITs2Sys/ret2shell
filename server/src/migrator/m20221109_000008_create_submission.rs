@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20221109_000005_create_user::User, m20221109_000007_create_challenge::Challenge};
+use super::{m20221109_000002_create_user::User, m20221109_000007_create_challenge::Challenge};
 
 pub struct Migration;
 

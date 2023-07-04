@@ -1,4 +1,4 @@
-use crate::migrator::m20221109_000005_create_user::User;
+use crate::migrator::m20221109_000002_create_user::User;
 use crate::migrator::m20221109_000007_create_challenge::Challenge;
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;

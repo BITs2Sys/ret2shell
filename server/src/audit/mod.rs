@@ -13,7 +13,6 @@ use crate::config::GlobalConfig;
 
 pub mod word_filter;
 
-
 #[derive(Clone)]
 pub struct Auditor {
     /// The `AhoCorasick` word filter used by the `Auditor` to filter out unwanted words.
@@ -22,7 +21,6 @@ pub struct Auditor {
 
 /// Initializes an `Auditor` instance with the given configuration.
 pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<Auditor> {
-    let word_filter = word_filter::initialize(config)
-        .await?;
+    let word_filter = word_filter::initialize(config).await?;
     Ok(Auditor { word_filter })
 }

@@ -1,12 +1,12 @@
 use sea_orm_migration::prelude::*;
 
-use super::m20221109_000002_create_institute::Institute;
+use super::m20221109_000001_create_institute::Institute;
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221109_000005_create_user"
+        "m_20221109_000002_create_user"
     }
 }
 

@@ -1,6 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use super::{m20221109_000005_create_user::User, m20221110_000003_create_ip_address::IpAddress};
+use super::{m20221109_000002_create_user::User, m20221110_000003_create_ip_address::IpAddress};
 
 pub struct Migration;
 

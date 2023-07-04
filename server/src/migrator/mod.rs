@@ -8,11 +8,11 @@ use tracing::log::LevelFilter;
 
 use crate::config::GlobalConfig;
 
-mod m20221109_000001_create_announcement;
-mod m20221109_000002_create_institute;
-mod m20221109_000003_create_game;
-mod m20221109_000004_create_notification;
-mod m20221109_000005_create_user;
+mod m20221109_000001_create_institute;
+mod m20221109_000002_create_user;
+mod m20221109_000003_create_announcement;
+mod m20221109_000004_create_game;
+mod m20221109_000005_create_notification;
 mod m20221109_000006_create_tag;
 mod m20221109_000007_create_challenge;
 mod m20221109_000008_create_submission;
@@ -34,11 +34,11 @@ pub struct Migrator;
 impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![
-            Box::new(m20221109_000001_create_announcement::Migration),
-            Box::new(m20221109_000002_create_institute::Migration),
-            Box::new(m20221109_000003_create_game::Migration),
-            Box::new(m20221109_000004_create_notification::Migration),
-            Box::new(m20221109_000005_create_user::Migration),
+            Box::new(m20221109_000001_create_institute::Migration),
+            Box::new(m20221109_000002_create_user::Migration),
+            Box::new(m20221109_000003_create_announcement::Migration),
+            Box::new(m20221109_000004_create_game::Migration),
+            Box::new(m20221109_000005_create_notification::Migration),
             Box::new(m20221109_000006_create_tag::Migration),
             Box::new(m20221109_000007_create_challenge::Migration),
             Box::new(m20221109_000008_create_submission::Migration),

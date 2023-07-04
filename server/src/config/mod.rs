@@ -25,8 +25,8 @@
 //! For convinience, we move some configurations into the database, so that you can still
 //! change them through the web interface.
 //!
-use std::path::Path;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 pub mod audit;
 pub mod bucket;

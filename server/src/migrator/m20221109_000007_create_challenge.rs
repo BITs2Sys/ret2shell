@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20221109_000003_create_game::Game, m20221109_000006_create_tag::Tag};
+use super::{m20221109_000004_create_game::Game, m20221109_000006_create_tag::Tag};
 
 pub struct Migration;
 

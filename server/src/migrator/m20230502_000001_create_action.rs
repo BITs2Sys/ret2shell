@@ -1,6 +1,8 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
+use super::m20221109_000007_create_challenge::Challenge;
+
 pub struct Migration;
 
 impl MigrationName for Migration {
@@ -41,25 +43,16 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(
-                        ColumnDef::new(Action::StartedAt)
-                            .timestamp_with_time_zone(),
+                    .col(ColumnDef::new(Action::StartedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Action::ChallengeId).big_integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("action_challenge_id_fkey")
+                            .from(Action::Table, Action::ChallengeId)
+                            .to(Challenge::Table, Challenge::Id),
                     )
-                    .col(
-                        ColumnDef::new(Action::ChallengeId)
-                            .big_integer()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(Action::Status)
-                            .small_integer()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(Action::CommitId)
-                            .string_len(63)
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(Action::Status).small_integer().not_null())
+                    .col(ColumnDef::new(Action::CommitId).string_len(63).not_null())
                     .to_owned(),
             )
             .await
