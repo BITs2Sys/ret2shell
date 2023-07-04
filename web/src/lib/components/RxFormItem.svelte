@@ -23,7 +23,7 @@
   $: formattedErrors = Array.isArray(errors) ? errors.join('; ') : errors
 </script>
 
-<div class={classes}>
+<fieldset class={classes}>
   <label class="label" for={name}>
     <slot name="label">
       <span class="label-text opacity-60 font-bold">{label}</span>
@@ -32,4 +32,4 @@
   <div class={tooltipClasses} data-tip={formattedErrors}>
     <slot />
   </div>
-</div>
+</fieldset>

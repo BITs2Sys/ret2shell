@@ -20,7 +20,7 @@
       <a href={$platform.footerUrl} class="link">{$platform.footerInfo}</a>
       {#if !$platform.hideMaker}
         &nbsp;<span class="opacity-60">|</span>&nbsp; By&nbsp;
-        <a href="https://www.woooo.tech" class="link">
+        <a href="https://github.com/Reverier-Xu" class="link">
           {$i18n.t('about.maker')}
         </a>
       {/if}

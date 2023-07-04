@@ -9,6 +9,7 @@
   import { z } from 'zod'
   import { validator } from '@felte/validator-zod'
   import { createForm } from 'felte'
+  import Captcha from '$lib/blocks/Captcha.svelte'
 
   let schema = z.object({
     account: z
@@ -30,6 +31,17 @@
 
   const { form, errors } = createForm({
     extend: validator({ schema }),
+    onSubmit(values, context) {
+      // console.log("submitting", values, context)
+    },
+    onSuccess(response, context) {
+      // console.log("success", response, context)
+      // Do something with the returned value from `onSubmit`.
+    },
+    onError(err, context) {
+      // console.log("error", err, context)
+      // Do something with the error thrown from `onSubmit`.
+    },
   })
 </script>
 
@@ -52,6 +64,7 @@
             id="account"
             name="account"
             hasError={$errors.account !== null}
+            autocomplete="username"
           />
         </RxFormItem>
         <RxFormItem
@@ -67,10 +80,12 @@
             type="password"
             name="password"
             hasError={$errors.password !== null}
+            autocomplete="current-password"
           />
         </RxFormItem>
-        <RxFormItem name="submit" label="">
-          <RxButton class="w-full" level="primary">{$i18n.t('account.login')}</RxButton>
+        <Captcha hasError={$errors.captchaAnswer !== null} errors={$errors.captchaAnswer || ''} />
+        <RxFormItem name="submitAction" label="">
+          <RxButton class="w-full" level="primary" type="submit">{$i18n.t('account.login')}</RxButton>
         </RxFormItem>
       </RxForm>
     </div>

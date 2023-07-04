@@ -39,6 +39,7 @@
         <div class={`w-5 h-5 icon-[fluent--${passwordVisible ? 'eye' : 'eye-off'}-16-regular]`} />
       </RxButton>
     {/if}
+    <slot />
   </div>
 {:else}
   <input {id} class={classes} type={computedType} {...$$restProps} />

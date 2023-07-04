@@ -21,7 +21,8 @@
     "title": "公告"
   },
   "playground": {
-    "title": "练习"
+    "title": "练习",
+    "searchPlaceholder": "搜索题目 / 赛事 ..."
   },
   "games": {
     "title": "赛事"
@@ -47,5 +48,17 @@
   "misc": {
     "or": "或",
     "verifyCode": "验证码"
+  },
+  "surprise": {
+    "sakana": "Sakana~"
+  },
+  "form": {
+    "loadingCaptcha": "验证码加载中...",
+    "reloadCaptcha": "重新加载验证码",
+    "powing": "计算中...",
+    "captcha": "验证码"
+  },
+  "global": {
+    "imageBroken": "图片已损坏"
   }
 }

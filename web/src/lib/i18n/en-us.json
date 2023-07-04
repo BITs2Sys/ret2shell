@@ -18,7 +18,8 @@
     "profile": "Account Profile"
   },
   "playground": {
-    "title": "Playground"
+    "title": "Playground",
+    "searchPlaceholder": "Search Challenges / Games ..."
   },
   "games": {
     "title": "Games"
@@ -47,5 +48,17 @@
     "english": "English",
     "language": "Language",
     "simplifiedChinese": "简体中文"
+  },
+  "surprise": {
+    "sakana": "Sakana~"
+  },
+  "form": {
+    "loadingCaptcha": "Loading Captcha...",
+    "reloadCaptcha": "Reload Captcha",
+    "powing": "Pow-ing...",
+    "captcha": "Captcha"
+  },
+  "global": {
+    "imageBroken": "Image Broken"
   }
 }
