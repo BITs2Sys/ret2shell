@@ -1,0 +1,74 @@
+use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
+
+pub struct Migration;
+
+impl MigrationName for Migration {
+    fn name(&self) -> &str {
+        "m20230502_000001_create_action"
+    }
+}
+
+#[derive(Iden)]
+pub enum Action {
+    Table,
+    Id,
+    ChallengeId,
+    CreatedAt,
+    StartedAt,
+    CommitId,
+    // -1: failed, 0: pending, 1: building, 2: succeeded
+    Status,
+}
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(Action::Table)
+                    .col(
+                        ColumnDef::new(Action::Id)
+                            .big_integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Action::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null()
+                            .default(CurrentTimestamp),
+                    )
+                    .col(
+                        ColumnDef::new(Action::StartedAt)
+                            .timestamp_with_time_zone(),
+                    )
+                    .col(
+                        ColumnDef::new(Action::ChallengeId)
+                            .big_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Action::Status)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Action::CommitId)
+                            .string_len(63)
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await
+    }
+
+    // Define how to rollback this migration: Drop the Bakery table.
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(Action::Table).to_owned())
+            .await
+    }
+}

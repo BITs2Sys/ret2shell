@@ -1,0 +1,84 @@
+use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
+
+use super::{m20221109_000002_create_institute::Institute, m20221109_000003_create_game::Game};
+
+pub struct Migration;
+
+impl MigrationName for Migration {
+    fn name(&self) -> &str {
+        "m_20221110_000001_create_team"
+    }
+}
+
+#[derive(Iden)]
+pub enum Team {
+    Table,
+    Id,
+    Name,
+    GameId,
+    Token,
+    State,
+    // 0 is not audited, 1 is audited, -1 is hidden, -2 is banned
+    InstituteId,
+    Score,
+    History,
+    LastActiveAt,
+}
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(Team::Table)
+                    .col(
+                        ColumnDef::new(Team::Id)
+                            .big_integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(Team::Name).string_len(127).not_null())
+                    .col(ColumnDef::new(Team::GameId).big_integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_game_id_fkey")
+                            .from(Team::Table, Team::GameId)
+                            .to(Game::Table, Game::Id),
+                    )
+                    .col(ColumnDef::new(Team::Token).string_len(255).not_null())
+                    .col(ColumnDef::new(Team::State).integer().not_null().default(0))
+                    .col(ColumnDef::new(Team::InstituteId).big_integer())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_institute_id_fkey")
+                            .from(Team::Table, Team::InstituteId)
+                            .to(Institute::Table, Institute::Id),
+                    )
+                    .col(ColumnDef::new(Team::Score).integer().not_null().default(0))
+                    .col(
+                        ColumnDef::new(Team::History)
+                            .json_binary()
+                            .not_null()
+                            .default("[]"),
+                    )
+                    .col(
+                        ColumnDef::new(Team::LastActiveAt)
+                            .timestamp_with_time_zone()
+                            .not_null()
+                            .default(CurrentTimestamp),
+                    )
+                    .to_owned(),
+            )
+            .await
+    }
+
+    // Define how to rollback this migration: Drop the Bakery table.
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(Team::Table).to_owned())
+            .await
+    }
+}

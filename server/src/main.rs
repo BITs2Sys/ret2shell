@@ -92,6 +92,8 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     warn!(">> Server initialization started <<");
     let _auditor = audit::initialize(&config).await?;
     info!("Loaded Module: < Audit >");
+    let _dbconn = migrator::initialize(&config).await?;
+    info!("Loaded Module: < Database >");
 
     warn!(">> Server initialization finished <<");
     Ok(())

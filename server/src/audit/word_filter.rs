@@ -54,6 +54,7 @@ pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<AhoCorasick> {
     Ok(AhoCorasick::new(Vec::<String>::new())?)
 }
 
+#[allow(dead_code)]
 /// Checks if a given text contains any sensitive words using the Aho-Corasick automaton.
 ///
 /// # Arguments

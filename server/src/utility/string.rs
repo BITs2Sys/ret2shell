@@ -5,6 +5,7 @@
 use deunicode::deunicode_with_tofu;
 use sanitizer::StringSanitizer;
 
+#[allow(dead_code)]
 /// Convert any unicode string into a path-safe string.
 /// 
 /// Assume that we have a string "你好世界", it will be converted to "ni_hao_shi_jie".

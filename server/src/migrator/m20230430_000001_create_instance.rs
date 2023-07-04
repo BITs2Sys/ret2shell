@@ -1,0 +1,102 @@
+use crate::migrator::m20221109_000005_create_user::User;
+use crate::migrator::m20221109_000007_create_challenge::Challenge;
+use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
+
+pub struct Migration;
+
+impl MigrationName for Migration {
+    fn name(&self) -> &str {
+        "m_20230430_000001_create_instance"
+    }
+}
+
+#[derive(Iden)]
+pub enum Instance {
+    Table,
+    Id,
+    UserId,
+    ChallengeId,
+    StartedAt,
+    RenewCount,
+    Name,
+    Flag,
+    Addr,
+    Wsrx,
+}
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(Instance::Table)
+                    .col(
+                        ColumnDef::new(Instance::Id)
+                            .big_integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Instance::Name)
+                            .string_len(127)
+                            .not_null()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Instance::Addr)
+                            .string_len(127)
+                            .not_null()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Instance::Wsrx)
+                            .string_len(127)
+                            .not_null()
+                            .unique_key(),
+                    )
+                    .col(ColumnDef::new(Instance::Flag).string_len(255).not_null())
+                    .col(
+                        ColumnDef::new(Instance::RenewCount)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .col(
+                        ColumnDef::new(Instance::StartedAt)
+                            .timestamp_with_time_zone()
+                            .not_null()
+                            .default(CurrentTimestamp),
+                    )
+                    .col(ColumnDef::new(Instance::UserId).big_integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("instance_user_id_fkey")
+                            .from(Instance::Table, Instance::UserId)
+                            .to(User::Table, User::Id),
+                    )
+                    .col(
+                        ColumnDef::new(Instance::ChallengeId)
+                            .big_integer()
+                            .not_null(),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("instance_challenge_id_fkey")
+                            .from(Instance::Table, Instance::ChallengeId)
+                            .to(Challenge::Table, Challenge::Id),
+                    )
+                    .to_owned(),
+            )
+            .await
+    }
+
+    // Define how to rollback this migration: Drop the Bakery table.
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(Instance::Table).to_owned())
+            .await
+    }
+}
