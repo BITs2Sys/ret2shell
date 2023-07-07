@@ -4,12 +4,14 @@
   import RxForm from '$lib/components/RxForm.svelte'
   import RxFormItem from '$lib/components/RxFormItem.svelte'
   import RxInput from '$lib/components/RxInput.svelte'
+  import Logo from '$lib/assets/logo.svg'
   import { platform } from '$lib/stores/platform'
   import { i18n } from '$lib/i18n'
   import { z } from 'zod'
   import { validator } from '@felte/validator-zod'
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
+    import RxLink from '$lib/components/RxLink.svelte'
 
   let schema = z.object({
     account: z
@@ -90,6 +92,12 @@
       </RxForm>
     </div>
     <div class="divider md:divider-horizontal opacity-60">{$i18n.t('misc.or')}</div>
-    <div class="md:w-0 flex-1" />
+    <div class="md:w-0 flex-1 flex flex-col space-y-6">
+      <div class="flex-1 md:flex flex-col justify-center items-center hidden">
+        <img class="object-fit max-h-48" src={Logo} alt="Ret2Shell" />
+      </div>
+      <RxLink class="w-full" href="/account/register">{$i18n.t('account.registerTips')}</RxLink>
+      <RxLink class="w-full" href="/account/oauth">{$i18n.t('account.3rdAuth')}</RxLink>
+    </div>
   </RxCard>
 </div>

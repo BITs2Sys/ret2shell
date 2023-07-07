@@ -15,7 +15,9 @@
     "superAdmin": "Super Administrator",
     "unknown": "Unknown",
     "settings": "Account Settings",
-    "profile": "Account Profile"
+    "profile": "Account Profile",
+    "registerTips": "Do not have accounts? Register now!",
+    "3rdAuth": "Using OAuth accounts"
   },
   "playground": {
     "title": "Playground",

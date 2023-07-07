@@ -109,7 +109,10 @@ fn greet() {
         "\n[[ {} ]]\n",
         "怀有希望的人和满天的星星一样 是永远都不会孤独的".bold().bright_yellow()
     );
-    println!("----------------------------- {} -----------------------------", "server log starts here".red());
+    println!(
+        "----------------------------- {} -----------------------------",
+        "server log starts here".red()
+    );
 }
 
 /// Power on the server.

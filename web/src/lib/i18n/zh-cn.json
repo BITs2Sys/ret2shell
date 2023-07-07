@@ -15,7 +15,9 @@
     "superAdmin": "超级管理员",
     "unknown": "未知",
     "settings": "用户设置",
-    "profile": "用户信息"
+    "profile": "用户信息",
+    "registerTips": "还没有账号？立即注册！",
+    "3rdAuth": "统一身份认证"
   },
   "announcements": {
     "title": "公告"

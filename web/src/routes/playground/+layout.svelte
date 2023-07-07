@@ -8,7 +8,8 @@
   <div class="w-72 xl:w-80 hidden lg:flex flex-col xl:ml-12 mt-6 sticky top-28 h-min">
     <RxInput placeholder={$i18n.t('playground.searchPlaceholder')} />
   </div>
-  <div class="flex-1 max-w-5xl">
+  <div class="flex-1 max-w-5xl flex flex-col p-3 lg:p-6">
+    <RxInput class="lg:hidden" placeholder={$i18n.t('playground.searchPlaceholder')} />
     <slot />
   </div>
   <div class="w-80 hidden 2xl:flex mr-12" />
