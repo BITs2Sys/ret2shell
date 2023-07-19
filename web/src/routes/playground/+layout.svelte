@@ -1,7 +1,6 @@
 <script lang="ts">
-    import RxInput from "$lib/components/RxInput.svelte"
-    import { i18n } from "$lib/i18n"
-
+  import RxInput from '$lib/components/RxInput.svelte'
+  import { i18n } from '$lib/i18n'
 </script>
 
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">

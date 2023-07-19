@@ -1,5 +1,5 @@
-use crate::migrator::m20221109_000002_create_user::User;
-use crate::migrator::m20221109_000007_create_challenge::Challenge;
+use crate::migrator::m20210101_000002_create_user::User;
+use crate::migrator::m20210101_000007_create_challenge::Challenge;
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
@@ -7,7 +7,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20230430_000001_create_instance"
+        "m_20210101_000017_create_instance"
     }
 }
 

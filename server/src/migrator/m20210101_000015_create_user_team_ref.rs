@@ -1,12 +1,12 @@
 use sea_orm_migration::prelude::*;
 
-use super::{m20221109_000002_create_user::User, m20221110_000001_create_team::Team};
+use super::{m20210101_000002_create_user::User, m20210101_000010_create_team::Team};
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221110_000007_create_user_team_ref"
+        "m_20210101_000015_create_user_team_ref"
     }
 }
 

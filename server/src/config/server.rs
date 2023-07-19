@@ -17,3 +17,29 @@ pub struct ServerConfig {
     /// CORS rules enabled
     pub cors_origins: String,
 }
+
+impl ServerConfig {
+    #[allow(dead_code)]
+    /// Returns the external link prefix for the server, including the protocol (http or https).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let config = ServerConfig {
+    ///     host: "localhost".to_string(),
+    ///     port: 8080,
+    ///     external_host: "example.com".to_string(),
+    ///     external_https: true,
+    ///     api_base_path: "/api".to_string(),
+    /// };
+    ///
+    /// assert_eq!(config.external_link_prefix(), "https://example.com");
+    /// ```
+    pub fn external_origin(&self) -> String {
+        if self.external_https {
+            format!("https://{}", self.external_domain)
+        } else {
+            format!("http://{}", self.external_domain)
+        }
+    }
+}

@@ -24,7 +24,7 @@
     size && `btn-${size}`,
     justify && `justify-${justify}`,
     !uppercase && 'normal-case',
-    clazz
+    clazz,
   ]
     .filter(Boolean)
     .join(' ')

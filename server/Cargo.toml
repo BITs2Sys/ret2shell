@@ -26,16 +26,15 @@ tower-http = { version = "0.4", features = ["cors", "fs", "trace"] }
 # Auth
 jsonwebtoken = "8.3"
 bcrypt = "0.15"
-argon2 = "0.5.0"
+argon2 = "0.5.1"
 # ORM
-sea-orm = { version = "0.11", features = [
+sea-orm = { version = "0.12.0-rc.4", features = [
     "sqlx-postgres",
     "runtime-tokio-rustls",
     "macros",
 ] }
-sqlx-core = "0.7"
-sea-orm-migration = "0.11"
-sea-query = "0.28"
+sea-orm-migration = "0.12.0-rc.4"
+sea-query = "0.29"
 # Utilities
 ring = "0.16"
 serde = { version = "1.0", features = ["derive"] }
@@ -74,17 +73,11 @@ tracing-core = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
 # Cache
-fred = { version = "6.3", features = [
-    "enable-rustls",
-    "metrics",
-    "partial-tracing",
-    "reconnect-on-auth-error",
-    "monitor",
-    "custom-reconnect-errors",
-    "serde-json",
-    "dns",
-    "subscriber-client",
-], default-features = false }
+redis = { version = "0.23", features = [
+    "tokio-comp",
+    "tokio-rustls-comp",
+    "cluster-async"
+] }
 # Email
 lettre = { version = "0.10", features = [
     "smtp-transport",
@@ -93,4 +86,4 @@ lettre = { version = "0.10", features = [
     "builder",
 ], default-features = false }
 # Message Queue
-async-nats = "0.29"
+async-nats = "0.30"

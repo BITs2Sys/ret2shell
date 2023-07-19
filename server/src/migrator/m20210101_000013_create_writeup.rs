@@ -1,26 +1,26 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20221109_000002_create_user::User, m20221109_000007_create_challenge::Challenge};
+use super::{m20210101_000002_create_user::User, m20210101_000004_create_game::Game};
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221110_000006_create_answer"
+        "m_20210101_000013_create_writeup"
     }
 }
 
-// Answer is for challenge.
+// Write up is for game.
 #[derive(Iden)]
-pub enum Answer {
+pub enum WriteUp {
     Table,
     Id,
     Title,
-    PublishedAt,
     UpdatedAt,
+    PublishedAt,
     AuthorId,
-    ChallengeId,
+    GameId,
     Content,
 }
 
@@ -30,42 +30,42 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Answer::Table)
+                    .table(WriteUp::Table)
                     .col(
-                        ColumnDef::new(Answer::Id)
+                        ColumnDef::new(WriteUp::Id)
                             .big_integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Answer::Title).string_len(127).not_null())
+                    .col(ColumnDef::new(WriteUp::Title).string_len(127).not_null())
                     .col(
-                        ColumnDef::new(Answer::PublishedAt)
+                        ColumnDef::new(WriteUp::PublishedAt)
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
                     )
                     .col(
-                        ColumnDef::new(Answer::UpdatedAt)
+                        ColumnDef::new(WriteUp::UpdatedAt)
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Answer::AuthorId).big_integer().not_null())
+                    .col(ColumnDef::new(WriteUp::AuthorId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("answer_author_id_fkey")
-                            .from(Answer::Table, Answer::AuthorId)
+                            .name("writeup_author_id_fkey")
+                            .from(WriteUp::Table, WriteUp::AuthorId)
                             .to(User::Table, User::Id),
                     )
-                    .col(ColumnDef::new(Answer::ChallengeId).big_integer().not_null())
+                    .col(ColumnDef::new(WriteUp::GameId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("answer_challenge_id_fkey")
-                            .from(Answer::Table, Answer::ChallengeId)
-                            .to(Challenge::Table, Challenge::Id),
+                            .name("writeup_game_id_fkey")
+                            .from(WriteUp::Table, WriteUp::GameId)
+                            .to(Game::Table, Game::Id),
                     )
-                    .col(ColumnDef::new(Answer::Content).text().not_null())
+                    .col(ColumnDef::new(WriteUp::Content).text().not_null())
                     .to_owned(),
             )
             .await
@@ -74,7 +74,7 @@ impl MigrationTrait for Migration {
     // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Answer::Table).to_owned())
+            .drop_table(Table::drop().table(WriteUp::Table).to_owned())
             .await
     }
 }

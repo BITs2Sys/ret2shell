@@ -9,7 +9,7 @@
   export let square = false
   export let disabled = false
   export let active = false
-  export let type: 'button' | 'reset' | 'submit'| null = 'button'
+  export let type: 'button' | 'reset' | 'submit' | null = 'button'
   let clazz = ''
   export { clazz as class }
 

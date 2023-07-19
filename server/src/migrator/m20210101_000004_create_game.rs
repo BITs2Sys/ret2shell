@@ -1,13 +1,13 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::m20221109_000001_create_institute::Institute;
+use super::m20210101_000001_create_institute::Institute;
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221109_000004_create_game"
+        "m_20210101_000004_create_game"
     }
 }
 

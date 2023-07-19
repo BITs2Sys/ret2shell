@@ -1,8 +1,6 @@
 <script lang="ts">
   import RxButton from './RxButton.svelte'
-  import { createEventDispatcher } from 'svelte'
 
-  const dispatch = createEventDispatcher()
   let clazz = ''
   export { clazz as class }
   export let hasError = false

@@ -8,7 +8,7 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = ["overflow-hidden relative", clazz].filter(Boolean).join(' ')
+  $: classes = ['overflow-hidden relative', clazz].filter(Boolean).join(' ')
 
   let loadingCover = true
 
@@ -25,9 +25,9 @@
     <img class="object-cover w-full h-full" alt={$i18n.t('global.imageBroken')} {src} on:load={handleLoad} />
   {/if}
   {#if loading || loadingCover}
-  <div class="w-full h-full flex flex-col justify-center items-center">
+    <div class="w-full h-full flex flex-col justify-center items-center">
       <span class="loading" />
-  </div>
+    </div>
   {/if}
   <slot />
 </div>

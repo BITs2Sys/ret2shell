@@ -1,21 +1,22 @@
 use sea_orm_migration::prelude::*;
 
-use super::m20221109_000007_create_challenge::Challenge;
-
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221109_000009_create_hint"
+        "m_20210101_000019_create_platform_info"
     }
 }
 
 #[derive(Iden)]
-pub enum Hint {
+pub enum PlatformInfo {
     Table,
     Id,
-    ChallengeId,
-    Content,
+    Captcha,
+    Email,
+    Media,
+    Platform,
+    Pusher,
 }
 
 #[async_trait::async_trait]
@@ -24,22 +25,19 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Hint::Table)
+                    .table(PlatformInfo::Table)
                     .col(
-                        ColumnDef::new(Hint::Id)
+                        ColumnDef::new(PlatformInfo::Id)
                             .big_integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Hint::ChallengeId).big_integer().not_null())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("submission_challenge_id_fkey")
-                            .from(Hint::Table, Hint::ChallengeId)
-                            .to(Challenge::Table, Challenge::Id),
-                    )
-                    .col(ColumnDef::new(Hint::Content).text().not_null())
+                    .col(ColumnDef::new(PlatformInfo::Platform).text())
+                    .col(ColumnDef::new(PlatformInfo::Captcha).text())
+                    .col(ColumnDef::new(PlatformInfo::Email).text())
+                    .col(ColumnDef::new(PlatformInfo::Media).text())
+                    .col(ColumnDef::new(PlatformInfo::Pusher).text())
                     .to_owned(),
             )
             .await
@@ -48,7 +46,7 @@ impl MigrationTrait for Migration {
     // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Hint::Table).to_owned())
+            .drop_table(Table::drop().table(PlatformInfo::Table).to_owned())
             .await
     }
 }

@@ -13,5 +13,6 @@
             "database": "ret2shell",
             "username": "ret2shell"
         }
-    ]
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

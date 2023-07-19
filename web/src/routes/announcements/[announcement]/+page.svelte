@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { platform } from '$lib/stores/platform'
-    let title = ''
+  import { i18n } from '$lib/i18n'
+  import { platform } from '$lib/stores/platform'
+  let title = $i18n.t('announcements.titleLoadingPlaceholder')
 </script>
 
 <svelte:head><title>{title} - {$platform.name}</title></svelte:head>

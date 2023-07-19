@@ -33,7 +33,9 @@
     <RxPopup class="btn-square btn-ghost hidden sm:inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
       <!-- TODO: replace with user's avatar if exists -->
       <div class="avatar" slot="button">
-        <div class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center">
+        <div
+          class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
+        >
           <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
         </div>
       </div>

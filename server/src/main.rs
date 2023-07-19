@@ -12,12 +12,15 @@
 
 #![warn(missing_docs)]
 
-use std::io::Write;
+use std::{io::Write, net::SocketAddr, process::exit, str::FromStr};
 
 use clap::{command, Parser, Subcommand};
 use colored::Colorize;
 use config::GlobalConfig;
+use tokio::signal;
 use tracing::{error, info, warn};
+
+use crate::controller::GlobalState;
 
 mod audit;
 mod bucket;
@@ -49,7 +52,7 @@ THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
 UNAUTHORIZED COPYING, TRANSFERRING OR REPRODUCTION OF THE CONTENTS OF THIS PROJECT,
 VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 
-If you have any problems, please contact tech support <ret2shell@woooo.tech>
+If you have any problems, please contact tech support <ret2shell@woooo.tech>.
     "#
 )]
 struct Args {
@@ -107,7 +110,9 @@ fn greet() {
     );
     println!(
         "\n[[ {} ]]\n",
-        "怀有希望的人和满天的星星一样 是永远都不会孤独的".bold().bright_yellow()
+        "怀有希望的人和满天的星星一样 是永远都不会孤独的"
+            .bold()
+            .bright_yellow()
     );
     println!(
         "----------------------------- {} -----------------------------",
@@ -118,13 +123,31 @@ fn greet() {
 /// Power on the server.
 async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     greet();
+
     warn!(">> Server initialization started <<");
-    let _auditor = audit::initialize(&config).await?;
+
+    let auditor = audit::initialize(&config).await?;
     info!("Loaded Module: < Audit >");
-    let _dbconn = migrator::initialize(&config).await?;
+    let db = migrator::initialize(&config).await?;
     info!("Loaded Module: < Database >");
+    let state = GlobalState { auditor, db };
+    let router = controller::initialize(&config, state).await?;
+    info!("Router constructed.");
 
     warn!(">> Server initialization finished <<");
+
+    info!("Starting server...");
+
+    let addr_str = format!("{}:{}", &config.server.host, &config.server.port);
+
+    let addr = SocketAddr::from_str(&addr_str).expect("Failed to parse server address");
+
+    info!("Server started at [ {} ]", addr_str);
+    axum::Server::bind(&addr)
+        .serve(router.into_make_service_with_connect_info::<SocketAddr>())
+        .with_graceful_shutdown(graceful_shutdown())
+        .await
+        .expect("Failed to start server.");
     Ok(())
 }
 
@@ -147,13 +170,13 @@ async fn erase(config: GlobalConfig) -> anyhow::Result<()> {
     );
     print!(
         "Are you sure to continue? [{}/{}]: ",
-        "y".red(),
-        "N".bold().green()
+        "yes".red(),
+        "NO".bold().green()
     );
     std::io::stdout().flush()?;
     let mut input = String::new();
     std::io::stdin().read_line(&mut input)?;
-    if !input.trim().to_lowercase().starts_with("y") {
+    if !input.trim().to_lowercase().eq("yes") {
         warn!("Cleanup aborted");
         return Ok(());
     }
@@ -162,4 +185,33 @@ async fn erase(config: GlobalConfig) -> anyhow::Result<()> {
     info!("Cleanup done: < Database >");
     warn!(">> Server cleanup finished <<");
     Ok(())
+}
+
+async fn graceful_shutdown() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("Failed to install SIGTERM handler")
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    info!("Server is shutting down...");
+    // TODO: add `pusher module`(websocket) graceful shutdown handle code here.
+    info!("Server shutdown completed, bye bye.");
+    exit(0);
 }

@@ -11,7 +11,7 @@
   import { validator } from '@felte/validator-zod'
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
-    import RxLink from '$lib/components/RxLink.svelte'
+  import RxLink from '$lib/components/RxLink.svelte'
 
   let schema = z.object({
     account: z
@@ -33,17 +33,17 @@
 
   const { form, errors } = createForm({
     extend: validator({ schema }),
-    onSubmit(values, context) {
-      // console.log("submitting", values, context)
-    },
-    onSuccess(response, context) {
-      // console.log("success", response, context)
-      // Do something with the returned value from `onSubmit`.
-    },
-    onError(err, context) {
-      // console.log("error", err, context)
-      // Do something with the error thrown from `onSubmit`.
-    },
+    // onSubmit(_values, _context) {
+    //   // console.log("submitting", values, context)
+    // },
+    // onSuccess(_response, _context) {
+    //   // console.log("success", response, context)
+    //   // Do something with the returned value from `onSubmit`.
+    // },
+    // onError(_err, _context) {
+    //   // console.log("error", err, context)
+    //   // Do something with the error thrown from `onSubmit`.
+    // },
   })
 </script>
 

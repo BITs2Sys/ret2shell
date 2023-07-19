@@ -1,12 +1,12 @@
 use sea_orm_migration::prelude::*;
 
-use super::{m20221109_000002_create_user::User, m20221110_000003_create_ip_address::IpAddress};
+use super::{m20210101_000002_create_user::User, m20210101_000012_create_ip_address::IpAddress};
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20221110_000008_create_user_ip_address_ref"
+        "m_20210101_000016_create_user_ip_address_ref"
     }
 }
 
