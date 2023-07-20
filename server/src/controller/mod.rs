@@ -5,8 +5,8 @@
 use axum::{
     body::Body,
     extract::FromRef,
-    http::{HeaderValue, Request},
-    response::Response,
+    http::{HeaderValue, Request, StatusCode},
+    response::{IntoResponse, Response},
     routing::get,
     Router,
 };
@@ -24,16 +24,15 @@ use crate::{audit::Auditor, config::GlobalConfig};
 
 mod account;
 mod announcement;
-mod captcha;
+mod certificate;
 mod challenge;
-mod clientip;
-mod forwarded;
 mod game;
-mod institute;
 mod media;
+mod middleware;
 mod platform;
-mod traffic;
 mod user;
+
+use middleware::forwarded::get_client_ip;
 
 #[derive(Clone, FromRef)]
 pub struct GlobalState {
@@ -44,7 +43,7 @@ pub struct GlobalState {
 pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Result<Router> {
     let api_base_path = &config.server.api_base_path;
     let cors_origins = &config.server.cors_origins;
-    let api_router = construct_router().await;
+    let api_router = construct_router();
     let router = Router::new()
         .nest(&api_base_path, api_router)
         .layer(
@@ -56,7 +55,7 @@ pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Re
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &Request<Body>| {
-                    let ip = clientip::get_client_ip_address_from_request(request)
+                    let ip = get_client_ip(request)
                         .unwrap_or(IpAddr::V4("0.0.0.0".parse().expect("Impossible!!!")));
                     tracing::info_span!("http",
                         from = %ip.to_string(),
@@ -73,10 +72,19 @@ pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Re
     Ok(router)
 }
 
-async fn construct_router() -> Router<Arc<GlobalState>> {
-    Router::new().route("/ping", get(ping))
+fn construct_router() -> Router<Arc<GlobalState>> {
+    Router::new()
+        .nest("/account", account::router())
+        .nest("/announcement", announcement::router())
+        .nest("/certificate", certificate::router())
+        .nest("/challenge", challenge::router())
+        .nest("/game", game::router())
+        .nest("/media", media::router())
+        .nest("/platform", platform::router())
+        .nest("/user", user::router())
+        .route("/ping", get(ping))
 }
 
-async fn ping() -> &'static str {
-    "pong"
+async fn ping() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok("pong")
 }

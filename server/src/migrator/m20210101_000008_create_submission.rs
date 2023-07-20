@@ -20,6 +20,7 @@ pub enum Submission {
     ChallengeId,
     Content,
     Solved,
+    WithScore,
 }
 
 #[async_trait::async_trait]
@@ -62,6 +63,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Submission::Content).text().not_null())
                     .col(ColumnDef::new(Submission::Solved).boolean().not_null())
+                    .col(ColumnDef::new(Submission::WithScore).boolean().not_null())
                     .to_owned(),
             )
             .await

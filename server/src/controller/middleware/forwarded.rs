@@ -11,7 +11,7 @@ const X_REAL_IP: &str = "x-real-ip";
 const X_FORWARDED_FOR: &str = "x-forwarded-for";
 
 /// Tries to parse the `x-forwarded-for` header
-pub fn maybe_x_forwarded_for(headers: &HeaderMap) -> Option<IpAddr> {
+fn maybe_x_forwarded_for(headers: &HeaderMap) -> Option<IpAddr> {
     headers
         .get(X_FORWARDED_FOR)
         .and_then(|hv| hv.to_str().ok())
@@ -19,7 +19,7 @@ pub fn maybe_x_forwarded_for(headers: &HeaderMap) -> Option<IpAddr> {
 }
 
 /// Tries to parse the `x-real-ip` header
-pub fn maybe_x_real_ip(headers: &HeaderMap) -> Option<IpAddr> {
+fn maybe_x_real_ip(headers: &HeaderMap) -> Option<IpAddr> {
     headers
         .get(X_REAL_IP)
         .and_then(|hv| hv.to_str().ok())
@@ -27,7 +27,7 @@ pub fn maybe_x_real_ip(headers: &HeaderMap) -> Option<IpAddr> {
 }
 
 /// Tries to parse `forwarded` headers
-pub fn maybe_forwarded(headers: &HeaderMap) -> Option<IpAddr> {
+fn maybe_forwarded(headers: &HeaderMap) -> Option<IpAddr> {
     headers.get_all(FORWARDED).iter().find_map(|hv| {
         hv.to_str()
             .ok()
@@ -46,7 +46,7 @@ pub fn maybe_forwarded(headers: &HeaderMap) -> Option<IpAddr> {
 }
 
 /// Looks in `ConnectInfo` extension
-pub fn maybe_connect_info<B: Send>(req: &Request<B>) -> Option<IpAddr> {
+fn maybe_connect_info<B: Send>(req: &Request<B>) -> Option<IpAddr> {
     req.extensions()
         .get::<ConnectInfo<SocketAddr>>()
         .map(|ConnectInfo(addr)| addr.ip())
@@ -107,7 +107,7 @@ impl FromStr for Identifier {
 }
 
 #[derive(Default)]
-pub struct ForwardedStanza {
+struct ForwardedStanza {
     pub forwarded_by: Option<Identifier>,
     pub forwarded_for: Option<Identifier>,
     pub forwarded_host: Option<String>,
@@ -153,7 +153,7 @@ impl FromStr for ForwardedStanza {
     }
 }
 
-pub struct ForwardedHeaderValueIterator<'a> {
+struct ForwardedHeaderValueIterator<'a> {
     head: Option<&'a ForwardedStanza>,
     tail: &'a [ForwardedStanza],
 }
@@ -205,7 +205,7 @@ fn values_from_header(header_value: &str) -> impl Iterator<Item = &str> {
     })
 }
 
-pub struct ForwardedHeaderValue {
+struct ForwardedHeaderValue {
     values: Vec<ForwardedStanza>,
 }
 
@@ -254,4 +254,29 @@ impl FromStr for ForwardedHeaderValue {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_forwarded(s)
     }
+}
+
+/// Get the client IP address from the request.
+/// 
+/// This function will try to get the client IP address from the following sources:
+/// 
+/// - `x-forwarded-for` header
+/// - `x-real-ip` header
+/// - `forwarded` header
+/// - `ConnectInfo` extension
+/// 
+/// The order of precedence is as listed above. We put headers first because the 
+/// physical IP address from `ConnectInfo` extension is not always correct. Nginx
+/// and other reverse proxies will shadow the real IP with `127.0.0.1`, to solve this
+/// problem, then will set the `x-forwarded-for` header to the client IP address,
+/// so we just use it.
+/// 
+/// In some cases, the `x-forwarded-for` header may not set, the IP record will be
+/// localhost, so please make sure the reverse proxy is configured correctly.
+pub fn get_client_ip<B: Send>(request: &Request<B>) -> Option<IpAddr> {
+    let headers = request.headers();
+    maybe_x_forwarded_for(headers)
+        .or_else(|| maybe_x_real_ip(headers))
+        .or_else(|| maybe_forwarded(headers))
+        .or_else(|| maybe_connect_info(request))
 }

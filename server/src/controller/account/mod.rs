@@ -1,4 +1,4 @@
-mod institute;
+mod captcha;
 
 use axum::Router;
 use std::sync::Arc;

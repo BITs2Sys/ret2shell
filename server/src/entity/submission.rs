@@ -11,6 +11,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub content: String,
     pub solved: bool,
+    pub with_score: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
