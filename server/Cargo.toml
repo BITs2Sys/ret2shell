@@ -34,7 +34,7 @@ sea-orm = { version = "0.12.0-rc.4", features = [
     "macros",
 ] }
 sea-orm-migration = "0.12.0-rc.4"
-sea-query = "0.29"
+sea-query = "0.30"
 # Utilities
 ring = "0.16"
 serde = { version = "1.0", features = ["derive"] }
