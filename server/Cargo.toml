@@ -28,12 +28,12 @@ jsonwebtoken = "8.3"
 bcrypt = "0.15"
 argon2 = "0.5.1"
 # ORM
-sea-orm = { version = "0.12.0-rc.4", features = [
+sea-orm = { version = "0.12.0-rc.5", features = [
     "sqlx-postgres",
     "runtime-tokio-rustls",
     "macros",
 ] }
-sea-orm-migration = "0.12.0-rc.4"
+sea-orm-migration = "0.12.0-rc.5"
 sea-query = "0.30"
 # Utilities
 ring = "0.16"
