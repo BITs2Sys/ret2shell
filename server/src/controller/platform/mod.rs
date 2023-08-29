@@ -1,29 +1,22 @@
-use axum::extract::State;
 use axum::http::StatusCode;
-use axum::Json;
 use axum::{response::IntoResponse, routing::get, Router};
-use sea_orm::DatabaseConnection;
+use axum::{Extension, Json};
 use tracing::error;
 
 use crate::controller::GlobalState;
-use crate::entity::platform_info;
+use crate::entity::platform_info::PlatformInfoModel;
 
 pub fn router() -> Router<GlobalState> {
     Router::new().route("/", get(get_platform_info))
 }
 
 async fn get_platform_info(
-    State(ref db): State<DatabaseConnection>,
+    Extension(platform_info): Extension<Option<PlatformInfoModel>>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    match platform_info::get_platform_info(db).await {
-        Ok(Some(info)) => Ok(Json(info)),
-        Ok(None) => Err((StatusCode::NOT_FOUND, "not found")),
-        Err(err) => {
-            error!("query platform info from database failed: {}", err);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "encountered database error",
-            ))
-        }
+    if let Some(platform_info) = platform_info {
+        Ok(Json(platform_info))
+    } else {
+        error!("platform info not found");
+        Err((StatusCode::INTERNAL_SERVER_ERROR, "encountered cache error"))
     }
 }

@@ -304,6 +304,10 @@ pub enum CacheError<E> {
     Redis(RedisError),
     #[error("BB8 cluster error: {0}")]
     Bb8(RunError<E>),
+    #[error("Database error: {0}")]
+    Database(#[from] sea_orm::DbErr),
+    #[error("Serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
 }
 
 impl From<RedisError> for CacheError<RedisError> {

@@ -8,17 +8,17 @@ pub struct HCaptchaValidator;
 #[async_trait]
 impl CaptchaValidator for HCaptchaValidator {
     async fn generate_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
+        _conn: &mut RedisPool,
+        _difficulty: u16,
     ) -> Result<Captcha, CaptchaError> {
         Err(CaptchaError::Unknown)
     }
 
     async fn check_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
-        id: &str,
-        answer: &str,
+        _conn: &mut RedisPool,
+        _difficulty: u16,
+        _id: &str,
+        _answer: &str,
     ) -> Result<bool, CaptchaError> {
         Err(CaptchaError::Unknown)
     }

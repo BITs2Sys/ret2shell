@@ -1,5 +1,7 @@
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde::{Deserialize, Serialize};
+
+use crate::captcha::Validator;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "platform_info")]
 pub struct Model {
@@ -107,7 +109,7 @@ pub struct Captcha {
     /// The captcha difficulty.
     pub difficulty: Option<u16>,
     /// The captcha validator to use.
-    pub validator: Option<String>,
+    pub validator: Validator,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

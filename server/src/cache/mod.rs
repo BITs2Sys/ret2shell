@@ -9,6 +9,7 @@ use self::manager::RedisPool;
 pub mod captcha;
 pub mod cluster;
 pub mod manager;
+pub mod platform;
 pub mod token;
 
 pub use captcha::Captcha;

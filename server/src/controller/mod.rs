@@ -6,6 +6,7 @@ use axum::{
     body::Body,
     extract::FromRef,
     http::{HeaderValue, Request, StatusCode},
+    middleware::from_fn_with_state,
     response::{IntoResponse, Response},
     routing::get,
     Router,
@@ -46,6 +47,10 @@ pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Re
     let api_router = construct_router();
     let router = Router::new()
         .nest(&api_base_path, api_router)
+        .route_layer(from_fn_with_state(
+            state.clone(),
+            middleware::info::prepare_platform_info,
+        ))
         .layer(
             CorsLayer::new()
                 .allow_headers(Any)

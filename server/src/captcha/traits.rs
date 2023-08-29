@@ -4,8 +4,9 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// Validator enum for different types of captcha validation
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub enum Validator {
+    None,
     #[default]
     Image,
     Pow,
