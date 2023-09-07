@@ -23,14 +23,14 @@ use tracing::{debug, error, warn};
 
 use crate::{
     cache::{self, manager::RedisPool},
-    entity::platform_info::{Auth, PlatformInfoModel},
+    entity::{platform_info::{Auth, Model as PlatformInfoModel}, user::Permissions},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Token {
     pub id: i64,
     pub name: String,
-    pub permissions: Vec<String>,
+    pub permissions: Permissions,
     pub exp: i64,
 }
 
@@ -155,14 +155,14 @@ pub async fn extract_user_info<B>(
 ///     .route_layer(axum::middleware::from_fn(permission_required!("basic", "verified", ...)))
 /// ```
 macro_rules! permission_required {
-    ($($perm:literal),*) => {
+    ($($perm:expr),*) => {
         |
             axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
             req: axum::http::Request<_>,
             next: axum::middleware::Next<_>,
         | async move {
             let required_perms = vec![$($perm.to_owned()),*];
-            match required_perms.iter().any(|perm| token.permissions.contains(perm)) {
+            match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
                 false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))
             }

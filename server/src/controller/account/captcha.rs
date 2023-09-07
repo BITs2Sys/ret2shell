@@ -4,7 +4,7 @@ use axum::{
 
 use crate::{
     cache::manager::RedisPool, captcha, controller::GlobalState,
-    entity::platform_info::PlatformInfoModel,
+    entity::platform_info::Model as PlatformInfoModel,
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {

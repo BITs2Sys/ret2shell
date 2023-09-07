@@ -8,13 +8,13 @@ use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use crate::{cache::manager::RedisPool, controller::GlobalState};
+use crate::{cache::manager::RedisPool, controller::GlobalState, entity::user::Permission};
 
 use super::layer::auth::{permission_required, Token};
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
-        .route_layer(from_fn(permission_required!("basic")))
+        .route_layer(from_fn(permission_required!(Permission::Basic)))
         .route("/login", post(login))
         .nest("/captcha", captcha::router(state))
 }

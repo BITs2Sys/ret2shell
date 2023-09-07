@@ -13,14 +13,15 @@ use tracing::error;
 use crate::cache;
 use crate::cache::manager::RedisPool;
 use crate::controller::GlobalState;
-use crate::entity::platform_info::{self, PlatformInfoModel};
+use crate::entity::platform_info::{self, Model as PlatformInfoModel};
+use crate::entity::user::Permission;
 
 use super::layer::auth::permission_required;
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/", post(set_platform_info))
-        .route_layer(from_fn(permission_required!("devops")))
+        .route_layer(from_fn(permission_required!(Permission::Devops)))
         .route("/", get(get_platform_info))
 }
 

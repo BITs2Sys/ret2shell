@@ -4,7 +4,7 @@
 use redis::RedisError;
 use sea_orm::DatabaseConnection;
 
-use crate::entity::platform_info::{self, PlatformInfoModel};
+use crate::entity::platform_info::{self, Model as PlatformInfoModel};
 
 use super::manager::{CacheError, PoolLike, PooledConnectionLike, RedisPool};
 

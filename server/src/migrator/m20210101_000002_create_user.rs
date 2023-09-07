@@ -69,7 +69,7 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(User::Permissions)
                             .json_binary()
                             .not_null()
-                            .default("[\"basic\"]"),
+                            .default("[0]"),
                     )
                     .col(
                         ColumnDef::new(User::Hidden)

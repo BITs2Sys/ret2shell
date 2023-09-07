@@ -51,7 +51,7 @@ impl MigrationTrait for Migration {
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Team::Token).string_len(255).not_null())
-                    .col(ColumnDef::new(Team::State).integer().not_null().default(0))
+                    .col(ColumnDef::new(Team::State).integer().not_null().default(1))
                     .col(ColumnDef::new(Team::InstituteId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
