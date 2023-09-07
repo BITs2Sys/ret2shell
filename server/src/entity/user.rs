@@ -18,7 +18,8 @@ pub struct Model {
     pub institute_id: Option<i64>,
     #[sea_orm(column_type = "Text", nullable)]
     pub institute_info: Option<String>,
-    pub level: i32,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub permissions: Option<Json>,
     pub hidden: bool,
     pub banned: bool,
 }
