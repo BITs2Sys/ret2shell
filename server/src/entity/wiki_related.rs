@@ -17,16 +17,16 @@ pub enum Relation {
         belongs_to = "super::wiki::Entity",
         from = "Column::RelatedId",
         to = "super::wiki::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Wiki2,
     #[sea_orm(
         belongs_to = "super::wiki::Entity",
         from = "Column::WikiId",
         to = "super::wiki::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Wiki1,
 }

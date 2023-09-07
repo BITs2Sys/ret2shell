@@ -70,12 +70,14 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Instance::UserId).big_integer().not_null())
+                    .col(ColumnDef::new(Instance::UserId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
                             .name("instance_user_id_fkey")
                             .from(Instance::Table, Instance::UserId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(
                         ColumnDef::new(Instance::ChallengeId)
@@ -93,7 +95,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Instance::Table).to_owned())

@@ -24,16 +24,16 @@ pub enum Relation {
         belongs_to = "super::game::Entity",
         from = "Column::GameId",
         to = "super::game::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Game,
     #[sea_orm(
         belongs_to = "super::institute::Entity",
         from = "Column::InstituteId",
         to = "super::institute::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     Institute,
     #[sea_orm(has_many = "super::user2_team::Entity")]

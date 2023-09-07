@@ -48,7 +48,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("submission_user_id_fkey")
                             .from(Submission::Table, Submission::UserId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(Submission::ChallengeId)
@@ -59,7 +61,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("submission_challenge_id_fkey")
                             .from(Submission::Table, Submission::ChallengeId)
-                            .to(Challenge::Table, Challenge::Id),
+                            .to(Challenge::Table, Challenge::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Submission::Content).text().not_null())
                     .col(ColumnDef::new(Submission::Solved).boolean().not_null())
@@ -69,7 +73,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Submission::Table).to_owned())

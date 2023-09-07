@@ -27,7 +27,7 @@ mod m20210101_000016_create_user_ip_ref;
 mod m20210101_000017_create_instance;
 mod m20210101_000018_create_action;
 mod m20210101_000019_create_platform_info;
-mod m20210101_000020_create_ctftime;
+mod m20210101_000020_create_calendar;
 mod m20210101_000021_create_wiki;
 mod m20210101_000022_create_wiki_related;
 mod m20210101_000023_create_plan;
@@ -60,7 +60,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20210101_000017_create_instance::Migration),
             Box::new(m20210101_000018_create_action::Migration),
             Box::new(m20210101_000019_create_platform_info::Migration),
-            Box::new(m20210101_000020_create_ctftime::Migration),
+            Box::new(m20210101_000020_create_calendar::Migration),
             Box::new(m20210101_000021_create_wiki::Migration),
             Box::new(m20210101_000022_create_wiki_related::Migration),
             Box::new(m20210101_000023_create_plan::Migration),

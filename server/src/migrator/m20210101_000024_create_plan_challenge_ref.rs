@@ -41,7 +41,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("plan_2_challenge_plan_id_fkey")
                             .from(Plan2Challenge::Table, Plan2Challenge::PlanId)
-                            .to(Plan::Table, Plan::Id),
+                            .to(Plan::Table, Plan::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(Plan2Challenge::ChallengeId)
@@ -52,14 +54,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("plan_2_challenge_challenge_id_fkey")
                             .from(Plan2Challenge::Table, Plan2Challenge::ChallengeId)
-                            .to(Challenge::Table, Challenge::Id),
+                            .to(Challenge::Table, Challenge::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Plan2Challenge::Table).to_owned())

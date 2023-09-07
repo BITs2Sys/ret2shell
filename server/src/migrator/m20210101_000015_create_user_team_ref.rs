@@ -37,21 +37,24 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("user2team_user_id_fkey")
                             .from(User2Team::Table, User2Team::UserId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(User2Team::TeamId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("user2team_team_id_fkey")
                             .from(User2Team::Table, User2Team::TeamId)
-                            .to(Team::Table, Team::Id),
+                            .to(Team::Table, Team::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(User2Team::Table).to_owned())

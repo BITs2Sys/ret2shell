@@ -18,8 +18,8 @@ pub enum Team {
     Name,
     GameId,
     Token,
-    State,
     // 0 is not audited, 1 is audited, -1 is hidden, -2 is banned
+    State,
     InstituteId,
     Score,
     History,
@@ -46,7 +46,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("team_game_id_fkey")
                             .from(Team::Table, Team::GameId)
-                            .to(Game::Table, Game::Id),
+                            .to(Game::Table, Game::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Team::Token).string_len(255).not_null())
                     .col(ColumnDef::new(Team::State).integer().not_null().default(0))
@@ -55,7 +57,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("team_institute_id_fkey")
                             .from(Team::Table, Team::InstituteId)
-                            .to(Institute::Table, Institute::Id),
+                            .to(Institute::Table, Institute::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(ColumnDef::new(Team::Score).integer().not_null().default(0))
                     .col(
@@ -75,7 +79,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Team::Table).to_owned())

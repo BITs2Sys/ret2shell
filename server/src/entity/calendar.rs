@@ -3,7 +3,7 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "ctftime")]
+#[sea_orm(table_name = "calendar")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
@@ -15,7 +15,7 @@ pub struct Model {
     pub end_time: DateTimeWithTimeZone,
     pub audited: bool,
     pub game_id: Option<i64>,
-    pub reporter_id: i64,
+    pub reporter_id: Option<i64>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -24,16 +24,16 @@ pub enum Relation {
         belongs_to = "super::game::Entity",
         from = "Column::GameId",
         to = "super::game::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     Game,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::ReporterId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     User,
 }

@@ -51,14 +51,21 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("challenge_game_id_fkey")
                             .from(Challenge::Table, Challenge::GameId)
-                            .to(Game::Table, Game::Id),
+                            .to(Game::Table, Game::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            // do not allow delete a game if it contains challenges
+                            // hidden it instead or delete all challenges to prevent dangling references
+                            .on_delete(ForeignKeyAction::Restrict),
                     )
                     .col(ColumnDef::new(Challenge::TagId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("challenge_tag_id_fkey")
                             .from(Challenge::Table, Challenge::TagId)
-                            .to(Tag::Table, Tag::Id),
+                            .to(Tag::Table, Tag::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            // do not allow deleting a tag if it is still used by a challenge
+                            .on_delete(ForeignKeyAction::Restrict),
                     )
                     .col(ColumnDef::new(Challenge::InitialScore).integer().not_null())
                     .col(
@@ -86,7 +93,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Challenge::Table).to_owned())

@@ -37,7 +37,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("wiki_related_wiki_id_fkey")
                             .from(WikiRelated::Table, WikiRelated::WikiId)
-                            .to(Wiki::Table, Wiki::Id),
+                            .to(Wiki::Table, Wiki::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(WikiRelated::RelatedId)
@@ -48,14 +50,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("wiki_related_related_id_fkey")
                             .from(WikiRelated::Table, WikiRelated::RelatedId)
-                            .to(Wiki::Table, Wiki::Id),
+                            .to(Wiki::Table, Wiki::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(WikiRelated::Table).to_owned())

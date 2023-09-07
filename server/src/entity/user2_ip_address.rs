@@ -17,16 +17,16 @@ pub enum Relation {
         belongs_to = "super::ip_address::Entity",
         from = "Column::IpAddressId",
         to = "super::ip_address::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     IpAddress,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     User,
 }

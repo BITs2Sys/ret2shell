@@ -63,7 +63,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("announcement_publisher_id_fkey")
                             .from(Announcement::Table, Announcement::PublisherId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Announcement::Content).text().not_null())
                     .col(ColumnDef::new(Announcement::Pinned).boolean().not_null())
@@ -72,7 +74,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Announcement::Table).to_owned())

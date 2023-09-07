@@ -7,12 +7,12 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20210101_000020_create_ctftime"
+        "m_20210101_000020_create_calendar"
     }
 }
 
 #[derive(Iden)]
-pub enum Ctftime {
+pub enum Calendar {
     Table,
     Id,
     GameId,
@@ -31,58 +31,61 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Ctftime::Table)
+                    .table(Calendar::Table)
                     .col(
-                        ColumnDef::new(Ctftime::Id)
+                        ColumnDef::new(Calendar::Id)
                             .big_integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Ctftime::Name).string_len(63).not_null())
-                    .col(ColumnDef::new(Ctftime::Intro).text().not_null())
-                    .col(ColumnDef::new(Ctftime::Link).string_len(511).not_null())
+                    .col(ColumnDef::new(Calendar::Name).string_len(63).not_null())
+                    .col(ColumnDef::new(Calendar::Intro).text().not_null())
+                    .col(ColumnDef::new(Calendar::Link).string_len(511).not_null())
                     .col(
-                        ColumnDef::new(Ctftime::StartTime)
+                        ColumnDef::new(Calendar::StartTime)
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
                     )
                     .col(
-                        ColumnDef::new(Ctftime::EndTime)
+                        ColumnDef::new(Calendar::EndTime)
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
                     )
                     .col(
-                        ColumnDef::new(Ctftime::Audited)
+                        ColumnDef::new(Calendar::Audited)
                             .boolean()
                             .not_null()
                             .default(false),
                     )
-                    .col(ColumnDef::new(Ctftime::GameId).big_integer())
+                    .col(ColumnDef::new(Calendar::GameId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("ctftime_game_id_fkey")
-                            .from(Ctftime::Table, Ctftime::GameId)
-                            .to(Game::Table, Game::Id),
+                            .name("calendar_game_id_fkey")
+                            .from(Calendar::Table, Calendar::GameId)
+                            .to(Game::Table, Game::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
-                    .col(ColumnDef::new(Ctftime::ReporterId).big_integer().not_null())
+                    .col(ColumnDef::new(Calendar::ReporterId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("ctftime_reporter_id_fkey")
-                            .from(Ctftime::Table, Ctftime::ReporterId)
-                            .to(User::Table, User::Id),
+                            .name("calendar_reporter_id_fkey")
+                            .from(Calendar::Table, Calendar::ReporterId)
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Ctftime::Table).to_owned())
+            .drop_table(Table::drop().table(Calendar::Table).to_owned())
             .await
     }
 }

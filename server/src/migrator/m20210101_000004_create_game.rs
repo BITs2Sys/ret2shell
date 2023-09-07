@@ -92,14 +92,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("game_institute_id_fkey")
                             .from(Game::Table, Game::InstituteId)
-                            .to(Institute::Table, Institute::Id),
+                            .to(Institute::Table, Institute::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Game::Table).to_owned())

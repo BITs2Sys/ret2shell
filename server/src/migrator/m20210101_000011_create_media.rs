@@ -45,14 +45,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("media_uploader_id_fkey")
                             .from(Media::Table, Media::UploaderId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Media::Table).to_owned())

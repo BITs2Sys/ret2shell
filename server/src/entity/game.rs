@@ -11,7 +11,7 @@ pub struct Model {
     pub name: String,
     pub brief: String,
     #[sea_orm(column_type = "Text")]
-    pub introduction: Option<String>,
+    pub introduction: String,
     pub start_time: DateTimeWithTimeZone,
     pub end_time: DateTimeWithTimeZone,
     pub register_time: DateTimeWithTimeZone,
@@ -20,7 +20,7 @@ pub struct Model {
     pub frozen: bool,
     pub host_as_game: bool,
     pub team_size_limit: i32,
-    pub cover_path: Option<String>,
+    pub cover_path: String,
     pub enable_team_audit: bool,
     pub can_register_after_started: bool,
     pub institute_id: Option<i64>,
@@ -28,16 +28,16 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::calendar::Entity")]
+    Calendar,
     #[sea_orm(has_many = "super::challenge::Entity")]
     Challenge,
-    #[sea_orm(has_many = "super::ctftime::Entity")]
-    Ctftime,
     #[sea_orm(
         belongs_to = "super::institute::Entity",
         from = "Column::InstituteId",
         to = "super::institute::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     Institute,
     #[sea_orm(has_many = "super::notification::Entity")]
@@ -48,15 +48,15 @@ pub enum Relation {
     WriteUp,
 }
 
-impl Related<super::challenge::Entity> for Entity {
+impl Related<super::calendar::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Challenge.def()
+        Relation::Calendar.def()
     }
 }
 
-impl Related<super::ctftime::Entity> for Entity {
+impl Related<super::challenge::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Ctftime.def()
+        Relation::Challenge.def()
     }
 }
 

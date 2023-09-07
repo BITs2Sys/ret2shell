@@ -19,8 +19,8 @@ pub enum Relation {
         belongs_to = "super::user::Entity",
         from = "Column::UploaderId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     User,
 }

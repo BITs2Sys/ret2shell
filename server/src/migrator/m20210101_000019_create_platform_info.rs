@@ -12,6 +12,7 @@ impl MigrationName for Migration {
 pub enum PlatformInfo {
     Table,
     Id,
+    Auth,
     Captcha,
     Email,
     Media,
@@ -63,12 +64,17 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default("{}"),
                     )
+                    .col(
+                        ColumnDef::new(PlatformInfo::Auth)
+                            .json_binary()
+                            .not_null()
+                            .default("{}"),
+                    )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(PlatformInfo::Table).to_owned())

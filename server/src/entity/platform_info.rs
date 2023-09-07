@@ -10,6 +10,8 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary")]
     pub platform: Option<Json>,
     #[sea_orm(column_type = "JsonBinary")]
+    pub auth: Option<Json>,
+    #[sea_orm(column_type = "JsonBinary")]
     pub captcha: Option<Json>,
     #[sea_orm(column_type = "JsonBinary")]
     pub email: Option<Json>,
@@ -19,36 +21,36 @@ pub struct Model {
     pub pusher: Option<Json>,
 }
 
+macro_rules! from_json_value {
+    ($name:expr) => {
+        serde_json::from_value($name.expect("failed to deserialize platform info"))
+            .expect("failed to deserialize platform info")
+    };
+}
+
+macro_rules! to_json_value {
+    ($name:expr) => {
+        Some(serde_json::to_value($name).expect("failed to serialize platform info"))
+    };
+}
+
 impl From<PlatformInfoModel> for Model {
     fn from(platform_info_model: PlatformInfoModel) -> Self {
         Self {
             id: 0,
-            platform: Some(
-                serde_json::to_value(platform_info_model.platform)
-                    .expect("failed to serialize platform info"),
-            ),
-            captcha: Some(
-                serde_json::to_value(platform_info_model.captcha)
-                    .expect("failed to serialize captcha info"),
-            ),
-            email: Some(
-                serde_json::to_value(platform_info_model.email)
-                    .expect("failed to serialize email info"),
-            ),
-            media: Some(
-                serde_json::to_value(platform_info_model.media)
-                    .expect("failed to serialize media info"),
-            ),
-            pusher: Some(
-                serde_json::to_value(platform_info_model.pusher)
-                    .expect("failed to serialize pusher info"),
-            ),
+            auth: to_json_value!(platform_info_model.auth),
+            platform: to_json_value!(platform_info_model.platform),
+            captcha: to_json_value!(platform_info_model.captcha),
+            email: to_json_value!(platform_info_model.email),
+            media: to_json_value!(platform_info_model.media),
+            pusher: to_json_value!(platform_info_model.pusher),
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PlatformInfoModel {
+    pub auth: Option<Auth>,
     pub platform: Option<Platform>,
     pub captcha: Option<Captcha>,
     pub email: Option<Email>,
@@ -59,36 +61,12 @@ pub struct PlatformInfoModel {
 impl From<Model> for PlatformInfoModel {
     fn from(platform_info: Model) -> Self {
         Self {
-            platform: serde_json::from_value(
-                platform_info
-                    .platform
-                    .expect("failed to deserialize platform info"),
-            )
-            .expect("failed to deserialize platform info"),
-            captcha: serde_json::from_value(
-                platform_info
-                    .captcha
-                    .expect("failed to deserialize captcha info"),
-            )
-            .expect("failed to deserialize captcha info"),
-            email: serde_json::from_value(
-                platform_info
-                    .email
-                    .expect("failed to deserialize email info"),
-            )
-            .expect("failed to deserialize email info"),
-            media: serde_json::from_value(
-                platform_info
-                    .media
-                    .expect("failed to deserialize media info"),
-            )
-            .expect("failed to deserialize media info"),
-            pusher: serde_json::from_value(
-                platform_info
-                    .pusher
-                    .expect("failed to deserialize pusher info"),
-            )
-            .expect("failed to deserialize pusher info"),
+            auth: from_json_value!(platform_info.auth),
+            platform: from_json_value!(platform_info.platform),
+            captcha: from_json_value!(platform_info.captcha),
+            email: from_json_value!(platform_info.email),
+            media: from_json_value!(platform_info.media),
+            pusher: from_json_value!(platform_info.pusher),
         }
     }
 }
@@ -110,6 +88,13 @@ pub struct Captcha {
     pub difficulty: Option<u16>,
     /// The captcha validator to use.
     pub validator: Validator,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Auth {
+    pub signing_key: String,
+    pub buffer_time: i64,
+    pub expires_time: i64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

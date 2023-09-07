@@ -22,16 +22,16 @@ pub enum Relation {
         belongs_to = "super::challenge::Entity",
         from = "Column::ChallengeId",
         to = "super::challenge::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Challenge,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     User,
 }

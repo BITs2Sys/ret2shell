@@ -3,8 +3,8 @@
 pub use super::action::Entity as Action;
 pub use super::announcement::Entity as Announcement;
 pub use super::answer::Entity as Answer;
+pub use super::calendar::Entity as Calendar;
 pub use super::challenge::Entity as Challenge;
-pub use super::ctftime::Entity as Ctftime;
 pub use super::game::Entity as Game;
 pub use super::hint::Entity as Hint;
 pub use super::instance::Entity as Instance;

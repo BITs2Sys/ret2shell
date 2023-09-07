@@ -21,8 +21,7 @@ pub enum User {
     CoverPath,
     InstituteId,
     InstituteInfo,
-    // 0: novice, 1: verified user, 2: admin
-    Level,
+    Permissions,
     Hidden,
     Banned,
 }
@@ -61,10 +60,17 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("user_institute_id_fkey")
                             .from(User::Table, User::InstituteId)
-                            .to(Institute::Table, Institute::Id),
+                            .to(Institute::Table, Institute::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(ColumnDef::new(User::InstituteInfo).text())
-                    .col(ColumnDef::new(User::Level).integer().not_null().default(0))
+                    .col(
+                        ColumnDef::new(User::Permissions)
+                            .json_binary()
+                            .not_null()
+                            .default("[\"basic\"]"),
+                    )
                     .col(
                         ColumnDef::new(User::Hidden)
                             .boolean()
@@ -82,7 +88,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(User::Table).to_owned())

@@ -10,7 +10,7 @@ pub struct Model {
     pub title: String,
     pub published_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
-    pub author_id: i64,
+    pub author_id: Option<i64>,
     pub challenge_id: i64,
     #[sea_orm(column_type = "Text")]
     pub content: Option<String>,
@@ -22,16 +22,16 @@ pub enum Relation {
         belongs_to = "super::challenge::Entity",
         from = "Column::ChallengeId",
         to = "super::challenge::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Challenge,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::AuthorId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     User,
 }

@@ -29,16 +29,16 @@ pub enum Relation {
     Announcement,
     #[sea_orm(has_many = "super::answer::Entity")]
     Answer,
-    #[sea_orm(has_many = "super::ctftime::Entity")]
-    Ctftime,
+    #[sea_orm(has_many = "super::calendar::Entity")]
+    Calendar,
     #[sea_orm(has_many = "super::instance::Entity")]
     Instance,
     #[sea_orm(
         belongs_to = "super::institute::Entity",
         from = "Column::InstituteId",
         to = "super::institute::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     Institute,
     #[sea_orm(has_many = "super::media::Entity")]
@@ -69,9 +69,9 @@ impl Related<super::answer::Entity> for Entity {
     }
 }
 
-impl Related<super::ctftime::Entity> for Entity {
+impl Related<super::calendar::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Ctftime.def()
+        Relation::Calendar.def()
     }
 }
 

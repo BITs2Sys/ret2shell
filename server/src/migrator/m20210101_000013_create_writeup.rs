@@ -51,19 +51,23 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(WriteUp::AuthorId).big_integer().not_null())
+                    .col(ColumnDef::new(WriteUp::AuthorId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
                             .name("writeup_author_id_fkey")
                             .from(WriteUp::Table, WriteUp::AuthorId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(ColumnDef::new(WriteUp::GameId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("writeup_game_id_fkey")
                             .from(WriteUp::Table, WriteUp::GameId)
-                            .to(Game::Table, Game::Id),
+                            .to(Game::Table, Game::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(WriteUp::Content).text().not_null())
                     .to_owned(),
@@ -71,7 +75,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(WriteUp::Table).to_owned())

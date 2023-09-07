@@ -41,7 +41,9 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("user2ip_address_user_id_fkey")
                             .from(User2IpAddress::Table, User2IpAddress::UserId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(User2IpAddress::IpAddressId)
@@ -52,14 +54,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("user2ip_address_ip_address_id_fkey")
                             .from(User2IpAddress::Table, User2IpAddress::IpAddressId)
-                            .to(IpAddress::Table, IpAddress::Id),
+                            .to(IpAddress::Table, IpAddress::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(User2IpAddress::Table).to_owned())

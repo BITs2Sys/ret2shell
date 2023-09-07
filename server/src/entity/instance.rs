@@ -16,7 +16,7 @@ pub struct Model {
     pub flag: String,
     pub renew_count: i32,
     pub started_at: DateTimeWithTimeZone,
-    pub user_id: i64,
+    pub user_id: Option<i64>,
     pub challenge_id: i64,
 }
 
@@ -34,8 +34,8 @@ pub enum Relation {
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     User,
 }

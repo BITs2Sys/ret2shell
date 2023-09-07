@@ -20,8 +20,8 @@ pub enum Relation {
         belongs_to = "super::game::Entity",
         from = "Column::GameId",
         to = "super::game::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Game,
 }

@@ -9,17 +9,17 @@ pub struct Model {
     pub id: i64,
     pub name: String,
     #[sea_orm(column_type = "Text")]
-    pub content: Option<String>,
+    pub content: String,
     pub hidden: bool,
     pub game_id: i64,
     pub tag_id: i64,
     pub initial_score: i32,
     pub current_score: i32,
-    pub minimum_score: i32,
     pub updated_at: DateTimeWithTimeZone,
+    pub minimum_score: i32,
     pub decay: i32,
-    pub bucket: Option<String>,
-    pub checker: Option<String>,
+    pub bucket: String,
+    pub checker: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -32,8 +32,8 @@ pub enum Relation {
         belongs_to = "super::game::Entity",
         from = "Column::GameId",
         to = "super::game::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Restrict"
     )]
     Game,
     #[sea_orm(has_many = "super::hint::Entity")]
@@ -48,8 +48,8 @@ pub enum Relation {
         belongs_to = "super::tag::Entity",
         from = "Column::TagId",
         to = "super::tag::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Restrict"
     )]
     Tag,
 }

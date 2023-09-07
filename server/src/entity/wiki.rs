@@ -10,9 +10,9 @@ pub struct Model {
     pub title: String,
     pub published_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
-    pub author_id: i64,
+    pub author_id: Option<i64>,
     #[sea_orm(column_type = "Text")]
-    pub content: String,
+    pub content: Option<String>,
     pub parent: Option<i64>,
 }
 
@@ -22,16 +22,16 @@ pub enum Relation {
         belongs_to = "super::user::Entity",
         from = "Column::AuthorId",
         to = "super::user::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     User,
     #[sea_orm(
         belongs_to = "Entity",
         from = "Column::Parent",
         to = "Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     SelfRef,
 }

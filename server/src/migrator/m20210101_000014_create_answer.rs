@@ -51,19 +51,23 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Answer::AuthorId).big_integer().not_null())
+                    .col(ColumnDef::new(Answer::AuthorId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
                             .name("answer_author_id_fkey")
                             .from(Answer::Table, Answer::AuthorId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(ColumnDef::new(Answer::ChallengeId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("answer_challenge_id_fkey")
                             .from(Answer::Table, Answer::ChallengeId)
-                            .to(Challenge::Table, Challenge::Id),
+                            .to(Challenge::Table, Challenge::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Answer::Content).text().not_null())
                     .to_owned(),
@@ -71,7 +75,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Answer::Table).to_owned())

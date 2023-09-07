@@ -18,8 +18,8 @@ pub enum Relation {
         belongs_to = "super::challenge::Entity",
         from = "Column::ChallengeId",
         to = "super::challenge::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Challenge,
 }

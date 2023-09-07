@@ -50,12 +50,14 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Wiki::AuthorId).big_integer().not_null())
+                    .col(ColumnDef::new(Wiki::AuthorId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
                             .name("answer_author_id_fkey")
                             .from(Wiki::Table, Wiki::AuthorId)
-                            .to(User::Table, User::Id),
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Wiki::Content).text().not_null())
                     .col(ColumnDef::new(Wiki::Parent).big_integer())
@@ -63,14 +65,15 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("answer_parent_fkey")
                             .from(Wiki::Table, Wiki::Parent)
-                            .to(Wiki::Table, Wiki::Id),
+                            .to(Wiki::Table, Wiki::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
             .await
     }
 
-    // Define how to rollback this migration: Drop the Bakery table.
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(Wiki::Table).to_owned())
