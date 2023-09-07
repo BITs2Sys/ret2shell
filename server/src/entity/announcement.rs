@@ -5,6 +5,7 @@ use sea_orm::entity::prelude::*;
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "announcement")]
 pub struct Model {
