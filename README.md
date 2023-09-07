@@ -4,4 +4,4 @@
 
 ## Requirements
 
-Rust `1.72.0`+, svelte `4.0`+.
+MSRV `1.72.0`+, svelte `4.0`+, typescript `5.3`+.
