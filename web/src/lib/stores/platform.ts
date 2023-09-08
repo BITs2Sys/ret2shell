@@ -8,6 +8,7 @@ class PlatformStore {
   footerInfo: string
   footerUrl: string
   acceptCookies: boolean
+  // 备案
   record: string | null
   hideMaker: boolean
 

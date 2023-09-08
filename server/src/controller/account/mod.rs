@@ -10,8 +10,8 @@ use tracing::{debug, warn};
 
 use super::layer::auth::{permission_required, Token, TokenTracker};
 use crate::captcha::captcha_protected;
-use crate::entity::platform_info::Model as PlatformInfoModel;
-use crate::entity::user;
+use crate::entity::config::Model as ConfigModel;
+use crate::entity::user::{self, Permissions};
 use crate::{cache::manager::RedisPool, controller::GlobalState, entity::user::Permission};
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -33,7 +33,7 @@ struct LoginRequest {
 async fn login(
     State(ref db): State<DatabaseConnection>,
     State(ref mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<PlatformInfoModel>,
+    Extension(platform_info): Extension<ConfigModel>,
     Extension(token): Extension<Token>,
     Extension(token_tracker): Extension<TokenTracker>,
     Json(body): Json<LoginRequest>,
@@ -43,12 +43,7 @@ async fn login(
         return Err((StatusCode::CONFLICT, "you are already logged in"));
     }
     let captcha_config = &platform_info.captcha;
-    captcha_protected!(
-        &captcha_config,
-        cache,
-        &body.captcha_id,
-        &body.captcha_answer
-    );
+    captcha_protected!(&captcha_config, cache, &body.captcha_id, &body.captcha_answer);
 
     let user = user::get_user_by_account(db, &body.account)
         .await
@@ -100,17 +95,12 @@ struct RegisterRequest {
 async fn register(
     State(ref db): State<DatabaseConnection>,
     State(ref mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<PlatformInfoModel>,
+    Extension(platform_info): Extension<ConfigModel>,
     Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("register request: {:?}", body);
     let captcha_config = &platform_info.captcha;
-    captcha_protected!(
-        &captcha_config,
-        cache,
-        &body.captcha_id,
-        &body.captcha_answer
-    );
+    captcha_protected!(&captcha_config, cache, &body.captcha_id, &body.captcha_answer);
 
     match user::get_user_by_account(db, &body.email).await {
         Ok(_) => return Err((StatusCode::CONFLICT, "account already exists")),
@@ -121,6 +111,16 @@ async fn register(
         warn!("failed to hash password: {:?}", err);
         (StatusCode::INTERNAL_SERVER_ERROR, "failed to hash password")
     })?;
+
+    let new_user = user::Model {
+        name: body.name,
+        password: Some(password),
+        email: Some(body.email),
+        permissions: Permissions(vec![Permission::Basic]),
+        hidden: false,
+        banned: false,
+        ..Default::default()
+    };
 
     Ok(StatusCode::OK)
 }

@@ -40,7 +40,7 @@
     "title": "Documents"
   },
   "about": {
-    "maker": "Reverier Xu"
+    "maker": "ret2shell team"
   },
   "misc": {
     "verifyCode": "Verification Code",
@@ -77,5 +77,8 @@
     "unknown": "Unknown Error",
     "unknownTip": "you fell into the void",
     "418Tip": "Does brewing coffee in a teapot really prevent odors?"
+  },
+  "wiki": {
+    "title": "Wiki"
   }
 }

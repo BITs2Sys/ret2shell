@@ -24,7 +24,7 @@ use tracing::{debug, error, warn};
 use crate::{
     cache::{self, manager::RedisPool},
     entity::{
-        platform_info::{Auth, Model as PlatformInfoModel},
+        config::{Auth, Model as PlatformInfoModel},
         user::Permissions,
     },
 };
@@ -137,7 +137,7 @@ pub async fn extract_user_info<B>(
             })
             .ok();
         resp.headers_mut().insert(
-            "New-Token",
+            "Set-Token",
             new_token.parse().expect("failed to parse token"),
         );
     }

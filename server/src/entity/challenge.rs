@@ -18,9 +18,9 @@ pub struct Model {
     pub tag_id: i64,
     pub initial_score: i32,
     pub current_score: i32,
+    pub minimum_score: i32,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub updated_at: DateTime<Utc>,
-    pub minimum_score: i32,
     pub decay: i32,
     pub bucket: String,
     pub checker: String,

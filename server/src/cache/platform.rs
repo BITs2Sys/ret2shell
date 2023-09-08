@@ -4,7 +4,7 @@
 use redis::RedisError;
 use sea_orm::DatabaseConnection;
 
-use crate::entity::platform_info::{self, Model as PlatformInfoModel};
+use crate::entity::config::{self, Model as PlatformInfoModel};
 
 use super::manager::{CacheError, PoolLike, PooledConnectionLike, RedisPool};
 
@@ -15,7 +15,7 @@ impl Platform {
         conn: &mut RedisPool,
         db: &DatabaseConnection,
     ) -> Result<PlatformInfoModel, CacheError<RedisError>> {
-        let platform_info = platform_info::get_platform_info(db).await?;
+        let platform_info = config::get_config(db).await?;
         let mut conn = conn.get().await?;
         conn.set("platform_info", serde_json::to_string(&platform_info)?)
             .await?;

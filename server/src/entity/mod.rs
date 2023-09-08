@@ -16,7 +16,7 @@ pub mod media;
 pub mod notification;
 pub mod plan;
 pub mod plan2_challenge;
-pub mod platform_info;
+pub mod config;
 pub mod submission;
 pub mod subscription;
 pub mod tag;

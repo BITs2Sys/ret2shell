@@ -19,7 +19,6 @@ pub enum Action {
     CreatedAt,
     StartedAt,
     CommitId,
-    // -1: failed, 0: pending, 1: building, 2: succeeded
     Status,
 }
 

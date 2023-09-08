@@ -14,7 +14,7 @@ pub use super::media::Entity as Media;
 pub use super::notification::Entity as Notification;
 pub use super::plan::Entity as Plan;
 pub use super::plan2_challenge::Entity as Plan2Challenge;
-pub use super::platform_info::Entity as PlatformInfo;
+pub use super::config::Entity as Config;
 pub use super::submission::Entity as Submission;
 pub use super::subscription::Entity as Subscription;
 pub use super::tag::Entity as Tag;

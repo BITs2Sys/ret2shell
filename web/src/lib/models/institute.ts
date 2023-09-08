@@ -2,7 +2,7 @@ export interface Institute {
   id: number
   name: string
   description: string
-  method: string
+  validator: string
   data: string
   logo: string
 }

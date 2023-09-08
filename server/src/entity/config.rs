@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::captcha::Validator;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "platform_info")]
+#[sea_orm(table_name = "config")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
@@ -28,6 +28,8 @@ pub struct Platform {
     pub footer_url: String,
     pub subject_info: String,
     pub subject_url: String,
+    pub record: Option<String>,
+    pub hide_maker: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
@@ -94,7 +96,7 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_platform_info(db: &DatabaseConnection) -> Result<Model, DbErr> {
+pub async fn get_config(db: &DatabaseConnection) -> Result<Model, DbErr> {
     let platform_info = Entity::find().one(db).await?;
     match platform_info {
         Some(platform_info) => Ok(platform_info),
@@ -102,7 +104,7 @@ pub async fn get_platform_info(db: &DatabaseConnection) -> Result<Model, DbErr> 
     }
 }
 
-pub async fn update_platform_info(
+pub async fn update_config(
     db: &DatabaseConnection,
     platform_info: Model,
 ) -> Result<(), DbErr> {

@@ -5,6 +5,12 @@
 </script>
 
 <li>
+  <RxLink ghost justify="start" href="/wiki">
+    <span class="icon-[fluent--book-number-16-regular] w-6 h-6" />
+    {$i18n.t('wiki.title')}
+  </RxLink>
+</li>
+<li>
   <RxLink ghost justify="start" href="/playground">
     <span class="icon-[fluent--dumbbell-16-regular] w-6 h-6" />
     {$i18n.t('playground.title')}
@@ -20,12 +26,6 @@
   <RxLink ghost justify="start" href="/announcements">
     <span class="icon-[fluent--megaphone-16-regular] w-6 h-6" />
     {$i18n.t('announcements.title')}
-  </RxLink>
-</li>
-<li>
-  <RxLink ghost justify="start" href="/certs">
-    <span class="icon-[fluent--trophy-16-regular] w-6 h-6" />
-    {$i18n.t('certs.title')}
   </RxLink>
 </li>
 {#if $user.level >= 2}

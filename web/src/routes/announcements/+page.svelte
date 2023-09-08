@@ -1,7 +1,7 @@
 <script lang="ts">
   import { platform } from '$lib/stores/platform'
   import { i18n } from '$lib/i18n'
-    import type { Announcement } from '$lib/models/announcement'
+  import type { Announcement } from '$lib/models/announcement'
 
   let announcements: Announcement[] = []
 </script>

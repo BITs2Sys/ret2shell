@@ -4,7 +4,7 @@ use axum::{
 
 use crate::{
     cache::manager::RedisPool, captcha, controller::GlobalState,
-    entity::platform_info::Model as PlatformInfoModel,
+    entity::config::Model as ConfigModel,
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
@@ -13,7 +13,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 
 async fn get_captcha(
     State(mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<PlatformInfoModel>,
+    Extension(platform_info): Extension<ConfigModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let captcha = platform_info.captcha;
     if !captcha.enabled {

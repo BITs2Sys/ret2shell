@@ -40,7 +40,7 @@
     "title": "技术文档"
   },
   "about": {
-    "maker": "Reverier Xu"
+    "maker": "ret2shell team"
   },
   "theme": {
     "colorScheme": "颜色主题",
@@ -77,5 +77,8 @@
     "unknown": "未知错误",
     "unknownTip": "你坠入了虚空",
     "418Tip": "用茶壶泡咖啡真的不会串味吗"
+  },
+  "wiki": {
+    "title": "知识"
   }
 }

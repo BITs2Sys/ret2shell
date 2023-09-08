@@ -11,22 +11,20 @@ export class api {
     init?: RequestInit | undefined
   ) {
     const token = get(user).token
+    let headers: HeadersInit = {}
     if (token && token.length > 0) {
-      return fetch(input, {
-        method,
-        headers: {
-          Authentication: `Bearer ${token}`,
-          ...init?.headers,
-        },
-        body: JSON.stringify(body),
-        ...init,
-      })
+      headers = { Authentication: `Bearer ${token}`, 'Content-Type': 'application/json', ...init?.headers }
     } else {
-      return fetch(input, {
-        method,
-        ...init,
+      headers = { 'Content-Type': 'application/json', ...init?.headers }
+    }
+    let resp = await fetch(input, { method, headers, body: JSON.stringify(body), ...init })
+    if (resp.headers.get('Set-Token')) {
+      user.update((value) => {
+        value.token = resp.headers.get('Set-Token')!
+        return value
       })
     }
+    return resp
   }
 
   static async GET(input: RequestInfo | URL, body?: Record<string, string>, init?: RequestInit) {
