@@ -80,5 +80,8 @@
   },
   "wiki": {
     "title": "Wiki"
+  },
+  "calendar": {
+    "title": "CTF Calendar"
   }
 }

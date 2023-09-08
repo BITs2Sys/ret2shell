@@ -1,6 +1,7 @@
 <script lang="ts">
   import { platform } from '$lib/stores/platform'
   import { i18n } from '$lib/i18n'
+  import RxCalendar from '$lib/components/RxCalendar.svelte'
 </script>
 
 <svelte:head><title>{$platform.name}</title></svelte:head>
@@ -36,8 +37,18 @@
         </p>
       </div>
     </section>
-    <section class="h-full min-h-full snap-center flex flex-col items-center">
+    <section class="h-full min-h-full snap-center flex flex-col p-3 md:p-6">
+      <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
+        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <h1 class="text-2xl font-bold">{$i18n.t('calendar.title')}</h1>
+        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      </div>
+      <div class="flex flex-1 flex-col lg:flex-row lg:p-24 lg:pt-12 lg:pb-36 space-y-6 lg:space-y-0 lg:space-x-24">
+        <RxCalendar class="flex-1" />
+        <div class="flex-1">
 
+        </div>
+      </div>
     </section>
   </div>
 </div>
