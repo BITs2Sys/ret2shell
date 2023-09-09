@@ -39,6 +39,7 @@ use self::layer::auth::extract_user_info;
 
 #[derive(Clone, FromRef)]
 pub struct GlobalState {
+    pub config: GlobalConfig,
     pub db: DatabaseConnection,
     pub cache: RedisPool,
     pub auditor: Auditor,

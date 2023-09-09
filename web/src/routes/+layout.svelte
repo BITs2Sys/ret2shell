@@ -11,9 +11,25 @@
   import { fade } from 'svelte/transition'
   import { platform } from '$lib/stores/platform'
   import { page } from '$app/stores'
+  import { getPlatformInfo } from '$lib/api/platform'
+  import { goto } from '$app/navigation'
 
   let platformTyped = ''
   let animation = $page.route.id === '/'
+
+  getPlatformInfo().then((data) => {
+    if (!data.ok && data.status === 404) {
+      goto('/init')
+      return
+    } else if (!data.ok) {
+      // TODO: warn user
+    }
+    data.json().then((data) => {
+      platform.update((value) => {
+        return { ...value, ...data }
+      })
+    })
+  })
 
   onMount(() => {
     if (!animation) return

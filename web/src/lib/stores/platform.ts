@@ -3,14 +3,14 @@ import { browser } from '$app/environment'
 
 class PlatformStore {
   name: string
-  subjectInfo: string
-  subjectUrl: string
-  footerInfo: string
-  footerUrl: string
-  acceptCookies: boolean
+  subject_info: string
+  subject_url: string
+  footer_info: string
+  footer_url: string
+  accept_cookies: boolean
   // 备案
   record: string | null
-  hideMaker: boolean
+  hide_maker: boolean
 
   constructor() {
     if (browser) {
@@ -18,24 +18,24 @@ class PlatformStore {
       if (stored) {
         const parsed = JSON.parse(stored)
         this.name = parsed.name
-        this.subjectInfo = parsed.subjectInfo
-        this.subjectUrl = parsed.subjectUrl
-        this.footerInfo = parsed.footerInfo
-        this.footerUrl = parsed.footerUrl
-        this.acceptCookies = parsed.acceptCookies
+        this.subject_info = parsed.subject_info
+        this.subject_url = parsed.subject_url
+        this.footer_info = parsed.footer_info
+        this.footer_url = parsed.footer_url
+        this.accept_cookies = parsed.accept_cookies
         this.record = parsed.record
-        this.hideMaker = parsed.hideMaker
+        this.hide_maker = parsed.hide_maker
         return
       }
     }
     this.name = 'Ret 2 Shell'
-    this.subjectInfo = 'Fighting for all the beauty in the world'
-    this.subjectUrl = 'https://www.woooo.tech'
-    this.footerInfo = 'Wootec Inc.'
-    this.footerUrl = 'https://www.woooo.tech'
-    this.acceptCookies = false
+    this.subject_info = 'Fighting for all the beauty in the world'
+    this.subject_url = 'https://www.woooo.tech'
+    this.footer_info = 'Wootec Inc.'
+    this.footer_url = 'https://www.woooo.tech'
+    this.accept_cookies = false
     this.record = null
-    this.hideMaker = false
+    this.hide_maker = false
   }
 }
 

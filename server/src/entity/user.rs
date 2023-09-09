@@ -155,6 +155,7 @@ impl Related<super::write_up::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+#[allow(dead_code)]
 pub async fn get_user(db: &DatabaseConnection, id: i64) -> Result<Model, DbErr> {
     let user = Entity::find_by_id(id).one(db).await?;
     match user {

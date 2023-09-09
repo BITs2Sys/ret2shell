@@ -146,7 +146,7 @@
             {/if}
             <div class="h-1 flex flex-row justify-center items-center space-x-1 w-4">
               {#if day.date.toLocaleDateString() === new Date().toLocaleDateString()}
-              <div class="flex-1 bg-primary h-1 rounded-full" />
+                <div class="flex-1 bg-primary h-1 rounded-full" />
               {/if}
               {#if day.highlight}
                 <div class="w-1 bg-primary h-1 rounded-full" />

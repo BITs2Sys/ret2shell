@@ -31,6 +31,7 @@ pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<AhoCorasick> {
 }
 
 /// Checks if a given text contains any sensitive words using the Aho-Corasick automaton.
+#[allow(dead_code)]
 pub fn check_text(ac: &AhoCorasick, src: &str) -> bool {
     ac.find(
         &src.trim()

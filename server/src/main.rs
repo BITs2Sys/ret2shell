@@ -117,6 +117,7 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     greet();
 
     warn!(">> Server initialization started <<");
+    // debug!("LOGGER TEST: DEBUG MESSAGE");
 
     info!("Loading module: < Audit >");
     let auditor = audit::initialize(&config).await?;
@@ -127,6 +128,7 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     info!("Loading module: < Message Queue >");
     let queue = queue::initialize(&config).await?;
     let state = GlobalState {
+        config: config.clone(),
         auditor,
         db,
         cache,

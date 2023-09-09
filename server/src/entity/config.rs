@@ -97,28 +97,28 @@ pub enum Relation {}
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_config(db: &DatabaseConnection) -> Result<Model, DbErr> {
-    let platform_info = Entity::find().one(db).await?;
-    match platform_info {
-        Some(platform_info) => Ok(platform_info),
-        None => Err(DbErr::RecordNotFound("platform_info".to_string())),
+    let config = Entity::find().one(db).await?;
+    match config {
+        Some(config) => Ok(config),
+        None => Err(DbErr::RecordNotFound("config".to_string())),
     }
 }
 
 pub async fn update_config(
     db: &DatabaseConnection,
-    platform_info: Model,
+    config: Model,
 ) -> Result<(), DbErr> {
     let original_info = Entity::find().one(db).await?;
     match original_info {
         Some(original_info) => {
-            let mut platform_info: ActiveModel = platform_info.into();
-            platform_info = platform_info.reset_all();
-            platform_info.id = ActiveValue::Unchanged(original_info.id);
-            platform_info.update(db).await?;
+            let mut config: ActiveModel = config.into();
+            config = config.reset_all();
+            config.id = ActiveValue::Unchanged(original_info.id);
+            config.update(db).await?;
         }
         None => {
-            let platform_info: ActiveModel = platform_info.into();
-            platform_info.insert(db).await?;
+            let config: ActiveModel = config.into();
+            config.insert(db).await?;
         }
     }
     Ok(())

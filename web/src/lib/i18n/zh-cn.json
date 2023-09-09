@@ -96,5 +96,30 @@
     "iKnow": "了解了",
     "gotoGame": "转到这场比赛",
     "noGame": "近期没有比赛"
+  },
+  "init": {
+    "accountTitle": "注册初始管理员用户",
+    "authTitle": "凭据签发设置",
+    "captchaTitle": "验证码保护设置",
+    "emailTitle": "发信邮箱设置",
+    "footerInfoRequired": "请填写页脚所有权信息",
+    "footerUrlRequired": "请填写页脚所有权的指向连接",
+    "infoTitle": "平台基础信息设置",
+    "invalidUrl": "链接格式错误",
+    "mediaSettings": "媒体控制设置",
+    "nameTips": "请为平台取一个新名字。",
+    "platformNameRequired": "请填写平台名称",
+    "pusherTitle": "消息推送设置",
+    "subjectInfoRequired": "请填写副标题",
+    "subjectUrlRequired": "请填写副标题的指向连接，可以和所有权链接相同",
+    "submitToken": "提交凭据",
+    "title": "初始化",
+    "tokenInvalid": "凭据错误",
+    "tokenPlaceholder": "请输入初始化凭据...",
+    "tokenRequired": "请输入凭据",
+    "welcome1": "欢迎选择 Ret 2 Shell 作为您的信息安全一体化训练方案！",
+    "welcome2": "接下来我们将通过几个步骤设置平台运行所需要的基本信息。",
+    "welcome4": "如果您忘记了初始化凭据，请联系运维人员查看平台配置文件，凭据可以在其中找到。",
+    "welcome3": "首先，请输入初始化凭据，此凭据是部署平台时写在配置文件中的。"
   }
 }

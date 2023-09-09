@@ -1,15 +1,27 @@
 import { i18n } from '$lib/i18n'
 import { get } from 'svelte/store'
 
+export enum Permission {
+  Basic,
+  Verified,
+  Publish,
+  Audit,
+  Organize,
+  Devops,
+  Statistics,
+  Calendar,
+  Certificates,
+}
+
 export interface User {
   id: number
   name: string
   email: string
-  level: number
   intro: string
   cover_path: string | null
   institute_info: string | null
   institute_id: number | null
+  permissions: Permission[]
   hidden: boolean
   banned: boolean
 }

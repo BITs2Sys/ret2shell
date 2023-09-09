@@ -96,5 +96,30 @@
     "iKnow": "I Know",
     "gotoGame": "Go to this game",
     "noGame": "No recent games"
+  },
+  "init": {
+    "title": "Initialize",
+    "pusherTitle": "Message push settings",
+    "mediaSettings": "Media control settings",
+    "infoTitle": "Platform basic information settings",
+    "emailTitle": "Outgoing email settings",
+    "accountTitle": "Register an initial administrator account",
+    "authTitle": "Token issuance settings",
+    "captchaTitle": "Captcha protection settings",
+    "welcome1": "Welcome to choose Ret 2 Shell as your all-in-one information security training solution!",
+    "welcome2": "Next we will go through several steps to set up the basic information required for the platform to run.",
+    "welcome3": "First, enter the token required to initialize the platform, which will be present in your configuration file when deploying the platform.",
+    "welcome4": "If you forget your init token, please contact devops to check the platform configuration file to find the init token.",
+    "tokenRequired": "Please enter token",
+    "submitToken": "Submit token",
+    "tokenInvalid": "Bad token",
+    "tokenPlaceholder": "Please enter initialization token...",
+    "platformNameRequired": "Please fill in the platform name",
+    "footerInfoRequired": "Please fill in footer ownership information",
+    "footerUrlRequired": "Please fill the link which point to footer ownership info",
+    "invalidUrl": "Wrong link format",
+    "subjectInfoRequired": "Please fill in the subtitle",
+    "subjectUrlRequired": "Please fill in the link pointed to by the subtitle, which can be the same as the ownership link",
+    "nameTips": "Please give the platform a name."
   }
 }

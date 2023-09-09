@@ -16,6 +16,8 @@ pub struct ServerConfig {
     pub api_base_path: String,
     /// CORS rules enabled
     pub cors_origins: String,
+    /// Initialize token
+    pub init_token: String,
 }
 
 impl ServerConfig {
@@ -34,6 +36,7 @@ impl ServerConfig {
     ///
     /// assert_eq!(config.external_link_prefix(), "https://example.com");
     /// ```
+    #[allow(dead_code)]
     pub fn external_origin(&self) -> String {
         if self.external_https {
             format!("https://{}", self.external_domain)

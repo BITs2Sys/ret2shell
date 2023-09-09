@@ -80,7 +80,7 @@
       <h1 class="text-3xl font-semibold">
         &nbsp;&nbsp;[&nbsp;{$platform.name}&nbsp;]&nbsp;<span class="text-primary animate-ping">_</span>
       </h1>
-      <a class="text-xl text-error mt-8" href={$platform.subjectUrl}>{$platform.subjectInfo}</a>
+      <a class="text-xl text-error mt-8" href={$platform.subject_url}>{$platform.subject_info}</a>
       <div class="flex-1" />
       <div class="h-24" />
       <div
@@ -90,8 +90,8 @@
           class="pr-3 pl-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap"
         >
           (C) 2022 - {new Date().getFullYear()}&nbsp;
-          <a href={$platform.footerUrl} class="link">{$platform.footerInfo}</a>
-          {#if !$platform.hideMaker}
+          <a href={$platform.footer_url} class="link">{$platform.footer_info}</a>
+          {#if !$platform.hide_maker}
             &nbsp;<span class="opacity-60">|</span>&nbsp; By&nbsp;
             <a href="https://github.com/ret2shell" class="link">
               {$i18n.t('about.maker')}
@@ -173,12 +173,12 @@
                 </div>
               </div>
             {:else}
-            {#if calendarBtns.length === 0}
-              <div class="flex flex-col space-y-12 items-center justify-center">
-                <img src={Logo} alt="LOGO" class="w-48 h-48" />
-                <span class="text-2xl font-bold opacity-60">{$i18n.t('calendar.noGame')}</span>
-              </div>
-            {/if}
+              {#if calendarBtns.length === 0}
+                <div class="flex flex-col space-y-12 items-center justify-center">
+                  <img src={Logo} alt="LOGO" class="w-48 h-48" />
+                  <span class="text-2xl font-bold opacity-60">{$i18n.t('calendar.noGame')}</span>
+                </div>
+              {/if}
               <div class="absolute w-full h-full">
                 <div class="w-full h-full flex flex-col space-y-2 overflow-scroll">
                   {#each calendarBtns as cal}

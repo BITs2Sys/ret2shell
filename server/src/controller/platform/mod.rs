@@ -1,12 +1,8 @@
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::middleware::from_fn;
-use axum::{
-    response::IntoResponse,
-    routing::get,
-    Router,
-};
-use axum::{Extension, Json};
+use axum::middleware::from_fn_with_state;
+use axum::{extract::Extension, Json};
+use axum::{response::IntoResponse, routing::get, Router};
 use sea_orm::DatabaseConnection;
 use tracing::error;
 
@@ -14,17 +10,21 @@ use crate::cache;
 use crate::cache::manager::RedisPool;
 use crate::controller::GlobalState;
 use crate::entity::config::{self, Model as ConfigModel};
-use crate::entity::user::Permission;
 
-use super::layer::auth::permission_required;
+use super::layer::auth::init_token_or_permission_required;
 
-pub fn router(_state: &GlobalState) -> Router<GlobalState> {
+pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route(
             "/config",
-            get(get_platform_config).post(set_platform_config),
+            get(get_platform_config)
+                .post(set_platform_config)
+                .head(test_platform_init_token),
         )
-        .route_layer(from_fn(permission_required!(Permission::Devops)))
+        .route_layer(from_fn_with_state(
+            state.clone(),
+            init_token_or_permission_required,
+        ))
         .route("/", get(get_platform_info))
 }
 
@@ -71,5 +71,9 @@ async fn set_platform_config(
                 "failed to update platform error [CacheErr]",
             )
         })?;
+    Ok(StatusCode::OK)
+}
+
+async fn test_platform_init_token() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     Ok(StatusCode::OK)
 }

@@ -3,12 +3,19 @@ export interface ScoreHistory {
   time: number
 }
 
+export enum State {
+  Banned = 0,
+  NeedAudit = 1,
+  Normal = 2,
+  Hidden = 3,
+}
+
 export interface Team {
   id: number
   name: string
   game_id: number
   token: string
-  state: number
+  state: State
   institute_id: number | null
   score: number
   history: ScoreHistory[]

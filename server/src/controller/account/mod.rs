@@ -1,14 +1,14 @@
 mod captcha;
 
 use axum::{
-    extract::State, http::StatusCode, middleware::from_fn, response::IntoResponse, routing::post,
+    extract::State, http::StatusCode, response::IntoResponse, routing::post,
     Extension, Json, Router,
 };
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, warn};
 
-use super::layer::auth::{permission_required, Token, TokenTracker};
+use super::layer::auth::{Token, TokenTracker};
 use crate::captcha::captcha_protected;
 use crate::entity::config::Model as ConfigModel;
 use crate::entity::user::{self, Permissions};
@@ -16,7 +16,6 @@ use crate::{cache::manager::RedisPool, controller::GlobalState, entity::user::Pe
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
-        .route_layer(from_fn(permission_required!(Permission::Basic)))
         .route("/login", post(login))
         .route("/register", post(register))
         .nest("/captcha", captcha::router(state))
@@ -33,7 +32,7 @@ struct LoginRequest {
 async fn login(
     State(ref db): State<DatabaseConnection>,
     State(ref mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<ConfigModel>,
+    Extension(config): Extension<ConfigModel>,
     Extension(token): Extension<Token>,
     Extension(token_tracker): Extension<TokenTracker>,
     Json(body): Json<LoginRequest>,
@@ -42,7 +41,7 @@ async fn login(
     if token.id >= 0 {
         return Err((StatusCode::CONFLICT, "you are already logged in"));
     }
-    let captcha_config = &platform_info.captcha;
+    let captcha_config = &config.captcha;
     captcha_protected!(&captcha_config, cache, &body.captcha_id, &body.captcha_answer);
 
     let user = user::get_user_by_account(db, &body.account)
@@ -95,11 +94,11 @@ struct RegisterRequest {
 async fn register(
     State(ref db): State<DatabaseConnection>,
     State(ref mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<ConfigModel>,
+    Extension(config): Extension<ConfigModel>,
     Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("register request: {:?}", body);
-    let captcha_config = &platform_info.captcha;
+    let captcha_config = &config.captcha;
     captcha_protected!(&captcha_config, cache, &body.captcha_id, &body.captcha_answer);
 
     match user::get_user_by_account(db, &body.email).await {

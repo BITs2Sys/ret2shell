@@ -24,9 +24,9 @@ use tracing::{debug, error, warn};
 use crate::{
     cache::{self, manager::RedisPool},
     entity::{
-        config::{Auth, Model as PlatformInfoModel},
-        user::Permissions,
-    },
+        config::{Auth, Model as ConfigModel},
+        user::{Permissions, Permission},
+    }, config::GlobalConfig,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -77,72 +77,114 @@ async fn distribute_token(token: Token, key: &str, expires_time: i64) -> String 
 
 pub async fn extract_user_info<B>(
     State(ref mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<PlatformInfoModel>,
+    config: Option<Extension<ConfigModel>>,
     mut req: Request<B>,
     next: Next<B>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let auth_config = platform_info.auth;
-    let Auth {
-        ref signing_key,
-        buffer_time,
-        expires_time,
-    } = auth_config;
-    let auth_header = req
-        .headers()
-        .get(header::AUTHORIZATION)
-        .and_then(|header| header.to_str().ok());
+    if let Some(Extension(config)) = config {
+        let auth_config = config.auth;
+        let Auth {
+            ref signing_key,
+            buffer_time,
+            expires_time,
+        } = auth_config;
+        let auth_header = req
+            .headers()
+            .get(header::AUTHORIZATION)
+            .and_then(|header| header.to_str().ok());
 
-    let auth_header = if let Some(auth_header) = auth_header {
-        match cache::Token::validate(
-            cache,
-            auth_header.strip_prefix("Bearer ").unwrap_or(auth_header),
-        )
-        .await
+        let auth_header = if let Some(auth_header) = auth_header {
+            match cache::Token::validate(
+                cache,
+                auth_header.strip_prefix("Bearer ").unwrap_or(auth_header),
+            )
+            .await
+            {
+                Ok(()) => String::from(auth_header),
+                Err(err) => {
+                    warn!("validate token failed: {}", err);
+                    String::from("")
+                }
+            }
+        } else {
+            String::new()
+        };
+
+        let token = decode_token(&auth_header, signing_key).await;
+
+        let last_time = token.exp - Local::now().timestamp();
+
+        let token_tracker = TokenTracker {
+            token: Arc::new(Mutex::new(token.clone())),
+            renew_requested: Arc::new(AtomicBool::new(last_time > 0 && last_time < buffer_time)),
+        };
+
+        req.extensions_mut().insert(token_tracker.clone());
+        req.extensions_mut().insert(token.clone());
+
+        let mut resp = next.run(req).await;
+
+        if token_tracker
+            .renew_requested
+            .load(std::sync::atomic::Ordering::Relaxed)
         {
-            Ok(()) => String::from(auth_header),
-            Err(err) => {
-                warn!("validate token failed: {}", err);
-                String::from("")
+            cache::Token::revoke(cache, &auth_header).await.ok();
+            let old_token = token_tracker.token.lock().await.clone();
+            let new_token = distribute_token(old_token, signing_key, expires_time).await;
+            cache::Token::store(cache, token.id, &new_token)
+                .await
+                .map_err(|err| {
+                    error!("failed to store new token: {:?}", err);
+                })
+                .ok();
+            resp.headers_mut().insert(
+                "Set-Token",
+                new_token.parse().expect("failed to parse token"),
+            );
+        }
+
+        Ok(resp)
+    } else {
+        req.extensions_mut().insert(Token::default());
+        req.extensions_mut().insert(TokenTracker {
+            token: Arc::new(Mutex::new(Token::default())),
+            renew_requested: Arc::new(AtomicBool::new(false)),
+        });
+        Ok(next.run(req).await)
+    }
+}
+
+
+pub async fn init_token_or_permission_required<B>(
+    State(config): State<GlobalConfig>,
+    Extension(token): Extension<Token>,
+    platform_info: Option<Extension<ConfigModel>>,
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    if platform_info.is_some() {
+        return Err((StatusCode::CONFLICT, "already configured"));
+    }
+    let init_token = req
+        .headers()
+        .get("Authorization")
+        .and_then(|header| header.to_str().ok())
+        .and_then(|header| header.strip_prefix("Bearer "))
+        .map(|token| token.to_owned());
+    debug!("user init token is: {:?}", init_token);
+    match init_token {
+        Some(token) => {
+            debug!("platform init token is: {}", config.server.init_token.trim());
+            if token.trim() == config.server.init_token.trim() {
+                return Ok(next.run(req).await);
+            } else {
+                return Err((StatusCode::FORBIDDEN, "permission denied"));
             }
         }
-    } else {
-        String::new()
-    };
-
-    let token = decode_token(&auth_header, signing_key).await;
-
-    let last_time = token.exp - Local::now().timestamp();
-
-    let token_tracker = TokenTracker {
-        token: Arc::new(Mutex::new(token.clone())),
-        renew_requested: Arc::new(AtomicBool::new(last_time > 0 && last_time < buffer_time)),
-    };
-
-    req.extensions_mut().insert(token_tracker.clone());
-    req.extensions_mut().insert(token.clone());
-
-    let mut resp = next.run(req).await;
-
-    if token_tracker
-        .renew_requested
-        .load(std::sync::atomic::Ordering::Relaxed)
-    {
-        cache::Token::revoke(cache, &auth_header).await.ok();
-        let old_token = token_tracker.token.lock().await.clone();
-        let new_token = distribute_token(old_token, signing_key, expires_time).await;
-        cache::Token::store(cache, token.id, &new_token)
-            .await
-            .map_err(|err| {
-                error!("failed to store new token: {:?}", err);
-            })
-            .ok();
-        resp.headers_mut().insert(
-            "Set-Token",
-            new_token.parse().expect("failed to parse token"),
-        );
+        None => {
+            return permission_required!(Permission::Devops)(Extension(token), req, next).await;
+        }
     }
-
-    Ok(resp)
 }
 
 /// Construct a middleware closure that validate permissions from token.
@@ -162,6 +204,8 @@ macro_rules! permission_required {
             next: axum::middleware::Next<_>,
         | async move {
             let required_perms = [$($perm),*];
+            tracing::debug!("user permissions: {:?}", token.permissions.0);
+            tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
                 false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))

@@ -4,12 +4,12 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20210101_000019_create_platform_info"
+        "m_20210101_000019_create_config"
     }
 }
 
 #[derive(Iden)]
-pub enum PlatformInfo {
+pub enum Config {
     Table,
     Id,
     Auth,
@@ -26,46 +26,46 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(PlatformInfo::Table)
+                    .table(Config::Table)
                     .col(
-                        ColumnDef::new(PlatformInfo::Id)
+                        ColumnDef::new(Config::Id)
                             .big_integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Platform)
+                        ColumnDef::new(Config::Platform)
                             .json_binary()
                             .not_null()
                             .default("{}"),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Captcha)
+                        ColumnDef::new(Config::Captcha)
                             .json_binary()
                             .not_null()
                             .default("{}"),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Email)
+                        ColumnDef::new(Config::Email)
                             .json_binary()
                             .not_null()
                             .default("{}"),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Media)
+                        ColumnDef::new(Config::Media)
                             .json_binary()
                             .not_null()
                             .default("{}"),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Pusher)
+                        ColumnDef::new(Config::Pusher)
                             .json_binary()
                             .not_null()
                             .default("{}"),
                     )
                     .col(
-                        ColumnDef::new(PlatformInfo::Auth)
+                        ColumnDef::new(Config::Auth)
                             .json_binary()
                             .not_null()
                             .default("{}"),
@@ -77,7 +77,7 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(PlatformInfo::Table).to_owned())
+            .drop_table(Table::drop().table(Config::Table).to_owned())
             .await
     }
 }
