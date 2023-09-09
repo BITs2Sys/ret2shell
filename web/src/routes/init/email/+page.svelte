@@ -13,7 +13,6 @@
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
   import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
-  import type { Validator } from '$lib/models/config'
   import RxTextarea from '$lib/components/RxTextarea.svelte'
 
   let schema = z.object({
@@ -67,10 +66,7 @@
         data = {
           ...data,
           config: {
-            captcha: {
-              validator: parseInt(values.validator) as Validator,
-              ...values,
-            },
+            email: values,
             ...data.config,
           },
         }
@@ -79,7 +75,7 @@
       return Promise.resolve()
     },
     onSuccess(_response, _context) {
-      goto('/init/email')
+      goto('/init/media')
     },
   })
   const tlsValue = $data.tls

@@ -177,6 +177,27 @@
     "emailVerifyEmailSubject": "Verification email title",
     "emailVerifyEmailSubjectPlaceholder": "Please enter a title",
     "emailVerifyEmailBody": "Verify email content (supports HTML)",
-    "emailVerifyEmailBodyPlaceholder": "Please enter the email content, support HTML and external links"
+    "emailVerifyEmailBodyPlaceholder": "Please enter the email content, support HTML and external links",
+    "emailHostRequired": "Please fill in the email server",
+    "emailPortRequired": "Please fill in the email server port",
+    "emailPortInvalid": "Invalid port",
+    "emailInvalid": "Email format error",
+    "emailUsernameRequired": "Please fill in the sender email address",
+    "emailSenderRequired": "Please fill in the sender",
+    "emailPasswordRequired": "Please fill in your email password",
+    "tlsOptionInvalid": "TLS config is invalid",
+    "emailResetPasswordBodyRequired": "Please enter the body of the password reset email",
+    "emailResetPasswordSubjectRequired": "Please enter the title of the password reset email",
+    "emailVerifyBodyRequired": "Please enter the body of the verification email",
+    "emailVerifySubjectRequired": "Please enter the title of the verification email",
+    "mediaLimit": "Media upload restrictions (per week)",
+    "mediaLimitPlaceholder": "Please enter the weekly upload limit",
+    "mediaAntiTheft": "Turn on anti-hotlink protection",
+    "mediaLimitInvalid": "Upload limit must not be less than 10",
+    "pusherEnabled": "Enable messages pushing",
+    "pusherToken": "Message push API token",
+    "pusherTokenPlaceholder": "Please enter a token, preferably a random string",
+    "submit": "Submit",
+    "pusherTokenRequired": "Please enter push token"
   }
 }

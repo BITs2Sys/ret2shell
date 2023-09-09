@@ -19,8 +19,8 @@ impl CaptchaValidator for ImageValidator {
                 "#aa3333".to_string(),
                 "#f08012".to_string(),
                 "#33aa00".to_string(),
-                "#aa33aa".to_string(),
-                "#3333aa".to_string(),
+                "#AA00AA".to_string(),
+                "#44CC7F".to_string(),
             ])
             .build()
             .map_err(|_| CaptchaError::BuilderError)?;

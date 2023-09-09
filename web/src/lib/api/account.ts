@@ -14,3 +14,7 @@ export async function login(request: LoginRequest) {
 export async function logout() {
   return api.POST(`${api_root}/account/logout`)
 }
+
+export async function getCaptcha() {
+  return api.GET(`${api_root}/account/captcha`)
+}

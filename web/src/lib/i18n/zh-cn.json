@@ -177,6 +177,27 @@
     "emailVerifyEmailSubject": "验证邮件的标题",
     "emailVerifyEmailSubjectPlaceholder": "请输入标题",
     "emailVerifyEmailBody": "验证邮件内容（支持HTML）",
-    "emailVerifyEmailBodyPlaceholder": "请输入邮件内容，支持HTML与外链"
+    "emailVerifyEmailBodyPlaceholder": "请输入邮件内容，支持HTML与外链",
+    "emailHostRequired": "请填写邮箱服务器",
+    "emailPortRequired": "请填写邮箱服务器端口",
+    "emailPortInvalid": "端口无效",
+    "emailInvalid": "邮箱格式错误",
+    "emailUsernameRequired": "请填写发信邮箱",
+    "emailSenderRequired": "请填写发件人",
+    "emailPasswordRequired": "请填写邮箱密码",
+    "tlsOptionInvalid": "加密类型错误",
+    "emailResetPasswordBodyRequired": "请输入重置密码邮件的正文部分",
+    "emailResetPasswordSubjectRequired": "请输入重置密码邮件的标题",
+    "emailVerifyBodyRequired": "请输入验证邮件的正文部分",
+    "emailVerifySubjectRequired": "请输入验证邮件的标题",
+    "mediaLimit": "媒体上传限制（每周）",
+    "mediaLimitPlaceholder": "请输入每周限制上传数量",
+    "mediaAntiTheft": "开启防盗链保护",
+    "mediaLimitInvalid": "上传限制不得小于10",
+    "pusherEnabled": "启用消息推送",
+    "pusherToken": "消息推送API密钥",
+    "pusherTokenPlaceholder": "请输入密钥，最好是随机字符串",
+    "submit": "提交",
+    "pusherTokenRequired": "请输入推送密钥"
   }
 }
