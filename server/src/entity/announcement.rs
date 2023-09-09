@@ -4,6 +4,7 @@ use sea_orm::entity::prelude::*;
 
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
+use sea_orm::{ActiveValue, Iterable, QueryOrder, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -41,3 +42,58 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_announcement_by_id(
+    conn: &DatabaseConnection,
+    id: i64,
+) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(id).one(conn).await
+}
+
+pub async fn get_announcement_page(
+    conn: &DatabaseConnection,
+    page: u64,
+    per_page: u64,
+) -> Result<(Vec<Model>, u64), DbErr> {
+    let paginator = Entity::find()
+        .select_only()
+        .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
+        .order_by_desc(Column::Pinned)
+        .order_by_desc(Column::PublishedAt)
+        .into_model()
+        .paginate(conn, per_page);
+    let num_pages = paginator.num_pages().await?;
+    let announcements = paginator.fetch_page(page - 1).await?;
+    Ok((announcements, num_pages))
+}
+
+pub async fn create_announcement(
+    conn: &DatabaseConnection,
+    announcement: Model,
+) -> Result<Model, DbErr> {
+    let mut active_model: ActiveModel = announcement.into();
+    active_model.id = ActiveValue::NotSet;
+    active_model.published_at = ActiveValue::Set(Utc::now());
+    active_model.updated_at = ActiveValue::Set(Utc::now());
+    active_model.insert(conn).await
+}
+
+pub async fn update_announcement(
+    conn: &DatabaseConnection,
+    id: i64,
+    announcement: Model,
+) -> Result<Model, DbErr> {
+    let mut active_model: ActiveModel = announcement.clone().into();
+    active_model.id = ActiveValue::Unchanged(id);
+    active_model.published_at = ActiveValue::Unchanged(announcement.published_at);
+    active_model.updated_at = ActiveValue::Set(Utc::now());
+    active_model.title = ActiveValue::Set(announcement.title);
+    active_model.content = ActiveValue::Set(announcement.content);
+    active_model.pinned = ActiveValue::Set(announcement.pinned);
+    active_model.publisher_id = ActiveValue::Set(announcement.publisher_id);
+    active_model.update(conn).await
+}
+
+pub async fn delete_announcement(conn: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(conn).await.map(|_| ())
+}
