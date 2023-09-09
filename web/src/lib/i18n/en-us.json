@@ -150,6 +150,7 @@
     "captchaValidatorImage": "SVG image verification",
     "captchaValidatorPow": "Proof of work",
     "captchaEnabled": "Enable verification code",
-    "captchaValidatorLimit": "Please choose a legitimate validator"
+    "captchaValidatorLimit": "Please choose a legitimate validator",
+    "captchaValidatorInvalid": "Invalid validator"
   }
 }

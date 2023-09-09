@@ -15,13 +15,26 @@
 
   function togglePasswordVisible() {
     passwordVisible = !passwordVisible
+    typeAction()
   }
 
-  function typeAction(node: HTMLInputElement) {
-    node.type = computedType
+  interface TypeAction {
+    (node?: HTMLInputElement): void
+    node?: HTMLInputElement
   }
 
-  $: computedType = type == 'password' && passwordVisible ? 'text' : type
+  const typeAction: TypeAction = Object.assign(
+    (node?: HTMLInputElement) => {
+      if (node) {
+        node.type = type == 'password' && passwordVisible ? 'text' : type
+
+        typeAction.node = node as HTMLInputElement | undefined
+      } else {
+        if (typeAction.node) typeAction.node.type = type == 'password' && passwordVisible ? 'text' : type
+      }
+    },
+    { node: (document.getElementById(id as string) as HTMLInputElement | null) || undefined }
+  )
 
   $: classes = ['input', 'backdrop-blur', 'bg-base-content/5', 'min-w-0', hasError && 'input-error', clazz]
     .filter(Boolean)
@@ -45,5 +58,5 @@
     <slot />
   </div>
 {:else}
-  <input {id} {name} class={classes}  use:typeAction {...$$restProps} bind:value />
+  <input {id} {name} class={classes} use:typeAction {...$$restProps} bind:value />
 {/if}

@@ -35,7 +35,7 @@ export interface Email {
   sender: string
   username: string
   password: string
-  tls: string
+  tls: 'none' | 'tls' | 'starttls'
   reset_password_email_body: string
   reset_password_email_subject: string
   verify_email_body: string

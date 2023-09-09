@@ -12,7 +12,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
 </script>
 
-<div class="navbar w-auto backdrop-blur shadow bg-neutral/80 transition-shadow z-40 print:hidden px-2 py-0">
+<div class="navbar w-auto backdrop-blur shadow bg-neutral/80 transition-shadow z-40 print:hidden px-2 py-0 sticky top-0">
   {#if $initConfig.processing}
     <RxPopup class="btn-square btn-ghost xl:hidden" name="navPopup" popupWidth={64}>
       <span slot="button" class="icon-[fluent--navigation-16-regular] w-5 h-5" />
@@ -45,22 +45,24 @@
     <span slot="button" class="icon-[fluent--wand-16-regular] w-5 h-5" />
     <CustomizeBox />
   </RxPopup>
-  {#if $user.isLoggedIn}
-    <RxPopup class="btn-square btn-ghost hidden sm:inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
-      <!-- TODO: replace with user's avatar if exists -->
-      <div class="avatar" slot="button">
-        <div
-          class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
-        >
-          <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
+  {#if !$initConfig.processing}
+    {#if $user.isLoggedIn}
+      <RxPopup class="btn-square btn-ghost hidden sm:inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
+        <!-- TODO: replace with user's avatar if exists -->
+        <div class="avatar" slot="button">
+          <div
+            class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
+          >
+            <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
+          </div>
         </div>
-      </div>
-      <UserBox />
-    </RxPopup>
-  {:else}
-    <RxLink href="/account/login" exactlyMatched>
-      <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
-      <span>{$i18n.t('account.login')}</span>
-    </RxLink>
+        <UserBox />
+      </RxPopup>
+    {:else}
+      <RxLink href="/account/login" exactlyMatched>
+        <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
+        <span>{$i18n.t('account.login')}</span>
+      </RxLink>
+    {/if}
   {/if}
 </div>

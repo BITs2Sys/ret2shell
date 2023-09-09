@@ -11,7 +11,9 @@
   import RxFormItem from '$lib/components/RxFormItem.svelte'
   import RxInput from '$lib/components/RxInput.svelte'
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
-    import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
+  import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
+  import RxButton from '$lib/components/RxButton.svelte'
+  import type { Validator } from '$lib/models/config'
 
   let schema = z.object({
     enabled: z.boolean(),
@@ -25,14 +27,17 @@
       .max(2, { message: $i18n.t('init.captchaValidatorLimit') }),
   })
 
-  const { form, errors } = createForm({
+  const { form, data, touched, errors } = createForm({
     extend: validator({ schema }),
     onSubmit(values, _context) {
       initConfig.update((data) => {
         data = {
           ...data,
           config: {
-            auth: values,
+            captcha: {
+              validator: parseInt(values.validator) as Validator,
+              ...values,
+            },
             ...data.config,
           },
         }
@@ -41,9 +46,15 @@
       return Promise.resolve()
     },
     onSuccess(_response, _context) {
-      goto('/init/captcha')
+      goto('/init/email')
     },
   })
+  const validatorValue = $data.validator
+  $: {
+    if (validatorValue !== $data.validator) {
+      $touched.validator = true
+    }
+  }
 </script>
 
 <svelte:head><title>{$i18n.t('init.captchaTitle')} - {$platform.name}</title></svelte:head>
@@ -81,11 +92,19 @@
         hasError={$errors.validator !== null}
         errors={$errors.validator || ''}
       >
-        <RxRadioGroup id="validator" name="validator" direction="row" items={[
-          {label: $i18n.t('init.captchaValidatorImage'), value: 1},
-          {label: $i18n.t('init.captchaValidatorPow'), value: 2},
-        ]} />
-    </RxFormItem>
+        <RxRadioGroup
+          class="w-full"
+          direction="row"
+          items={[
+            { label: $i18n.t('init.captchaValidatorImage'), value: 1 },
+            { label: $i18n.t('init.captchaValidatorPow'), value: 2 },
+          ]}
+          bind:value={$data.validator}
+        />
+      </RxFormItem>
+      <RxFormItem name="submitAction" label="">
+        <RxButton class="w-full" level="primary" type="submit">{$i18n.t('init.next')}</RxButton>
+      </RxFormItem>
     </RxForm>
   </div>
 </div>

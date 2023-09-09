@@ -150,6 +150,7 @@
     "captchaDifficultyPlaceholder": "请输入验证难度，在0到9之间",
     "captchaValidator": "验证器",
     "captchaValidatorImage": "SVG图像验证码",
-    "captchaValidatorPow": "工作量证明"
+    "captchaValidatorPow": "工作量证明",
+    "captchaValidatorInvalid": "无效的验证器"
   }
 }

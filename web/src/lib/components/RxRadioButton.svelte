@@ -4,7 +4,7 @@
 
   export let label: string | undefined = undefined
   export let preset: string | number | undefined = undefined
-  export let value: string | number | undefined = undefined
+  export let value: unknown | string | number | undefined = undefined
 
   let clazz = ''
   export { clazz as class }
