@@ -3,7 +3,6 @@
   import { i18n } from '$lib/i18n'
   import { z } from 'zod'
   import { validator } from '@felte/validator-zod'
-  import { testToken } from '$lib/api/platform'
   import { createForm } from 'felte'
   import { initConfig } from '$lib/stores/init'
   import { goto } from '$app/navigation'
@@ -38,27 +37,23 @@
     record: z.string().nullable(),
     hide_maker: z.boolean(),
   })
-  let tokenStored = ''
-  let loading = false
   const { form, errors } = createForm({
     extend: validator({ schema }),
     onSubmit(values, _context) {
-      tokenStored = values.init_token
-      loading = true
-      return testToken(values.init_token)
-    },
-    onSuccess(response, context) {
-      loading = false
-      if ((response as Response).status === 403) {
-        context.setErrors({ init_token: $i18n.t('init.tokenInvalid') })
-        return
-      }
-      // Do something with the returned value from `onSubmit`.
-      initConfig.update((config) => {
-        config.token = tokenStored
-        return config
+      initConfig.update((data) => {
+        data = {
+          ...data,
+          config: {
+            platform: values,
+            ...data.config,
+          },
+        }
+        return data
       })
-      goto('/init/info')
+      return Promise.resolve()
+    },
+    onSuccess(_response, _context) {
+      goto('/init/auth')
     },
   })
 </script>
@@ -166,7 +161,7 @@
         <RxCheckBox id="hide_maker" name="hide_maker" label={$i18n.t('init.hideMaker')} />
       </RxFormItem>
       <RxFormItem name="submitAction" label="">
-        <RxButton {loading} class="w-full" level="primary" type="submit">{$i18n.t('init.next')}</RxButton>
+        <RxButton class="w-full" level="primary" type="submit">{$i18n.t('init.next')}</RxButton>
       </RxFormItem>
     </RxForm>
   </div>

@@ -17,17 +17,15 @@
     passwordVisible = !passwordVisible
   }
 
+  function typeAction(node: HTMLInputElement) {
+    node.type = computedType
+  }
+
   $: computedType = type == 'password' && passwordVisible ? 'text' : type
 
   $: classes = ['input', 'backdrop-blur', 'bg-base-content/5', 'min-w-0', hasError && 'input-error', clazz]
     .filter(Boolean)
     .join(' ')
-
-  const handleInput = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
-    // in here, you can switch on type and implement
-    // whatever behaviour you need
-    value = type.match(/^(number|range)$/) ? +e.currentTarget.value : e.currentTarget.value
-  }
 </script>
 
 {#if icon || type == 'password'}
@@ -37,7 +35,7 @@
         <div class={`w-5 h-5 ${icon}`} />
       </span>
     {/if}
-    <input {id} {name} class={classes} {disabled} type={computedType} {...$$restProps} value on:input={handleInput} />
+    <input {id} {name} class={classes} {disabled} use:typeAction {...$$restProps} bind:value />
     {#if type == 'password'}
       <RxButton on:click={togglePasswordVisible}>
         <!-- icon-[fluent--eye-16-regular] and icon-[fluent--eye-off-16-regular] -->
@@ -47,5 +45,5 @@
     <slot />
   </div>
 {:else}
-  <input {id} class={classes} type={computedType} {...$$restProps} />
+  <input {id} class={classes}  use:typeAction {...$$restProps} bind:value />
 {/if}
