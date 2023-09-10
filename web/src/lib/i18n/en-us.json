@@ -18,7 +18,13 @@
     "profile": "Account Profile",
     "registerTips": "Do not have accounts? Register now!",
     "3rdAuth": "Using OAuth accounts",
-    "loginFailed": "Login failed"
+    "loginFailed": "Login failed",
+    "logout": "Logout",
+    "emailTooLong": "Email length is too long",
+    "emailInvalid": "Email format is illegal",
+    "registerFailed": "Registration failed",
+    "name": "Username",
+    "loginSuccess": "Identity verification successful, welcome back."
   },
   "playground": {
     "title": "Playground",
@@ -41,7 +47,7 @@
     "title": "Documents"
   },
   "about": {
-    "maker": "ret2shell team"
+    "maker": "Ret2Shell"
   },
   "misc": {
     "verifyCode": "Verification Code",
@@ -61,10 +67,11 @@
     "reloadCaptcha": "Reload Captcha",
     "powing": "Pow-ing...",
     "captcha": "Captcha",
-    "fetchingPow": "Getting..."
+    "fetchingPow": "Getting...",
+    "fetchCaptchaFailed": "Failed to fetch captcha",
+    "imageBroken": "Image Broken"
   },
-  "global": {
-    "imageBroken": "Image Broken",
+  "platform": {
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
     "cookieAlert": "We don't use cookies, so don't worry."
   },
@@ -99,7 +106,8 @@
     "gameLink": "Game Link",
     "iKnow": "I Know",
     "gotoGame": "Go to this game",
-    "noGame": "No recent games"
+    "noGame": "There are no games this month",
+    "failedToFetch": "Failed to get game calendar"
   },
   "init": {
     "title": "Initialize",

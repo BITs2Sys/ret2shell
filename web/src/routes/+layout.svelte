@@ -16,23 +16,21 @@
   import { showMessage } from '$lib/stores/toast'
   import { i18n } from '$lib/i18n'
   import GlobalToast from '$lib/blocks/GlobalToast.svelte'
+  import type { AxiosError } from 'axios'
 
   let platformTyped = ''
   let animation = $page.route.id === '/'
 
-  getPlatformInfo().then((data) => {
-    if (!data.ok && data.status === 404) {
-      goto('/init')
-      return
-    } else if (!data.ok) {
-      showMessage('error', $i18n.t('global.backendOffline'))
-    }
-    data.json().then((data) => {
+  getPlatformInfo()
+    .then((data) => {
       platform.update((value) => {
-        return { ...value, ...data }
+        return { ...data, ...value }
       })
     })
-  })
+    .catch((err) => {
+      if ((err as AxiosError).response?.status === 404) return goto('/init')
+      else showMessage('error', $i18n.t('platform.backendOffline'))
+    })
 
   function acceptCookiePolicy() {
     $platform.accept_cookies = true
@@ -42,7 +40,7 @@
     if (!$platform.accept_cookies) {
       showMessage(
         'info',
-        $i18n.t('global.cookieAlert'),
+        $i18n.t('platform.cookieAlert'),
         undefined,
         acceptCookiePolicy,
         $i18n.t('action.ok'),

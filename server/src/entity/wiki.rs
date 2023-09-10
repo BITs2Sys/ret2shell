@@ -60,8 +60,8 @@ pub async fn get_wiki_page(
     let mut sql = Entity::find()
         .select_only()
         .columns(Column::iter().filter(|c| !matches!(c, Column::Content)));
-    if parent.is_some() {
-        sql = sql.filter(Column::Parent.eq(parent.unwrap()));
+    if let Some(parent) = parent {
+        sql = sql.filter(Column::Parent.eq(parent));
     }
     let paginator = sql.into_model().paginate(conn, per_page);
     let num_pages = paginator.num_pages().await?;

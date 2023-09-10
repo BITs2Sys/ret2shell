@@ -2,6 +2,9 @@
   import { i18n } from '$lib/i18n'
   import RxLink from '$lib/components/RxLink.svelte'
   import { user } from '$lib/stores/user'
+    import { Permission } from '$lib/models/user'
+
+  $: hasAdminEntry = $user.permissions.some((p) => p >= Permission.Publish)
 </script>
 
 <li>
@@ -28,7 +31,7 @@
     {$i18n.t('announcements.title')}
   </RxLink>
 </li>
-{#if $user.level >= 2}
+{#if hasAdminEntry}
   <li>
     <RxLink ghost justify="start" href="/admin">
       <span class="icon-[fluent--organization-16-regular] w-6 h-6" />

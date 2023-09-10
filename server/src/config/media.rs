@@ -6,6 +6,4 @@ use serde::{Deserialize, Serialize};
 pub struct MediaConfig {
     /// `path` is the directory where media files are stored.
     pub path: String,
-    /// `limit` is the maximum allowed size (in bytes) for media files.
-    pub limit: i64,
 }

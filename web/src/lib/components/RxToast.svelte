@@ -58,7 +58,7 @@
 </script>
 
 <div
-  class="alert bg-neutral relative transition-all"
+  class="alert bg-neutral relative transition-all border-base-content/5"
   transition:fly={{ delay: 100, duration: 300, x: 0, y: 32, opacity: 0, easing: quintOut }}
 >
   <div class="flex flex-row space-x-2 flex-1 items-center">

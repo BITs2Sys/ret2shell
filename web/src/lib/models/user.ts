@@ -40,3 +40,10 @@ export function getUserRole(level: number): string {
       return get(i18n).t('account.unknown')
   }
 }
+
+export interface Token {
+  id: number
+  name: string,
+  permissions: Permission[]
+  exp: number
+}

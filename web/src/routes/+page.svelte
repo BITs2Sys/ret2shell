@@ -9,6 +9,8 @@
   import { onMount } from 'svelte'
   import { getCalendarList } from '$lib/api/calendar'
   import { showMessage } from '$lib/stores/toast'
+    import type { AxiosError } from 'axios'
+    import { inView } from '$lib/utils/view'
 
   let calendars: Calendar[] = []
 
@@ -84,17 +86,9 @@
       Math.floor(new Date(year, month - 1).getTime() / 1000),
       Math.floor(new Date(year, month).getTime() / 1000)
     ).then((response) => {
-      if (response.ok && response.status === 200) {
-        response.json().then((data) => {
-          // console.log(data)
-          calendars = data
-        })
-      } else {
-        response.text().then((text) => {
-          // console.error(text)
-          showMessage('error', `${$i18n.t('calendar.failedToFetch')}: ${text}`, 5000)
-        })
-      }
+      calendars = response.sort((a, b) => a.start_time - b.start_time)
+    }).catch((err) => {
+      showMessage('error', $i18n.t('calendar.failedToFetch') + ': ' + (err as AxiosError).response?.data, 5000)
     })
   }
 
@@ -124,7 +118,7 @@
           (C) 2022 - {new Date().getFullYear()}&nbsp;
           <a href={$platform.footer_url} class="link">{$platform.footer_info}</a>
           {#if !$platform.hide_maker}
-            &nbsp;<span class="opacity-60">|</span>&nbsp; By&nbsp;
+            &nbsp;<span class="opacity-60">|</span>&nbsp;By&nbsp;
             <a href="https://github.com/ret2shell" class="link">
               {$i18n.t('about.maker')}
             </a>
@@ -152,7 +146,7 @@
         <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
       </div>
       <div class="flex flex-1 flex-col lg:flex-row lg:p-24 lg:pt-12 lg:pb-36 space-y-6 lg:space-y-0 lg:space-x-24">
-        <div class="flex flex-col justify-start items-center !pt-0">
+        <div class="flex flex-col justify-start items-center lg:p-12 !pt-0">
           <RxCalendar
             {year}
             {month}
@@ -239,8 +233,16 @@
                         />
                         <span class={`text-base ${cal.active && 'text-primary'}`}>{cal.data.name}</span>
                         <div class="flex-1" />
-                        <span class="text-base opacity-60"
+                        <span class={`text-base opacity-60 ${cal.active && 'text-primary'}`}
                           >{new Date(cal.data.start_time * 1000).toLocaleDateString('default', {
+                            year: 'numeric',
+                            day: '2-digit',
+                            month: '2-digit',
+                          })}</span
+                        >
+                        <span class="text-base opacity-40">-&gt;</span>
+                        <span class={`text-base opacity-60 ${cal.active && 'text-primary'}`}
+                          >{new Date(cal.data.end_time * 1000).toLocaleDateString('default', {
                             year: 'numeric',
                             day: '2-digit',
                             month: '2-digit',

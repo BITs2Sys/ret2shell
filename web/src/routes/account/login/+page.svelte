@@ -15,6 +15,7 @@
   import { login } from '$lib/api/account'
   import { goto } from '$app/navigation'
   import { showMessage, toast } from '$lib/stores/toast'
+    import type { AxiosError } from 'axios'
 
   let schema = z.object({
     account: z
@@ -43,15 +44,13 @@
     },
     onSuccess(response, _context) {
       loading = false
-      if ((response as Response).status !== 200) {
-        ;(response as Response).text().then((reason) => {
-          showMessage('error', $i18n.t('account.loginFailed') + ': ' + reason, 5000)
-          captcha?.refreshAll()
-        })
-        return
-      }
-      // Do something with the returned value from `onSubmit`.
+      showMessage('success', $i18n.t('account.loginSuccess'), 5000)
       goto('/')
+    },
+    onError(error, _context) {
+      loading = false
+        showMessage('error', $i18n.t('account.loginFailed') + ': ' + (error as AxiosError).response?.data, 5000)
+          captcha?.refreshAll()
     },
   })
 

@@ -12,6 +12,7 @@
   import { createForm } from 'felte'
   import { initConfig } from '$lib/stores/init'
   import { goto } from '$app/navigation'
+  import { showMessage } from '$lib/stores/toast'
   let schema = z.object({
     init_token: z
       .string()
@@ -29,10 +30,6 @@
     },
     onSuccess(response, context) {
       loading = false
-      if ((response as Response).status === 403) {
-        context.setErrors({ init_token: $i18n.t('init.tokenInvalid') })
-        return
-      }
       // Do something with the returned value from `onSubmit`.
       initConfig.update((config) => {
         config.token = tokenStored
@@ -40,6 +37,11 @@
         return config
       })
       goto('/init/info')
+    },
+    onError(_errors, _context) {
+      loading = false
+      // Do something with the errors.
+      showMessage('error', $i18n.t('init.tokenInvalid'), 5000)
     },
   })
 </script>

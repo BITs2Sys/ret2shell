@@ -22,7 +22,7 @@
 
 <div class={classes} {...$$restProps}>
   {#if !loading}
-    <img class="object-cover w-full h-full" alt={$i18n.t('global.imageBroken')} {src} on:load={handleLoad} />
+    <img class="object-cover w-full h-full" alt={$i18n.t('form.imageBroken')} {src} on:load={handleLoad} />
   {/if}
   {#if loading || loadingCover}
     <div class="w-full h-full flex flex-col justify-center items-center">

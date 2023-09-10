@@ -5,7 +5,7 @@
   import { quintOut } from 'svelte/easing'
 </script>
 
-<div class="fixed bottom-0 right-0 max-w-[50vw] flex flex-col p-4 space-y-4">
+<div class="fixed bottom-0 right-0 max-w-[50vw] flex flex-col items-end p-4 space-y-4">
   {#each $toast.toasts as toast (toast)}
     <div animate:flip={{ delay: 100, duration: 300, easing: quintOut }}>
       <RxToast

@@ -9,6 +9,8 @@
   import type { Captcha } from '$lib/models/captcha'
   import { Validator } from '$lib/models/config'
   import { encode } from 'js-base64'
+  import { showMessage } from '$lib/stores/toast'
+  import type { AxiosError } from 'axios'
 
   export let hasError = false
   export let errors: string | string[] | undefined = undefined
@@ -24,35 +26,40 @@
 
   function refreshImg() {
     fetchingImg = true
+    captchaAnswer = ''
     refresh()
   }
 
   export function refreshAll() {
     loading = true
+    captchaAnswer = ''
     refresh()
   }
 
   function refreshPow() {
     fetchingPow = true
+    captchaAnswer = ''
     refresh()
   }
 
   function refresh() {
-    getCaptcha().then((res) => {
-      if (res.status !== 200) {
-        failed = true
-        loading = false
-        return
-      }
-      res.json().then((data) => {
-        captcha = data
+    getCaptcha()
+      .then((res) => {
+        captcha = res
         captchaId = captcha.id
         failed = false
         loading = false
         fetchingImg = false
         fetchingPow = false
       })
-    })
+      .catch((err) => {
+        captchaId = ''
+        failed = true
+        loading = false
+        fetchingImg = false
+        fetchingPow = false
+        showMessage('error', $i18n.t('form.fetchCaptchaFailed') + ': ' + (err as AxiosError).response?.data, 5000)
+      })
   }
 
   $: {
@@ -99,7 +106,11 @@
     </RxInput>
   {:else if enabled && !loading && !failed && captcha.validator === Validator.Image}
     <RxInput icon="icon-[fluent--beaker-16-regular]" class="w-full" type="text" {hasError} bind:value={captchaAnswer}>
-      <RxButton class="border-none w-24 p-0 overflow-hidden join-item ml-0" disabled={fetchingImg} on:click={refreshImg}>
+      <RxButton
+        class="border-none w-24 p-0 overflow-hidden join-item ml-0"
+        disabled={fetchingImg}
+        on:click={refreshImg}
+      >
         <RxImage
           class="w-full object-scale-down"
           loading={fetchingImg}

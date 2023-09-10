@@ -1,5 +1,6 @@
 mod captcha;
 
+use axum::middleware;
 use axum::{
     extract::State, http::StatusCode, response::IntoResponse, routing::post, Extension, Json,
     Router,
@@ -8,7 +9,8 @@ use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error, warn};
 
-use super::layer::auth::{Token, TokenTracker};
+use super::layer::auth::{permission_required, Token, TokenTracker};
+use crate::cache;
 use crate::captcha::captcha_protected;
 use crate::entity::config::Model as ConfigModel;
 use crate::entity::user::{self, count_user, create_user, Permissions};
@@ -16,6 +18,8 @@ use crate::{cache::manager::RedisPool, controller::GlobalState, entity::user::Pe
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+        .route("/logout", post(logout))
+        .route_layer(middleware::from_fn(permission_required!(Permission::Basic)))
         .route("/login", post(login))
         .route("/register", post(register))
         .nest("/captcha", captcha::router(state))
@@ -162,4 +166,26 @@ async fn register(
             })?
             .desensitize(),
     ))
+}
+
+async fn logout(
+    State(ref mut cache): State<RedisPool>,
+    Extension(token): Extension<Token>,
+    Extension(token_tracker): Extension<TokenTracker>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    debug!("logout request");
+    if token.id < 0 {
+        return Err((StatusCode::FORBIDDEN, "you are not logged in"));
+    }
+    if let Some(token) = token_tracker.original {
+        cache::Token::revoke(cache, &token).await.map_err(|err| {
+            error!("failed to revoke token: {:?}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to revoke token with cache error",
+            )
+        })?;
+    }
+
+    Ok(StatusCode::OK)
 }

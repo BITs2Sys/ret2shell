@@ -18,7 +18,14 @@
     "profile": "用户信息",
     "registerTips": "还没有账号？立即注册！",
     "3rdAuth": "统一身份认证",
-    "loginFailed": "登录失败"
+    "loginFailed": "登录失败",
+    "logout": "退出登录",
+    "emailTooLong": "邮箱长度过长",
+    "emailInvalid": "邮箱格式不合法",
+    "registerFailed": "注册失败",
+    "name": "用户名",
+    "email": "邮箱",
+    "loginSuccess": "身份验证成功，欢迎回来。"
   },
   "announcements": {
     "title": "公告",
@@ -41,7 +48,7 @@
     "title": "技术文档"
   },
   "about": {
-    "maker": "ret2shell team"
+    "maker": "回归终端"
   },
   "theme": {
     "colorScheme": "颜色主题",
@@ -61,10 +68,11 @@
     "reloadCaptcha": "重新加载验证码",
     "powing": "计算中...",
     "captcha": "验证码",
-    "fetchingPow": "获取中..."
+    "fetchingPow": "获取中...",
+    "fetchCaptchaFailed": "获取验证码失败",
+    "imageBroken": "图片已损坏"
   },
-  "global": {
-    "imageBroken": "图片已损坏",
+  "platform": {
     "backendOffline": "后端服务似乎离线了，请尝试刷新页面，如果多次尝试仍旧出错，请联系网站管理员。",
     "cookieAlert": "我们不使用小饼干，无须担心。"
   },
@@ -99,7 +107,7 @@
     "gameLink": "比赛链接",
     "iKnow": "了解了",
     "gotoGame": "转到这场比赛",
-    "noGame": "近期没有比赛",
+    "noGame": "这个月没有比赛",
     "failedToFetch": "获取竞赛日历失败"
   },
   "init": {
