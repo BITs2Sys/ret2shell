@@ -29,7 +29,7 @@
     })
     .catch((err) => {
       if ((err as AxiosError).response?.status === 404) return goto('/init')
-      else showMessage('error', $i18n.t('global.backendOffline'))
+      else showMessage('error', $i18n.t('platform.backendOffline'))
     })
 
   function acceptCookiePolicy() {
@@ -40,7 +40,7 @@
     if (!$platform.accept_cookies) {
       showMessage(
         'info',
-        $i18n.t('global.cookieAlert'),
+        $i18n.t('platform.cookieAlert'),
         undefined,
         acceptCookiePolicy,
         $i18n.t('action.ok'),

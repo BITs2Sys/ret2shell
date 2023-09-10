@@ -12,6 +12,18 @@ export async function login(request: LoginRequest) {
   return api.post(`${api_root}/account/login`, request)
 }
 
+export interface RegisterRequest {
+  name: string
+  email: string
+  password: string
+  captcha_id: string
+  captcha_answer: string
+}
+
+export async function register(request: RegisterRequest) {
+  return api.post(`${api_root}/account/register`, request)
+}
+
 export async function logout() {
   return api.post(`${api_root}/account/logout`)
 }

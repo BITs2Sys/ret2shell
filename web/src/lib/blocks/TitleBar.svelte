@@ -15,7 +15,7 @@
 <div
   class="navbar w-auto backdrop-blur shadow bg-neutral/80 transition-shadow z-40 print:hidden px-2 py-0 sticky top-0"
 >
-  {#if $initConfig.processing}
+  {#if !$initConfig.processing}
     <RxPopup class="btn-square btn-ghost xl:hidden" name="navPopup" popupWidth={64}>
       <span slot="button" class="icon-[fluent--navigation-16-regular] w-5 h-5" />
       <ul class="menu menu-vertical">
@@ -49,7 +49,7 @@
   </RxPopup>
   {#if !$initConfig.processing}
     {#if $user.isLoggedIn}
-      <RxPopup class="btn-square btn-ghost hidden sm:inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
+      <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
         <!-- TODO: replace with user's avatar if exists -->
         <div class="avatar" slot="button">
           <div

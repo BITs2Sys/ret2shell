@@ -53,7 +53,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
-                    .col(ColumnDef::new(User::Intro).text().not_null())
+                    .col(ColumnDef::new(User::Intro).text())
                     .col(ColumnDef::new(User::CoverPath).string_len(511))
                     .col(ColumnDef::new(User::InstituteId).big_integer())
                     .foreign_key(

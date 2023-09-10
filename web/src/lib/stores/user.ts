@@ -54,6 +54,7 @@ export function userExtractToken(token: string) {
     value.id = tokenJson.id
     value.name = tokenJson.name
     value.permissions = tokenJson.permissions
+    value.isLoggedIn = true
     return value
   })
 }

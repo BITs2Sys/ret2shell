@@ -42,6 +42,7 @@ pub struct Token {
 pub struct TokenTracker {
     pub token: Arc<Mutex<Token>>,
     pub renew_requested: Arc<AtomicBool>,
+    pub original: Option<String>,
 }
 
 pub async fn decode_token(token: &str, key: &str) -> Token {
@@ -52,7 +53,7 @@ pub async fn decode_token(token: &str, key: &str) -> Token {
     ) {
         Ok(c) => c,
         Err(err) => {
-            debug!("decode token failed: {:?}", err);
+            debug!("decode token failed: {err:?}, token is {token:?}");
             return Token {
                 id: -1,
                 ..Default::default()
@@ -95,29 +96,31 @@ pub async fn extract_user_info<B>(
             .and_then(|header| header.to_str().ok());
 
         let auth_header = if let Some(auth_header) = auth_header {
-            match cache::Token::validate(
-                cache,
-                auth_header.strip_prefix("Bearer ").unwrap_or(auth_header),
-            )
-            .await
-            {
-                Ok(()) => String::from(auth_header),
-                Err(err) => {
-                    warn!("validate token failed: {}", err);
-                    String::from("")
-                }
-            }
+            auth_header
+                .strip_prefix("Bearer ")
+                .unwrap_or(&auth_header)
+                .trim()
         } else {
-            String::new()
+            ""
+        };
+
+        let auth_header = match cache::Token::validate(cache, auth_header).await {
+            Ok(()) => String::from(auth_header),
+            Err(err) => {
+                warn!("validate token failed: {}", err);
+                String::new()
+            }
         };
 
         let token = decode_token(&auth_header, signing_key).await;
+        debug!("user requested with token {token:?}");
 
         let last_time = token.exp - Local::now().timestamp();
 
         let token_tracker = TokenTracker {
             token: Arc::new(Mutex::new(token.clone())),
             renew_requested: Arc::new(AtomicBool::new(last_time > 0 && last_time < buffer_time)),
+            original: Some(auth_header.clone()),
         };
 
         req.extensions_mut().insert(token_tracker.clone());
@@ -150,6 +153,7 @@ pub async fn extract_user_info<B>(
         req.extensions_mut().insert(TokenTracker {
             token: Arc::new(Mutex::new(Token::default())),
             renew_requested: Arc::new(AtomicBool::new(false)),
+            original: None,
         });
         Ok(next.run(req).await)
     }

@@ -44,6 +44,7 @@
     },
     onSuccess(response, _context) {
       loading = false
+      showMessage('success', $i18n.t('account.loginSuccess'), 5000)
       goto('/')
     },
     onError(error, _context) {

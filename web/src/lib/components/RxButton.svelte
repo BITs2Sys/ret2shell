@@ -20,7 +20,7 @@
   }
   /**
    * Possible classes:
-   * btn text-base btn-ghost btn-xs btn-sm btn-md btn-lg
+   * btn text-base btn-ghost btn-xs btn-sm btn-md btn-lg btn-xl btn-2xl
    * bg-base-content/5 backdrop-blur space-x-2
    * text-primary text-info text-success text-warning text-error
    * btn-primary btn-info btn-success btn-warning btn-error

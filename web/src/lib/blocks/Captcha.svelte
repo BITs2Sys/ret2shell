@@ -26,16 +26,19 @@
 
   function refreshImg() {
     fetchingImg = true
+    captchaAnswer = ''
     refresh()
   }
 
   export function refreshAll() {
     loading = true
+    captchaAnswer = ''
     refresh()
   }
 
   function refreshPow() {
     fetchingPow = true
+    captchaAnswer = ''
     refresh()
   }
 
@@ -44,7 +47,6 @@
       .then((res) => {
         captcha = res
         captchaId = captcha.id
-        captchaAnswer = ''
         failed = false
         loading = false
         fetchingImg = false
@@ -52,7 +54,6 @@
       })
       .catch((err) => {
         captchaId = ''
-        captchaAnswer = ''
         failed = true
         loading = false
         fetchingImg = false
