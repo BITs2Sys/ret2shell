@@ -61,7 +61,8 @@
     "reloadCaptcha": "Reload Captcha",
     "powing": "Pow-ing...",
     "captcha": "Captcha",
-    "fetchingPow": "Getting..."
+    "fetchingPow": "Getting...",
+    "fetchCaptchaFailed": "Failed to fetch captcha"
   },
   "global": {
     "imageBroken": "Image Broken",
