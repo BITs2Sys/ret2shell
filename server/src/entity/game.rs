@@ -93,3 +93,7 @@ impl Related<super::write_up::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_game(conn: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(id).one(conn).await
+}

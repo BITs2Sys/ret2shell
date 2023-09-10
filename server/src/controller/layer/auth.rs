@@ -189,6 +189,27 @@ pub async fn init_token_or_permission_required<B>(
     }
 }
 
+pub async fn challenge_privilege_required<B>(
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok(next.run(req).await)
+}
+
+pub async fn game_privilege_required<B>(
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok(next.run(req).await)
+}
+
+pub async fn game_challenges_privilege_required<B>(
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok(next.run(req).await)
+}
+
 /// Construct a middleware closure that validate permissions from token.
 ///
 /// Usage:
