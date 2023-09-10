@@ -61,7 +61,7 @@ pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Re
             CorsLayer::new()
                 .allow_headers(Any)
                 .allow_methods(Any)
-                .allow_origin(cors_origins.parse::<HeaderValue>().unwrap()),
+                .allow_origin(cors_origins.parse::<HeaderValue>().expect("invalid CORS origins")),
         )
         .layer(
             TraceLayer::new_for_http()
