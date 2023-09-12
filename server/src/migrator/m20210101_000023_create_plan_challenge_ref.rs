@@ -1,23 +1,21 @@
 use sea_orm_migration::prelude::*;
 
-use super::{
-    m20210101_000002_create_user::User, m20210101_000025_create_subscription::Subscription,
-};
+use super::{m20210101_000007_create_challenge::Challenge, m20210101_000022_create_plan::Plan};
 
 pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m_20210101_000026_create_subscription_user_ref"
+        "m_20210101_000023_create_plan_challenge_ref"
     }
 }
 
 #[derive(Iden)]
-pub enum User2Subscription {
+pub enum Plan2Challenge {
     Table,
     Id,
-    UserId,
-    SubscriptionId,
+    PlanId,
+    ChallengeId,
 }
 
 #[async_trait::async_trait]
@@ -26,37 +24,37 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(User2Subscription::Table)
+                    .table(Plan2Challenge::Table)
                     .col(
-                        ColumnDef::new(User2Subscription::Id)
+                        ColumnDef::new(Plan2Challenge::Id)
                             .big_integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
                     .col(
-                        ColumnDef::new(User2Subscription::UserId)
+                        ColumnDef::new(Plan2Challenge::PlanId)
                             .big_integer()
                             .not_null(),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user_2_subscription_user_id_fkey")
-                            .from(User2Subscription::Table, User2Subscription::UserId)
-                            .to(User::Table, User::Id)
+                            .name("plan_2_challenge_plan_id_fkey")
+                            .from(Plan2Challenge::Table, Plan2Challenge::PlanId)
+                            .to(Plan::Table, Plan::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
-                        ColumnDef::new(User2Subscription::SubscriptionId)
+                        ColumnDef::new(Plan2Challenge::ChallengeId)
                             .big_integer()
                             .not_null(),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user_2_subscription_subscription_id_fkey")
-                            .from(User2Subscription::Table, User2Subscription::SubscriptionId)
-                            .to(Subscription::Table, Subscription::Id)
+                            .name("plan_2_challenge_challenge_id_fkey")
+                            .from(Plan2Challenge::Table, Plan2Challenge::ChallengeId)
+                            .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
@@ -67,7 +65,7 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(User2Subscription::Table).to_owned())
+            .drop_table(Table::drop().table(Plan2Challenge::Table).to_owned())
             .await
     }
 }

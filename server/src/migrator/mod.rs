@@ -29,11 +29,10 @@ mod m20210101_000018_create_action;
 mod m20210101_000019_create_config;
 mod m20210101_000020_create_calendar;
 mod m20210101_000021_create_wiki;
-mod m20210101_000022_create_wiki_related;
-mod m20210101_000023_create_plan;
-mod m20210101_000024_create_plan_challenge_ref;
-mod m20210101_000025_create_subscription;
-mod m20210101_000026_create_subscription_user_ref;
+mod m20210101_000022_create_plan;
+mod m20210101_000023_create_plan_challenge_ref;
+mod m20210101_000024_create_subscription;
+mod m20210101_000025_create_subscription_user_ref;
 
 pub struct Migrator;
 
@@ -62,11 +61,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20210101_000019_create_config::Migration),
             Box::new(m20210101_000020_create_calendar::Migration),
             Box::new(m20210101_000021_create_wiki::Migration),
-            Box::new(m20210101_000022_create_wiki_related::Migration),
-            Box::new(m20210101_000023_create_plan::Migration),
-            Box::new(m20210101_000024_create_plan_challenge_ref::Migration),
-            Box::new(m20210101_000025_create_subscription::Migration),
-            Box::new(m20210101_000026_create_subscription_user_ref::Migration),
+            Box::new(m20210101_000022_create_plan::Migration),
+            Box::new(m20210101_000023_create_plan_challenge_ref::Migration),
+            Box::new(m20210101_000024_create_subscription::Migration),
+            Box::new(m20210101_000025_create_subscription_user_ref::Migration),
         ]
     }
 }

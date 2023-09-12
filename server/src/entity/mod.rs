@@ -26,5 +26,4 @@ pub mod user2_ip_address;
 pub mod user2_subscription;
 pub mod user2_team;
 pub mod wiki;
-pub mod wiki_related;
 pub mod write_up;

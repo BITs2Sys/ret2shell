@@ -24,5 +24,4 @@ pub use super::user2_ip_address::Entity as User2IpAddress;
 pub use super::user2_subscription::Entity as User2Subscription;
 pub use super::user2_team::Entity as User2Team;
 pub use super::wiki::Entity as Wiki;
-pub use super::wiki_related::Entity as WikiRelated;
 pub use super::write_up::Entity as WriteUp;
