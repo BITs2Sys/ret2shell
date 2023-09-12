@@ -90,7 +90,11 @@
     "418Tip": "Does brewing coffee in a teapot really prevent odors?"
   },
   "wiki": {
-    "title": "Wiki"
+    "title": "Wiki",
+    "sideTitle": "Wiki",
+    "sideToc": "Wiki table-of-content",
+    "fetchFailed": "Failed to get article list",
+    "fetchingList": "Loading list..."
   },
   "calendar": {
     "0": "Sun.",
@@ -107,7 +111,11 @@
     "iKnow": "I Know",
     "gotoGame": "Go to this game",
     "noGame": "There are no games this month",
-    "failedToFetch": "Failed to get game calendar"
+    "failedToFetch": "Failed to get game calendar",
+    "fetching": "Fetching...",
+    "gameOver": "GAME OVER",
+    "gameNotStarted": "NOT STARTED",
+    "gameOngoing": "IN PROGRESS"
   },
   "init": {
     "title": "Initialize",

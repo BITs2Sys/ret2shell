@@ -4,3 +4,4 @@
 </script>
 
 <svelte:head><title>{$i18n.t('wiki.title')} - {$platform.name}</title></svelte:head>
+

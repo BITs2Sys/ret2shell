@@ -9,8 +9,9 @@
   import { onMount } from 'svelte'
   import { getCalendarList } from '$lib/api/calendar'
   import { showMessage } from '$lib/stores/toast'
-    import type { AxiosError } from 'axios'
-    import { inView } from '$lib/utils/view'
+  import type { AxiosError } from 'axios'
+  import RxTag from '$lib/components/RxTag.svelte'
+  import xdsecMascot from '$lib/assets/xdsec-mascot.webp'
 
   let calendars: Calendar[] = []
 
@@ -28,6 +29,7 @@
   let selectedDates: Date[] = []
   let calendarBtns: CalendarBtn[] = []
   let gameDescription: Promise<string | null> = Promise.resolve(null)
+  let currentDate = new Date()
 
   $: {
     calendarBtns = calendars.map((c) => ({
@@ -85,11 +87,13 @@
     getCalendarList(
       Math.floor(new Date(year, month - 1).getTime() / 1000),
       Math.floor(new Date(year, month).getTime() / 1000)
-    ).then((response) => {
-      calendars = response.sort((a, b) => a.start_time - b.start_time)
-    }).catch((err) => {
-      showMessage('error', $i18n.t('calendar.failedToFetch') + ': ' + (err as AxiosError).response?.data, 5000)
-    })
+    )
+      .then((response) => {
+        calendars = response.sort((a, b) => a.start_time - b.start_time)
+      })
+      .catch((err) => {
+        showMessage('error', $i18n.t('calendar.failedToFetch') + ': ' + (err as AxiosError).response?.data, 5000)
+      })
   }
 
   onMount(() => {
@@ -170,10 +174,17 @@
                 class="absolute top-0 left-0 h-full w-full bg-base-content/5 shadow backdrop-blur rounded-box p-6 lg:p-12 space-y-6 overflow-scroll flex flex-col"
               >
                 <div class="flex flex-row space-x-4 items-center">
-                  <span class="icon-[fluent--flag-24-regular] text-error w-8 h-8" />
-                  <span class="text-3xl font-bold">{selectedCalendar.name}</span>
+                  <span class="icon-[fluent--flag-24-regular] text-error w-6 h-6" />
+                  <span class="text-base font-bold">{selectedCalendar.name}</span>
                   <div class="flex-1" />
-                  <span class="icon-[fluent--calendar-16-regular] opacity-80" />
+                  {#if currentDate > new Date(selectedCalendar.end_time * 1000)}
+                    <RxTag level="error" label={$i18n.t('calendar.gameOver')} />
+                  {:else if currentDate < new Date(selectedCalendar.start_time * 1000)}
+                    <RxTag level="info" label={$i18n.t('calendar.gameNotStarted')} />
+                  {:else}
+                    <RxTag level="success" label={$i18n.t('calendar.gameOngoing')} />
+                  {/if}
+                  <span class="icon-[fluent--calendar-16-regular] opacity-80 w-6 h-6" />
                   <span class="text-base font-bold opacity-80">
                     {new Date(selectedCalendar.start_time * 1000).toLocaleDateString('default', {
                       year: 'numeric',
@@ -190,7 +201,7 @@
                 </div>
                 <article class="flex-1 prose !max-w-full">
                   {#await gameDescription}
-                    <span>please wait</span>
+                    <RxButton ghost loading>{$i18n.t('calendar.fetching')}</RxButton>
                   {:then desc}
                     {@html desc}
                   {/await}
@@ -225,29 +236,28 @@
                           chosenDate = null
                         }}
                       >
-                        <span class="icon-[fluent--flag-16-regular]" />
+                        <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
                         <span
-                          class={`icon-[fluent--chevron-double-right-16-regular] text-primary transition-all ${
-                            !cal.active && 'w-0'
+                          class={`icon-[fluent--chevron-double-right-16-regular] w-6 h-6 animate-pulse text-primary transition-all ${
+                            !cal.active && '!w-0'
                           }`}
                         />
                         <span class={`text-base ${cal.active && 'text-primary'}`}>{cal.data.name}</span>
                         <div class="flex-1" />
-                        <span class={`text-base opacity-60 ${cal.active && 'text-primary'}`}
-                          >{new Date(cal.data.start_time * 1000).toLocaleDateString('default', {
+                        {#if currentDate > new Date(cal.data.end_time * 1000)}
+                          <RxTag level="error" label={$i18n.t('calendar.gameOver')} />
+                        {:else if currentDate < new Date(cal.data.start_time * 1000)}
+                          <RxTag level="info" label={$i18n.t('calendar.gameNotStarted')} />
+                        {:else}
+                          <RxTag level="success" label={$i18n.t('calendar.gameOngoing')} />
+                        {/if}
+                        <span class={`text-base opacity-60 ${cal.active && '!opacity-100 text-primary'}`}>
+                          {new Date(cal.data.start_time * 1000).toLocaleDateString('default', {
                             year: 'numeric',
                             day: '2-digit',
                             month: '2-digit',
-                          })}</span
-                        >
-                        <span class="text-base opacity-40">-&gt;</span>
-                        <span class={`text-base opacity-60 ${cal.active && 'text-primary'}`}
-                          >{new Date(cal.data.end_time * 1000).toLocaleDateString('default', {
-                            year: 'numeric',
-                            day: '2-digit',
-                            month: '2-digit',
-                          })}</span
-                        >
+                          })}
+                        </span>
                       </RxButton>
                     </div>
                   {/each}

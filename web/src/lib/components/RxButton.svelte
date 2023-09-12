@@ -3,6 +3,7 @@
   export let level: 'primary' | 'info' | 'success' | 'warning' | 'error' | null = null
   export let size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' = 'md'
   export let ghost = false
+  export let bold = true
   export let justify: 'start' | 'center' | 'end' = 'center'
   export let uppercase = false
   export let loading = false
@@ -29,6 +30,7 @@
    */
   $: classes = [
     'btn',
+    'flex flex-row flex-nowrap items-center',
     'border-none',
     'space-x-2',
     'text-base',
@@ -38,6 +40,7 @@
     level && `${ghost ? 'text' : 'btn'}-${level}`,
     active && 'text-primary',
     size && `btn-${size}`,
+    bold ? 'font-bold' : 'font-normal',
     justify && `justify-${justify}`,
     !uppercase && 'normal-case',
     square && 'btn-square',

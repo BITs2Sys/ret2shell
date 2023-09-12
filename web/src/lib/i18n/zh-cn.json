@@ -91,7 +91,11 @@
     "418Tip": "用茶壶泡咖啡真的不会串味吗"
   },
   "wiki": {
-    "title": "知识"
+    "title": "知识",
+    "sideTitle": "知识库",
+    "sideToc": "知识库目录",
+    "fetchFailed": "获取文章列表失败",
+    "fetchingList": "加载列表中..."
   },
   "calendar": {
     "0": "日",
@@ -108,7 +112,11 @@
     "iKnow": "了解了",
     "gotoGame": "转到这场比赛",
     "noGame": "这个月没有比赛",
-    "failedToFetch": "获取竞赛日历失败"
+    "failedToFetch": "获取竞赛日历失败",
+    "fetching": "获取中...",
+    "gameOver": "已结束",
+    "gameNotStarted": "未开始",
+    "gameOngoing": "进行中"
   },
   "init": {
     "accountTitle": "注册初始管理员用户",

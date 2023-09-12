@@ -32,29 +32,15 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 
 #[derive(Deserialize)]
 struct ListParams {
-    parent_id: Option<i64>,
-    page: Option<u64>,
-    per_page: Option<u64>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct WikiList {
-    wikis: Vec<WikiModel>,
-    total: u64,
+    parent_id: Option<i64>
 }
 
 async fn get_wiki_list(
     State(ref conn): State<DatabaseConnection>,
     Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    if page < 1 || per_page < 1 {
-        error!("Invalid page={} or per_page={}", page, per_page);
-        return Err((StatusCode::BAD_REQUEST, "invalid parameters"));
-    }
-    match wiki::get_wiki_page(conn, params.parent_id, page, per_page).await {
-        Ok((wikis, total)) => Ok(Json(WikiList { wikis, total })),
+    match wiki::get_wiki_page(conn, params.parent_id).await {
+        Ok(wikis) => Ok(Json(wikis)),
         Err(err) => {
             error!("Failed to get wiki list: {}", err);
             Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get wiki list"))
