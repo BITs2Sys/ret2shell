@@ -30,7 +30,8 @@
   "announcements": {
     "title": "公告",
     "titleLoadingPlaceholder": "公告加载中",
-    "fetchFailed": "获取公告失败"
+    "fetchFailed": "获取公告失败",
+    "fetchingContent": "获取内容中..."
   },
   "playground": {
     "title": "练习",

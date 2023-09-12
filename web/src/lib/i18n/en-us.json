@@ -37,7 +37,8 @@
   "announcements": {
     "title": "Announcements",
     "titleLoadingPlaceholder": "Announcement is loading",
-    "fetchFailed": "Failed to get announcement"
+    "fetchFailed": "Failed to get announcement",
+    "fetchingContent": "Fetching content..."
   },
   "certs": {
     "title": "Certificates"

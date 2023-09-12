@@ -88,41 +88,42 @@
 <svelte:head>
   <title>{wiki.title} - {$platform.name}</title>
 </svelte:head>
-{#if loading}
-  <div class="h-16 flex flex-row justify-center items-center space-x-2">
-    <span class="loading loading-spinner loading-sm" />
-    <span class="text-base">{$i18n.t('wiki.fetchingContent')}</span>
-  </div>
-{:else}
-  <div class="flex flex-col items-center">
-    <h1 class="text-3xl font-bold h-16 mt-12 flex justify-center items-center">
-      {wiki.title}
-    </h1>
-    <div class="flex flex-row space-x-4 flex-wrap">
-      <p>
-        <span class="text-base opacity-80">{$i18n.t('wiki.author')}</span>:
-        <span class="text-base opacity-80">{user?.name || $i18n.t('wiki.unknownAuthor')}</span>
-      </p>
-      <p>
-        <span class="text-base opacity-80">{$i18n.t('wiki.publishedAt')}</span>:
-        <span class="text-base opacity-80">{new Date(wiki.published_at * 1000).toLocaleString()}</span>
-      </p>
-      {#if wiki.published_at !== wiki.updated_at}
-        <p>
-          <span class="text-base opacity-80">{$i18n.t('wiki.updatedAt')}</span>:
-          <span class="text-base opacity-80">{new Date(wiki.updated_at * 1000).toLocaleString()}</span>
-        </p>
-      {/if}
+
+<div class="flex-1 flex flex-col p-4 lg:p-6 items-center">
+  {#if loading}
+    <div class="h-16 flex flex-row justify-center items-center space-x-2">
+      <span class="loading loading-spinner loading-sm" />
+      <span class="text-base">{$i18n.t('wiki.fetchingContent')}</span>
     </div>
-    <article class="prose max-w-5xl w-full p-6 pt-12">
-      {#await contentRendered}
-        <span class="loading loading-spinner loading-sm" />
-        <span>{$i18n.t('wiki.rendering')}</span>
-      {:then desc}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html desc}
-      {/await}
-    </article>
-    <div class="h-32" />
-  </div>
-{/if}
+  {:else}
+      <h1 class="text-3xl font-bold h-16 mt-12 flex justify-center items-center">
+        {wiki.title}
+      </h1>
+      <div class="flex flex-row space-x-4 flex-wrap">
+        <p>
+          <span class="text-base opacity-80">{$i18n.t('wiki.author')}</span>:
+          <span class="text-base opacity-80">{user?.name || $i18n.t('wiki.unknownAuthor')}</span>
+        </p>
+        <p>
+          <span class="text-base opacity-80">{$i18n.t('wiki.publishedAt')}</span>:
+          <span class="text-base opacity-80">{new Date(wiki.published_at * 1000).toLocaleString()}</span>
+        </p>
+        {#if wiki.published_at !== wiki.updated_at}
+          <p>
+            <span class="text-base opacity-80">{$i18n.t('wiki.updatedAt')}</span>:
+            <span class="text-base opacity-80">{new Date(wiki.updated_at * 1000).toLocaleString()}</span>
+          </p>
+        {/if}
+      </div>
+      <article class="prose w-full max-w-5xl p-6 pt-12">
+        {#await contentRendered}
+          <span class="loading loading-spinner loading-sm" />
+          <span>{$i18n.t('wiki.rendering')}</span>
+        {:then desc}
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+          {@html desc}
+        {/await}
+      </article>
+      <div class="h-32" />
+  {/if}
+</div>

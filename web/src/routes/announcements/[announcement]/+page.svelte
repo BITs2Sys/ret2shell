@@ -71,45 +71,43 @@
 
 <svelte:head><title>{announcement.title} - {$platform.name}</title></svelte:head>
 
-<div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
-  <div class="flex-1 max-w-5xl items-center">
-    {#if loading}
-      <div class="h-16 flex flex-row justify-center items-center space-x-2">
+<div class="flex-1 flex flex-col self-center w-full p-4 lg:p-6 items-center">
+  {#if loading}
+    <div class="h-16 flex flex-row justify-center items-center space-x-2">
+      <span class="loading loading-spinner loading-sm" />
+      <span class="text-base">{$i18n.t('announcements.fetchingContent')}</span>
+    </div>
+  {:else if error - 200 > 100 && !loading}
+    <Error status={error} />
+  {:else}
+    <h1 class="text-3xl font-bold h-16 mt-12 flex justify-center items-center">
+      {announcement.title}
+    </h1>
+    <div class="flex flex-row space-x-4 flex-wrap justify-center">
+      <p>
+        <span class="text-base opacity-80">{$i18n.t('announcement.author')}</span>:
+        <span class="text-base opacity-80">{user?.name || $i18n.t('announcement.unknownAuthor')}</span>
+      </p>
+      <p>
+        <span class="text-base opacity-80">{$i18n.t('announcement.publishedAt')}</span>:
+        <span class="text-base opacity-80">{new Date(announcement.published_at * 1000).toLocaleString()}</span>
+      </p>
+      {#if announcement.published_at !== announcement.updated_at}
+        <p>
+          <span class="text-base opacity-80">{$i18n.t('announcement.updatedAt')}</span>:
+          <span class="text-base opacity-80">{new Date(announcement.updated_at * 1000).toLocaleString()}</span>
+        </p>
+      {/if}
+    </div>
+    <article class="prose max-w-5xl w-full p-6 pt-12">
+      {#await contentRendered}
         <span class="loading loading-spinner loading-sm" />
-        <span class="text-base">{$i18n.t('announcements.fetchingContent')}</span>
-      </div>
-    {:else if error - 200 > 100 && !loading}
-      <Error status={error} />
-    {:else}
-      <h1 class="text-3xl font-bold h-16 mt-12 flex justify-center items-center">
-        {announcement.title}
-      </h1>
-      <div class="flex flex-row space-x-4 flex-wrap justify-center">
-        <p>
-          <span class="text-base opacity-80">{$i18n.t('announcement.author')}</span>:
-          <span class="text-base opacity-80">{user?.name || $i18n.t('announcement.unknownAuthor')}</span>
-        </p>
-        <p>
-          <span class="text-base opacity-80">{$i18n.t('announcement.publishedAt')}</span>:
-          <span class="text-base opacity-80">{new Date(announcement.published_at * 1000).toLocaleString()}</span>
-        </p>
-        {#if announcement.published_at !== announcement.updated_at}
-          <p>
-            <span class="text-base opacity-80">{$i18n.t('announcement.updatedAt')}</span>:
-            <span class="text-base opacity-80">{new Date(announcement.updated_at * 1000).toLocaleString()}</span>
-          </p>
-        {/if}
-      </div>
-      <article class="prose max-w-5xl w-full p-6 pt-12">
-        {#await contentRendered}
-          <span class="loading loading-spinner loading-sm" />
-          <span>{$i18n.t('wiki.rendering')}</span>
-        {:then desc}
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-          {@html desc}
-        {/await}
-      </article>
-      <div class="h-32" />
-    {/if}
-  </div>
+        <span>{$i18n.t('wiki.rendering')}</span>
+      {:then desc}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        {@html desc}
+      {/await}
+    </article>
+    <div class="h-32" />
+  {/if}
 </div>
