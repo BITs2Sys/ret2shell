@@ -46,7 +46,8 @@
     "challengeAnswer": "参考题解",
     "gameIntro": "赛事介绍",
     "challengeList": "题目列表",
-    "returnToList": "回到练习场列表"
+    "returnToList": "回到练习场列表",
+    "loadMore": "加载更多..."
   },
   "games": {
     "title": "赛事"

@@ -19,6 +19,7 @@ use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::error;
 
+mod tag;
 // for challenge answer
 mod answer;
 // for challenge env
@@ -53,15 +54,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route_layer(middleware::from_fn(auth::permission_required_all!(
             Permission::Verified
         )))
-        .nest("/answer", answer::router(state))
+        .nest("/tag", tag::router(state))
         .nest(
             "/:challenge_id",
             Router::new()
                 .route("/", patch(update_challenge).delete(delete_challenge))
-                .route(
-                    "/build",
-                    get(get_challenge_build_status).post(add_challenge_to_build_queue),
-                )
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Organize,
                     Permission::Devops
@@ -82,9 +79,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::Verified
                 )))
+                .nest("/answer", answer::router(state))
                 .nest("/submission", submission::router(state))
                 .nest("/env", env::router(state))
                 .nest("/repo", repo::router(state))
+                .nest("/workflow", workflow::router(state))
                 .nest("/hint", hint::router(state)),
         )
 }
@@ -234,13 +233,5 @@ async fn get_challenge_static_info() -> Result<impl IntoResponse, (StatusCode, &
 }
 
 async fn download_challenge_attachment() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    Ok(Json("to be implemented"))
-}
-
-async fn get_challenge_build_status() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    Ok(Json("to be implemented"))
-}
-
-async fn add_challenge_to_build_queue() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     Ok(Json("to be implemented"))
 }

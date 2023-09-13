@@ -4,7 +4,7 @@
   import { quintOut } from 'svelte/easing'
   import WikiSidebar from '$lib/blocks/WikiSidebar.svelte'
   import { transformToWikiEntry, type WikiEntry } from '$lib/models/wiki'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import { getWikiList } from '$lib/api/wiki'
   import type { AxiosError } from 'axios'
   import { showMessage } from '$lib/stores/toast'
@@ -74,7 +74,7 @@
 
   $: showSidebar = screenWidth > 1024 // lg
 
-  page.subscribe((value) => {
+  const unsubscribe = page.subscribe((value) => {
     if (value.params['wiki']) {
       activeChains = value.params['wiki'].split('/').map((item) => {
         try {
@@ -87,6 +87,7 @@
       activeChains = [-1]
     }
   })
+  onDestroy(unsubscribe)
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
@@ -94,11 +95,11 @@
 <div class="flex-1 flex flex-row">
   {#if showSidebar}
     <div
-      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10"
+      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 print:hidden"
     >
       <WikiSidebar bind:wiki={wikiEntries} {activeChains} {loading} />
     </div>
-    <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0" />
+    <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0 print:hidden" />
   {:else}
     <RxButton
       size="lg"
@@ -117,7 +118,7 @@
   {/if}
   {#if toggleSidebar && !showSidebar}
     <div
-      class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10"
+      class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 print:hidden"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
       <WikiSidebar bind:wiki={wikiEntries} {activeChains} {loading} />

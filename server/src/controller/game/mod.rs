@@ -19,7 +19,6 @@ use serde::{Deserialize, Serialize};
 use tracing::{error, warn};
 
 mod notification;
-mod tag;
 mod team;
 mod writeup;
 
@@ -30,18 +29,19 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             Permission::Organize
         )))
         .route("/", get(get_game_list))
-        .route("/search", get(search_game))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             info::prepare_user_full_info,
         ))
-        .nest("/tag", tag::router(state))
         .nest(
             "/:game_id",
             Router::new()
                 .route("/", patch(update_game))
-                .route("/submission", get(get_game_submission_list))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
+                    Permission::Organize
+                )))
+                .route("/submission", get(get_game_submission_list))
+                .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Organize,
                     Permission::Devops,
                     Permission::Audit
@@ -88,7 +88,7 @@ struct GameList {
 async fn get_game_list(
     State(ref conn): State<DatabaseConnection>,
     Query(query): Query<GameListQuery>,
-    Extension(op_user): Extension<user::Model>,
+    op_user: Option<Extension<user::Model>>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = query.page.unwrap_or(1);
     let per_page = query.per_page.unwrap_or(10);
@@ -96,15 +96,12 @@ async fn get_game_list(
         error!("Invalid page={} or per_page={}", page, per_page);
         return Err((StatusCode::BAD_REQUEST, "invalid parameters"));
     }
-    match game::get_game_page(
-        conn,
-        page,
-        per_page,
-        query.host_as_game,
-        op_user.permissions.0.contains(&Permission::Organize),
-    )
-    .await
-    {
+    let is_organizer = if let Some(Extension(op_user)) = op_user.as_ref() {
+        op_user.permissions.0.contains(&Permission::Organize)
+    } else {
+        false
+    };
+    match game::get_game_page(conn, page, per_page, query.host_as_game, !is_organizer).await {
         Ok((games, total)) => Ok(Json(GameList { games, total })),
         Err(err) => {
             error!("Failed to get game list: {}", err);
@@ -147,24 +144,6 @@ async fn update_game(
         Err(err) => {
             error!("update game failed: {}", err);
             Err((StatusCode::INTERNAL_SERVER_ERROR, "update game failed"))
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-struct SearchQuery {
-    pub keyword: String,
-}
-
-async fn search_game(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<SearchQuery>,
-) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    match game::search_game(conn, query.keyword).await {
-        Ok(games) => Ok(Json(games)),
-        Err(err) => {
-            error!("search game failed: {}", err);
-            Err((StatusCode::INTERNAL_SERVER_ERROR, "search game failed"))
         }
     }
 }

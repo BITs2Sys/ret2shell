@@ -40,7 +40,8 @@
     "challengeAnswer": "SOLUTION",
     "gameIntro": "INTRODUCTION",
     "challengeList": "CHALLENGES",
-    "returnToList": "Return to playground list"
+    "returnToList": "Return to playground list",
+    "loadMore": "Load more..."
   },
   "games": {
     "title": "Games"

@@ -78,7 +78,7 @@
     <li>
       <div class="join w-full">
         <RxLink
-          active={item.id === itemActiveId}
+          exactlyMatched
           bold={false}
           ghost
           class="flex-1 join-item"

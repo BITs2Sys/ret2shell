@@ -10,6 +10,7 @@
   import type { User } from '$lib/models/user'
   import Error from '$lib/blocks/Error.svelte'
   import '$lib/styles/article.scss'
+    import { onDestroy } from 'svelte'
 
   let loading = true
   let error = 200
@@ -41,7 +42,7 @@
     }, 100)
   }
 
-  page.subscribe((page) => {
+  const unsubscribe = page.subscribe((page) => {
     if (!page.params['wiki']) return
     const arr = page.params['wiki'].split('/')
 
@@ -87,6 +88,8 @@
       loading = false
     }
   })
+
+  onDestroy(unsubscribe)
 </script>
 
 <svelte:head>

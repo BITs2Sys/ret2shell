@@ -147,9 +147,13 @@ pub async fn get_solved_submission_of_team(
         .column_as(super::challenge::Column::CurrentScore, "challenge_score")
         .column_as(super::tag::Column::Name, "tag_name");
     // .order_by_desc(Column::CreatedAt);
-    let resp = sql
+    // F**k you SQL.
+    let mut resp = sql
         .into_model::<ModelWithUserAndChallengeSolvedInfo>()
         .all(conn)
         .await?;
+    resp.sort_by(|a, b| {
+        return a.created_at.cmp(&b.created_at);
+    });
     Ok(resp)
 }

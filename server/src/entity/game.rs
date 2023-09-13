@@ -117,13 +117,13 @@ pub async fn create_game(conn: &DatabaseConnection, game: Model) -> Result<(), D
 /// * `page` - Page number
 /// * `per_page` - Number of items per page
 /// * `host_as_game` - Whether the game will be hosted as a `Game`, or it will be treated as `Playground`, which is open to all users.
-/// * `is_organizer` - Auth parameter, if set to true, all games will returned regardless of `hidden` field.
+/// * `filter_hidden` - Whether to filter hidden games
 pub async fn get_game_page(
     conn: &DatabaseConnection,
     page: u64,
     per_page: u64,
     host_as_game: Option<bool>,
-    is_organizer: bool,
+    filter_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find()
         .select_only()
@@ -135,23 +135,13 @@ pub async fn get_game_page(
         // returns games by default
         sql = sql.filter(Column::HostAsGame.eq(true));
     }
-    if !is_organizer {
+    if filter_hidden {
         sql = sql.filter(Column::Hidden.eq(false));
     }
     let paginator = sql.into_model().paginate(conn, per_page);
     let resp = paginator.fetch_page(page - 1).await?;
     let num_pages = paginator.num_pages().await?;
     Ok((resp, num_pages))
-}
-
-pub async fn search_game(conn: &DatabaseConnection, keyword: String) -> Result<Vec<Model>, DbErr> {
-    let keyword = format!("%{}%", keyword);
-    let games = Entity::find()
-        .filter(Column::Name.like(keyword))
-        .into_model()
-        .all(conn)
-        .await?;
-    Ok(games)
 }
 
 pub async fn update_game(conn: &DatabaseConnection, id: i64, game: Model) -> Result<(), DbErr> {

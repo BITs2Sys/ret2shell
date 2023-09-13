@@ -92,7 +92,7 @@ pub async fn extract_user_info<B>(
         let auth_header = if let Some(auth_header) = auth_header {
             auth_header
                 .strip_prefix("Bearer ")
-                .unwrap_or(&auth_header)
+                .unwrap_or(auth_header)
                 .trim()
         } else {
             ""
