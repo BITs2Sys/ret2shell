@@ -111,7 +111,7 @@ impl Related<super::institute::Entity> for Entity {
     }
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<user::Entity> for Entity {
     fn to() -> RelationDef {
         super::user2_team::Relation::User.def()
     }

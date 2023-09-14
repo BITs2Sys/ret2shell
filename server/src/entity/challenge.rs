@@ -74,7 +74,7 @@ impl Related<super::answer::Entity> for Entity {
     }
 }
 
-impl Related<super::game::Entity> for Entity {
+impl Related<game::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Game.def()
     }

@@ -153,6 +153,56 @@ pub async fn extract_user_info<B>(
     }
 }
 
+/// Construct a middleware closure that validate permissions from token.
+///
+/// all the permissions appeared here should be in the `permissions` field in user's token.
+///
+/// Usage:
+///
+/// ```
+/// Router::new()
+///     .route(...)
+///     .route_layer(axum::middleware::from_fn(permission_required_all!(Permission::Basic, ...)))
+/// ```
+macro_rules! permission_required_all {
+    ($($perm:expr),*) => {
+        |
+            axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
+            req: axum::http::Request<_>,
+            next: axum::middleware::Next<_>,
+        | async move {
+            let required_perms = [$($perm),*];
+            tracing::debug!("user permissions: {:?}", token.permissions.0);
+            tracing::debug!("required perms: {:?}", required_perms);
+            match required_perms.iter().all(|perm| token.permissions.0.contains(perm)) {
+                true => Ok(next.run(req).await),
+                false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))
+            }
+        }
+    };
+}
+
+macro_rules! permission_required_any {
+    ($($perm:expr),*) => {
+        |
+            axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
+            req: axum::http::Request<_>,
+            next: axum::middleware::Next<_>,
+        | async move {
+            let required_perms = [$($perm),*];
+            tracing::debug!("user permissions: {:?}", token.permissions.0);
+            tracing::debug!("required perms: {:?}", required_perms);
+            match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
+                true => Ok(next.run(req).await),
+                false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))
+            }
+        }
+    };
+}
+
+pub(crate) use permission_required_all;
+pub(crate) use permission_required_any;
+
 pub async fn init_token_or_permission_required<B>(
     State(config): State<GlobalConfig>,
     Extension(token): Extension<Token>,
@@ -210,53 +260,3 @@ pub async fn game_challenges_privilege_required<B>(
     // TODO: implement
     Ok(next.run(req).await)
 }
-
-/// Construct a middleware closure that validate permissions from token.
-///
-/// all the permissions appeared here should be in the `permissions` field in user's token.
-///
-/// Usage:
-///
-/// ```
-/// Router::new()
-///     .route(...)
-///     .route_layer(axum::middleware::from_fn(permission_required_all!(Permission::Basic, ...)))
-/// ```
-macro_rules! permission_required_all {
-    ($($perm:expr),*) => {
-        |
-            axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
-            req: axum::http::Request<_>,
-            next: axum::middleware::Next<_>,
-        | async move {
-            let required_perms = [$($perm),*];
-            tracing::debug!("user permissions: {:?}", token.permissions.0);
-            tracing::debug!("required perms: {:?}", required_perms);
-            match required_perms.iter().all(|perm| token.permissions.0.contains(perm)) {
-                true => Ok(next.run(req).await),
-                false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))
-            }
-        }
-    };
-}
-
-macro_rules! permission_required_any {
-    ($($perm:expr),*) => {
-        |
-            axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
-            req: axum::http::Request<_>,
-            next: axum::middleware::Next<_>,
-        | async move {
-            let required_perms = [$($perm),*];
-            tracing::debug!("user permissions: {:?}", token.permissions.0);
-            tracing::debug!("required perms: {:?}", required_perms);
-            match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
-                true => Ok(next.run(req).await),
-                false => Err((axum::http::StatusCode::FORBIDDEN, "permission denied"))
-            }
-        }
-    };
-}
-
-pub(crate) use permission_required_all;
-pub(crate) use permission_required_any;

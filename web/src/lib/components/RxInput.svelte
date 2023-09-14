@@ -41,7 +41,7 @@
     .join(' ')
 </script>
 
-{#if icon || type == 'password'}
+{#if icon || type === 'password'}
   <div class="join flex-1">
     {#if icon}
       <span class="bg-base-content/20 join-item pl-4 pr-4 flex items-center">
@@ -49,7 +49,7 @@
       </span>
     {/if}
     <input {id} {name} class={classes} {disabled} use:typeAction {...$$restProps} bind:value />
-    {#if type == 'password'}
+    {#if type === 'password'}
       <RxButton class="join-item ml-0" on:click={togglePasswordVisible}>
         <!-- icon-[fluent--eye-16-regular] and icon-[fluent--eye-off-16-regular] -->
         <div class={`w-5 h-5 icon-[fluent--${passwordVisible ? 'eye' : 'eye-off'}-16-regular]`} />

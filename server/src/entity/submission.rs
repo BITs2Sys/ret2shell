@@ -25,7 +25,7 @@ pub struct Model {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ModelWithUserAndChallengeInfo {
     pub id: i64,
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub challenge_id: i64,
     pub game_id: i64,
@@ -38,7 +38,7 @@ pub struct ModelWithUserAndChallengeInfo {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ModelWithUserAndChallengeSolvedInfo {
     pub id: i64,
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub challenge_id: i64,
     pub game_id: i64,
@@ -127,10 +127,10 @@ pub async fn get_solved_submission_of_team(
         .filter(Column::Solved.eq(true))
         .filter(Column::WithScore.eq(true))
         .distinct_on([
-            (super::submission::Entity, super::submission::Column::UserId),
+            (Entity, Column::UserId),
             (
-                super::submission::Entity,
-                super::submission::Column::ChallengeId,
+                Entity,
+                Column::ChallengeId,
             ),
         ]);
     let mut cond = Condition::any();
@@ -153,7 +153,7 @@ pub async fn get_solved_submission_of_team(
         .all(conn)
         .await?;
     resp.sort_by(|a, b| {
-        return a.created_at.cmp(&b.created_at);
+        a.created_at.cmp(&b.created_at)
     });
     Ok(resp)
 }

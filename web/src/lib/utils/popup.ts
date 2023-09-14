@@ -143,15 +143,15 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
 
   // Event Handlers
   function toggle(): void {
-    popupState.open === false ? open() : close()
+    !popupState.open ? open() : close()
   }
   function onWindowClick(event: Event): void {
     // Return if the popup is not yet open
-    if (popupState.open === false) return
+    if (!popupState.open) return
     // Return if click is the trigger element
     if (triggerNode.contains(event.target as Node)) return
     // If click it outside the popup
-    if (elemPopup && elemPopup.contains(event.target as Node) === false) {
+    if (elemPopup && !elemPopup.contains(event.target as Node)) {
       close()
       return
     }
@@ -165,7 +165,7 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
 
   // Keyboard Interactions for A11y
   const onWindowKeyDown = (event: KeyboardEvent): void => {
-    if (popupState.open === false) return
+    if (!popupState.open) return
     // Handle keys
     const key: string = event.key
     // On Esc key

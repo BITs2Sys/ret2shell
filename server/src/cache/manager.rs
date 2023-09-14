@@ -281,7 +281,7 @@ pub async fn new_redis_pool(
         ))),
         1 => {
             let mgr = RedisMultiplexedConnectionManager::new(nodes[0].clone())?;
-            let pool = bb8::Pool::builder()
+            let pool = Pool::builder()
                 .max_size(max_connections.into())
                 .build(mgr)
                 .await?;
@@ -290,7 +290,7 @@ pub async fn new_redis_pool(
         }
         _ => {
             let mgr = RedisClusterConnectionManager::new(nodes)?;
-            let pool = bb8::Pool::builder()
+            let pool = Pool::builder()
                 .max_size(max_connections.into())
                 .build(mgr)
                 .await?;
