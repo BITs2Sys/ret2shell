@@ -3,7 +3,7 @@
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
-use sea_orm::{FromQueryResult, QueryOrder, QuerySelect, ActiveValue, IntoActiveModel};
+use sea_orm::{ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect};
 use sea_query::{Condition, JoinType};
 use serde::{Deserialize, Serialize};
 
@@ -117,7 +117,7 @@ pub async fn get_solved_submission_of_team(
     conn: &DatabaseConnection,
     game_id: i64,
     team_id: i64,
-) -> anyhow::Result<Vec<ModelWithUserAndChallengeSolvedInfo>> {
+) -> Result<Vec<ModelWithUserAndChallengeSolvedInfo>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -167,7 +167,10 @@ pub async fn get_solved_submission_of_user(
     sql.into_model().all(db).await
 }
 
-pub async fn create_submission(conn: &DatabaseConnection, submission: Model) -> Result<Model, DbErr> {
+pub async fn create_submission(
+    conn: &DatabaseConnection,
+    submission: Model,
+) -> Result<Model, DbErr> {
     match challenge::Entity::find_by_id(submission.challenge_id)
         .one(conn)
         .await
