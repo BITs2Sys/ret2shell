@@ -52,8 +52,10 @@ export class MarkTo {
         // @ts-expect-error remark has not updated
         this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true })
       }
-      this.processor?.use(rehypeSlug)
-      this.processor?.use(rehypeAutolinkHeadings, { behavior: 'wrap' })
+      if (options?.headingAnchors) {
+        this.processor?.use(rehypeSlug)
+        this.processor?.use(rehypeAutolinkHeadings, { behavior: 'wrap' })
+      }
       this.processor?.use(rehypeStringify.default)
     }
   }

@@ -18,6 +18,16 @@ article > h6 > a {
   @apply no-underline #{!important};
 }
 
+article > h1 > a,
+article > h2 > a {
+  @apply font-bold #{!important};
+}
+
+article > h3 > a,
+article > h4 > a {
+  @apply font-semibold #{!important};
+}
+
 article > h1 > a:hover::after,
 article > h2 > a:hover::after,
 article > h3 > a:hover::after,

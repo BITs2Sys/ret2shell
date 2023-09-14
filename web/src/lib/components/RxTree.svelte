@@ -76,12 +76,12 @@
 >
   {#each tree as item}
     <li>
-      <div class="join w-full">
+      <div class="join w-full overflow-hidden">
         <RxLink
           exactlyMatched
           bold={false}
           ghost
-          class="flex-1 join-item"
+          class="flex-1 join-item overflow-hidden"
           justify="start"
           href={`${addrPrefix}/${item.id}`}
         >

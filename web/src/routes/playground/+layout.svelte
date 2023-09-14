@@ -17,7 +17,7 @@
   import { fly } from 'svelte/transition'
 
   if (!$user.isLoggedIn) {
-    goto('/account/login').then(() => {
+    goto(`/account/login?redirect=${$page.url.pathname}`).then(() => {
       showMessage('warning', $i18n.t('permissions.beLoggedInToView'), 5000)
     })
   } else if (!$user.permissions.find((p) => p === Permission.Verified)) {
@@ -161,7 +161,7 @@
 
 <svelte:window bind:innerWidth={screenWidth} />
 
-<div class="flex-1 flex flex-row">
+<div class="flex-1 flex flex-row overflow-x-hidden">
   {#if showSidebar}
     <div
       class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10"

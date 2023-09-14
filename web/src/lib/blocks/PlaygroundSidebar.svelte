@@ -76,10 +76,10 @@
     </div>
   </div>
   {#if activeGameId}
-    <div class="flex-1 flex-col p-4">
+    <div class="flex-1 flex-col p-4 overflow-x-hidden">
       <RxLink ghost class="w-full" justify="start" href="/playground">
         <span class="icon-[fluent--arrow-hook-down-left-16-regular] w-6 h-6" />
-        <span class="flex-1 text-start">{$i18n.t('playground.returnToList')}</span>
+        <span class="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">{$i18n.t('playground.returnToList')}</span>
         <span class="icon-[fluent--chevron-down-16-regular] w-5 h-5" />
       </RxLink>
       <ul class="relative">
@@ -95,7 +95,7 @@
                 }}
               >
                 <span class="icon-[fluent--tag-16-regular] w-6 h-6" />
-                <span class="flex-1 text-start">{tag.name}</span>
+                <span class="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">{tag.name}</span>
                 <span
                   class="icon-[fluent--chevron-down-16-regular] w-5 h-5 flex-shrink-0 transition-all {tagExpandedRecord[
                     tag.id
@@ -106,12 +106,12 @@
               </RxButton>
               {#if tagExpandedRecord[tag.id]}
                 <ul
-                  class="pl-4 relative before:border-l-2 before:absolute before:h-full before:border-l-base-content/10"
+                  class="pl-4 relative before:border-l-2 before:absolute before:h-full before:border-l-base-content/10 overflow-x-hidden"
                 >
                   {#each tagsChallengesRecord[tag.id] as chal}
                     <RxLink ghost class="w-full" justify="start" href={`/playground/${activeGameId}#${chal.id}`}>
                       <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
-                      <span class="flex-1 text-start">{chal.name}</span>
+                      <span class="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">{chal.name}</span>
                       {#if selfSubmissions.find((item) => item.challenge_id === chal.id)}
                         <span class="icon-[fluent--checkmark-circle-16-regular] text-success w-5 h-5" />
                       {/if}

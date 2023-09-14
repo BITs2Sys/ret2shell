@@ -13,8 +13,13 @@
   export let type: 'button' | 'reset' | 'submit' | null = 'button'
   let clazz = ''
   export { clazz as class }
+  let innerButton: HTMLButtonElement
 
   const dispatch = createEventDispatcher()
+
+  export function tryScrollInToView() {
+    innerButton.scrollIntoView({ behavior: 'smooth' })
+  }
 
   function handleClick() {
     dispatch('click')
@@ -50,7 +55,14 @@
     .join(' ')
 </script>
 
-<button class={classes} on:click={handleClick} disabled={disabled || loading} {type} {...$$restProps}>
+<button
+  class={classes}
+  on:click={handleClick}
+  disabled={disabled || loading}
+  {type}
+  bind:this={innerButton}
+  {...$$restProps}
+>
   {#if loading}
     <span class="loading loading-spinner loading-sm" />
   {/if}

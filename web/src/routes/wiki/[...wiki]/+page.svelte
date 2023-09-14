@@ -9,8 +9,8 @@
   import { getUserInfo } from '$lib/api/user'
   import type { User } from '$lib/models/user'
   import Error from '$lib/blocks/Error.svelte'
-  import '$lib/styles/article.scss'
-    import { onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
+  import RxArticle from '$lib/components/RxArticle.svelte'
 
   let loading = true
   let error = 200
@@ -26,22 +26,6 @@
 
   let user: User | undefined
 
-  const render = async (content: string) => {
-    let { MarkTo } = await import('$lib/markto')
-    let dompurify = await import('isomorphic-dompurify')
-    const markTo = new MarkTo()
-    await markTo.init({ type: 'html', options: { prism: true, katex: true } })
-    return dompurify.sanitize((await markTo.render(content)) as string)
-  }
-
-  let contentRendered: Promise<string> = render(wiki.content)
-
-  function scrollToView() {
-    setTimeout(() => {
-      document.getElementById(decodeURI(location.hash.replace('#', '')))?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
-  }
-
   const unsubscribe = page.subscribe((page) => {
     if (!page.params['wiki']) return
     const arr = page.params['wiki'].split('/')
@@ -53,10 +37,6 @@
       getWiki(id)
         .then((data) => {
           wiki = data
-          contentRendered = render(wiki.content)
-          contentRendered.then(() => {
-            scrollToView()
-          })
           getUserInfo(data.author_id)
             .then((data) => {
               user = data
@@ -75,7 +55,7 @@
                 banned: true,
               }
             })
-            error = 200
+          error = 200
         })
         .catch((err) => {
           showMessage('error', `${$i18n.t('wiki.fetchContentFailed')}: ${(err as AxiosError).response?.data}`)
@@ -124,15 +104,7 @@
         </p>
       {/if}
     </div>
-    <article class="prose w-full max-w-5xl p-6 pt-12">
-      {#await contentRendered}
-        <span class="loading loading-spinner loading-sm" />
-        <span>{$i18n.t('wiki.rendering')}</span>
-      {:then desc}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html desc}
-      {/await}
-    </article>
+    <RxArticle content={wiki.content} headingAnchors={true} class="p-6 pt-12" />
     <div class="h-32" />
   {/if}
 </div>

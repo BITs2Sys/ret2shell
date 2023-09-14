@@ -56,7 +56,12 @@
     "gameLoading": "加载信息中...",
     "noMoreChallenges": "没有更多的题目了",
     "noMorePlaygrounds": "没有更多的常驻练习了",
-    "noMoreGames": "没有更多的归档赛事了"
+    "noMoreGames": "没有更多的归档赛事了",
+    "fetchChallengeFailed": "获取题目信息失败",
+    "challengeLoading": "加载题目...",
+    "hostAsGame": "归档赛事",
+    "hostAsPlayground": "常驻练习",
+    "emptyContent": "这里什么也没有..."
   },
   "games": {
     "title": "赛事"

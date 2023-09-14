@@ -50,7 +50,12 @@
     "gameLoading": "Loading information...",
     "noMoreChallenges": "No more challenges",
     "noMorePlaygrounds": "No more resident playgrounds",
-    "noMoreGames": "No more archived games"
+    "noMoreGames": "No more archived games",
+    "fetchChallengeFailed": "Failed to fetch challenge information",
+    "challengeLoading": "Loading challenge...",
+    "hostAsGame": "Archived Games",
+    "hostAsPlayground": "Playground",
+    "emptyContent": "There is nothing here..."
   },
   "games": {
     "title": "Games"

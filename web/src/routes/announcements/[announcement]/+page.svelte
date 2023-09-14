@@ -10,7 +10,7 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { onMount } from 'svelte'
-  import '$lib/styles/article.scss'
+  import RxArticle from '$lib/components/RxArticle.svelte'
   let loading = true
   let error = 200
   let user: User | undefined = undefined
@@ -23,21 +23,7 @@
     content: '',
     pinned: false,
   }
-  const render = async (content: string) => {
-    let { MarkTo } = await import('$lib/markto')
-    let dompurify = await import('isomorphic-dompurify')
-    const markTo = new MarkTo()
-    await markTo.init({ type: 'html', options: { prism: true, katex: true } })
-    return dompurify.sanitize((await markTo.render(content)) as string)
-  }
 
-  let contentRendered: Promise<string> = render(announcement.content)
-
-  function scrollToView() {
-    setTimeout(() => {
-      document.getElementById(decodeURI(location.hash.replace('#', '')))?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
-  }
   onMount(() => {
     loading = true
     let id = parseInt($page.params['announcement']) || -1
@@ -56,10 +42,6 @@
           .catch(() => {
             user = undefined
           })
-        contentRendered = render(announcement.content)
-        contentRendered.then(() => {
-          scrollToView()
-        })
         loading = false
       })
       .catch((err) => {
@@ -99,15 +81,7 @@
         </p>
       {/if}
     </div>
-    <article class="prose max-w-5xl w-full p-6 pt-12">
-      {#await contentRendered}
-        <span class="loading loading-spinner loading-sm" />
-        <span>{$i18n.t('wiki.rendering')}</span>
-      {:then desc}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html desc}
-      {/await}
-    </article>
+    <RxArticle content={announcement.content} headingAnchors={true} class="p-6 pt-12" />
     <div class="h-32" />
   {/if}
 </div>

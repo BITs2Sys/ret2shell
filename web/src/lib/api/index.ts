@@ -2,6 +2,7 @@ import { get } from 'svelte/store'
 import { user, userExtractToken, userReset } from '$lib/stores/user'
 import type { AxiosError, AxiosRequestHeaders, AxiosResponse } from 'axios'
 import axios from 'axios'
+import { goto } from '$app/navigation'
 
 const api = axios.create()
 
@@ -41,7 +42,7 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       userReset()
-      window.location.reload()
+      goto(`/account/login?redirect=${window.location.pathname}`)
     }
     return Promise.reject(error)
   }

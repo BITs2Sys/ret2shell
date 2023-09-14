@@ -4,7 +4,7 @@
   import { user } from '$lib/stores/user'
     import { Permission } from '$lib/models/user'
 
-  $: hasAdminEntry = $user.permissions.some((p) => p >= Permission.Publish)
+  $: hasAdminEntry = $user && $user.permissions.some((p) => p >= Permission.Publish)
 </script>
 
 <li>

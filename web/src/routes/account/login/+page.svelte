@@ -16,6 +16,7 @@
   import { goto } from '$app/navigation'
   import { showMessage } from '$lib/stores/toast'
     import type { AxiosError } from 'axios'
+    import { page } from '$app/stores'
 
   let schema = z.object({
     account: z
@@ -45,7 +46,7 @@
     onSuccess() {
       loading = false
       showMessage('success', $i18n.t('account.loginSuccess'), 5000)
-      goto('/')
+      goto($page.url.searchParams.get('redirect') || '/')
     },
     onError(error) {
       loading = false
