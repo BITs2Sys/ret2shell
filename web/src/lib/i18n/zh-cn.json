@@ -61,7 +61,19 @@
     "challengeLoading": "加载题目...",
     "hostAsGame": "归档赛事",
     "hostAsPlayground": "常驻练习",
-    "emptyContent": "这里什么也没有..."
+    "emptyContent": "这里什么也没有...",
+    "attachmentCount": "附件数量",
+    "challengeHints": "提示信息",
+    "currentScore": "当前分数",
+    "envAddr": "环境地址",
+    "envLastTime": "剩余时间",
+    "lastUpdatedAt": "最后更新",
+    "listAllAttachment": "列出所有附件",
+    "manageAttachments": "下载附件",
+    "manageEnv": "进入环境",
+    "noRunningEnv": "没有正在运行的环境...",
+    "packAndDownload": "打包下载所有",
+    "quickAction": "快速操作"
   },
   "games": {
     "title": "赛事"

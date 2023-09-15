@@ -58,5 +58,5 @@
     <slot />
   </div>
 {:else}
-  <input {id} {name} class={classes.replace('join-item', '')} use:typeAction {...$$restProps} bind:value />
+  <input {id} {name} class={classes.replace('join-item', '')} {disabled} use:typeAction {...$$restProps} bind:value />
 {/if}

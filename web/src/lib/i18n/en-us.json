@@ -55,7 +55,19 @@
     "challengeLoading": "Loading challenge...",
     "hostAsGame": "Archived Games",
     "hostAsPlayground": "Playground",
-    "emptyContent": "There is nothing here..."
+    "emptyContent": "There is nothing here...",
+    "currentScore": "Current score",
+    "lastUpdatedAt": "Last updated at",
+    "manageAttachments": "Download attachments",
+    "manageEnv": "Environment",
+    "challengeHints": "Hints",
+    "quickAction": "Quick Actions",
+    "listAllAttachment": "List all attachments",
+    "packAndDownload": "Pack and download all",
+    "attachmentCount": "Attachment count",
+    "envAddr": "Env addr",
+    "noRunningEnv": "No running environment...",
+    "envLastTime": "Last time"
   },
   "games": {
     "title": "Games"

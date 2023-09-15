@@ -5,6 +5,7 @@
   import Error from '$lib/blocks/Error.svelte'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
+  import RxInput from '$lib/components/RxInput.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
@@ -99,6 +100,11 @@
       activeChallenge = null
     }
   })
+
+  // user experience
+  let challengeScrollExpanded = true
+  let challengeEnvExpanded = false
+  let challengeAttachmentExpanded = false
 </script>
 
 <svelte:head><title>{game?.name || $i18n.t('playground.gameLoading')} - {$platform.name}</title></svelte:head>
@@ -107,7 +113,7 @@
   <div class="flex-1 flex flex-col overflow-x-hidden">
     <div id="info-stack" class="flex flex-col overflow-x-hidden">
       <div
-        class="border-b border-b-base-content/5 flex flex-row items-center pr-2 space-x-2 backdrop-blur relative overflow-x-scroll flex-shrink-0"
+        class="border-b border-b-base-content/5 flex flex-row items-center pr-2 space-x-2 backdrop-blur relative overflow-x-scroll flex-shrink-0 h-16 overflow-y-hidden"
         on:wheel={(e) => {
           e.currentTarget.scrollLeft += e.deltaY
         }}
@@ -177,14 +183,134 @@
             class="relative w-full h-full print:h-auto print:overflow-auto"
             defer
           >
-            <div class="w-full flex p-6 pt-0 justify-center relative">
+            <div
+              class="w-full min-h-full flex flex-col items-center"
+              on:wheel={(e) => {
+                if (e.deltaY > 0) {
+                  challengeScrollExpanded = false
+                  challengeAttachmentExpanded = false
+                  challengeEnvExpanded = false
+                } else {
+                  challengeScrollExpanded = true
+                }
+              }}
+            >
               {#if activeChallenge}
+                <div
+                  class={`w-full transition-all ${
+                    challengeScrollExpanded ? 'h-32' : 'h-16'
+                  } backdrop-blur border-b border-b-base-content/5 flex flex-row justify-center sticky top-0`}
+                >
+                  <div class="w-full max-w-5xl flex flex-row px-6 items-center">
+                    <span
+                      class={`icon-[fluent--braces-16-regular] transition-all transform ${
+                        challengeScrollExpanded ? 'w-12 h-12 mr-4 text-primary' : 'w-6 h-6 mr-2 text-error'
+                      }`}
+                    />
+                    <div class="flex flex-col">
+                      <h1
+                        class={`font-bold transition-all transform ${
+                          challengeScrollExpanded ? 'text-2xl' : 'text-base'
+                        } flex flex-row space-x-2 items-center`}
+                      >
+                        <span>{activeChallenge.name}</span>
+                      </h1>
+                      <p
+                        class={`overflow-hidden transition-all flex flex-col justify-end ${
+                          challengeScrollExpanded ? 'h-8 opacity-60' : 'h-0 opacity-0'
+                        }`}
+                      >
+                        {$i18n.t('playground.currentScore')}: {activeChallenge.current_score}&nbsp;
+                        {$i18n.t('playground.lastUpdatedAt')}: {new Date(
+                          activeChallenge.updated_at * 1000
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                    <div class="flex-1"></div>
+                    <div class={`flex ${challengeScrollExpanded ? 'flex-col' : 'flex-row space-x-2'}`}>
+                      <RxButton
+                        ghost
+                        square={!challengeScrollExpanded}
+                        on:click={() => {
+                          challengeAttachmentExpanded = !challengeAttachmentExpanded
+                          challengeEnvExpanded = false
+                          challengeScrollExpanded = true
+                        }}
+                      >
+                        <span class="icon-[fluent--archive-16-regular] w-6 h-6 text-warning"></span>
+                        {#if challengeScrollExpanded}
+                          <span>{$i18n.t('playground.manageAttachments')}</span>
+                        {/if}
+                      </RxButton>
+                      <RxButton
+                        ghost
+                        square={!challengeScrollExpanded}
+                        on:click={() => {
+                          challengeEnvExpanded = !challengeEnvExpanded
+                          challengeAttachmentExpanded = false
+                          challengeScrollExpanded = true
+                        }}
+                      >
+                        <span class="icon-[fluent--engine-20-regular] w-6 h-6 text-success"></span>
+                        {#if challengeScrollExpanded}
+                          <span>{$i18n.t('playground.manageEnv')}</span>
+                        {/if}
+                      </RxButton>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class={`w-full transition-all backdrop-blur border-b overflow-hidden flex flex-row justify-center sticky ${
+                    challengeEnvExpanded || challengeAttachmentExpanded
+                      ? 'h-16 border-b-base-content/5'
+                      : 'h-0 border-b-transparent'
+                  } ${challengeScrollExpanded ? 'top-32' : 'top-16'}`}
+                >
+                  {#if challengeAttachmentExpanded}
+                    <div class="w-full max-w-5xl flex flex-row items-center px-6 space-x-2">
+                      <span class="font-bold text-base opacity-60">{$i18n.t('playground.attachmentCount')}:</span>
+                      <span class="font-bold text-base">{0}</span>
+                      <div class="flex-1"></div>
+                      <span class="font-bold text-base opacity-60">{$i18n.t('playground.quickAction')}:</span>
+                      <RxButton ghost>
+                        <span class="icon-[fluent--apps-list-20-regular] w-5 h-5"></span>
+                        <span>{$i18n.t('playground.listAllAttachment')}</span>
+                      </RxButton>
+                      <RxButton ghost>
+                        <span class="icon-[fluent--cloud-arrow-down-20-regular] w-5 h-5"></span>
+                        <span>{$i18n.t('playground.packAndDownload')}</span>
+                      </RxButton>
+                    </div>
+                  {:else if challengeEnvExpanded}
+                    <div class="w-full max-w-5xl flex flex-row items-center px-6 space-x-2">
+                      <RxButton ghost class="w-full max-w-xs">
+                        <span class="icon-[fluent--flow-16-regular] w-5 h-5"></span>
+                        <span class="flex-1 text-left opacity-60">{$i18n.t('playground.noRunningEnv')}</span>
+                        <span class="icon-[fluent--copy-16-regular] w-5 h-5 text-success"></span>
+                      </RxButton>
+                      <span class="text-base font-bold opacity-60">{$i18n.t('playground.envLastTime')}:</span>
+                      <span class="text-base font-bold">--:--:--</span>
+                      <div class="flex-1"></div>
+                      <span class="font-bold text-base opacity-60">{$i18n.t('playground.quickAction')}:</span>
+                      <RxButton ghost square>
+                        <span class="icon-[fluent--play-16-regular] w-5 h-5 text-success"></span>
+                      </RxButton>
+                      <RxButton ghost square>
+                        <span class="icon-[fluent--timer-16-regular] w-5 h-5 text-info"></span>
+                      </RxButton>
+                      <RxButton ghost square>
+                        <span class="icon-[fluent--circle-off-16-regular] w-5 h-5 text-error"></span>
+                      </RxButton>
+                    </div>
+                  {/if}
+                </div>
                 <div class="flex flex-col w-full max-w-5xl px-6">
-                  <RxArticle class="mt-4" content={activeChallenge?.content || $i18n.t('playground.emptyContent')} />
+                  <RxArticle class="mt-12" content={activeChallenge?.content || $i18n.t('playground.emptyContent')} />
+                  <div class="h-12" />
                 </div>
               {:else}
                 <div class="flex flex-col w-full max-w-5xl px-6">
-                  <h1 class="font-bold text-center text-3xl p-6 pb-0">
+                  <h1 class="font-bold text-center text-3xl p-6 pt-12 pb-0">
                     {game?.name}
                   </h1>
                   <RxArticle class="mt-4" content={game?.introduction || $i18n.t('playground.emptyContent')} />
@@ -208,11 +334,15 @@
     <div id="work-stack" class="flex flex-col backdrop-blur">
       <div class="border-b border-b-base-content/5 flex flex-row items-center p-2 space-x-2">
         <RxButton ghost active>
-          <span class="w-4 h-4 icon-[fluent--code-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--code-16-regular]" />
           {$i18n.t('playground.terminal')}
         </RxButton>
         <RxButton ghost>
-          <span class="w-4 h-4 icon-[fluent--checkmark-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--info-16-regular]" />
+          {$i18n.t('playground.challengeHints')}
+        </RxButton>
+        <RxButton ghost>
+          <span class="w-5 h-5 icon-[fluent--checkmark-16-regular]" />
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
       </div>
