@@ -7,8 +7,7 @@ use crate::{
         GlobalState,
     },
     entity::{
-        config, game,
-        team::{self, TeamScoreHistoryList},
+        config, game, team,
         user::{self, Permission},
         user2_team,
     },
@@ -290,13 +289,13 @@ async fn get_team_info(
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_team(conn, team_id).await {
         Ok(Some(team)) => {
-            if !op_user.permissions.0.contains(&Permission::Devops)
-                && !(op_user.permissions.0.contains(&Permission::Organize)
+            if op_user.permissions.0.contains(&Permission::Devops)
+                || (op_user.permissions.0.contains(&Permission::Organize)
                     && op_user.institute_id == team.institute_id)
             {
-                Ok(Json(team.desensitize()))
-            } else {
                 Ok(Json(team))
+            } else {
+                Ok(Json(team.desensitize()))
             }
         }
         Ok(None) => Err((StatusCode::NOT_FOUND, "team not found")),

@@ -192,6 +192,7 @@ struct ChallengeScore {
     score: i32,
 }
 
+#[allow(dead_code)]
 pub async fn calc_team_score(
     conn: &DatabaseConnection,
     team: &Model,
@@ -228,6 +229,7 @@ pub async fn calc_team_score(
     Ok(team_score)
 }
 
+#[allow(dead_code)]
 pub async fn update_team_history_and_active_time(
     conn: &DatabaseConnection,
     time: DateTime<Utc>,
@@ -246,6 +248,7 @@ pub async fn update_team_history_and_active_time(
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn get_affected_teams_by_challenge_id(
     conn: &DatabaseConnection,
     challenge_id: i64,
@@ -271,6 +274,7 @@ pub async fn get_affected_teams_by_challenge_id(
     Ok(teams)
 }
 
+#[allow(dead_code)]
 pub async fn update_team_history_only(
     conn: &DatabaseConnection,
     time: DateTime<Utc>,

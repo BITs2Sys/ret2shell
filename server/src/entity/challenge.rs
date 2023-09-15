@@ -181,6 +181,7 @@ pub async fn delete_challenge(conn: &DatabaseConnection, id: i64) -> Result<(), 
     Entity::delete_by_id(id).exec(conn).await.map(|_| ())
 }
 
+#[allow(dead_code)]
 pub async fn calc_challenge_score(
     conn: &DatabaseConnection,
     game: &game::Model,
@@ -226,6 +227,7 @@ fn _calc_challenge_score(challenge: &Model, solves: u64) -> i32 {
     score
 }
 
+#[allow(dead_code)]
 pub async fn update_challenge_current_score(
     conn: &DatabaseConnection,
     challenge: &Model,
@@ -235,5 +237,5 @@ pub async fn update_challenge_current_score(
         current_score: ActiveValue::Set(challenge.current_score),
         ..challenge.clone().into()
     };
-    Ok(active_model.update(conn).await?)
+    active_model.update(conn).await
 }
