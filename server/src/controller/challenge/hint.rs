@@ -1,6 +1,6 @@
 use crate::{
     controller::{
-        layer::{auth, info},
+        layer::auth,
         GlobalState,
     },
     entity::{hint, user::Permission},
@@ -19,14 +19,13 @@ use tracing::error;
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/", post(create_hint).delete(delete_hint))
-        .route_layer(middleware::from_fn(auth::permission_required_all!(
-            Permission::Organize
+        .route_layer(middleware::from_fn(auth::permission_required_any!(
+            Permission::Organize, Permission::Devops
         )))
         .route("/", get(get_hint_list))
-        .route_layer(middleware::from_fn_with_state(
-            _state.clone(),
-            info::prepare_challenge_info,
-        ))
+        .route_layer(middleware::from_fn(auth::permission_required_all!(
+            Permission::Basic, Permission::Verified
+        )))
 }
 
 async fn create_hint(
@@ -44,8 +43,8 @@ async fn create_hint(
 }
 
 async fn get_hint_list(
-    Path(challenge_id): Path<i64>,
     State(ref conn): State<DatabaseConnection>,
+    Path(challenge_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match hint::get_hint_list(conn, challenge_id).await {
         Ok(hints) => Ok(Json(hints)),
@@ -58,8 +57,8 @@ async fn get_hint_list(
 }
 
 async fn delete_hint(
-    Query(tag_id): Query<i64>,
     State(ref conn): State<DatabaseConnection>,
+    Query(tag_id): Query<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match hint::delete_hint(conn, tag_id).await {
         Ok(_) => Ok(StatusCode::OK),

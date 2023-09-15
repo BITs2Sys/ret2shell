@@ -2,13 +2,12 @@ use crate::{
     audit::{word_filter::check_text, Auditor},
     cache::manager::RedisPool,
     captcha::captcha_protected,
-    config::GlobalConfig,
     controller::{
         layer::{auth, info},
         GlobalState,
     },
     entity::{
-        game,
+        config, game,
         team::{self, TeamScoreHistoryList},
         user::{self, Permission},
         user2_team,
@@ -29,9 +28,10 @@ use tracing::error;
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/info", patch(update_team_info))
-        .route_layer(middleware::from_fn(auth::permission_required_all!(
+        .route_layer(middleware::from_fn(auth::permission_required_any!(
             Permission::Audit,
-            Permission::Organize
+            Permission::Organize,
+            Permission::Devops
         )))
         .route("/info/teammates", get(get_team_teammates))
         .route("/info", get(get_team_info))
@@ -39,6 +39,10 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route("/self/teammates", get(get_self_teammates))
         .route("/self", get(get_self_team_info))
         .route("/", get(get_team_list).post(create_team).patch(join_team))
+        .route_layer(middleware::from_fn_with_state(
+            _state.clone(),
+            info::prepare_game_info,
+        ))
         .route_layer(middleware::from_fn_with_state(
             _state.clone(),
             auth::game_privilege_required,
@@ -96,19 +100,22 @@ struct CreateTeamRequest {
 
 async fn create_team(
     State(ref conn): State<DatabaseConnection>,
-    State(config): State<GlobalConfig>,
     State(mut cache): State<RedisPool>,
     State(ref auditor): State<Auditor>,
+    Extension(config): Extension<config::Model>,
     Extension(user): Extension<user::Model>,
-    Path(game_id): Path<i64>,
-    Json(request): Json<CreateTeamRequest>,
+    Extension(game): Extension<game::Model>,
+    Json(req): Json<CreateTeamRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let id = request.captcha_id;
-    let answer = request.captcha_answer;
-    captcha_protected!(config.captcha, &mut cache, &id, &answer);
-    let team_name = request.name.trim().to_string();
+    captcha_protected!(
+        &config.captcha,
+        &mut cache,
+        &req.captcha_id,
+        &req.captcha_answer
+    );
+    let team_name = req.name.trim().to_string();
 
-    match team::get_team_by_game_id_and_name(conn, game_id, &team_name).await {
+    match team::get_team_by_game_id_and_name(conn, game.id, &team_name).await {
         Ok(Some(_)) => {
             return Err((StatusCode::BAD_REQUEST, "team name already exists"));
         }
@@ -121,7 +128,7 @@ async fn create_team(
             ));
         }
     }
-    let state = match config.audit.is_some() {
+    let state = match game.enable_team_audit {
         true => {
             if check_text(&auditor.word_filter, &team_name) {
                 team::State::NeedAudit
@@ -133,12 +140,9 @@ async fn create_team(
     };
     let team = team::Model {
         name: team_name,
-        game_id,
+        game_id: game.id,
         state,
         institute_id: user.institute_id,
-        score: 0,
-        history: TeamScoreHistoryList::new(),
-        last_active_at: chrono::Utc::now(),
         ..Default::default()
     };
 
@@ -150,13 +154,16 @@ async fn create_team(
             return Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to create team"));
         }
     };
-    match user2_team::link_team_user(conn, user.id, team.id).await {
-        Ok(_) => Ok(Json(team)),
-        Err(_) => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "failed to link team with user",
-        )),
-    }
+    Ok(Json(
+        user2_team::link_team_user(conn, user.id, team.id)
+            .await
+            .map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to link team with user",
+                )
+            })?,
+    ))
 }
 
 #[derive(Deserialize)]
@@ -168,8 +175,8 @@ struct JoinTeamRequest {
 
 async fn join_team(
     State(ref conn): State<DatabaseConnection>,
-    State(config): State<GlobalConfig>,
     State(mut cache): State<RedisPool>,
+    Extension(config): Extension<config::Model>,
     Extension(user): Extension<user::Model>,
     Extension(game): Extension<game::Model>,
     Json(request): Json<JoinTeamRequest>,
@@ -221,16 +228,14 @@ async fn get_self_team_info(
     Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    team::get_team_by_user_id(conn, game_id, user.id)
-        .await
-        .map(|team| match team {
-            Some(team) => Ok(Json(team)),
-            None => Err((StatusCode::NOT_FOUND, "team not found")),
-        })
-        .map_err(|err| {
+    match team::get_team_by_user_id(conn, game_id, user.id).await {
+        Ok(Some(team)) => Ok(Json(team)),
+        Ok(None) => Err((StatusCode::NOT_FOUND, "team not found")),
+        Err(err) => {
             error!("failed to get team info: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info")
-        })
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info"))
+        }
+    }
 }
 
 async fn get_self_teammates(
@@ -238,16 +243,14 @@ async fn get_self_teammates(
     Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let team = team::get_team_by_user_id(conn, game_id, user.id)
-        .await
-        .map(|team| match team {
-            Some(team) => Ok(team),
-            None => Err((StatusCode::NOT_FOUND, "team not found")),
-        })
-        .map_err(|err| {
+    let team = match team::get_team_by_user_id(conn, game_id, user.id).await {
+        Ok(Some(team)) => Ok(team),
+        Ok(None) => Err((StatusCode::NOT_FOUND, "team not found")),
+        Err(err) => {
             error!("failed to get team info: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info")
-        })??;
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info"))
+        }
+    }?;
     team::get_team_members(conn, team.id)
         .await
         .map(Json)
@@ -266,8 +269,8 @@ struct TeamRank {
 }
 
 async fn get_self_team_rank(
-    Extension(user): Extension<user::Model>,
     State(ref conn): State<DatabaseConnection>,
+    Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_team_rank_by_user_id(conn, game_id, user.id).await {
@@ -286,14 +289,15 @@ async fn get_team_info(
     Query(team_id): Query<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_team(conn, team_id).await {
-        Ok(Some(mut team)) => {
+        Ok(Some(team)) => {
             if !op_user.permissions.0.contains(&Permission::Devops)
                 && !(op_user.permissions.0.contains(&Permission::Organize)
                     && op_user.institute_id == team.institute_id)
             {
-                team = team.desensitize();
+                Ok(Json(team.desensitize()))
+            } else {
+                Ok(Json(team))
             }
-            Ok(Json(team))
         }
         Ok(None) => Err((StatusCode::NOT_FOUND, "team not found")),
         Err(err) => {

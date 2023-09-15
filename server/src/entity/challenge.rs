@@ -199,6 +199,7 @@ async fn get_challenge_solves_in_game(
     let solves = challenge
         .find_related(submission::Entity)
         .filter(submission::Column::Solved.eq(true))
+        .filter(submission::Column::WithScore.eq(true))
         .filter(submission::Column::CreatedAt.gt(game.start_time))
         .filter(submission::Column::CreatedAt.lt(game.end_time))
         .distinct_on([

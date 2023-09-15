@@ -66,3 +66,21 @@ pub async fn prepare_challenge_info<B>(
 
     Ok(next.run(req).await)
 }
+
+pub async fn prepare_game_info<B>(
+    State(ref db): State<DatabaseConnection>,
+    Path(game_id): Path<i64>,
+    mut req: Request<B>,
+    next: Next<B>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    match crate::entity::game::get_game(db, game_id).await {
+        Ok(game) => {
+            req.extensions_mut().insert(game);
+        }
+        Err(err) => {
+            error!("failed to get game: {}", err);
+        }
+    };
+
+    Ok(next.run(req).await)
+}

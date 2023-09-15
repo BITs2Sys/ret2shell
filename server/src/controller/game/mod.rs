@@ -12,7 +12,7 @@ use crate::entity::{
 use axum::{
     extract::{Path, Query, State},
     middleware,
-    response::IntoResponse,
+    response::{IntoResponse, Response},
     routing::{get, patch, post},
     Extension, Json, Router,
 };
@@ -51,10 +51,9 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                     Permission::Devops,
                     Permission::Audit
                 )))
-                .route("/submission/self", get(get_self_submission))
+                .route("/solved", get(get_self_solved))
                 .route("/", get(get_game))
                 .route("/scoreboard", get(get_scoreboard))
-                .route("/team-solved", get(get_team_solved))
                 .route_layer(middleware::from_fn_with_state(
                     state.clone(),
                     info::prepare_user_full_info,
@@ -97,8 +96,8 @@ struct GameList {
 
 async fn get_game_list(
     State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<GameListQuery>,
     op_user: Option<Extension<user::Model>>,
+    Query(query): Query<GameListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = query.page.unwrap_or(1);
     let per_page = query.per_page.unwrap_or(10);
@@ -122,8 +121,8 @@ async fn get_game_list(
 
 async fn get_game(
     State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
     Extension(op_user): Extension<user::Model>,
+    Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match game::get_game(conn, game_id).await {
         Ok(Some(model)) => {
@@ -166,14 +165,14 @@ struct SubmissionListParams {
 
 #[derive(Serialize, Deserialize)]
 struct SubmissionList {
-    pub submissions: Vec<submission::ModelWithUserAndChallengeInfo>,
+    pub submissions: Vec<submission::ModelWithInfo>,
     pub total: u64,
 }
 
 async fn get_game_submission_list(
     State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<SubmissionListParams>,
     Path(game_id): Path<i64>,
+    Query(params): Query<SubmissionListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(10);
@@ -230,44 +229,41 @@ async fn get_scoreboard(
 }
 
 #[derive(Deserialize)]
-struct TeamSolvedQuery {
+pub struct TeamSolvedQuery {
     pub team_id: Option<i64>,
 }
 
-async fn get_team_solved(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
-    Query(query): Query<TeamSolvedQuery>,
-) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let team_id = match query.team_id {
-        Some(id) => id,
-        None => return Err((StatusCode::BAD_REQUEST, "team_id needed")),
-    };
-    match submission::get_solved_submission_of_team(conn, game_id, team_id).await {
-        Ok(solved_challenges) => Ok(Json(solved_challenges)),
-        Err(err) => {
-            error!("Failed to get team solved challenges: {}", err);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to get team solved challenges",
-            ))
-        }
-    }
-}
-
-pub async fn get_self_submission(
+pub async fn get_self_solved(
     State(ref conn): State<DatabaseConnection>,
     Extension(token): Extension<Token>,
     Path(game_id): Path<i64>,
-) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    match submission::get_solved_submission_of_user(conn, game_id, token.id).await {
-        Ok(submissions) => Ok(Json(submissions)),
-        Err(err) => {
-            error!("Failed to get self submission: {}", err);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to get self submission",
-            ))
-        }
-    }
+    Query(query): Query<TeamSolvedQuery>,
+) -> Result<Response, (StatusCode, &'static str)> {
+    let result = match query.team_id {
+        Some(id) => Json(
+            submission::get_solved_submission_of_team(conn, game_id, id)
+                .await
+                .map_err(|err| {
+                    error!("failed to get team solved challenges: {:?}", err);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "failed to get team solved challenges",
+                    )
+                })?,
+        )
+        .into_response(),
+        None => Json(
+            submission::get_solved_submission_of_user(conn, game_id, token.id)
+                .await
+                .map_err(|err| {
+                    error!("failed to get self solved challenges: {:?}", err);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "failed to get self solved challenges",
+                    )
+                })?,
+        )
+        .into_response(),
+    };
+    Ok(result)
 }

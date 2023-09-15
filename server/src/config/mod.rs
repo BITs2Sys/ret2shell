@@ -57,8 +57,6 @@ pub struct GlobalConfig {
     pub queue: queue::QueueConfig,
     /// The configuration for the server.
     pub server: server::ServerConfig,
-    /// The configuration for the captcha.
-    pub captcha: captcha::CaptchaConfig,
 
     /// The file path of the configuration file, not serialized or deserialized.
     #[serde(skip_serializing)]

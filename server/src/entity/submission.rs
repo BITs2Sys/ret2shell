@@ -7,8 +7,6 @@ use sea_orm::{ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder, QuerySe
 use sea_query::{Condition, JoinType};
 use serde::{Deserialize, Serialize};
 
-use super::challenge;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "submission")]
 pub struct Model {
@@ -25,20 +23,7 @@ pub struct Model {
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
-pub struct ModelWithUserAndChallengeInfo {
-    pub id: i64,
-    pub created_at: DateTime<Utc>,
-    pub user_id: i64,
-    pub challenge_id: i64,
-    pub game_id: i64,
-    pub content: String,
-    pub solved: bool,
-    pub user_name: String,
-    pub challenge_name: String,
-}
-
-#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
-pub struct ModelWithUserAndChallengeSolvedInfo {
+pub struct ModelWithInfo {
     pub id: i64,
     pub created_at: DateTime<Utc>,
     pub user_id: i64,
@@ -91,7 +76,7 @@ pub async fn get_submission_page(
     game_id: Option<i64>,
     page: u64,
     per_page: u64,
-) -> Result<(Vec<ModelWithUserAndChallengeInfo>, u64), DbErr> {
+) -> Result<(Vec<ModelWithInfo>, u64), DbErr> {
     let mut sql = Entity::find();
     sql = sql
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -100,6 +85,9 @@ pub async fn get_submission_page(
         .column_as(super::challenge::Column::Name, "challenge_name")
         .column_as(super::user::Column::Name, "user_name")
         .column_as(super::challenge::Column::GameId, "game_id")
+        .column_as(super::challenge::Column::TagId, "tag_id")
+        .column_as(super::challenge::Column::CurrentScore, "challenge_score")
+        .column_as(super::tag::Column::Name, "tag_name")
         .order_by_desc(Column::CreatedAt);
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -117,7 +105,7 @@ pub async fn get_solved_submission_of_team(
     conn: &DatabaseConnection,
     game_id: i64,
     team_id: i64,
-) -> Result<Vec<ModelWithUserAndChallengeSolvedInfo>, DbErr> {
+) -> Result<Vec<ModelWithInfo>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -145,7 +133,7 @@ pub async fn get_solved_submission_of_team(
     // .order_by_desc(Column::CreatedAt);
     // F**k you SQL.
     let mut resp = sql
-        .into_model::<ModelWithUserAndChallengeSolvedInfo>()
+        .into_model::<ModelWithInfo>()
         .all(conn)
         .await?;
     resp.sort_by(|a, b| a.created_at.cmp(&b.created_at));
@@ -171,18 +159,9 @@ pub async fn create_submission(
     conn: &DatabaseConnection,
     submission: Model,
 ) -> Result<Model, DbErr> {
-    match challenge::Entity::find_by_id(submission.challenge_id)
-        .one(conn)
-        .await
-    {
-        Ok(Some(_)) => {
-            let active_model = ActiveModel {
-                id: ActiveValue::NotSet,
-                ..submission.into_active_model().reset_all()
-            };
-            active_model.insert(conn).await
-        }
-        Ok(None) => Err(DbErr::RecordNotFound("challenge".to_string())),
-        Err(err) => Err(err),
-    }
+    let active_model = ActiveModel {
+        id: ActiveValue::NotSet,
+        ..submission.into_active_model().reset_all()
+    };
+    active_model.insert(conn).await
 }

@@ -156,8 +156,8 @@ struct ChallengeList {
 
 async fn get_challenge_list(
     State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<ChallengeListQuery>,
     Extension(current_user): Extension<user::Model>,
+    Query(params): Query<ChallengeListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let current_game = match params.game_id {
         Some(game_id) => match game::get_game(conn, game_id).await {
