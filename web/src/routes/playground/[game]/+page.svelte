@@ -5,9 +5,7 @@
   import Error from '$lib/blocks/Error.svelte'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
-  import RxInput from '$lib/components/RxInput.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
-  import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge } from '$lib/models/challenge'
   import type { Game } from '$lib/models/game'
@@ -84,6 +82,7 @@
       getChallenge(challengeId)
         .then((value) => {
           openedChallenges.push(value)
+          challengeScrollExpanded = true
           activeChallenge = value
         })
         .catch((err) => {
@@ -199,7 +198,7 @@
                 <div
                   class={`w-full transition-all ${
                     challengeScrollExpanded ? 'h-32' : 'h-16'
-                  } backdrop-blur border-b border-b-base-content/5 flex flex-row justify-center sticky top-0`}
+                  } backdrop-blur bg-base-100/80 border-b border-b-base-content/5 flex flex-row justify-center sticky top-0`}
                 >
                   <div class="w-full max-w-5xl flex flex-row px-6 items-center">
                     <span
@@ -260,7 +259,7 @@
                   </div>
                 </div>
                 <div
-                  class={`w-full transition-all backdrop-blur border-b overflow-hidden flex flex-row justify-center sticky ${
+                  class={`w-full transition-all bg-base-100/80 backdrop-blur border-b overflow-hidden flex flex-row justify-center sticky ${
                     challengeEnvExpanded || challengeAttachmentExpanded
                       ? 'h-16 border-b-base-content/5'
                       : 'h-0 border-b-transparent'
