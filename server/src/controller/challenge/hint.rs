@@ -1,8 +1,5 @@
 use crate::{
-    controller::{
-        layer::auth,
-        GlobalState,
-    },
+    controller::{layer::auth, GlobalState},
     entity::{hint, user::Permission},
 };
 use axum::{
@@ -20,11 +17,13 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/", post(create_hint).delete(delete_hint))
         .route_layer(middleware::from_fn(auth::permission_required_any!(
-            Permission::Organize, Permission::Devops
+            Permission::Organize,
+            Permission::Devops
         )))
         .route("/", get(get_hint_list))
         .route_layer(middleware::from_fn(auth::permission_required_all!(
-            Permission::Basic, Permission::Verified
+            Permission::Basic,
+            Permission::Verified
         )))
 }
 

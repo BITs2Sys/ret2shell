@@ -31,12 +31,12 @@ use std::path::Path;
 pub mod audit;
 pub mod bucket;
 pub mod cache;
+pub mod captcha;
 pub mod database;
 pub mod logging;
 pub mod media;
 pub mod queue;
 pub mod server;
-pub mod captcha;
 
 /// Represents the configuration for the whole application.
 #[derive(Debug, Clone, Serialize, Deserialize)]
