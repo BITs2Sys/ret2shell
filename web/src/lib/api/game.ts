@@ -13,5 +13,9 @@ export async function getGame(id: number) {
 }
 
 export async function getGameSelfSubmission(game_id: number) {
-  return (await api.get(`${api_root}/game/${game_id}/submission/self`)).data as Submission[]
+  return (await api.get(`${api_root}/game/${game_id}/solved`)).data as Submission[]
+}
+
+export async function getGameTeamSubmission(game_id: number, team_id: number) {
+  return (await api.get(`${api_root}/team/${game_id}/solved?team_id=${team_id}`)).data as Submission[]
 }

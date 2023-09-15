@@ -33,7 +33,7 @@
       },
       gutter: (_index, direction) => {
         const gutter = document.createElement('div')
-        gutter.className = `gutter gutter-${direction} border-b border-b-base-content/5`
+        gutter.className = `gutter gutter-${direction} border-b border-b-base-content/10 hover:border-b-primary transition-all duration-300`
         return gutter
       },
     })
@@ -112,7 +112,7 @@
   <div class="flex-1 flex flex-col overflow-x-hidden">
     <div id="info-stack" class="flex flex-col overflow-x-hidden">
       <div
-        class="border-b border-b-base-content/5 flex flex-row items-center pr-2 space-x-2 backdrop-blur relative overflow-x-scroll flex-shrink-0 h-16 overflow-y-hidden"
+        class="border-b border-b-base-content/10 flex flex-row items-center pr-2 space-x-2 backdrop-blur relative overflow-x-scroll flex-shrink-0 h-16 overflow-y-hidden"
         on:wheel={(e) => {
           e.currentTarget.scrollLeft += e.deltaY
         }}
@@ -238,7 +238,7 @@
                       >
                         <span class="icon-[fluent--archive-16-regular] w-6 h-6 text-warning"></span>
                         {#if challengeScrollExpanded}
-                          <span>{$i18n.t('playground.manageAttachments')}</span>
+                          <span class="hidden md:inline-block">{$i18n.t('playground.manageAttachments')}</span>
                         {/if}
                       </RxButton>
                       <RxButton
@@ -252,7 +252,7 @@
                       >
                         <span class="icon-[fluent--engine-20-regular] w-6 h-6 text-success"></span>
                         {#if challengeScrollExpanded}
-                          <span>{$i18n.t('playground.manageEnv')}</span>
+                          <span class="hidden md:inline-block">{$i18n.t('playground.manageEnv')}</span>
                         {/if}
                       </RxButton>
                     </div>
@@ -270,19 +270,21 @@
                       <span class="font-bold text-base opacity-60">{$i18n.t('playground.attachmentCount')}:</span>
                       <span class="font-bold text-base">{0}</span>
                       <div class="flex-1"></div>
-                      <span class="font-bold text-base opacity-60">{$i18n.t('playground.quickAction')}:</span>
+                      <span class="font-bold text-base opacity-60 hidden lg:inline-block"
+                        >{$i18n.t('playground.quickAction')}:</span
+                      >
                       <RxButton ghost>
                         <span class="icon-[fluent--apps-list-20-regular] w-5 h-5"></span>
-                        <span>{$i18n.t('playground.listAllAttachment')}</span>
+                        <span class="hidden md:inline-block">{$i18n.t('playground.listAllAttachment')}</span>
                       </RxButton>
                       <RxButton ghost>
                         <span class="icon-[fluent--cloud-arrow-down-20-regular] w-5 h-5"></span>
-                        <span>{$i18n.t('playground.packAndDownload')}</span>
+                        <span class="hidden md:inline-block">{$i18n.t('playground.packAndDownload')}</span>
                       </RxButton>
                     </div>
                   {:else if challengeEnvExpanded}
                     <div class="w-full max-w-5xl flex flex-row items-center px-6 space-x-2">
-                      <RxButton ghost class="w-full max-w-xs">
+                      <RxButton ghost class="max-w-xs">
                         <span class="icon-[fluent--flow-16-regular] w-5 h-5"></span>
                         <span class="flex-1 text-left opacity-60">{$i18n.t('playground.noRunningEnv')}</span>
                         <span class="icon-[fluent--copy-16-regular] w-5 h-5 text-success"></span>
@@ -290,7 +292,9 @@
                       <span class="text-base font-bold opacity-60">{$i18n.t('playground.envLastTime')}:</span>
                       <span class="text-base font-bold">--:--:--</span>
                       <div class="flex-1"></div>
-                      <span class="font-bold text-base opacity-60">{$i18n.t('playground.quickAction')}:</span>
+                      <span class="font-bold text-base opacity-60 hidden md:inline-block"
+                        >{$i18n.t('playground.quickAction')}:</span
+                      >
                       <RxButton ghost square>
                         <span class="icon-[fluent--play-16-regular] w-5 h-5 text-success"></span>
                       </RxButton>
@@ -344,6 +348,22 @@
           <span class="w-5 h-5 icon-[fluent--checkmark-16-regular]" />
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
+      </div>
+      <div class="flex-1 relative">
+        <div class="absolute w-full h-full">
+          <OverlayScrollbarsComponent
+            options={{
+              scrollbars: {
+                theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+                autoHide: 'scroll',
+              },
+            }}
+            class="relative w-full h-full print:h-auto print:overflow-auto"
+            defer
+          >
+            <div class="w-full min-h-full flex flex-col items-center"></div>
+          </OverlayScrollbarsComponent>
+        </div>
       </div>
     </div>
   </div>
