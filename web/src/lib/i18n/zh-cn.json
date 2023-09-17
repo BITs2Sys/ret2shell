@@ -78,7 +78,13 @@
   "games": {
     "title": "赛事",
     "noGameTitle": "未找到赛事",
-    "noBrief": "这场比赛很神秘，什么也没有写..."
+    "noBrief": "这场比赛很神秘，什么也没有写...",
+    "ended": " 已结束",
+    "fetchGamesError": "获取比赛列表失败",
+    "gameIdInvalid": "指定的比赛不存在",
+    "notStarted": "未开始",
+    "started": "进行中",
+    "unknown": "未知"
   },
   "certs": {
     "title": "证书"

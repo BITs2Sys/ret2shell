@@ -72,7 +72,13 @@
   "games": {
     "title": "Games",
     "noGameTitle": "No games found",
-    "noBrief": "The game is very mysterious, nothing is written..."
+    "noBrief": "The game is very mysterious, nothing is written...",
+    "started": "IN PROGRESS",
+    "ended": "ENDED",
+    "unknown": "UNKNOWN",
+    "notStarted": "NOT STARTED",
+    "fetchGamesError": "Failed to fetch games",
+    "gameIdInvalid": "The specified game does not exist"
   },
   "announcements": {
     "title": "Announcements",
