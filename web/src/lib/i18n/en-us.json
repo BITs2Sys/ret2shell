@@ -78,7 +78,9 @@
     "unknown": "UNKNOWN",
     "notStarted": "NOT STARTED",
     "fetchGamesError": "Failed to fetch games",
-    "gameIdInvalid": "The specified game does not exist"
+    "gameIdInvalid": "The specified game does not exist",
+    "invalidGameId": "The game does not exist",
+    "fetchGameError": "Failed to fetch game"
   },
   "announcements": {
     "title": "Announcements",

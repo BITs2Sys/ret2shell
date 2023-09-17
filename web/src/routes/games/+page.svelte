@@ -129,13 +129,18 @@
     {#each games as item}
       <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
         <span
+          class={`w-5 h-5 ${
+            currentGame?.id === item.id ? 'icon-[fluent--flag-16-filled] text-primary' : 'icon-[fluent--flag-16-regular]'
+          }`}
+        />
+        <span class={`text-base flex-1 text-start ${currentGame?.id === item.id ? 'font-bold text-primary' : 'font-normal'}`}
+          >{item.name}</span
+        >
+        <span
           class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
             currentGame?.id === item.id && 'text-primary'
           }`}
         />
-        <span class={`text-base ${currentGame?.id === item.id ? 'font-bold text-primary' : 'font-normal'}`}
-          >{item.name}</span
-        >
       </RxLink>
     {/each}
     <div class="divider m-0"></div>

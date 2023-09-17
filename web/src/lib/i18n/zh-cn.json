@@ -84,7 +84,9 @@
     "gameIdInvalid": "指定的比赛不存在",
     "notStarted": "未开始",
     "started": "进行中",
-    "unknown": "未知"
+    "unknown": "未知",
+    "invalidGameId": "赛事不存在",
+    "fetchGameError": "获取赛事失败"
   },
   "certs": {
     "title": "证书"
