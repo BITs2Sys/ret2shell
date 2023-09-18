@@ -83,7 +83,7 @@ async fn get_user_info(
             return Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get user info"));
         }
     };
-    if op_user.is_some_and(|Extension(op_user)| op_user.permissions.0.contains(&Permission::Devops))
+    if op_user.is_some_and(|Extension(op_user)| op_user.permissions.0.contains(&Permission::Devops) || op_user.id == user.id)
     {
         return Ok(Json(user));
     }

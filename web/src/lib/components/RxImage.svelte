@@ -44,7 +44,7 @@
   {#if loading || loadingCover}
     <div
       class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-neutral"
-      transition:blur={{ amount: 10 }}
+      transition:blur={{ amount: 20 }}
     >
       <span class="loading" />
     </div>

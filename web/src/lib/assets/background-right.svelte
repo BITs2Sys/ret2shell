@@ -1,8 +1,8 @@
 <svg class="fixed right-0 top-0 print:hidden" viewBox="0 0 960 1080" height="100vh" xmlns="http://www.w3.org/2000/svg">
-  <g fill="none" stroke="#0078d6" stroke-opacity=".2">
+  <g fill="none" stroke="#0078d6" stroke-width="2" stroke-opacity=".2">
     <g
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-linecap="round"
       stroke-linejoin="round"
       transform="translate(-1001.383 14.3)"
@@ -45,7 +45,7 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="m 1892.1,558.5 v 101.1 l 87.6,50.5 87.5,-50.5 V 558.5 l -87.5,-50.6 z"
       transform="translate(-1001.383 14.3)"
@@ -105,7 +105,7 @@
       stroke-linejoin="round"
     >
       <path class="path" d="M 1758.8,702.9 H 1634 m 124.8,39.4 H 1634" />
-      <path class="path" stroke-width="2" stroke-dasharray="12" d="M 1758.8,777.5 H 1634" />
+      <path class="path" stroke-width="3" stroke-dasharray="12" d="M 1758.8,777.5 H 1634" />
     </g>
     <path
       class="path"
@@ -121,7 +121,7 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M 1826.4,155.1 V 494 l -132.7,71.9"
       transform="translate(-1001.383 14.3)"

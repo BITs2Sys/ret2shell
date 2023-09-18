@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import RxButton from '$lib/components/RxButton.svelte'
-  import RxInput from '$lib/components/RxInput.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
@@ -56,7 +55,7 @@
   defer
 >
   <h1
-    class="font-bold flex flex-row justify-center items-center h-16 space-x-2 sticky top-0 bg-base-100 border-b border-b-base-content/5"
+    class="font-bold flex flex-row justify-center items-center h-16 space-x-2 sticky top-0 bg-base-100 border-b border-b-base-content/5 z-10"
   >
     <span class="icon-[fluent--dumbbell-16-regular] w-6 h-6" />
     {#if activeGame}

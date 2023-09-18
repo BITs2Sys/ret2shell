@@ -24,7 +24,7 @@ use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::error;
 
-pub fn router(_state: &GlobalState) -> Router<GlobalState> {
+pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/info", patch(update_team_info))
         .route_layer(middleware::from_fn(auth::permission_required_any!(
@@ -39,15 +39,15 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route("/self", get(get_self_team_info))
         .route("/", get(get_team_list).post(create_team).patch(join_team))
         .route_layer(middleware::from_fn_with_state(
-            _state.clone(),
+            state.clone(),
             info::prepare_game_info,
         ))
         .route_layer(middleware::from_fn_with_state(
-            _state.clone(),
+            state.clone(),
             auth::game_privilege_required,
         ))
         .route_layer(middleware::from_fn_with_state(
-            _state.clone(),
+            state.clone(),
             info::prepare_user_full_info,
         ))
         .route_layer(middleware::from_fn(auth::permission_required_all!(

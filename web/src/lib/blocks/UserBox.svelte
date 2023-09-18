@@ -16,7 +16,7 @@
 </script>
 
 <div class="p-2 flex flex-col">
-  <RxLink ghost justify="start" class="h-16" href="/account/profile">
+  <RxLink justify="start" class="h-16" href="/account/profile">
     <div class="avatar">
       <div
         class="w-10 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"

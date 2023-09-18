@@ -87,5 +87,5 @@
     <RxTag label={$i18n.t('games.cannotTakePartIn')} level="error" />
   {/if}
 </div>
-<RxArticle class="w-full self-center max-w-5xl p-6" content={$game.current?.introduction || ''} headingAnchors />
+<RxArticle class="w-full self-center max-w-5xl p-6" content={$game.current?.introduction || ''} />
 <div class="h-32"></div>

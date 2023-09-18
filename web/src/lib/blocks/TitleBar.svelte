@@ -10,6 +10,9 @@
   import UserBox from './UserBox.svelte'
   import { initConfig } from '$lib/stores/init'
   import RxButton from '$lib/components/RxButton.svelte'
+  import { game } from '$lib/stores/game'
+  import GameMenu from './GameMenu.svelte'
+  import TeamBox from './TeamBox.svelte'
 </script>
 
 <div
@@ -18,9 +21,15 @@
   {#if !$initConfig.processing}
     <RxPopup class="btn-square btn-ghost xl:hidden" name="navPopup" popupWidth={64}>
       <span slot="button" class="icon-[fluent--navigation-16-regular] w-5 h-5" />
-      <ul class="menu menu-vertical">
-        <GlobalMenu />
-      </ul>
+      <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
+        <ul class="menu menu-vertical">
+          {#if $game.current}
+            <GameMenu />
+          {:else}
+            <GlobalMenu />
+          {/if}
+        </ul>
+      </div>
     </RxPopup>
   {/if}
   {#if $initConfig.processing}
@@ -34,18 +43,28 @@
       </li>
     </ul>
   {:else}
-    <RxLink ghost href="/" exactlyMatched>
+    <RxLink ghost href={$game.current ? `/games/${$game.current.id}` : '/'} exactlyMatched>
       <img class="hidden xl:block" width="28" height="28" src={logo} alt="logo" />
-      <span>{$platform.name}</span>
+      {#if $game.current}
+        <span>{$game.current?.name}</span>
+      {:else}
+        <span>{$platform.name}</span>
+      {/if}
     </RxLink>
     <ul class="menu menu-horizontal px-6 space-x-2 hidden xl:flex">
-      <GlobalMenu />
+      {#if $game.current}
+        <GameMenu />
+      {:else}
+        <GlobalMenu />
+      {/if}
     </ul>
   {/if}
   <div class="flex-1" />
-  <RxPopup class="btn-square btn-ghost hidden sm:inline-flex mr-2" name="customizeBoxPopup">
+  <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="customizeBoxPopup">
     <span slot="button" class="icon-[fluent--wand-16-regular] w-5 h-5" />
-    <CustomizeBox />
+    <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
+      <CustomizeBox />
+    </div>
   </RxPopup>
   {#if !$initConfig.processing}
     {#if $user.isLoggedIn}
@@ -58,7 +77,14 @@
             <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
           </div>
         </div>
-        <UserBox />
+        <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
+          <UserBox />
+        </div>
+        {#if $game.current}
+          <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
+            <TeamBox />
+          </div>
+        {/if}
       </RxPopup>
     {:else}
       <RxLink href="/account/login" exactlyMatched>

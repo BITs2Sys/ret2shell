@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg version="1.1" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" stroke="#0078D6" stroke-opacity=".402">
-        <path d="m243.4 147.8-92.9 53.6-92.9-53.6v-180.8" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="2" />
-        <g clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <path d="m243.4 147.8-92.9 53.6-92.9-53.6v-180.8" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="3" />
+        <g clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
             <path d="m479.3 660.7v-3l-2.7-1.5m-5.3-3.1-5.2-3" />
             <path d="m455.5 644-228.3-131.8" stroke-dasharray="12.26, 12.26" />
             <path d="m221.9 509.1-5.2-3m-2.7-1.5-2.6-1.6-2.7 1.6m-5.3 3.1-5.2 3" />
@@ -34,18 +34,18 @@
         <path d="m-73 543.9v105.6l91.4 52.7 91.4-52.8v-105.5l-91.4-52.8z" clip-path="url(#b)" stroke-linecap="round"
             stroke-linejoin="round" stroke-miterlimit="10" />
         <path d="m634.4 996.2v101.1l87.6 50.5 87.5-50.5v-101.1l-87.5-50.6z" clip-path="url(#b)" stroke-miterlimit="10"
-            stroke-width="2" />
+            stroke-width="3" />
         <path
             d="m791.5 1058.6v73.4l63.5 36.7 63.5-36.7v-73.4l-63.5-36.7zm-641-619.1v73.3l63.5 36.7 63.6-36.7v-73.3l-63.6-36.7z"
-            clip-path="url(#b)" stroke-miterlimit="10" stroke-width="2" />
+            clip-path="url(#b)" stroke-miterlimit="10" stroke-width="3" />
         <path transform="translate(129.3 38)" d="m179.6 556v129.8l112.5 64.9 112.4-64.9v-129.8l-112.5-64.9z"
             clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" />
-        <path d="m117.7 732.1v153.3l132.7 76.6h132.7" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="2" />
+        <path d="m117.7 732.1v153.3l132.7 76.6h132.7" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="3" />
         <g transform="translate(-1.5 .084)" clip-path="url(#b)">
             <path transform="rotate(-36.554 553.12 988.81)"
                 d="m561.8 988.8a8.7 8.7 0 0 1-8.7 8.7 8.7 8.7 0 0 1-8.7-8.7 8.7 8.7 0 0 1 8.7-8.7 8.7 8.7 0 0 1 8.7 8.7z" />
         </g>
-        <path d="m33.5 402.8v457.2l219.2 128.8h297.9" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="2" />
+        <path d="m33.5 402.8v457.2l219.2 128.8h297.9" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="3" />
         <g transform="translate(-.012 -.98)" clip-path="url(#b)">
             <path transform="rotate(-36.554 33.482 402.76)"
                 d="m42.2 402.8a8.7 8.7 0 0 1-8.7 8.7 8.7 8.7 0 0 1-8.7-8.7 8.7 8.7 0 0 1 8.7-8.7 8.7 8.7 0 0 1 8.7 8.7z" />
@@ -80,14 +80,14 @@
                 stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="4" />
         </g>
         <path d="m63 851.3v-611.2" clip-path="url(#b)" stroke-dasharray="12" stroke-linecap="round"
-            stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" />
+            stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" />
         <g clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10">
             <path d="m130.8 240.1v124.9m39.4-124.9v124.9" />
-            <path d="m205.5 240.1v124.9" stroke-dasharray="12" stroke-width="2" />
+            <path d="m205.5 240.1v124.9" stroke-dasharray="12" stroke-width="3" />
         </g>
     </g>
     <g fill="none" stroke="#0078D6" stroke-opacity=".402">
-        <g clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <g clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
             <path d="m1935.2 166.2-228.3-131.7" stroke-dasharray="12.26, 12.26" />
             <path d="m1701.6 31.4-5.2-3m-2.7-1.5-2.6-1.6-2.7 1.6m-5.3 3-5.2 3" />
             <path d="M1667.3 39.1L1439 170.9" stroke-dasharray="12.26, 12.26" />
@@ -116,7 +116,7 @@
         <path d="m1329.7-67.8v186.3l161.4 93.2 161.3-93.2v-186.3l-161.3-93.2z" clip-path="url(#b)"
             stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="4" />
         <path d="m1892.1 558.5v101.1l87.6 50.5 87.5-50.5v-101.1l-87.5-50.6z" clip-path="url(#b)" stroke-miterlimit="10"
-            stroke-width="2" />
+            stroke-width="3" />
         <path d="m1741 288.9v88.5l76.7 44.2 76.6-44.2v-88.5l-76.7-44.3z" clip-path="url(#b)" stroke-linecap="round"
             stroke-linejoin="round" stroke-miterlimit="10" />
         <path transform="translate(1228.5 -9.4)" d="m179.6 556v129.8l112.5 64.9 112.4-64.9v-129.8l-112.5-64.9z"
@@ -145,10 +145,10 @@
         <g transform="rotate(90 1657.7 808.3)" clip-path="url(#b)" stroke-linecap="round" stroke-linejoin="round"
             stroke-miterlimit="10">
             <path d="M1758.8 702.9H1634M1758.8 742.3H1634" />
-            <path d="m1758.8 777.5h-124.8" stroke-dasharray="12" stroke-width="2" />
+            <path d="m1758.8 777.5h-124.8" stroke-dasharray="12" stroke-width="3" />
         </g>
         <path d="m1872.1 167v636.6" clip-path="url(#b)" stroke-dasharray="12" stroke-linecap="round"
             stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" />
-        <path d="m1826.4 155.1v338.9l-132.7 71.9" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="2" />
+        <path d="m1826.4 155.1v338.9l-132.7 71.9" clip-path="url(#b)" stroke-miterlimit="10" stroke-width="3" />
     </g>
 </svg>

@@ -337,7 +337,7 @@
         {#if loadingNewChallenge}
           <div
             class="absolute bg-base-100/60 w-full h-full backdrop-blur-xl flex justify-center items-center space-x-2"
-            transition:blur
+            transition:blur={{ amount: 20 }}
           >
             <span class="loading loading-sm loading-spinner"></span>
             <span>{$i18n.t('playground.challengeLoading')}</span>

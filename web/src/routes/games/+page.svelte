@@ -16,10 +16,10 @@
   import { page } from '$app/stores'
   import { onDestroy } from 'svelte'
     import { goto } from '$app/navigation'
+    import {game} from '$lib/stores/game'
 
   let games: Game[] = []
-  let currentGame: Game | null = null
-  let hasCover = false
+  $: hasCover = ($game.cached?.cover_path !== null)
   let loading = true
   const perPage = 10
   let currentPage = 1
@@ -31,10 +31,10 @@
   let isEnded = false
   let unknownState = true
   $: {
-    if (currentGame) {
+    if ($game.cached) {
       unknownState = false
-      let startTime = new Date(currentGame.start_time * 1000)
-      let endTime = new Date(currentGame.end_time * 1000)
+      let startTime = new Date($game.cached.start_time * 1000)
+      let endTime = new Date($game.cached.end_time * 1000)
       let now = new Date()
       isStarted = now >= startTime
       isEnded = now >= endTime
@@ -73,50 +73,45 @@
   }
 
   fetchPage().then(() => {
-    if (games.length !== 0 && currentGame === null) {
-      currentGame = games[0]
-      hasCover = currentGame?.cover_path !== null
+    if (games.length !== 0 && $game.cached === null) {
+      $game.cached = games[0]
     }
   })
 
   let unsubscribe = page.subscribe((value) => {
     if (!value.url.hash || value.url.hash === '#' || value.url.hash.trim() === '') {
       if (games.length !== 0) {
-        currentGame = games[0]
-        hasCover = currentGame?.cover_path !== null
+        $game.cached = games[0]
       }
       return
     }
     let gameId = value.url.hash ? parseInt(value.url.hash.slice(1)) || null : null
     if (gameId) {
-      currentGame = games.find((item) => item.id === gameId) || null
-      if (!currentGame)
+      $game.cached = games.find((item) => item.id === gameId) || null
+      if (!$game.cached)
         getGame(gameId)
           .then((res) => {
             if (!res.host_as_game) {
               goto(`/playground/${res.id}`)
               return
             }
-            currentGame = res
-            hasCover = currentGame.cover_path !== null
+            $game.cached = res
           })
           .catch(() => {
-            currentGame = null
-            hasCover = false
+            $game.cached = null
           })
-      if (currentGame) {
-        hasCover = currentGame.cover_path !== null
-      }
     } else {
       if (games.length !== 0) {
-        currentGame = games[0]
-        hasCover = currentGame?.cover_path !== null
+        $game.cached = games[0]
       }
       showMessage('error', $i18n.t('games.gameIdInvalid'), 5000)
     }
   })
 
-  onDestroy(unsubscribe)
+  onDestroy(() => {
+    unsubscribe()
+    $game.cached = null
+  })
 </script>
 
 <svelte:head><title>{$i18n.t('games.title')} - {$platform.name}</title></svelte:head>
@@ -130,15 +125,15 @@
       <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
         <span
           class={`w-5 h-5 ${
-            currentGame?.id === item.id ? 'icon-[fluent--flag-16-filled] text-primary' : 'icon-[fluent--flag-16-regular]'
+            $game.cached?.id === item.id ? 'icon-[fluent--flag-16-filled] text-primary' : 'icon-[fluent--flag-16-regular]'
           }`}
         />
-        <span class={`text-base flex-1 text-start ${currentGame?.id === item.id ? 'font-bold text-primary' : 'font-normal'}`}
+        <span class={`text-base flex-1 text-start ${$game.cached?.id === item.id ? 'font-bold text-primary' : 'font-normal'}`}
           >{item.name}</span
         >
         <span
           class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
-            currentGame?.id === item.id && 'text-primary'
+            $game.cached?.id === item.id && 'text-primary'
           }`}
         />
       </RxLink>
@@ -153,7 +148,7 @@
       class="w-full lg:w-3/4 h-auto rounded-box bg-base-content/5 backdrop-blur shadow-lg aspect-video transition-all lg:-translate-x-[4rem] rounded-b-none lg:rounded-b-box overflow-clip relative"
     >
       {#if hasCover}
-        <RxImage class="w-full h-full relative" src={currentGame?.cover_path || ''} {loading}></RxImage>
+        <RxImage class="w-full h-full relative" src={$game.cached?.cover_path || ''} {loading}></RxImage>
       {:else}
         <RxImage class="w-full h-full relative" src={Bg} {loading}>
           <div class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">
@@ -187,22 +182,22 @@
     >
       <a
         class="w-full lg:w-2/3 rounded-box bg-neutral/80 backdrop-blur rounded-t-none lg:rounded-t-box overflow-clip flex flex-row relative shadow-lg"
-        href={currentGame ? `/games/${currentGame.id}` : '#'}
+        href={$game.cached ? `/games/${$game.cached.id}` : '#'}
       >
         <div class="flex flex-col p-6 space-y-4 sm:space-y-2 flex-1 sm:flex-none">
           <h1 class="text-2xl font-bold flex-1 flex flex-row space-x-4 items-center">
             <img alt="CTF" src={Logo} width="48" height="48" />
             <div class="flex flex-col">
-              <span>{currentGame?.name || $i18n.t('games.noGameTitle')}</span>
+              <span>{$game.cached?.name || $i18n.t('games.noGameTitle')}</span>
               <span class="font-bold text-base opacity-60">
-                {currentGame?.brief ? currentGame.brief : $i18n.t('games.noBrief')}
+                {$game.cached?.brief ? $game.cached.brief : $i18n.t('games.noBrief')}
               </span>
             </div>
           </h1>
           <div class="flex-1 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 items-center justify-center">
-            {#if currentGame}
+            {#if $game.cached}
               <RxTag
-                label={new Date(currentGame.start_time * 1000).toLocaleDateString('default', {
+                label={new Date($game.cached.start_time * 1000).toLocaleDateString('default', {
                   year: 'numeric',
                   day: '2-digit',
                   month: '2-digit',
@@ -210,7 +205,7 @@
               />
               <span class="text-primary transform transition-all rotate-90 sm:rotate-0">=&gt;</span>
               <RxTag
-                label={new Date(currentGame.end_time * 1000).toLocaleDateString('default', {
+                label={new Date($game.cached.end_time * 1000).toLocaleDateString('default', {
                   year: 'numeric',
                   day: '2-digit',
                   month: '2-digit',
@@ -225,7 +220,7 @@
         {#if loading}
           <div
             class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-neutral"
-            transition:blur={{ amount: 10 }}
+            transition:blur={{ amount: 20 }}
           >
             <span class="loading" />
           </div>

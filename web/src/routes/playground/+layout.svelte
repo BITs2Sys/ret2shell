@@ -164,7 +164,7 @@
 <div class="flex-1 flex flex-row overflow-x-hidden">
   {#if showSidebar}
     <div
-      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10"
+      class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
     >
       <PlaygroundSidebar
         {games}
@@ -180,7 +180,6 @@
         on:loadMorePlaygrounds={getMorePlaygrounds}
       />
     </div>
-    <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0" />
   {:else}
     <label
       class="btn bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"

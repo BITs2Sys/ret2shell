@@ -4,15 +4,15 @@
   height="100vh"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <g fill="none" stroke="#0078D6" stroke-opacity=".2">
+  <g fill="none" stroke="#0078D6" stroke-width="2" stroke-opacity=".2">
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M243.4 147.8L150.5 201.4 57.6 147.8 57.6 -33"
     />
-    <g clip-path="url(#b)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g clip-path="url(#b)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
       <path class="path" d="M479.3 660.7L479.3 657.7 476.6 656.2M471.3 653.1L466.1 650.1" />
       <path class="path" stroke-dasharray="12.26, 12.26" d="M455.5 644L227.2 512.2" />
       <path class="path" d="M221.9 509.1L216.7 506.1M214 504.6L211.4 503 208.7 504.6M203.4 507.7L198.2 510.7" />
@@ -90,14 +90,14 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M634.4 996.2L634.4 1097.3 722 1147.8 809.5 1097.3 809.5 996.2 722 945.6z"
     />
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M791.5 1058.6L791.5 1132 855 1168.7 918.5 1132 918.5 1058.6 855 1021.9zM150.5 439.5L150.5 512.8 214 549.5 277.6 512.8 277.6 439.5 214 402.8z"
     />
@@ -113,7 +113,7 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M117.7 732.1L117.7 885.4 250.4 962 383.1 962"
     />
@@ -123,7 +123,7 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-miterlimit="10"
       d="M33.5 402.8L33.5 860 252.7 988.8 550.6 988.8"
     />
@@ -178,7 +178,7 @@
     <path
       class="path"
       clip-path="url(#b)"
-      stroke-width="2"
+      stroke-width="3"
       stroke-linecap="round"
       stroke-linejoin="round"
       stroke-miterlimit="10"
@@ -187,7 +187,7 @@
     />
     <g clip-path="url(#b)" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round">
       <path class="path" d="M130.8 240.1L130.8 365M170.2 240.1L170.2 365" />
-      <path class="path" stroke-width="2" stroke-dasharray="12" d="M205.5 240.1L205.5 365" />
+      <path class="path" stroke-width="3" stroke-dasharray="12" d="M205.5 240.1L205.5 365" />
     </g>
   </g>
 </svg>

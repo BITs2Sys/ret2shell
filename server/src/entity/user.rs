@@ -36,6 +36,7 @@ pub struct Model {
     pub id: i64,
     #[sea_orm(unique)]
     pub name: String,
+    #[serde(skip_serializing)]
     pub password: Option<String>,
     #[sea_orm(unique)]
     pub email: Option<String>,
