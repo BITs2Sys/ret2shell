@@ -25,7 +25,8 @@
     "registerFailed": "注册失败",
     "name": "用户名",
     "email": "邮箱",
-    "loginSuccess": "身份验证成功，欢迎回来。"
+    "loginSuccess": "身份验证成功，欢迎回来。",
+    "copyTeamLink": "复制组队链接"
   },
   "announcements": {
     "title": "公告",
@@ -92,7 +93,15 @@
     "multiPlayer": "组队赛",
     "publicGame": "公开赛事",
     "restrictedGame": "组织限定赛事",
-    "singlePlayer": "个人赛"
+    "singlePlayer": "个人赛",
+    "challenges": "题目",
+    "intro": "简介",
+    "scoreboard": "积分板",
+    "writeups": "题解",
+    "loading": "加载中...",
+    "exit": "退出",
+    "challengeList": "题目列表",
+    "copyInviteLink": "复制组队邀请链接"
   },
   "certs": {
     "title": "证书"
