@@ -64,7 +64,7 @@ num-traits = "0.2"
 mime_guess = "2.0"
 mime = "0.3"
 image = { version = "0.24", features = ["webp-encoder"] }
-aho-corasick = "1.0"
+aho-corasick = "1.1"
 clap = { version = "4.4", features = ["derive"] }
 colored = "2.0"
 base64 = "0.21"

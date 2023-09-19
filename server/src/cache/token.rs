@@ -14,7 +14,8 @@ impl Token {
         token: &str,
     ) -> Result<(), CacheError<RedisError>> {
         let mut conn = conn.get().await?;
-        conn.pset_ex(format!("token:{token}"), user_id, 24 * 60 * 60 * 1000)
+        // 86400000 ms == 24 hours
+        conn.pset_ex(format!("token:{token}"), user_id, 86400000)
             .await?;
         conn.rpush(format!("token-user:{}", user_id), token).await?;
         Ok(())

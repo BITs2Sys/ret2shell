@@ -35,7 +35,7 @@ user.subscribe((value) => {
   if (browser) localStorage.setItem('user', JSON.stringify(value))
 })
 
-export function userReset () {
+export function userReset() {
   user.update((value) => {
     value.token = ''
     value.id = -1
@@ -47,7 +47,7 @@ export function userReset () {
   })
 }
 
-export function userExtractToken (token: string) {
+export function userExtractToken(token: string) {
   user.update((value) => {
     value.token = token
     const tokenRaw = fromBase64(token.split('.')[1])
@@ -60,7 +60,7 @@ export function userExtractToken (token: string) {
   })
 }
 
-async function _fetchUserInfo () {
+async function _fetchUserInfo() {
   let response = await getUserInfo(get(user).id)
   user.update((value) => {
     value.info = response

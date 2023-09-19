@@ -14,5 +14,18 @@
             "username": "ret2shell"
         }
     ],
-    "rust-analyzer.showUnlinkedFileNotification": false
+    "rust-analyzer.showUnlinkedFileNotification": false,
+    "prettier.bracketSpacing": false,
+    "prettier.configPath": "web/.prettierrc",
+    "prettier.ignorePath": "web/.prettierignore",
+    "prettier.prettierPath": "web/node_modules/prettier",
+    "prettier.requireConfig": true,
+    "prettier.singleQuote": true,
+    "javascript.format.enable": false,
+    "typescript.format.enable": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    }
 }
