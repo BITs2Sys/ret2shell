@@ -106,7 +106,8 @@
     "title": "Announcements",
     "titleLoadingPlaceholder": "Announcement is loading",
     "fetchFailed": "Failed to get announcement",
-    "fetchingContent": "Fetching content..."
+    "fetchingContent": "Fetching content...",
+    "fetchingList": "Fetching list..."
   },
   "certs": {
     "title": "Certificates"
