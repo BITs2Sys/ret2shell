@@ -36,6 +36,9 @@
       <span class="text-base">{$i18n.t('wiki.fetchingList')}</span>
     </div>
   {:else}
+    {#if wiki.length === 0}
+      <p class="text-base font-semibold p-4 opacity-60 text-center">{$i18n.t('playground.emptyCategory')}</p>
+    {/if}
     <div class="p-4">
       <RxTree bind:tree={wiki} {activeChains} addrPrefix="/wiki" {fetchChildren} />
     </div>

@@ -15,11 +15,11 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import { page } from '$app/stores'
   import { onDestroy } from 'svelte'
-    import { goto } from '$app/navigation'
-    import {game} from '$lib/stores/game'
+  import { goto } from '$app/navigation'
+  import { game } from '$lib/stores/game'
 
   let games: Game[] = []
-  $: hasCover = ($game.cached?.cover_path !== null)
+  $: hasCover = $game.cached?.cover_path !== null
   let loading = true
   const perPage = 10
   let currentPage = 1
@@ -88,18 +88,21 @@
     let gameId = value.url.hash ? parseInt(value.url.hash.slice(1)) || null : null
     if (gameId) {
       $game.cached = games.find((item) => item.id === gameId) || null
-      if (!$game.cached)
-        getGame(gameId)
-          .then((res) => {
-            if (!res.host_as_game) {
-              goto(`/playground/${res.id}`)
-              return
-            }
-            $game.cached = res
-          })
-          .catch(() => {
-            $game.cached = null
-          })
+      if (!$game.cached) loading = true
+      getGame(gameId)
+        .then((res) => {
+          if (!res.host_as_game) {
+            goto(`/playground/${res.id}`)
+            return
+          }
+          $game.cached = res
+        })
+        .catch(() => {
+          $game.cached = null
+        })
+        .finally(() => {
+          loading = false
+        })
     } else {
       if (games.length !== 0) {
         $game.cached = games[0]
@@ -125,11 +128,15 @@
       <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
         <span
           class={`w-5 h-5 ${
-            $game.cached?.id === item.id ? 'icon-[fluent--flag-16-filled] text-primary' : 'icon-[fluent--flag-16-regular]'
+            $game.cached?.id === item.id
+              ? 'icon-[fluent--flag-16-filled] text-primary'
+              : 'icon-[fluent--flag-16-regular]'
           }`}
         />
-        <span class={`text-base flex-1 text-start ${$game.cached?.id === item.id ? 'font-bold text-primary' : 'font-normal'}`}
-          >{item.name}</span
+        <span
+          class={`text-base flex-1 text-start ${
+            $game.cached?.id === item.id ? 'font-bold text-primary' : 'font-normal'
+          }`}>{item.name}</span
         >
         <span
           class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
@@ -147,35 +154,37 @@
     <div
       class="w-full lg:w-3/4 h-auto rounded-box bg-base-content/5 backdrop-blur shadow-lg aspect-video transition-all lg:-translate-x-[4rem] rounded-b-none lg:rounded-b-box overflow-clip relative"
     >
-      {#if hasCover}
+      {#if hasCover && games.length !== 0}
         <RxImage class="w-full h-full relative" src={$game.cached?.cover_path || ''} {loading}></RxImage>
       {:else}
         <RxImage class="w-full h-full relative" src={Bg} {loading}>
           <div class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">
-            {#if games.length !== 0}
-              <img alt="CTF" src={Logo} width="128" height="128" />
-            {:else}
-              <img alt="CTF" src={LogoGray} width="128" height="128" />
+            {#if games.length !== 0 && !loading}
+              <img alt="CTF" src={Logo} width="128" height="128" transition:blur={{ amount: 20, duration: 300 }} />
+            {:else if !loading}
+              <img alt="CTF" src={LogoGray} width="128" height="128" transition:blur={{ amount: 20, duration: 300 }} />
             {/if}
           </div>
         </RxImage>
       {/if}
-      <RxTag
-        class="absolute top-4 right-4 !bg-neutral/60"
-        level={isStarted && !isEnded ? 'success' : isEnded ? 'warning' : unknownState ? 'error' : 'info'}
-      >
-        <span class="text-base font-bold">
-          {#if isStarted && !isEnded}
-            {$i18n.t('games.started')}
-          {:else if isEnded}
-            {$i18n.t('games.ended')}
-          {:else if unknownState}
-            {$i18n.t('games.unknown')}
-          {:else}
-            {$i18n.t('games.notStarted')}
-          {/if}
-        </span>
-      </RxTag>
+      {#if !loading}
+        <RxTag
+          class="absolute top-4 right-4 !bg-neutral/60"
+          level={isStarted && !isEnded ? 'success' : isEnded ? 'warning' : unknownState ? 'error' : 'info'}
+        >
+          <span class="text-base font-bold">
+            {#if isStarted && !isEnded}
+              {$i18n.t('games.started')}
+            {:else if isEnded}
+              {$i18n.t('games.ended')}
+            {:else if unknownState}
+              {$i18n.t('games.unknown')}
+            {:else}
+              {$i18n.t('games.notStarted')}
+            {/if}
+          </span>
+        </RxTag>
+      {/if}
     </div>
     <div
       class="h-64 sm:h-40 w-full lg:w-3/4 lg:translate-x-[4rem] lg:-translate-y-[3rem] flex flex-row justify-end transition-all"

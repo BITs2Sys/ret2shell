@@ -46,24 +46,35 @@
       <h1 class="text-2xl font-bold">{$i18n.t('announcements.title')}</h1>
       <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
     </div>
-    <div class="flex-1 flex flex-col space-y-2 overflow-scroll mt-4">
-      {#each announcements as item}
-        <div class="border-b border-b-base-content/5 w-full">
-          <RxLink class="w-full" justify="start" ghost href={`/announcements/${item.id}`}>
-            <span class={`icon-[fluent--megaphone-16-regular] w-6 h-6 ${item.pinned ? 'text-error' : ''}`} />
-            <span class="text-base">{item.title}</span>
-            <div class="flex-1" />
-            <span class="text-base opacity-60">
-              {new Date(item.published_at * 1000).toLocaleDateString('default', {
-                year: 'numeric',
-                day: '2-digit',
-                month: '2-digit',
-              })}
-            </span>
-          </RxLink>
-        </div>
-      {/each}
-    </div>
-    <RxPaginator bind:page {total}></RxPaginator>
+
+    {#if loading}
+      <div class="flex flex-row justify-center items-center h-16 space-x-2">
+        <span class="loading loading-spinner" />
+        <span class="text-base">{$i18n.t('announcements.fetchingList')}</span>
+      </div>
+    {:else}
+      {#if announcements.length === 0}
+        <p class="text-base font-semibold p-4 opacity-60 text-center">{$i18n.t('playground.emptyCategory')}</p>
+      {/if}
+      <div class="flex-1 flex flex-col space-y-2 overflow-scroll mt-4">
+        {#each announcements as item}
+          <div class="border-b border-b-base-content/5 w-full">
+            <RxLink class="w-full" justify="start" ghost href={`/announcements/${item.id}`}>
+              <span class={`icon-[fluent--megaphone-16-regular] w-6 h-6 ${item.pinned ? 'text-error' : ''}`} />
+              <span class="text-base">{item.title}</span>
+              <div class="flex-1" />
+              <span class="text-base opacity-60">
+                {new Date(item.published_at * 1000).toLocaleDateString('default', {
+                  year: 'numeric',
+                  day: '2-digit',
+                  month: '2-digit',
+                })}
+              </span>
+            </RxLink>
+          </div>
+        {/each}
+      </div>
+      <RxPaginator bind:page {total}></RxPaginator>
+    {/if}
   </div>
 </div>
