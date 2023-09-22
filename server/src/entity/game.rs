@@ -40,6 +40,14 @@ impl Model {
         let now = Utc::now();
         self.start_time <= now && now <= self.end_time
     }
+    pub fn can_submit_writeup(&self) -> bool {
+        let now = Utc::now();
+        self.end_time < now && now <= self.archive_time
+    }
+    pub fn can_see_writeup(&self) -> bool {
+        let now = Utc::now();
+        self.archive_time < now
+    }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
