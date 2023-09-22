@@ -17,6 +17,7 @@ pub struct Model {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub updated_at: DateTime<Utc>,
     pub author_id: Option<i64>,
+    #[sea_orm(unique)]
     pub challenge_id: i64,
     #[sea_orm(column_type = "Text")]
     pub content: Option<String>,

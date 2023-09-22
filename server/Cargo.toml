@@ -19,6 +19,7 @@ tokio-stream = "0.1"
 bytes = "1.5"
 futures = "0.3"
 async-trait = "0.1"
+async-recursion = "1.0"
 # Web Framework
 axum = { version = "0.6", features = [
     "headers",
@@ -95,7 +96,7 @@ lettre = { version = "0.10", features = [
     "builder",
 ], default-features = false }
 # Message Queue
-async-nats = "0.31"
+async-nats = "0.32"
 # Captcha
 biosvg = "0.1"
 # Version Control and Storage
