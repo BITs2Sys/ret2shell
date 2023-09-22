@@ -78,7 +78,7 @@ async fn get_writeup_list(
             &Permission::Organize | &Permission::Devops | &Permission::Audit
         )
     });
-    if !is_admin && !game.can_see_writeup() {
+    if !is_admin && !game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "cannot see writeup in this time"));
     }
     match write_up::get_writeup_page(conn, game.id, is_admin, page, per_page).await {
@@ -104,7 +104,7 @@ async fn submit_writeup(
             p,
             &Permission::Organize | &Permission::Devops | &Permission::Audit
         )
-    }) && !game.can_submit_writeup()
+    }) && !game.end_but_not_archive()
     {
         return Err((StatusCode::FORBIDDEN, "cannot submit writeup in this time"));
     }
@@ -141,7 +141,7 @@ async fn get_writeup(
             p,
             &Permission::Organize | &Permission::Devops | &Permission::Audit
         )
-    }) && !game.can_see_writeup()
+    }) && !game.end_and_archive()
     {
         return Err((StatusCode::FORBIDDEN, "cannot see writeup in this time"));
     }
@@ -176,7 +176,7 @@ pub async fn update_self_writeup(
     Extension(game): Extension<game::Model>,
     Json(data): Json<write_up::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    if game.can_see_writeup() {
+    if game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "cannot update writeup in this time"));
     }
     match write_up::update_writeup(conn, game.id, user.id, data).await {
@@ -197,7 +197,7 @@ pub async fn delete_self_writeup(
     Extension(user): Extension<user::Model>,
     Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    if game.can_see_writeup() {
+    if game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "cannot delete writeup in this time"));
     }
     match write_up::delete_writeup_by_game_and_user_id(conn, game.id, user.id).await {

@@ -46,7 +46,7 @@ async fn get_challenge_answer(
             return Err((StatusCode::INTERNAL_SERVER_ERROR, "Failed to get game"));
         }
     };
-    if game.host_as_game && !game.can_see_writeup() {
+    if game.host_as_game && !game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "answer can not be seen in this time"));
     }
     match answer::get_answer_by_challenge_id(conn, challenge_id).await {
