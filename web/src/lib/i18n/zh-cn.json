@@ -327,5 +327,8 @@
   "permissions": {
     "beVerifiedToView": "请先验证邮箱后访问",
     "beLoggedInToView": "请先登录"
+  },
+  "game": {
+    "fetchingList": "加载列表中..."
   }
 }

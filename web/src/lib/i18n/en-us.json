@@ -25,7 +25,8 @@
     "registerFailed": "Registration failed",
     "name": "Username",
     "loginSuccess": "Identity verification successful, welcome back.",
-    "email": "Email"
+    "email": "Email",
+    "copyTeamLink": "Copy invite link"
   },
   "playground": {
     "title": "Playground",
@@ -100,7 +101,9 @@
     "verifyFirst": "Please verify your account before entering",
     "adminWarning": "The question records submitted by the administrator will not be used as point data, so you can test with confidence.",
     "adminCanNotTakePartIn": "Administrators cannot create teams",
-    "takePartInAs": "Participated as"
+    "takePartInAs": "Participated as",
+    "challenges": "Challenges",
+    "intro": "Intro"
   },
   "announcements": {
     "title": "Announcements",
@@ -324,5 +327,8 @@
   "permissions": {
     "beVerifiedToView": "Please verify your email first before accessing",
     "beLoggedInToView": "please log in first"
+  },
+  "game": {
+    "fetchingList": "Loading list..."
   }
 }

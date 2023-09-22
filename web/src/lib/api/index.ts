@@ -6,7 +6,7 @@ import { goto } from '$app/navigation'
 
 const api = axios.create()
 
-export const api_root = import.meta.env.VITE_API_ROOT
+export const api_root = import.meta.env.VITE_API_ROOT || '/api'
 
 interface ExtractNewTokenHeaders {
   'set-token': string
