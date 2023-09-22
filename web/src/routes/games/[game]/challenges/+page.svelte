@@ -29,6 +29,7 @@
   let challenges: Challenge[] = []
   $: mayHaveMoreChallenges = challengePage < challengeTotalPages
   let tags: Tag[] = []
+  let current_game_id_cache: number | null = null
 
   function getChallenges() {
     if ($game.current?.id) {
@@ -75,7 +76,8 @@
   })
 
   let gameUnsubscribe = game.subscribe((value) => {
-    if (value.current?.id) {
+    if (value.current?.id && current_game_id_cache !== value.current.id) {
+      current_game_id_cache = value.current.id
       challengePage = 1
       challenges = []
       getChallenges()

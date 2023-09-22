@@ -28,7 +28,7 @@
       if (!gameId) {
         showMessage('error', `${$i18n.t('games.invalidGameId')}: ${$page.params.game}`, 5000)
         goto('/errors/404')
-      } else {
+      } else if ($game.current?.id !== gameId) {
         getGame(gameId)
           .then((res) => {
             game.update((value) => {

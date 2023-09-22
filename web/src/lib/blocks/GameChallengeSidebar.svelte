@@ -1,7 +1,7 @@
 <script lang="ts">
   import RxButton from '$lib/components/RxButton.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
-    import { i18n } from '$lib/i18n'
+  import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import type { Submission } from '$lib/models/submission'
   import { game } from '$lib/stores/game'
@@ -13,6 +13,7 @@
   export let tags: Tag[]
   export let selfSubmissions: Submission[]
   export let mayHaveMoreChallenges: boolean
+  export let loading = false
 
   const dispatch = createEventDispatcher()
 
@@ -45,9 +46,18 @@
   >
     <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
     <span>
-        {$i18n.t('games.challengeList')}
+      {$i18n.t('games.challengeList')}
     </span>
   </h1>
+  {#if loading}
+    <div class="flex flex-row justify-center items-center h-16 space-x-2">
+      <span class="loading loading-spinner" />
+      <span class="text-base">{$i18n.t('game.fetchingList')}</span>
+    </div>
+  {/if}
+  {#if challenges.length === 0}
+    <p class="text-base font-semibold p-4 opacity-60 text-center">{$i18n.t('playground.emptyCategory')}</p>
+  {/if}
   <div class="flex-1 flex-col p-4 overflow-x-hidden">
     <ul class="relative">
       {#each tags as tag}
