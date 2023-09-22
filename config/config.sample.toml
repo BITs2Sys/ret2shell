@@ -1,0 +1,56 @@
+[audit]
+sensitive_word_list = './config/sensitive_word_list.txt'
+
+[bucket]
+path = './data/bucket'
+
+[cache]
+# Cluster supports here.
+# Multiple nodes will automatically enable the cluster mode,
+# Otherwise, the single mode will be used.
+# If the node list is empty, the server will refuse to start.
+nodes = [
+    'redis://localhost:6379',
+    #'redis://localhost:6380',
+    #'redis://admin:password@localhost:6381',
+    #'rediss://localhost:6382',
+]
+# The maximum number of connections allowed in the pool.
+max_connections = 32
+
+[database]
+db = 'ret2shell'
+host = '127.0.0.1'
+port = 5432
+user = 'ret2shell'
+password = 'P@ssw02dInD3v3l0pm3nt'
+ssl_mode = 'disable'               # disable, allow, prefer, require, verify-ca, verify-full
+
+[logging]
+directory = './data/log'
+level = 'ret2shell=debug,tower_http=info,sqlx=warn'
+log_to_file = true
+log_to_console = true
+
+[media]
+path = './data/media'
+
+[queue]
+host = '127.0.0.1'
+port = 4222
+### token has higher priority than user & password, only one auth method will be used.
+#token = 'T0k3nInD3v3l0pm3nt'
+### user and password must be both valid, whether it will be ignored.
+#user = 'ret2shell'
+#password = 'P@ssw0rdInD3v3l0pm3nt'
+#ping_interval = 5
+#tls = false
+
+[server]
+host = '127.0.0.1'
+port = 8080
+external_domain = 'ctf.woooo.tech'
+external_https = true
+api_base_path = '/api'
+cors_origins = '*'
+init_token = 'Samp1eT0k3n'
