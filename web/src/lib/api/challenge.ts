@@ -1,4 +1,5 @@
 import type { Challenge, Tag } from '$lib/models/challenge'
+import type { Hint } from '$lib/models/hint'
 import { api, api_root } from '.'
 
 export async function getChallengeList(game_id: number, page: number, per_page: number) {
@@ -13,4 +14,8 @@ export async function getTagList() {
 
 export async function getChallenge(id: number) {
   return (await api.get(`${api_root}/challenge/${id}`)).data as Challenge
+}
+
+export async function getChallengeHints(id: number) {
+  return (await api.get(`${api_root}/challenge/${id}/hint`)).data as Hint[]
 }

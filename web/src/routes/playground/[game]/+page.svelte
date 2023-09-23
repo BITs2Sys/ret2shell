@@ -2,7 +2,10 @@
   import { page } from '$app/stores'
   import { getChallenge } from '$lib/api/challenge'
   import { getGame } from '$lib/api/game'
+  import AnswerPanel from '$lib/blocks/AnswerPanel.svelte'
   import Error from '$lib/blocks/Error.svelte'
+  import HintsPanel from '$lib/blocks/HintsPanel.svelte'
+  import TerminalPanel from '$lib/blocks/TerminalPanel.svelte'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -106,6 +109,9 @@
   let challengeScrollExpanded = true
   let challengeEnvExpanded = false
   let challengeAttachmentExpanded = false
+
+  // bottom panel
+  let bottomTab = 0
 </script>
 
 <svelte:head><title>{game?.name || $i18n.t('playground.gameLoading')} - {$platform.name}</title></svelte:head>
@@ -347,15 +353,33 @@
     </div>
     <div id="work-stack" class="flex flex-col backdrop-blur">
       <div class="border-b border-b-base-content/5 flex flex-row items-center p-2 space-x-2">
-        <RxButton ghost active>
+        <RxButton
+          ghost
+          active={bottomTab === 0}
+          on:click={() => {
+            bottomTab = 0
+          }}
+        >
           <span class="w-5 h-5 icon-[fluent--code-16-regular]" />
           {$i18n.t('playground.terminal')}
         </RxButton>
-        <RxButton ghost>
+        <RxButton
+          ghost
+          active={bottomTab === 1}
+          on:click={() => {
+            bottomTab = 1
+          }}
+        >
           <span class="w-5 h-5 icon-[fluent--info-16-regular]" />
           {$i18n.t('playground.challengeHints')}
         </RxButton>
-        <RxButton ghost>
+        <RxButton
+          ghost
+          active={bottomTab === 2}
+          on:click={() => {
+            bottomTab = 2
+          }}
+        >
           <span class="w-5 h-5 icon-[fluent--checkmark-16-regular]" />
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
@@ -372,7 +396,11 @@
             class="relative w-full h-full print:h-auto print:overflow-auto"
             defer
           >
-            <div class="w-full min-h-full flex flex-col items-center"></div>
+            <div class="w-full min-h-full flex flex-col">
+              <TerminalPanel class={bottomTab === 0 ? 'flex' : 'hidden'} />
+              <HintsPanel class={bottomTab === 1 ? 'flex' : 'hidden'} />
+              <AnswerPanel class={bottomTab === 2 ? 'flex' : 'hidden'} />
+            </div>
           </OverlayScrollbarsComponent>
         </div>
       </div>

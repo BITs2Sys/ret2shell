@@ -71,7 +71,7 @@
         showMessage('warning', $i18n.t('games.takePartInFirst'), 5000)
       })
     } else if ($user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)) {
-      showMessage('info', $i18n.t('games.adminWarning'), 5000)
+      // showMessage('info', $i18n.t('games.adminWarning'), 5000)
     }
   })
 

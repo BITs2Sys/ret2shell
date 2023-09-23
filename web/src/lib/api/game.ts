@@ -28,3 +28,10 @@ export async function getTeamInfo(game_id: number, team_id: number) {
 export async function getSelfTeamInfo(game_id: number) {
   return (await api.get(`${api_root}/team/${game_id}/team/self`)).data as Team
 }
+
+export async function getGameNotifications(game_id: number, page: number, per_page: number) {
+  return (await api.get(`${api_root}/game/${game_id}/notification?page=${page}&per_page=${per_page}`)).data as {
+    notifications: Notification[]
+    total: number
+  }
+}

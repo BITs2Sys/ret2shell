@@ -36,7 +36,17 @@
     { node: (document.getElementById(id as string) as HTMLInputElement | null) || undefined }
   )
 
-  $: classes = ['input', 'backdrop-blur', 'ml-0', 'bg-base-content/5', 'min-w-0', 'flex-1', hasError && 'input-error', 'join-item', clazz]
+  $: classes = [
+    'input',
+    'backdrop-blur',
+    'ml-0',
+    'bg-base-content/5',
+    'min-w-0',
+    'flex-1',
+    hasError && 'input-error',
+    'join-item',
+    clazz,
+  ]
     .filter(Boolean)
     .join(' ')
 </script>

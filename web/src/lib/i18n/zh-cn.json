@@ -110,7 +110,9 @@
     "verifyFirst": "请先验证你的账户后再参赛",
     "adminWarning": "管理员提交题目记录不会作为积分数据，可放心测试。",
     "adminCanNotTakePartIn": "管理员不可创建队伍",
-    "takePartInAs": "已参与"
+    "takePartInAs": "已参与",
+    "teamAsAdmin": "管理员测试",
+    "teamAsAdminTips": "不允许参赛，不参与成绩计算"
   },
   "certs": {
     "title": "证书"
@@ -330,5 +332,8 @@
   },
   "game": {
     "fetchingList": "加载列表中..."
+  },
+  "challenges": {
+    "noHint": "暂无提示信息"
   }
 }

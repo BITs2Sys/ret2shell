@@ -103,7 +103,9 @@
     "adminCanNotTakePartIn": "Administrators cannot create teams",
     "takePartInAs": "Participated as",
     "challenges": "Challenges",
-    "intro": "Intro"
+    "intro": "Intro",
+    "teamAsAdmin": "Administrator test",
+    "teamAsAdminTips": "Not allowed to participate and will not be included in the score calculation"
   },
   "announcements": {
     "title": "Announcements",
@@ -330,5 +332,8 @@
   },
   "game": {
     "fetchingList": "Loading list..."
+  },
+  "challenges": {
+    "noHint": "No hints yet"
   }
 }
