@@ -61,7 +61,7 @@ export function userExtractToken(token: string) {
 }
 
 async function _fetchUserInfo() {
-  let response = await getUserInfo(get(user).id)
+  const response = await getUserInfo(get(user).id)
   user.update((value) => {
     value.info = response
     return value

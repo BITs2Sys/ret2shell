@@ -6,14 +6,13 @@
   import RxButton from './RxButton.svelte'
   import RxLink from './RxLink.svelte'
   import { onMount } from 'svelte'
-  
+
   // pl-0 pl-4 pl-8 pl-12 pl-16
   export let depth = 0
 
   export let tree: WikiEntry[] = []
   export let activeChains: number[] = []
   export let addrPrefix = ''
-  let itemActiveId = 0
   export let treeExpandedRecord: Record<number, boolean> = {}
   export let treeLoadingRecord: Record<number, boolean> = {}
   export let treeNoChildrenRecord: Record<number, boolean> = {}
@@ -57,8 +56,6 @@
         }
         treeExpandedRecord = treeExpandedRecord
       })
-      // console.log(chains)
-      if (chains.length > 0) itemActiveId = chains[chains.length - 1]
     }
   }
 

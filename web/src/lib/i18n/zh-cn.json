@@ -342,5 +342,11 @@
   },
   "challenges": {
     "noHint": "暂无提示信息"
+  },
+  "shell": {
+    "commandInvalid": "命令无效",
+    "commandNotFound": "命令未找到: {{command}}",
+    "welcome": "欢迎使用 Rnix Shell！",
+    "help": "请输入 {{command}} 查看使用帮助，如有疑问，可以联系平台管理员进行解决。"
   }
 }

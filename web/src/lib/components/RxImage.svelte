@@ -13,18 +13,15 @@
   $: classes = ['overflow-hidden relative', clazz].filter(Boolean).join(' ')
 
   let loadingCover = true
-  let hasError = false
 
   function stateWatcher(node: HTMLImageElement) {
     const onload = () => {
       // console.log('src loaded:', node.complete)
       node.complete ? (loadingCover = false) : (loadingCover = true)
-      hasError = false
     }
     const onerror = () => {
       // console.log('src load failed:', node.complete)
       loadingCover = false
-      hasError = true
     }
     node.addEventListener('load', onload)
     node.addEventListener('error', onerror)
@@ -34,7 +31,6 @@
     if (src) {
       // console.log('src changed:', src)
       loadingCover = true
-      hasError = false
     }
   }
 </script>

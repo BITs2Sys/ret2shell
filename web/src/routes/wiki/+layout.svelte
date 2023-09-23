@@ -1,5 +1,4 @@
 <script lang="ts">
-  import RxButton from '$lib/components/RxButton.svelte'
   import { fly } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
   import WikiSidebar from '$lib/blocks/WikiSidebar.svelte'

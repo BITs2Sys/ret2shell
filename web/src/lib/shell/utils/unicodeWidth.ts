@@ -277,7 +277,7 @@ export function length(str: string) {
 }
 
 export function slice(text: string, start: number | null, end: number | null) {
-  let textLen = length(text)
+  const textLen = length(text)
   start = start === null ? 0 : start
   end = end === null ? 1 : end
   if (start < 0) {
@@ -288,10 +288,10 @@ export function slice(text: string, start: number | null, end: number | null) {
   }
   let result = ''
   let eawLen = 0
-  let chars = stringToArray(text)
+  const chars = stringToArray(text)
   for (let i = 0; i < chars.length; i++) {
-    let char = chars[i]
-    let charLen = length(char)
+    const char = chars[i]
+    const charLen = length(char)
     if (eawLen >= start - (charLen === 2 ? 1 : 0)) {
       if (eawLen + charLen <= end) {
         result += char

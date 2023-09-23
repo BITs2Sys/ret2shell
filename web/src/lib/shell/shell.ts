@@ -10,6 +10,8 @@ import type { User } from '$lib/models/user'
 import ansiEscapes from 'isomorphic-ansi-escapes'
 import { parse } from 'shell-quote'
 import stripAnsi from 'strip-ansi'
+import { i18n } from '$lib/i18n'
+import { get } from 'svelte/store'
 
 export interface RnixEnv {
   challenge: Challenge | null
@@ -50,6 +52,10 @@ export class RnixShell {
     }
   }
 
+  public emulateCommand(command: string) {
+    this.stdio.emulateInput(command + '\n')
+  }
+
   public setGame(game: Game | null) {
     this.env.game = game
     this.buildPrompt()
@@ -74,6 +80,9 @@ export class RnixShell {
 
   public async run() {
     if (this.running) return
+    this.stdio.println(ansiColors.blueBright(get(i18n).t('shell.welcome')))
+    this.stdio.println((get(i18n).t('shell.help', { command: ansiEscapes.link(ansiColors.green('help'), 'rnix-cmd://help') })))
+    this.stdio.println('')
     this.running = true
     let pendingBuffer = ''
     while (true) {
@@ -95,8 +104,11 @@ export class RnixShell {
         break
       }
       this.stdio.print('\n')
+      if (stripAnsi(this.inputBuffer).trim().length === 0) continue
+      if (this.inputBuffer.trim() === 'exit') break
       this.history.push(stripAnsi(this.inputBuffer))
       this.code = await this.exec.exec(this.stdio, parse(this.inputBuffer), this.env, this.inputBuffer)
+      this.buildPrompt()
     }
   }
 
@@ -104,7 +116,7 @@ export class RnixShell {
     this.prompt.head = `${ansiColors.green(this.env.user?.name || 'guest')}@${ansiColors.blue(
       this.env.game?.name || 'unknown'
     )} in ${ansiColors.yellow(this.env.challenge?.name || '/')} ${
-      this.code === 0 ? '' : ansiColors.redBright('Error(' + this.code.toString() + ')')
+      this.code === 0 ? '' : ansiColors.redBright('   -- Error(' + this.code.toString() + ')')
     }\n${this.code === 0 ? ansiColors.greenBright.bold('$') : ansiColors.redBright.bold('$')} `
   }
 }

@@ -1,8 +1,6 @@
 <script lang="ts">
   import RxPaginator from '$lib/components/RxPaginator.svelte'
   import RxTag from '$lib/components/RxTag.svelte'
-  import { theme } from '$lib/stores/theme'
-  import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
 
   interface DataEntry {
     [key: string]: string | number | boolean | null
@@ -10,35 +8,8 @@
   interface ColumnType {
     [key: string]: 'plain' | 'number' | 'tag' | 'bool' | 'date' | 'hidden' | 'action'
   }
-  export let dataEntries: DataEntry[] = [
-    {
-      id: 1,
-      name: 'John DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn Doe',
-      email: 'John DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn DoeJohn',
-      role: 'admin',
-      created_at: 1695492932,
-      updated_at: 1695492978,
-      is_admin: true,
-    },
-    {
-      id: 2,
-      name: 'Jane Doe',
-      email: '',
-      role: 'user',
-      created_at: 1695492946,
-      updated_at: 1695492949,
-      is_admin: false,
-    },
-  ]
-  export let columntypes: ColumnType = {
-    id: 'number',
-    name: 'plain',
-    email: 'plain',
-    role: 'tag',
-    created_at: 'date',
-    updated_at: 'date',
-    is_admin: 'bool',
-  }
+  export let dataEntries: DataEntry[] = []
+  export let columntypes: ColumnType = {}
   export let page: number = 0
   export let total: number = 1
 </script>
@@ -86,9 +57,9 @@
             {:else if columntypes[key] == 'bool' && typeof dataEntry[key] === 'boolean'}
               <td class="w-0 whitespace-nowrap">
                 {#if dataEntry[key] === true}
-                  <span class="icon-[fluent--checkmark-circle-16-regular] w-6 h-6 opacity-80" />
+                  <span class="icon-[fluent--checkmark-circle-16-regular] w-6 h-6 text-success" />
                 {:else}
-                  <span class="icon-[fluent--dismiss-circle-16-regular] w-6 h-6 opacity-80" />
+                  <span class="icon-[fluent--dismiss-circle-16-regular] w-6 h-6 text-warning" />
                 {/if}
               </td>
             {:else if columntypes[key] == 'action'}

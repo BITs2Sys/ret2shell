@@ -1,1 +1,2 @@
-export { Example as example } from './example'
+export { Echo as echo } from './echo'
+export { Clear as clear } from './clear'

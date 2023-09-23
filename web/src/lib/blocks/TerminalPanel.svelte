@@ -4,7 +4,7 @@
   import { FitAddon } from 'xterm-addon-fit'
   import { WebLinksAddon } from 'xterm-addon-web-links'
   import { CanvasAddon } from 'xterm-addon-canvas'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import { RnixShell } from '$lib/shell/shell'
   import 'xterm/css/xterm.css'
 
@@ -30,7 +30,7 @@
       green: '#36D399',
       red: '#F83030',
     },
-    fontFamily: 'JetBrains Mono',
+    fontFamily: 'JetBrains Mono Regular, monospace',
     fontSize: 16,
     lineHeight: 1.2,
   } as ITerminalOptions)
@@ -55,6 +55,10 @@
     })
 
     resizeObserver.observe(terminal)
+  })
+
+  onDestroy(() => {
+    shell?.emulateCommand('exit')
   })
 </script>
 
