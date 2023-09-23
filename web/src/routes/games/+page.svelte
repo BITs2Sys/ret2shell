@@ -119,39 +119,41 @@
 
 <svelte:head><title>{$i18n.t('games.title')} - {$platform.name}</title></svelte:head>
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
-  {#if games.length > 0}
-    <div class="w-1/4 min-w-[24rem] max-w-[32rem] flex-shrink-0 hidden lg:flex flex-col pt-16 pl-16 pr-8 space-y-1">
-      <RxButton class="w-full !bg-transparent" ghost disabled={!hasPrevPage} on:click={fetchPrevPage}>
-        <span class="icon-[fluent--chevron-double-up-16-regular] w-5 h-5" />
-      </RxButton>
-      <div class="divider m-0"></div>
-      {#each games as item}
-        <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
-          <span
-            class={`w-5 h-5 ${
-              $game.cached?.id === item.id
-                ? 'icon-[fluent--flag-16-filled] text-primary'
-                : 'icon-[fluent--flag-16-regular]'
-            }`}
-          />
-          <span
-            class={`text-base flex-1 text-start ${
-              $game.cached?.id === item.id ? 'font-bold text-primary' : 'font-normal'
-            }`}>{item.name}</span
-          >
-          <span
-            class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
-              $game.cached?.id === item.id && 'text-primary'
-            }`}
-          />
-        </RxLink>
-      {/each}
-      <div class="divider m-0"></div>
-      <RxButton class="w-full !bg-transparent" ghost disabled={!hasNextPage} on:click={fetchNextPage}>
-        <span class="icon-[fluent--chevron-double-down-16-regular] w-5 h-5" />
-      </RxButton>
-    </div>
-  {/if}
+  <div
+    class={`max-w-[32rem] flex-shrink-0 hidden lg:flex flex-col pt-16 pl-16 pr-8 space-y-1 ${
+      games.length > 0 ? 'w-1/4 min-w-[24rem]' : 'w-0'
+    }`}
+  >
+    <RxButton class="w-full !bg-transparent" ghost disabled={!hasPrevPage} on:click={fetchPrevPage}>
+      <span class="icon-[fluent--chevron-double-up-16-regular] w-5 h-5" />
+    </RxButton>
+    <div class="divider m-0"></div>
+    {#each games as item}
+      <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
+        <span
+          class={`w-5 h-5 ${
+            $game.cached?.id === item.id
+              ? 'icon-[fluent--flag-16-filled] text-primary'
+              : 'icon-[fluent--flag-16-regular]'
+          }`}
+        />
+        <span
+          class={`text-base flex-1 text-start ${
+            $game.cached?.id === item.id ? 'font-bold text-primary' : 'font-normal'
+          }`}>{item.name}</span
+        >
+        <span
+          class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
+            $game.cached?.id === item.id && 'text-primary'
+          }`}
+        />
+      </RxLink>
+    {/each}
+    <div class="divider m-0"></div>
+    <RxButton class="w-full !bg-transparent" ghost disabled={!hasNextPage} on:click={fetchNextPage}>
+      <span class="icon-[fluent--chevron-double-down-16-regular] w-5 h-5" />
+    </RxButton>
+  </div>
   <div class="flex-1 flex flex-col p-3 lg:p-6 items-center lg:justify-center">
     <div
       class="w-full lg:w-3/4 h-auto rounded-box bg-base-content/5 backdrop-blur shadow-lg aspect-video transition-all lg:-translate-x-[4rem] rounded-b-none lg:rounded-b-box overflow-clip relative"

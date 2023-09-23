@@ -18,7 +18,7 @@
   let delayedLoading = false
   setTimeout(() => {
     delayedLoading = false
-  }, 2000)
+  }, 3000)
 
   onMount(() => {
     loading = true

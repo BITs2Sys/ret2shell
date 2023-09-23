@@ -1,4 +1,4 @@
-FROM rust:1-bookworm as builder
+FROM rust:1 as builder
 
 # Do not copy `target` directory by accident.
 WORKDIR /usr/ret2shell

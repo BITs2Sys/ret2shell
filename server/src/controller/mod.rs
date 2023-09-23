@@ -28,6 +28,7 @@ mod calendar;
 mod certificate;
 mod challenge;
 mod game;
+mod instance;
 mod layer;
 mod media;
 mod platform;
@@ -99,6 +100,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
         .nest("/user", user::router(state))
         .nest("/calendar", calendar::router(state))
         .nest("/wiki", wiki::router(state))
+        .nest("/instance", instance::router(state))
         .route("/ping", get(ping))
         .route_layer(from_fn_with_state(state.clone(), extract_user_info))
 }
