@@ -4,7 +4,7 @@
   height="100vh"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <g fill="none" stroke="#0078D6" stroke-width="2" class="group-partial-fade">
+  <g fill="none" stroke="#0078D6" stroke-width="2" stroke-opacity="0.3">
     <path
       class="path"
       clip-path="url(#b)"
@@ -202,17 +202,6 @@
   @keyframes dash {
     to {
       stroke-dashoffset: 0;
-    }
-  }
-
-  .group-partial-fade {
-    opacity: 0.8;
-    animation: fade 1s 3s ease-in-out forwards;
-  }
-
-  @keyframes fade {
-    to {
-      opacity: 0.3;
     }
   }
 </style>
