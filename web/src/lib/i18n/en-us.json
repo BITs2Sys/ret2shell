@@ -118,7 +118,14 @@
     "title": "Certificates"
   },
   "admin": {
-    "title": "Admin"
+    "title": "Admin",
+    "platformSettings": "Platform information",
+    "gamesSettings": "games management",
+    "usersSettings": "User and group",
+    "announcementsSettings": "Platform announcement",
+    "statistics": "Statistics & Logs",
+    "wikiSettings": "Wiki management",
+    "calendarSettings": "Game Calendar"
   },
   "docs": {
     "title": "Documents"

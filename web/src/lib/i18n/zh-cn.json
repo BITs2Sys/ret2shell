@@ -118,7 +118,14 @@
     "title": "证书"
   },
   "admin": {
-    "title": "管理"
+    "title": "管理",
+    "platformSettings": "平台综合信息设置",
+    "gamesSettings": "赛事管理",
+    "usersSettings": "用户与组管理",
+    "announcementsSettings": "平台公告管理",
+    "statistics": "数据与日志",
+    "wikiSettings": "知识库管理",
+    "calendarSettings": "竞赛日历"
   },
   "docs": {
     "title": "技术文档"

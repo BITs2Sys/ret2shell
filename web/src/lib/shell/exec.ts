@@ -3,6 +3,7 @@ import type { Command } from './commands/interface'
 import * as commands from './commands'
 import type { RnixStdio } from './stdio'
 import type { ParseEntry } from 'shell-quote'
+import type { RnixEnv } from './shell'
 
 export class Exec {
   commands: Map<string, Command>
@@ -15,7 +16,7 @@ export class Exec {
     }
   }
 
-  public async exec(proxy: RnixStdio, args: ParseEntry[], origin: string) {
+  public async exec(io: RnixStdio, args: ParseEntry[], env: RnixEnv, origin: string) {
     // TODO
     return 0
   }

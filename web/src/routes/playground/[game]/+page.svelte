@@ -384,26 +384,9 @@
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
       </div>
-      <div class="flex-1 relative">
-        <div class="absolute w-full h-full">
-          <OverlayScrollbarsComponent
-            options={{
-              scrollbars: {
-                theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
-                autoHide: 'scroll',
-              },
-            }}
-            class="relative w-full h-full print:h-auto print:overflow-auto"
-            defer
-          >
-            <div class="w-full min-h-full flex flex-col">
-              <TerminalPanel class={bottomTab === 0 ? 'flex' : 'hidden'} />
-              <HintsPanel class={bottomTab === 1 ? 'flex' : 'hidden'} />
-              <AnswerPanel class={bottomTab === 2 ? 'flex' : 'hidden'} />
-            </div>
-          </OverlayScrollbarsComponent>
-        </div>
-      </div>
+      <TerminalPanel class={bottomTab === 0 ? 'p-6' : 'hidden'} />
+      <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} />
+      <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} />
     </div>
   </div>
 {:else}
