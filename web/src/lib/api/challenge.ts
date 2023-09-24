@@ -28,15 +28,19 @@ export async function submitFlag(submission: Submission) {
   return await api.post(`${api_root}/challenge/${submission.challenge_id}/submission`, submission)
 }
 
-export async function downloadChallengeAttachment(game_id: number, challenge_id: number, file: string, callback?: (progress: number) => void) {
+export async function downloadChallengeAttachment(
+  game_id: number,
+  challenge_id: number,
+  file: string,
+  callback?: (progress: number) => void
+) {
   let resp = await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/attachment?file=${file}`, {
     responseType: 'blob',
     onDownloadProgress: (e) => {
       let progress = Math.floor((e.loaded * 100) / (e.total || -1))
       if (progress < 0) progress = 0
-      if (callback)
-        callback(progress)
-    }
+      if (callback) callback(progress)
+    },
   })
   const url = window.URL.createObjectURL(new Blob([resp.data]))
   const link = document.createElement('a')

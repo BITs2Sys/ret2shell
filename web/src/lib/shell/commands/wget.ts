@@ -20,21 +20,23 @@ export class Wget implements Command {
       return 1
     }
     if (args.length != 1) {
-      io.println(`${get(i18n).t('shell.wget.usage')}`)
+      io.println(`${ansiColors.red('[-]')} ${ansiColors.dim(get(i18n).t('shell.wget.usage'))}`)
       return 1
     }
     let file = args[0].toString().trim()
 
     try {
       await downloadChallengeAttachment(envp.game?.id as number, envp.challenge?.id as number, file, (progress) => {
-        io.print(`\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b` +
-          `${get(i18n).t('shell.wget.downloading')}: [${'='.repeat(Math.ceil(progress / 5)).padEnd(20)}] ${progress}%`)
+        io.print(
+          `\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b` +
+            `${get(i18n).t('shell.wget.downloading')}: [${'='.repeat(Math.ceil(progress / 5)).padEnd(20)}] ${progress}%`
+        )
       })
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         io.println(`${get(i18n).t('shell.wget.failed')}: ${err.response?.data}`)
         return 255
-      } else { 
+      } else {
         io.println(`${get(i18n).t('shell.wget.failed')}: ${err}`)
         return 255
       }
