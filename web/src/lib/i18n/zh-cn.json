@@ -134,7 +134,19 @@
     "mediaSettings": "媒体上传设置",
     "pusherSettings": "消息主动推送设置",
     "serverLogs": "服务器日志",
-    "statisticsSummary": "数据概览"
+    "statisticsSummary": "数据概览",
+    "config": {
+      "submit": "提交",
+      "platform": {
+        "info": {
+          "hideMaker": "隐藏页脚中的开发团队信息"
+        },
+        "fetchFailed": "获取平台配置信息失败"
+      },
+      "fetching": "正在加载配置信息",
+      "saveFailed": "配置保存失败",
+      "saved": "配置保存成功"
+    }
   },
   "docs": {
     "title": "技术文档"

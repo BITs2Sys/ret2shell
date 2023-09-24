@@ -134,7 +134,19 @@
     "captchaSettings": "Captcha Verification",
     "emailSettings": "Email validation & notification",
     "mediaSettings": "Media upload settings",
-    "pusherSettings": "Message push settings"
+    "pusherSettings": "Message push settings",
+    "config": {
+      "submit": "submit",
+      "platform": {
+        "info": {
+          "hideMaker": "Hide development team information in footer"
+        },
+        "fetchFailed": "Failed to load platform config"
+      },
+      "fetching": "Loading configuration information",
+      "saveFailed": "Configuration save failed",
+      "saved": "Configuration saved successfully"
+    }
   },
   "docs": {
     "title": "Documents"

@@ -216,9 +216,6 @@ pub async fn init_token_or_permission_required<B>(
     req: Request<B>,
     next: Next<B>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    if platform_info.is_some() {
-        return Err((StatusCode::CONFLICT, "already configured"));
-    }
     let init_token = req
         .headers()
         .get("Authorization")
@@ -227,19 +224,22 @@ pub async fn init_token_or_permission_required<B>(
         .map(|token| token.to_owned());
     debug!("user init token is: {:?}", init_token);
     match init_token {
-        Some(token) => {
+        Some(token_str) => {
             debug!(
                 "platform init token is: {}",
                 config.server.init_token.trim()
             );
-            if token.trim() == config.server.init_token.trim() {
+            if token_str.trim() == config.server.init_token.trim() {
+                if platform_info.is_some() {
+                    return Err((StatusCode::CONFLICT, "already configured"));
+                }
                 Ok(next.run(req).await)
             } else {
-                Err((StatusCode::FORBIDDEN, "permission denied"))
+                #[allow(clippy::redundant_closure_call)]
+                permission_required_all!(Permission::Devops)(Extension(token), req, next).await
             }
         }
-        #[allow(clippy::redundant_closure_call)]
-        None => permission_required_all!(Permission::Devops)(Extension(token), req, next).await,
+        None => Err((StatusCode::FORBIDDEN, "permission denied")),
     }
 }
 
