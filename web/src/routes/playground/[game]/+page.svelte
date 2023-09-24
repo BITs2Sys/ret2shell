@@ -384,7 +384,7 @@
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
       </div>
-      <TerminalPanel class={bottomTab === 0 ? 'p-6' : 'hidden'} />
+      <TerminalPanel {game} challenge={activeChallenge} class={bottomTab === 0 ? 'p-6' : 'hidden'} />
       <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} />
       <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} />
     </div>

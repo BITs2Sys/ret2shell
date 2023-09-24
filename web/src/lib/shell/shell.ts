@@ -41,19 +41,29 @@ export class RnixShell {
     this.buildPrompt()
   }
 
+  public emulateCommand(command: string) {
+    this.stdio.clearInput()
+    this.stdio.emulateInput(command + '\n')
+  }
+
+  public greet() {
+    this.stdio.println(ansiColors.blueBright(get(i18n).t('shell.welcome')))
+    this.stdio.println(
+      get(i18n).t('shell.help', { command: ansiEscapes.link(ansiColors.green('help'), 'rnix-cmd://help') })
+    )
+    this.stdio.println('')
+  }
+
   public setChallenge(challenge: Challenge | null) {
     this.env.challenge = challenge
     this.buildPrompt()
     if (this.running) {
       this.stdio.clearInput()
       this.stdio.clear()
+      this.greet()
       this.stdio.print(this.prompt.head)
       this.inputBuffer = ''
     }
-  }
-
-  public emulateCommand(command: string) {
-    this.stdio.emulateInput(command + '\n')
   }
 
   public setGame(game: Game | null) {
@@ -62,6 +72,7 @@ export class RnixShell {
     if (this.running) {
       this.stdio.clearInput()
       this.stdio.clear()
+      this.greet()
       this.stdio.print(this.prompt.head)
       this.inputBuffer = ''
     }
@@ -73,6 +84,7 @@ export class RnixShell {
     if (this.running) {
       this.stdio.clearInput()
       this.stdio.clear()
+      this.greet()
       this.stdio.print(this.prompt.head)
       this.inputBuffer = ''
     }
@@ -80,10 +92,8 @@ export class RnixShell {
 
   public async run() {
     if (this.running) return
-    this.stdio.println(ansiColors.blueBright(get(i18n).t('shell.welcome')))
-    this.stdio.println((get(i18n).t('shell.help', { command: ansiEscapes.link(ansiColors.green('help'), 'rnix-cmd://help') })))
-    this.stdio.println('')
     this.running = true
+    this.greet()
     let pendingBuffer = ''
     while (true) {
       this.stdio.print(this.prompt.head)

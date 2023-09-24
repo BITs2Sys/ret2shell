@@ -42,7 +42,7 @@ export function userReset() {
     value.name = ''
     value.permissions = []
     value.isLoggedIn = false
-    value.info = {} as User
+    value.info = null
     return value
   })
 }
@@ -63,6 +63,7 @@ export function userExtractToken(token: string) {
 async function _fetchUserInfo() {
   const response = await getUserInfo(get(user).id)
   user.update((value) => {
+    // console.log(response)
     value.info = response
     return value
   })
@@ -70,7 +71,7 @@ async function _fetchUserInfo() {
 }
 
 export async function userInfo() {
-  if (get(user).info === null) {
+  if (!get(user).info) {
     await _fetchUserInfo()
   }
   return get(user).info
