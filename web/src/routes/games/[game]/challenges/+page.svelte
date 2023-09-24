@@ -47,6 +47,7 @@
       getChallengeList($game.current?.id, challengePage, challengePageSize)
         .then((res) => {
           challenges = challenges.concat(res.challenges)
+          $game.challenges = challenges
           challengeTotalPages = res.total
         })
         .catch((err) => {
@@ -105,6 +106,7 @@
 
   onDestroy(() => {
     gameUnsubscribe()
+    $game.challenges = []
   })
 
   onMount(() => {
@@ -495,7 +497,7 @@
           {$i18n.t('playground.challengeHints')}
         </RxButton>
       </div>
-      <TerminalPanel game={$game.current} challenge={activeChallenge} class={bottomTab === 0 ? 'p-6' : 'hidden'} />
+      <TerminalPanel game={$game.current} challenge={activeChallenge} availableChallenges={$game.challenges} class={bottomTab === 0 ? 'p-6' : 'hidden'} />
       <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} />
     </div>
   </div>

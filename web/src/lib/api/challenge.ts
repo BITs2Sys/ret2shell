@@ -3,8 +3,11 @@ import type { Hint } from '$lib/models/hint'
 import type { Submission } from '$lib/models/submission'
 import { api, api_root } from '.'
 
-export async function getChallengeList(game_id: number, page: number, per_page: number) {
-  const uri = `${api_root}/challenge?page=${page}&per_page=${per_page}&game_id=${game_id}`
+export async function getChallengeList(game_id: number, page?: number, per_page?: number) {
+  let uri = `${api_root}/challenge?game_id=${game_id}`
+  if (page && per_page) {
+    uri += `&page=${page}&per_page=${per_page}`
+  }
   const response = await api.get(uri)
   return response.data as { challenges: Challenge[]; total: number }
 }

@@ -14,6 +14,7 @@ import { i18n } from '$lib/i18n'
 import { get } from 'svelte/store'
 
 export interface RnixEnv {
+  availableChallenges: Challenge[]
   challenge: Challenge | null
   game: Game | null
   user: User | null
@@ -27,7 +28,7 @@ export class RnixShell {
   private stdio: RnixStdio
   private exec: Exec
   private code = 0
-  private env: RnixEnv = { challenge: null, game: null, user: null }
+  private env: RnixEnv = { availableChallenges: [], challenge: null, game: null, user: null }
   private prompt: Prompt = { head: '$ ' }
   private history: BufferHistory
   private inputBuffer: string = ''
@@ -56,6 +57,18 @@ export class RnixShell {
 
   public setChallenge(challenge: Challenge | null) {
     this.env.challenge = challenge
+    this.buildPrompt()
+    if (this.running) {
+      this.stdio.clearInput()
+      this.stdio.clear()
+      this.greet()
+      this.stdio.print(this.prompt.head)
+      this.inputBuffer = ''
+    }
+  }
+
+  public setAvailableChallenges(availableChallenges: Challenge[]) {
+    this.env.availableChallenges = availableChallenges
     this.buildPrompt()
     if (this.running) {
       this.stdio.clearInput()

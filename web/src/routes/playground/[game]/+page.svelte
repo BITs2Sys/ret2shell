@@ -21,6 +21,7 @@
   import { onDestroy, onMount } from 'svelte'
   import { quintOut } from 'svelte/easing'
   import { blur, fly } from 'svelte/transition'
+  import { game } from '$lib/stores/game'
 
   onMount(() => {
     Split(['#info-stack', '#work-stack'], {
@@ -43,14 +44,13 @@
     })
   })
 
-  let game: Game | null = null
   let error = 200
 
   let gameId = $page.params.game ? parseInt($page.params.game) || null : null
   if (gameId) {
     getGame(gameId)
       .then((res) => {
-        game = res
+        $game.current = res
       })
       .catch((err) => {
         error = (err as AxiosError).response?.status || 500
@@ -114,7 +114,7 @@
   let bottomTab = 0
 </script>
 
-<svelte:head><title>{game?.name || $i18n.t('playground.gameLoading')} - {$platform.name}</title></svelte:head>
+<svelte:head><title>{$game.current?.name || $i18n.t('playground.gameLoading')} - {$platform.name}</title></svelte:head>
 
 {#if error - 200 < 100}
   <div class="flex-1 flex flex-col overflow-x-hidden">
@@ -331,9 +331,9 @@
               {:else}
                 <div class="flex flex-col w-full max-w-5xl px-6">
                   <h1 class="font-bold text-center text-3xl p-6 pt-12 pb-0">
-                    {game?.name}
+                    {$game.current?.name}
                   </h1>
-                  <RxArticle class="mt-4" content={game?.introduction || $i18n.t('playground.emptyContent')} />
+                  <RxArticle class="mt-4" content={$game.current?.introduction || $i18n.t('playground.emptyContent')} />
                   <div class="h-32" />
                 </div>
               {/if}
@@ -384,7 +384,7 @@
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
       </div>
-      <TerminalPanel {game} challenge={activeChallenge} class={bottomTab === 0 ? 'p-6' : 'hidden'} />
+      <TerminalPanel game={$game.current} challenge={activeChallenge} availableChallenges={$game.challenges} class={bottomTab === 0 ? 'p-6' : 'hidden'} />
       <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} />
       <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} />
     </div>

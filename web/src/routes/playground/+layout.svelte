@@ -15,6 +15,7 @@
   import { onDestroy } from 'svelte'
   import { quintOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
+  import { game } from '$lib/stores/game'
 
   if (!$user.isLoggedIn) {
     goto(`/account/login?redirect=${$page.url.pathname}`).then(() => {
@@ -145,6 +146,7 @@
         .then((res) => {
           // console.log(res)
           activeGameChallenges = res.challenges
+          $game.challenges = res.challenges
           challengeTotalPages = res.total
         })
         .catch((err) => {
@@ -156,7 +158,10 @@
         })
     }
   })
-  onDestroy(unsubscribe)
+  onDestroy(() => {
+    unsubscribe()
+    $game.challenges = []
+  })
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
