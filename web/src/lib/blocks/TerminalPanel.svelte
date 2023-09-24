@@ -31,6 +31,9 @@
         const action = text.replace('rnix-cmd://', '')
         // console.log('emulating', action)
         shell?.emulateCommand(action)
+      } else if (text.startsWith('challenge://')) {
+        const challengeId = text.replace('challenge://', '')
+        window.location.hash = `#${challengeId}`
       }
     },
     allowNonHttpProtocols: true,
