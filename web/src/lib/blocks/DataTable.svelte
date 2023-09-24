@@ -8,10 +8,12 @@
   interface ColumnType {
     [key: string]: 'plain' | 'number' | 'tag' | 'bool' | 'date' | 'hidden' | 'action'
   }
-  export let dataEntries: DataEntry[] = []
-  export let columntypes: ColumnType = {}
+  export let data: object[] = []
+  export let types: {} = {}
   export let page: number = 0
   export let total: number = 1
+  let dataEntries = data as DataEntry[]
+  let columntypes = types as ColumnType
 </script>
 
 <div class="flex flex-col space-y-2">
