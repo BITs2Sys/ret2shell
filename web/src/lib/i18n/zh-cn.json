@@ -353,6 +353,8 @@
     "helpWelcome": "欢迎使用 {{terminal}} 题目环境控制终端！",
     "helpCommands": "在环境之内，你有如下命令可以使用：",
     "helpExit": "如有疑问，可以联系平台管理员进行解决。",
+    "noGameSpecified": "终端中未指明比赛",
+    "noChallengeSpecified": "终端中未指明题目",
     "clear": {
       "man": "清空当前终端"
     },
@@ -363,13 +365,27 @@
       "man": "显示这份帮助"
     },
     "submit": {
-      "no_game": "终端中未指明比赛",
-      "no_challenge": "终端中未指明题目",
       "usage": "用法： submit flag",
       "waiting": "正在提交",
       "right": "flag正确",
       "wrong": "flag错误",
-      "error": "提交失败"
+      "error": "提交失败",
+      "man": "提交flag"
+    },
+    "wget": {
+      "downloading": "正在下载",
+      "failed": "下载失败",
+      "success": "下载成功",
+      "usage": "用法: wget 文件名",
+      "man": "下载题目附件"
+    },
+    "cd": {
+      "notFound": "题目未找到",
+      "usage": "用法: cd 题目名",
+      "man": "进入题目目录"
+    },
+    "ls": {
+      "man": "列出当前比赛的所有题目"
     }
   }
 }

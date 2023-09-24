@@ -9,8 +9,12 @@ import { goto } from '$app/navigation'
 
 export class Cd implements Command {
   name = 'cd'
-  man = 'cd'
+  man = get(i18n).t('shell.cd.man')
   func = async (io: RnixStdio, args: ParseEntry[], _origin: string, envp: RnixEnv) => {
+    if (envp.game == null) {
+      io.println(`${ansiColors.red('[-]')} ${ansiColors.dim(get(i18n).t('shell.noGameSpecified'))}`)
+      return 1
+    }
     if (args.length !== 1) {
       io.println(`${ansiColors.red('[-]')} ${ansiColors.dim(get(i18n).t('shell.cd.usage'))}`)
       return 1

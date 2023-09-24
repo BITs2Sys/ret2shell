@@ -11,10 +11,10 @@ import ansiEscapes from 'isomorphic-ansi-escapes'
 
 export class Ls implements Command {
   name = 'ls'
-  man = 'ls'
+  man = get(i18n).t('shell.ls.man')
   func = async (io: RnixStdio, _args: ParseEntry[], origin: string, envp: RnixEnv) => {
     if (envp.game == null) {
-      io.println(`${ansiColors.red('[-]')} ${ansiColors.dim(get(i18n).t('shell.submit.no_game'))}`)
+      io.println(`${ansiColors.red('[-]')} ${ansiColors.dim(get(i18n).t('shell.noGameSpecified'))}`)
       return 1
     }
     const map = new Map<number, Array<Challenge>>()

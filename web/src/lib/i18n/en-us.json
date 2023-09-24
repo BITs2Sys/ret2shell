@@ -350,6 +350,8 @@
     "helpTips": "Please enter {{command}} to view the usage help. If you have any questions, you can contact the platform administrator for resolution.",
     "helpCommands": "Within the environment, you have the following commands available:",
     "helpExit": "If you have any questions, you can contact the platform administrator for resolution.",
+    "noGameSpecified": "No game specified in terminal",
+    "noChallengeSpecified": "No challenge specified in terminal",
     "clear": {
       "man": "Clear current terminal"
     },
@@ -364,13 +366,26 @@
     "welcome": "Welcome to Rnix Shell!",
     "submit": {
       "man": "submit your flag",
-      "no_game": "No game specified in terminal",
-      "no_challenge": "No challenge specified in terminal",
       "usage": "Usage: submit flag",
       "waiting": "submitting",
       "right": "Correct",
       "wrong": "Wrong",
       "error": "Submission Failed"
+    },
+    "wget": {
+      "downloading": "downloading",
+      "failed": "download failed",
+      "success": "download successful",
+      "usage": "Usage: wget filename",
+      "man": "Download challenge attachment"
+    },
+    "cd": {
+      "notFound": "Challenge not found",
+      "usage": "Usage: cd challenge name",
+      "man": "Enter the challenge directory"
+    },
+    "ls": {
+      "man": "List all challenge in the current game"
     }
   }
 }
