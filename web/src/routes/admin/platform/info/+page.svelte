@@ -48,12 +48,10 @@
   const { form, data, errors } = createForm({
     extend: validator({ schema }),
     onSubmit(values) {
-        console.log("vulues", values)
         const payload: Config = {
             ...platformConfig,
             platform: values,
         } as Config
-        console.log("payload", payload)
       setPlatformConfig(payload, $user.token)
         .then(() => {
           showMessage('success', $i18n.t('admin.config.saved'), 5000)
