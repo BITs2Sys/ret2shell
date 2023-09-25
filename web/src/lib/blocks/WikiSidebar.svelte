@@ -32,7 +32,7 @@
   </h1>
   {#if loading}
     <div class="flex flex-row justify-center items-center h-16 space-x-2">
-      <span class="loading loading-spinner" />
+      <span class="loading loading-spinner loading-sm" />
       <span class="text-base">{$i18n.t('wiki.fetchingList')}</span>
     </div>
   {:else}

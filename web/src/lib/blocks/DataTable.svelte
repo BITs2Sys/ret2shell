@@ -47,7 +47,7 @@
           class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center bg-neutral z-20"
           transition:blur={{ amount: 20, duration: 300 }}
         >
-          <span class="loading loading-spinner" />
+          <span class="loading loading-spinner loading-sm" />
         </div>
       {/if}
       {#if dataEntries.length === 0}

@@ -72,7 +72,7 @@
 {#if loading}
   <div class="flex-1 h-full relative z-20 bg-base-100" transition:blur={{ amount: 20, duration: 300 }}>
     <div class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">
-      <span class="loading loading-spinner" />
+      <span class="loading loading-spinner loading-sm" />
     </div>
   </div>
 {/if}
