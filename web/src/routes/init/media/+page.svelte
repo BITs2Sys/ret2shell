@@ -24,8 +24,8 @@
         data = {
           ...data,
           config: {
-            media: values,
             ...data.config,
+            media: values,
           },
         }
         return data

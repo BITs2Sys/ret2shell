@@ -2,10 +2,10 @@
   import { page } from '$app/stores'
   import { getChallenge, getChallengeHints } from '$lib/api/challenge'
   import { getGame } from '$lib/api/game'
-  import AnswerPanel from '$lib/blocks/AnswerPanel.svelte'
+  import AnswerPanel from '$lib/blocks/challenge/AnswerPanel.svelte'
+  import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
+  import TerminalPanel from '$lib/blocks/challenge/TerminalPanel.svelte'
   import Error from '$lib/blocks/Error.svelte'
-  import HintsPanel from '$lib/blocks/HintsPanel.svelte'
-  import TerminalPanel from '$lib/blocks/TerminalPanel.svelte'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -22,7 +22,7 @@
   import { blur, fly } from 'svelte/transition'
   import { game } from '$lib/stores/game'
   import type { Hint } from '$lib/models/hint'
-  import ChallengePanel from '$lib/blocks/ChallengePanel.svelte'
+  import ChallengePanel from '$lib/blocks/challenge/ChallengePanel.svelte'
 
   onMount(() => {
     Split(['#info-stack', '#work-stack'], {

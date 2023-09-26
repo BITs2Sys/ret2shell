@@ -30,8 +30,8 @@
         data = {
           ...data,
           config: {
-            auth: values,
             ...data.config,
+            auth: values,
           },
         }
         return data

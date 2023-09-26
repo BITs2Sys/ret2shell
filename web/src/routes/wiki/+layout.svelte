@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
-  import WikiSidebar from '$lib/blocks/WikiSidebar.svelte'
+  import Sidebar from './Sidebar.svelte'
   import { transformToWikiEntry, type WikiEntry } from '$lib/models/wiki'
   import { onDestroy, onMount } from 'svelte'
   import { getWikiList } from '$lib/api/wiki'
@@ -96,7 +96,7 @@
     <div
       class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 print:hidden"
     >
-      <WikiSidebar bind:wiki={wikiEntries} {activeChains} {loading} />
+      <Sidebar bind:wiki={wikiEntries} {activeChains} {loading} />
     </div>
     <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0 print:hidden" />
   {:else}
@@ -123,7 +123,7 @@
       class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 print:hidden"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
-      <WikiSidebar bind:wiki={wikiEntries} {activeChains} {loading} />
+      <Sidebar bind:wiki={wikiEntries} {activeChains} {loading} />
     </div>
   {/if}
 </div>

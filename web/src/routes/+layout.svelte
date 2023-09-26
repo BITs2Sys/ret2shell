@@ -2,7 +2,7 @@
   import '$lib/styles/base.scss'
   import '@fontsource/jetbrains-mono'
   import 'overlayscrollbars/overlayscrollbars.css'
-  import TitleBar from '$lib/blocks/TitleBar.svelte'
+  import TitleBar from '$lib/blocks/title/TitleBar.svelte'
   import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
   import Background from '$lib/blocks/Background.svelte'
   import { theme } from '$lib/stores/theme'

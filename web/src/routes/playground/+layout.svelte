@@ -3,9 +3,9 @@
   import { page } from '$app/stores'
   import { getChallengeList, getTagList } from '$lib/api/challenge'
   import { getGameList, getGameSelfSubmission } from '$lib/api/game'
-  import PlaygroundSidebar from '$lib/blocks/PlaygroundSidebar.svelte'
+  import Sidebar from './Sidebar.svelte'
   import { i18n } from '$lib/i18n'
-  import type { Challenge, Tag } from '$lib/models/challenge'
+  import type { Tag } from '$lib/models/challenge'
   import type { Game } from '$lib/models/game'
   import type { Submission } from '$lib/models/submission'
   import { Permission } from '$lib/models/user'
@@ -186,7 +186,7 @@
     <div
       class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
     >
-      <PlaygroundSidebar
+      <Sidebar
         {games}
         {playgrounds}
         {selfSubmissions}
@@ -220,7 +220,7 @@
       class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
-      <PlaygroundSidebar
+      <Sidebar
         {games}
         {playgrounds}
         {selfSubmissions}

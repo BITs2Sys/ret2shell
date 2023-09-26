@@ -15,28 +15,34 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
 
-  let schema = z.object({
-    name: z
-      .string()
-      .trim()
-      .min(2, { message: $i18n.t('account.accountTooShort') })
-      .max(32, { message: $i18n.t('account.accountTooLong') }),
-    email: z
-      .string()
-      .trim()
-      .max(120, { message: $i18n.t('account.emailTooLong') })
-      .email({ message: $i18n.t('account.emailInvalid') }),
-    password: z
-      .string()
-      .trim()
-      .min(8, { message: $i18n.t('account.passwordTooShort') })
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/, { message: $i18n.t('account.passwordTooWeak') }),
-    captcha_id: z.string().trim(),
-    captcha_answer: z
-      .string()
-      .trim()
-      .min(1, { message: $i18n.t('account.captchaIsRequired') }),
-  })
+  let schema = z
+    .object({
+      name: z
+        .string()
+        .trim()
+        .min(2, { message: $i18n.t('account.accountTooShort') })
+        .max(32, { message: $i18n.t('account.accountTooLong') }),
+      email: z
+        .string()
+        .trim()
+        .max(120, { message: $i18n.t('account.emailTooLong') })
+        .email({ message: $i18n.t('account.emailInvalid') }),
+      password: z
+        .string()
+        .trim()
+        .min(8, { message: $i18n.t('account.passwordTooShort') })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/, { message: $i18n.t('account.passwordTooWeak') }),
+      passwordConfirm: z.string().trim(),
+      captcha_id: z.string().trim(),
+      captcha_answer: z
+        .string()
+        .trim()
+        .min(1, { message: $i18n.t('account.captchaIsRequired') }),
+    })
+    .refine((data) => data.password === data.passwordConfirm, {
+      message: $i18n.t('account.passwordNotMatch'),
+      path: ['passwordConfirm'], // path of error
+    })
   let loading = false
   let captcha: Captcha | null
   const { form, data, touched, errors } = createForm({
@@ -126,6 +132,21 @@
             name="password"
             hasError={$errors.password !== null}
             autocomplete="current-password"
+          />
+        </RxFormItem>
+        <RxFormItem
+          name="passwordConfirm"
+          label={$i18n.t('account.passwordConfirm')}
+          hasError={$errors.passwordConfirm !== null}
+          errors={$errors.passwordConfirm || ''}
+        >
+          <RxInput
+            icon="icon-[fluent--lock-16-regular]"
+            class="w-full"
+            id="passwordConfirm"
+            type="password"
+            name="passwordConfirm"
+            hasError={$errors.passwordConfirm !== null}
           />
         </RxFormItem>
         <Captcha

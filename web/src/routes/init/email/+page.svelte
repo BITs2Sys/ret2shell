@@ -66,8 +66,8 @@
         data = {
           ...data,
           config: {
-            email: values,
             ...data.config,
+            email: values,
           },
         }
         return data

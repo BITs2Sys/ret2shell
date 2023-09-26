@@ -2,7 +2,7 @@
   import logo from '$lib/assets/logo.svg'
   import { platform } from '$lib/stores/platform'
   import { user, userInfo } from '$lib/stores/user'
-  import GlobalMenu from '$lib/blocks/GlobalMenu.svelte'
+  import GlobalMenu from './GlobalMenu.svelte'
   import CustomizeBox from './CustomizeBox.svelte'
   import { i18n } from '$lib/i18n'
   import RxLink from '$lib/components/RxLink.svelte'

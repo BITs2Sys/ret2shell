@@ -26,7 +26,9 @@
     "name": "Username",
     "loginSuccess": "Identity verification successful, welcome back.",
     "email": "Email",
-    "copyTeamLink": "Copy invite link"
+    "copyTeamLink": "Copy invite link",
+    "passwordNotMatch": "The passwords entered twice do not match",
+    "passwordConfirm": "Password confirmation"
   },
   "playground": {
     "title": "Playground",
@@ -147,7 +149,8 @@
       "saveFailed": "Configuration save failed",
       "saved": "Configuration saved successfully",
       "updating": "Updating..."
-    }
+    },
+    "currentPage": "Current"
   },
   "docs": {
     "title": "Documents"

@@ -2,10 +2,10 @@
   import { goto } from '$app/navigation'
   import { getChallengeHints, getChallengeList, getTagList } from '$lib/api/challenge'
   import { getGameNotifications, getGameSelfSubmission } from '$lib/api/game'
-  import GameChallengeSidebar from '$lib/blocks/GameChallengeSidebar.svelte'
-  import GameTeamSidebar from '$lib/blocks/GameTeamSidebar.svelte'
-  import HintsPanel from '$lib/blocks/HintsPanel.svelte'
-  import TerminalPanel from '$lib/blocks/TerminalPanel.svelte'
+  import ChallengeSidebar from './ChallengeSidebar.svelte'
+  import TeamSidebar from './TeamSidebar.svelte'
+  import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
+  import TerminalPanel from '$lib/blocks/challenge/TerminalPanel.svelte'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -27,7 +27,7 @@
   import Split from 'split.js'
   import type { Notification } from '$lib/models/game'
   import type { Hint } from '$lib/models/hint'
-  import ChallengePanel from '$lib/blocks/ChallengePanel.svelte'
+  import ChallengePanel from '$lib/blocks/challenge/ChallengePanel.svelte'
 
   let screenWidth: number
   let toggleSidebar = false
@@ -232,7 +232,7 @@
     <div
       class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
     >
-      <GameChallengeSidebar
+      <ChallengeSidebar
         {selfSubmissions}
         challenges={$game.challenges}
         {tags}
@@ -392,7 +392,7 @@
     <div
       class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-l border-l-base-content/10 overflow-hidden"
     >
-      <GameTeamSidebar {notifications} />
+      <TeamSidebar {notifications} />
     </div>
   {:else}
     <label
@@ -413,7 +413,7 @@
       class="fixed right-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-l border-l-base-content/10"
       transition:fly={{ delay: 100, duration: 300, x: 256, y: 0, opacity: 0, easing: quintOut }}
     >
-      <GameTeamSidebar {notifications} />
+      <TeamSidebar {notifications} />
     </div>
   {/if}
   {#if toggleSidebar && !showSidebar}
@@ -421,7 +421,7 @@
       class="fixed left-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
-      <GameChallengeSidebar
+      <ChallengeSidebar
         {selfSubmissions}
         challenges={$game.challenges}
         {tags}

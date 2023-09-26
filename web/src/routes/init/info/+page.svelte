@@ -44,8 +44,8 @@
         data = {
           ...data,
           config: {
-            platform: values,
             ...data.config,
+            platform: values,
           },
         }
         return data

@@ -34,11 +34,11 @@
         data = {
           ...data,
           config: {
-            captcha: {
-              validator: parseInt(values.validator) as Validator,
-              ...values,
-            },
             ...data.config,
+            captcha: {
+              ...values,
+              validator: parseInt(values.validator) as Validator,
+            },
           },
         }
         return data

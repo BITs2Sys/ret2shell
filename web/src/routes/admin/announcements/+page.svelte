@@ -111,8 +111,8 @@
   }
 </script>
 
-<div class="flex-1 flex flex-col min-h-full items-center">
-  <div class="w-full flex-1 max-w-5xl flex flex-col p-4 lg:p-6">
+<div class="flex-1 flex flex-col items-center">
+  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
     <div class="h-16 flex flex-row items-center">
       <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
       <RxLink size="sm" level="info" href="/admin/announcements/create">

@@ -27,8 +27,8 @@
         data = {
           ...data,
           config: {
-            pusher: values,
             ...data.config,
+            pusher: values,
           },
         }
         return data

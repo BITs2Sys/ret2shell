@@ -71,51 +71,54 @@
 </script>
 
 <svelte:head><title>{$i18n.t('init.pusherTitle')} - {$platform.name}</title></svelte:head>
-{#if loading}
-  <div class="flex-1 h-full relative z-20 bg-base-100" transition:blur={{ amount: 20, duration: 300 }}>
-    <div class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">
-      <span class="loading loading-spinner" />
+<div class="flex-1 relative">
+  {#if loading}
+    <div
+      class="absolute top-0 left-0 w-full h-full z-20 bg-base-100/80 backdrop-blur flex flex-row justify-center items-center"
+      transition:blur={{ amount: 20, duration: 300 }}
+    >
+      <span class="loading loading-spinner loading-sm" />
     </div>
-  </div>
-{/if}
-<div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
-  <div class="flex-1 flex flex-col max-w-5xl">
-    <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-      <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
-      <h1 class="text-2xl font-bold">{$i18n.t('init.pusherTitle')}</h1>
-      <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
-    </div>
-    <RxForm {form}>
-      <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
-        <RxCheckBox
-          id="enabled"
-          name="enabled"
-          checked={platformConfig.pusher?.enabled}
-          label={$i18n.t('init.pusherEnabled')}
-        />
-      </RxFormItem>
-      <RxFormItem
-        name="token"
-        label={$i18n.t('init.pusherToken')}
-        hasError={$errors.token !== null}
-        errors={$errors.token || ''}
-      >
-        <RxInput
-          icon="icon-[fluent--lock-16-regular]"
-          class="w-full"
-          id="token"
+  {/if}
+  <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
+    <div class="flex-1 flex flex-col max-w-5xl">
+      <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
+        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <h1 class="text-2xl font-bold">{$i18n.t('init.pusherTitle')}</h1>
+        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      </div>
+      <RxForm {form}>
+        <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
+          <RxCheckBox
+            id="enabled"
+            name="enabled"
+            checked={platformConfig.pusher?.enabled}
+            label={$i18n.t('init.pusherEnabled')}
+          />
+        </RxFormItem>
+        <RxFormItem
           name="token"
+          label={$i18n.t('init.pusherToken')}
           hasError={$errors.token !== null}
-          value={platformConfig.pusher?.token}
-          placeholder={$i18n.t('init.pusherTokenPlaceholder')}
-        />
-      </RxFormItem>
-      <RxFormItem name="submitAction" label="">
-        <RxButton class="w-full" level="primary" type="submit" loading={submitting}>
-          {submitting ? $i18n.t('admin.config.updating') : $i18n.t('admin.config.update')}
-        </RxButton>
-      </RxFormItem>
-    </RxForm>
-    <div class="h-32"></div>
+          errors={$errors.token || ''}
+        >
+          <RxInput
+            icon="icon-[fluent--lock-16-regular]"
+            class="w-full"
+            id="token"
+            name="token"
+            hasError={$errors.token !== null}
+            value={platformConfig.pusher?.token}
+            placeholder={$i18n.t('init.pusherTokenPlaceholder')}
+          />
+        </RxFormItem>
+        <RxFormItem name="submitAction" label="">
+          <RxButton class="w-full" level="primary" type="submit" loading={submitting}>
+            {submitting ? $i18n.t('admin.config.updating') : $i18n.t('admin.config.update')}
+          </RxButton>
+        </RxFormItem>
+      </RxForm>
+      <div class="h-32"></div>
+    </div>
   </div>
 </div>

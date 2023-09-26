@@ -113,12 +113,12 @@
 </script>
 
 <div
-  class="sticky top-16 h-[calc(100vh_-_4rem)] flex-shrink-0 bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden flex flex-row"
+  class="fixed top-16 left-0 w-1/5 min-w-[24rem] max-w-[32rem] h-[calc(100vh_-_4rem)] flex-shrink-0 bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden flex flex-row"
 >
   <div
     class={`${
-      firstLevelExpanded ? 'w-[24rem]' : 'w-16 border-r'
-    } transition-all flex flex-col p-2 space-y-2 duration-200 border-r-base-content/10`}
+      firstLevelExpanded ? 'w-full p-4' : 'w-16 border-r p-2'
+    } transition-all flex flex-col space-y-2 duration-200 border-r-base-content/10`}
   >
     <div class="join">
       {#if firstLevelExpanded}
@@ -130,7 +130,7 @@
       <RxButton
         square
         ghost
-        class="join-item"
+        class="join-item disabled:bg-transparent"
         disabled={!haveSecondLevel}
         on:click={() => {
           firstLevelExpanded = !firstLevelExpanded
@@ -145,11 +145,12 @@
     </div>
     {#if $user.permissions.find((p) => p === Permission.Statistics || p === Permission.Devops || p === Permission.Audit || p === Permission.Organize)}
       <RxLink
-        class="!mt-4 flex-nowrap overflow-hidden"
+        class="flex-nowrap overflow-hidden"
         href="/admin/statistics"
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.statistics')}
       >
         <span class="icon-[fluent--data-pie-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -164,6 +165,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.platformSettings')}
       >
         <span class="icon-[fluent--home-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -178,6 +180,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.gamesSettings')}
       >
         <span class="icon-[fluent--flag-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -192,6 +195,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.announcementsSettings')}
       >
         <span class="icon-[fluent--megaphone-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -206,6 +210,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.calendarSettings')}
       >
         <span class="icon-[fluent--calendar-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -220,6 +225,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.wikiSettings')}
       >
         <span class="icon-[fluent--book-number-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -234,6 +240,7 @@
         ghost
         justify={firstLevelExpanded ? 'start' : 'center'}
         square={!firstLevelExpanded}
+        title={$i18n.t('admin.usersSettings')}
       >
         <span class="icon-[fluent--person-24-regular] w-6 h-6 flex-shrink-0" />
         {#if firstLevelExpanded}
@@ -242,13 +249,13 @@
       </RxLink>
     {/if}
   </div>
-  <div class={`${secondLevelExpanded ? 'w-[20rem]' : 'w-0'} transition-all flex flex-col duration-200`}>
+  <div class={`${secondLevelExpanded ? 'w-[calc(100%_-_4rem)]' : 'w-0'} transition-all flex flex-col duration-200`}>
     <div class="h-16 bg-base-100 border-b border-b-base-content/5 flex flex-row px-4 items-center">
       <h2 class="font-bold text-base flex flex-row space-x-2 items-center justify-center w-full overflow-hidden">
         <span class="text-ellipsis whitespace-nowrap overflow-hidden">{secondTitle}</span>
       </h2>
     </div>
-    <div class="flex-1 flex flex-col space-y-2 p-2">
+    <div class="flex-1 flex flex-col space-y-2 p-4">
       {#each currentRoutes as item}
         <RxLink
           class="flex-nowrap overflow-hidden"
@@ -264,3 +271,4 @@
     </div>
   </div>
 </div>
+<div class="w-1/5 min-w-[24rem] max-w-[32rem]"></div>
