@@ -10,6 +10,7 @@
   export let id: string | undefined = undefined
   export let name: string | undefined = undefined
   export let value: string | number | unknown | undefined = undefined
+  export let ghost = false
 
   let passwordVisible = false
 
@@ -38,9 +39,9 @@
 
   $: classes = [
     'input',
-    'backdrop-blur',
+    !ghost && 'backdrop-blur',
     'ml-0',
-    'bg-base-content/5',
+    ghost ? 'bg-transparent' : 'bg-base-content/5',
     'min-w-0',
     'flex-1',
     hasError && 'input-error',

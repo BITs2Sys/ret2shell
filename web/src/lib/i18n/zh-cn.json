@@ -397,7 +397,8 @@
     "publishedAt": "发布于",
     "title": "标题",
     "content": "内容",
-    "pinned": "置顶"
+    "pinned": "置顶",
+    "submit": "提交"
   },
   "permissions": {
     "beVerifiedToView": "请先验证邮箱后访问",

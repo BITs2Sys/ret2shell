@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getAnnouncementList } from '$lib/api/announcement'
+  import { getAnnouncement, getAnnouncementList } from '$lib/api/announcement'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -7,13 +7,26 @@
   import type { Announcement } from '$lib/models/announcement'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
+  import CreatePanel from './EditPanel.svelte'
+  import { page } from '$app/stores'
 
-  let page: number = 1
-  let perPage: number = 12
+  let currentPage: number = 1
+  let perPage: number = 15
   let total: number = 0
   let loading = false
   let announcements: Announcement[] = []
+  let showCreatePanel = false
+
+  let activeAnnouncement: Announcement = {
+    id: 0,
+    title: '',
+    content: '',
+    pinned: false,
+    published_at: 0,
+    publisher_id: 0,
+    updated_at: 0,
+  }
 
   $: renderedAnnouncements = announcements.map((a) => {
     return {
@@ -94,7 +107,7 @@
 
   function fetchAnnouncements() {
     loading = true
-    getAnnouncementList(page, perPage)
+    getAnnouncementList(currentPage, perPage)
       .then((res) => {
         announcements = res.announcements
 
@@ -113,35 +126,59 @@
   })
 
   $: {
-    if (page) {
+    if (currentPage) {
       fetchAnnouncements()
     }
   }
+  const unsubscribe = page.subscribe((val) => {
+    if (val.url.hash && val.url.hash.replace('#', '')) {
+      const id = parseInt(val.url.hash.replace('#', ''))
+      getAnnouncement(id)
+        .then((res) => {
+          activeAnnouncement = res
+          showCreatePanel = true
+        })
+        .catch((err) => {
+          showMessage('error', `${$i18n.t('announcements.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        })
+    } else {
+      showCreatePanel = false
+    }
+  })
+
+  onDestroy(() => {
+    unsubscribe()
+  })
 </script>
 
-<div class="flex-1 flex flex-col items-center">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
-      <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular] w-6 h-6" />
-        <span class="text-base">{$i18n.t('action.create')}</span>
-      </RxLink>
-    </div>
-    <DataTable
-      class="flex-1"
-      {actions}
-      data={renderedAnnouncements}
-      {colDef}
-      bind:page
-      {total}
-      {loading}
-      booleanIconsDef={{
-        pinned: {
-          true: 'icon-[fluent--pin-16-regular] text-error',
-          false: '',
-        },
-      }}
-    />
+<div class="w-full flex-1 flex flex-col relative">
+  <div class="h-16 flex flex-row items-center px-6 lg:px-12">
+    <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
+    <RxLink size="sm" level="info" href="#create">
+      <span class="icon-[fluent--add-16-regular] w-6 h-6" />
+      <span class="text-base">{$i18n.t('action.create')}</span>
+    </RxLink>
   </div>
+  <DataTable
+    class="flex-1  px-6 lg:px-12"
+    {actions}
+    data={renderedAnnouncements}
+    {colDef}
+    bind:page={currentPage}
+    {total}
+    {loading}
+    booleanIconsDef={{
+      pinned: {
+        true: 'icon-[fluent--pin-16-regular] text-error',
+        false: '',
+      },
+    }}
+  />
+  <CreatePanel
+    class={`transition-all ${showCreatePanel ? 'h-3/4' : 'h-0'}`}
+    bind:announcement={activeAnnouncement}
+    on:close={() => {
+      window.location.hash = ''
+    }}
+  />
 </div>

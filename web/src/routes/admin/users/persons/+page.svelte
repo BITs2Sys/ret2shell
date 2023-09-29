@@ -2,7 +2,6 @@
   import { getInstituteList, getUserList } from '$lib/api/user'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
-  import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'
   import type { Institute } from '$lib/models/institute'
   import { Permission, permissionToString, type User } from '$lib/models/user'
@@ -11,7 +10,7 @@
   import { onMount } from 'svelte'
 
   let page: number = 1
-  let perPage: number = 12
+  let perPage: number = 15
   let total: number = 0
   let loading = false
   let users: User[] = []
@@ -125,7 +124,7 @@
       .then((res) => {
         users = res.users
         total = res.total
-        console.log(users)
+        // console.log(users)
       })
       .catch((err) => {
         showMessage('error', `${$i18n.t('users.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
@@ -160,29 +159,27 @@
   }
 </script>
 
-<div class="flex-1 flex flex-col items-center">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
-    </div>
-    <DataTable
-      class="flex-1"
-      {actions}
-      data={readerUsers}
-      {colDef}
-      bind:page
-      {total}
-      {loading}
-      booleanIconsDef={{
-        hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
-          false: '',
-        },
-        banned: {
-          true: 'icon-[fluent--circle-off-16-regular] text-error',
-          false: '',
-        },
-      }}
-    />
+<div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+  <div class="h-16 flex flex-row items-center">
+    <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
   </div>
+  <DataTable
+    class="flex-1"
+    {actions}
+    data={readerUsers}
+    {colDef}
+    bind:page
+    {total}
+    {loading}
+    booleanIconsDef={{
+      hidden: {
+        true: 'icon-[fluent--eye-off-16-regular] text-warning',
+        false: '',
+      },
+      banned: {
+        true: 'icon-[fluent--circle-off-16-regular] text-error',
+        false: '',
+      },
+    }}
+  />
 </div>

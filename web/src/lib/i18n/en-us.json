@@ -152,7 +152,31 @@
     },
     "currentPage": "Current",
     "userListSettings": "User management",
-    "calendarsSettings": "Game calendar"
+    "calendarsSettings": "Game calendar",
+    "routes": {
+      "admin": "Admin",
+      "calendar": "Calendar",
+      "announcements": "Announcements",
+      "captcha": "Captcha",
+      "challenges": "Challenges",
+      "email": "Email Verify & Notify",
+      "game": "Games",
+      "games": "Games",
+      "info": "Platform Info",
+      "institutes": "Institutes",
+      "logs": "Server Logs",
+      "media": "Media upload",
+      "notifications": "Notifications",
+      "overview": "Data Overview",
+      "permissions": "Permissions",
+      "persons": "User management",
+      "platform": "Platform info settings",
+      "pusher": "Pusher settings",
+      "statistics": "Statistics",
+      "teams": "Teams",
+      "users": "Users",
+      "wiki": "Wiki"
+    }
   },
   "docs": {
     "title": "Documents"
@@ -373,7 +397,8 @@
     "unknownAuthor": "[UNKNOWN]",
     "title": "Title",
     "content": "Content",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "submit": "Submit"
   },
   "permissions": {
     "beVerifiedToView": "Please verify your email first before accessing",
@@ -383,7 +408,9 @@
     "fetchingList": "Loading list..."
   },
   "challenges": {
-    "noHint": "No hints yet"
+    "noHint": "No hints yet",
+    "solved": "SOLVED",
+    "unsolved": "UNSOLVED"
   },
   "shell": {
     "helpWelcome": "Welcome to {{terminal}} environment terminal！",

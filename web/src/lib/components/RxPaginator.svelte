@@ -24,14 +24,15 @@
   <div class="flex justify-center mt-4 mb-12">
     <div class="join">
       {#each paginationKeys as key}
-        <RxButton class="join-item ml-0"
+        <RxButton
+          class="join-item ml-0"
           active={key === page}
           on:click={() => {
             page = key
           }}
           disabled={key === -1}
         >
-          {key === -1 ? '...' : key}
+          {key === -1 ? '..' : key}
         </RxButton>
       {/each}
     </div>

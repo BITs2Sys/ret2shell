@@ -1,0 +1,40 @@
+.ace_search {
+    @apply text-base text-base-content bg-base-100/80 backdrop-blur border-base-content/5 border rounded-box;
+
+    .ace_search_form {
+        @apply text-base-content bg-transparent;
+
+        .ace_search_field {
+            @apply text-base-content bg-base-100/80 border-0 border-b border-b-base-content/20 rounded-none focus:border-b-primary;
+        }
+
+        .ace_searchbtn {
+            @apply btn btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center p-0;
+        }
+    }
+
+
+    .ace_searchbtn_close {
+        @apply icon-[fluent--dismiss-16-regular] align-middle;
+    }
+
+    .ace_search_counter {
+        @apply text-base text-base-content font-mono;
+    }
+
+    .ace_button {
+        @apply btn btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
+
+        .checked {
+            @apply text-info;
+        }
+    }
+}
+
+.ace-twilight .ace_gutter {
+    @apply bg-transparent text-base-content opacity-60 border-r border-r-base-content/20;
+}
+
+.ace-github .ace_gutter {
+    @apply bg-transparent text-base-content opacity-60 border-r border-r-base-content/20;
+}
