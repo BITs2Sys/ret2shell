@@ -10,6 +10,7 @@
   import { onDestroy, onMount } from 'svelte'
   import CreatePanel from './EditPanel.svelte'
   import { page } from '$app/stores'
+  import { user } from '$lib/stores/user'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -133,14 +134,27 @@
   const unsubscribe = page.subscribe((val) => {
     if (val.url.hash && val.url.hash.replace('#', '')) {
       const id = parseInt(val.url.hash.replace('#', ''))
-      getAnnouncement(id)
-        .then((res) => {
-          activeAnnouncement = res
-          showCreatePanel = true
-        })
-        .catch((err) => {
-          showMessage('error', `${$i18n.t('announcements.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
-        })
+      if (id && !Number.isNaN(id))
+        getAnnouncement(id)
+          .then((res) => {
+            activeAnnouncement = res
+            showCreatePanel = true
+          })
+          .catch((err) => {
+            showMessage('error', `${$i18n.t('announcements.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+          })
+      else if (Number.isNaN(id)) {
+        activeAnnouncement = {
+          id: -1,
+          title: '',
+          content: '',
+          pinned: false,
+          published_at: 0,
+          publisher_id: $user.id,
+          updated_at: 0,
+        }
+        showCreatePanel = true
+      }
     } else {
       showCreatePanel = false
     }

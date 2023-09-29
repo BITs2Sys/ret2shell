@@ -21,7 +21,13 @@
     class="h-16 min-h-16 border-y border-y-base-content/10 backdrop-blur bg-base-100/80 flex flex-row px-2 items-center space-x-2"
   >
     <div class="join flex-1">
-      <RxButton ghost class="join-item">
+      <RxButton
+        on:click={() => {
+          announcement.pinned = !announcement.pinned
+        }}
+        ghost
+        class="join-item"
+      >
         <span class={`icon-[fluent--pin-16-regular] w-5 h-5 ${announcement.pinned ? 'text-error' : 'opacity-60'}`}
         ></span>
       </RxButton>

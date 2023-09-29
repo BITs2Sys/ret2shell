@@ -1,34 +1,79 @@
 .ace_search {
-    @apply text-base text-base-content bg-base-100/80 backdrop-blur border-base-content/5 border rounded-box;
+    @apply text-base text-base-content bg-base-100 flex flex-col;
+    @apply border-base-content/5 border rounded-box space-y-0 px-4 py-2 #{!important};
 
     .ace_search_form {
-        @apply text-base-content bg-transparent;
+        @apply text-base-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12 #{!important};
 
         .ace_search_field {
-            @apply text-base-content bg-base-100/80 border-0 border-b border-b-base-content/20 rounded-none focus:border-b-primary;
+            @apply text-base text-base-content input input-sm bg-base-content/5 m-1;
         }
 
         .ace_searchbtn {
-            @apply btn btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center p-0;
+            @apply btn btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2 flex-1;
+        }
+
+        .ace_searchbtn.prev:after,
+        .ace_searchbtn.next:after {
+            @apply hidden;
+        }
+
+        .ace_searchbtn.prev,
+        .ace_searchbtn.next {
+            @apply btn btn-sm btn-ghost w-8 h-8 flex flex-row justify-center items-center;
+        }
+
+        .ace_searchbtn.prev:before,
+        .ace_searchbtn.next:before {
+            @apply absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center;
+        }
+
+        .ace_searchbtn.prev:before {
+            content: '<';
+        }
+
+        .ace_searchbtn.next:before {
+            content: '>';
         }
     }
 
+    .ace_replace_form {
+        @apply text-base-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12;
+
+        .ace_search_field {
+            @apply text-base text-base-content input input-sm bg-base-content/5 m-1;
+        }
+
+        .ace_searchbtn {
+            @apply btn btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2;
+        }
+    }
 
     .ace_searchbtn_close {
-        @apply icon-[fluent--dismiss-16-regular] align-middle;
+        @apply hidden;
+    }
+
+    .ace_search_options {
+        @apply flex flex-row space-x-2 p-0 m-0 items-center h-12;
     }
 
     .ace_search_counter {
-        @apply text-base text-base-content font-mono;
+        @apply text-base text-base-content font-mono flex-1 text-left;
     }
 
     .ace_button {
         @apply btn btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
-
-        .checked {
-            @apply text-info;
-        }
     }
+
+    .ace_button.checked {
+        @apply btn-primary;
+    }
+}
+
+.ace_search.right {
+    @apply right-4 top-4;
+    border-right: 1px solid;
+    border-top: 1px solid;
 }
 
 .ace-twilight .ace_gutter {
@@ -37,4 +82,34 @@
 
 .ace-github .ace_gutter {
     @apply bg-transparent text-base-content opacity-60 border-r border-r-base-content/20;
+}
+
+.ace_nomatch {
+    @apply outline-none #{!important};
+}
+
+.ace_scrollbar {
+    -ms-overflow-style: auto;
+    scrollbar-width: auto;
+
+    &::-webkit-scrollbar {
+        display: initial;
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Track */
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* Handle */
+    &::-webkit-scrollbar-thumb {
+        @apply bg-base-content/30 rounded-lg min-h-[4rem] min-w-[4rem];
+    }
+
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover {
+        @apply bg-base-content/60 rounded-lg;
+    }
 }
