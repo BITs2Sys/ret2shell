@@ -15,8 +15,8 @@
   import { login } from '$lib/api/account'
   import { goto } from '$app/navigation'
   import { showMessage } from '$lib/stores/toast'
-    import type { AxiosError } from 'axios'
-    import { page } from '$app/stores'
+  import type { AxiosError } from 'axios'
+  import { page } from '$app/stores'
 
   let schema = z.object({
     account: z
@@ -50,8 +50,8 @@
     },
     onError(error) {
       loading = false
-        showMessage('error', $i18n.t('account.loginFailed') + ': ' + (error as AxiosError).response?.data, 5000)
-          captcha?.refreshAll()
+      showMessage('error', $i18n.t('account.loginFailed') + ': ' + (error as AxiosError).response?.data, 5000)
+      captcha?.refreshAll()
     },
   })
 

@@ -6,8 +6,11 @@ export async function getUserInfo(id: number) {
   return (await api.get(`${api_root}/user/${id}`)).data as User
 }
 
-export async function getUserList(page: number, per_page: number) {
-  return (await api.get(`${api_root}/user?page=${page}&per_page=${per_page}`)).data as {users: User[], total: number}
+export async function getUserList(page: number, per_page: number, order?: string, filter?: string) {
+  let uri = `${api_root}/user?page=${page}&per_page=${per_page}`
+  if (order) uri += `&order=${order}`
+  if (filter) uri += `&filter=${filter}`
+  return (await api.get(uri)).data as {users: User[], total: number}
 }
 
 export async function getInstituteList() {

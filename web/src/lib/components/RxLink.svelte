@@ -8,6 +8,7 @@
   export let uppercase = false
   export let square = false
   export let active = false
+  export let disabled = false
   export let exactlyMatched = false
   let clazz = ''
   export { clazz as class }
@@ -23,6 +24,7 @@
    */
   $: classes = [
     'btn',
+    disabled && 'btn-disabled',
     'border-none',
     'space-x-2',
     'text-base',
@@ -42,10 +44,6 @@
     .join(' ')
 </script>
 
-<a
-  {href}
-  class={classes}
-  {...$$restProps}
->
+<a {href} class={classes} {...$$restProps}>
   <slot />
 </a>

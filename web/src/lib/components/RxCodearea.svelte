@@ -5,10 +5,18 @@
   import '$lib/styles/codeeditor.scss'
   import { onDestroy, onMount } from 'svelte'
   import { blur } from 'svelte/transition'
+  import { createField } from 'felte'
+
   export let value: string
-  export let lang: string = 'markdown'
+  export let lang: string = ''
   export let readonly: boolean = false
+  export let placeholder: string = ''
   export let loading = false
+
+  export let name: string = 'common_code_area'
+
+  const { field, onBlur, onInput } = createField(name)
+
   let clazz = ''
   export { clazz as class }
 
@@ -20,6 +28,7 @@
   function watchValue(val: string) {
     if (contentBackup !== val && editor && typeof val === 'string') {
       editor.session.setValue(val)
+      onInput(val)
       contentBackup = val
     }
   }
@@ -31,9 +40,7 @@
     }
   }
 
-  $: classes = ['w-full', 'h-full', 'overflow-scroll', 'bg-base-100/80', 'backdrop-blur', 'relative', '', clazz].join(
-    ' '
-  )
+  $: classes = ['w-full', 'h-full', 'overflow-scroll', 'relative', clazz].join(' ')
 
   onMount(() => {
     setTimeout(() => {
@@ -63,13 +70,20 @@
       hScrollBarAlwaysVisible: true,
       scrollPastEnd: true,
       selectionStyle: 'text',
+      placeholder,
+      useWorker: false,
     })
     editor.container.style.lineHeight = '1.6'
 
     editor.on('change', function () {
       const content = editor?.getValue()
       value = content || ''
+      onInput(value)
       contentBackup = value
+    })
+
+    editor.on('blur', function () {
+      onBlur()
     })
   }
 
@@ -93,6 +107,6 @@
     </div>
   {/if}
   <div class="absolute left-0 top-0 bottom-0 right-0 p-4">
-    <pre class="w-full min-h-full relative bg-transparent" bind:this={editorElement}></pre>
+    <pre class="w-full min-h-full relative bg-transparent" use:field bind:this={editorElement}></pre>
   </div>
 </div>

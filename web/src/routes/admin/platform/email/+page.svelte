@@ -19,6 +19,7 @@
   import type { AxiosError } from 'axios'
   import type { Obj } from '@felte/core'
   import { blur } from 'svelte/transition'
+  import RxCodeBox from '$lib/components/RxCodeBox.svelte'
 
   let schema = z.object({
     enabled: z.boolean(),
@@ -267,13 +268,12 @@
           hasError={$errors.reset_password_email_body !== null}
           errors={$errors.reset_password_email_body || ''}
         >
-          <RxTextarea
-            id="reset_password_email_body"
+          <RxCodeBox
+            lang="html"
             name="reset_password_email_body"
             hasError={$errors.reset_password_email_body !== null}
             value={platformConfig.email?.reset_password_email_body}
             placeholder={$i18n.t('init.emailResetPasswordBodyPlaceholder')}
-            droppable={false}
           />
         </RxFormItem>
         <p class="p-1 text-sm opacity-60">{$i18n.t('init.emailTemplateRenderTips')}</p>
@@ -301,13 +301,12 @@
           hasError={$errors.verify_email_body !== null}
           errors={$errors.verify_email_body || ''}
         >
-          <RxTextarea
-            id="verify_email_body"
+          <RxCodeBox
+            lang="html"
             name="verify_email_body"
-            hasError={$errors.verify_email_body !== null}
-            placeholder={$i18n.t('init.emailVerifyEmailBodyPlaceholder')}
-            value={platformConfig.email?.verify_email_body}
-            droppable={false}
+            hasError={$errors.reset_password_email_body !== null}
+            value={platformConfig.email?.reset_password_email_body}
+            placeholder={$i18n.t('init.emailResetPasswordBodyPlaceholder')}
           />
         </RxFormItem>
         <p class="p-1 text-sm opacity-60">{$i18n.t('init.emailTemplateRenderTips')}</p>

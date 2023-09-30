@@ -2,6 +2,7 @@
   import { getInstituteList, getUserList } from '$lib/api/user'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
+  import RxInput from '$lib/components/RxInput.svelte'
   import { i18n } from '$lib/i18n'
   import type { Institute } from '$lib/models/institute'
   import { Permission, permissionToString, type User } from '$lib/models/user'
@@ -162,6 +163,9 @@
 <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
   <div class="h-16 flex flex-row items-center">
     <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
+    <div>
+      <RxInput size="sm" placeholder={$i18n.t('admin.filter')} icon="icon-[fluent--filter-16-regular]" />
+    </div>
   </div>
   <DataTable
     class="flex-1"

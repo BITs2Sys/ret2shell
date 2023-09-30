@@ -161,111 +161,111 @@
         />
       </RxButton>
     </div>
-    {#if $user.permissions.find((p) => p === Permission.Statistics || p === Permission.Devops || p === Permission.Audit || p === Permission.Organize)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/statistics"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.statistics')}
-      >
-        <span class="icon-[fluent--data-pie-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.statistics')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Devops)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/platform"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.platformSettings')}
-      >
-        <span class="icon-[fluent--home-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.platformSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize || p === Permission.Audit)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/games"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.gamesSettings')}
-      >
-        <span class="icon-[fluent--flag-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.gamesSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Publish)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/announcements"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.announcementsSettings')}
-      >
-        <span class="icon-[fluent--megaphone-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.announcementsSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Publish)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/calendar"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.calendarSettings')}
-      >
-        <span class="icon-[fluent--calendar-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.calendarSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Publish)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/wiki"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.wikiSettings')}
-      >
-        <span class="icon-[fluent--book-number-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.wikiSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
-    {#if $user.permissions.find((p) => p === Permission.Organize || p === Permission.Devops || p === Permission.Audit)}
-      <RxLink
-        class="flex-nowrap overflow-hidden"
-        href="/admin/users"
-        ghost
-        justify={firstLevelExpanded ? 'start' : 'center'}
-        square={!firstLevelExpanded}
-        title={$i18n.t('admin.usersSettings')}
-      >
-        <span class="icon-[fluent--person-24-regular] w-6 h-6 flex-shrink-0" />
-        {#if firstLevelExpanded}
-          <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.usersSettings')}</span>
-        {/if}
-      </RxLink>
-    {/if}
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/statistics"
+      ghost
+      disabled={!$user.permissions.find(
+        (p) =>
+          p === Permission.Statistics || p === Permission.Devops || p === Permission.Audit || p === Permission.Organize
+      )}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.statistics')}
+    >
+      <span class="icon-[fluent--data-pie-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.statistics')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/platform"
+      ghost
+      disabled={!$user.permissions.find((p) => p === Permission.Devops) === undefined}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.platformSettings')}
+    >
+      <span class="icon-[fluent--home-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.platformSettings')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/games"
+      ghost
+      disabled={!$user.permissions.find(
+        (p) => p === Permission.Devops || p === Permission.Organize || p === Permission.Audit
+      )}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.gamesSettings')}
+    >
+      <span class="icon-[fluent--flag-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.gamesSettings')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/announcements"
+      ghost
+      disabled={!$user.permissions.find((p) => p === Permission.Publish)}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.announcementsSettings')}
+    >
+      <span class="icon-[fluent--megaphone-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.announcementsSettings')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/calendar"
+      ghost
+      disabled={!$user.permissions.find((p) => p === Permission.Calendar)}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.calendarSettings')}
+    >
+      <span class="icon-[fluent--calendar-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.calendarSettings')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/wiki"
+      ghost
+      disabled={!$user.permissions.find((p) => p === Permission.Publish)}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.wikiSettings')}
+    >
+      <span class="icon-[fluent--book-number-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.wikiSettings')}</span>
+      {/if}
+    </RxLink>
+    <RxLink
+      class="flex-nowrap overflow-hidden"
+      href="/admin/users"
+      ghost
+      disabled={!$user.permissions.find(
+        (p) => p === Permission.Organize || p === Permission.Devops || p === Permission.Audit
+      )}
+      justify={firstLevelExpanded ? 'start' : 'center'}
+      square={!firstLevelExpanded}
+      title={$i18n.t('admin.usersSettings')}
+    >
+      <span class="icon-[fluent--person-24-regular] w-6 h-6 flex-shrink-0" />
+      {#if firstLevelExpanded}
+        <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.usersSettings')}</span>
+      {/if}
+    </RxLink>
   </div>
   <div class={`${secondLevelExpanded ? 'w-[calc(100%_-_4rem)]' : 'w-0'} transition-all flex flex-col duration-200`}>
     <div class="h-16 bg-base-100 border-b border-b-base-content/5 flex flex-row px-4 items-center">

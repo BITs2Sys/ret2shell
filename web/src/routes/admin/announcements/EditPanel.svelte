@@ -68,7 +68,7 @@
     </div>
   </div>
   <RxCodearea
-    class="flex-1"
+    class="flex-1 bg-base-100/80 backdrop-blur"
     lang="markdown"
     {loading}
     readonly={loading || submitting}

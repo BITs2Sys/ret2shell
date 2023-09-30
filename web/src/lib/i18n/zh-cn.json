@@ -176,7 +176,8 @@
     },
     "currentPage": "当前",
     "userListSettings": "用户管理",
-    "calendarsSettings": "竞赛日历"
+    "calendarsSettings": "竞赛日历",
+    "filter": "过滤条件..."
   },
   "docs": {
     "title": "技术文档"

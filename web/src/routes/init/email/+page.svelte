@@ -14,6 +14,7 @@
   import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxTextarea from '$lib/components/RxTextarea.svelte'
+  import RxCodeBox from '$lib/components/RxCodeBox.svelte'
 
   let schema = z.object({
     enabled: z.boolean(),
@@ -226,12 +227,11 @@
         hasError={$errors.reset_password_email_body !== null}
         errors={$errors.reset_password_email_body || ''}
       >
-        <RxTextarea
-          id="reset_password_email_body"
+        <RxCodeBox
+          lang="html"
           name="reset_password_email_body"
           hasError={$errors.reset_password_email_body !== null}
           placeholder={$i18n.t('init.emailResetPasswordBodyPlaceholder')}
-          droppable={false}
         />
       </RxFormItem>
       <p class="p-1 text-sm opacity-60">{$i18n.t('init.emailTemplateRenderTips')}</p>
@@ -258,12 +258,11 @@
         hasError={$errors.verify_email_body !== null}
         errors={$errors.verify_email_body || ''}
       >
-        <RxTextarea
-          id="verify_email_body"
+        <RxCodeBox
+          lang="html"
           name="verify_email_body"
           hasError={$errors.verify_email_body !== null}
           placeholder={$i18n.t('init.emailVerifyEmailBodyPlaceholder')}
-          droppable={false}
         />
       </RxFormItem>
       <p class="p-1 text-sm opacity-60">{$i18n.t('init.emailTemplateRenderTips')}</p>

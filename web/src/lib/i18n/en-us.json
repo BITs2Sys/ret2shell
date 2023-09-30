@@ -176,7 +176,8 @@
       "teams": "Teams",
       "users": "Users",
       "wiki": "Wiki"
-    }
+    },
+    "filter": "Filter..."
   },
   "docs": {
     "title": "Documents"
