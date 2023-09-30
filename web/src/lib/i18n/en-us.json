@@ -266,7 +266,9 @@
     "startTime": "Starting time",
     "endTime": "End Time",
     "submit": "Submit",
-    "cantBeEmpty": "Calendar introduction cannot be empty"
+    "cantBeEmpty": "Calendar introduction cannot be empty",
+    "edit": "Edit Game Event",
+    "create": "Create Game Event"
   },
   "init": {
     "title": "Initialize",

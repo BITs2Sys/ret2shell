@@ -44,7 +44,6 @@
   $: {
     // gameDates = ranges in [start_time, end_time]
     gameDates = calendars
-      .filter((c) => c.audited)
       .map((c) => {
         const start = new Date(c.start_time * 1000)
         const end = new Date(c.end_time * 1000)

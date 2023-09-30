@@ -29,8 +29,6 @@
     link: '',
     start_time: 0,
     end_time: 0,
-    audited: false,
-    game_id: 0,
     reporter_id: 0,
   }
   let calendars: Calendar[] = []
@@ -225,8 +223,6 @@
           link: '',
           start_time: 0,
           end_time: 0,
-          audited: false,
-          game_id: 0,
           reporter_id: $user.id,
         }
         loadingCalendar = false
@@ -240,8 +236,6 @@
         link: '',
         start_time: 0,
         end_time: 0,
-        audited: false,
-        game_id: 0,
         reporter_id: 0,
       }
     }

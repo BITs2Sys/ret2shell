@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20210101_000002_create_user::User, m20210101_000004_create_game::Game};
+use super::m20210101_000002_create_user::User;
 
 pub struct Migration;
 
@@ -15,14 +15,12 @@ impl MigrationName for Migration {
 pub enum Calendar {
     Table,
     Id,
-    GameId,
     ReporterId,
     Name,
     Intro,
     Link,
     StartTime,
     EndTime,
-    Audited,
 }
 
 #[async_trait::async_trait]
@@ -53,21 +51,6 @@ impl MigrationTrait for Migration {
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
-                    )
-                    .col(
-                        ColumnDef::new(Calendar::Audited)
-                            .boolean()
-                            .not_null()
-                            .default(false),
-                    )
-                    .col(ColumnDef::new(Calendar::GameId).big_integer())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("calendar_game_id_fkey")
-                            .from(Calendar::Table, Calendar::GameId)
-                            .to(Game::Table, Game::Id)
-                            .on_update(ForeignKeyAction::Cascade)
-                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .col(ColumnDef::new(Calendar::ReporterId).big_integer())
                     .foreign_key(

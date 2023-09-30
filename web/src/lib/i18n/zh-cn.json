@@ -266,7 +266,9 @@
     "startTime": "开始时间",
     "name": "竞赛名称",
     "submit": "提交",
-    "cantBeEmpty": "日历简介不能为空"
+    "cantBeEmpty": "日历简介不能为空",
+    "edit": "编辑赛事详情",
+    "create": "创建赛事日历"
   },
   "init": {
     "accountTitle": "注册初始管理员用户",

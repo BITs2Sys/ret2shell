@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
-use sea_orm::{ActiveValue, Iterable, QueryOrder, QuerySelect};
+use sea_orm::{ActiveValue, IntoActiveModel, Iterable, QueryOrder, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -83,14 +83,12 @@ pub async fn update_announcement(
     id: i64,
     announcement: Model,
 ) -> Result<Model, DbErr> {
-    let mut active_model: ActiveModel = announcement.clone().into();
-    active_model.id = ActiveValue::Unchanged(id);
-    active_model.published_at = ActiveValue::Unchanged(announcement.published_at);
-    active_model.updated_at = ActiveValue::Set(Utc::now());
-    active_model.title = ActiveValue::Set(announcement.title);
-    active_model.content = ActiveValue::Set(announcement.content);
-    active_model.pinned = ActiveValue::Set(announcement.pinned);
-    active_model.publisher_id = ActiveValue::Set(announcement.publisher_id);
+    let active_model = ActiveModel {
+        id: ActiveValue::Unchanged(id),
+        updated_at: ActiveValue::Set(Utc::now()),
+        published_at: ActiveValue::Unchanged(announcement.published_at),
+        ..announcement.into_active_model().reset_all()
+    };
     active_model.update(conn).await
 }
 

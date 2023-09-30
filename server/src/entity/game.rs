@@ -52,8 +52,6 @@ impl Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::calendar::Entity")]
-    Calendar,
     #[sea_orm(has_many = "super::challenge::Entity")]
     Challenge,
     #[sea_orm(
@@ -70,12 +68,6 @@ pub enum Relation {
     Team,
     #[sea_orm(has_many = "super::write_up::Entity")]
     WriteUp,
-}
-
-impl Related<super::calendar::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Calendar.def()
-    }
 }
 
 impl Related<super::challenge::Entity> for Entity {
