@@ -21,6 +21,7 @@
   $: readerUsers = users.map((a) => {
     return {
       ...a,
+      name: `${encodeURI(a.name)}|#${encodeURI(a.id.toString())}`,
       permissions: a.permissions
         .filter((p) => p !== Permission.Basic)
         .map((p) => {
@@ -37,15 +38,6 @@
       level: 'info',
       type: 'link',
       href: '#{id}',
-    },
-    {
-      icon: 'icon-[fluent--delete-16-regular]',
-      label: '',
-      level: 'error',
-      type: 'button',
-      onClick: (data: DTDataEntry) => {
-        // popup delete modal
-      },
     },
   ]
   let colDef: DTColumnsDef = {
@@ -122,7 +114,7 @@
   }
   function fetchUsers() {
     loading = true
-    getUserList(page, perPage, '', filter)
+    getUserList(page, perPage, 'id', filter)
       .then((res) => {
         users = res.users
         total = res.total

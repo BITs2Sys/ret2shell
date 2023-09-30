@@ -7,7 +7,7 @@
   import RxLink from '$lib/components/RxLink.svelte'
   import Logo from '$lib/assets/logo-gray.svg'
   import { onMount } from 'svelte'
-  import { getCalendarList } from '$lib/api/calendar'
+  import { getCalendar, getCalendarList } from '$lib/api/calendar'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import RxTag from '$lib/components/RxTag.svelte'
@@ -99,6 +99,16 @@
   onMount(() => {
     fetchCalendar()
   })
+
+  function fetchSelected() {
+    getCalendar(selectedCalendar!.id)
+      .then((response) => {
+        selectedCalendar = response
+      })
+      .catch((err) => {
+        showMessage('error', $i18n.t('calendar.failedToFetch') + ': ' + (err as AxiosError).response?.data, 5000)
+      })
+  }
 </script>
 
 <svelte:head><title>{$platform.name}</title></svelte:head>
@@ -234,6 +244,7 @@
                         justify="start"
                         on:click={() => {
                           selectedCalendar = cal.data
+                          fetchSelected()
                           chosenDate = null
                         }}
                       >

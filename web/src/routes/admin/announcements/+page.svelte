@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getAnnouncement, getAnnouncementList } from '$lib/api/announcement'
+  import { createAnnouncement, getAnnouncement, getAnnouncementList, updateAnnouncement } from '$lib/api/announcement'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -17,6 +17,7 @@
   let total: number = 0
   let loading = false
   let loadingAnnouncement = false
+  let submitting = false
   let announcements: Announcement[] = []
   let showCreatePanel = false
 
@@ -178,6 +179,46 @@
   onDestroy(() => {
     unsubscribe()
   })
+
+  function updateOrCreateAnnouncement() {
+    if (activeAnnouncement.title.length <= 0 || activeAnnouncement.content.length <= 0) {
+      showMessage('error', $i18n.t('announcement.cantBeEmpty'), 5000)
+      return
+    }
+    submitting = true
+    if (activeAnnouncement.id > 0) {
+      updateAnnouncement(activeAnnouncement.id, activeAnnouncement)
+        .then((res) => {
+          showMessage('success', $i18n.t('announcement.updateSuccess'), 5000)
+          window.location.hash = ''
+        })
+        .catch((err) => {
+          showMessage('error', `${$i18n.t('announcement.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        })
+        .finally(() => {
+          submitting = false
+        })
+    } else {
+      const announcement: Announcement = {
+        ...activeAnnouncement,
+        id: 0,
+        published_at: Math.floor(new Date().getTime() / 1000),
+        publisher_id: $user.id,
+      }
+      createAnnouncement(announcement)
+        .then((res) => {
+          showMessage('success', $i18n.t('announcement.createSuccess'), 5000)
+          window.location.hash = ''
+          fetchAnnouncements()
+        })
+        .catch((err) => {
+          showMessage('error', `${$i18n.t('announcement.createFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        })
+        .finally(() => {
+          submitting = false
+        })
+    }
+  }
 </script>
 
 <div class="w-full flex-1 flex flex-col relative">
@@ -207,8 +248,12 @@
     class={`transition-all ${showCreatePanel ? 'h-full' : 'h-0'}`}
     bind:announcement={activeAnnouncement}
     loading={loadingAnnouncement}
+    {submitting}
     on:close={() => {
       window.location.hash = ''
+    }}
+    on:submit={() => {
+      updateOrCreateAnnouncement()
     }}
   />
 </div>

@@ -67,7 +67,7 @@
       cursorStyle: 'smooth',
       animatedScroll: true,
       fadeFoldWidgets: true,
-      hScrollBarAlwaysVisible: true,
+      hScrollBarAlwaysVisible: false,
       scrollPastEnd: true,
       selectionStyle: 'text',
       placeholder,

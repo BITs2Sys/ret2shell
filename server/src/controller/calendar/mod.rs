@@ -20,6 +20,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route_layer(middleware::from_fn(auth::permission_required_all!(
             Permission::Calendar
         )))
+        .route("/:id", get(get_calendar))
         .route("/", get(get_calendar_list))
 }
 
@@ -41,6 +42,19 @@ async fn get_calendar_list(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "failed to get calendar list",
             ))
+        }
+    }
+}
+
+async fn get_calendar(
+    State(ref conn): State<DatabaseConnection>,
+    Path(id): Path<i64>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    match calendar::get_calendar_by_id(conn, id).await {
+        Ok(calendar) => Ok(Json(calendar)),
+        Err(err) => {
+            error!("Failed to get calendar: {}", err);
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get calendar"))
         }
     }
 }

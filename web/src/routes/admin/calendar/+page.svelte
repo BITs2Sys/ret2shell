@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getCalendarList } from '$lib/api/calendar'
+  import { createCalendar, getCalendar, getCalendarList, updateCalendar } from '$lib/api/calendar'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
@@ -8,16 +8,33 @@
   import type { Calendar } from '$lib/models/calendar'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
+  import EditPanel from './EditPanel.svelte'
+  import { page } from '$app/stores'
+  import { user } from '$lib/stores/user'
 
-  let page = 0
+  let currentPage = 0
   let total = 0
   let currentYear = new Date().getFullYear()
   let currentMonth = new Date().getMonth() + 1
   $: startTime = new Date(currentYear, currentMonth, 0).setDate(1) / 1000
   $: endTime = new Date(currentYear, currentMonth, 0).getTime() / 1000
   let loading = false
+  let loadingCalendar = false
+  let submitting = false
+  let activeCalendar: Calendar = {
+    id: 0,
+    name: '',
+    intro: '',
+    link: '',
+    start_time: 0,
+    end_time: 0,
+    audited: false,
+    game_id: 0,
+    reporter_id: 0,
+  }
   let calendars: Calendar[] = []
+  let showCreatePanel = false
 
   let actions: DTColumnAction[] = [
     {
@@ -143,9 +160,99 @@
       fetchCalendars()
     }
   }
+
+  function updateOrCreateCalendar() {
+    if (activeCalendar.name.length <= 0 || activeCalendar.intro.length <= 0 || activeCalendar.link.length <= 0) {
+      showMessage('error', $i18n.t('calendar.cantBeEmpty'), 5000)
+      return
+    }
+    submitting = true
+    if (activeCalendar.id > 0) {
+      updateCalendar(activeCalendar.id, activeCalendar)
+        .then(() => {
+          showMessage('success', $i18n.t('announcement.updateSuccess'), 5000)
+          window.location.hash = ''
+        })
+        .catch((err) => {
+          showMessage('error', `${$i18n.t('announcement.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        })
+        .finally(() => {
+          submitting = false
+        })
+    } else {
+      const calendar: Calendar = {
+        ...activeCalendar,
+        id: 0,
+        reporter_id: $user.id,
+      }
+      createCalendar(calendar)
+        .then((res) => {
+          showMessage('success', $i18n.t('announcement.createSuccess'), 5000)
+          window.location.hash = ''
+          fetchCalendars()
+        })
+        .catch((err) => {
+          showMessage('error', `${$i18n.t('announcement.createFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        })
+        .finally(() => {
+          submitting = false
+        })
+    }
+  }
+
+  const unsubscribe = page.subscribe((val) => {
+    if (val.url.hash && val.url.hash.replace('#', '')) {
+      loadingCalendar = true
+      const id = parseInt(val.url.hash.replace('#', ''))
+      showCreatePanel = true
+      if (id && !Number.isNaN(id)) {
+        getCalendar(id)
+          .then((res) => {
+            activeCalendar = res
+            showCreatePanel = true
+          })
+          .catch((err) => {
+            showMessage('error', `${$i18n.t('calendar.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+          })
+          .finally(() => {
+            loadingCalendar = false
+          })
+      } else if (Number.isNaN(id)) {
+        activeCalendar = {
+          id: 0,
+          name: '',
+          intro: '',
+          link: '',
+          start_time: 0,
+          end_time: 0,
+          audited: false,
+          game_id: 0,
+          reporter_id: $user.id,
+        }
+        loadingCalendar = false
+      }
+    } else {
+      showCreatePanel = false
+      activeCalendar = {
+        id: 0,
+        name: '',
+        intro: '',
+        link: '',
+        start_time: 0,
+        end_time: 0,
+        audited: false,
+        game_id: 0,
+        reporter_id: 0,
+      }
+    }
+  })
+
+  onDestroy(() => {
+    unsubscribe()
+  })
 </script>
 
-<div class="flex-1 flex flex-col items-center">
+<div class="w-full flex-1 flex flex-col relative">
   <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
     <div class="h-16 flex flex-row items-center space-x-2">
       <h2 class="text-base font-bold flex-1">{$i18n.t('admin.calendarsSettings')}</h2>
@@ -165,6 +272,18 @@
         <span class="text-base">{$i18n.t('action.create')}</span>
       </RxLink>
     </div>
-    <DataTable class="flex-1" {actions} data={calendars} {colDef} bind:page {total} {loading} />
+    <DataTable class="flex-1" {actions} data={calendars} {colDef} bind:page={currentPage} {total} {loading} />
   </div>
+  <EditPanel
+    class={`transition-all ${showCreatePanel ? 'h-full' : 'h-0'}`}
+    bind:calendar={activeCalendar}
+    loading={loadingCalendar}
+    {submitting}
+    on:close={() => {
+      window.location.hash = ''
+    }}
+    on:submit={() => {
+      updateOrCreateCalendar()
+    }}
+  />
 </div>

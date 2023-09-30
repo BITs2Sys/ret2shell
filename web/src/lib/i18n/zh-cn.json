@@ -264,7 +264,9 @@
     "fetchFailed": "获取竞赛日历失败",
     "endTime": "结束时间",
     "startTime": "开始时间",
-    "name": "竞赛名称"
+    "name": "竞赛名称",
+    "submit": "提交",
+    "cantBeEmpty": "日历简介不能为空"
   },
   "init": {
     "accountTitle": "注册初始管理员用户",
@@ -399,7 +401,12 @@
     "title": "标题",
     "content": "内容",
     "pinned": "置顶",
-    "submit": "提交"
+    "submit": "提交",
+    "cantBeEmpty": "公告标题与内容不能为空",
+    "updateSuccess": "更新成功",
+    "updateFailed": "更新失败",
+    "createSuccess": "创建成功",
+    "createFailed": "创建失败"
   },
   "permissions": {
     "beVerifiedToView": "请先验证邮箱后访问",

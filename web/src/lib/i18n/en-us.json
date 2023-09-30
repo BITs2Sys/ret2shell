@@ -264,7 +264,9 @@
     "fetchFailed": "Failed to get game calendar",
     "name": "Game name",
     "startTime": "Starting time",
-    "endTime": "End Time"
+    "endTime": "End Time",
+    "submit": "Submit",
+    "cantBeEmpty": "Calendar introduction cannot be empty"
   },
   "init": {
     "title": "Initialize",
@@ -399,7 +401,12 @@
     "title": "Title",
     "content": "Content",
     "pinned": "Pinned",
-    "submit": "Submit"
+    "submit": "Submit",
+    "cantBeEmpty": "Announcement title and content cannot be empty",
+    "updateSuccess": "Update successfully",
+    "updateFailed": "Update failed",
+    "createSuccess": "Created successfully",
+    "createFailed": "Create failed"
   },
   "permissions": {
     "beVerifiedToView": "Please verify your email first before accessing",
