@@ -16,6 +16,7 @@
   let loading = false
   let users: User[] = []
   let institutes: Institute[] = []
+  let filter: string = ''
 
   $: readerUsers = users.map((a) => {
     return {
@@ -121,7 +122,7 @@
   }
   function fetchUsers() {
     loading = true
-    getUserList(page, perPage)
+    getUserList(page, perPage, '', filter)
       .then((res) => {
         users = res.users
         total = res.total
@@ -158,13 +159,26 @@
       fetchUsers()
     }
   }
+
+  $: {
+    if (filter) {
+      fetchUsers()
+    } else {
+      fetchUsers()
+    }
+  }
 </script>
 
 <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
   <div class="h-16 flex flex-row items-center">
     <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
     <div>
-      <RxInput size="sm" placeholder={$i18n.t('admin.filter')} icon="icon-[fluent--filter-16-regular]" />
+      <RxInput
+        size="sm"
+        placeholder={$i18n.t('admin.filter')}
+        icon="icon-[fluent--filter-16-regular]"
+        bind:value={filter}
+      />
     </div>
   </div>
   <DataTable

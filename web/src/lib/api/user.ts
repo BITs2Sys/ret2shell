@@ -8,8 +8,8 @@ export async function getUserInfo(id: number) {
 
 export async function getUserList(page: number, per_page: number, order?: string, filter?: string) {
   let uri = `${api_root}/user?page=${page}&per_page=${per_page}`
-  if (order) uri += `&order=${order}`
-  if (filter) uri += `&filter=${filter}`
+  if (order && order.length > 0) uri += `&order=${order}`
+  if (filter && filter.length > 0) uri += `&filter=${filter}`
   return (await api.get(uri)).data as {users: User[], total: number}
 }
 
