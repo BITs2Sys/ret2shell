@@ -6,7 +6,7 @@ COPY src src
 COPY Cargo.toml ./
 RUN ls && cargo build --release
 
-FROM debian:bookworm-slim
+FROM debian:12
 
 ## For developers in China ##
 #RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
@@ -14,4 +14,4 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/ret2shell/target/release/ret2shell /usr/local/bin/ret2shell
 
-CMD ["/usr/local/bin/ret2shell", "serve"]
+CMD ["/usr/local/bin/ret2shell", "up"]

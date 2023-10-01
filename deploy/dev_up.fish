@@ -27,11 +27,12 @@ end
 
 podman pull docker.io/redis:7
 podman pull docker.io/postgres:15
-podman pull docker.io/rust:1-bookworm
-podman pull docker.io/debian:bookworm-slim
+podman pull docker.io/nats:2
+podman pull docker.io/rust:1
+podman pull docker.io/debian:12
 
 podman-compose -f ./deploy/compose.dev.yml up -d
 
-tmux new-session -d -s ret2shell 'cd ./server && cargo run'
+tmux new-session -d -s ret2shell 'cargo run'
 tmux split-window -t ret2shell:0 -h 'cd ./web && pnpm dev --host'
 tmux attach-session -t ret2shell
