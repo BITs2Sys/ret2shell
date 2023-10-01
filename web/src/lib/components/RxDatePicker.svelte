@@ -35,6 +35,8 @@
       selectionStart = Math.floor(date.getTime() / 1000)
       selectionEnd = 0
       selectingEnd = true
+      startField.onInput(selectionStart)
+      endField.onInput(selectionEnd)
     }
   }
 </script>

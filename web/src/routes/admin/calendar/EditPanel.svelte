@@ -34,7 +34,11 @@
       .int()
       .min(new Date(2014, 0, 1).getTime() / 1000, { message: $i18n.t('calendar.startTimeLimit') })
       .max(new Date(2077, 0, 1).getTime() / 1000, { message: $i18n.t('calendar.startTimeLimit') }),
-    end_time: z.number().int(),
+    end_time: z
+      .number()
+      .int()
+      .min(new Date(2014, 0, 1).getTime() / 1000, { message: $i18n.t('calendar.startTimeLimit') })
+      .max(new Date(2077, 0, 1).getTime() / 1000, { message: $i18n.t('calendar.startTimeLimit') }),
   })
 
   const { form, data, touched, errors } = createForm({
@@ -143,7 +147,7 @@
           name="start_time"
           label={$i18n.t('calendar.startTime')}
           hasError={$errors.start_time !== null || $errors.end_time !== null}
-          errors={$errors.start_time || ''}
+          errors={$errors.start_time || $errors.end_time || ''}
         >
           <RxDatePicker
             selectionStartName="start_time"

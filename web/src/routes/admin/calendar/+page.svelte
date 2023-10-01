@@ -168,6 +168,7 @@
         .then(() => {
           showMessage('success', $i18n.t('announcement.updateSuccess'), 5000)
           window.location.hash = ''
+          fetchCalendars()
         })
         .catch((err) => {
           showMessage('error', `${$i18n.t('announcement.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)
@@ -194,7 +195,6 @@
           submitting = false
         })
     }
-    fetchCalendars()
   }
 
   const unsubscribe = page.subscribe((val) => {
