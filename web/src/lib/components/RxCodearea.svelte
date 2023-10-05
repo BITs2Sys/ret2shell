@@ -12,6 +12,7 @@
   export let readonly: boolean = false
   export let placeholder: string = ''
   export let loading = false
+  let rendering = true
 
   export let name: string = 'common_code_area'
 
@@ -85,6 +86,8 @@
     editor.on('blur', function () {
       onBlur()
     })
+
+    rendering = false
   }
 
   const unsubscribe = theme.subscribe((value) => {
@@ -107,6 +110,9 @@
     </div>
   {/if}
   <div class="absolute left-0 top-0 bottom-0 right-0 p-4">
-    <pre class="w-full min-h-full relative bg-transparent" use:field bind:this={editorElement}></pre>
+    <pre
+      class={`w-full min-h-full relative bg-transparent ${rendering ? 'hidden' : ''}`}
+      use:field
+      bind:this={editorElement}></pre>
   </div>
 </div>

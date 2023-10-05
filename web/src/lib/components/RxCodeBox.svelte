@@ -1,6 +1,5 @@
 <script lang="ts">
   import RxCodearea from './RxCodearea.svelte'
-  import 'ace-builds/esm-resolver'
 
   let clazz = ''
   export { clazz as class }

@@ -82,7 +82,7 @@
         <h2
           class="h-12 text-base font-bold flex flex-row space-x-2 items-center mt-4 border-b border-b-base-content/10"
         >
-          <span class="icon-[fluent--cellular-data-1-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--data-bar-vertical-ascending-16-regular] w-5 h-5"></span>
           <span>{$i18n.t('account.recentActivities')}</span>
         </h2>
         <p class="flex flex-col space-y-2">
@@ -93,7 +93,11 @@
                 >{$i18n.t('account.takePartAs', { team: team.name, game: team.game_name, score: team.score })}</span
               >
               <span class="text-base opacity-60 px-4">
-                {new Date(team.last_active_at * 1000).toLocaleDateString()}
+                {new Date(team.last_active_at * 1000).toLocaleDateString('default', {
+                  year: 'numeric',
+                  day: '2-digit',
+                  month: '2-digit',
+                })}
               </span>
             </div>
           {/each}

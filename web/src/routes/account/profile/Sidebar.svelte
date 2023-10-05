@@ -17,8 +17,8 @@
 </script>
 
 <div class="w-full flex flex-col">
-  <div class="h-28 flex flex-row p-6 border-b border-b-base-content/5">
-    <div class="rounded-full overflow-clip w-16 h-16 ring-4 ring-offset-base-100 ring-offset-4">
+  <div class="h-28 flex flex-row items-center p-6 border-b border-b-base-content/5">
+    <div class="rounded-full overflow-clip w-12 h-12 mx-2 ring-4 ring-offset-base-100 ring-offset-4">
       {#if $user.info && $user.info.cover_path}
         <RxImage src={$user.info.cover_path} {loading}></RxImage>
       {:else}
