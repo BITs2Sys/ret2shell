@@ -497,7 +497,15 @@
       "man": "列出当前比赛的所有题目"
     },
     "noGameSpecifiedTips": "只能在比赛或练习场环境中使用",
-    "noChallengeSpecifiedTips": "必须在题目中使用"
+    "noChallengeSpecifiedTips": "必须在题目中使用",
+    "service": {
+      "man": "操作动态题目环境"
+    },
+    "base64": {
+      "man": "base系列编码工具",
+      "needArgs": "参数错误",
+      "usage": "使用方法：base64 [-d|-e] \"content\""
+    }
   },
   "table": {
     "noData": "没有数据"

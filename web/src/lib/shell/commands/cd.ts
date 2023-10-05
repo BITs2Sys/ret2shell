@@ -1,11 +1,9 @@
 import type { ParseEntry } from 'shell-quote'
 import type { RnixStdio } from '../stdio'
 import type { Command } from './interface'
-import ansiColors from 'ansi-colors'
 import { get } from 'svelte/store'
 import { i18n } from '$lib/i18n'
 import type { RnixEnv } from '../shell'
-import { goto } from '$app/navigation'
 
 export class Cd implements Command {
   name = 'cd'

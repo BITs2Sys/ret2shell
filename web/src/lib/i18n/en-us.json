@@ -497,7 +497,15 @@
       "man": "List all challenge in the current game"
     },
     "noGameSpecifiedTips": "For use only in a game or playground environment",
-    "noChallengeSpecifiedTips": "Must be used in the challenge"
+    "noChallengeSpecifiedTips": "Must be used in the challenge",
+    "service": {
+      "man": "Operate dynamic challenge environment"
+    },
+    "base64": {
+      "man": "base series coding tools",
+      "needArgs": "Parameters error",
+      "usage": "Usage: base64 [-d|-e] \"content\""
+    }
   },
   "table": {
     "noData": "No data"

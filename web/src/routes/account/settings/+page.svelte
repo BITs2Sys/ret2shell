@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { platform } from '$lib/stores/platform'
-  import { i18n } from '$lib/i18n'
-</script>
+  import { onMount } from 'svelte'
+  import { goto } from '$app/navigation'
 
-<svelte:head><title>{$i18n.t('account.settings')} - {$platform.name}</title></svelte:head>
+  onMount(() => {
+    goto('/account/settings/info')
+  })
+</script>

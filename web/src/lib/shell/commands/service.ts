@@ -8,7 +8,7 @@ import ansiColors from 'ansi-colors'
 
 export class Service implements Command {
   name = 'service'
-  man = 'service'
+  man = get(i18n).t('shell.service.man')
   func = async (io: RnixStdio, _args: ParseEntry[], origin: string, envp: RnixEnv) => {
     if (envp.game == null) {
       io.logError(get(i18n).t('shell.noGameSpecified'))

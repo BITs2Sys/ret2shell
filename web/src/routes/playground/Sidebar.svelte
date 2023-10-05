@@ -69,7 +69,7 @@
     {/if}
   </h1>
   {#if activeGameId}
-    <div class="flex-1 flex-col p-4 overflow-x-hidden">
+    <div class="flex-1 flex-col p-4 overflow-x-hidden space-y-2">
       <RxLink ghost class="w-full" justify="start" href="/playground">
         <span class="icon-[fluent--arrow-hook-down-left-16-regular] w-6 h-6" />
         <span class="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap"
@@ -77,7 +77,7 @@
         >
         <span class="icon-[fluent--chevron-down-16-regular] w-5 h-5" />
       </RxLink>
-      <ul class="relative">
+      <ul class="relative flex flex-col space-y-2">
         {#each tags as tag}
           {#if tagsChallengesRecord[tag.id] && tagsChallengesRecord[tag.id].length > 0}
             <li>
@@ -101,7 +101,7 @@
               </RxButton>
               {#if tagExpandedRecord[tag.id]}
                 <ul
-                  class="pl-4 relative before:border-l-2 before:absolute before:h-full before:border-l-base-content/10 overflow-x-hidden"
+                  class="pl-4 relative before:border-l-2 before:absolute before:h-full before:border-l-base-content/10 overflow-x-hidden flex flex-col space-y-2 mt-2"
                 >
                   {#each tagsChallengesRecord[tag.id] as chal}
                     <RxLink ghost class="w-full" justify="start" href={`/playground/${activeGameId}#${chal.id}`}>
@@ -147,7 +147,7 @@
             {$i18n.t('playground.persistTitle')}
           </span>
         </h2>
-        <div class="flex flex-col p-4">
+        <div class="flex flex-col p-4 space-y-2">
           {#each playgrounds as item}
             <RxLink class="w-full" justify="start" ghost href={`/playground/${item.id}`}>
               <span class="icon-[fluent--bookmark-16-regular] w-6 h-6" />
@@ -175,7 +175,7 @@
             {$i18n.t('playground.gamesTitle')}
           </span>
         </h2>
-        <div class="flex flex-col p-4">
+        <div class="flex flex-col p-4 space-y-2">
           {#each filteredGames as item}
             <RxLink class="w-full" justify="start" ghost href={`/playground/${item.id}`}>
               <span class="icon-[fluent--archive-16-regular] w-6 h-6" />

@@ -11,7 +11,6 @@
   import type { AxiosError } from 'axios'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import type { TeamWithGameName } from '$lib/models/team'
-  import { game } from '$lib/stores/game'
 
   let toggleSidebar = false
   let screenWidth: number
