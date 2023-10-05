@@ -187,7 +187,8 @@
       "users": "Users",
       "wiki": "Wiki"
     },
-    "filter": "Filter..."
+    "filter": "Filter...",
+    "enter": "Enter"
   },
   "docs": {
     "title": "Documents"
@@ -432,7 +433,8 @@
     "beLoggedInToView": "please log in first"
   },
   "game": {
-    "fetchingList": "Loading list..."
+    "fetchingList": "Loading list...",
+    "fetchFailed": "Failed to get game"
   },
   "challenges": {
     "noHint": "No hints yet",

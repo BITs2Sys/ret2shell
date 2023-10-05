@@ -134,18 +134,17 @@ pub async fn get_game_page(
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find()
         .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Introduction)))
-        .order_by_desc(Column::StartTime);
+        .columns(Column::iter().filter(|c| !matches!(c, Column::Introduction)));
     if let Some(host_as_game) = host_as_game {
         sql = sql.filter(Column::HostAsGame.eq(host_as_game));
     } else {
-        // returns games by default
-        sql = sql.filter(Column::HostAsGame.eq(true));
+        // returns all by default
+        sql = sql.order_by_asc(Column::HostAsGame);
     }
     if filter_hidden {
         sql = sql.filter(Column::Hidden.eq(false));
     }
-    let paginator = sql.into_model().paginate(conn, per_page);
+    let paginator = sql.order_by_desc(Column::StartTime).into_model().paginate(conn, per_page);
     let resp = paginator.fetch_page(page - 1).await?;
     let num_pages = paginator.num_pages().await?;
     Ok((resp, num_pages))

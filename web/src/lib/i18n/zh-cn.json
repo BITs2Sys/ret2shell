@@ -187,7 +187,8 @@
     "currentPage": "当前",
     "userListSettings": "用户管理",
     "calendarsSettings": "竞赛日历",
-    "filter": "过滤条件..."
+    "filter": "过滤条件...",
+    "enter": "进入"
   },
   "docs": {
     "title": "技术文档"
@@ -432,7 +433,8 @@
     "beLoggedInToView": "请先登录"
   },
   "game": {
-    "fetchingList": "加载列表中..."
+    "fetchingList": "加载列表中...",
+    "fetchFailed": "获取赛事失败"
   },
   "challenges": {
     "noHint": "暂无提示信息",
