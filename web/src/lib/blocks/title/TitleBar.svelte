@@ -72,7 +72,7 @@
       </li>
     </ul>
   {:else}
-    <RxLink ghost href={$game.current ? `/games/${$game.current.id}` : '/'} exactlyMatched>
+    <RxLink ghost href={$game.current && $game.showGameNav ? `/games/${$game.current.id}` : '/'} exactlyMatched>
       <img class="hidden xl:block" width="28" height="28" src={logo} alt="logo" />
       {#if $game.showGameNav}
         <span>{$game.current?.name}</span>
