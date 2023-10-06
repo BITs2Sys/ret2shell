@@ -222,7 +222,10 @@
     "imageBroken": "Image Broken",
     "uploadTips": "Drag the image here to upload...",
     "imageUploadSuccess": "Image uploaded successfully, {{remaining}} remaining this week.",
-    "imageUploadFail": "Image upload failed"
+    "imageUploadFail": "Image upload failed",
+    "deleteConfirm": "confirm deletion of {{item}} ?",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "platform": {
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
@@ -438,7 +441,9 @@
     "updateSuccess": "Update successfully",
     "updateFailed": "Update failed",
     "createSuccess": "Created successfully",
-    "createFailed": "Create failed"
+    "createFailed": "Create failed",
+    "deleteSuccess": "successfully deleted",
+    "deleteFailed": "failed to delete"
   },
   "permissions": {
     "beVerifiedToView": "Please verify your email first before accessing",

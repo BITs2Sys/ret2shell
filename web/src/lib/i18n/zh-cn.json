@@ -222,7 +222,10 @@
     "imageBroken": "图片已损坏",
     "uploadTips": "将图片拖拽到此处上传...",
     "imageUploadSuccess": "图片上传成功，本周剩余 {{remaining}} 张。",
-    "imageUploadFail": "图片上传失败"
+    "imageUploadFail": "图片上传失败",
+    "deleteConfirm": "确认删除 {{item}} ？",
+    "confirm": "确认",
+    "cancel": "取消"
   },
   "platform": {
     "backendOffline": "后端服务似乎离线了，请尝试刷新页面，如果多次尝试仍旧出错，请联系网站管理员。",
@@ -438,7 +441,9 @@
     "updateSuccess": "更新成功",
     "updateFailed": "更新失败",
     "createSuccess": "创建成功",
-    "createFailed": "创建失败"
+    "createFailed": "创建失败",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败"
   },
   "permissions": {
     "beVerifiedToView": "请先验证邮箱后访问",

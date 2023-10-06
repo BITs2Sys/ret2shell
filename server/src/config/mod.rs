@@ -37,6 +37,7 @@ pub mod logging;
 pub mod media;
 pub mod queue;
 pub mod server;
+pub mod service;
 
 /// Represents the configuration for the whole application.
 #[derive(Debug, Clone, Serialize, Deserialize)]

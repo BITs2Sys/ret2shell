@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { createAnnouncement, getAnnouncement, getAnnouncementList, updateAnnouncement } from '$lib/api/announcement'
+  import {
+    createAnnouncement,
+    deleteAnnouncement,
+    getAnnouncement,
+    getAnnouncementList,
+    updateAnnouncement,
+  } from '$lib/api/announcement'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
@@ -12,6 +18,8 @@
   import { page } from '$app/stores'
   import { user } from '$lib/stores/user'
   import { platform } from '$lib/stores/platform'
+  import RxButton from '$lib/components/RxButton.svelte'
+  import { blur } from 'svelte/transition'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -39,6 +47,12 @@
     }
   })
 
+  let deleteModalOpened = false
+  let willDeletedAnnouncement = {
+    id: 0,
+    title: '',
+  }
+
   let actions: DTColumnAction[] = [
     {
       icon: 'icon-[fluent--edit-16-regular]',
@@ -53,7 +67,11 @@
       level: 'error',
       type: 'button',
       onClick: (data: DTDataEntry) => {
-        // popup delete modal
+        deleteModalOpened = true
+        willDeletedAnnouncement = {
+          id: data.id as number,
+          title: data.title as string,
+        }
       },
     },
   ]
@@ -216,6 +234,18 @@
         })
     }
   }
+
+  function handleDeleteAnnouncement() {
+    deleteAnnouncement(willDeletedAnnouncement.id)
+      .then(() => {
+        showMessage('success', $i18n.t('announcement.deleteSuccess'), 5000)
+        deleteModalOpened = false
+        fetchAnnouncements()
+      })
+      .catch((err) => {
+        showMessage('error', `${$i18n.t('announcement.deleteFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+      })
+  }
 </script>
 
 <svelte:head><title>{$i18n.t('admin.announcementsSettings')} - {$platform.name}</title></svelte:head>
@@ -256,3 +286,19 @@
     }}
   />
 </div>
+{#if deleteModalOpened}
+  <div
+    class="fixed top-0 left-0 w-full h-full bg-base-100/60 z-50 flex flex-col items-center justify-center"
+    transition:blur={{ amount: 20, duration: 300 }}
+  >
+    <div class="rounded-box p-4 flex flex-col space-y-4 bg-neutral w-64">
+      <h1 class="text-base font-bold">
+        {$i18n.t('form.deleteConfirm', { item: decodeURI(willDeletedAnnouncement.title.split('|')[0]) })}
+      </h1>
+      <div class="flex flex-row justify-end space-x-4">
+        <RxButton size="sm" on:click={() => (deleteModalOpened = false)}>{$i18n.t('form.cancel')}</RxButton>
+        <RxButton size="sm" level="error" on:click={handleDeleteAnnouncement}>{$i18n.t('form.confirm')}</RxButton>
+      </div>
+    </div>
+  </div>
+{/if}
