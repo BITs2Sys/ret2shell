@@ -192,7 +192,8 @@
     "wikiGuide": "欢迎来到知识库！请在左侧选择你想编辑的文章，或装创建一篇新的。",
     "enter": "进入",
     "update": "更新",
-    "instituteListSettings": "组织管理"
+    "instituteListSettings": "组织管理",
+    "deleteWikiConfirm": "确认删除 {{item}} ？该文章下的所有子文章将一并删除（如果有）。"
   },
   "docs": {
     "title": "技术文档"

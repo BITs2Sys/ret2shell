@@ -192,7 +192,8 @@
     "create": "Create",
     "enter": "Enter",
     "update": "Update",
-    "instituteListSettings": "Institute management"
+    "instituteListSettings": "Institute management",
+    "deleteWikiConfirm": "Confirm to delete {{item}}? \nAll sub-articles under this article will be deleted (if any)."
   },
   "docs": {
     "title": "Documents"

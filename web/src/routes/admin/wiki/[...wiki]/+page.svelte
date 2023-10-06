@@ -10,6 +10,7 @@
   import RxInput from '$lib/components/RxInput.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import { goto } from '$app/navigation'
+  import { blur } from 'svelte/transition'
 
   let loading = true
   let error = 200
@@ -100,7 +101,7 @@
       loading = false
     }
   })
-  
+
   function handleDeleteWiki() {
     deleteWiki(wiki.id)
       .then(() => {
@@ -111,7 +112,7 @@
           pathArr.pop()
           goto(`/${pathArr.join('/')}#edit`)
         } else {
-          goto("/admin/wiki/0#create")
+          goto('/admin/wiki/0#create')
         }
       })
       .catch((err) => {
@@ -191,18 +192,18 @@
 </div>
 <RxCodearea class="flex-1" lang="markdown" bind:value={editedWiki.content} droppable={true}></RxCodearea>
 {#if deleteModalOpened}
-    <div
-      class="fixed top-0 left-0 w-full h-full bg-base-100/60 z-50 flex flex-col items-center justify-center"
-      transition:blur={{ amount: 20, duration: 300 }}
-    >
-      <div class="rounded-box p-4 flex flex-col space-y-4 bg-neutral w-64">
-        <h1 class="text-base font-bold">
-          {$i18n.t('form.deleteConfirm', { item: decodeURI(wiki.title.split('|')[0]) })}
-        </h1>
-        <div class="flex flex-row justify-end space-x-4">
-          <RxButton size="sm" on:click={() => (deleteModalOpened = false)}>{$i18n.t('form.cancel')}</RxButton>
-          <RxButton size="sm" level="error" on:click={handleDeleteWiki}>{$i18n.t('form.confirm')}</RxButton>
-        </div>
+  <div
+    class="fixed top-0 left-0 w-full h-full bg-base-100/60 z-50 flex flex-col items-center justify-center"
+    transition:blur={{ amount: 20, duration: 300 }}
+  >
+    <div class="rounded-box p-4 flex flex-col space-y-4 bg-neutral w-80">
+      <h1 class="text-base font-bold">
+        {$i18n.t('admin.deleteWikiConfirm', { item: decodeURI(wiki.title.split('|')[0]) })}
+      </h1>
+      <div class="flex flex-row justify-end space-x-4">
+        <RxButton size="sm" on:click={() => (deleteModalOpened = false)}>{$i18n.t('form.cancel')}</RxButton>
+        <RxButton size="sm" level="error" on:click={handleDeleteWiki}>{$i18n.t('form.confirm')}</RxButton>
       </div>
     </div>
-  {/if}
+  </div>
+{/if}
