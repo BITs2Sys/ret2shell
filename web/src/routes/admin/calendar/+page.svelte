@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createCalendar, getCalendar, getCalendarList, updateCalendar } from '$lib/api/calendar'
+  import { createCalendar, deleteCalendar, getCalendar, getCalendarList, updateCalendar } from '$lib/api/calendar'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
@@ -35,6 +35,11 @@
   let calendars: Calendar[] = []
   let showCreatePanel = false
 
+  let deleteModalOpened = false
+  let willDeletedCalendar = {
+    id: 0,
+    name: '',
+  }
   let actions: DTColumnAction[] = [
     {
       icon: 'icon-[fluent--edit-16-regular]',
@@ -49,7 +54,11 @@
       level: 'error',
       type: 'button',
       onClick: (data: DTDataEntry) => {
-        // popup delete modal
+        deleteModalOpened = true
+        willDeletedCalendar = {
+          id: data.id as number,
+          name: data.name as string,
+        }
       },
     },
   ]
@@ -240,6 +249,18 @@
     }
   })
 
+  function handleDeleteCalendar() {
+    deleteCalendar(willDeletedCalendar.id)
+      .then(() => {
+        showMessage('success', $i18n.t('announcement.deleteSuccess'), 5000)
+        deleteModalOpened = false
+        fetchCalendars()
+      })
+      .catch((err) => {
+        showMessage('error', `${$i18n.t('announcement.deleteFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+      })
+  }
+
   onDestroy(() => {
     unsubscribe()
   })
@@ -281,4 +302,20 @@
       updateOrCreateCalendar(event.detail)
     }}
   />
+  {#if deleteModalOpened}
+  <div
+    class="fixed top-0 left-0 w-full h-full bg-base-100/60 z-50 flex flex-col items-center justify-center"
+    transition:blur={{ amount: 20, duration: 300 }}
+  >
+    <div class="rounded-box p-4 flex flex-col space-y-4 bg-neutral w-64">
+      <h1 class="text-base font-bold">
+        {$i18n.t('form.deleteConfirm', { item: decodeURI(willDeletedCalendar.name.split('|')[0]) })}
+      </h1>
+      <div class="flex flex-row justify-end space-x-4">
+        <RxButton size="sm" on:click={() => (deleteModalOpened = false)}>{$i18n.t('form.cancel')}</RxButton>
+        <RxButton size="sm" level="error" on:click={handleDeleteCalendar}>{$i18n.t('form.confirm')}</RxButton>
+      </div>
+    </div>
+  </div>
+{/if}
 </div>
