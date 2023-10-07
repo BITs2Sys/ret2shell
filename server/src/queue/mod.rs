@@ -3,9 +3,9 @@
 //!
 
 use crate::config::GlobalConfig;
-use async_nats::Client;
+use async_nats::jetstream;
 
-pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<Client> {
+pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<jetstream::Context> {
     let mut options =
         async_nats::ConnectOptions::new().require_tls(config.queue.tls.unwrap_or(false));
     if config.queue.token.is_some() {
@@ -27,5 +27,5 @@ pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<Client> {
         )
     }
     let client = options.connect(config.queue.addr()).await?;
-    Ok(client)
+    Ok(jetstream::new(client))
 }
