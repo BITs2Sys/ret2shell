@@ -45,6 +45,9 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             state.clone(),
             info::prepare_user_full_info,
         ))
+        .route_layer(middleware::from_fn(auth::permission_required_all!(
+            Permission::Basic
+        )))
         .nest("/institute", institute::router(state))
 }
 

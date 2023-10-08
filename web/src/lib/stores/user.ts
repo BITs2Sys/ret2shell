@@ -82,3 +82,7 @@ export async function userInfo() {
   }
   return get(user).info
 }
+
+export async function refreshUserInfo() {
+  await _fetchUserInfo()
+}

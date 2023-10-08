@@ -17,7 +17,7 @@
   import { i18n } from '$lib/i18n'
   import GlobalToast from '$lib/blocks/GlobalToast.svelte'
   import type { AxiosError } from 'axios'
-  import { userReset } from '$lib/stores/user'
+  import { refreshUserInfo, user, userReset } from '$lib/stores/user'
 
   let platformTyped = ''
   let animation = $page.url.pathname === '/'
@@ -37,6 +37,8 @@
         return goto('/init')
       } else showMessage('error', $i18n.t('platform.backendOffline'))
     })
+
+  refreshUserInfo()
 
   function acceptCookiePolicy() {
     $platform.accept_cookies = true

@@ -98,8 +98,7 @@
   </RxPopup>
   {#if !$initConfig.processing}
     {#if $user.isLoggedIn}
-      <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="userBoxPopup" popupWidth={64}>
-        <!-- TODO: replace with user's avatar if exists -->
+      <RxPopup class="btn-square btn-ghost inline-flex" name="userBoxPopup" popupWidth={64}>
         <div class="avatar" slot="button">
           <div
             class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"

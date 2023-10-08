@@ -117,7 +117,8 @@
     <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
       <div class="flex-1" />
       <h1 class="text-3xl font-semibold">
-        &nbsp;&nbsp;[&nbsp;{$platform.name}&nbsp;]&nbsp;
+        &nbsp;
+        <span>[&nbsp;{$platform.name}&nbsp;]</span>
         <span class="text-primary animate-ping">_</span>
       </h1>
       <a class="text-xl text-error mt-8" href={$platform.subject_url}>{$platform.subject_info}</a>
