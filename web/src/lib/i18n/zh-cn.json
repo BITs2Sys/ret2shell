@@ -55,7 +55,14 @@
     "fetchFailed": "获取基本信息失败",
     "resetPassword": "重置密码",
     "changePassword": "修改密码",
-    "oldPassword": "旧密码"
+    "oldPassword": "旧密码",
+    "resendVerifyEmail": "重新发送验证邮件",
+    "needVerify": "验证邮件已发送至您的邮箱，请尽快验证，否则您可能会受到限制",
+    "emailVerifying": "正在验证邮箱",
+    "verifyEmail": "邮箱验证",
+    "sendResetEmail": "发送密码重置邮件",
+    "forgotPassword": "忘记密码",
+    "submit": "提交"
   },
   "announcements": {
     "title": "公告",
@@ -559,5 +566,12 @@
   },
   "institute": {
     "name": "组织名"
+  },
+  "email": {
+    "sent": "邮件发送成功",
+    "sendFailed": "邮件发送失败",
+    "verifyFailed": "邮箱验证失败",
+    "verifySuccess": "邮箱验证成功",
+    "invalidVerifyLink": "链接缺少关键参数，请仔细核对后重试"
   }
 }

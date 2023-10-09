@@ -96,10 +96,14 @@
         </RxFormItem>
         <RxFormItem
           name="password"
-          label={$i18n.t('account.password')}
+          label=""
           hasError={$errors.password !== null}
           errors={$errors.password || ''}
         >
+        <span slot="label" class="text-sm font-bold opacity-60 flex flex-row justify-between w-full">
+          <span>{$i18n.t('account.password')}</span>
+          <a class="hover:underline" href="/account/forgot-password">{ $i18n.t('account.forgotPassword') }</a>
+        </span>
           <RxInput
             icon="icon-[fluent--lock-16-regular]"
             class="w-full"

@@ -18,6 +18,8 @@
   import GlobalToast from '$lib/blocks/GlobalToast.svelte'
   import type { AxiosError } from 'axios'
   import { refreshUserInfo, user, userReset } from '$lib/stores/user'
+  import { Permission } from "$lib/models/user"
+  import { resendEmailVerification } from '$lib/api/account'
 
   let platformTyped = ''
   let animation = $page.url.pathname === '/'
@@ -44,6 +46,15 @@
     $platform.accept_cookies = true
   }
 
+  function sendEmailVerification() {
+    resendEmailVerification()
+    .then(() => {
+      showMessage('success', $i18n.t('email.resent'), 5000)
+    }).catch((err) => {
+      showMessage('error', `${$i18n.t('email.sendFailed')}: ${err.response?.data}`, 5000)
+    })
+  }
+
   onMount(() => {
     if (!$platform.accept_cookies) {
       showMessage(
@@ -56,6 +67,11 @@
         $i18n.t('action.yes')
       )
     }
+
+    if ($user.token && !$user.permissions.includes(Permission.Verified)) {
+      showMessage('warning', $i18n.t('account.needVerify'), undefined, undefined, undefined, sendEmailVerification, $i18n.t('account.resendVerifyEmail'))
+    }
+
     if (!animation) return
     setTimeout(() => {
       let platformLast = `\xa0\xa0[ ${$platform.name} ] `

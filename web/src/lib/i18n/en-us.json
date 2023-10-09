@@ -55,7 +55,14 @@
     "fetchFailed": "Failed to get basic info",
     "resetPassword": "Reset Password",
     "changePassword": "Change Password",
-    "oldPassword": "Old Password"
+    "oldPassword": "Old Password",
+    "resendVerifyEmail": "Resend verification email",
+    "needVerify": "A verification email has been sent to your email, please verify as soon as possible, otherwise you may be restricted",
+    "emailVerifying": "Verifying email",
+    "verifyEmail": "Email verification",
+    "sendResetEmail": "Send password reset email",
+    "forgotPassword": "Forgot password",
+    "submit": "submit"
   },
   "playground": {
     "title": "Playground",
@@ -560,5 +567,12 @@
   },
   "institute": {
     "name": "Institute name"
+  },
+  "email": {
+    "sent": "email has been sent",
+    "sendFailed": "Failed to send email",
+    "verifyFailed": "Email verification failed",
+    "verifySuccess": "Email verification successful",
+    "invalidVerifyLink": "The link is missing key parameters, please check carefully and try again."
   }
 }
