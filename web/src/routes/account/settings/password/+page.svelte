@@ -1,17 +1,14 @@
 <script lang="ts">
     import RxButton from '$lib/components/RxButton.svelte'
-    import RxCard from '$lib/components/RxCard.svelte'
     import RxForm from '$lib/components/RxForm.svelte'
     import RxFormItem from '$lib/components/RxFormItem.svelte'
     import RxInput from '$lib/components/RxInput.svelte'
-    import Logo from '$lib/assets/logo.svg'
     import { platform } from '$lib/stores/platform'
     import { i18n } from '$lib/i18n'
     import { z } from 'zod'
     import { validator } from '@felte/validator-zod'
     import { createForm } from 'felte'
     import Captcha from '$lib/blocks/Captcha.svelte'
-    import RxLink from '$lib/components/RxLink.svelte'
     import { changeUserPassword } from '$lib/api/account'
     import { goto } from '$app/navigation'
     import { showMessage } from '$lib/stores/toast'
@@ -37,7 +34,7 @@
         .min(1, { message: $i18n.t('account.captchaIsRequired') }),
     }) .refine((data) => data.new_password === data.passwordConfirm, {
           message: $i18n.t('account.passwordNotMatch'),
-          path: ['verified_password'], // path of error
+          path: ['passwordConfirm'], // path of error
         })
 
     let loading = false
@@ -45,7 +42,6 @@
     const { form, data, touched, errors } = createForm({
       extend: validator({ schema }),
       onSubmit(values) {
-        console.log("1111")
         loading = true
         return changeUserPassword({...values})
       },
@@ -126,7 +122,6 @@
         type="password"
         name="new_password"
         hasError={$errors.new_password !== null}
-        autocomplete="current-password"
       />
     </RxFormItem>
     <RxFormItem
@@ -142,7 +137,6 @@
         type="password"
         name="passwordConfirm"
         hasError={$errors.passwordConfirm !== null}
-        autocomplete="current-password"
       />
     </RxFormItem>
     <Captcha
