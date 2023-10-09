@@ -61,13 +61,13 @@ export async function verifyEmail (request: VerifyEmailRequest) {
   return api.post(`${api_root}/account/verify-email`, request)
 }
 
-export interface ResetPassowrdEmailRequest {
+export interface SendResetEmailRequest {
   email: string
   captcha_id: string
   captcha_answer: string
 }
 
-export async function ResetPassword (request: ResetPassowrdEmailRequest) {
+export async function sendResetEmail (request: SendResetEmailRequest) {
   return api.post(`${api_root}/account/send-reset-email`, request)
 }
 
