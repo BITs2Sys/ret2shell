@@ -1,5 +1,6 @@
 import type { Challenge } from '$lib/models/challenge'
 import type { Game } from '$lib/models/game'
+import type { Submission } from '$lib/models/submission'
 import type { Team } from '$lib/models/team'
 import { writable } from 'svelte/store'
 
@@ -8,6 +9,7 @@ class GameStore {
   cached: Game | null
   team: Team | null
   challenges: Challenge[]
+  submissions: Submission[]
   showGameNav: boolean
 
   constructor() {
@@ -15,6 +17,7 @@ class GameStore {
     this.cached = null
     this.team = null
     this.challenges = []
+    this.submissions = []
     this.showGameNav = false
   }
 }

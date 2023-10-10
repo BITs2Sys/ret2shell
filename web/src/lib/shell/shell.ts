@@ -12,6 +12,7 @@ import { parse } from 'shell-quote'
 import stripAnsi from 'strip-ansi'
 import { i18n } from '$lib/i18n'
 import { get } from 'svelte/store'
+import type { EventDispatcher } from 'svelte'
 
 export interface RnixEnv {
   availableChallenges: Challenge[]
@@ -33,9 +34,11 @@ export class RnixShell {
   private history: BufferHistory
   private inputBuffer: string = ''
   private running: boolean = false
+  private dispatch: EventDispatcher<Record<string, any>> | null = null
 
-  public constructor(term: Terminal) {
+  public constructor(term: Terminal, dispatch: EventDispatcher<Record<string, any>> | null = null) {
     ansiColors.enabled = true
+    this.dispatch = dispatch
     this.history = new BufferHistory()
     this.stdio = new RnixStdio(term)
     this.exec = new Exec()
@@ -56,6 +59,7 @@ export class RnixShell {
   }
 
   public setChallenge(challenge: Challenge | null) {
+    if (this.env.challenge?.id === challenge?.id) return
     this.env.challenge = challenge
     this.buildPrompt()
     if (this.running) {
@@ -68,6 +72,7 @@ export class RnixShell {
   }
 
   public setAvailableChallenges(availableChallenges: Challenge[]) {
+    if (this.env.availableChallenges === availableChallenges) return
     this.env.availableChallenges = availableChallenges
     this.buildPrompt()
     if (this.running) {
@@ -80,6 +85,7 @@ export class RnixShell {
   }
 
   public setGame(game: Game | null) {
+    if (this.env.game?.id === game?.id) return
     this.env.game = game
     this.buildPrompt()
     if (this.running) {
@@ -92,6 +98,7 @@ export class RnixShell {
   }
 
   public setUser(user: User | null) {
+    if (this.env.user?.id === user?.id) return
     this.env.user = user
     this.buildPrompt()
     if (this.running) {
@@ -132,7 +139,15 @@ export class RnixShell {
       if (stripAnsi(this.inputBuffer).trim().length === 0) continue
       if (this.inputBuffer.trim() === 'exit') break
       this.history.push(stripAnsi(this.inputBuffer))
-      this.code = await this.exec.exec(this.stdio, parse(this.inputBuffer), this.env, this.inputBuffer)
+      const args = parse(this.inputBuffer)
+      const result = await this.exec.exec(this.stdio, args, this.env, this.inputBuffer)
+      if (this.dispatch) {
+        this.dispatch('executed', {
+          cmd: result.cmd,
+          code: result.code,
+        })
+      }
+      this.code = result.code
       this.stdio.print('\n')
       this.buildPrompt()
     }

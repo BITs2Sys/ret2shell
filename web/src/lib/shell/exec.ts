@@ -22,15 +22,15 @@ export class Exec {
     let cmd = args[0]
     if (typeof cmd !== 'string') {
       io.logError(get(i18n).t('shell.commandInvalid'))
-      return -127
+      return { cmd: '', code: -127 }
     }
     cmd = cmd.trim()
-    if (cmd === '') return 0
+    if (cmd === '') return { cmd, code: 0 }
     if (this.commands.has(cmd)) {
-      return await this.commands.get(cmd)!.func(io, args.slice(1), origin, env)
+      return { cmd, code: await this.commands.get(cmd)!.func(io, args.slice(1), origin, env) }
     } else {
       io.logError(get(i18n).t('shell.commandNotFound', { command: cmd }))
-      return -127
+      return { cmd, code: -127 }
     }
   }
 }

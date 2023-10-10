@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import { getChallenge, getChallengeHints } from '$lib/api/challenge'
-  import { getGame } from '$lib/api/game'
+  import { getGame, getGameSelfSubmission } from '$lib/api/game'
   import AnswerPanel from '$lib/blocks/challenge/AnswerPanel.svelte'
   import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
   import TerminalPanel from '$lib/blocks/challenge/TerminalPanel.svelte'
@@ -68,9 +68,24 @@
   let openedTabDivRecord: Record<number, HTMLDivElement> = {}
   let hints: Hint[] = []
 
+  function getSelfSubmissions() {
+    if ($game.current?.id)
+      getGameSelfSubmission($game.current.id)
+        .then((res) => {
+          $game.submissions = res
+        })
+        .catch((err) => {
+          showMessage(
+            'error',
+            `${$i18n.t('playground.fetchSelfSubmissionsFailed')}: ${(err as AxiosError).response?.data}`,
+            5000
+          )
+        })
+  }
+
   let unsubscribe = page.subscribe((value) => {
     let challengeId = value.url.hash ? parseInt(value.url.hash.slice(1)) || null : null
-    if (challengeId) {
+    if (challengeId && challengeId !== activeChallenge?.id) {
       if (openedChallenges.find((chal) => chal.id === challengeId)) {
         activeChallenge = openedChallenges.find((chal) => chal.id === challengeId) || null
         if (openedTabDivRecord[challengeId]) {
@@ -257,6 +272,11 @@
         challenge={activeChallenge}
         availableChallenges={$game.challenges}
         class={bottomTab === 0 ? 'p-6' : 'hidden'}
+        on:executed={(e) => {
+          if (e.detail.code === 0 && e.detail.cmd === 'submit') {
+            getSelfSubmissions()
+          }
+        }}
       />
       <HintsPanel {hints} class={bottomTab === 1 ? '' : 'hidden'} />
       <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} />

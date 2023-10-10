@@ -45,7 +45,6 @@
   let challengeTotalPages: number = 0
   let challengePageSize = 200
   let challengePage: number = 1
-  let selfSubmissions: Submission[] = []
   $: mayHaveMoreChallenges = challengePage < challengeTotalPages
   $: mayHaveMoreGames = gamePage < gameTotalPages
   $: mayHaveMorePlaygrounds = playgroundPage < playgroundTotalPages
@@ -133,16 +132,11 @@
     }
   }
 
-  const unsubscribe = page.subscribe((value) => {
-    let newActiveGameId = value.params.game ? parseInt(value.params.game) || null : null
-    // console.log(activeGameId)
-    if (newActiveGameId && newActiveGameId !== activeGameId) {
-      $game.challenges = []
-      activeGameId = newActiveGameId
-
+  function getSelfSubmissions() {
+    if (activeGameId)
       getGameSelfSubmission(activeGameId)
         .then((res) => {
-          selfSubmissions = res
+          $game.submissions = res
         })
         .catch((err) => {
           showMessage(
@@ -151,6 +145,14 @@
             5000
           )
         })
+  }
+
+  const unsubscribe = page.subscribe((value) => {
+    let newActiveGameId = value.params.game ? parseInt(value.params.game) || null : null
+    // console.log(activeGameId)
+    if (newActiveGameId && newActiveGameId !== activeGameId) {
+      $game.challenges = []
+      activeGameId = newActiveGameId
       getChallengeList(activeGameId, challengePage, challengePageSize)
         .then((res) => {
           $game.challenges = res.challenges.toSorted((a, b) =>
@@ -171,6 +173,7 @@
             5000
           )
         })
+      getSelfSubmissions()
     }
   })
   onDestroy(() => {
@@ -189,7 +192,7 @@
       <Sidebar
         {games}
         {playgrounds}
-        {selfSubmissions}
+        selfSubmissions={$game.submissions}
         activeGameChallenges={$game.challenges}
         {tags}
         {mayHaveMoreChallenges}
@@ -223,7 +226,7 @@
       <Sidebar
         {games}
         {playgrounds}
-        {selfSubmissions}
+        selfSubmissions={$game.submissions}
         activeGameChallenges={$game.challenges}
         {tags}
         {mayHaveMoreChallenges}

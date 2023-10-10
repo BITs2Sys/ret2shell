@@ -62,7 +62,7 @@
   function initEditor() {
     editor = ace.edit(editorElement, {
       mode: `ace/mode/${lang}`,
-      theme: `ace/theme/${$theme.colorScheme === 'light' ? 'kuroir' : 'twilight'}`,
+      theme: `ace/theme/${$theme.colorScheme === 'light' ? 'kuroir' : 'github_dark'}`,
       readOnly: readonly,
       showPrintMargin: false,
       highlightActiveLine: false,
@@ -101,7 +101,7 @@
   }
 
   const unsubscribe = theme.subscribe((value) => {
-    if (editor) editor.setTheme(`ace/theme/${value.colorScheme === 'light' ? 'kuroir' : 'twilight'}`)
+    if (editor) editor.setTheme(`ace/theme/${value.colorScheme === 'light' ? 'kuroir' : 'github_dark'}`)
   })
 
   onDestroy(() => {
@@ -190,7 +190,7 @@
     on:drop={drop}
   >
     <pre
-      class={`w-full min-h-full relative bg-transparent ${rendering ? 'hidden' : ''}`}
+      class={`w-full min-h-full relative bg-transparent opacity-80 ${rendering ? 'hidden' : ''}`}
       use:field
       bind:this={editorElement}></pre>
   </div>

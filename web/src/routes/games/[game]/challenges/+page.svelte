@@ -11,7 +11,6 @@
   import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
-  import type { Submission } from '$lib/models/submission'
   import { Permission } from '$lib/models/user'
   import { game } from '$lib/stores/game'
   import { theme } from '$lib/stores/theme'
@@ -38,7 +37,6 @@
   let challengeTotalPages: number = 0
   let challengePageSize = 200
   let challengePage: number = 1
-  let selfSubmissions: Submission[] = []
   $: mayHaveMoreChallenges = challengePage < challengeTotalPages
   let tags: Tag[] = []
   let currentGameIdCache: number | null = null
@@ -75,7 +73,7 @@
     if ($game.current?.id) {
       getGameSelfSubmission($game.current?.id)
         .then((res) => {
-          selfSubmissions = res
+          $game.submissions = res
         })
         .catch((err) => {
           showMessage(
@@ -149,7 +147,7 @@
 
   let unsubscribe = page.subscribe((value) => {
     let challengeId = value.url.hash ? parseInt(value.url.hash.slice(1)) || null : null
-    if (challengeId) {
+    if (challengeId && challengeId !== activeChallenge?.id) {
       if (openedChallenges.find((chal) => chal.id === challengeId)) {
         activeChallenge = openedChallenges.find((chal) => chal.id === challengeId) || null
         if (openedTabDivRecord[challengeId]) {
@@ -233,7 +231,7 @@
       class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
     >
       <ChallengeSidebar
-        {selfSubmissions}
+        selfSubmissions={$game.submissions}
         challenges={$game.challenges}
         {tags}
         {mayHaveMoreChallenges}
@@ -331,7 +329,7 @@
               {#if activeChallenge}
                 <ChallengePanel
                   challenge={activeChallenge}
-                  solved={selfSubmissions.find((s) => s.challenge_id === activeChallenge?.id) !== undefined}
+                  solved={$game.submissions.find((s) => s.challenge_id === activeChallenge?.id) !== undefined}
                 />
               {:else}
                 <div class="flex flex-col w-full max-w-5xl px-6">
@@ -384,6 +382,11 @@
         challenge={activeChallenge}
         availableChallenges={$game.challenges}
         class={bottomTab === 0 ? 'p-6' : 'hidden'}
+        on:executed={(e) => {
+          if (e.detail.code === 0 && e.detail.cmd === 'submit') {
+            getSelfSubmissions()
+          }
+        }}
       />
       <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} {hints} />
     </div>
@@ -422,7 +425,7 @@
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
       <ChallengeSidebar
-        {selfSubmissions}
+        selfSubmissions={$game.submissions}
         challenges={$game.challenges}
         {tags}
         {mayHaveMoreChallenges}

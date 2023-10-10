@@ -5,8 +5,15 @@ article.prose * {
 
 article > pre,
 article > pre * {
-  @apply whitespace-pre-wrap;
-  overflow-wrap: break-word;
+  @apply whitespace-pre-wrap text-base break-words bg-neutral #{!important};
+}
+
+code:not(pre code) {
+  @apply whitespace-pre-wrap text-base break-all bg-base-content/10 rounded-md mx-1 #{!important};
+}
+
+article.prose img {
+  @apply rounded-lg #{!important};
 }
 
 article > h1 > a,

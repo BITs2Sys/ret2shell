@@ -4,7 +4,7 @@
   import { FitAddon } from 'xterm-addon-fit'
   import { WebLinksAddon } from 'xterm-addon-web-links'
   import { CanvasAddon } from 'xterm-addon-canvas'
-  import { onDestroy, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { RnixShell } from '$lib/shell/shell'
   import 'xterm/css/xterm.css'
   import { goto } from '$app/navigation'
@@ -20,6 +20,8 @@
   export let game: Game | null
   export let challenge: Challenge | null
   export let availableChallenges: Challenge[]
+
+  const dispatch = createEventDispatcher()
 
   const linkHandler = {
     activate(_event: MouseEvent, text: string) {
@@ -80,7 +82,7 @@
     term.open(terminal)
     fitAddon.fit()
     term.focus()
-    shell = new RnixShell(term)
+    shell = new RnixShell(term, dispatch)
     userInfo().then((user) => {
       // console.log('setting user', user?.name)
       shell?.setUser(user)
