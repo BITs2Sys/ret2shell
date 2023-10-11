@@ -572,7 +572,8 @@
     "certificates": "证书签发"
   },
   "users": {
-    "fetchFailed": "获取用户列表失败"
+    "fetchFailed": "获取用户列表失败",
+    "fetchInfoFailed": "获取用户信息失败"
   },
   "institutes": {
     "fetchFailed": "获取组织列表失败"

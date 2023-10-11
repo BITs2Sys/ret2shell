@@ -29,9 +29,11 @@
 >
   <div class="w-full max-w-5xl flex flex-row px-6 items-center">
     <span
-      class={`icon-[fluent--braces-16-regular] transition-all transform text-primary ${
-        challengeScrollExpanded ? 'w-12 h-12 mr-4' : 'w-6 h-6 mr-2'
-      }`}
+      class={`${
+        solved
+          ? 'icon-[fluent--checkmark-circle-16-regular] text-success'
+          : 'icon-[fluent--question-circle-16-regular] text-base-content/60'
+      } transition-all transform ${challengeScrollExpanded ? 'w-16 h-16 mr-4' : 'w-6 h-6 mr-2'}`}
     />
     <div class="flex flex-col">
       <h1
@@ -39,11 +41,6 @@
           challengeScrollExpanded ? 'text-2xl' : 'text-base'
         } flex flex-row space-x-2 items-center`}
       >
-        {#if solved}
-          <span class="text-success">[{$i18n.t('challenges.solved')}]</span>
-        {:else}
-          <span class="text-warning">[{$i18n.t('challenges.unsolved')}]</span>
-        {/if}
         <span>{challenge?.name}</span>
       </h1>
       <p

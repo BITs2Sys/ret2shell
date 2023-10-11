@@ -64,7 +64,7 @@
     "forgotPassword": "Forgot password",
     "submit": "submit",
     "loading": "loading...",
-    "deleteAccountTitle": "warn! \nOnce the account is deactivated, it cannot be restored!",
+    "deleteAccountTitle": "Warning! Deactivated account cannot be restored!",
     "deleteAccountTipsTitle1": "Please make it clear that your account is not really deleted, but is placed in a state where it is deleted and cannot be recovered. The following operations will be performed:",
     "deleteAccountTips1": "Please make it clear that your account is not really deleted, but is placed in a deactivated and unrecoverable state. The following operations will be performed:",
     "deleteAccountTipsList1": "Your account will be renamed [DELETED]_<hash>;",

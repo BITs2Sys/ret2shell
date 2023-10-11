@@ -210,7 +210,10 @@
           >
             <div class="w-full min-h-full flex flex-col items-center">
               {#if activeChallenge}
-                <ChallengePanel challenge={activeChallenge} />
+                <ChallengePanel
+                  challenge={activeChallenge}
+                  solved={$game.submissions.find((s) => s.challenge_id === activeChallenge?.id) !== undefined}
+                />
               {:else}
                 <div class="flex flex-col w-full max-w-5xl px-6">
                   <h1 class="font-bold text-center text-3xl p-6 pt-12 pb-0">
