@@ -108,6 +108,8 @@
         showMessage('error', $i18n.t('calendar.failedToFetch') + ': ' + (err as AxiosError).response?.data, 5000)
       })
   }
+
+  let calendarSection: HTMLElement
 </script>
 
 <svelte:head><title>{$platform.name}</title></svelte:head>
@@ -150,15 +152,18 @@
             <span class="icon-[fluent--gift-16-regular] w-6 h-6 opacity-80" />
           </a>
         </p>
-        <div
-          class="pr-3 pl-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap space-x-2"
+        <button
+          class="pr-3 pl-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap space-x-2 hover:animate-pulse"
+          on:click={() => {
+            calendarSection.scrollIntoView({ behavior: 'smooth' })
+          }}
         >
           <span class="font-semibold">{$i18n.t('calendar.scrollToView')}</span>
           <span class="icon-[fluent--chevron-double-down-16-regular] w-6 h-6 opacity-80" />
-        </div>
+        </button>
       </div>
     </section>
-    <section class="h-full min-h-full snap-center flex flex-col p-3 md:p-6">
+    <section class="h-full min-h-full snap-center flex flex-col p-3 md:p-6" bind:this={calendarSection}>
       <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
         <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
         <h1 class="text-2xl font-bold">{$i18n.t('calendar.title')}</h1>

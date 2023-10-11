@@ -280,7 +280,7 @@ pub async fn get_user_page(
     if op_user.permissions.0.contains(&Permission::Devops) {
         cond = cond.add(Column::Hidden.eq(true));
     }
-    sql = sql.filter(cond);
+    sql = sql.filter(cond).order_by_asc(Column::Banned);
     let sql = filter_and_order_user(sql, order, filter)?;
     let paginator = sql.into_model().paginate(db, per_page);
     let num_pages = paginator.num_pages().await?;
@@ -288,14 +288,7 @@ pub async fn get_user_page(
     if !op_user.permissions.0.contains(&Permission::Organize)
         && !op_user.permissions.0.contains(&Permission::Devops)
     {
-        users = users
-            .into_iter()
-            .map(|mut user| {
-                user.institute_id = None;
-                user.email = None;
-                user
-            })
-            .collect();
+        users = users.into_iter().map(|user| user.desensitize()).collect();
     }
     Ok((users, num_pages))
 }

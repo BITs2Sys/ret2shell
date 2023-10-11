@@ -221,7 +221,11 @@
       "statistics": "Statistics",
       "teams": "Teams",
       "users": "Users",
-      "wiki": "Wiki"
+      "wiki": "Wiki",
+      "gameInfo": "Game information",
+      "gameChallenges": "Challenge management",
+      "gameNotifications": "Notification management",
+      "gameTeams": "Team management"
     },
     "filter": "Filter...",
     "wikiGuide": "Welcome to the knowledge base! \nPlease select the article you want to edit on the left, or create a new one.",

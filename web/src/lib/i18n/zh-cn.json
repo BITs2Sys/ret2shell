@@ -218,7 +218,11 @@
       "logs": "服务器日志",
       "persons": "用户管理",
       "institutes": "组织管理",
-      "permissions": "权限详情"
+      "permissions": "权限详情",
+      "gameInfo": "比赛信息",
+      "gameChallenges": "题目管理",
+      "gameNotifications": "通知管理",
+      "gameTeams": "队伍管理"
     },
     "currentPage": "当前",
     "userListSettings": "用户管理",

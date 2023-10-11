@@ -6,7 +6,8 @@
   import { admin, refreshAdminRoute } from '$lib/stores/admin'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
-  import { onDestroy } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
+  import Sidebar from './Sidebar.svelte'
 
   const gameId = parseInt($page.params.game)
   if (isNaN(gameId)) {
@@ -24,8 +25,13 @@
       })
     })
 
+  onMount(() => {
+    $admin.secondLevelComponent = Sidebar
+  })
+
   onDestroy(() => {
     $admin.game = null
+    $admin.secondLevelComponent = null
   })
 </script>
 
