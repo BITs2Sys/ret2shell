@@ -125,7 +125,9 @@
     "noRunningEnv": "没有正在运行的环境...",
     "packAndDownload": "打包下载所有",
     "quickAction": "快速操作",
-    "fetchHintsFailed": "获取题目提示信息失败"
+    "fetchHintsFailed": "获取题目提示信息失败",
+    "challengeSolves": "已解出",
+    "noNotifications": "暂时没有通知"
   },
   "games": {
     "title": "赛事",
@@ -591,5 +593,8 @@
     "verifyFailed": "邮箱验证失败",
     "verifySuccess": "邮箱验证成功",
     "invalidVerifyLink": "链接缺少关键参数，请仔细核对后重试"
+  },
+  "challenge": {
+    "gankAuthor": "一键锤爆出题人"
   }
 }

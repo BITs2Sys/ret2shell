@@ -118,7 +118,9 @@
     "noRunningEnv": "No running environment...",
     "envLastTime": "Last time",
     "fetchNotificationsFailed": "Failed to fetch notifications",
-    "fetchHintsFailed": "Failed to obtain challenge hints"
+    "fetchHintsFailed": "Failed to obtain challenge hints",
+    "challengeSolves": "Solves",
+    "noNotifications": "No notification yet"
   },
   "games": {
     "title": "Games",
@@ -591,5 +593,8 @@
     "verifyFailed": "Email verification failed",
     "verifySuccess": "Email verification successful",
     "invalidVerifyLink": "The link is missing key parameters, please check carefully and try again."
+  },
+  "challenge": {
+    "gankAuthor": "One-click hammer reveals the questioner"
   }
 }

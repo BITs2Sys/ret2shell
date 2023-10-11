@@ -23,6 +23,7 @@
   import { game } from '$lib/stores/game'
   import type { Hint } from '$lib/models/hint'
   import ChallengePanel from '$lib/blocks/challenge/ChallengePanel.svelte'
+  import SolvedPanel from '$lib/blocks/challenge/SolvedPanel.svelte'
 
   onMount(() => {
     Split(['#info-stack', '#work-stack'], {
@@ -269,6 +270,16 @@
           <span class="w-5 h-5 icon-[fluent--checkmark-16-regular]" />
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
+        <RxButton
+          ghost
+          active={bottomTab === 3}
+          on:click={() => {
+            bottomTab = 3
+          }}
+        >
+          <span class="w-5 h-5 icon-[fluent--people-16-regular]" />
+          {$i18n.t('playground.challengeSolves')}
+        </RxButton>
       </div>
       <TerminalPanel
         game={$game.current}
@@ -283,6 +294,7 @@
       />
       <HintsPanel {hints} class={bottomTab === 1 ? '' : 'hidden'} />
       <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} />
+      <SolvedPanel class={bottomTab === 3 ? '' : 'hidden'} />
     </div>
   </div>
 {:else}

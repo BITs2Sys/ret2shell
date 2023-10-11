@@ -27,6 +27,7 @@
   import type { Notification } from '$lib/models/game'
   import type { Hint } from '$lib/models/hint'
   import ChallengePanel from '$lib/blocks/challenge/ChallengePanel.svelte'
+  import SolvedPanel from '$lib/blocks/challenge/SolvedPanel.svelte'
 
   let screenWidth: number
   let toggleSidebar = false
@@ -376,6 +377,20 @@
           <span class="w-5 h-5 icon-[fluent--info-16-regular]" />
           {$i18n.t('playground.challengeHints')}
         </RxButton>
+        <RxButton
+          ghost
+          active={bottomTab === 2}
+          on:click={() => {
+            bottomTab = 2
+          }}
+        >
+          <span class="w-5 h-5 icon-[fluent--people-16-regular]" />
+          {$i18n.t('playground.challengeSolves')}
+        </RxButton>
+        <RxButton ghost>
+          <span class="w-5 h-5 icon-[fluent--thumb-dislike-16-regular]" />
+          {$i18n.t('challenge.gankAuthor')}
+        </RxButton>
       </div>
       <TerminalPanel
         game={$game.current}
@@ -389,6 +404,7 @@
         }}
       />
       <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} {hints} />
+      <SolvedPanel class={bottomTab === 2 ? '' : 'hidden'} />
     </div>
   </div>
   {#if showTeamSidebar}

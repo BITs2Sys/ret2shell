@@ -17,6 +17,7 @@
   import { canTakePartInGame } from '$lib/utils/auth'
   import { onDestroy, onMount } from 'svelte'
   import { Permission, type User } from '$lib/models/user'
+  import InstanceBox from './InstanceBox.svelte'
 
   let canTakePartIn = false
 
@@ -96,6 +97,14 @@
       <CustomizeBox />
     </div>
   </RxPopup>
+  {#if $game.runningInstance}
+    <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="instanceBoxPopup" popupWidth={72}>
+      <span class="icon-[fluent--engine-24-regular] w-6 h-6 text-success animate-pulse" slot="button"></span>
+      <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
+        <InstanceBox />
+      </div>
+    </RxPopup>
+  {/if}
   {#if !$initConfig.processing}
     {#if $user.isLoggedIn}
       <RxPopup class="btn-square btn-ghost inline-flex" name="userBoxPopup" popupWidth={64}>
