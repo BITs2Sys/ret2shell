@@ -555,7 +555,11 @@
     "noGameSpecifiedTips": "For use only in a game or playground environment",
     "noChallengeSpecifiedTips": "Must be used in the challenge",
     "service": {
-      "man": "Operate dynamic challenge environment"
+      "man": "Operate dynamic challenge environment",
+      "alreadyRunningAnotherInstance": "A container has been started in another challenge, you can only keep one active container.",
+      "alreadyRunningAnotherInstanceConfirm": "Do you want to close the currently running container and operate the environment of this question?",
+      "willStoppingPreviousInstance": "The previously active container will be stopped, please wait...",
+      "willNotStoppingPreviousInstance": "No action will be performed"
     },
     "base64": {
       "man": "base series coding tools",

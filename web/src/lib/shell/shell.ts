@@ -26,7 +26,7 @@ interface Prompt {
 }
 
 export class RnixShell {
-  private stdio: RnixStdio
+  private readonly stdio: RnixStdio
   private exec: Exec
   private code = 0
   private env: RnixEnv = { availableChallenges: [], challenge: null, game: null, user: null }
@@ -34,7 +34,7 @@ export class RnixShell {
   private history: BufferHistory
   private inputBuffer: string = ''
   private running: boolean = false
-  private dispatch: EventDispatcher<Record<string, any>> | null = null
+  private readonly dispatch: EventDispatcher<Record<string, any>> | null = null
 
   public constructor(term: Terminal, dispatch: EventDispatcher<Record<string, any>> | null = null) {
     ansiColors.enabled = true

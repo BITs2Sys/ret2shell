@@ -8,6 +8,7 @@
   import { onDestroy } from 'svelte'
   import { getInstituteList } from '$lib/api/user'
   import type { Institute } from '$lib/models/institute'
+  import RxTimer from '$lib/components/RxTimer.svelte'
 
   let isStarted = false
   let isEnded = false
@@ -28,20 +29,15 @@
   let timer = setInterval(() => {
     calcTime()
   }, 1000)
-  let hours = 0
-  let minutes = 0
-  let seconds = 0
+  let time = 0
 
   function calcTime() {
     let now = new Date()
-    let diff = ($game.current?.end_time || 0) - now.getTime() / 1000
-    if (diff <= 0) {
+    time = ($game.current?.end_time || 0) - now.getTime() / 1000
+    if (time <= 0) {
       clearInterval(timer)
       return
     }
-    hours = Math.floor(diff / 3600)
-    minutes = Math.floor((diff - hours * 3600) / 60)
-    seconds = Math.floor(diff - hours * 3600 - minutes * 60)
   }
 
   let canTakePartIn = false
@@ -77,14 +73,10 @@
     <h1 class="text-4xl font-bold">{$game.current?.name}</h1>
     <h2 class="text-3xl font-bold">
       {#if isStarted && !isEnded}
-        <span class="flex flex-row items-center space-x-0">
-          <span class="icon-[fluent--chevron-double-right-16-regular] opacity-40 mr-4"></span>
-          <span>{hours.toString().padStart(2, '0')}</span>
-          <span class="opacity-60">:</span>
-          <span>{minutes.toString().padStart(2, '0')}</span>
-          <span class="opacity-60">:</span>
-          <span class="text-primary">{seconds.toString().padStart(2, '0')}</span>
-          <span class="icon-[fluent--chevron-double-left-16-regular] opacity-40 !ml-4"></span>
+        <span class="flex flex-row items-center space-x-4">
+          <span class="icon-[fluent--chevron-double-right-16-regular] opacity-40"></span>
+          <RxTimer {time} />
+          <span class="icon-[fluent--chevron-double-left-16-regular] opacity-40"></span>
         </span>
       {:else if isEnded}
         <span class="text-warning">{$i18n.t('games.ended')}</span>

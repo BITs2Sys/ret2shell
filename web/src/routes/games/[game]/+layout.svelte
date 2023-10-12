@@ -9,10 +9,10 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { onDestroy, onMount } from 'svelte'
-  import { blur } from 'svelte/transition'
-  import Logo from '$lib/assets/logo.svg'
+  import { blur, fly } from 'svelte/transition'
   import { user } from '$lib/stores/user'
   import { Permission } from '$lib/models/user'
+  import LogoAnimate from '$lib/assets/logo-animate.svelte'
 
   let loading = false
   let delayedLoading = false
@@ -94,11 +94,16 @@
     transition:blur={{ amount: 20, duration: 300 }}
   >
     <Background />
-    <img src={Logo} alt="Ret2Shell" width="128" height="128" />
-    <p class="text-2xl opacity-60 font-bold" transition:blur={{ amount: 20, duration: 300 }}>
-      W E L C O M E&nbsp;&nbsp;&nbsp;T O
-    </p>
-    <h1 class="text-3xl font-bold">{$game.current?.name || $game.cached?.name || $i18n.t('games.loading')}</h1>
+    <div in:fly={{ x: 0, y: -64, duration: 1500 }}>
+      <LogoAnimate width={128} height={128} />
+    </div>
+    <div
+      class="flex flex-col space-y-8 items-center justify-center"
+      in:fly={{ x: 0, y: 32, duration: 1500, opacity: 0 }}
+    >
+      <p class="text-2xl opacity-60 font-bold">W E L C O M E&nbsp;&nbsp;&nbsp;T O</p>
+      <h1 class="text-3xl font-bold">{$game.current?.name || $game.cached?.name || $i18n.t('games.loading')}</h1>
+    </div>
     <div class="h-32"></div>
   </div>
 {/if}

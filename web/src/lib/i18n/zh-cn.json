@@ -133,7 +133,7 @@
     "title": "赛事",
     "noGameTitle": "未找到赛事",
     "noBrief": "这场比赛很神秘，什么也没有写...",
-    "ended": " 已结束",
+    "ended": "已结束",
     "fetchGamesError": "获取比赛列表失败",
     "gameIdInvalid": "指定的比赛不存在",
     "notStarted": "未开始",
@@ -555,7 +555,11 @@
     "noGameSpecifiedTips": "只能在比赛或练习场环境中使用",
     "noChallengeSpecifiedTips": "必须在题目中使用",
     "service": {
-      "man": "操作动态题目环境"
+      "man": "操作动态题目环境",
+      "alreadyRunningAnotherInstance": "已在另一道题目中启动了容器，你只能保有一个活动容器。",
+      "alreadyRunningAnotherInstanceConfirm": "要关闭当前正在运行的容器并操作本题环境吗？",
+      "willStoppingPreviousInstance": "将停止之前的活动容器，请稍等...",
+      "willNotStoppingPreviousInstance": "不会执行任何操作"
     },
     "base64": {
       "man": "base系列编码工具",

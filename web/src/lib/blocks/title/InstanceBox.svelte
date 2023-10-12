@@ -1,6 +1,8 @@
 <script lang="ts">
   import { getChallenge } from '$lib/api/challenge'
+  import Engine from '$lib/assets/engine.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
+  import RxTimer from '$lib/components/RxTimer.svelte'
   import type { Challenge } from '$lib/models/challenge'
   import type { Instance } from '$lib/models/instance'
   import { game } from '$lib/stores/game'
@@ -37,33 +39,16 @@
 </script>
 
 <div class="p-2 flex flex-col">
-  <div class="flex-1 flex flex-row items-center rounded-lg">
-    <span class="icon-[fluent--engine-24-regular] w-12 h-12 text-success animate-pulse m-2 mx-4"></span>
+  <div class="flex-1 flex flex-row items-center rounded-lg space-x-2">
+    <div class="text-success m-2">
+      <Engine width={48} height={48} />
+    </div>
     <div class="flex flex-col flex-1">
       <p class="text-base font-bold flex flex-row">
         {challenge?.name}
       </p>
       <p class="text-base font-bold opacity-60 flex flex-row">
-        <span>T =&nbsp;</span>
-        <span class="flex flex-row items-center space-x-0">
-          <span>
-            {Math.floor(lastTime / 3600)
-              .toString()
-              .padStart(2, '0')}
-          </span>
-          <span class="opacity-60">:</span>
-          <span>
-            {Math.floor((lastTime / 60) % 60)
-              .toString()
-              .padStart(2, '0')}
-          </span>
-          <span class="opacity-60">:</span>
-          <span class="text-primary">
-            {Math.floor(lastTime % 60)
-              .toString()
-              .padStart(2, '0')}
-          </span>
-        </span>
+        <RxTimer time={lastTime} />
       </p>
     </div>
   </div>

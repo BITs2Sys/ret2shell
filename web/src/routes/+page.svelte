@@ -148,7 +148,7 @@
             &nbsp;
             <a href="https://beian.miit.gov.cn" class="link">{$platform.record}</a>
           {/if}
-          <a class="btn btn-sm btn-ghost btn-square ml-2" href="/surprise/sakana">
+          <a class="btn btn-sm btn-ghost btn-square ml-2" href="/magic/sakana">
             <span class="icon-[fluent--gift-16-regular] w-6 h-6 opacity-80" />
           </a>
         </p>

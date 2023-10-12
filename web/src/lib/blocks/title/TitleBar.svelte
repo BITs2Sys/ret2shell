@@ -18,6 +18,10 @@
   import { onDestroy, onMount } from 'svelte'
   import { Permission, type User } from '$lib/models/user'
   import InstanceBox from './InstanceBox.svelte'
+  import Engine from '$lib/assets/engine.svelte'
+  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import RxTimer from '$lib/components/RxTimer.svelte'
+  import { fly } from 'svelte/transition'
 
   let canTakePartIn = false
 
@@ -35,6 +39,17 @@
 
   let userFullInfo: User | null = null
   let loadingAvatar = false
+
+  let gameLastTime = 0
+
+  function calcTime() {
+    let now = new Date()
+    gameLastTime = ($game.current?.end_time || 0) - now.getTime() / 1000
+  }
+
+  setInterval(() => {
+    calcTime()
+  }, 1000)
 
   onMount(() => {
     loadingAvatar = true
@@ -75,7 +90,9 @@
     </ul>
   {:else}
     <RxLink ghost href={$game.current && $game.showGameNav ? `/games/${$game.current.id}` : '/'} exactlyMatched>
-      <img class="hidden xl:block" width="28" height="28" src={logo} alt="logo" />
+      <span class="hidden sm:inline">
+        <LogoAnimate width={28} height={28} />
+      </span>
       {#if $game.showGameNav}
         <span>{$game.current?.name}</span>
       {:else}
@@ -91,6 +108,11 @@
     </ul>
   {/if}
   <div class="flex-1" />
+  {#if $game.current && gameLastTime >= 0}
+    <div class="px-4 hidden sm:inline">
+      <RxTimer time={gameLastTime} />
+    </div>
+  {/if}
   <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="customizeBoxPopup">
     <span slot="button" class="icon-[fluent--wand-16-regular] w-5 h-5" />
     <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
@@ -99,7 +121,9 @@
   </RxPopup>
   {#if $game.runningInstance}
     <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="instanceBoxPopup" popupWidth={72}>
-      <span class="icon-[fluent--engine-24-regular] w-6 h-6 text-success animate-pulse" slot="button"></span>
+      <div slot="button" class="text-success">
+        <Engine width={32} height={32} />
+      </div>
       <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
         <InstanceBox />
       </div>
@@ -131,7 +155,7 @@
     {:else}
       <RxLink href="/account/login" exactlyMatched>
         <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
-        <span>{$i18n.t('account.login')}</span>
+        <span class="hidden sm:inline">{$i18n.t('account.login')}</span>
       </RxLink>
     {/if}
     {#if $game.showGameNav && !$game.team && canTakePartIn && !$user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}

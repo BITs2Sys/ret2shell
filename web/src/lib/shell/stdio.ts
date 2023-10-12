@@ -39,6 +39,10 @@ export class RnixStdio {
     this.println(ansiColors.red('[!] ' + ansiColors.bold(text)))
   }
 
+  public logWarning(text: string) {
+    this.println(ansiColors.yellow('[!] ' + ansiColors.bold(text)))
+  }
+
   public logSuccess(text: string) {
     this.println(ansiColors.green('[+] ' + ansiColors.bold(text)))
   }
@@ -79,7 +83,7 @@ export class RnixStdio {
   }
 
   /// read user input from terminal with custom prompt, function act as python `input`.
-  public input(pendingBuffer: string): Promise<string> {
+  public input(pendingBuffer?: string): Promise<string> {
     if (this.bufferLock) return Promise.reject('buffer locked')
     this.bufferLock = true
     return new Promise((resolve) => {
@@ -90,7 +94,7 @@ export class RnixStdio {
       this.prefixX = this.termCursor.x
       this.flush()
       this.activeRead = true
-      if (pendingBuffer.length > 0) this.emulateInput(pendingBuffer)
+      if (pendingBuffer && pendingBuffer.length > 0) this.emulateInput(pendingBuffer)
     })
   }
 
@@ -124,6 +128,7 @@ export class RnixStdio {
     } else if (ord.charCodeAt(0) < 32 || ord.charCodeAt(0) === 0x7f) {
       switch (data) {
         case '\r': // enter
+        case '\n':
           this.finishInput()
           break
         case '\x01': // ctrl-a
@@ -151,6 +156,7 @@ export class RnixStdio {
   }
 
   private finishInput() {
+    console.log('finished')
     this.activeRead = false
     this.bufferLock = false
     this.resolve(this.userBuffer)
