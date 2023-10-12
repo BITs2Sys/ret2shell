@@ -36,6 +36,14 @@ pub struct ModelWithInfo {
     pub tag_name: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ModelOnlyUserInfo {
+    pub id: i64,
+    pub created_at: DateTime<Utc>,
+    pub user_id: i64,
+    pub user_name: String,
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
@@ -161,4 +169,25 @@ pub async fn create_submission(
         ..submission.into_active_model().reset_all()
     };
     active_model.insert(conn).await
+}
+
+pub async fn get_solved_user_page(
+    conn: &DatabaseConnection,
+    challenge_id: i64,
+    page: u64,
+    per_page: u64,
+) -> Result<(Vec<ModelOnlyUserInfo>, u64), DbErr> {
+    let sql = Entity::find()
+        .select_only()
+        .columns([Column::Id, Column::UserId, Column::CreatedAt])
+        .join(JoinType::InnerJoin, Relation::User.def())
+        .column_as(super::user::Column::Name, "user_name")
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .filter(Column::Solved.eq(true))
+        .distinct_on([(Entity, Column::UserId), (Entity, Column::ChallengeId)]);
+    let paginator = sql.into_model::<ModelOnlyUserInfo>().paginate(conn, per_page);
+    let mut resp = paginator.fetch_page(page - 1).await?;
+    resp.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+    let num_pages = paginator.num_pages().await?;
+    Ok((resp, num_pages))
 }

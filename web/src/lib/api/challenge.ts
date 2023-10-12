@@ -1,6 +1,6 @@
 import type { Challenge, Tag } from '$lib/models/challenge'
 import type { Hint } from '$lib/models/hint'
-import type { Submission } from '$lib/models/submission'
+import type { Submission, SubmissionOnlyUserInfo } from '$lib/models/submission'
 import { api, api_root } from '.'
 
 export async function getChallengeList(game_id: number, page?: number, per_page?: number) {
@@ -49,4 +49,12 @@ export async function downloadChallengeAttachment(
   document.body.appendChild(link)
   link.click()
   link.remove()
+}
+
+export async function getChallengeSolvedUser(id: number, page?: number, per_page?: number) {
+  let uri = `${api_root}/challenge/${id}/solved`
+  if (page && per_page) {
+    uri += `?page=${page}&per_page=${per_page}`
+  }
+  return (await api.get(uri)).data as { records: SubmissionOnlyUserInfo[]; total: number }
 }

@@ -2,6 +2,7 @@ use super::{
     layer::{auth, info},
     GlobalState,
 };
+use crate::entity::submission as submission_entity;
 use crate::utility::string::deunicode_str;
 use crate::{
     bucket::Bucket,
@@ -77,6 +78,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                     state.clone(),
                     info::prepare_user_full_info,
                 ))
+                .route("/solved", get(get_solved_user_list))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::Verified
                 )))
@@ -87,6 +89,41 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .nest("/workflow", workflow::router(state))
                 .nest("/hint", hint::router(state)),
         )
+}
+
+#[derive(Deserialize)]
+struct SolvedUserListQuery {
+    page: Option<u64>,
+    per_page: Option<u64>,
+}
+
+#[derive(Serialize)]
+struct SolvedUserList {
+    users: Vec<submission_entity::ModelOnlyUserInfo>,
+    total: u64,
+}
+
+async fn get_solved_user_list(
+    State(ref conn): State<DatabaseConnection>,
+    Path(challenge_id): Path<i64>,
+    Query(params): Query<SolvedUserListQuery>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let page = params.page.unwrap_or(1);
+    let per_page = params.per_page.unwrap_or(10);
+    if page < 1 || per_page < 1 {
+        error!("Invalid page={} or per_page={}", page, per_page);
+        return Err((StatusCode::BAD_REQUEST, "invalid paginate parameters"));
+    }
+    match submission_entity::get_solved_user_page(conn, challenge_id, page, per_page).await {
+        Ok((users, total)) => Ok(Json(SolvedUserList { users, total })),
+        Err(err) => {
+            error!("get_solved_user_list error: {}", err);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get solved user list due to database error",
+            ))
+        }
+    }
 }
 
 async fn create_challenge(
