@@ -2,7 +2,7 @@
   import RxButton from './RxButton.svelte'
   import RxPopup from './RxPopup.svelte'
   import { createField } from 'felte'
-
+  export let size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' = 'md'
   export let availableOptions: { id: number | string | null; label: string }[] = []
   export let value: number | string | null = null
   export let disabled = false
@@ -10,7 +10,7 @@
   const { field, onBlur, onInput } = createField(name)
 </script>
 
-<RxPopup class="flex-1 justify-start z-50 bg-base-content/5 border-none" {name} popupWidth="full" offset={6} {disabled}>
+<RxPopup {size} class="flex-1 justify-start z-50 bg-base-content/5 backdrop-blur border-none" {name} popupWidth="full" offset={6} {disabled}>
   <span slot="button" use:field class="text-base flex flex-row items-center w-full">
     <span class="flex-1 text-start">
       {availableOptions.find((option) => option.id === value)?.label || 'Select'}
@@ -23,7 +23,7 @@
         ghost
         on:click={() => {
           value = option.id
-          console.log(option)
+          // console.log(option)
           onInput(option.id)
           onBlur()
         }}

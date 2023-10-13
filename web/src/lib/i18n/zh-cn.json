@@ -239,7 +239,8 @@
     "userInfo": "用户信息",
     "userStatistics": "数据统计",
     "userGames": "已参与赛事",
-    "userIpAddresses": "使用过的 IP 地址"
+    "userIpAddresses": "使用过的 IP 地址",
+    "challengeListSettings": "题目管理"
   },
   "docs": {
     "title": "技术文档"
@@ -599,6 +600,14 @@
     "invalidVerifyLink": "链接缺少关键参数，请仔细核对后重试"
   },
   "challenge": {
-    "gankAuthor": "一键锤爆出题人"
+    "gankAuthor": "一键锤爆出题人",
+    "name": "题目名称",
+    "tag": "标签",
+    "status": "状态",
+    "fetchFailed": "获取题目失败",
+    "filterTag": "过滤标签："
+  },
+  "tag": {
+    "fetchFailed": "获取标签失败"
   }
 }
