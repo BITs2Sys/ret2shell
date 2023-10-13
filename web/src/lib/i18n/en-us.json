@@ -242,7 +242,9 @@
     "userStatistics": "Statistics",
     "userGames": "Participated Games",
     "userIpAddresses": "IP address used",
-    "challengeListSettings": "Challenge management"
+    "challengeListSettings": "Challenge management",
+    "NotificationListSettings": "Notification management",
+    "teamListSettings": "Team management"
   },
   "docs": {
     "title": "Documents"
@@ -611,5 +613,9 @@
   },
   "tag": {
     "fetchFailed": "Failed to get tags"
+  },
+  "notification": {
+    "title": "title",
+    "publishedAt": "Published At"
   }
 }

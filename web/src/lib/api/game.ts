@@ -36,3 +36,11 @@ export async function getGameNotifications(game_id: number, page: number, per_pa
     total: number
   }
 }
+
+export async function createNotification(game_id: number, notification: Notification) {
+  return await api.post(`${api_root}/game/${game_id}/notification`, notification)
+}
+
+export async function deleteGameNotification(game_id: number, notification_id: number) {
+  return await api.delete(`${api_root}/game/${game_id}/notification?notification_id=${notification_id}`)
+}

@@ -242,7 +242,9 @@
     "userStatistics": "数据统计",
     "userGames": "已参与赛事",
     "userIpAddresses": "使用过的 IP 地址",
-    "challengeListSettings": "题目管理"
+    "challengeListSettings": "题目管理",
+    "NotificationListSettings": "通知管理",
+    "teamListSettings": "队伍管理"
   },
   "docs": {
     "title": "技术文档"
@@ -611,5 +613,9 @@
   },
   "tag": {
     "fetchFailed": "获取标签失败"
+  },
+  "notification": {
+    "title": "标题",
+    "publishedAt": "发布于"
   }
 }
