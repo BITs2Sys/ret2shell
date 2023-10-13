@@ -610,7 +610,8 @@
     "tag": "标签",
     "status": "状态",
     "fetchFailed": "获取题目失败",
-    "filterTag": "过滤标签："
+    "filterTag": "过滤标签：",
+    "create": "创建"
   },
   "tag": {
     "fetchFailed": "获取标签失败"

@@ -610,7 +610,8 @@
     "tag": "Tag",
     "status": "Status",
     "fetchFailed": "Failed to get challenges",
-    "filterTag": "filter tags:"
+    "filterTag": "filter tags:",
+    "create": "Create"
   },
   "tag": {
     "fetchFailed": "Failed to get tags"

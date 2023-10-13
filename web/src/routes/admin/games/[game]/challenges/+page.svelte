@@ -5,13 +5,13 @@
   import { platform } from '$lib/stores/platform'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
-  import { onDestroy, onMount } from 'svelte'
-  import { page } from '$app/stores'
+  import { onMount } from 'svelte'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import { getChallengeList, getTagList } from '$lib/api/challenge'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
   import RxSelect from '$lib/components/RxSelect.svelte'
+  import RxButton from '$lib/components/RxButton.svelte'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -190,8 +190,8 @@
   <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
     <div class="h-16 flex flex-row items-center space-x-2">
       <h2 class="text-base font-bold flex-1">{$i18n.t('admin.challengeListSettings')}</h2>
-      <h2 class="text-base font-bold opacity-80">{$i18n.t('challenge.filterTag')}</h2>
-      <div class="relative w-32 flex flex-row">
+      <p class="text-base font-bold opacity-80">{$i18n.t('challenge.filterTag')}</p>
+      <div class="relative w-64 flex flex-row">
         <RxSelect
           size="sm"
           name="tag_id"
@@ -203,6 +203,10 @@
           bind:value={filterTagID}
         />
       </div>
+      <RxButton size="sm" level="primary">
+        <span class="icon-[fluent--add-16-regular]"></span>
+        <span>{$i18n.t('challenge.create')}</span>
+      </RxButton>
     </div>
     <DataTable
       class="flex-1"

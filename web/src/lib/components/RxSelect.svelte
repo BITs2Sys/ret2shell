@@ -10,7 +10,14 @@
   const { field, onBlur, onInput } = createField(name)
 </script>
 
-<RxPopup {size} class="flex-1 justify-start z-50 bg-base-content/5 backdrop-blur border-none" {name} popupWidth="full" offset={6} {disabled}>
+<RxPopup
+  {size}
+  class="flex-1 justify-start bg-base-content/5 backdrop-blur border-none"
+  {name}
+  popupWidth="full"
+  offset={6}
+  {disabled}
+>
   <span slot="button" use:field class="text-base flex flex-row items-center w-full">
     <span class="flex-1 text-start">
       {availableOptions.find((option) => option.id === value)?.label || 'Select'}

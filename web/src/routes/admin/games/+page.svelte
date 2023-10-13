@@ -176,7 +176,7 @@
     <div class="h-16 flex flex-row items-center space-x-2">
       <h2 class="text-base font-bold flex-1">{$i18n.t('admin.gamesSettings')}</h2>
       <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular] w-6 h-6" />
+        <span class="icon-[fluent--add-16-regular]" />
         <span class="text-base">{$i18n.t('action.create')}</span>
       </RxLink>
     </div>

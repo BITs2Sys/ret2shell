@@ -285,7 +285,7 @@
         </RxButton>
       </div>
       <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular] w-6 h-6" />
+        <span class="icon-[fluent--add-16-regular]" />
         <span class="text-base">{$i18n.t('action.create')}</span>
       </RxLink>
     </div>
