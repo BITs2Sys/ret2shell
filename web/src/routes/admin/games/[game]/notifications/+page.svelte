@@ -72,7 +72,7 @@
         total = res.total
       })
       .catch((err) => {
-        showMessage('error', `${$i18n.t('challenge.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+        showMessage('error', `${$i18n.t('notification.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
       })
       .finally(() => {
         loading = false
