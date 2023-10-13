@@ -56,7 +56,7 @@
               class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
-              <p class="w-full max-w-lg text-lg indent-8">
+              <p class="w-full text-lg indent-8">
                 {$i18n.t('tutorial.platformInfoWiki')}
               </p>
             </div>
@@ -80,7 +80,7 @@
               class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
-              <p class="w-full max-w-lg text-lg indent-8">
+              <p class="w-full text-lg indent-8">
                 {$i18n.t('tutorial.platformInfoPlatform')}
               </p>
             </div>
@@ -94,7 +94,7 @@
           {#if routeItemIndex === 3}
             <div
               class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center"
-              in:fly={{ y: 16, duration: 500 }}
+              transition:fly={{ y: 16, duration: 500 }}
             >
               <div>
                 <ArrowUpAnimate width={200} height={200} />
@@ -104,7 +104,7 @@
               class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
-              <p class="w-full max-w-lg text-lg indent-8">
+              <p class="w-full text-lg indent-8">
                 {$i18n.t('tutorial.platformInfoGames')}
               </p>
             </div>
@@ -118,7 +118,7 @@
           {#if routeItemIndex === 4}
             <div
               class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center"
-              in:fly={{ y: 16, duration: 500 }}
+              transition:fly={{ y: 16, duration: 500 }}
             >
               <div>
                 <ArrowUpAnimate width={200} height={200} />
@@ -128,7 +128,7 @@
               class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
-              <p class="w-full max-w-lg text-lg indent-8">
+              <p class="w-full text-lg indent-8">
                 {$i18n.t('tutorial.platformInfoAnnouncements')}
               </p>
             </div>

@@ -53,7 +53,7 @@
     },
     onSuccess() {
       loading = false
-      goto('/account/login')
+      goto('/magic/tutorial')
     },
     onError(error) {
       loading = false

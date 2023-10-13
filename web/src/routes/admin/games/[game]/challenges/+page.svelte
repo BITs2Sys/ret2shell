@@ -12,6 +12,7 @@
   import type { Game } from '$lib/models/game'
   import RxSelect from '$lib/components/RxSelect.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
+  import RxLink from '$lib/components/RxLink.svelte'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -203,10 +204,10 @@
           bind:value={filterTagID}
         />
       </div>
-      <RxButton size="sm" level="primary">
+      <RxLink size="sm" level="info" href="#create">
         <span class="icon-[fluent--add-16-regular]"></span>
         <span>{$i18n.t('challenge.create')}</span>
-      </RxButton>
+      </RxLink>
     </div>
     <DataTable
       class="flex-1"
