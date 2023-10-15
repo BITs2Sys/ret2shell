@@ -292,7 +292,7 @@
     <DataTable class="flex-1" {actions} data={calendars} {colDef} bind:page={currentPage} {total} {loading} />
   </div>
   <EditPanel
-    class={`transition-all ${showCreatePanel ? 'h-full' : 'h-0'}`}
+    class={`transition-all ${showCreatePanel ? 'h-[calc(100%_-_4rem)]' : 'h-0'}`}
     bind:calendar={activeCalendar}
     loading={loadingCalendar}
     {submitting}

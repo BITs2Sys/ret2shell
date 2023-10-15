@@ -241,7 +241,7 @@
   <PersonPanel
     user={currentUser}
     loading={loadingUser}
-    class={`transition-all ${showPersonPanel ? 'h-full' : 'h-0'}`}
+    class={`transition-all ${showPersonPanel ? 'h-[calc(100%_-_4rem)]' : 'h-0'}`}
     on:close={() => {
       window.location.hash = ''
     }}

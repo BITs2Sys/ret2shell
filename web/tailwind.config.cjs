@@ -116,6 +116,7 @@ module.exports = {
     themes: [
       {
         dark: {
+          'base-content': 'hsl(145 0% 79%)',
           primary: '#3399FF',
           secondary: '#60a5fa',
           accent: '#1FB2A6',
@@ -127,6 +128,7 @@ module.exports = {
           error: '#F83030',
         },
         light: {
+          'base-content': 'hsl(146 0% 19%)',
           primary: '#0078D6',
           secondary: '#60a5fa',
           accent: '#1FB2A6',

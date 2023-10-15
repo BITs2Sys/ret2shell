@@ -21,12 +21,18 @@
       class="w-full h-full relative print:hidden"
       defer
     >
-      <div class="w-full flex flex-col items-center">
-        <div class="flex flex-col w-full max-w-5xl px-6">
-          <RxArticle class="mt-12" content={answer?.content || $i18n.t('playground.emptyContent')} />
-          <div class="h-12" />
+      {#if !answer || answer.content.length === 0}
+        <p class="w-full min-h-full flex-1 flex flex-row justify-center items-center font-bold opacity-60">
+          {$i18n.t('playground.emptyContent')}
+        </p>
+      {:else}
+        <div class="w-full flex flex-col items-center">
+          <div class="flex flex-col w-full max-w-5xl px-6">
+            <RxArticle class="mt-12" content={answer?.content || $i18n.t('playground.emptyContent')} />
+            <div class="h-12" />
+          </div>
         </div>
-      </div>
+      {/if}
     </OverlayScrollbarsComponent>
   </div>
 </div>

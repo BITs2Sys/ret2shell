@@ -85,7 +85,7 @@
 </script>
 
 <div
-  class="fixed top-16 left-0 w-1/5 min-w-[24rem] max-w-[32rem] h-[calc(100vh_-_4rem)] flex-shrink-0 bg-base-100/60 backdrop-blur border-r border-r-base-content/10 overflow-hidden flex flex-row"
+  class="fixed top-16 left-0 w-1/5 min-w-[24rem] max-w-[32rem] h-[calc(100vh_-_4rem)] flex-shrink-0 bg-neutral/20 backdrop-blur border-r border-r-base-content/10 overflow-hidden flex flex-row"
 >
   <div
     class={`${
@@ -133,7 +133,7 @@
     {/each}
   </div>
   <div class={`${secondLevelExpanded ? 'w-[calc(100%_-_4rem)]' : 'w-0'} transition-all flex flex-col duration-200`}>
-    <div class="h-16 flex-shrink-0 bg-base-100 border-b border-b-base-content/5 flex flex-row px-4 items-center">
+    <div class="h-16 flex-shrink-0 bg-neutral/10 border-b border-b-base-content/5 flex flex-row px-4 items-center">
       <h2 class="font-bold text-base flex flex-row space-x-2 items-center justify-center w-full overflow-hidden">
         <span class="text-ellipsis whitespace-nowrap overflow-hidden">{secondTitle}</span>
       </h2>
@@ -142,7 +142,7 @@
       options={{
         scrollbars: { theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light', autoHide: 'scroll' },
       }}
-      class="w-full h-full relative print:hidden"
+      class="w-full flex-1 relative print:hidden"
       defer
     >
       <div class="flex flex-col space-y-2 p-4">

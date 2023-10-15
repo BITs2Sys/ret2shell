@@ -21,7 +21,7 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = `absolute w-full bottom-0 flex flex-col overflow-hidden ${clazz}`
+  $: classes = `absolute w-full bottom-0 flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
 
   const dispatch = createEventDispatcher()
 
@@ -83,12 +83,10 @@
     options={{
       scrollbars: { theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light', autoHide: 'scroll' },
     }}
-    class="w-full h-full relative print:hidden bg-base-100/80 backdrop-blur"
+    class="w-full h-full relative print:hidden"
     defer
   >
-    <div
-      class="sticky top-0 h-16 min-h-16 border-b border-b-base-content/5 backdrop-blur bg-base-100 flex flex-row px-2 items-center space-x-2"
-    >
+    <div class="sticky top-0 h-16 min-h-16 border-y border-y-base-content/5 flex flex-row px-2 items-center space-x-2">
       <div class="flex-1 flex flex-row items-center px-4">
         <h1 class="text-base font-bold">{calendar.id > 0 ? $i18n.t('calendar.edit') : $i18n.t('calendar.create')}</h1>
       </div>

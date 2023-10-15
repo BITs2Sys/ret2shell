@@ -156,7 +156,7 @@ export class RnixStdio {
   }
 
   private finishInput() {
-    console.log('finished')
+    // console.log('finished')
     this.activeRead = false
     this.bufferLock = false
     this.resolve(this.userBuffer)

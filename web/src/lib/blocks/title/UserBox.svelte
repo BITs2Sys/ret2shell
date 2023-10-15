@@ -17,13 +17,11 @@
     })
   }
 
-  let userFullInfo: User | null = null
   let loadingAvatar = false
 
   onMount(() => {
     loadingAvatar = true
     userInfo().then((value) => {
-      userFullInfo = value
       loadingAvatar = false
     })
   })
@@ -35,8 +33,8 @@
       <div
         class="w-10 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
       >
-        {#if userFullInfo?.cover_path}
-          <RxImage src={userFullInfo.cover_path} loading={loadingAvatar} />
+        {#if $user.info?.cover_path}
+          <RxImage src={$user.info.cover_path} loading={loadingAvatar} />
         {:else}
           <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
         {/if}

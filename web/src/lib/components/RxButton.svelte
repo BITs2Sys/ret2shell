@@ -34,7 +34,7 @@
    * justify-end normal-case btn-square
    */
   $: classes = [
-    'btn',
+    'btn no-animation',
     'flex flex-row flex-nowrap items-center',
     'border-none',
     'space-x-2',

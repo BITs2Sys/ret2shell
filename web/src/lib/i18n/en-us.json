@@ -283,7 +283,8 @@
   },
   "platform": {
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
-    "cookieAlert": "We don't use cookies, so don't worry."
+    "cookieAlert": "We don't use cookies, so don't worry.",
+    "screenTooSmall": "The screen you are currently using seems a bit small, and some content may not be fully displayed. \nIf you still see this prompt when using a desktop browser, please check whether your web page zoom is set too high?"
   },
   "errors": {
     "401": "Please Login First",
@@ -546,7 +547,7 @@
       "downloading": "downloading",
       "failed": "download failed",
       "success": "The download is successful, please check it in the browser download window.",
-      "usage": "Usage: wget filename",
+      "usage": "Usage: wget <filename>",
       "man": "Download challenge attachment"
     },
     "cd": {

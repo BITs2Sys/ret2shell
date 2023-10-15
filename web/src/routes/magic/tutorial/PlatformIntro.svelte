@@ -31,7 +31,7 @@
 {#if !goNext}
   <div class="flex-1 flex flex-col justify-center items-center space-y-24 relative" out:fly={{ y: -32, duration: 500 }}>
     <div class="absolute h-40 top-0 left-0 w-full px-2 py-0 flex flex-row">
-      <div class="btn text-base space-x-2 invisible">
+      <div class="btn no-animation text-base space-x-2 invisible">
         <span>
           <LogoAnimate width={28} height={28} />
         </span>
@@ -39,7 +39,7 @@
       </div>
       <ul class="menu menu-horizontal space-x-2 m-0 p-0 px-6">
         <li class="relative">
-          <div class="btn text-base space-x-2 invisible">
+          <div class="btn no-animation text-base space-x-2 invisible">
             <span class="icon-[fluent--book-number-16-regular] w-6 h-6" />
             {$i18n.t('wiki.title')}
           </div>
@@ -53,7 +53,7 @@
               </div>
             </div>
             <div
-              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
+              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 border border-base-content/5 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
               <p class="w-full text-lg indent-8">
@@ -63,7 +63,7 @@
           {/if}
         </li>
         <li class="relative">
-          <div class="btn text-base space-x-2 invisible">
+          <div class="btn no-animation text-base space-x-2 invisible">
             <span class="icon-[fluent--dumbbell-16-regular] w-6 h-6" />
             {$i18n.t('playground.title')}
           </div>
@@ -77,7 +77,7 @@
               </div>
             </div>
             <div
-              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
+              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 border border-base-content/5 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
               <p class="w-full text-lg indent-8">
@@ -87,7 +87,7 @@
           {/if}
         </li>
         <li class="relative">
-          <div class="btn text-base space-x-2 invisible">
+          <div class="btn no-animation text-base space-x-2 invisible">
             <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
             {$i18n.t('games.title')}
           </div>
@@ -101,7 +101,7 @@
               </div>
             </div>
             <div
-              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
+              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 border border-base-content/5 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
               <p class="w-full text-lg indent-8">
@@ -111,7 +111,7 @@
           {/if}
         </li>
         <li class="relative">
-          <div class="btn text-base space-x-2 invisible">
+          <div class="btn no-animation text-base space-x-2 invisible">
             <span class="icon-[fluent--megaphone-16-regular] w-6 h-6" />
             {$i18n.t('announcements.title')}
           </div>
@@ -125,7 +125,7 @@
               </div>
             </div>
             <div
-              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 backdrop-blur"
+              class="absolute top-40 left-0 w-96 p-6 rounded-box bg-neutral/80 border border-base-content/5 backdrop-blur"
               transition:fly={{ y: 16, duration: 500 }}
             >
               <p class="w-full text-lg indent-8">

@@ -13,15 +13,13 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = `absolute w-full bottom-0 flex flex-col overflow-hidden ${clazz}`
+  $: classes = `absolute w-full bg-neutral/20 backdrop-blur bottom-0 flex flex-col overflow-hidden ${clazz}`
 
   const dispatch = createEventDispatcher()
 </script>
 
 <div class={classes}>
-  <div
-    class="h-16 min-h-16 border-b border-b-base-content/5 backdrop-blur bg-base-100 flex flex-row px-2 items-center space-x-2"
-  >
+  <div class="h-16 min-h-16 border-y border-y-base-content/5 flex flex-row px-2 items-center space-x-2">
     <div class="join flex-1">
       <RxButton
         on:click={() => {
@@ -70,7 +68,7 @@
     </div>
   </div>
   <RxCodearea
-    class="flex-1 bg-base-100/80 backdrop-blur"
+    class="flex-1"
     lang="markdown"
     placeholder="Mode = Markdown"
     {loading}

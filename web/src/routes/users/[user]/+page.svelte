@@ -7,37 +7,51 @@
   import { quintOut } from 'svelte/easing'
   import { onMount } from 'svelte'
   import { getUserInfo, getUserTeams } from '$lib/api/user'
-  import { user } from '$lib/stores/user'
   import type { AxiosError } from 'axios'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import type { TeamWithGameName } from '$lib/models/team'
   import { showMessage } from '$lib/stores/toast'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
+  import type { User } from '$lib/models/user'
 
   let toggleSidebar = false
   let screenWidth: number
   let loading = false
   let error = 200
+  let user: User = {
+    id: -1,
+    name: $i18n.t('user.deletedAuthor'),
+    email: '',
+    intro: '',
+    cover_path: null,
+    institute_info: null,
+    institute_id: null,
+    permissions: [],
+    hidden: true,
+    banned: true,
+  }
   let teams: TeamWithGameName[] = []
   $: showSidebar = screenWidth > 1024 // lg
 
   onMount(() => {
+    const userId = parseInt($page.params['user']) || null
+    if (!userId) {
+      error = 404
+      loading = false
+      return
+    }
     loading = true
-    getUserInfo($user.id)
+    getUserInfo(userId)
       .then((value) => {
-        user.update((val) => {
-          val = {
-            ...val,
-            info: value,
-          }
-          return val
-        })
+        user = value
         loading = false
       })
       .catch((err) => {
         showMessage('error', `${$i18n.t('account.fetchInfoFailed')}: ${(err as AxiosError).response?.data}`, 5000)
         error = (err as AxiosError).response?.status || 500
       })
-    getUserTeams($user.id)
+    getUserTeams(userId)
       .then((value) => {
         teams = value
       })
@@ -54,9 +68,9 @@
 <div class="flex-1 flex flex-row">
   {#if showSidebar}
     <div
-      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-neutral/30 backdrop-blur border-r border-r-base-content/10 print:hidden"
+      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-neutral/20 backdrop-blur border-r border-r-base-content/10 print:hidden"
     >
-      <Sidebar {loading} user={$user.info} />
+      <Sidebar {loading} {user} />
     </div>
     <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0 print:hidden" />
   {:else}
@@ -80,7 +94,7 @@
           <span class="icon-[fluent--notepad-20-regular] w-5 h-5"></span>
           <span class="text-base font-bold">{$i18n.t('account.intro')}</span>
         </h2>
-        <RxArticle class="mt-4" content={$user.info?.intro || $i18n.t('account.noIntro')}></RxArticle>
+        <RxArticle class="mt-4" content={user.intro || $i18n.t('account.noIntro')}></RxArticle>
         <h2
           class="h-12 text-base font-bold flex flex-row space-x-2 items-center mt-4 border-b-2 border-b-base-content/5"
         >
@@ -114,7 +128,7 @@
       class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 print:hidden"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
-      <Sidebar {loading} user={$user.info} />
+      <Sidebar {loading} {user} />
     </div>
   {/if}
 </div>

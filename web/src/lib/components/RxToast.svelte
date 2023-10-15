@@ -58,22 +58,24 @@
   transition:fly={{ delay: 100, duration: 300, x: 0, y: 32, opacity: 0, easing: quintOut }}
 >
   <div class="flex flex-row space-x-2 flex-1 items-center">
-    {#if level === 'info'}
-      <span class="icon-[fluent--info-16-regular] w-6 h-6 text-info" />
-    {:else if level === 'warning'}
-      <span class="icon-[fluent--warning-16-regular] w-6 h-6 text-warning" />
-    {:else if level === 'success'}
-      <span class="icon-[fluent--checkmark-circle-16-regular] w-6 h-6 text-success" />
-    {:else if level === 'error'}
-      <span class="icon-[fluent--dismiss-circle-16-regular] w-6 h-6 text-error" />
-    {/if}
+    <div class="flex-shrink-0 flex flex-row items-center">
+      {#if level === 'info'}
+        <span class="icon-[fluent--info-16-regular] w-6 h-6 text-info" />
+      {:else if level === 'warning'}
+        <span class="icon-[fluent--warning-16-regular] w-6 h-6 text-warning" />
+      {:else if level === 'success'}
+        <span class="icon-[fluent--checkmark-circle-16-regular] w-6 h-6 text-success" />
+      {:else if level === 'error'}
+        <span class="icon-[fluent--dismiss-circle-16-regular] w-6 h-6 text-error" />
+      {/if}
+    </div>
     <span class="text-base">{message}</span>
     <div class="flex-1" />
     {#if rejectMessage}
-      <button class="btn btn-sm btn-ghost" on:click={reject}>{rejectMessage}</button>
+      <button class="btn no-animation btn-sm btn-ghost" on:click={reject}>{rejectMessage}</button>
     {/if}
     {#if acceptMessage}
-      <button class="btn btn-sm btn-primary" on:click={accept}>{acceptMessage}</button>
+      <button class="btn no-animation btn-sm btn-primary" on:click={accept}>{acceptMessage}</button>
     {/if}
   </div>
   {#if persistTime}

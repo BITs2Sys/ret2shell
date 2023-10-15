@@ -44,7 +44,7 @@
   }}
   class={`w-full transition-all ${
     challengeScrollExpanded ? 'h-32' : 'h-16'
-  } backdrop-blur bg-base-100/80 border-b border-b-base-content/5 flex flex-row justify-center sticky top-0`}
+  } backdrop-blur border-b border-b-base-content/10 flex flex-row justify-center sticky top-0`}
 >
   <div class="w-full max-w-5xl flex flex-row px-6 items-center">
     <span
@@ -107,7 +107,7 @@
   </div>
 </div>
 <div
-  class={`w-full transition-all bg-base-100/80 backdrop-blur border-b overflow-hidden flex flex-row justify-center sticky ${
+  class={`w-full transition-all backdrop-blur border-b overflow-hidden flex flex-row justify-center sticky ${
     challengeEnvExpanded || challengeAttachmentExpanded ? 'h-16 border-b-base-content/5' : 'h-0 border-b-transparent'
   } ${challengeScrollExpanded ? 'top-32' : 'top-16'}`}
 >

@@ -94,14 +94,14 @@
 <div class="flex-1 flex flex-row">
   {#if showSidebar}
     <div
-      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-base-100/60 backdrop-blur border-r border-r-base-content/10 print:hidden"
+      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-neutral/20 backdrop-blur border-r border-r-base-content/10 flex flex-col print:hidden"
     >
       <Sidebar bind:wiki={wikiEntries} {activeChains} {loading} />
     </div>
     <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0 print:hidden" />
   {:else}
     <label
-      class="btn bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"
+      class="btn no-animation bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"
     >
       <input
         type="checkbox"
@@ -120,7 +120,7 @@
   {/if}
   {#if toggleSidebar && !showSidebar}
     <div
-      class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 print:hidden"
+      class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 flex flex-col print:hidden"
       transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
     >
       <Sidebar bind:wiki={wikiEntries} {activeChains} {loading} />

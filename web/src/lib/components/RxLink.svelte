@@ -46,7 +46,7 @@
    * justify-end normal-case btn-square
    */
   $: classes = [
-    'btn',
+    'btn no-animation',
     disabled && 'btn-disabled',
     'border-none',
     'space-x-2',

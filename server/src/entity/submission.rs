@@ -25,6 +25,7 @@ pub struct Model {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ModelWithInfo {
     pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub challenge_id: i64,
@@ -39,6 +40,7 @@ pub struct ModelWithInfo {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ModelOnlyUserInfo {
     pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub user_name: String,
@@ -166,6 +168,7 @@ pub async fn create_submission(
 ) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
+        created_at: ActiveValue::Set(Utc::now()),
         ..submission.into_active_model().reset_all()
     };
     active_model.insert(conn).await
@@ -185,7 +188,9 @@ pub async fn get_solved_user_page(
         .filter(Column::ChallengeId.eq(challenge_id))
         .filter(Column::Solved.eq(true))
         .distinct_on([(Entity, Column::UserId), (Entity, Column::ChallengeId)]);
-    let paginator = sql.into_model::<ModelOnlyUserInfo>().paginate(conn, per_page);
+    let paginator = sql
+        .into_model::<ModelOnlyUserInfo>()
+        .paginate(conn, per_page);
     let mut resp = paginator.fetch_page(page - 1).await?;
     resp.sort_by(|a, b| a.created_at.cmp(&b.created_at));
     let num_pages = paginator.num_pages().await?;

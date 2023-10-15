@@ -2,6 +2,8 @@
   import { i18n } from '$lib/i18n'
   import { theme } from '$lib/stores/theme'
   import RxButton from '$lib/components/RxButton.svelte'
+  import { onMount } from 'svelte'
+  import { platform } from '$lib/stores/platform'
 
   function toggleColorScheme(scheme: string) {
     $theme.colorScheme = scheme

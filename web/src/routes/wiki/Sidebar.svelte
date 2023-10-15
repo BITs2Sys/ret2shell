@@ -15,21 +15,21 @@
   }
 </script>
 
+<h1
+  class="h-16 bg-neutral/10 border-b border-b-base-content/5 flex flex-row items-center justify-center space-x-2 p-4 font-bold sticky top-0 z-10"
+>
+  <span class="w-6 h-6 icon-[fluent--hat-graduation-16-regular]" />
+  <span>
+    {$i18n.t('wiki.sideToc')}
+  </span>
+</h1>
 <OverlayScrollbarsComponent
   options={{
     scrollbars: { theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light', autoHide: 'scroll' },
   }}
-  class="w-full h-full flex flex-col relative print:hidden"
+  class="w-full flex-1 flex flex-col relative print:hidden"
   defer
 >
-  <h1
-    class="h-16 bg-base-100 border-b border-b-base-content/5 flex flex-row items-center justify-center space-x-2 p-4 font-bold sticky top-0 z-10"
-  >
-    <span class="w-6 h-6 icon-[fluent--hat-graduation-16-regular]" />
-    <span>
-      {$i18n.t('wiki.sideToc')}
-    </span>
-  </h1>
   {#if loading}
     <div class="flex flex-row justify-center items-center h-16 space-x-2">
       <span class="loading loading-spinner loading-sm" />

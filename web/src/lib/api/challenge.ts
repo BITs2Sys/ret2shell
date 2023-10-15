@@ -59,5 +59,5 @@ export async function getChallengeSolvedUser(id: number, page?: number, per_page
   if (page && per_page) {
     uri += `?page=${page}&per_page=${per_page}`
   }
-  return (await api.get(uri)).data as { records: SubmissionOnlyUserInfo[]; total: number }
+  return (await api.get(uri)).data as { users: SubmissionOnlyUserInfo[]; total: number }
 }

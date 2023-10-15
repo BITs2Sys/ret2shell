@@ -47,8 +47,8 @@
 
 <div class={classes}>
   <table class="w-full max-w-full table table-auto rounded-box overflow-hidden bg-base-content/5 backdrop-blur">
-    <thead class="text-base bg-neutral/80">
-      <tr class="border-b-base-100/60">
+    <thead class="text-base bg-base-content/5">
+      <tr class="border-b-base-100/5">
         {#each Object.keys(colDef) as key}
           {#if types[key] != 'hidden'}
             <td
@@ -67,21 +67,21 @@
     <tbody class="w-full max-w-full overflow-hidden text-base relative">
       {#if loading}
         <div
-          class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center bg-neutral z-20"
+          class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center backdrop-blur z-20"
           transition:blur={{ amount: 20, duration: 300 }}
         >
           <span class="loading loading-spinner loading-sm" />
         </div>
       {/if}
       {#if dataEntries.length === 0}
-        <tr class="border-b-base-100/60">
+        <tr class="border-b-base-100/5">
           <td colspan={Object.keys(colDef).length + (actions.length > 0 ? 1 : 0)} class="text-center">
             <span class="text-base opacity-80">{$i18n.t('table.noData')}</span>
           </td>
         </tr>
       {/if}
       {#each dataEntries as dataEntry}
-        <tr class="border-b-base-100/60">
+        <tr class="border-b-base-100/5">
           {#each Object.keys(dataEntry) as key}
             {#if types[key] == 'plain'}
               <td

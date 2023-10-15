@@ -197,7 +197,7 @@
       class="h-64 sm:h-40 w-full lg:w-3/4 lg:translate-x-[4rem] lg:-translate-y-[3rem] flex flex-row justify-end transition-all"
     >
       <a
-        class="w-full lg:w-2/3 rounded-box bg-neutral/80 backdrop-blur rounded-t-none lg:rounded-t-box overflow-clip flex flex-row relative shadow-lg"
+        class="w-full lg:w-2/3 rounded-box bg-neutral/80 backdrop-blur rounded-t-none lg:rounded-t-box overflow-clip flex flex-row relative border border-base-content/5"
         href={$game.cached ? `/games/${$game.cached.id}` : '#'}
       >
         <div class="flex flex-col p-6 space-y-4 sm:space-y-2 flex-1 sm:flex-none">
@@ -237,7 +237,7 @@
         </div>
         {#if loading}
           <div
-            class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-neutral"
+            class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center backdrop-blur"
             transition:blur={{ amount: 20, duration: 300 }}
           >
             <span class="loading" />

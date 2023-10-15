@@ -34,21 +34,21 @@
   }
 </script>
 
+<h1
+  class="font-bold flex flex-row bg-neutral/30 justify-center items-center h-16 space-x-2 sticky top-0 border-b border-b-base-content/5 z-10"
+>
+  <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
+  <span>
+    {$i18n.t('games.challengeList')}
+  </span>
+</h1>
 <OverlayScrollbarsComponent
   options={{
     scrollbars: { theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light', autoHide: 'scroll' },
   }}
-  class="w-full h-full flex flex-col relative print:hidden"
+  class="w-full flex-1 flex flex-col relative print:hidden"
   defer
 >
-  <h1
-    class="font-bold flex flex-row justify-center items-center h-16 space-x-2 sticky top-0 bg-base-100 border-b border-b-base-content/5 z-10"
-  >
-    <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
-    <span>
-      {$i18n.t('games.challengeList')}
-    </span>
-  </h1>
   {#if loading}
     <div class="flex flex-row justify-center items-center h-16 space-x-2">
       <span class="loading loading-spinner loading-sm" />

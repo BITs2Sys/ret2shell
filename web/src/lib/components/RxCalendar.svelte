@@ -115,7 +115,15 @@
         <span class="icon-[fluent--chevron-left-16-regular] w-6 h-6" />
       </RxButton>
     </div>
-    <span class="font-bold">{year} - {month.toString().padStart(2, '0')}</span>
+    <RxButton
+      ghost
+      on:click={() => {
+        handleSetMonth(new Date().getMonth() + 1)
+        handleSetYear(new Date().getFullYear())
+      }}
+    >
+      {year} - {month.toString().padStart(2, '0')}
+    </RxButton>
     <div class="flex flex-row space-x-2">
       <RxButton ghost on:click={() => handleSetMonth(month + 1)}>
         <span class="icon-[fluent--chevron-right-16-regular] w-6 h-6" />

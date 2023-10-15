@@ -128,6 +128,7 @@ async fn register(
     State(ref queue): State<jetstream::Context>,
     State(global_config): State<GlobalConfig>,
     Extension(config): Extension<ConfigModel>,
+    Extension(token_tracker): Extension<TokenTracker>,
     Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("register request: {:?}", body);
@@ -208,7 +209,19 @@ async fn register(
             .replace("%NAME%", &user.name),
     };
     match send_email(&email, queue).await {
-        Ok(_) => Ok(StatusCode::OK),
+        Ok(_) => {
+            *(token_tracker.token.lock().await) = Token {
+                id: user.id,
+                name: user.name,
+                permissions: user.permissions,
+                ..Default::default()
+            };
+            token_tracker
+                .renew_requested
+                .store(true, std::sync::atomic::Ordering::Relaxed);
+
+            Ok(StatusCode::OK)
+        }
         Err(err) => {
             error!("Failed to send verification email: {}", err);
             Err((

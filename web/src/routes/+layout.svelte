@@ -13,7 +13,7 @@
   import { page } from '$app/stores'
   import { getPlatformInfo } from '$lib/api/platform'
   import { goto } from '$app/navigation'
-  import { showMessage } from '$lib/stores/toast'
+  import { removeMessage, showMessage } from '$lib/stores/toast'
   import { i18n } from '$lib/i18n'
   import GlobalToast from '$lib/blocks/GlobalToast.svelte'
   import type { AxiosError } from 'axios'
@@ -29,6 +29,8 @@
       platform.update((value) => {
         return {
           accept_cookies: value.accept_cookies,
+          see_custom_box: value.see_custom_box,
+          see_magic_category: value.see_magic_category,
           ...data,
         }
       })
@@ -102,9 +104,23 @@
   })
 
   onDestroy(themeUnsubscribe)
+
+  let screenWidth: number
+  let screenHeight: number
+  let screenTip: string | null = null
+  function watchScreenSize(width: number, height: number) {
+    if (width < 1600 || height < 900) {
+      if (!screenTip) screenTip = showMessage('warning', $i18n.t('platform.screenTooSmall'))
+    } else if (screenTip) {
+      removeMessage(screenTip)
+      screenTip = null
+    }
+  }
+  $: watchScreenSize(screenWidth, screenHeight)
 </script>
 
 <svelte:head><title>{$platform.name}</title></svelte:head>
+<svelte:window bind:innerWidth={screenWidth} bind:innerHeight={screenHeight} />
 <Background />
 <OverlayScrollbarsComponent
   options={{

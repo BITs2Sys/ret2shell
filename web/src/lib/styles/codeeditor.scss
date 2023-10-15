@@ -10,7 +10,7 @@
     }
 
     .ace_searchbtn {
-      @apply btn btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2 flex-1;
+      @apply btn no-animation btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2 flex-1;
     }
 
     .ace_searchbtn.prev:after,
@@ -20,7 +20,7 @@
 
     .ace_searchbtn.prev,
     .ace_searchbtn.next {
-      @apply btn btn-sm btn-ghost w-8 h-8 flex flex-row justify-center items-center;
+      @apply btn no-animation btn-sm btn-ghost w-8 h-8 flex flex-row justify-center items-center;
     }
 
     .ace_searchbtn.prev:before,
@@ -45,7 +45,7 @@
     }
 
     .ace_searchbtn {
-      @apply btn btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2;
+      @apply btn no-animation btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2;
     }
   }
 
@@ -62,7 +62,7 @@
   }
 
   .ace_button {
-    @apply btn btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
+    @apply btn no-animation btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
   }
 
   .ace_button.checked {

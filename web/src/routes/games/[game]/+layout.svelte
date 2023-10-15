@@ -3,6 +3,7 @@
   import { page } from '$app/stores'
   import { getGame, getSelfTeamInfo } from '$lib/api/game'
   import Background from '$lib/blocks/Background.svelte'
+  import BgBlur from '$lib/assets/bg-blur.webp'
   import { i18n } from '$lib/i18n'
   import { game } from '$lib/stores/game'
   import { platform } from '$lib/stores/platform'
@@ -88,7 +89,10 @@
 <slot />
 
 {#if loading || delayedLoading}
-  <div class="w-screen h-screen fixed bg-base-100 z-50 flex flex-col items-center justify-center"></div>
+  <div class="fixed left-0 right-0 top-0 bottom-0 z-50">
+    <img src={BgBlur} alt="" class="w-full h-full object-fill" />
+    <div class="fixed left-0 right-0 top-0 bottom-0 bg-base-100/90 backdrop-blur"></div>
+  </div>
   <div
     class="w-screen h-screen fixed z-50 flex flex-col items-center justify-center space-y-8"
     transition:blur={{ amount: 20, duration: 300 }}

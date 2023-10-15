@@ -21,7 +21,7 @@
   import Engine from '$lib/assets/engine.svelte'
   import LogoAnimate from '$lib/assets/logo-animate.svelte'
   import RxTimer from '$lib/components/RxTimer.svelte'
-  import { fly } from 'svelte/transition'
+  import RxPing from '$lib/components/RxPing.svelte'
 
   let canTakePartIn = false
 
@@ -37,7 +37,6 @@
     gameUnsubscribe()
   })
 
-  let userFullInfo: User | null = null
   let loadingAvatar = false
 
   let gameLastTime = 0
@@ -53,8 +52,7 @@
 
   onMount(() => {
     loadingAvatar = true
-    userInfo().then((value) => {
-      userFullInfo = value
+    userInfo().then(() => {
       loadingAvatar = false
     })
   })
@@ -62,7 +60,7 @@
 
 <div id="page-top" />
 <div
-  class="navbar w-auto backdrop-blur shadow bg-neutral/80 transition-shadow z-50 print:hidden px-2 py-0 sticky top-0"
+  class="navbar h-16 border-b border-b-base-content/5 w-auto backdrop-blur bg-neutral/60 z-50 print:hidden px-2 py-0 sticky top-0"
 >
   {#if !$initConfig.processing}
     <RxPopup class="btn-square btn-ghost xl:hidden" name="navPopup" popupWidth={64}>
@@ -113,8 +111,19 @@
       <RxTimer time={gameLastTime} />
     </div>
   {/if}
-  <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="customizeBoxPopup">
-    <span slot="button" class="icon-[fluent--wand-16-regular] w-5 h-5" />
+  <RxPopup
+    class="btn-square btn-ghost inline-flex mr-2 relative"
+    name="customizeBoxPopup"
+    on:click={() => {
+      $platform.see_custom_box = true
+    }}
+  >
+    <div slot="button">
+      <span class="icon-[fluent--wand-16-regular] w-5 h-5" />
+      {#if !$platform.see_custom_box}
+        <RxPing level="info" />
+      {/if}
+    </div>
     <div class="rounded-box bg-neutral flex flex-col shadow-lg w-full">
       <CustomizeBox />
     </div>
@@ -136,8 +145,8 @@
           <div
             class="w-8 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
           >
-            {#if userFullInfo?.cover_path}
-              <RxImage src={userFullInfo.cover_path} loading={loadingAvatar} />
+            {#if $user.info?.cover_path}
+              <RxImage src={$user.info.cover_path} loading={loadingAvatar} />
             {:else}
               <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
             {/if}

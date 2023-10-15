@@ -91,10 +91,10 @@
       {/if}
     </div>
     <RxArticle content={announcement.content} headingAnchors={true} class="p-6 pt-12" />
-    <RxButton square class="btn-lg fixed bottom-28 right-6 print:hidden" on:click={scrollToTop}>
+    <RxButton square size="lg" class="fixed bottom-28 right-6 print:hidden" on:click={scrollToTop}>
       <span class="icon-[fluent--chevron-up-24-regular] w-6 h-6"></span>
     </RxButton>
-    <RxButton square class="btn-lg fixed bottom-6 right-6 print:hidden" on:click={() => history.back()}>
+    <RxButton square size="lg" class="fixed bottom-6 right-6 print:hidden" on:click={() => history.back()}>
       <span class="icon-[fluent--arrow-hook-down-left-24-regular] w-6 h-6"></span>
     </RxButton>
     <div class="h-32" />
