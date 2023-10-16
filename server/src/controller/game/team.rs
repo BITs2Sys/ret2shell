@@ -27,6 +27,7 @@ use tracing::error;
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route("/info", patch(update_team_info))
+        .route("/audit", patch(change_team_audit))
         .route_layer(middleware::from_fn(auth::permission_required_any!(
             Permission::Audit,
             Permission::Organize,
@@ -348,6 +349,38 @@ async fn update_team_info(
     Json(data): Json<team::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::update_team(conn, team_id, data).await {
+        Ok(_) => Ok(StatusCode::OK),
+        Err(err) => {
+            error!("Failed to update team: {}", err);
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to update team"))
+        }
+    }
+}
+
+#[derive(Deserialize)]
+struct ChangeTeamAuditQuery {
+    team_id: i64,
+}
+
+async fn change_team_audit(
+    State(ref conn): State<DatabaseConnection>,
+    Query(query): Query<ChangeTeamAuditQuery>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let team_id = query.team_id;
+    let mut current_team = match team::get_team(conn, team_id).await {
+        Ok(Some(current_team)) => current_team,
+        Ok(None) => return Err((StatusCode::NOT_FOUND, "team not found")),
+        Err(err) => {
+            error!("failed to get team info: {}", err);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info"));
+        }
+    };
+    match current_team.state {
+        team::State::NeedAudit => current_team.state = team::State::Normal,
+        team::State::Normal => current_team.state = team::State::NeedAudit,
+        _ => {}
+    }
+    match team::update_team(conn, team_id, current_team).await {
         Ok(_) => Ok(StatusCode::OK),
         Err(err) => {
             error!("Failed to update team: {}", err);
