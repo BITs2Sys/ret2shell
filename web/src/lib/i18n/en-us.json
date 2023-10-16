@@ -646,5 +646,10 @@
     "platformInfoAnnouncements": "Here is the platform announcement! \nSome notices will be released, etc. Special notes about the competition, important events, and daily platform maintenance information will be here, so stay tuned!",
     "theEnd": "Okay, that’s the brief introduction to CTF, but we still have a long, long road to learn... The rest of the time is entirely up to you!",
     "end": "End of journey"
+  },
+  "team": {
+    "institute_info": "Institute Info",
+    "name": "Team name",
+    "fetchFailed": "Failed to get team information"
   }
 }
