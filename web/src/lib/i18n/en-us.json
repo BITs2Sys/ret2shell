@@ -264,7 +264,28 @@
     "simplifiedChinese": "简体中文"
   },
   "surprise": {
-    "sakana": "Sakana~"
+    "sakana": {
+      "title": "Sakana~",
+      "illustration": "Artwork"
+    },
+    "jswdnmd": {
+      "title": "Nice JavaScript",
+      "source": "original idea"
+    },
+    "source": "Original Idea",
+    "tutorial": {
+      "title": "welcome"
+    },
+    "title": "RX の strange space",
+    "toast": {
+      "0": "Why are you poking me? Just poke me down there!",
+      "1": "Hum hum hum hum ahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+      "2": "Stop poking. What’s so exciting about the title?",
+      "3": "Life is always a little ridiculous, look at something else",
+      "4": "Do you have any weird obsession with titles?",
+      "5": "418 I'm just a teapot... No, I'm just a title",
+      "6": "You seem to be very free. Have you solved the P!=NP problem?"
+    }
   },
   "form": {
     "loadingCaptcha": "Loading Captcha...",

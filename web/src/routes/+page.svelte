@@ -111,6 +111,9 @@
   }
 
   let calendarSection: HTMLElement
+
+  const suprises = ['sakana', 'wdnmd']
+  $: surprise = `/magic/${suprises[Math.floor(Math.random() * suprises.length)]}`
 </script>
 
 <svelte:head><title>{$platform.name}</title></svelte:head>
@@ -149,7 +152,7 @@
             &nbsp;
             <a href="https://beian.miit.gov.cn" class="link">{$platform.record}</a>
           {/if}
-          <a class="btn no-animation btn-sm btn-ghost btn-square ml-2 relative" href="/magic/sakana">
+          <a class="btn no-animation btn-sm btn-ghost btn-square ml-2 relative" href={surprise}>
             <span class="icon-[fluent--gift-16-regular] w-6 h-6 opacity-80" />
             {#if !$platform.see_magic_category}
               <RxPing level="info" />

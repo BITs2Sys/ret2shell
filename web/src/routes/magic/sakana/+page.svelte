@@ -55,7 +55,7 @@
   })
 </script>
 
-<svelte:head><title>{$i18n.t('surprise.sakana')} - {$platform.name}</title></svelte:head>
+<svelte:head><title>{$i18n.t('surprise.sakana.title')} - {$platform.name}</title></svelte:head>
 
 <div class="flex-1 flex flex-row items-center justify-center">
   <div class="relative">
@@ -77,8 +77,12 @@
     </RxLink>
   </div>
 </div>
-<div class="self-center p-12 text-zinc-500 text-center">
-  Illustration (C) <a class="link" href="https://twitter.com/LAttic1ng">Ac4ae0</a>
-  ,
+<div class="h-24 self-center text-zinc-500 text-center">
+  <span>{$i18n.t('surprise.sakana.illustration')} (C)</span>
+  <a class="link" href="https://twitter.com/LAttic1ng">Ac4ae0</a>
+  <span>,</span>
   <a class="link" href="https://twitter.com/arttnba3">arttnba3</a>
+  <br />
+  <span>{$i18n.t('surprise.source')}:</span>
+  <a class="link" href="https://lab.magiconch.com/sakana/">https://lab.magiconch.com/sakana</a>
 </div>

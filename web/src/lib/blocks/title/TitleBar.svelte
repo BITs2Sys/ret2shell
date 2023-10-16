@@ -60,7 +60,7 @@
 
 <div id="page-top" />
 <div
-  class="navbar h-16 border-b border-b-base-content/5 w-auto backdrop-blur bg-neutral/60 z-50 print:hidden px-2 py-0 sticky top-0"
+  class="navbar h-16 border-b border-b-base-content/5 w-auto backdrop-blur bg-neutral/60 z-50 print:hidden px-2 py-0 sticky top-0 left-0"
 >
   {#if !$initConfig.processing}
     <RxPopup class="btn-square btn-ghost xl:hidden" name="navPopup" popupWidth={64}>
