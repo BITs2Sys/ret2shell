@@ -169,6 +169,7 @@ async fn register(
         ]),
         _ => Permissions(vec![Permission::Basic]),
     };
+    let email = body.email.clone();
     let new_user = user::Model {
         name: body.name,
         password: Some(password),
@@ -190,6 +191,16 @@ async fn register(
         }
     };
     let verification_id = nanoid!(21, &alphabet::SAFE);
+    match cache::Email::add_validation(cache, verification_id.as_str(), &email).await {
+        Ok(_) => {}
+        Err(err) => {
+            error!("add email validation failed: {}", err);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "add email validation failed",
+            ));
+        }
+    }
     let email = Email {
         name: user.name.clone(),
         email: user.email.clone().unwrap_or_default(),
@@ -206,7 +217,7 @@ async fn register(
                     verification_id
                 ),
             )
-            .replace("%NAME%", &user.name),
+            .replace("%USER%", &user.name),
     };
     match send_email(&email, queue).await {
         Ok(_) => {

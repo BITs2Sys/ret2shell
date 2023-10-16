@@ -60,7 +60,7 @@
     !uppercase && 'normal-case',
     square && 'btn-square',
     (active || (exactlyMatched ? $page.url.pathname === href : startsWithPath(href))) &&
-      (ghost ? 'text-primary' : 'btn-primary'),
+      (ghost ? 'text-primary' : '!btn-primary'),
     clazz,
   ]
     .filter(Boolean)

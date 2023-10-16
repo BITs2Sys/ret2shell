@@ -43,7 +43,7 @@
     level === null && !ghost && 'bg-base-content/5 backdrop-blur',
     ghost && 'btn-ghost',
     level && `${ghost ? 'text' : 'btn'}-${level}`,
-    active && (ghost ? 'text-primary' : 'btn-primary'),
+    active && (ghost ? 'text-primary' : '!btn-primary'),
     size && `btn-${size}`,
     bold ? 'font-bold' : 'font-normal',
     justify && `justify-${justify}`,
