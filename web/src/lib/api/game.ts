@@ -22,9 +22,17 @@ export async function getGameTeamSubmission(game_id: number, team_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/solved?team_id=${team_id}`)).data as Submission[]
 }
 
-export async function getGameTeamList(game_id: number, page: number, per_page: number, filter?: string) {
+export async function getGameTeamList(
+  game_id: number,
+  page: number,
+  per_page: number,
+  filter?: string,
+  filterNeedAudit?: boolean
+) {
   let uri = `${api_root}/game/${game_id}/team?page=${page}&per_page=${per_page}`
-  if (filter !== undefined && filter != null) uri += `&filter=${filter}`
+  if (filter !== undefined && filter !== null && filter !== '') uri += `&filter=${filter}`
+  if (filterNeedAudit !== undefined && filterNeedAudit !== null) uri += `&need_audit=${filterNeedAudit}`
+  console.log(uri)
   return (await api.get(uri)).data as { teams: Team[]; total: number }
 }
 

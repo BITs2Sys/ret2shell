@@ -311,11 +311,15 @@ pub async fn get_team_page_by_game_id(
     page: u64,
     per_page: u64,
     filter: Option<String>,
+    need_audit: Option<bool>,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let sql = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .order_by_asc(Column::Id);
-    let sql = filter_team(sql, filter)?;
+    let mut sql = filter_team(sql, filter)?;
+    if Some(true) == need_audit {
+        sql = sql.filter(Column::State.eq(State::NeedAudit));
+    }
     let paginator = sql.paginate(conn, per_page);
     let num_pages = paginator.num_pages().await?;
     let teams = paginator.fetch_page(page - 1).await?;
