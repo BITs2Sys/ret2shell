@@ -75,7 +75,7 @@
           errors={$errors.email || ''}
         >
           <RxInput
-            icon="icon-[fluent--mail-16-regular]"
+            icon="icon-[fluent--mail-20-regular]"
             class="w-full"
             id="email"
             name="email"

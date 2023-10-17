@@ -647,7 +647,8 @@
   "notification": {
     "title": "title",
     "publishedAt": "Published At",
-    "gankAuthor": "One-click hammer reveals the questioner"
+    "gankAuthor": "One-click hammer reveals the questioner",
+    "fetchFailed": "Failed to get game notifications"
   },
   "tutorial": {
     "welcome": "Welcome to the world of CTF!",

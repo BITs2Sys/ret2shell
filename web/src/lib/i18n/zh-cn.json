@@ -647,7 +647,8 @@
   "notification": {
     "title": "标题",
     "publishedAt": "发布于",
-    "gankAuthor": "一键锤爆出题人"
+    "gankAuthor": "一键锤爆出题人",
+    "fetchFailed": "获取赛事通知失败"
   },
   "tutorial": {
     "welcome": "欢迎来到 CTF 的世界！",

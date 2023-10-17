@@ -6,17 +6,17 @@
   const routes = [
     {
       name: $i18n.t('admin.routes.persons'),
-      icon: 'icon-[fluent--person-24-regular]',
+      icon: 'icon-[fluent--person-20-regular]',
       link: '/admin/users/persons',
     },
     {
       name: $i18n.t('admin.routes.institutes'),
-      icon: 'icon-[fluent--people-24-regular]',
+      icon: 'icon-[fluent--people-20-regular]',
       link: '/admin/users/institutes',
     },
     {
       name: $i18n.t('admin.routes.permissions'),
-      icon: 'icon-[fluent--shield-24-regular]',
+      icon: 'icon-[fluent--shield-20-regular]',
       link: '/admin/users/permissions',
     },
   ]
@@ -30,7 +30,7 @@
     justify="start"
     exactlyMatched={item.link === $page.url.pathname}
   >
-    <span class={`${item.icon} w-6 h-6 flex-shrink-0`} />
+    <span class={`${item.icon} w-5 h-5 flex-shrink-0`} />
     <span class="text-ellipsis whitespace-nowrap overflow-hidden">{item.name}</span>
   </RxLink>
 {/each}

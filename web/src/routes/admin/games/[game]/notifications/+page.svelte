@@ -17,7 +17,7 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
@@ -109,8 +109,8 @@
       {loading}
       booleanIconsDef={{
         hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
-          false: 'icon-[fluent--checkmark-16-regular] text-success',
+          true: 'icon-[fluent--eye-off-20-regular] text-warning',
+          false: 'icon-[fluent--checkmark-20-regular] text-success',
         },
       }}
     />

@@ -42,9 +42,9 @@
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
   <div class="flex-1 flex flex-col max-w-5xl">
     <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-      <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
       <h1 class="text-2xl font-bold">{$i18n.t('init.mediaSettings')}</h1>
-      <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
     </div>
     <RxForm {form}>
       <RxFormItem
@@ -54,7 +54,7 @@
         errors={$errors.limit || ''}
       >
         <RxInput
-          icon="icon-[fluent--code-16-regular]"
+          icon="icon-[fluent--code-20-regular]"
           class="w-full"
           id="limit"
           name="limit"

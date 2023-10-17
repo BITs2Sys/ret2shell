@@ -164,9 +164,9 @@
                 transition:fly={{ x: 24, duration: 300 }}
               >
                 {#if log.state}
-                  <span class="icon-[fluent--checkmark-16-regular] text-success flex-shrink-0"></span>
+                  <span class="icon-[fluent--checkmark-20-regular] text-success flex-shrink-0"></span>
                 {:else}
-                  <span class="icon-[fluent--dismiss-16-regular] text-warning flex-shrink-0"></span>
+                  <span class="icon-[fluent--dismiss-20-regular] text-warning flex-shrink-0"></span>
                 {/if}
                 &nbsp;
                 <span class="opacity-80">{log.expr}</span>

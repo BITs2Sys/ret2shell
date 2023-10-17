@@ -101,7 +101,7 @@
 </script>
 
 <RxLink href="/admin/wiki/0#create" class="sticky top-4 z-10 bg-neutral">
-  <span class="icon-[fluent--add-16-regular] w-5 h-5"></span>
+  <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
   <span>{$i18n.t('admin.create')}</span>
 </RxLink>
 {#if loading}

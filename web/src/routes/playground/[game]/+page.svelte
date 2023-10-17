@@ -141,7 +141,7 @@
       <div class="flex flex-row h-16 bg-neutral/30 border-b border-b-base-content/10">
         <div class="sticky left-0 p-2 flex-shrink-0 z-50">
           <RxLink ghost active={activeChallenge === null} href="#">
-            <span class="w-4 h-4 icon-[fluent--pin-16-regular]" />
+            <span class="w-5 h-5 icon-[fluent--pin-20-regular]" />
             {$i18n.t('playground.gameIntro')}
           </RxLink>
         </div>
@@ -168,7 +168,7 @@
                 active={activeChallenge?.id === chal.id}
                 href={`#${chal.id}`}
               >
-                <span class="w-4 h-4 icon-[fluent--braces-16-regular] flex-shrink-0" />
+                <span class="w-5 h-5 icon-[fluent--braces-20-regular] flex-shrink-0" />
                 <span class="text-ellipsis overflow-hidden whitespace-nowrap">
                   {chal.name}
                 </span>
@@ -184,7 +184,7 @@
                   }
                 }}
               >
-                <span class="w-4 h-4 icon-[fluent--dismiss-16-regular]" />
+                <span class="w-5 h-5 icon-[fluent--dismiss-20-regular]" />
               </RxButton>
             </div>
           {/each}
@@ -249,7 +249,7 @@
             bottomTab = 0
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--code-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--code-20-regular]" />
           {$i18n.t('playground.terminal')}
         </RxButton>
         <RxButton
@@ -259,7 +259,7 @@
             bottomTab = 1
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--info-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--info-20-regular]" />
           {$i18n.t('playground.challengeHints')}
         </RxButton>
         <RxButton
@@ -269,7 +269,7 @@
             bottomTab = 2
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--checkmark-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--checkmark-20-regular]" />
           {$i18n.t('playground.challengeAnswer')}
         </RxButton>
         <RxButton
@@ -279,7 +279,7 @@
             bottomTab = 3
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--people-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--people-20-regular]" />
           {$i18n.t('playground.challengeSolves')}
         </RxButton>
       </div>

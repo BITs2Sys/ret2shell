@@ -37,9 +37,9 @@
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
   <div class="flex-1 flex flex-col max-w-5xl">
     <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-      <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
       <h1 class="text-2xl font-bold">{$i18n.t('announcements.title')}</h1>
-      <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
     </div>
 
     {#if loading}
@@ -55,7 +55,7 @@
         {#each announcements as item}
           <div class="border-b border-b-base-content/5 w-full">
             <RxLink class="w-full" justify="start" ghost href={`/announcements/${item.id}`}>
-              <span class={`icon-[fluent--megaphone-16-regular] w-6 h-6 ${item.pinned ? 'text-error' : ''}`} />
+              <span class={`icon-[fluent--megaphone-20-regular] w-5 h-5 ${item.pinned ? 'text-error' : ''}`} />
               <span class="text-base">{item.title}</span>
               <div class="flex-1" />
               <span class="text-base opacity-60">

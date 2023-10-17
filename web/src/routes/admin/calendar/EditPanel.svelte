@@ -98,7 +98,7 @@
           dispatch('close')
         }}
       >
-        <span class="icon-[fluent--dismiss-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
       </RxButton>
     </div>
 
@@ -111,7 +111,7 @@
           errors={$errors.name || ''}
         >
           <RxInput
-            icon="icon-[fluent--flag-16-regular]"
+            icon="icon-[fluent--flag-20-regular]"
             class="w-full"
             id="name"
             name="name"
@@ -128,7 +128,7 @@
           errors={$errors.link || ''}
         >
           <RxInput
-            icon="icon-[fluent--link-16-regular]"
+            icon="icon-[fluent--link-20-regular]"
             class="w-full"
             id="link"
             name="link"

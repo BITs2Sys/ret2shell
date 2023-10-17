@@ -26,14 +26,14 @@
   </div>
   <div class="flex flex-col p-6">
     <h2 class="font-bold text-base opacity-60 flex flex-row space-x-2 items-center">
-      <span class="icon-[fluent--mail-16-regular] w-5 h-5"></span>
+      <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
       <span>
         {$i18n.t('account.email')}
       </span>
     </h2>
     <a class="hover:underline mt-2 px-2" href={`mailto:${user.email}`}>{user.email}</a>
     <h2 class="font-bold text-base opacity-60 flex flex-row space-x-2 items-center mt-6">
-      <span class="icon-[fluent--shield-question-16-regular] w-5 h-5"></span>
+      <span class="icon-[fluent--shield-question-20-regular] w-5 h-5"></span>
       <span>
         {$i18n.t('account.status')}
       </span>
@@ -50,7 +50,7 @@
       {/if}
     </p>
     <h2 class="font-bold text-base opacity-60 flex flex-row space-x-2 items-center mt-6">
-      <span class="icon-[fluent--key-multiple-16-regular] w-5 h-5"></span>
+      <span class="icon-[fluent--key-multiple-20-regular] w-5 h-5"></span>
       <span>
         {$i18n.t('account.permissions')}
       </span>

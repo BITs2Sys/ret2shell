@@ -7,27 +7,27 @@
   $: routes = [
     {
       name: $i18n.t('admin.routes.statistics'),
-      icon: 'icon-[fluent--data-pie-24-regular]',
+      icon: 'icon-[fluent--data-pie-20-regular]',
       link: `/admin/games/${$admin.game?.id}/statistics`,
     },
     {
       name: $i18n.t('admin.routes.gameInfo'),
-      icon: 'icon-[fluent--info-24-regular]',
+      icon: 'icon-[fluent--info-20-regular]',
       link: `/admin/games/${$admin.game?.id}/info`,
     },
     {
       name: $i18n.t('admin.routes.gameChallenges'),
-      icon: 'icon-[fluent--flag-24-regular]',
+      icon: 'icon-[fluent--flag-20-regular]',
       link: `/admin/games/${$admin.game?.id}/challenges`,
     },
     {
       name: $i18n.t('admin.routes.gameNotifications'),
-      icon: 'icon-[fluent--chat-24-regular]',
+      icon: 'icon-[fluent--chat-20-regular]',
       link: `/admin/games/${$admin.game?.id}/notifications`,
     },
     {
       name: $i18n.t('admin.routes.gameTeams'),
-      icon: 'icon-[fluent--people-24-regular]',
+      icon: 'icon-[fluent--people-20-regular]',
       link: `/admin/games/${$admin.game?.id}/teams`,
     },
   ]
@@ -41,7 +41,7 @@
     justify="start"
     exactlyMatched={item.link === $page.url.pathname}
   >
-    <span class={`${item.icon} w-6 h-6 flex-shrink-0`} />
+    <span class={`${item.icon} w-5 h-5 flex-shrink-0`} />
     <span class="text-ellipsis whitespace-nowrap overflow-hidden">{item.name}</span>
   </RxLink>
 {/each}

@@ -32,7 +32,7 @@
     </h1>
     <div class="flex flex-col space-y-4" in:fly={{ y: 16, duration: 1000, delay: 2000 }}>
       <RxButton size="lg" on:click={next}>
-        <span class="icon-[fluent--thumb-like-16-regular] w-6 h-6"></span>
+        <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('tutorial.start')}</span>
       </RxButton>
       <RxButton
@@ -44,7 +44,7 @@
           })
         }}
       >
-        <span class="icon-[fluent--person-walking-16-regular] w-6 h-6 opacity-40"></span>
+        <span class="icon-[fluent--person-walking-20-regular] w-5 h-5 opacity-40"></span>
         <span class="opacity-60">{$i18n.t('tutorial.skip')}</span>
       </RxButton>
     </div>

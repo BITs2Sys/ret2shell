@@ -96,7 +96,7 @@
           errors={$errors.password || ''}
         >
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="password"
             type="password"
@@ -112,7 +112,7 @@
           errors={$errors.passwordConfirm || ''}
         >
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="passwordConfirm"
             type="password"

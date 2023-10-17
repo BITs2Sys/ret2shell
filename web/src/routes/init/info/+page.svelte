@@ -62,9 +62,9 @@
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
   <div class="flex-1 flex flex-col max-w-5xl">
     <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-      <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
       <h1 class="text-2xl font-bold">{$i18n.t('init.infoTitle')}</h1>
-      <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
     </div>
     <RxForm {form}>
       <RxFormItem
@@ -74,7 +74,7 @@
         errors={$errors.name || ''}
       >
         <RxInput
-          icon="icon-[fluent--flag-16-regular]"
+          icon="icon-[fluent--flag-20-regular]"
           class="w-full"
           id="name"
           name="name"
@@ -89,7 +89,7 @@
         errors={$errors.footer_info || ''}
       >
         <RxInput
-          icon="icon-[fluent--info-16-regular]"
+          icon="icon-[fluent--info-20-regular]"
           class="w-full"
           id="footer_info"
           name="footer_info"
@@ -104,7 +104,7 @@
         errors={$errors.footer_url || ''}
       >
         <RxInput
-          icon="icon-[fluent--link-16-regular]"
+          icon="icon-[fluent--link-20-regular]"
           class="w-full"
           id="footer_url"
           name="footer_url"
@@ -119,7 +119,7 @@
         errors={$errors.subject_info || ''}
       >
         <RxInput
-          icon="icon-[fluent--info-16-regular]"
+          icon="icon-[fluent--info-20-regular]"
           class="w-full"
           id="subject_info"
           name="subject_info"
@@ -134,7 +134,7 @@
         errors={$errors.subject_url || ''}
       >
         <RxInput
-          icon="icon-[fluent--link-16-regular]"
+          icon="icon-[fluent--link-20-regular]"
           class="w-full"
           id="subject_url"
           name="subject_url"
@@ -149,7 +149,7 @@
         errors={$errors.record || ''}
       >
         <RxInput
-          icon="icon-[fluent--slide-record-16-regular]"
+          icon="icon-[fluent--slide-record-20-regular]"
           class="w-full"
           id="record"
           name="record"

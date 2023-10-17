@@ -42,7 +42,7 @@
     </div>
     <div in:fly={{ y: 16, duration: 1000, delay: 1500 }}>
       <RxButton size="lg" on:click={next}>
-        <span class="icon-[fluent--thumb-like-16-regular] w-6 h-6"></span>
+        <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('tutorial.next')}</span>
       </RxButton>
     </div>

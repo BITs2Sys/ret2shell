@@ -182,16 +182,16 @@
     <RxInput ghost bind:value={editedWiki.title}></RxInput>
     <RxButton class="join-item" ghost level="info" on:click={createOrSaveWikiItem}>
       {#if isCreate}
-        <span class="icon-[fluent--add-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('admin.create')}</span>
       {:else}
-        <span class="icon-[fluent--save-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--save-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('admin.update')}</span>
       {/if}
     </RxButton>
     {#if !isCreate}
       <RxButton class="join-item" ghost level="error" on:click={deleteWikiItem}>
-        <span class="icon-[fluent--delete-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
       </RxButton>
     {/if}
   </div>

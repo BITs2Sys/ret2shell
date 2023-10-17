@@ -160,7 +160,7 @@
           {#if $data.cover_path}
             <RxImage src={cover_path} loading={false} />
           {:else}
-            <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
+            <span class="w-5 h-5 icon-[fluent--person-20-regular]" />
           {/if}
           <RxButton
             class="absolute w-full h-full top-0 left-0 opacity-0 hover:opacity-100"
@@ -174,9 +174,9 @@
             }}
           >
             {#if $data.cover_path}
-              <span class="icon-[fluent--dismiss-24-regular] w-6 h-6 text-error" />
+              <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 text-error" />
             {:else}
-              <span class="icon-[fluent--cloud-arrow-up-24-regular] w-6 h-6" />
+              <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
             {/if}
           </RxButton>
         </div>
@@ -189,7 +189,7 @@
       errors={$errors.name || ''}
     >
       <RxInput
-        icon="icon-[fluent--person-16-regular]"
+        icon="icon-[fluent--person-20-regular]"
         class="w-full"
         id="name"
         name="name"
@@ -205,7 +205,7 @@
       errors={$errors.email || ''}
     >
       <RxInput
-        icon="icon-[fluent--mail-16-regular]"
+        icon="icon-[fluent--mail-20-regular]"
         class="w-full"
         id="email"
         name="email"
@@ -293,7 +293,7 @@
       errors={$errors.institute_info || ''}
     >
       <RxInput
-        icon="icon-[fluent--person-16-regular]"
+        icon="icon-[fluent--person-20-regular]"
         class="w-full"
         id="institute_info"
         name="institute_info"

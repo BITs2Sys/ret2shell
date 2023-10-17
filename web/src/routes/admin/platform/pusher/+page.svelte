@@ -81,9 +81,9 @@
   <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
     <div class="flex-1 flex flex-col max-w-5xl">
       <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
         <h1 class="text-2xl font-bold">{$i18n.t('init.pusherTitle')}</h1>
-        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <RxForm {form}>
         <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
@@ -101,7 +101,7 @@
           errors={$errors.token || ''}
         >
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="token"
             name="token"

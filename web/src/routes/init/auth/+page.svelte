@@ -48,9 +48,9 @@
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
   <div class="flex-1 flex flex-col max-w-5xl">
     <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-      <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
       <h1 class="text-2xl font-bold">{$i18n.t('init.authTitle')}</h1>
-      <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+      <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
     </div>
     <RxForm {form}>
       <p class="text-base mt-6 text-warning text-center">{$i18n.t('init.authWarning')}</p>
@@ -61,7 +61,7 @@
         errors={$errors.signing_key || ''}
       >
         <RxInput
-          icon="icon-[fluent--lock-16-regular]"
+          icon="icon-[fluent--lock-20-regular]"
           class="w-full"
           id="signing_key"
           name="signing_key"
@@ -77,7 +77,7 @@
         errors={$errors.expires_time || ''}
       >
         <RxInput
-          icon="icon-[fluent--clock-16-regular]"
+          icon="icon-[fluent--clock-20-regular]"
           class="w-full"
           id="expires_time"
           name="expires_time"
@@ -94,7 +94,7 @@
         errors={$errors.buffer_time || ''}
       >
         <RxInput
-          icon="icon-[fluent--clock-16-regular]"
+          icon="icon-[fluent--clock-20-regular]"
           class="w-full"
           id="buffer_time"
           name="buffer_time"

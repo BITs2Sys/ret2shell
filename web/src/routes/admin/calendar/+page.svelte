@@ -43,14 +43,14 @@
   }
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
       href: '#{id}',
     },
     {
-      icon: 'icon-[fluent--delete-16-regular]',
+      icon: 'icon-[fluent--delete-20-regular]',
       label: '',
       level: 'error',
       type: 'button',
@@ -285,7 +285,7 @@
         </RxButton>
       </div>
       <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular]" />
+        <span class="icon-[fluent--add-20-regular]" />
         <span class="text-base">{$i18n.t('action.create')}</span>
       </RxLink>
     </div>

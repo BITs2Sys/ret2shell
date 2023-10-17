@@ -153,7 +153,7 @@
             <a href="https://beian.miit.gov.cn" class="link">{$platform.record}</a>
           {/if}
           <a class="btn no-animation btn-sm btn-ghost btn-square ml-2 relative" href={surprise}>
-            <span class="icon-[fluent--gift-16-regular] w-6 h-6 opacity-80" />
+            <span class="icon-[fluent--gift-20-regular] w-5 h-5 opacity-80" />
             {#if !$platform.see_magic_category}
               <RxPing level="info" />
             {/if}
@@ -166,15 +166,15 @@
           }}
         >
           <span class="font-semibold">{$i18n.t('calendar.scrollToView')}</span>
-          <span class="icon-[fluent--chevron-double-down-16-regular] w-6 h-6 opacity-80" />
+          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-80" />
         </button>
       </div>
     </section>
     <section class="h-full min-h-full snap-center flex flex-col p-3 md:p-6" bind:this={calendarSection}>
       <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
         <h1 class="text-2xl font-bold">{$i18n.t('calendar.title')}</h1>
-        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <div class="flex flex-1 flex-col lg:flex-row lg:p-24 lg:pt-12 lg:pb-36 space-y-6 lg:space-y-0 lg:space-x-24">
         <div class="flex flex-col justify-start items-center lg:p-12 !pt-0">
@@ -201,7 +201,7 @@
                 class="absolute top-0 left-0 h-full w-full bg-base-content/5 shadow backdrop-blur rounded-box p-6 lg:p-12 space-y-6 overflow-scroll flex flex-col"
               >
                 <div class="flex flex-row space-x-4 items-center">
-                  <span class="icon-[fluent--flag-24-regular] text-error w-6 h-6" />
+                  <span class="icon-[fluent--flag-20-regular] text-error w-5 h-5" />
                   <span class="text-base font-bold">{selectedCalendar.name}</span>
                   <div class="flex-1" />
                   {#if currentDate > new Date(selectedCalendar.end_time * 1000)}
@@ -211,7 +211,7 @@
                   {:else}
                     <RxTag level="success" label={$i18n.t('calendar.gameOngoing')} />
                   {/if}
-                  <span class="icon-[fluent--calendar-16-regular] opacity-80 w-6 h-6" />
+                  <span class="icon-[fluent--calendar-20-regular] opacity-80 w-5 h-5" />
                   <span class="text-base font-bold opacity-80">
                     {new Date(selectedCalendar.start_time * 1000).toLocaleDateString('default', {
                       year: 'numeric',
@@ -270,9 +270,9 @@
                           chosenDate = null
                         }}
                       >
-                        <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
+                        <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
                         <span
-                          class={`icon-[fluent--chevron-double-right-16-regular] w-6 h-6 animate-pulse text-primary transition-all ${
+                          class={`icon-[fluent--chevron-double-right-20-regular] w-5 h-5 animate-pulse text-primary transition-all ${
                             !cal.active && '!w-0'
                           }`}
                         />

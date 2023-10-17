@@ -20,6 +20,6 @@
 >
   {#each $admin.route as route}
     <RxLink ghost href={route.path} exactlyMatched>{route.name}</RxLink>
-    <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+    <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
   {/each}
 </div>

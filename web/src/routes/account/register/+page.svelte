@@ -94,7 +94,7 @@
             errors={$errors.name || ''}
           >
             <RxInput
-              icon="icon-[fluent--person-16-regular]"
+              icon="icon-[fluent--person-20-regular]"
               class="w-full"
               id="name"
               name="name"
@@ -109,7 +109,7 @@
             errors={$errors.email || ''}
           >
             <RxInput
-              icon="icon-[fluent--mail-16-regular]"
+              icon="icon-[fluent--mail-20-regular]"
               class="w-full"
               id="email"
               name="email"
@@ -125,7 +125,7 @@
           errors={$errors.password || ''}
         >
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="password"
             type="password"
@@ -141,7 +141,7 @@
           errors={$errors.passwordConfirm || ''}
         >
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="passwordConfirm"
             type="password"

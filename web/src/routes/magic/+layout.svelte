@@ -18,6 +18,6 @@
 >
   <div class="w-full h-full relative flex items-center justify-center">
     <RxPing level="info" />
-    <span class="icon-[fluent--apps-list-20-regular] w-6 h-6"></span>
+    <span class="icon-[fluent--apps-list-20-regular] w-5 h-5"></span>
   </div>
 </RxLink>

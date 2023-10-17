@@ -69,8 +69,8 @@
           toggleSidebar = !toggleSidebar
         }}
       />
-      <span class="swap-off icon-[fluent--navigation-16-regular] fill-current w-6 h-6"></span>
-      <span class="swap-on icon-[fluent--dismiss-16-regular] fill-current w-6 h-6"></span>
+      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-5 h-5"></span>
+      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
     </label>
   {/if}
   {#if error - 200 < 100}
@@ -84,7 +84,7 @@
         <h2
           class="h-12 text-base font-bold flex flex-row space-x-2 items-center mt-4 border-b-2 border-b-base-content/5"
         >
-          <span class="icon-[fluent--data-bar-vertical-ascending-16-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--data-area-20-regular] w-5 h-5"></span>
           <span class="text-base font-bold">{$i18n.t('account.recentActivities')}</span>
         </h2>
         <p class="flex flex-col space-y-2">

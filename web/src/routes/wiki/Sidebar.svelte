@@ -18,7 +18,7 @@
 <h1
   class="h-16 bg-neutral/10 backdrop-blur border-b border-b-base-content/5 flex flex-row items-center justify-center space-x-2 p-4 font-bold sticky top-0 z-10"
 >
-  <span class="w-6 h-6 icon-[fluent--hat-graduation-16-regular]" />
+  <span class="w-5 h-5 icon-[fluent--hat-graduation-20-regular]" />
   <span>
     {$i18n.t('wiki.sideToc')}
   </span>

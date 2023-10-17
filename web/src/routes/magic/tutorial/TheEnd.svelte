@@ -27,7 +27,7 @@
     <p class="w-full max-w-2xl text-lg" in:fly={{ y: 32, duration: 1000, delay: 500 }}>{$i18n.t('tutorial.theEnd')}</p>
     <div class="flex flex-col space-y-4" in:fly={{ y: 16, duration: 1000, delay: 2000 }}>
       <RxButton size="lg" on:click={next}>
-        <span class="icon-[fluent--thumb-like-16-regular] w-6 h-6"></span>
+        <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('tutorial.end')}</span>
       </RxButton>
     </div>

@@ -58,7 +58,7 @@
     <RxForm {form} class="w-full max-w-3xl mt-12">
       <RxFormItem name="init_token" label="" hasError={$errors.init_token !== null} errors={$errors.init_token || ''}>
         <RxInput
-          icon="icon-[fluent--lock-16-regular]"
+          icon="icon-[fluent--lock-20-regular]"
           class="w-full"
           id="init_token"
           name="init_token"

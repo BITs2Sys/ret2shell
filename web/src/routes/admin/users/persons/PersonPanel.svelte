@@ -54,7 +54,7 @@
           dispatch('close')
         }}
       >
-        <span class="icon-[fluent--dismiss-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
       </RxButton>
     </div>
     {#if activeTab === 'info'}

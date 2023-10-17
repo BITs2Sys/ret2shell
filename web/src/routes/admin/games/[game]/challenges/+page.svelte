@@ -23,7 +23,7 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
@@ -204,7 +204,7 @@
         />
       </div>
       <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular]"></span>
+        <span class="icon-[fluent--add-20-regular]"></span>
         <span>{$i18n.t('challenge.create')}</span>
       </RxLink>
     </div>
@@ -218,8 +218,8 @@
       {loading}
       booleanIconsDef={{
         hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
-          false: 'icon-[fluent--checkmark-16-regular] text-success',
+          true: 'icon-[fluent--eye-off-20-regular] text-warning',
+          false: 'icon-[fluent--checkmark-20-regular] text-success',
         },
       }}
     />

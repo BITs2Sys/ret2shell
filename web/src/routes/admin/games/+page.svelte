@@ -17,7 +17,7 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--chevron-double-right-16-regular]',
+      icon: 'icon-[fluent--chevron-double-right-20-regular]',
       label: $i18n.t('admin.enter'),
       level: 'info',
       type: 'link',
@@ -176,7 +176,7 @@
     <div class="h-16 flex flex-row items-center space-x-2">
       <h2 class="text-base font-bold flex-1">{$i18n.t('admin.gamesSettings')}</h2>
       <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-16-regular]" />
+        <span class="icon-[fluent--add-20-regular]" />
         <span class="text-base">{$i18n.t('action.create')}</span>
       </RxLink>
     </div>
@@ -190,7 +190,7 @@
       {loading}
       booleanIconsDef={{
         hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
+          true: 'icon-[fluent--eye-off-20-regular] text-warning',
           false: '',
         },
         frozen: {
@@ -198,8 +198,8 @@
           false: '',
         },
         host_as_game: {
-          true: 'icon-[fluent--flag-16-regular] text-error',
-          false: 'icon-[fluent--beaker-16-regular] text-info',
+          true: 'icon-[fluent--flag-20-regular] text-error',
+          false: 'icon-[fluent--beaker-20-regular] text-info',
         },
       }}
     />

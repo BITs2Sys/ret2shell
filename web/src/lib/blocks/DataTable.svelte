@@ -198,7 +198,7 @@
                         item.onClick && item.onClick(dataEntry)
                       }}
                     >
-                      <span class={`${item.icon} w-4 h-4 text-${item.level}`}></span>
+                      <span class={`${item.icon} w-5 h-5 text-${item.level}`}></span>
                       {#if item.label.length > 0}
                         <span class="text-sm">{item.label}</span>
                       {/if}
@@ -210,7 +210,7 @@
                       square={item.label.length === 0}
                       href={renderLink(item.href || '', dataEntry)}
                     >
-                      <span class={`${item.icon} w-4 h-4 text-${item.level}`}></span>
+                      <span class={`${item.icon} w-5 h-5 text-${item.level}`}></span>
                       {#if item.label.length > 0}
                         <span class="text-sm">{item.label}</span>
                       {/if}

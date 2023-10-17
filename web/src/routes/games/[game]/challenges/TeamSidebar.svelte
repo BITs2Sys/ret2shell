@@ -13,12 +13,12 @@
 <div class="flex flex-col h-32 sticky top-0 bg-neutral/30 border-b border-b-base-content/5 z-10 p-6">
   <div class="flex-1 flex flex-row items-center space-x-2">
     {#if $game.team}
-      <span class="icon-[fluent--people-team-16-regular] w-6 h-6" />
+      <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
       <span>{$game.team?.name}</span>
       <span class="flex-1" />
       <span>#{$game.team?.id}</span>
     {:else if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}
-      <span class="icon-[fluent--person-wrench-20-regular] w-6 h-6 text-info flex-shrink-0" />
+      <span class="icon-[fluent--person-wrench-20-regular] w-5 h-5 text-info flex-shrink-0" />
       <span class="text-info font-bold">{$i18n.t('games.teamAsAdmin')}</span>
     {/if}
   </div>
@@ -26,7 +26,7 @@
     {#if $game.team}
       <div></div>
     {:else if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}
-      <span class="icon-[fluent--info-20-regular] w-6 h-6 opacity-60 flex-shrink-0" />
+      <span class="icon-[fluent--info-20-regular] w-5 h-5 opacity-60 flex-shrink-0" />
       <span class="text-base font-bold opacity-60">{$i18n.t('games.teamAsAdminTips')}</span>
     {/if}
   </div>
@@ -48,7 +48,7 @@
       {#each notifications as item}
         <div class="flex flex-col p-6">
           <h2 class="text-base font-bold flex flex-row items-center space-x-2" title={item.title}>
-            <span class="icon-[fluent--info-20-regular] w-6 h-6 text-info" />
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-info" />
             <span class="flex-1 text-ellipsis text-start whitespace-nowrap overflow-hidden">{item.title}</span>
             <span class="text-end opacity-60">
               {new Date(item.published_at * 1000).toLocaleString()}

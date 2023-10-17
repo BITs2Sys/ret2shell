@@ -39,7 +39,7 @@
   })
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
@@ -203,7 +203,7 @@
         <RxInput
           size="sm"
           placeholder={$i18n.t('admin.filter')}
-          icon="icon-[fluent--question-16-regular]"
+          icon="icon-[fluent--question-20-regular]"
           bind:value={filter}
         >
           <RxButton
@@ -213,7 +213,7 @@
               fetchUsers()
             }}
           >
-            <span class="icon-[fluent--filter-16-regular] w-4 h-4"></span>
+            <span class="icon-[fluent--filter-20-regular] w-4 h-4"></span>
           </RxButton>
         </RxInput>
       </div>
@@ -228,11 +228,11 @@
       {loading}
       booleanIconsDef={{
         hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
+          true: 'icon-[fluent--eye-off-20-regular] text-warning',
           false: '',
         },
         banned: {
-          true: 'icon-[fluent--circle-off-16-regular] text-error',
+          true: 'icon-[fluent--circle-off-20-regular] text-error',
           false: '',
         },
       }}

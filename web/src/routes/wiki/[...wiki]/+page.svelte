@@ -115,7 +115,7 @@
     </div>
     <RxArticle content={wiki.content} headingAnchors={true} class="p-6 pt-12" />
     <RxButton square size="lg" class="fixed bottom-28 right-6 print:hidden" on:click={scrollToTop}>
-      <span class="icon-[fluent--chevron-up-24-regular] w-6 h-6"></span>
+      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
     </RxButton>
     <div class="h-32" />
   {/if}

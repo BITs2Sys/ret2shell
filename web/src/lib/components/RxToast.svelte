@@ -60,13 +60,13 @@
   <div class="flex flex-row space-x-2 flex-1 items-center">
     <div class="flex-shrink-0 flex flex-row items-center">
       {#if level === 'info'}
-        <span class="icon-[fluent--info-16-regular] w-6 h-6 text-info" />
+        <span class="icon-[fluent--info-20-regular] w-5 h-5 text-info" />
       {:else if level === 'warning'}
-        <span class="icon-[fluent--warning-16-regular] w-6 h-6 text-warning" />
+        <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning" />
       {:else if level === 'success'}
-        <span class="icon-[fluent--checkmark-circle-16-regular] w-6 h-6 text-success" />
+        <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
       {:else if level === 'error'}
-        <span class="icon-[fluent--dismiss-circle-16-regular] w-6 h-6 text-error" />
+        <span class="icon-[fluent--dismiss-circle-20-regular] w-5 h-5 text-error" />
       {/if}
     </div>
     <span class="text-base">{message}</span>

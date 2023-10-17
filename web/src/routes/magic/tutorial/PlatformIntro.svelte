@@ -40,7 +40,7 @@
       <ul class="menu menu-horizontal space-x-2 m-0 p-0 px-6">
         <li class="relative">
           <div class="btn no-animation text-base space-x-2 invisible">
-            <span class="icon-[fluent--book-number-16-regular] w-6 h-6" />
+            <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
             {$i18n.t('wiki.title')}
           </div>
           {#if routeItemIndex === 1}
@@ -64,7 +64,7 @@
         </li>
         <li class="relative">
           <div class="btn no-animation text-base space-x-2 invisible">
-            <span class="icon-[fluent--dumbbell-16-regular] w-6 h-6" />
+            <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
             {$i18n.t('playground.title')}
           </div>
           {#if routeItemIndex === 2}
@@ -88,7 +88,7 @@
         </li>
         <li class="relative">
           <div class="btn no-animation text-base space-x-2 invisible">
-            <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
+            <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
             {$i18n.t('games.title')}
           </div>
           {#if routeItemIndex === 3}
@@ -112,7 +112,7 @@
         </li>
         <li class="relative">
           <div class="btn no-animation text-base space-x-2 invisible">
-            <span class="icon-[fluent--megaphone-16-regular] w-6 h-6" />
+            <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
             {$i18n.t('announcements.title')}
           </div>
           {#if routeItemIndex === 4}
@@ -141,7 +141,7 @@
     </h1>
     <div class="transition-all" in:fly={{ y: 16, duration: 1000, delay: 1500 }}>
       <RxButton size="lg" on:click={next}>
-        <span class="icon-[fluent--thumb-like-16-regular] w-6 h-6"></span>
+        <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5"></span>
         <span>{$i18n.t('tutorial.next')}</span>
       </RxButton>
     </div>

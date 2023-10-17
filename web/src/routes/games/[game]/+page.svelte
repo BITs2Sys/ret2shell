@@ -77,9 +77,9 @@
     <h2 class="text-3xl font-bold">
       {#if isStarted && !isEnded}
         <span class="flex flex-row items-center space-x-4">
-          <span class="icon-[fluent--chevron-double-right-16-regular] opacity-40"></span>
+          <span class="icon-[fluent--chevron-double-right-20-regular] opacity-40"></span>
           <RxTimer {time} />
-          <span class="icon-[fluent--chevron-double-left-16-regular] opacity-40"></span>
+          <span class="icon-[fluent--chevron-double-left-20-regular] opacity-40"></span>
         </span>
       {:else if isEnded}
         <span class="text-warning">{$i18n.t('games.ended')}</span>

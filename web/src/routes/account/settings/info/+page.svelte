@@ -122,9 +122,9 @@
   <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
     <div class="flex-1 flex flex-col max-w-5xl">
       <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
         <h1 class="text-2xl font-bold">{$i18n.t('account.infoSetting')}</h1>
-        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <RxForm {form}>
         <div class="flex flex-row space-x-4">
@@ -144,7 +144,7 @@
                 {#if userSetting?.cover_path}
                   <RxImage src={userSetting.cover_path} loading={loadingAvatar} />
                 {:else}
-                  <span class="w-6 h-6 icon-[fluent--person-16-regular]" />
+                  <span class="w-5 h-5 icon-[fluent--person-20-regular]" />
                 {/if}
                 <RxButton
                   class="absolute w-full h-full top-0 left-0 opacity-0 hover:opacity-100"
@@ -159,9 +159,9 @@
                   }}
                 >
                   {#if userSetting?.cover_path}
-                    <span class="icon-[fluent--dismiss-24-regular] w-6 h-6 text-error" />
+                    <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 text-error" />
                   {:else}
-                    <span class="icon-[fluent--cloud-arrow-up-24-regular] w-6 h-6" />
+                    <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
                   {/if}
                 </RxButton>
               </div>
@@ -174,7 +174,7 @@
             errors={$errors.name || ''}
           >
             <RxInput
-              icon="icon-[fluent--person-16-regular]"
+              icon="icon-[fluent--person-20-regular]"
               class="w-full"
               id="name"
               name="name"
@@ -190,7 +190,7 @@
           errors={$errors.email || ''}
         >
           <RxInput
-            icon="icon-[fluent--mail-16-regular]"
+            icon="icon-[fluent--mail-20-regular]"
             class="w-full"
             id="email"
             name="email"

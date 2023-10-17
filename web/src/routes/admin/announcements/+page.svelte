@@ -55,14 +55,14 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
       href: '#{id}',
     },
     {
-      icon: 'icon-[fluent--delete-16-regular]',
+      icon: 'icon-[fluent--delete-20-regular]',
       label: '',
       level: 'error',
       type: 'button',
@@ -254,7 +254,7 @@
   <div class="h-16 flex flex-row items-center px-6 lg:px-12 flex-shrink-0">
     <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
     <RxLink size="sm" level="info" href="#create">
-      <span class="icon-[fluent--add-16-regular]" />
+      <span class="icon-[fluent--add-20-regular]" />
       <span class="text-base">{$i18n.t('action.create')}</span>
     </RxLink>
   </div>
@@ -269,7 +269,7 @@
       {loading}
       booleanIconsDef={{
         pinned: {
-          true: 'icon-[fluent--pin-16-regular] text-error',
+          true: 'icon-[fluent--pin-20-regular] text-error',
           false: '',
         },
       }}

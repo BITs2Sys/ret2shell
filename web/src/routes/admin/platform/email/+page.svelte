@@ -127,9 +127,9 @@
   <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
     <div class="flex-1 flex flex-col max-w-5xl">
       <div class="m-2 md:m-4 flex flex-row justify-center items-center space-x-6">
-        <span class="icon-[fluent--chevron-double-right-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-right-20-regular] opacity-60" />
         <h1 class="text-2xl font-bold">{$i18n.t('init.emailTitle')}</h1>
-        <span class="icon-[fluent--chevron-double-left-16-regular] opacity-60" />
+        <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <RxForm {form}>
         <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
@@ -144,7 +144,7 @@
             errors={$errors.host || ''}
           >
             <RxInput
-              icon="icon-[fluent--mail-16-regular]"
+              icon="icon-[fluent--mail-20-regular]"
               class="w-full"
               id="host"
               name="host"
@@ -161,7 +161,7 @@
             errors={$errors.port || ''}
           >
             <RxInput
-              icon="icon-[fluent--code-16-regular]"
+              icon="icon-[fluent--code-20-regular]"
               class="w-full"
               id="port"
               name="port"
@@ -197,7 +197,7 @@
           errors={$errors.sender || ''}
         >
           <RxInput
-            icon="icon-[fluent--mail-16-regular]"
+            icon="icon-[fluent--mail-20-regular]"
             class="w-full"
             id="sender"
             name="sender"
@@ -215,7 +215,7 @@
             errors={$errors.username || ''}
           >
             <RxInput
-              icon="icon-[fluent--mail-16-regular]"
+              icon="icon-[fluent--mail-20-regular]"
               class="w-full"
               id="username"
               name="username"
@@ -232,7 +232,7 @@
             errors={$errors.password || ''}
           >
             <RxInput
-              icon="icon-[fluent--lock-16-regular]"
+              icon="icon-[fluent--lock-20-regular]"
               class="w-full"
               id="password"
               name="password"

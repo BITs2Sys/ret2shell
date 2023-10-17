@@ -26,14 +26,14 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--edit-16-regular]',
+      icon: 'icon-[fluent--edit-20-regular]',
       label: '',
       level: 'info',
       type: 'link',
       href: '#{id}',
     },
     {
-      icon: 'icon-[fluent--subtract-circle-16-regular]',
+      icon: 'icon-[fluent--subtract-circle-20-regular]',
       label: '',
       level: 'info',
       type: 'button',
@@ -220,7 +220,7 @@
         <RxInput
           size="sm"
           placeholder={$i18n.t('admin.filter')}
-          icon="icon-[fluent--question-16-regular]"
+          icon="icon-[fluent--question-20-regular]"
           bind:value={filter}
         >
           <RxButton
@@ -230,7 +230,7 @@
               fetchTeams()
             }}
           >
-            <span class="icon-[fluent--filter-16-regular] w-4 h-4"></span>
+            <span class="icon-[fluent--filter-20-regular] w-5 h-5"></span>
           </RxButton>
         </RxInput>
       </div>
@@ -245,15 +245,15 @@
       {loading}
       booleanIconsDef={{
         hidden: {
-          true: 'icon-[fluent--eye-off-16-regular] text-warning',
+          true: 'icon-[fluent--eye-off-20-regular] text-warning',
           false: '',
         },
         banned: {
-          true: 'icon-[fluent--circle-off-16-regular] text-error',
-          false: 'icon-[fluent--checkmark-circle-16-regular] text-success',
+          true: 'icon-[fluent--circle-off-20-regular] text-error',
+          false: 'icon-[fluent--checkmark-circle-20-regular] text-success',
         },
         needAudit: {
-          true: 'icon-[fluent--question-circle-16-regular] text-info',
+          true: 'icon-[fluent--question-circle-20-regular] text-info',
           false: '',
         },
       }}

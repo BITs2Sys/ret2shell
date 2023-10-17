@@ -126,7 +126,7 @@
     }`}
   >
     <RxButton class="w-full !bg-transparent" ghost disabled={!hasPrevPage} on:click={fetchPrevPage}>
-      <span class="icon-[fluent--chevron-double-up-16-regular] w-5 h-5" />
+      <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
     </RxButton>
     <div class="divider m-0"></div>
     {#each games as item}
@@ -134,8 +134,8 @@
         <span
           class={`w-5 h-5 ${
             $game.cached?.id === item.id
-              ? 'icon-[fluent--flag-16-filled] text-primary'
-              : 'icon-[fluent--flag-16-regular]'
+              ? 'icon-[fluent--flag-20-filled] text-primary'
+              : 'icon-[fluent--flag-20-regular]'
           }`}
         />
         <span
@@ -146,7 +146,7 @@
           {item.name}
         </span>
         <span
-          class={`icon-[fluent--chevron-double-right-16-regular] w-5 h-5 ${
+          class={`icon-[fluent--chevron-double-right-20-regular] w-5 h-5 ${
             $game.cached?.id === item.id && 'text-primary'
           }`}
         />
@@ -154,7 +154,7 @@
     {/each}
     <div class="divider m-0"></div>
     <RxButton class="w-full !bg-transparent" ghost disabled={!hasNextPage} on:click={fetchNextPage}>
-      <span class="icon-[fluent--chevron-double-down-16-regular] w-5 h-5" />
+      <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
     </RxButton>
   </div>
   <div class="flex-1 flex flex-col p-3 lg:p-6 items-center lg:justify-center">

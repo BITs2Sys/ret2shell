@@ -39,8 +39,8 @@
           toggleSidebar = !toggleSidebar
         }}
       />
-      <span class="swap-off icon-[fluent--navigation-16-regular] fill-current w-6 h-6"></span>
-      <span class="swap-on icon-[fluent--dismiss-16-regular] fill-current w-6 h-6"></span>
+      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-5 h-5"></span>
+      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
     </label>
   {/if}
   {#if error - 200 < 100}

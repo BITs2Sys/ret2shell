@@ -252,8 +252,8 @@
           toggleSidebar = !toggleSidebar
         }}
       />
-      <span class="swap-off icon-[fluent--navigation-16-regular] fill-current w-6 h-6"></span>
-      <span class="swap-on icon-[fluent--dismiss-16-regular] fill-current w-6 h-6"></span>
+      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-5 h-5"></span>
+      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
     </label>
   {/if}
   <div class="flex-1 flex flex-col overflow-x-hidden">
@@ -261,7 +261,7 @@
       <div class="border-b border-b-base-content/10 flex flex-row h-16 overflow-hidden bg-neutral/30 backdrop-blur">
         <div class="sticky left-0 p-2 flex-shrink-0 z-20">
           <RxLink ghost active={activeChallenge === null} href="#">
-            <span class="w-4 h-4 icon-[fluent--pin-16-regular]" />
+            <span class="w-5 h-5 icon-[fluent--pin-20-regular]" />
             {$i18n.t('playground.gameIntro')}
           </RxLink>
         </div>
@@ -288,7 +288,7 @@
                 active={activeChallenge?.id === chal.id}
                 href={`#${chal.id}`}
               >
-                <span class="w-4 h-4 icon-[fluent--braces-16-regular] flex-shrink-0" />
+                <span class="w-5 h-5 icon-[fluent--braces-20-regular] flex-shrink-0" />
                 <span class="text-ellipsis overflow-hidden whitespace-nowrap">
                   {chal.name}
                 </span>
@@ -304,7 +304,7 @@
                   }
                 }}
               >
-                <span class="w-4 h-4 icon-[fluent--dismiss-16-regular]" />
+                <span class="w-5 h-5 icon-[fluent--dismiss-20-regular]" />
               </RxButton>
             </div>
           {/each}
@@ -369,7 +369,7 @@
             bottomTab = 0
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--code-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--code-20-regular]" />
           {$i18n.t('playground.terminal')}
         </RxButton>
         <RxButton
@@ -379,7 +379,7 @@
             bottomTab = 1
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--info-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--info-20-regular]" />
           {$i18n.t('playground.challengeHints')}
         </RxButton>
         <RxButton
@@ -389,11 +389,11 @@
             bottomTab = 2
           }}
         >
-          <span class="w-5 h-5 icon-[fluent--people-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--people-20-regular]" />
           {$i18n.t('playground.challengeSolves')}
         </RxButton>
         <RxButton ghost>
-          <span class="w-5 h-5 icon-[fluent--thumb-dislike-16-regular]" />
+          <span class="w-5 h-5 icon-[fluent--thumb-dislike-20-regular]" />
           {$i18n.t('challenge.gankAuthor')}
         </RxButton>
       </div>
@@ -428,8 +428,8 @@
           toggleTeamSidebar = !toggleTeamSidebar
         }}
       />
-      <span class="swap-off icon-[fluent--flag-16-regular] fill-current w-6 h-6"></span>
-      <span class="swap-on icon-[fluent--dismiss-16-regular] fill-current w-6 h-6"></span>
+      <span class="swap-off icon-[fluent--flag-20-regular] fill-current w-5 h-5"></span>
+      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
     </label>
   {/if}
   {#if toggleTeamSidebar && !showTeamSidebar}

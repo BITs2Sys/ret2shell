@@ -51,12 +51,12 @@
     <div class="w-full max-w-5xl flex flex-row" in:fly={{ y: 16, duration: 1000, delay: 1500 }}>
       <RxInput
         class="flex-1"
-        icon="icon-[fluent--flag-16-regular]"
+        icon="icon-[fluent--flag-20-regular]"
         bind:value={flag}
         placeholder={$i18n.t('tutorial.inputFlagAndNext')}
       >
         <RxButton class="join-item ml-0" on:click={next} disabled={flag !== expected}>
-          <span class="icon-[fluent--thumb-like-16-regular] w-6 h-6"></span>
+          <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5"></span>
           <span>{$i18n.t('tutorial.next')}</span>
         </RxButton>
       </RxInput>

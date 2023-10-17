@@ -37,7 +37,7 @@
 <h1
   class="font-bold flex flex-row bg-neutral/30 justify-center items-center h-16 space-x-2 sticky top-0 border-b border-b-base-content/5 z-10"
 >
-  <span class="icon-[fluent--flag-16-regular] w-6 h-6" />
+  <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
   <span>
     {$i18n.t('games.challengeList')}
   </span>
@@ -71,10 +71,10 @@
                 handleTagExpand(tag.id)
               }}
             >
-              <span class="icon-[fluent--tag-16-regular] w-6 h-6" />
+              <span class="icon-[fluent--tag-20-regular] w-5 h-5" />
               <span class="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">{tag.name}</span>
               <span
-                class="icon-[fluent--chevron-down-16-regular] w-5 h-5 flex-shrink-0 transition-all {tagExpandedRecord[
+                class="icon-[fluent--chevron-down-20-regular] w-5 h-5 flex-shrink-0 transition-all {tagExpandedRecord[
                   tag.id
                 ]
                   ? ' rotate-0'
@@ -93,9 +93,9 @@
                     href={`/games/${$game.current?.id}/challenges#${chal.id}`}
                   >
                     {#if selfSubmissions.find((item) => item.challenge_id === chal.id)}
-                      <span class="icon-[fluent--checkmark-circle-16-regular] text-success w-6 h-6" />
+                      <span class="icon-[fluent--checkmark-circle-20-regular] text-success w-5 h-5" />
                     {:else}
-                      <span class="icon-[fluent--question-circle-16-regular] opacity-60 w-6 h-6" />
+                      <span class="icon-[fluent--question-circle-20-regular] opacity-60 w-5 h-5" />
                     {/if}
                     <span
                       class={`flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap ${

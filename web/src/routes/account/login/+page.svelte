@@ -86,7 +86,7 @@
           errors={$errors.account || ''}
         >
           <RxInput
-            icon="icon-[fluent--person-16-regular]"
+            icon="icon-[fluent--person-20-regular]"
             class="w-full"
             id="account"
             name="account"
@@ -100,7 +100,7 @@
             <a class="hover:underline" href="/account/forgot-password">{$i18n.t('account.forgotPassword')}</a>
           </span>
           <RxInput
-            icon="icon-[fluent--lock-16-regular]"
+            icon="icon-[fluent--lock-20-regular]"
             class="w-full"
             id="password"
             type="password"

@@ -16,43 +16,43 @@
   const routes = [
     {
       name: $i18n.t('admin.statistics'),
-      icon: 'icon-[fluent--data-pie-24-regular]',
+      icon: 'icon-[fluent--data-pie-20-regular]',
       link: '/admin/statistics',
       permissions: [Permission.Statistics, Permission.Devops, Permission.Audit, Permission.Organize],
     },
     {
       name: $i18n.t('admin.platformSettings'),
-      icon: 'icon-[fluent--home-24-regular]',
+      icon: 'icon-[fluent--home-20-regular]',
       link: '/admin/platform',
       permissions: [Permission.Devops],
     },
     {
       name: $i18n.t('admin.gamesSettings'),
-      icon: 'icon-[fluent--flag-24-regular]',
+      icon: 'icon-[fluent--flag-20-regular]',
       link: '/admin/games',
       permissions: [Permission.Devops, Permission.Organize, Permission.Audit],
     },
     {
       name: $i18n.t('admin.announcementsSettings'),
-      icon: 'icon-[fluent--megaphone-24-regular]',
+      icon: 'icon-[fluent--megaphone-20-regular]',
       link: '/admin/announcements',
       permissions: [Permission.Publish],
     },
     {
       name: $i18n.t('admin.calendarSettings'),
-      icon: 'icon-[fluent--calendar-24-regular]',
+      icon: 'icon-[fluent--calendar-20-regular]',
       link: '/admin/calendar',
       permissions: [Permission.Calendar],
     },
     {
       name: $i18n.t('admin.wikiSettings'),
-      icon: 'icon-[fluent--book-number-24-regular]',
+      icon: 'icon-[fluent--book-number-20-regular]',
       link: '/admin/wiki',
       permissions: [Permission.Publish],
     },
     {
       name: $i18n.t('admin.usersSettings'),
-      icon: 'icon-[fluent--person-24-regular]',
+      icon: 'icon-[fluent--person-20-regular]',
       link: '/admin/users',
       permissions: [Permission.Organize, Permission.Devops, Permission.Audit],
     },
@@ -95,7 +95,7 @@
     <div class="join">
       {#if firstLevelExpanded}
         <RxLink href="/admin" exactlyMatched ghost class="join-item flex-1 flex-nowrap overflow-hidden" justify="start">
-          <span class="icon-[fluent--organization-16-regular] w-6 h-6 text-error" />
+          <span class="icon-[fluent--organization-20-regular] w-5 h-5 text-error" />
           <span class="text-ellipsis whitespace-nowrap overflow-hidden">{$i18n.t('admin.title')}</span>
         </RxLink>
       {/if}
@@ -109,7 +109,7 @@
         }}
       >
         <span
-          class={`icon-[fluent--chevron-double-left-16-regular] w-6 h-6 transition-all duration-300 ${
+          class={`icon-[fluent--chevron-double-left-20-regular] w-5 h-5 transition-all duration-300 ${
             !firstLevelExpanded && 'rotate-180'
           }`}
         />
@@ -125,7 +125,7 @@
         square={!firstLevelExpanded}
         title={item.name}
       >
-        <span class={`${item.icon} w-6 h-6 flex-shrink-0`} />
+        <span class={`${item.icon} w-5 h-5 flex-shrink-0`} />
         {#if firstLevelExpanded}
           <span class="text-ellipsis whitespace-nowrap overflow-hidden">{item.name}</span>
         {/if}

@@ -30,7 +30,7 @@
         class="join-item"
       >
         {#if !loading}
-          <span class={`icon-[fluent--pin-16-regular] w-5 h-5 ${announcement.pinned ? 'text-error' : 'opacity-60'}`} />
+          <span class={`icon-[fluent--pin-20-regular] w-5 h-5 ${announcement.pinned ? 'text-error' : 'opacity-60'}`} />
         {/if}
       </RxButton>
       <RxInput
@@ -63,7 +63,7 @@
           dispatch('close')
         }}
       >
-        <span class="icon-[fluent--dismiss-16-regular] w-5 h-5"></span>
+        <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
       </RxButton>
     </div>
   </div>

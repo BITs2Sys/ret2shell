@@ -57,7 +57,7 @@
     {/each}
   </div>
   <div class="h-12 flex flex-row items-center space-x-2 border-b-2 border-b-base-content/5 px-4 mt-6">
-    <span class="icon-[fluent--data-bar-vertical-ascending-16-regular] w-5 h-5"></span>
+    <span class="icon-[fluent--data-area-20-regular] w-5 h-5"></span>
     <span class="text-base font-bold">{$i18n.t('account.recentActivities')}</span>
   </div>
   {#if loadingGames}
