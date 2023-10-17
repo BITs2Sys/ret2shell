@@ -671,6 +671,8 @@
   "team": {
     "institute_info": "Institute Info",
     "name": "Team name",
-    "fetchFailed": "Failed to get team information"
+    "fetchFailed": "Failed to get team information",
+    "auditFailed": "Failed to change team audit status",
+    "filterNeedAudit": "Filter teams to be audited"
   }
 }

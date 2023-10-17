@@ -67,6 +67,7 @@ struct ListParams {
     pub page: Option<u64>,
     pub per_page: Option<u64>,
     pub filter: Option<String>,
+    pub need_audit: Option<bool>
 }
 
 #[derive(Serialize)]
@@ -83,11 +84,12 @@ async fn get_team_list(
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(10);
     let filter = params.filter;
+    let need_audit = params.need_audit;
     if page < 1 || per_page < 1 {
         error!("Invalid page={} or per_page={}", page, per_page);
         return Err((StatusCode::BAD_REQUEST, "invalid parameters"));
     }
-    match team::get_team_page_by_game_id(conn, game_id, page, per_page, filter).await {
+    match team::get_team_page_by_game_id(conn, game_id, page, per_page, filter, need_audit).await {
         Ok((teams, total)) => Ok(Json(TeamList { teams, total })),
         Err(err) => {
             error!("Failed to get team list: {}", err);

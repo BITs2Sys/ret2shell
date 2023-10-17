@@ -671,6 +671,8 @@
   "team": {
     "institute_info": "组织信息",
     "name": "队伍名",
-    "fetchFailed": "获取队伍信息失败"
+    "fetchFailed": "获取队伍信息失败",
+    "auditFailed": "更改队伍审查状态失败",
+    "filterNeedAudit": "过滤待审核队伍"
   }
 }
