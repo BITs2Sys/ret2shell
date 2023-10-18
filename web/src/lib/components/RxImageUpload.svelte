@@ -13,7 +13,7 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = `flex-1 aspect-video relative rounded-box overflow-hidden ${clazz}`
+  $: classes = `flex-1 aspect-video relative rounded-box bg-neutral/40 overflow-hidden ${clazz}`
 
   let inputEl: HTMLInputElement
   const progress = writable(0)
@@ -52,7 +52,7 @@
   {#if value && value.length > 0}
     <img src={value} alt="" class="absolute inset-0 top-0 left-0 w-full h-full object-cover" />
   {:else}
-    <p class="absolute top-0 left-0 w-full h-full flex flex-row items-center justify-center">
+    <p class="absolute top-0 left-0 w-full h-full flex flex-row items-center justify-center space-x-2">
       <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5"></span>
       <span class="font-bold text-base">{$i18n.t('form.upload')}</span>
     </p>
@@ -66,4 +66,13 @@
     <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5"></span>
     <span class="font-bold text-base">{$i18n.t('form.upload')}</span>
   </RxButton>
+  {#if $progress && $progress !== 100 && $progress !== 0}
+    <div class="alert shadow-lg rounded-lg absolute top-4 left-4 right-4 z-10 flex flex-row">
+      <div class="flex-1 flex flex-row items-center space-x-4">
+        <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
+        <progress class="progress flex-1" value={$progress} max="100"></progress>
+        <span class="loading loading-spinner loading-sm"></span>
+      </div>
+    </div>
+  {/if}
 </div>
