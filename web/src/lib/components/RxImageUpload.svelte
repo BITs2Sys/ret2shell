@@ -69,7 +69,7 @@
     </div>
   </RxButton>
   {#if $progress && $progress !== 100 && $progress !== 0}
-    <div class="alert shadow-lg rounded-lg absolute top-4 left-4 right-4 z-10 flex flex-row">
+    <div class="alert !w-auto shadow-lg rounded-lg absolute top-4 left-4 right-4 z-10 flex flex-row">
       <div class="flex-1 flex flex-row items-center space-x-4">
         <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
         <progress class="progress flex-1" value={$progress} max="100"></progress>
