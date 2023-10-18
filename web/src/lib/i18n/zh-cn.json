@@ -639,7 +639,8 @@
     "status": "状态",
     "fetchFailed": "获取题目失败",
     "filterTag": "过滤标签：",
-    "create": "创建"
+    "create": "创建",
+    "isHidden": "已隐藏"
   },
   "tag": {
     "fetchFailed": "获取标签失败"

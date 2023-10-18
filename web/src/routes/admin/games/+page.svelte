@@ -15,6 +15,13 @@
   let loading: boolean = false
   let games: Game[] = []
 
+  $: renderedGames = games.map((a) => {
+    return {
+      ...a,
+      name: `${encodeURI(a.name)}|/admin/games/${encodeURI(a.id.toString())}`,
+    }
+  })
+
   let actions: DTColumnAction[] = [
     {
       icon: 'icon-[fluent--chevron-double-right-20-regular]',
@@ -183,7 +190,7 @@
     <DataTable
       class="flex-1"
       {actions}
-      data={games}
+      data={renderedGames}
       {colDef}
       bind:page={currentPage}
       {total}

@@ -68,7 +68,7 @@
       justify: 'text-center',
     },
     hidden: {
-      header: $i18n.t('challenge.status'),
+      header: '',
       type: 'bool',
       dimmed: false,
       sizePolicy: 'shrink',
@@ -155,9 +155,10 @@
       })
   }
 
-  $: renderChallenges = challenges.map((challenge) => {
+  $: renderedChallenges = challenges.map((challenge) => {
     return {
       ...challenge,
+      name: `${encodeURI(challenge.name)}|#${encodeURI(challenge.id.toString())}`,
       tag_id: tags.find((tag) => tag.id === challenge.tag_id)?.name,
     }
   })
@@ -211,7 +212,7 @@
     <DataTable
       class="flex-1"
       {actions}
-      data={renderChallenges}
+      data={renderedChallenges}
       {colDef}
       bind:page={currentPage}
       {total}
@@ -219,7 +220,7 @@
       booleanIconsDef={{
         hidden: {
           true: 'icon-[fluent--eye-off-20-regular] text-warning',
-          false: 'icon-[fluent--checkmark-20-regular] text-success',
+          false: '',
         },
       }}
     />

@@ -251,14 +251,14 @@
 <svelte:head><title>{$i18n.t('admin.announcementsSettings')} - {$platform.name}</title></svelte:head>
 
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="h-16 flex flex-row items-center px-6 lg:px-12 flex-shrink-0">
-    <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
-    <RxLink size="sm" level="info" href="#create">
-      <span class="icon-[fluent--add-20-regular]" />
-      <span class="text-base">{$i18n.t('action.create')}</span>
-    </RxLink>
-  </div>
   {#if !showCreatePanel}
+    <div class="h-16 flex flex-row items-center px-6 lg:px-12 flex-shrink-0">
+      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.announcementsSettings')}</h2>
+      <RxLink size="sm" level="info" href="#create">
+        <span class="icon-[fluent--add-20-regular]" />
+        <span class="text-base">{$i18n.t('action.create')}</span>
+      </RxLink>
+    </div>
     <DataTable
       class="flex-1  px-6 lg:px-12"
       {actions}

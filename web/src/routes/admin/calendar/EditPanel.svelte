@@ -21,7 +21,7 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = `absolute w-full bottom-0 flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
+  $: classes = `w-full flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
 
   const dispatch = createEventDispatcher()
 
@@ -86,7 +86,7 @@
     class="w-full h-full relative print:hidden"
     defer
   >
-    <div class="sticky top-0 h-16 min-h-16 border-y border-y-base-content/5 flex flex-row px-2 items-center space-x-2">
+    <div class="sticky top-0 h-16 min-h-16 border-b border-b-base-content/5 flex flex-row px-2 items-center space-x-2">
       <div class="flex-1 flex flex-row items-center px-4">
         <h1 class="text-base font-bold">{calendar.id > 0 ? $i18n.t('calendar.edit') : $i18n.t('calendar.create')}</h1>
       </div>
@@ -101,7 +101,6 @@
         <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
       </RxButton>
     </div>
-
     <RxForm class="p-4 lg:p-6" {form}>
       <div class="flex flex-row space-x-4">
         <RxFormItem

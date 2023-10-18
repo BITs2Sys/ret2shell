@@ -639,7 +639,8 @@
     "status": "Status",
     "fetchFailed": "Failed to get challenges",
     "filterTag": "filter tags:",
-    "create": "Create"
+    "create": "Create",
+    "isHidden": "Hidden"
   },
   "tag": {
     "fetchFailed": "Failed to get tags"

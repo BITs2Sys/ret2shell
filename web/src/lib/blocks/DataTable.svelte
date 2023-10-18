@@ -46,7 +46,7 @@
 </script>
 
 <div class={classes}>
-  <table class="w-full max-w-full table table-auto rounded-box overflow-hidden bg-base-content/5 backdrop-blur">
+  <table class="w-full max-w-full table table-auto rounded-box overflow-hidden bg-neutral/40 backdrop-blur">
     <thead class="text-base bg-base-content/5">
       <tr class="border-b-base-100/5">
         {#each Object.keys(colDef) as key}
@@ -81,7 +81,7 @@
         </tr>
       {/if}
       {#each dataEntries as dataEntry}
-        <tr class="border-b-base-100/5">
+        <tr class="!border-b !border-b-base-content/5">
           {#each Object.keys(dataEntry) as key}
             {#if types[key] == 'plain'}
               <td
@@ -110,7 +110,7 @@
               </td>
             {:else if types[key] == 'tag'}
               <td
-                class={`whitespace-nowrap ${colDef[key].sizePolicy === 'shrink' && 'w-0'} ${
+                class={`whitespace-nowrap py-0 ${colDef[key].sizePolicy === 'shrink' && 'w-0'} ${
                   colDef[key].dimmed && 'opacity-60'
                 } ${colDef[key].justify && colDef[key].justify}`}
               >

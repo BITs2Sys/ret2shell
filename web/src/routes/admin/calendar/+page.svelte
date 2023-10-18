@@ -270,39 +270,44 @@
 <svelte:head><title>{$i18n.t('admin.calendarsSettings')} - {$platform.name}</title></svelte:head>
 
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center space-x-2">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.calendarsSettings')}</h2>
-      <div class="join">
-        <RxButton size="sm" class="join-item" on:click={preMonth} disabled={loading}>
-          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5"></span>
-        </RxButton>
-        <h2 class="text-base font-bold join-item flex flex-row items-center px-2 backdrop-blur bg-base-content/5 ml-0">
-          <span>{currentYear} - {currentMonth.toString().padStart(2, '0')}</span>
-        </h2>
-        <RxButton size="sm" class="join-item ml-0" on:click={nextMonth} disabled={loading}>
-          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
-        </RxButton>
+  {#if !showCreatePanel}
+    <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+      <div class="h-16 flex flex-row items-center space-x-2">
+        <h2 class="text-base font-bold flex-1">{$i18n.t('admin.calendarsSettings')}</h2>
+        <div class="join">
+          <RxButton size="sm" class="join-item" on:click={preMonth} disabled={loading}>
+            <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5"></span>
+          </RxButton>
+          <h2
+            class="text-base font-bold join-item flex flex-row items-center px-2 backdrop-blur bg-base-content/5 ml-0"
+          >
+            <span>{currentYear} - {currentMonth.toString().padStart(2, '0')}</span>
+          </h2>
+          <RxButton size="sm" class="join-item ml-0" on:click={nextMonth} disabled={loading}>
+            <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+          </RxButton>
+        </div>
+        <RxLink size="sm" level="info" href="#create">
+          <span class="icon-[fluent--add-20-regular]" />
+          <span class="text-base">{$i18n.t('action.create')}</span>
+        </RxLink>
       </div>
-      <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-20-regular]" />
-        <span class="text-base">{$i18n.t('action.create')}</span>
-      </RxLink>
+      <DataTable class="flex-1" {actions} data={calendars} {colDef} bind:page={currentPage} {total} {loading} />
     </div>
-    <DataTable class="flex-1" {actions} data={calendars} {colDef} bind:page={currentPage} {total} {loading} />
-  </div>
-  <EditPanel
-    class={`transition-all ${showCreatePanel ? 'h-[calc(100%_-_4rem)]' : 'h-0'}`}
-    bind:calendar={activeCalendar}
-    loading={loadingCalendar}
-    {submitting}
-    on:close={() => {
-      window.location.hash = ''
-    }}
-    on:submit={(event) => {
-      updateOrCreateCalendar(event.detail)
-    }}
-  />
+  {:else}
+    <EditPanel
+      class="flex-1"
+      bind:calendar={activeCalendar}
+      loading={loadingCalendar}
+      {submitting}
+      on:close={() => {
+        window.location.hash = ''
+      }}
+      on:submit={(event) => {
+        updateOrCreateCalendar(event.detail)
+      }}
+    />
+  {/if}
   {#if deleteModalOpened}
     <div
       class="fixed top-0 left-0 w-full h-full bg-base-100/60 z-50 flex flex-col items-center justify-center"

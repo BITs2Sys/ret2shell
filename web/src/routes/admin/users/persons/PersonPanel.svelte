@@ -16,7 +16,7 @@
   let activeTab = 'info'
   export { clazz as class }
 
-  $: classes = `absolute w-full bottom-0 flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
+  $: classes = `w-full flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
   const dispatch = createEventDispatcher()
 </script>
 
@@ -36,7 +36,7 @@
         <span class="loading loading-spinner loading-sm" />
       </div>
     {/if}
-    <div class="sticky top-0 h-16 min-h-16 border-y border-y-base-content/5 flex flex-row px-2 items-center space-x-2">
+    <div class="sticky top-0 h-16 min-h-16 border-b border-b-base-content/5 flex flex-row px-2 items-center space-x-2">
       <div class="flex-1 flex flex-row items-center space-x-2 px-4">
         <h1 class="text-base font-bold">{user?.name}</h1>
         <RxButton class="!ml-12" ghost on:click={() => (activeTab = 'info')} active={activeTab === 'info'}>

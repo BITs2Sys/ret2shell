@@ -19,7 +19,7 @@
 </script>
 
 <div class={classes}>
-  <div class="h-16 min-h-16 border-y border-y-base-content/5 flex flex-row px-2 items-center space-x-2">
+  <div class="h-16 min-h-16 border-b border-b-base-content/5 flex flex-row px-2 items-center space-x-2">
     <div class="join flex-1">
       <RxButton
         on:click={() => {

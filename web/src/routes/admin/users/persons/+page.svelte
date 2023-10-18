@@ -196,54 +196,57 @@
 
 <svelte:head><title>{$i18n.t('admin.userListSettings')} - {$platform.name}</title></svelte:head>
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
-      <div>
-        <RxInput
-          size="sm"
-          placeholder={$i18n.t('admin.filter')}
-          icon="icon-[fluent--question-20-regular]"
-          bind:value={filter}
-        >
-          <RxButton
-            class="join-item ml-0"
+  {#if !showPersonPanel}
+    <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+      <div class="h-16 flex flex-row items-center">
+        <h2 class="text-base font-bold flex-1">{$i18n.t('admin.userListSettings')}</h2>
+        <div>
+          <RxInput
             size="sm"
-            on:click={() => {
-              fetchUsers()
-            }}
+            placeholder={$i18n.t('admin.filter')}
+            icon="icon-[fluent--question-20-regular]"
+            bind:value={filter}
           >
-            <span class="icon-[fluent--filter-20-regular] w-4 h-4"></span>
-          </RxButton>
-        </RxInput>
+            <RxButton
+              class="join-item ml-0"
+              size="sm"
+              on:click={() => {
+                fetchUsers()
+              }}
+            >
+              <span class="icon-[fluent--filter-20-regular] w-4 h-4"></span>
+            </RxButton>
+          </RxInput>
+        </div>
       </div>
+      <DataTable
+        class="flex-1"
+        {actions}
+        data={readerUsers}
+        {colDef}
+        bind:page={currentPage}
+        {total}
+        {loading}
+        booleanIconsDef={{
+          hidden: {
+            true: 'icon-[fluent--eye-off-20-regular] text-warning',
+            false: '',
+          },
+          banned: {
+            true: 'icon-[fluent--circle-off-20-regular] text-error',
+            false: '',
+          },
+        }}
+      />
     </div>
-    <DataTable
+  {:else}
+    <PersonPanel
+      user={currentUser}
+      loading={loadingUser}
       class="flex-1"
-      {actions}
-      data={readerUsers}
-      {colDef}
-      bind:page={currentPage}
-      {total}
-      {loading}
-      booleanIconsDef={{
-        hidden: {
-          true: 'icon-[fluent--eye-off-20-regular] text-warning',
-          false: '',
-        },
-        banned: {
-          true: 'icon-[fluent--circle-off-20-regular] text-error',
-          false: '',
-        },
+      on:close={() => {
+        window.location.hash = ''
       }}
     />
-  </div>
-  <PersonPanel
-    user={currentUser}
-    loading={loadingUser}
-    class={`transition-all ${showPersonPanel ? 'h-[calc(100%_-_4rem)]' : 'h-0'}`}
-    on:close={() => {
-      window.location.hash = ''
-    }}
-  />
+  {/if}
 </div>
