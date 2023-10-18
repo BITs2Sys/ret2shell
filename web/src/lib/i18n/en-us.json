@@ -300,7 +300,8 @@
     "imageUploadFail": "Image upload failed",
     "deleteConfirm": "confirm deletion of {{item}} ?",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "upload": "Upload Image"
   },
   "platform": {
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
