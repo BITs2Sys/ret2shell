@@ -250,7 +250,15 @@
     "userIpAddresses": "使用过的 IP 地址",
     "challengeListSettings": "题目管理",
     "NotificationListSettings": "通知管理",
-    "teamListSettings": "队伍管理"
+    "teamListSettings": "队伍管理",
+    "welcome": "管理员，欢迎！",
+    "statisticsIntro": "查看服务器运行情况，了解各项指标与统计数据",
+    "platformIntro": "修改平台基础信息",
+    "gameIntro": "举办比赛，管理练习场，部署题目",
+    "announcementsIntro": "发布与管理公告栏",
+    "calendarIntro": "新增并管理赛事日历",
+    "wikiIntro": "在知识库中编写并发布技术文档与知识文章",
+    "usersIntro": "管理用户与机构"
   },
   "docs": {
     "title": "技术文档"
@@ -311,7 +319,8 @@
   "platform": {
     "backendOffline": "后端服务似乎离线了，请尝试刷新页面，如果多次尝试仍旧出错，请联系网站管理员。",
     "cookieAlert": "我们不使用小饼干，无须担心。",
-    "screenTooSmall": "你当前使用的屏幕似乎有点小了，一些内容可能展示不全。如果你在使用桌面浏览器仍看到此条提示的话，请检查你的网页缩放是否开的太高了？"
+    "screenTooSmall": "你当前使用的屏幕似乎有点小了，一些内容可能展示不全。如果你在使用桌面浏览器仍看到此条提示的话，请检查你的网页缩放是否开的太高了？",
+    "fetchStatFailed": "获取服务器资源情况失败"
   },
   "errors": {
     "401": "请先登录",

@@ -61,3 +61,30 @@ export interface Config {
   media?: Media
   pusher?: Pusher
 }
+
+export interface CPULoad {
+  user: number
+  system: number
+}
+
+export interface Memory {
+  total: number
+  free: number
+}
+
+export interface Disk {
+  total: number
+  free: number
+  avail: number
+  fs_type: string
+  fs_mounted_from: string
+  fs_mounted_on: string
+}
+
+export interface PlatformStat {
+  cpu: CPULoad[]
+  memory: Memory
+  swap: Memory
+  disks: Disk[]
+  uptime: number
+}

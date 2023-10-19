@@ -117,3 +117,5 @@ kube = { version = "0.86", features = [
     "derive",
 ] }
 k8s-openapi = { version = "0.20", features = ["v1_28"] }
+# System stat
+systemstat = {version = "0.2", features = ["serde"]}

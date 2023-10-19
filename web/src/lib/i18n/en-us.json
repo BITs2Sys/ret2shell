@@ -250,7 +250,15 @@
     "userIpAddresses": "IP address used",
     "challengeListSettings": "Challenge management",
     "NotificationListSettings": "Notification management",
-    "teamListSettings": "Team management"
+    "teamListSettings": "Team management",
+    "welcome": "Administrator, welcome!",
+    "statisticsIntro": "Check the server operation status and understand various indicators and statistics.",
+    "platformIntro": "Modify basic platform information",
+    "gameIntro": "Hold games, manage playground, and deploy challenges",
+    "announcementsIntro": "Publishing and managing announcement boards",
+    "calendarIntro": "Create or manage game calendar",
+    "wikiIntro": "Write and publish technical documentation and knowledge articles in the wiki",
+    "usersIntro": "Manage users and organizations"
   },
   "docs": {
     "title": "Documents"
@@ -311,7 +319,8 @@
   "platform": {
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
     "cookieAlert": "We don't use cookies, so don't worry.",
-    "screenTooSmall": "The screen you are currently using seems a bit small, and some content may not be fully displayed. \nIf you still see this prompt when using a desktop browser, please check whether your web page zoom is set too high?"
+    "screenTooSmall": "The screen you are currently using seems a bit small, and some content may not be fully displayed. \nIf you still see this prompt when using a desktop browser, please check whether your web page zoom is set too high?",
+    "fetchStatFailed": "Failed to fetch server resource status"
   },
   "errors": {
     "401": "Please Login First",

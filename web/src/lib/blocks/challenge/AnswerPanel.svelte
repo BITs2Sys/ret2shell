@@ -29,7 +29,7 @@
       {:else}
         <div class="w-full flex flex-col items-center">
           <div class="flex flex-col w-full max-w-5xl px-6 py-4">
-            <div class="flex flex-row items-center space-x-2 bg-warning/5 border-l-4 border-l-warning p-4 rounded-lg">
+            <div class="flex flex-row items-center space-x-2 bg-warning/10 p-4 rounded-lg">
               <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning flex-shrink-0" />
               <span>
                 {$i18n.t('playground.challengeAnswerWarning')}
