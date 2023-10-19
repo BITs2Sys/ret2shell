@@ -10,7 +10,7 @@
     '"JetBrains Mono", Menlo, -apple-system, "Noto Sans", "Helvetica Neue", Helvetica, "Nimbus Sans L", Arial, "Liberation Sans", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Microsoft YaHei", Consolas, Courier, monospace'
   Chart.defaults.font.size = 16
   Chart.defaults.color = colorDefs()['base-content']
-  Chart.defaults.borderColor = '#80808060'
+  Chart.defaults.borderColor = '#80808020'
   Chart.defaults.plugins.tooltip.borderWidth = 1
   Chart.defaults.plugins.tooltip.padding = 16
   Chart.defaults.plugins.tooltip.bodySpacing = 6
@@ -22,6 +22,7 @@
   Chart.defaults.plugins.tooltip.titleColor = colorDefs()['base-content']
   Chart.defaults.plugins.tooltip.bodyColor = colorDefs()['base-content']
   Chart.defaults.plugins.tooltip.footerColor = colorDefs()['base-content']
+  Chart.defaults.animation = false
 
   let canvas: HTMLCanvasElement
   let chart: Chart

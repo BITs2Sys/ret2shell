@@ -11,7 +11,7 @@
   import { blur } from 'svelte/transition'
   import { onDestroy, onMount } from 'svelte'
 
-  let loading = false
+  let loading = true
 
   Chart.defaults.font.family =
     '"JetBrains Mono", Menlo, -apple-system, "Noto Sans", "Helvetica Neue", Helvetica, "Nimbus Sans L", Arial, "Liberation Sans", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Microsoft YaHei", Consolas, Courier, monospace'
@@ -158,7 +158,7 @@
 
 <svelte:head><title>{$i18n.t('admin.serverLogs')} - {$platform.name}</title></svelte:head>
 
-<div class="flex flex-col p-6 space-y-4 relative">
+<div class="flex-1 flex flex-col p-6 space-y-4 relative">
   <h2 class="py-2 text-base font-bold border-b border-b-base-content/10">CPU Load</h2>
   <div class="flex flex-row space-x-2">
     <div class="w-48 flex flex-col justify-start space-y-2 text-base font-bold">
