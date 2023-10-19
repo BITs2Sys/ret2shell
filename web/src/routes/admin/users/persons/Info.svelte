@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getInstituteList, updateUser } from '$lib/api/user'
+  import { updateUser } from '$lib/api/user'
   import { i18n } from '$lib/i18n'
   import type { Institute } from '$lib/models/institute'
   import { Permission, permissionToString, type User } from '$lib/models/user'
@@ -22,14 +22,11 @@
 
   export let user: User | null
 
-  let institutes: Institute[] = []
+  export let institutes: Institute[] = []
 
   onMount(() => {
     if (user) {
       watchUser(user)
-      getInstituteList().then((value) => {
-        institutes = value
-      })
     }
   })
 

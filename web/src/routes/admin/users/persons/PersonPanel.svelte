@@ -8,9 +8,11 @@
   import Statistics from './Statistics.svelte'
   import { i18n } from '$lib/i18n'
   import { blur } from 'svelte/transition'
+  import type { Institute } from '$lib/models/institute'
 
   export let user: User | null
   export let loading = false
+  export let institutes: Institute[] = []
 
   let clazz = ''
   let activeTab = 'info'
@@ -58,7 +60,7 @@
       </RxButton>
     </div>
     {#if activeTab === 'info'}
-      <Info {user} />
+      <Info {user} {institutes} />
     {:else if activeTab === 'statistics'}
       <Statistics {user} />
     {/if}

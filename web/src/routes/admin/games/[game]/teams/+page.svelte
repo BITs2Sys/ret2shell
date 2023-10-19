@@ -168,6 +168,7 @@
 
   let storedPage: number | undefined = undefined
   let storedGameId: number | undefined = undefined
+  let storedFilter = false
 
   function watchPage(p: number, g: Game | null) {
     if (p && g && (p !== storedPage || storedGameId !== g.id)) {
@@ -195,8 +196,9 @@
   }
 
   $: {
-    if (filterNeedAudit || !filterNeedAudit) {
+    if (filterNeedAudit !== storedFilter) {
       fetchTeams()
+      storedFilter = filterNeedAudit
     }
   }
 

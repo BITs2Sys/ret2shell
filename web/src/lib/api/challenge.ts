@@ -4,7 +4,12 @@ import type { Hint } from '$lib/models/hint'
 import type { Submission, SubmissionOnlyUserInfo } from '$lib/models/submission'
 import { api, api_root } from '.'
 
-export async function getChallengeList(game_id: number, page?: number, per_page?: number, tag_id?: number) {
+export async function getChallengeList(
+  game_id: number,
+  page?: number,
+  per_page?: number,
+  tag_id: number | null = null
+) {
   let uri = `${api_root}/challenge?game_id=${game_id}`
   if (page && per_page) {
     uri += `&page=${page}&per_page=${per_page}`

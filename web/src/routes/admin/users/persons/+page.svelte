@@ -242,6 +242,7 @@
     <PersonPanel
       user={currentUser}
       loading={loadingUser}
+      {institutes}
       class="flex-1"
       on:close={() => {
         window.location.hash = ''

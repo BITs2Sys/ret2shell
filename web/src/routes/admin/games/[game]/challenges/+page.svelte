@@ -19,7 +19,7 @@
   let loading = false
   let challenges: Challenge[] = []
   let tags: Tag[] = []
-  let filterTagID: number | undefined = undefined
+  let filterTagID: number | null = null
 
   let actions: DTColumnAction[] = [
     {
@@ -169,6 +169,7 @@
 
   let storedPage: number | undefined = undefined
   let storedGameId: number | undefined = undefined
+  let storedFilter: number | null = null
 
   function watchPage(p: number, g: Game | null) {
     if (p && g && (p !== storedPage || storedGameId !== g.id)) {
@@ -180,8 +181,9 @@
 
   $: watchPage(currentPage, $admin.game)
   $: {
-    if (filterTagID || !filterTagID) {
+    if (filterTagID !== storedFilter) {
       fetchChallenges()
+      storedFilter = filterTagID
     }
   }
 </script>

@@ -97,6 +97,8 @@
   })
   admin.subscribe((value) => {
     if (!value.game) return
+    if (value.game.id === game.id) return
+    game.id = value.game.id
     loading = true
     getGame(value.game.id)
       .then((res) => {
@@ -114,16 +116,15 @@
       .finally(() => {
         loading = false
       })
-    loading = true
+  })
+
+  onMount(() => {
     getInstituteList()
       .then((res) => {
         institutes = res
       })
       .catch((error) => {
         showMessage('error', `${$i18n.t('institute.fatchFailed')}: ${(error as AxiosError).response?.data}`, 5000)
-      })
-      .finally(() => {
-        loading = false
       })
   })
 </script>
@@ -224,7 +225,7 @@
             value={game.institute_id}
           />
         </RxFormItem>
-        <div class="flex flex-row">
+        <div class="flex flex-row space-x-4">
           <RxFormItem
             name="team_size_limit"
             label={$i18n.t('game.team_size_limit')}
@@ -249,7 +250,7 @@
             <RxCheckBox name="frozen" label={$i18n.t('game.frozen')} checked={game.frozen} />
           </RxFormItem>
         </div>
-        <div class="flex flex-row">
+        <div class="flex flex-row space-x-4">
           <RxFormItem
             name="host_as_game"
             label=""
