@@ -26,6 +26,7 @@
 
   onMount(() => {
     if (user) {
+      watchUser(user)
       getInstituteList().then((value) => {
         institutes = value
       })
@@ -66,9 +67,6 @@
     if (!u) return
     $data = {
       ...u,
-      permissions: u.permissions.map((p) => {
-        return p.valueOf()
-      }),
     }
     Object.keys($touched).forEach((key) => {
       $touched[key] = true
@@ -103,10 +101,6 @@
 
   $: watchUser(user)
 
-  $: {
-    console.log($data, $errors)
-  }
-
   function updatePermissionChecks() {
     if (user)
       for (let i = 0; i < permissionChecks.length; i++) {
@@ -116,12 +110,15 @@
 
   let permissionChecks = [false, false, false, false, false, false, false, false, false]
 
-  $: {
-    $data.permissions = permissionChecks
+  $: watchChecks(permissionChecks)
+
+  function watchChecks(checks: boolean[]) {
+    $data.permissions = checks
       .map((p, i) => {
         if (p) return i
       })
       .filter((p) => p !== undefined) as number[]
+    console.log($data.permissions)
     $touched.permissions = true
   }
 
