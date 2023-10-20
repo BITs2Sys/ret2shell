@@ -323,7 +323,10 @@
     "backendOffline": "The backend service seems to be offline. Please try refreshing the page. If the error persists after multiple attempts, please contact the website administrator.",
     "cookieAlert": "We don't use cookies, so don't worry.",
     "screenTooSmall": "The screen you are currently using seems a bit small, and some content may not be fully displayed. \nIf you still see this prompt when using a desktop browser, please check whether your web page zoom is set too high?",
-    "fetchStatFailed": "Failed to fetch server resource status"
+    "fetchStatFailed": "Failed to fetch server resource status",
+    "failedToFetchPlatformVersion": "Failed to fetch platform version. The current version may not work properly.",
+    "donate": "Donate",
+    "report": "Bug Report"
   },
   "errors": {
     "401": "Please Login First",

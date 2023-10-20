@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::middleware::{self, from_fn_with_state};
 use axum::{extract::Extension, Json};
 use axum::{response::IntoResponse, routing::get, Router};
+use git_version::git_version;
 use sea_orm::DatabaseConnection;
 use serde::Serialize;
 use systemstat::{CPULoad, Filesystem, Memory, Platform, Swap, System};
@@ -36,6 +37,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                     Permission::Devops
                 ))),
         )
+        .route("/version", get(get_platform_version))
         .route("/", get(get_platform_info))
 }
 
@@ -48,6 +50,15 @@ async fn get_platform_info(
         error!("platform info not found");
         Err((StatusCode::NOT_FOUND, "platform info not found"))
     }
+}
+
+async fn get_platform_version() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok(Json(format!(
+        "{}-{}-{}",
+        env!("CARGO_PKG_VERSION"),
+        git_version!(args = ["--abbrev=8", "--always"], fallback = "unknown").to_uppercase(),
+        env!("CARGO_PKG_RUST_VERSION")
+    )))
 }
 
 #[derive(Serialize)]

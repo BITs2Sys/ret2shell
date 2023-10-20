@@ -5,6 +5,10 @@ export async function getPlatformInfo() {
   return (await api.get(`${api_root}/platform`)).data as Platform
 }
 
+export async function getPlatformVersion() {
+  return (await api.get(`${api_root}/platform/version`)).data as string
+}
+
 export async function testToken(token: string) {
   return await api.head(`${api_root}/platform/config`, {
     headers: { Authorization: `Bearer ${token}` },

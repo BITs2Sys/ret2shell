@@ -323,7 +323,10 @@
     "backendOffline": "后端服务似乎离线了，请尝试刷新页面，如果多次尝试仍旧出错，请联系网站管理员。",
     "cookieAlert": "我们不使用小饼干，无须担心。",
     "screenTooSmall": "你当前使用的屏幕似乎有点小了，一些内容可能展示不全。如果你在使用桌面浏览器仍看到此条提示的话，请检查你的网页缩放是否开的太高了？",
-    "fetchStatFailed": "获取服务器资源情况失败"
+    "fetchStatFailed": "获取服务器资源情况失败",
+    "failedToFetchPlatformVersion": "获取平台版本信息失败，当前版本可能工作不正常",
+    "donate": "捐赠",
+    "report": "问题反馈"
   },
   "errors": {
     "401": "请先登录",

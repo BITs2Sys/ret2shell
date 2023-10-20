@@ -13,6 +13,10 @@
   import RxTag from '$lib/components/RxTag.svelte'
   import '$lib/styles/article.scss'
   import RxPing from '$lib/components/RxPing.svelte'
+  import { getPlatformVersion } from '$lib/api/platform'
+  import RxPopup from '$lib/components/RxPopup.svelte'
+  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import { fade } from 'svelte/transition'
 
   let calendars: Calendar[] = []
 
@@ -31,6 +35,7 @@
   let calendarBtns: CalendarBtn[] = []
   let gameDescription: Promise<string | null> = Promise.resolve(null)
   let currentDate = new Date()
+  let version = 'unknown'
 
   $: {
     calendarBtns = calendars.map((c) => ({
@@ -98,6 +103,17 @@
 
   onMount(() => {
     fetchCalendar()
+    getPlatformVersion()
+      .then((res) => {
+        version = res
+      })
+      .catch((err) => {
+        showMessage(
+          'error',
+          $i18n.t('platform.failedToFetchPlatformVersion') + ': ' + (err as AxiosError).response?.data,
+          5000
+        )
+      })
   })
 
   function fetchSelected() {
@@ -130,11 +146,9 @@
       <a class="text-xl text-error mt-8" href={$platform.subject_url}>{$platform.subject_info}</a>
       <div class="flex-1" />
       <div class="h-24" />
-      <div
-        class="absolute bottom-4 flex flex-col lg:flex-row items-center justify-center h-32 lg:h-16 p-2 space-y-4 lg:space-y-0 lg:space-x-4"
-      >
+      <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2">
         <p
-          class="pr-3 pl-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap"
+          class="m-2 p-3 py-2 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap"
         >
           (C) 2022 - {new Date().getFullYear()}&nbsp;
           <a href={$platform.footer_url} class="link">{$platform.footer_info}</a>
@@ -160,7 +174,7 @@
           </a>
         </p>
         <button
-          class="pr-3 pl-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap space-x-2 hover:animate-pulse"
+          class="m-2 p-3 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap space-x-2 hover:animate-pulse"
           on:click={() => {
             calendarSection.scrollIntoView({ behavior: 'smooth' })
           }}
@@ -168,6 +182,45 @@
           <span class="font-semibold">{$i18n.t('calendar.scrollToView')}</span>
           <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-80" />
         </button>
+        <RxPopup
+          name="platformVersion"
+          class="m-2 backdrop-blur bg-transparent backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5"
+          popupWidth="auto"
+          placement="top"
+        >
+          <span slot="button" class="icon-[fluent--info-20-regular] w-5 h-5"></span>
+          <div class="w-max flex flex-col space-y-2">
+            <div
+              class="bg-neutral/30 backdrop-blur rounded-box border border-base-content/5 flex flex-row items-center space-x-4 p-4 px-8"
+            >
+              <LogoAnimate width={64} height={64} />
+              <div class="flex flex-col space-y-1">
+                <h2 class="text-2xl font-bold flex flex-row">
+                  <span class="text-primary">R</span>
+                  <span class="opacity-80">et</span>
+                  <span class="opacity-60">&nbsp;2&nbsp;</span>
+                  <span class="text-error">S</span>
+                  <span class="opacity-80">hell</span>
+                </h2>
+                <p class="text-base font-bold opacity-60">{version}</p>
+              </div>
+            </div>
+            <div
+              class="bg-neutral/30 backdrop-blur rounded-box border border-base-content/5 flex flex-row items-center space-x-2 py-2 px-3"
+            >
+              <RxLink href="mailto:ret2shell@woooo.tech" ghost size="sm">
+                <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
+                <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
+              </RxLink>
+              <RxLink href="https://github.com/ret2shell" ghost size="sm" square title={$i18n.t('platform.donate')}>
+                <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5"></span>
+              </RxLink>
+              <RxLink href="https://github.com/ret2shell" ghost size="sm" square title={$i18n.t('platform.report')}>
+                <span class="icon-[fluent--open-20-regular] w-5 h-5"></span>
+              </RxLink>
+            </div>
+          </div>
+        </RxPopup>
       </div>
     </section>
     <section class="h-full min-h-full snap-center flex flex-col p-3 md:p-6" bind:this={calendarSection}>

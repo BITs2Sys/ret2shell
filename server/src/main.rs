@@ -98,12 +98,12 @@ async fn main() {
 fn greet() {
     println!(
         "[START UP] {} {}{}",
-        "Ret 2 Shell".bold().bright_blue(),
+        "Ret 2 Shell".bold(),
         "v".dimmed(),
         env!("CARGO_PKG_VERSION")
     );
     println!(
-        "[START UP] {} : {}{}",
+        "[START UP] {} {}{}",
         "MSRV".bold(),
         "v".dimmed(),
         env!("CARGO_PKG_RUST_VERSION")
