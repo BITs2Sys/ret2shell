@@ -1,4 +1,14 @@
 <script lang="ts">
+  import { passiveSupport } from 'passive-events-support/src/utils'
+  passiveSupport({
+    events: ['touchstart'],
+    listeners: [
+      {
+        element: 'gutter',
+        event: 'touchstart',
+      },
+    ],
+  })
   import { page } from '$app/stores'
   import { getChallenge, getChallengeAnwser, getChallengeHints } from '$lib/api/challenge'
   import { getGame, getGameSelfSubmission } from '$lib/api/game'
@@ -170,7 +180,7 @@
         </div>
         <div
           class="flex flex-1 flex-row items-center pr-2 space-x-2 backdrop-blur relative overflow-x-scroll flex-shrink-0 overflow-y-hidden"
-          on:wheel={(e) => {
+          on:wheel|passive={(e) => {
             e.currentTarget.scrollLeft += e.deltaY
           }}
         >
@@ -306,20 +316,25 @@
           {$i18n.t('playground.challengeSolves')}
         </RxButton>
       </div>
-      <TerminalPanel
-        game={$game.current}
-        challenge={activeChallenge}
-        availableChallenges={$game.challenges}
-        class={bottomTab === 0 ? 'p-6' : 'hidden'}
-        on:executed={(e) => {
-          if (e.detail.code === 0 && e.detail.cmd === 'submit') {
-            getSelfSubmissions()
-          }
-        }}
-      />
-      <HintsPanel {hints} class={bottomTab === 1 ? '' : 'hidden'} />
-      <AnswerPanel class={bottomTab === 2 ? '' : 'hidden'} {answer} />
-      <SolvedPanel class={bottomTab === 3 ? '' : 'hidden'} challenge={activeChallenge} />
+      {#if bottomTab === 0}
+        <TerminalPanel
+          game={$game.current}
+          challenge={activeChallenge}
+          availableChallenges={$game.challenges}
+          class="p-6"
+          on:executed={(e) => {
+            if (e.detail.code === 0 && e.detail.cmd === 'submit') {
+              getSelfSubmissions()
+            }
+          }}
+        />
+      {:else if bottomTab === 1}
+        <HintsPanel {hints} />
+      {:else if bottomTab === 2}
+        <AnswerPanel {answer} />
+      {:else if bottomTab === 3}
+        <SolvedPanel challenge={activeChallenge} />
+      {/if}
     </div>
   </div>
 {:else}

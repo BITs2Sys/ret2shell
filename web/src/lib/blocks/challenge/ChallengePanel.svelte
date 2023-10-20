@@ -33,7 +33,7 @@
 </script>
 
 <div
-  on:wheel={(e) => {
+  on:wheel|passive={(e) => {
     if (e.deltaY > 0) {
       challengeScrollExpanded = false
       challengeAttachmentExpanded = false
@@ -190,7 +190,7 @@
 </div>
 <div
   class="flex flex-col w-full px-6 flex-1"
-  on:wheel={(e) => {
+  on:wheel|passive={(e) => {
     if (e.deltaY > 0) {
       challengeScrollExpanded = false
       challengeAttachmentExpanded = false

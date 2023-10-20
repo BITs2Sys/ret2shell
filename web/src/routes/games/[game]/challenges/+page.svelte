@@ -1,4 +1,15 @@
 <script lang="ts">
+  import { passiveSupport } from 'passive-events-support/src/utils'
+  passiveSupport({
+    events: ['touchstart'],
+    listeners: [
+      {
+        element: 'gutter',
+        event: 'touchstart',
+      },
+    ],
+  })
+
   import { goto } from '$app/navigation'
   import { getChallengeHints, getChallengeList, getTagList } from '$lib/api/challenge'
   import { getGameNotifications, getGameSelfSubmission } from '$lib/api/game'
@@ -275,7 +286,7 @@
         </div>
         <div
           class="flex-1 flex flex-row items-center pr-2 space-x-2 relative overflow-x-scroll flex-shrink-0 h-16 overflow-y-hidden"
-          on:wheel={(e) => {
+          on:wheel|passive={(e) => {
             e.currentTarget.scrollLeft += e.deltaY
           }}
         >
@@ -368,7 +379,7 @@
         {/if}
       </div>
     </div>
-    <div id="work-stack" class="flex flex-col backdrop-blur">
+    <div id="work-stack" class="flex flex-col backdrop-blur min-h-16">
       <div class="border-b border-b-base-content/5 bg-neutral/30 flex flex-row items-center p-2 space-x-2">
         <RxButton
           ghost
@@ -405,19 +416,23 @@
           {$i18n.t('challenge.gankAuthor')}
         </RxButton>
       </div>
-      <TerminalPanel
-        game={$game.current}
-        challenge={activeChallenge}
-        availableChallenges={$game.challenges}
-        class={bottomTab === 0 ? 'p-6' : 'hidden'}
-        on:executed={(e) => {
-          if (e.detail.code === 0 && e.detail.cmd === 'submit') {
-            getSelfSubmissions()
-          }
-        }}
-      />
-      <HintsPanel class={bottomTab === 1 ? '' : 'hidden'} {hints} />
-      <SolvedPanel class={bottomTab === 2 ? '' : 'hidden'} challenge={activeChallenge} />
+      {#if bottomTab === 0}
+        <TerminalPanel
+          game={$game.current}
+          challenge={activeChallenge}
+          availableChallenges={$game.challenges}
+          class="p-6"
+          on:executed={(e) => {
+            if (e.detail.code === 0 && e.detail.cmd === 'submit') {
+              getSelfSubmissions()
+            }
+          }}
+        />
+      {:else if bottomTab === 1}
+        <HintsPanel {hints} />
+      {:else if bottomTab === 2}
+        <SolvedPanel challenge={activeChallenge} />
+      {/if}
     </div>
   </div>
   {#if showTeamSidebar}
