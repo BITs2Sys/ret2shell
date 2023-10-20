@@ -291,6 +291,7 @@
           on:click={() => {
             bottomTab = 1
           }}
+          disabled={!activeChallenge || hints.length === 0}
         >
           <span class="w-5 h-5 icon-[fluent--info-20-regular]" />
           {$i18n.t('playground.challengeHints')}
@@ -301,6 +302,7 @@
           on:click={() => {
             bottomTab = 2
           }}
+          disabled={!activeChallenge || answer === null}
         >
           <span class="w-5 h-5 icon-[fluent--checkmark-20-regular]" />
           {$i18n.t('playground.challengeAnswer')}

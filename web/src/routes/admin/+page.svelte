@@ -8,7 +8,10 @@
 <svelte:head><title>{$i18n.t('admin.title')} - {$platform.name}</title></svelte:head>
 
 <div class="flex-1 flex flex-col items-center justify-center space-y-16">
-  <h1 class="text-3xl font-bold">{$i18n.t('admin.welcome')}</h1>
+  <h1 class="text-3xl font-bold flex flex-row items-center space-x-4">
+    <span class="icon-[fluent--emoji-32-filled] w-8 h-8"></span>
+    <span>{$i18n.t('admin.welcome')}</span>
+  </h1>
   <div class="flex flex-row flex-wrap self-center justify-center">
     <RxCard class="w-72 m-4">
       <a class="flex flex-col w-full h-full space-y-4" href="/admin/statistics">
@@ -40,7 +43,6 @@
         <div class="flex-1"></div>
       </a>
     </RxCard>
-
     <RxCard class="w-72 m-4">
       <a class="flex flex-col w-full h-full space-y-4" href="/admin/announcements">
         <div class="flex flex-row items-center space-x-2">
@@ -51,7 +53,6 @@
         <div class="flex-1"></div>
       </a>
     </RxCard>
-
     <RxCard class="w-72 m-4">
       <a class="flex flex-col w-full h-full space-y-4" href="/admin/calendar">
         <div class="flex flex-row items-center space-x-2">
@@ -62,7 +63,6 @@
         <div class="flex-1"></div>
       </a>
     </RxCard>
-
     <RxCard class="w-72 m-4">
       <a class="flex flex-col w-full h-full space-y-4" href="/admin/wiki">
         <div class="flex flex-row items-center space-x-2">
@@ -73,7 +73,6 @@
         <div class="flex-1"></div>
       </a>
     </RxCard>
-
     <RxCard class="w-72 m-4">
       <a class="flex flex-col w-full h-full space-y-4" href="/admin/users">
         <div class="flex flex-row items-center space-x-2">

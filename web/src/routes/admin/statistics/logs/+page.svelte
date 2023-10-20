@@ -161,16 +161,16 @@
 <div class="flex-1 flex flex-col p-6 space-y-4 relative">
   <h2 class="py-2 text-base font-bold border-b border-b-base-content/10">CPU Load</h2>
   <div class="flex flex-row space-x-2">
-    <div class="w-48 flex flex-col justify-start space-y-2 text-base font-bold">
-      <div class="flex flex-row rounded-lg bg-base-content/5 p-4 backdrop-blur">
+    <div class="w-48 flex flex-col justify-start space-y-4 text-base font-bold">
+      <div class="flex flex-row border-l-4 border-l-warning px-2 py-1">
         <div class="w-24 opacity-60">SYSTEM:</div>
         <span>{systemCpuUsage.toFixed(2)}%</span>
       </div>
-      <div class="flex flex-row rounded-lg bg-base-content/5 p-4 backdrop-blur">
+      <div class="flex flex-row border-l-4 border-l-primary px-2 py-1">
         <div class="w-24 opacity-60">USER:</div>
         <span>{userCpuUsage.toFixed(2)}%</span>
       </div>
-      <div class="flex flex-row rounded-lg bg-base-content/5 p-4 backdrop-blur">
+      <div class="flex flex-row border-l-4 border-l-success px-2 py-1">
         <div class="w-24 opacity-60">TOTAL:</div>
         <span>{totalCpuUsage.toFixed(2)}%</span>
       </div>
