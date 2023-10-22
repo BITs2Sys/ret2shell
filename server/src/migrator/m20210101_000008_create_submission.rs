@@ -46,7 +46,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Submission::UserId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("submission_user_id_fkey")
                             .from(Submission::Table, Submission::UserId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -59,7 +58,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("submission_challenge_id_fkey")
                             .from(Submission::Table, Submission::ChallengeId)
                             .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)

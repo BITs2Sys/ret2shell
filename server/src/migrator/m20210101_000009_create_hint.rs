@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
 
 use super::m20210101_000007_create_challenge::Challenge;
 
@@ -14,6 +15,7 @@ impl MigrationName for Migration {
 pub enum Hint {
     Table,
     Id,
+    CreatedAt,
     ChallengeId,
     Content,
 }
@@ -32,10 +34,15 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
+                    .col(
+                        ColumnDef::new(Hint::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null()
+                            .default(CurrentTimestamp),
+                    )
                     .col(ColumnDef::new(Hint::ChallengeId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("submission_challenge_id_fkey")
                             .from(Hint::Table, Hint::ChallengeId)
                             .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)

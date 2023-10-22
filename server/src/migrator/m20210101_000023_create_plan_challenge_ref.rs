@@ -39,7 +39,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("plan_2_challenge_plan_id_fkey")
                             .from(Plan2Challenge::Table, Plan2Challenge::PlanId)
                             .to(Plan::Table, Plan::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -52,7 +51,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("plan_2_challenge_challenge_id_fkey")
                             .from(Plan2Challenge::Table, Plan2Challenge::ChallengeId)
                             .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)

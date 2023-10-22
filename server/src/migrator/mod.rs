@@ -33,6 +33,7 @@ mod m20210101_000022_create_plan;
 mod m20210101_000023_create_plan_challenge_ref;
 mod m20210101_000024_create_subscription;
 mod m20210101_000025_create_subscription_user_ref;
+mod m20210101_000026_create_extra;
 
 pub struct Migrator;
 
@@ -65,6 +66,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20210101_000023_create_plan_challenge_ref::Migration),
             Box::new(m20210101_000024_create_subscription::Migration),
             Box::new(m20210101_000025_create_subscription_user_ref::Migration),
+            Box::new(m20210101_000026_create_extra::Migration),
         ]
     }
 }

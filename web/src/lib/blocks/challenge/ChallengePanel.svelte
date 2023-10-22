@@ -158,16 +158,18 @@
           {#if $game.runningInstance && challenge && $game.runningInstance.challenge_id === challenge.id}
             <span class="opacity-60">{$i18n.t('playground.envLastTime')}</span>
             <RxTimer time={lastTime} />
-            <RxButton ghost square class="join-item ml-0">
-              <span class="icon-[fluent--copy-20-regular] w-5 h-5 text-success"></span>
-            </RxButton>
-            <RxButton ghost square class="join-item ml-0">
-              <span class="icon-[fluent--open-20-regular] w-5 h-5 text-info"></span>
-            </RxButton>
           {/if}
         </RxButton>
         {#if $game.runningInstance && challenge && $game.runningInstance.challenge_id === challenge.id}
-          <div class="w-[2px] h-[2rem] bg-base-content/20 mx-2"></div>
+          <RxButton ghost square class="join-item ml-0">
+            <span class="icon-[fluent--copy-20-regular] w-5 h-5 text-success"></span>
+          </RxButton>
+          <RxButton ghost square class="join-item ml-0">
+            <span class="icon-[fluent--open-20-regular] w-5 h-5 text-info"></span>
+          </RxButton>
+        {/if}
+        {#if $game.runningInstance && challenge && $game.runningInstance.challenge_id === challenge.id}
+          <div class="w-[2px] h-[1.5rem] bg-base-content/20 mx-2"></div>
           <RxButton ghost class="join-item ml-0" square>
             <span class="icon-[fluent--timer-20-regular] w-5 h-5 text-info"></span>
           </RxButton>

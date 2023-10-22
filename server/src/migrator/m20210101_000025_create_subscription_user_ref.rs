@@ -41,7 +41,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user_2_subscription_user_id_fkey")
                             .from(User2Subscription::Table, User2Subscription::UserId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -54,7 +53,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user_2_subscription_subscription_id_fkey")
                             .from(User2Subscription::Table, User2Subscription::SubscriptionId)
                             .to(Subscription::Table, Subscription::Id)
                             .on_update(ForeignKeyAction::Cascade)

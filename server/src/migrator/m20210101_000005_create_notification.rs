@@ -44,7 +44,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("notification_game_id_fkey")
                             .from(Notification::Table, Notification::GameId)
                             .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)

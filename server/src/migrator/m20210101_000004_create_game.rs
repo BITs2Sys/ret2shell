@@ -90,7 +90,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Game::InstituteId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("game_institute_id_fkey")
                             .from(Game::Table, Game::InstituteId)
                             .to(Institute::Table, Institute::Id)
                             .on_update(ForeignKeyAction::Cascade)

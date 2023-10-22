@@ -54,7 +54,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Answer::AuthorId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("answer_author_id_fkey")
                             .from(Answer::Table, Answer::AuthorId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -68,7 +67,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("answer_challenge_id_fkey")
                             .from(Answer::Table, Answer::ChallengeId)
                             .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)

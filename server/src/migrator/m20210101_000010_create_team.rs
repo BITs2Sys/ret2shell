@@ -44,7 +44,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Team::GameId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("team_game_id_fkey")
                             .from(Team::Table, Team::GameId)
                             .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -55,7 +54,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Team::InstituteId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("team_institute_id_fkey")
                             .from(Team::Table, Team::InstituteId)
                             .to(Institute::Table, Institute::Id)
                             .on_update(ForeignKeyAction::Cascade)

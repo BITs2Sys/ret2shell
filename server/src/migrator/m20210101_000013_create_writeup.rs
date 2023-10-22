@@ -55,7 +55,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(WriteUp::AuthorId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("writeup_author_id_fkey")
                             .from(WriteUp::Table, WriteUp::AuthorId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -64,7 +63,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(WriteUp::GameId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("writeup_game_id_fkey")
                             .from(WriteUp::Table, WriteUp::GameId)
                             .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)

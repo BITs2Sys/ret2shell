@@ -61,7 +61,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("announcement_publisher_id_fkey")
                             .from(Announcement::Table, Announcement::PublisherId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)

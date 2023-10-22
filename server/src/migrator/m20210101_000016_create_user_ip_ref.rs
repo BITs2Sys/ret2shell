@@ -39,7 +39,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user2ip_address_user_id_fkey")
                             .from(User2IpAddress::Table, User2IpAddress::UserId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -52,7 +51,6 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user2ip_address_ip_address_id_fkey")
                             .from(User2IpAddress::Table, User2IpAddress::IpAddressId)
                             .to(IpAddress::Table, IpAddress::Id)
                             .on_update(ForeignKeyAction::Cascade)

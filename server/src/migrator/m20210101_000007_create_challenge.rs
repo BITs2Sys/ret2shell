@@ -49,7 +49,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Challenge::GameId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("challenge_game_id_fkey")
                             .from(Challenge::Table, Challenge::GameId)
                             .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -60,7 +59,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Challenge::TagId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("challenge_tag_id_fkey")
                             .from(Challenge::Table, Challenge::TagId)
                             .to(Tag::Table, Tag::Id)
                             .on_update(ForeignKeyAction::Cascade)

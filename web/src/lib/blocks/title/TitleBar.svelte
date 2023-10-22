@@ -10,7 +10,7 @@
   import { initConfig } from '$lib/stores/init'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxImage from '$lib/components/RxImage.svelte'
-  import { game } from '$lib/stores/game'
+  import { game, refreshInstanceState } from '$lib/stores/game'
   import GameMenu from './GameMenu.svelte'
   import TeamBox from './TeamBox.svelte'
   import { canTakePartInGame } from '$lib/utils/auth'
@@ -54,6 +54,7 @@
     userInfo().then(() => {
       loadingAvatar = false
     })
+    refreshInstanceState()
   })
 </script>
 
@@ -128,7 +129,7 @@
     </div>
   </RxPopup>
   {#if $game.runningInstance}
-    <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="instanceBoxPopup" popupWidth={72}>
+    <RxPopup class="btn-square btn-ghost inline-flex mr-2" name="instanceBoxPopup" popupWidth={72} event="click-blur">
       <div slot="button" class="text-success">
         <Engine width={32} height={32} />
       </div>

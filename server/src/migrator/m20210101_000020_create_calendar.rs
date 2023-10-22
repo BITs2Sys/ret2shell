@@ -55,7 +55,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Calendar::ReporterId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("calendar_reporter_id_fkey")
                             .from(Calendar::Table, Calendar::ReporterId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)

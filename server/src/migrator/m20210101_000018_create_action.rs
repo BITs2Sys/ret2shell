@@ -46,7 +46,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Action::ChallengeId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("action_challenge_id_fkey")
                             .from(Action::Table, Action::ChallengeId)
                             .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)

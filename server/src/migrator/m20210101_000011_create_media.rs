@@ -43,7 +43,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Media::UploaderId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("media_uploader_id_fkey")
                             .from(Media::Table, Media::UploaderId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)

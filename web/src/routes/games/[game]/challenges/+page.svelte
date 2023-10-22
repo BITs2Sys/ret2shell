@@ -1,11 +1,11 @@
 <script lang="ts">
   import { passiveSupport } from 'passive-events-support/src/utils'
   passiveSupport({
+    events: ['touchstart'],
     listeners: [
       {
         element: 'gutter',
         event: 'touchstart',
-        prevented: true,
       },
     ],
   })

@@ -8,6 +8,7 @@ pub mod answer;
 pub mod calendar;
 pub mod challenge;
 pub mod config;
+pub mod extra;
 pub mod game;
 pub mod hint;
 pub mod instance;

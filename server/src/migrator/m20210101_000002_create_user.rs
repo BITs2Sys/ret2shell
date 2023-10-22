@@ -58,7 +58,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(User::InstituteId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("user_institute_id_fkey")
                             .from(User::Table, User::InstituteId)
                             .to(Institute::Table, Institute::Id)
                             .on_update(ForeignKeyAction::Cascade)

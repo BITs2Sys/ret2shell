@@ -23,6 +23,7 @@ pub enum Instance {
     Flag,
     Addr,
     Wsrx,
+    Running,
 }
 
 #[async_trait::async_trait]
@@ -73,7 +74,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Instance::UserId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("instance_user_id_fkey")
                             .from(Instance::Table, Instance::UserId)
                             .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
@@ -86,10 +86,10 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("instance_challenge_id_fkey")
                             .from(Instance::Table, Instance::ChallengeId)
                             .to(Challenge::Table, Challenge::Id),
                     )
+                    .col(ColumnDef::new(Instance::Running).boolean().not_null())
                     .to_owned(),
             )
             .await
