@@ -3,6 +3,8 @@
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
+use sea_orm::{ActiveValue, IntoActiveModel, QuerySelect};
+use sea_query::JoinType;
 use serde::{Deserialize, Serialize};
 
 use super::{hint, team};
@@ -19,18 +21,19 @@ pub struct Model {
     pub reason: String,
     pub score: i32,
     pub hint_id: Option<i64>,
+    pub challenge_id: Option<i64>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    // #[sea_orm(
-    //     belongs_to = "super::challenge::Entity",
-    //     from = "Column::ChallengeId",
-    //     to = "super::challenge::Column::Id",
-    //     on_update = "Cascade",
-    //     on_delete = "Cascade"
-    // )]
-    // Challenge,
+    #[sea_orm(
+        belongs_to = "super::challenge::Entity",
+        from = "Column::ChallengeId",
+        to = "super::challenge::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Challenge,
     #[sea_orm(
         belongs_to = "super::hint::Entity",
         from = "Column::HintId",
@@ -61,4 +64,44 @@ impl Related<hint::Entity> for Entity {
     }
 }
 
+impl Related<super::challenge::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Challenge.def()
+    }
+}
+
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn create_extra(conn: &DatabaseConnection, extra: Model) -> Result<(), DbErr> {
+    let extra = ActiveModel {
+        id: ActiveValue::NotSet,
+        ..extra.into_active_model().reset_all()
+    };
+    extra.insert(conn).await?;
+    Ok(())
+}
+
+pub async fn get_extras_by_team_id(
+    conn: &DatabaseConnection,
+    team_id: i64,
+) -> Result<Vec<Model>, DbErr> {
+    let extras = Entity::find()
+        .filter(Column::TeamId.eq(team_id))
+        .join(
+            JoinType::InnerJoin,
+            super::submission::Relation::Challenge.def(),
+        )
+        .filter(super::challenge::Column::Hidden.eq(false))
+        .all(conn)
+        .await?;
+    Ok(extras)
+}
+
+#[allow(dead_code)]
+pub async fn delete_extra_by_id(conn: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    let extra = Entity::find_by_id(id).one(conn).await?;
+    if let Some(extra) = extra {
+        extra.delete(conn).await?;
+    }
+    Ok(())
+}

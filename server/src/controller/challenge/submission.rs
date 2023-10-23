@@ -1,7 +1,7 @@
 use crate::{
     controller::{layer::auth, GlobalState},
     entity::{
-        challenge, game, submission,
+        challenge, extra, game, submission,
         team::{self, TeamScoreHistory},
         user::{self, Permission},
     },
@@ -136,6 +136,38 @@ async fn submit_flag(
                         "failed to calc challenge score",
                     )
                 })?;
+            blood_state = submission::count_blood(&conn, challenge.id)
+                .await
+                .map_err(|err| {
+                    error!("count_blood error: {}", err);
+                    (StatusCode::INTERNAL_SERVER_ERROR, "failed to count blood")
+                })? as i32;
+            if blood_state > 0 && blood_state <= 3 {
+                let award_score = ((challenge.initial_score as f64
+                    * (game.blood_award_rate as f64 / 100.0))
+                    / blood_state as f64)
+                    .round() as i32;
+                extra::create_extra(
+                    &conn,
+                    extra::Model {
+                        id: 0,
+                        created_at: updated_time.clone(),
+                        team_id: team.id,
+                        reason: format!(
+                            "No.{} solution for challenge {}:<{}>",
+                            blood_state, challenge.id, challenge.name
+                        ),
+                        score: award_score,
+                        hint_id: None,
+                        challenge_id: Some(challenge.id),
+                    },
+                )
+                .await
+                .map_err(|err| {
+                    error!("create_extra error: {}", err);
+                    (StatusCode::INTERNAL_SERVER_ERROR, "failed to create award")
+                })?;
+            }
             challenge.current_score = challenge_current_score;
             challenge::update_challenge_current_score(&conn, &challenge)
                 .await
@@ -155,12 +187,7 @@ async fn submit_flag(
                     "failed to update team score",
                 ));
             }
-            blood_state = submission::count_blood(&conn, challenge.id)
-                .await
-                .map_err(|err| {
-                    error!("count_blood error: {}", err);
-                    (StatusCode::INTERNAL_SERVER_ERROR, "failed to count blood")
-                })? as i32;
+
             tokio::spawn(async move {
                 if let Some(affected_teams) =
                     team::get_affected_teams_by_challenge_id(&conn, challenge.id)
@@ -180,20 +207,28 @@ async fn submit_flag(
                             };
                             affected_team.history.0.push(score_history);
                         } else {
-                            if let Err(err) =
-                                team::update_team_score(&conn, &team, game.id, updated_time.clone())
-                                    .await
+                            match team::update_team_score(
+                                &conn,
+                                &team,
+                                game.id,
+                                updated_time.clone(),
+                            )
+                            .await
                             {
-                                error!("failed to update team score: {}", err);
-                                continue;
+                                Ok(score) => {
+                                    let score_history = TeamScoreHistory {
+                                        score,
+                                        time: updated_time.clone(),
+                                        challenge_id: None,
+                                        blood_state: None,
+                                    };
+                                    affected_team.history.0.push(score_history);
+                                }
+                                Err(err) => {
+                                    error!("failed to update team score: {}", err);
+                                    continue;
+                                }
                             }
-                            let score_history = TeamScoreHistory {
-                                score: affected_team.score,
-                                time: updated_time.clone(),
-                                challenge_id: None,
-                                blood_state: None,
-                            };
-                            affected_team.history.0.push(score_history);
                         }
                         team::update_team_history(&conn, &affected_team)
                             .await

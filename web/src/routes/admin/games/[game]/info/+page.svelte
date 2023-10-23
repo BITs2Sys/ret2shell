@@ -49,6 +49,7 @@
     end_time: z.number(),
     register_time: z.number(),
     archive_time: z.number(),
+    blood_award_rate: z.number().min(0).max(100),
   })
   let loading = false
   let submitting = false
@@ -70,6 +71,7 @@
     enable_team_audit: false,
     can_register_after_started: false,
     institute_id: null,
+    blood_award_rate: 0,
   }
   let institutes: Institute[] = []
 
@@ -278,11 +280,22 @@
               placeholder={$i18n.t('game.team_size_limitPlaceholder')}
             />
           </RxFormItem>
-          <RxFormItem name="hidden" label="" hasError={$errors.hidden !== null} errors={$errors.hidden || ''}>
-            <RxCheckBox name="hidden" label={$i18n.t('game.hidden')} checked={game.hidden} />
-          </RxFormItem>
-          <RxFormItem name="frozen" label="" hasError={$errors.frozen !== null} errors={$errors.frozen || ''}>
-            <RxCheckBox name="frozen" label={$i18n.t('game.frozen')} checked={game.frozen} />
+          <RxFormItem
+            name="blood_award_rate"
+            label={$i18n.t('game.blood_award_rate')}
+            hasError={$errors.blood_award_rate !== null}
+            errors={$errors.blood_award_rate || ''}
+          >
+            <RxInput
+              icon="icon-[fluent--person-20-regular]"
+              class="w-full"
+              id="blood_award_rate"
+              name="blood_award_rate"
+              type="number"
+              hasError={$errors.blood_award_rate !== null}
+              value={game.blood_award_rate}
+              placeholder={$i18n.t('game.blood_award_ratePlaceholder')}
+            />
           </RxFormItem>
         </div>
         <div class="flex flex-row space-x-4">
@@ -317,6 +330,12 @@
               label={$i18n.t('game.can_register_after_started')}
               checked={game.can_register_after_started}
             />
+          </RxFormItem>
+          <RxFormItem name="hidden" label="" hasError={$errors.hidden !== null} errors={$errors.hidden || ''}>
+            <RxCheckBox name="hidden" label={$i18n.t('game.hidden')} checked={game.hidden} />
+          </RxFormItem>
+          <RxFormItem name="frozen" label="" hasError={$errors.frozen !== null} errors={$errors.frozen || ''}>
+            <RxCheckBox name="frozen" label={$i18n.t('game.frozen')} checked={game.frozen} />
           </RxFormItem>
         </div>
         <RxFormItem name="submitAction" label="">

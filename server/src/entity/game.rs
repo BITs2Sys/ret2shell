@@ -33,6 +33,7 @@ pub struct Model {
     pub enable_team_audit: bool,
     pub can_register_after_started: bool,
     pub institute_id: Option<i64>,
+    pub blood_award_rate: i32,
 }
 
 impl Model {

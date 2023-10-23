@@ -31,6 +31,7 @@ pub enum Game {
     EnableTeamAudit,
     CanRegisterAfterStarted,
     InstituteId,
+    BloodAwardRate,
 }
 
 #[async_trait::async_trait]
@@ -94,6 +95,12 @@ impl MigrationTrait for Migration {
                             .to(Institute::Table, Institute::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .col(
+                        ColumnDef::new(Game::BloodAwardRate)
+                            .integer()
+                            .not_null()
+                            .default(0),
                     )
                     .to_owned(),
             )

@@ -210,7 +210,7 @@
           }
         }),
         fill: false,
-        tension: 0.1,
+        stepped: true,
       })
     }
     chart.data.datasets = datasets
@@ -246,18 +246,20 @@
     </div>
   </div>
   <div class="flex flex-row">
-    <table>
+    <table class="table-auto flex-1 flex-shrink-0 min-w-[32rem]">
       <thead class="border-b-4 border-b-base-content/10">
         <tr class="h-12"></tr>
         <tr class="border-b border-b-base-content/10 h-12">
-          <th class="text-base font-bold sticky z-50 left-0">
+          <th class="text-base font-bold">
             <div class="w-16"></div>
           </th>
-          <th class="text-base font-bold sticky z-50 left-16">
-            <div class="w-64 text-start">{$i18n.t('game.team')}</div>
+          <th class="text-base font-bold max-w-0 w-full overflow-hidden">
+            <div class="text-start whitespace-nowrap flex-nowrap truncate max-w-lg px-2">
+              {$i18n.t('game.team')}
+            </div>
           </th>
-          <th class="text-base font-bold sticky z-50 left-80">
-            <div class="w-32 text-start">
+          <th class="text-base font-bold">
+            <div class="w-32 text-start px-2">
               {$i18n.t('game.score')}
             </div>
           </th>
@@ -279,10 +281,16 @@
                 {/if}
               </div>
             </td>
-            <td class="text-base font-bold sticky z-10 left-16">{item.name}</td>
+            <td class="text-base font-bold sticky z-10 left-16 min-w-64 max-w-lg overflow-hidden">
+              <div class="min-w-64 text-start whitespace-nowrap flex-nowrap truncate px-2">
+                <a class="hover:underline" href={`/games/${$game.current?.id}/teams/${item.id}`}>{item.name}</a>
+              </div>
+            </td>
             <td class="text-base font-bold sticky z-10 left-80">
-              {item.score}
-              <span class="opacity-60">pts</span>
+              <div class="px-2">
+                {item.score}
+                <span class="opacity-60">pts</span>
+              </div>
             </td>
           </tr>
         {/each}
@@ -292,7 +300,7 @@
       options={{
         scrollbars: { theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light', autoHide: 'scroll' },
       }}
-      class="flex-1 relative h-auto print:h-auto print:overflow-auto"
+      class="relative h-auto print:h-auto print:overflow-auto"
       defer
     >
       <table>
@@ -304,7 +312,7 @@
                   class="text-base font-bold h-12 border-l border-l-base-content/5"
                   colspan={tagsChallengesRecord[item.id].length}
                 >
-                  {item.name}
+                  <span class="opacity-60">{item.name}</span>
                 </th>
               {/if}
             {/each}
@@ -314,7 +322,7 @@
               {#if tagsChallengesRecord[item.id].length > 0}
                 {#each tagsChallengesRecord[item.id] as challenge}
                   <th class="text-base border-l border-l-base-content/5" title={challenge.name}>
-                    <div class="w-20 overflow-hidden whitespace-nowrap truncate">{challenge.name}</div>
+                    <div class="w-20 overflow-hidden whitespace-nowrap truncate opacity-80">{challenge.name}</div>
                   </th>
                 {/each}
               {/if}

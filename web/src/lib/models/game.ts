@@ -16,6 +16,7 @@ export interface Game {
   enable_team_audit: boolean
   can_register_after_started: boolean
   institute_id: number | null
+  blood_award_rate: number
 }
 
 export interface Notification {

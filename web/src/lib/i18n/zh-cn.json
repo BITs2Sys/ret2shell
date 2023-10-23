@@ -590,7 +590,10 @@
     "fetchTeamRankFailed": "获取队伍排名失败",
     "fetchScoreboardFailed": "获取积分板失败",
     "team": "队伍",
-    "score": "分数"
+    "score": "分数",
+    "enable_blood_award": "开启前三血奖励",
+    "blood_award_rate": "前三血奖励分数比例 (0 - 100)%",
+    "blood_award_ratePlaceholder": "请填写前三血奖励分数比例，在 0 - 100 之间，不加 % 号。"
   },
   "challenges": {
     "noHint": "暂无提示信息",

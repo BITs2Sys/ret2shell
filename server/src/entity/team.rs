@@ -2,6 +2,7 @@
 
 use std::collections::HashSet;
 
+use super::extra;
 use super::user::{self, Entity as User};
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
@@ -236,6 +237,7 @@ async fn calc_team_score(
             super::submission::Relation::Challenge.def(),
         )
         .filter(super::challenge::Column::GameId.eq(game_id))
+        .filter(super::challenge::Column::Hidden.eq(false))
         .select_only()
         .column_as(super::challenge::Column::CurrentScore, "score")
         .distinct_on([
@@ -256,6 +258,10 @@ async fn calc_team_score(
     let mut team_score = 0;
     for challenge_score in res {
         team_score += challenge_score.score
+    }
+    let extras = extra::get_extras_by_team_id(conn, team.id).await?;
+    for extra in extras {
+        team_score += extra.score;
     }
     Ok(team_score)
 }

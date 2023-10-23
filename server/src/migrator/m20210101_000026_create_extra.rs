@@ -1,7 +1,10 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20210101_000008_create_team::Team, m20210101_000009_create_hint::Hint};
+use super::{
+    m20210101_000007_create_challenge::Challenge, m20210101_000008_create_team::Team,
+    m20210101_000009_create_hint::Hint,
+};
 
 pub struct Migration;
 
@@ -20,6 +23,7 @@ pub enum Extra {
     Score,
     HintId,
     TeamId,
+    ChallengeId,
 }
 
 #[async_trait::async_trait]
@@ -57,6 +61,14 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .from(Extra::Table, Extra::TeamId)
                             .to(Team::Table, Team::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .col(ColumnDef::new(Extra::ChallengeId).big_integer())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Extra::Table, Extra::ChallengeId)
+                            .to(Challenge::Table, Challenge::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )

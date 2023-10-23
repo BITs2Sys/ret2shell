@@ -590,7 +590,10 @@
     "fetchTeamRankFailed": "Failed to obtain team ranking",
     "fetchScoreboardFailed": "Failed to fetch scoreboard",
     "team": "Team",
-    "score": "Score"
+    "score": "Score",
+    "enable_blood_award": "Activate blood reward",
+    "blood_award_rate": "The first three blood bonus points proportion (0 - 100)%",
+    "blood_award_ratePlaceholder": "Please fill in the first three blood reward score ratios, between 0 and 100, without adding the % sign."
   },
   "challenges": {
     "noHint": "No hints yet",

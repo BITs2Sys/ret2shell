@@ -141,6 +141,7 @@
   $: renderTeams = teams.map((team) => {
     return {
       ...team,
+      name: `${team.name}|#${team.id}`,
       state: State[team.state],
       institute_info: institutes.find((i) => i.id === team.institute_id)?.name || '',
       needAudit: team.state === State.NeedAudit,

@@ -5,4 +5,5 @@ export interface Extra {
   reason: string
   score: number
   hint_id: number | null
+  challenge_id: number | null
 }

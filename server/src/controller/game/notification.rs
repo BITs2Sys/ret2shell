@@ -12,7 +12,7 @@ use axum::{
 use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
-use tracing::error;
+use tracing::{debug, error};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -33,6 +33,7 @@ async fn create_notification(
     Path(game_id): Path<i64>,
     Json(notification): Json<notification::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    debug!("game_id={}", game_id);
     match notification::create_notification(conn, game_id, notification).await {
         Ok(_) => Ok(StatusCode::CREATED),
         Err(DbErr::RecordNotFound(_)) => Err((StatusCode::NOT_FOUND, "game not found")),
