@@ -5,7 +5,7 @@ export interface Submission {
   challenge_id: number
   content: string
   solved: boolean
-  with_score: boolean
+  team_id: number | null
 }
 
 export interface SubmissionOnlyUserInfo {

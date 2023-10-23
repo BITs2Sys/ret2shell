@@ -14,9 +14,9 @@
   <div class="flex-1 flex flex-row items-center space-x-2">
     {#if $game.team}
       <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
-      <span>{$game.team?.name}</span>
+      <span class="text-base font-bold">{$game.team?.name}</span>
       <span class="flex-1" />
-      <span>#{$game.team?.id}</span>
+      <span class="text-base font-bold opacity-60">0x{$game.team?.id.toString(16).padStart(6, '0')}</span>
     {:else if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}
       <span class="icon-[fluent--person-wrench-20-regular] w-5 h-5 text-info flex-shrink-0" />
       <span class="text-info font-bold">{$i18n.t('games.teamAsAdmin')}</span>
@@ -24,7 +24,15 @@
   </div>
   <div class="flex-1 flex flex-row items-center space-x-2">
     {#if $game.team}
-      <div></div>
+      <span>
+        <span class="text-base font-bold opacity-60">SCORE:</span>
+        <span class="text-base font-bold text-primary">{$game.team?.score}</span>
+      </span>
+      <span class="flex-1"></span>
+      <span>
+        <span class="text-base font-bold opacity-60">RANK:</span>
+        <span class="text-base font-bold text-primary">{$game.rank}</span>
+      </span>
     {:else if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}
       <span class="icon-[fluent--info-20-regular] w-5 h-5 opacity-60 flex-shrink-0" />
       <span class="text-base font-bold opacity-60">{$i18n.t('games.teamAsAdminTips')}</span>

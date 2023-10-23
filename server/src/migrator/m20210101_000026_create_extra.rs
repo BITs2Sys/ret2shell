@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20210101_000009_create_hint::Hint, m20210101_000010_create_team::Team};
+use super::{m20210101_000008_create_team::Team, m20210101_000009_create_hint::Hint};
 
 pub struct Migration;
 

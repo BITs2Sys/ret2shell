@@ -579,7 +579,18 @@
     "startTime": "比赛开始时间（本地时区）",
     "endTime": "比赛结束时间（本地时区）",
     "registerTime": "开放注册时间（本地时区）",
-    "archiveTime": "比赛归档时间（本地时区）"
+    "archiveTime": "比赛归档时间（本地时区）",
+    "teamNameIsRequired": "请填写队伍名称",
+    "teamNameTooLong": "队伍名称太长了！",
+    "createTeamSuccess": "队伍创建成功，欢迎参加比赛！",
+    "createTeamFailed": "创建队伍失败",
+    "createTeam": "创建队伍",
+    "teamName": "队伍名称",
+    "joinTeamLink": "队友已经创建过队伍了？点击这里加入",
+    "fetchTeamRankFailed": "获取队伍排名失败",
+    "fetchScoreboardFailed": "获取积分板失败",
+    "team": "队伍",
+    "score": "分数"
   },
   "challenges": {
     "noHint": "暂无提示信息",
@@ -611,7 +622,8 @@
       "right": "答案正确！",
       "wrong": "答案错误...",
       "error": "提交失败",
-      "man": "提交flag"
+      "man": "提交flag",
+      "blood": "恭喜，你是第 {{blood}} 位解出本题的选手！"
     },
     "wget": {
       "downloading": "正在下载",

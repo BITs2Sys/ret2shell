@@ -1,6 +1,7 @@
 import type { Game, Notification } from '$lib/models/game'
 import type { Submission } from '$lib/models/submission'
 import type { Team } from '$lib/models/team'
+import type { User } from '$lib/models/user'
 import { api, api_root } from '.'
 
 export async function getGameList(page: number, per_page: number, host_as_game?: boolean) {
@@ -16,6 +17,26 @@ export async function getGame(id: number) {
 
 export async function updateGame(id: number, game: Game) {
   return await api.patch(`${api_root}/game/${id}`, game)
+}
+
+export interface CreateTeamRequest {
+  name: string
+  captcha_id: string
+  captcha_answer: string
+}
+
+export async function createTeam(game_id: number, req: CreateTeamRequest) {
+  return await api.post(`${api_root}/game/${game_id}/team`, req)
+}
+
+export interface JoinTeamRequest {
+  token: number
+  captcha_id: string
+  captcha_answer: string
+}
+
+export async function joinTeam(game_id: number, req: JoinTeamRequest) {
+  return await api.patch(`${api_root}/game/${game_id}/team`, req)
 }
 
 export async function getGameSelfSubmission(game_id: number) {
@@ -44,8 +65,20 @@ export async function getTeamInfo(game_id: number, team_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/team/info?team_id=${team_id}`)).data as Team
 }
 
+export async function getTeamMembers(game_id: number, team_id: number) {
+  return (await api.get(`${api_root}/game/${game_id}/team/info/members?team_id=${team_id}`)).data as User[]
+}
+
 export async function getSelfTeamInfo(game_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/team/self`)).data as Team
+}
+
+export async function getSelfTeamRank(game_id: number) {
+  return (await api.get(`${api_root}/game/${game_id}/team/self/rank`)).data as { rank: number }
+}
+
+export async function getSelfTeamMembers(game_id: number) {
+  return (await api.get(`${api_root}/game/${game_id}/team/self/members`)).data as User[]
 }
 
 export async function changeTeamAudit(game_id: number, team_id: number) {
@@ -65,4 +98,22 @@ export async function createNotification(game_id: number, notification: Notifica
 
 export async function deleteGameNotification(game_id: number, notification_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/notification?notification_id=${notification_id}`)
+}
+
+export interface Scoreboard {
+  teams: Team[]
+  total: number
+}
+
+export async function getGameScoreboard(
+  game_id: number,
+  page: number,
+  per_page: number,
+  all?: boolean,
+  institute?: number | null
+) {
+  let uri = `${api_root}/game/${game_id}/scoreboard?page=${page}&per_page=${per_page}`
+  if (all !== undefined && all !== null) uri += `&all=${all}`
+  if (institute !== undefined && institute !== null) uri += `&institute=${institute}`
+  return (await api.get(uri)).data as Scoreboard
 }

@@ -34,7 +34,10 @@ export async function getChallengeHints(id: number) {
 }
 
 export async function submitFlag(submission: Submission) {
-  return await api.post(`${api_root}/challenge/${submission.challenge_id}/submission`, submission)
+  return (await api.post(`${api_root}/challenge/${submission.challenge_id}/submission`, submission)).data as {
+    result: boolean
+    blood_state: number
+  }
 }
 
 export async function downloadChallengeAttachment(

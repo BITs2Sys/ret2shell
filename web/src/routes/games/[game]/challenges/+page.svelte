@@ -23,7 +23,7 @@
   import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import { Permission } from '$lib/models/user'
-  import { game } from '$lib/stores/game'
+  import { game, refreshTeam } from '$lib/stores/game'
   import { theme } from '$lib/stores/theme'
   import { showMessage } from '$lib/stores/toast'
   import { user } from '$lib/stores/user'
@@ -52,7 +52,6 @@
   $: mayHaveMoreChallenges = challengePage < challengeTotalPages
   let tags: Tag[] = []
   let currentGameIdCache: number | null = null
-  let currentTeamIdCache: number | null = null
 
   function getChallenges() {
     if ($game.current?.id) {
@@ -72,7 +71,19 @@
           challengeTotalPages = res.total
         })
         .catch((err) => {
-          showMessage('error', `${$i18n.t('playground.noMoreChallenges')}: ${(err as AxiosError).response?.data}`, 5000)
+          if (
+            (err as AxiosError).response?.status === 403 &&
+            (err as AxiosError).response?.data === 'you have not joined this game'
+          ) {
+            showMessage('warning', $i18n.t('games.takePartInFirst'), 5000)
+            goto(`/games/${$game.current?.id}`)
+          } else {
+            showMessage(
+              'error',
+              `${$i18n.t('playground.noMoreChallenges')}: ${(err as AxiosError).response?.data}`,
+              5000
+            )
+          }
         })
     }
   }
@@ -82,44 +93,12 @@
     if (challengePage <= challengeTotalPages) getChallenges()
   }
 
-  function getSelfSubmissions() {
-    if ($game.current?.id) {
-      let func = $game.team
-        ? (id: number) => {
-            return getGameTeamSubmission(id, $game.team?.id || 0)
-          }
-        : getGameSelfSubmission
-      func($game.current?.id)
-        .then((res) => {
-          $game.submissions = res
-        })
-        .catch((err) => {
-          showMessage(
-            'error',
-            `${$i18n.t('playground.fetchSelfSubmissionsFailed')}: ${(err as AxiosError).response?.data}`,
-            5000
-          )
-        })
-    }
-  }
-
-  onMount(() => {
-    if (!$game.team && !$user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)) {
-      goto(`/games/${$game.current?.id}`).then(() => {
-        showMessage('warning', $i18n.t('games.takePartInFirst'), 5000)
-      })
-    } else if ($user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)) {
-      // showMessage('info', $i18n.t('games.adminWarning'), 5000)
-    }
-  })
-
   let gameUnsubscribe = game.subscribe((value) => {
     if (value.current?.id && currentGameIdCache !== value.current.id) {
       currentGameIdCache = value.current.id
       challengePage = 1
       $game.challenges = []
       getChallenges()
-      getSelfSubmissions()
       getTagList()
         .then((res) => {
           tags = res.toSorted((a, b) => (a.name > b.name ? 1 : a.name === b.name ? 0 : -1))
@@ -127,10 +106,6 @@
         .catch((err) => {
           showMessage('error', `${$i18n.t('playground.fetchTagsFailed')}: ${(err as AxiosError).response?.data}`, 5000)
         })
-    }
-    if (value.team?.id && currentTeamIdCache !== value.team.id) {
-      currentTeamIdCache = value.team.id
-      getSelfSubmissions()
     }
   })
 
@@ -435,7 +410,7 @@
           class="p-6"
           on:executed={(e) => {
             if (e.detail.code === 0 && e.detail.cmd === 'submit') {
-              getSelfSubmissions()
+              refreshTeam()
             }
           }}
         />

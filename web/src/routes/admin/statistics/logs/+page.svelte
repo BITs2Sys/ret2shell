@@ -75,7 +75,7 @@
 
     if (chart) {
       chart.data.datasets = [
-        ...Object.entries(cpusHistory).map(([key, value]) => {
+        ...Object.entries(cpusHistory).map(([_, value]) => {
           return {
             label: '',
             data: value,

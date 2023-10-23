@@ -4,7 +4,7 @@ use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use sea_orm::{ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder, QuerySelect};
-use sea_query::{Condition, JoinType};
+use sea_query::JoinType;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -16,10 +16,10 @@ pub struct Model {
     pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub challenge_id: i64,
+    pub team_id: Option<i64>,
     #[sea_orm(column_type = "Text")]
     pub content: String,
     pub solved: bool,
-    pub with_score: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -64,6 +64,14 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     User,
+    #[sea_orm(
+        belongs_to = "super::team::Entity",
+        from = "Column::TeamId",
+        to = "super::team::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Team,
 }
 
 impl Related<super::challenge::Entity> for Entity {
@@ -75,6 +83,12 @@ impl Related<super::challenge::Entity> for Entity {
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::User.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
     }
 }
 
@@ -120,18 +134,12 @@ pub async fn get_solved_submission_of_team(
     sql = sql
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::User.def())
-        .join(JoinType::InnerJoin, super::challenge::Relation::Tag.def());
-    let members = super::team::get_team_members(conn, team_id).await?;
-    sql = sql
+        .join(JoinType::InnerJoin, super::challenge::Relation::Tag.def())
         .filter(super::challenge::Column::GameId.eq(game_id))
         .filter(Column::Solved.eq(true))
-        .filter(Column::WithScore.eq(true))
+        .filter(Column::TeamId.eq(team_id))
+        .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
         .distinct_on([(Entity, Column::UserId), (Entity, Column::ChallengeId)]);
-    let mut cond = Condition::any();
-    for user in members {
-        cond = cond.add(Column::UserId.eq(user.id))
-    }
-    sql = sql.filter(cond);
 
     let sql = sql
         .column_as(super::challenge::Column::Name, "challenge_name")
@@ -195,4 +203,15 @@ pub async fn get_solved_user_page(
     resp.sort_by(|a, b| a.created_at.cmp(&b.created_at));
     let num_pages = paginator.num_pages().await?;
     Ok((resp, num_pages))
+}
+
+pub async fn count_blood(conn: &DatabaseConnection, challenge_id: i64) -> Result<u64, DbErr> {
+    Entity::find()
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .filter(Column::Solved.eq(true))
+        .filter(Column::TeamId.is_not_null())
+        .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
+        .distinct_on([(Entity, Column::UserId), (Entity, Column::ChallengeId)])
+        .count(conn)
+        .await
 }

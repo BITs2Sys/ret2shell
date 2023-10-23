@@ -40,10 +40,13 @@ export class Submit implements Command {
         challenge_id: envp.challenge?.id,
         content: flag,
         solved: false,
-        with_score: false,
+        team_id: 0,
       })
-      if (resp) {
+      if (resp.result) {
         io.logSuccess(get(i18n).t('shell.submit.right'))
+        if (resp.blood_state > 0 && resp.blood_state <= 3) {
+          io.logSuccess(get(i18n).t('shell.submit.blood', { blood: resp.blood_state }))
+        }
         return 0
       } else {
         io.logError(get(i18n).t('shell.submit.wrong'))

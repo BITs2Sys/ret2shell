@@ -15,9 +15,9 @@ mod m20210101_000004_create_game;
 mod m20210101_000005_create_notification;
 mod m20210101_000006_create_tag;
 mod m20210101_000007_create_challenge;
-mod m20210101_000008_create_submission;
+mod m20210101_000008_create_team;
 mod m20210101_000009_create_hint;
-mod m20210101_000010_create_team;
+mod m20210101_000010_create_submission;
 mod m20210101_000011_create_media;
 mod m20210101_000012_create_ip_address;
 mod m20210101_000013_create_writeup;
@@ -48,9 +48,9 @@ impl MigratorTrait for Migrator {
             Box::new(m20210101_000005_create_notification::Migration),
             Box::new(m20210101_000006_create_tag::Migration),
             Box::new(m20210101_000007_create_challenge::Migration),
-            Box::new(m20210101_000008_create_submission::Migration),
+            Box::new(m20210101_000008_create_team::Migration),
             Box::new(m20210101_000009_create_hint::Migration),
-            Box::new(m20210101_000010_create_team::Migration),
+            Box::new(m20210101_000010_create_submission::Migration),
             Box::new(m20210101_000011_create_media::Migration),
             Box::new(m20210101_000012_create_ip_address::Migration),
             Box::new(m20210101_000013_create_writeup::Migration),

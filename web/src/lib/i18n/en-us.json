@@ -579,7 +579,18 @@
     "startTime": "Game start time (local time zone)",
     "endTime": "Match end time (local time zone)",
     "registerTime": "Open registration time (local time zone)",
-    "archiveTime": "Match archive time (local time zone)"
+    "archiveTime": "Match archive time (local time zone)",
+    "teamNameIsRequired": "Please fill in the team name",
+    "teamNameTooLong": "The team name is too long!",
+    "createTeamSuccess": "The team has been created successfully, welcome to participate in the game!",
+    "createTeamFailed": "Team creation failed",
+    "createTeam": "Create a team",
+    "teamName": "Team name",
+    "joinTeamLink": "Already created a team? \nClick here to join",
+    "fetchTeamRankFailed": "Failed to obtain team ranking",
+    "fetchScoreboardFailed": "Failed to fetch scoreboard",
+    "team": "Team",
+    "score": "Score"
   },
   "challenges": {
     "noHint": "No hints yet",
@@ -611,7 +622,8 @@
       "waiting": "submitting",
       "right": "Correct!",
       "wrong": "Wrong...",
-      "error": "Submission Failed"
+      "error": "Submission Failed",
+      "blood": "Congratulations, you are the No.{{blood}} player to solve this challenge!"
     },
     "wget": {
       "downloading": "downloading",

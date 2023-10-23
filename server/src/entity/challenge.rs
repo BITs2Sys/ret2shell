@@ -185,7 +185,6 @@ pub async fn delete_challenge(conn: &DatabaseConnection, id: i64) -> Result<(), 
     Entity::delete_by_id(id).exec(conn).await.map(|_| ())
 }
 
-#[allow(dead_code)]
 pub async fn calc_challenge_score(
     conn: &DatabaseConnection,
     game: &game::Model,
@@ -204,9 +203,13 @@ async fn get_challenge_solves_in_game(
     let solves = challenge
         .find_related(submission::Entity)
         .filter(submission::Column::Solved.eq(true))
-        .filter(submission::Column::WithScore.eq(true))
         .filter(submission::Column::CreatedAt.gt(game.start_time))
         .filter(submission::Column::CreatedAt.lt(game.end_time))
+        .filter(submission::Column::TeamId.is_not_null())
+        .distinct_on([
+            (submission::Entity, submission::Column::TeamId),
+            (submission::Entity, submission::Column::ChallengeId),
+        ])
         .distinct_on([
             (submission::Entity, submission::Column::UserId),
             (submission::Entity, submission::Column::ChallengeId),
@@ -231,7 +234,6 @@ fn _calc_challenge_score(challenge: &Model, solves: u64) -> i32 {
     score
 }
 
-#[allow(dead_code)]
 pub async fn update_challenge_current_score(
     conn: &DatabaseConnection,
     challenge: &Model,

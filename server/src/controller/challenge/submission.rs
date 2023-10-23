@@ -2,6 +2,7 @@ use crate::{
     controller::{layer::auth, GlobalState},
     entity::{
         challenge, game, submission,
+        team::{self, TeamScoreHistory},
         user::{self, Permission},
     },
 };
@@ -12,6 +13,7 @@ use axum::{
     routing::{get, post},
     Extension, Json, Router,
 };
+use chrono::Utc;
 use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
@@ -59,10 +61,16 @@ async fn get_challenge_submission_list(
     }
 }
 
+#[derive(Serialize)]
+struct SubmitResult {
+    pub result: bool,
+    pub blood_state: i32,
+}
+
 async fn submit_flag(
     State(ref conn): State<DatabaseConnection>,
     Extension(user): Extension<user::Model>,
-    Extension(challenge): Extension<challenge::Model>,
+    Extension(mut challenge): Extension<challenge::Model>,
     Json(mut submission): Json<submission::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // TODO: impl checker
@@ -74,8 +82,13 @@ async fn submit_flag(
             Permission::Audit | Permission::Devops | Permission::Organize
         )
     }) {
-        return Ok(Json(result));
+        return Ok(Json(SubmitResult {
+            result,
+            blood_state: 0,
+        }));
     }
+
+    let mut team: Option<team::Model> = None;
 
     let game = game::get_game(conn, challenge.game_id)
         .await
@@ -87,7 +100,20 @@ async fn submit_flag(
     submission.solved = result;
     submission.challenge_id = challenge.id;
     submission.user_id = user.id;
-    submission.with_score = game.host_as_game && game.in_progress() && result;
+    submission.team_id = None;
+    let mut with_score = false;
+    if game.host_as_game && game.in_progress() && result {
+        team = team::get_team_by_user_id(conn, game.id, user.id)
+            .await
+            .map_err(|err| {
+                error!("get_team_by_user_id error: {}", err);
+                (StatusCode::INTERNAL_SERVER_ERROR, "failed to get team")
+            })?;
+        if let Some(team) = team.clone() {
+            submission.team_id = Some(team.id);
+            with_score = true;
+        }
+    }
     if let Err(err) = submission::create_submission(conn, submission).await {
         error!("create_submission error: {}", err);
         return Err((
@@ -95,9 +121,96 @@ async fn submit_flag(
             "failed to create submission",
         ));
     }
+    let conn = conn.clone();
+    let mut blood_state: i32 = 0;
 
-    // TODO check and refresh team score & history for scoreboard
+    if with_score {
+        if let Some(team) = team {
+            let updated_time = Utc::now();
+            let challenge_current_score = challenge::calc_challenge_score(&conn, &game, &challenge)
+                .await
+                .map_err(|err| {
+                    error!("calc_challenge_score error: {}", err);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "failed to calc challenge score",
+                    )
+                })?;
+            challenge.current_score = challenge_current_score;
+            challenge::update_challenge_current_score(&conn, &challenge)
+                .await
+                .map_err(|err| {
+                    error!("update_challenge_current_score error: {}", err);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "failed to update challenge current score",
+                    )
+                })?;
+            if let Err(err) =
+                team::update_team_score(&conn, &team, game.id, updated_time.clone()).await
+            {
+                error!("failed to update team score: {}", err);
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to update team score",
+                ));
+            }
+            blood_state = submission::count_blood(&conn, challenge.id)
+                .await
+                .map_err(|err| {
+                    error!("count_blood error: {}", err);
+                    (StatusCode::INTERNAL_SERVER_ERROR, "failed to count blood")
+                })? as i32;
+            tokio::spawn(async move {
+                if let Some(affected_teams) =
+                    team::get_affected_teams_by_challenge_id(&conn, challenge.id)
+                        .await
+                        .map_err(|err| {
+                            error!("get_affected_teams_by_challenge_id error: {}", err);
+                        })
+                        .ok()
+                {
+                    for mut affected_team in affected_teams {
+                        if affected_team.id == team.id {
+                            let score_history = TeamScoreHistory {
+                                score: affected_team.score,
+                                time: updated_time.clone(),
+                                challenge_id: Some(challenge.id),
+                                blood_state: Some(blood_state),
+                            };
+                            affected_team.history.0.push(score_history);
+                        } else {
+                            if let Err(err) =
+                                team::update_team_score(&conn, &team, game.id, updated_time.clone())
+                                    .await
+                            {
+                                error!("failed to update team score: {}", err);
+                                continue;
+                            }
+                            let score_history = TeamScoreHistory {
+                                score: affected_team.score,
+                                time: updated_time.clone(),
+                                challenge_id: None,
+                                blood_state: None,
+                            };
+                            affected_team.history.0.push(score_history);
+                        }
+                        team::update_team_history(&conn, &affected_team)
+                            .await
+                            .map_err(|err| {
+                                error!("update_team_history error: {}", err);
+                            })
+                            .ok();
+                    }
+                }
+            });
+        }
+    }
+
     // TODO push event to all connected clients
 
-    Ok(Json(result))
+    Ok(Json(SubmitResult {
+        result,
+        blood_state,
+    }))
 }

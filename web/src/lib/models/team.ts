@@ -2,6 +2,7 @@ export interface ScoreHistory {
   score: number
   time: number
   challenge_id: number | null
+  blood_state: number | null
 }
 
 export enum State {

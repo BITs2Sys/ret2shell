@@ -34,7 +34,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             Permission::Devops
         )))
         .route("/self/rank", get(get_self_team_rank))
-        .route("/self/teammates", get(get_self_teammates))
+        .route("/self/members", get(get_self_teammates))
         .route("/self", get(get_self_team_info))
         .route("/", post(create_team).patch(join_team))
         .route_layer(middleware::from_fn_with_state(
@@ -42,7 +42,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             auth::game_participate_privilege_required,
         ))
         .route("/info", get(get_team_info))
-        .route("/info/teammates", get(get_team_teammates))
+        .route("/info/members", get(get_team_teammates))
         .route("/", get(get_team_list))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
@@ -164,8 +164,8 @@ async fn create_team(
         ..Default::default()
     };
 
-    match team::create_team(conn, team.clone()).await {
-        Ok(_) => {}
+    let team = match team::create_team(conn, team.clone()).await {
+        Ok(model) => model,
         Err(DbErr::RecordNotFound(_)) => return Err((StatusCode::BAD_REQUEST, "game not found")),
         Err(err) => {
             error!("Failed to create team: {}", err);
@@ -175,7 +175,8 @@ async fn create_team(
     Ok(Json(
         user2_team::link_team_user(conn, user.id, team.id)
             .await
-            .map_err(|_| {
+            .map_err(|err| {
+                error!("Failed to link team with user: {:?}", err);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "failed to link team with user",

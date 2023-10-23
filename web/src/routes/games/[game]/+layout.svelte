@@ -5,7 +5,7 @@
   import Background from '$lib/blocks/Background.svelte'
   import BgBlur from '$lib/assets/bg-blur.webp'
   import { i18n } from '$lib/i18n'
-  import { game } from '$lib/stores/game'
+  import { game, refreshTeam } from '$lib/stores/game'
   import { platform } from '$lib/stores/platform'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
@@ -38,6 +38,7 @@
               value.showGameNav = true
               return value
             })
+            refreshTeam()
           })
           .catch((err) => {
             if ($user.permissions.find((p) => p === Permission.Verified)) {
@@ -52,23 +53,6 @@
           })
           .finally(() => {
             loading = false
-          })
-
-        getSelfTeamInfo(gameId)
-          .then((res) => {
-            game.update((value) => {
-              value.team = res
-              return value
-            })
-          })
-          .catch((err) => {
-            if ((err as AxiosError).response?.status !== 404) {
-              showMessage('error', `${$i18n.t('games.fetchTeamError')}: ${(err as AxiosError).response?.data}`, 5000)
-            }
-            game.update((value) => {
-              value.team = null
-              return value
-            })
           })
       }
     }
