@@ -30,9 +30,10 @@ struct NotificationIDQuery {
 
 async fn create_notification(
     State(ref conn): State<DatabaseConnection>,
+    Path(game_id): Path<i64>,
     Json(notification): Json<notification::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    match notification::create_notification(conn, notification).await {
+    match notification::create_notification(conn, game_id, notification).await {
         Ok(_) => Ok(StatusCode::CREATED),
         Err(DbErr::RecordNotFound(_)) => Err((StatusCode::NOT_FOUND, "game not found")),
         Err(e) => {

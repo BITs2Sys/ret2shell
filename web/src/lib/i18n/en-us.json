@@ -715,7 +715,12 @@
     "title": "title",
     "publishedAt": "Published At",
     "gankAuthor": "One-click hammer reveals the questioner",
-    "fetchFailed": "Failed to get game notifications"
+    "fetchFailed": "Failed to get game notifications",
+    "deleteSuccess": "delete successfully",
+    "deleteFailed": "delete failed",
+    "createSuccess": "create successfully",
+    "createFailed": "create failed",
+    "submit": "Submit"
   },
   "tutorial": {
     "welcome": "Welcome to the world of CTF!",

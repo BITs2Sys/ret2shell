@@ -715,7 +715,12 @@
     "title": "标题",
     "publishedAt": "发布于",
     "gankAuthor": "一键锤爆出题人",
-    "fetchFailed": "获取赛事通知失败"
+    "fetchFailed": "获取赛事通知失败",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败",
+    "createSuccess": "创建成功",
+    "createFailed": "创建失败",
+    "submit": "提交"
   },
   "tutorial": {
     "welcome": "欢迎来到 CTF 的世界！",
