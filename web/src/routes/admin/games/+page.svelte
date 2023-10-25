@@ -6,14 +6,40 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { platform } from '$lib/stores/platform'
-  import { getGameList } from '$lib/api/game'
+  import { createGame, getGameList } from '$lib/api/game'
   import type { Game } from '$lib/models/game'
+  import { onDestroy } from 'svelte'
+  import { page } from '$app/stores'
+  import CreatePanel from './CreatePanel.svelte'
 
   let currentPage: number = 1
   let perPage: number = 15
   let total: number = 0
   let loading: boolean = false
   let games: Game[] = []
+  let showCreatePanel: boolean = false
+  let loadingGame: boolean = false
+  let submitting: boolean = false
+  let activeGame: Game = {
+    id: 0,
+    name: '',
+    brief: '',
+    introduction: '',
+    start_time: 0,
+    end_time: 0,
+    register_time: 0,
+    archive_time: 0,
+    hidden: false,
+    frozen: false,
+    host_as_game: false,
+    team_size_limit: 0,
+    cover_path: '',
+    enable_team_audit: false,
+    can_register_after_started: false,
+    institute_id: null,
+    updated_at: 0,
+    blood_award_rate: 0,
+  }
 
   $: renderedGames = games.map((a) => {
     return {
@@ -174,41 +200,106 @@
       fetchgames()
     }
   }
+
+  const unsubscribe = page.subscribe((val) => {
+    if (val.url.hash && val.url.hash.replace('#', '')) {
+      if (val.url.hash.replace('#', '') == 'create') {
+        showCreatePanel = true
+      }
+    } else {
+      showCreatePanel = false
+      activeGame = {
+        id: 0,
+        name: '',
+        brief: '',
+        introduction: '',
+        start_time: 0,
+        end_time: 0,
+        register_time: 0,
+        archive_time: 0,
+        hidden: false,
+        frozen: false,
+        host_as_game: false,
+        team_size_limit: 0,
+        cover_path: '',
+        enable_team_audit: false,
+        can_register_after_started: false,
+        institute_id: null,
+        updated_at: 0,
+        blood_award_rate: 0,
+      }
+    }
+  })
+
+  onDestroy(() => {
+    unsubscribe()
+  })
+
+  function handleCreateGame(newGame: Game) {
+    submitting = true
+    createGame(newGame)
+      .then(() => {
+        showMessage('success', $i18n.t('game.createSuccess'), 5000)
+        window.location.hash = ''
+        fetchgames()
+      })
+      .catch((err) => {
+        showMessage('error', `${$i18n.t('game.createFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+      })
+      .finally(() => {
+        submitting = false
+      })
+  }
 </script>
 
 <svelte:head><title>{$i18n.t('admin.gamesSettings')} - {$platform.name}</title></svelte:head>
 
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center space-x-2">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.gamesSettings')}</h2>
-      <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-20-regular]" />
-        <span class="text-base">{$i18n.t('action.create')}</span>
-      </RxLink>
+  {#if !showCreatePanel}
+    <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+      <div class="h-16 flex flex-row items-center space-x-2">
+        <h2 class="text-base font-bold flex-1">{$i18n.t('admin.gamesSettings')}</h2>
+        <RxLink size="sm" level="info" href="#create">
+          <span class="icon-[fluent--add-20-regular]" />
+          <span class="text-base">{$i18n.t('action.create')}</span>
+        </RxLink>
+      </div>
+      <DataTable
+        class="flex-1"
+        {actions}
+        data={renderedGames}
+        {colDef}
+        bind:page={currentPage}
+        {total}
+        {loading}
+        booleanIconsDef={{
+          hidden: {
+            true: 'icon-[fluent--eye-off-20-regular] text-warning',
+            false: '',
+          },
+          frozen: {
+            true: 'icon-[fluent--weather-snowflake-20-regular] text-info',
+            false: '',
+          },
+          host_as_game: {
+            true: 'icon-[fluent--flag-20-regular] text-error',
+            false: 'icon-[fluent--beaker-20-regular] text-info',
+          },
+        }}
+      />
     </div>
-    <DataTable
+  {:else}
+    <CreatePanel
       class="flex-1"
-      {actions}
-      data={renderedGames}
-      {colDef}
-      bind:page={currentPage}
-      {total}
-      {loading}
-      booleanIconsDef={{
-        hidden: {
-          true: 'icon-[fluent--eye-off-20-regular] text-warning',
-          false: '',
-        },
-        frozen: {
-          true: 'icon-[fluent--weather-snowflake-20-regular] text-info',
-          false: '',
-        },
-        host_as_game: {
-          true: 'icon-[fluent--flag-20-regular] text-error',
-          false: 'icon-[fluent--beaker-20-regular] text-info',
-        },
+      bind:game={activeGame}
+      loading={loadingGame}
+      {submitting}
+      on:close={() => {
+        window.location.hash = ''
+      }}
+      on:submit={(event) => {
+        handleCreateGame(event.detail)
       }}
     />
-  </div>
+  {/if}
 </div>

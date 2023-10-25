@@ -599,7 +599,11 @@
     "score": "Score",
     "enable_blood_award": "Activate blood reward",
     "blood_award_rate": "The first three blood bonus points proportion (0 - 100)%",
-    "blood_award_ratePlaceholder": "Please fill in the first three blood reward score ratios, between 0 and 100, without adding the % sign."
+    "blood_award_ratePlaceholder": "Please fill in the first three blood reward score ratios, between 0 and 100, without adding the % sign.",
+    "create": "Create game",
+    "creating": "Game creating",
+    "createSuccess": "Game created successfully",
+    "createFailed": "Failed to create game"
   },
   "challenges": {
     "noHint": "No hints yet",

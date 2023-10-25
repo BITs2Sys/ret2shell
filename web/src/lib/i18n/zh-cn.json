@@ -599,7 +599,11 @@
     "score": "分数",
     "enable_blood_award": "开启前三血奖励",
     "blood_award_rate": "前三血奖励分数比例 (0 - 100)%",
-    "blood_award_ratePlaceholder": "请填写前三血奖励分数比例，在 0 - 100 之间，不加 % 号。"
+    "blood_award_ratePlaceholder": "请填写前三血奖励分数比例，在 0 - 100 之间，不加 % 号。",
+    "create": "创建比赛",
+    "creating": "正在创建比赛",
+    "createSuccess": "创建比赛成功",
+    "createFailed": "创建比赛失败"
   },
   "challenges": {
     "noHint": "暂无提示信息",
