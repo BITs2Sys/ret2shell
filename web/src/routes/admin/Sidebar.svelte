@@ -56,6 +56,12 @@
       link: '/admin/users',
       permissions: [Permission.Organize, Permission.Devops, Permission.Audit],
     },
+    {
+      name: $i18n.t('admin.routes.about'),
+      icon: 'icon-[fluent--info-20-regular]',
+      link: '/admin/about',
+      permissions: [Permission.Organize, Permission.Devops, Permission.Audit],
+    },
   ]
 
   $: {

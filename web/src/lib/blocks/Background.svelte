@@ -8,7 +8,14 @@
 
 {#if showBlurBg}
   <div class="fixed -left-1 -right-1 -top-1 -bottom-1 -z-50">
-    <img src={BgBlur} alt="" class="w-full h-full object-fill" />
+    <img
+      src={BgBlur}
+      alt=""
+      class="w-full h-full object-fill"
+      on:contextmenu={() => {
+        return false
+      }}
+    />
     <div class="fixed left-0 right-0 top-0 bottom-0 bg-base-100/80 backdrop-blur"></div>
   </div>
 {/if}

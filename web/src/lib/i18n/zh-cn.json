@@ -233,7 +233,9 @@
       "gameNotifications": "通知管理",
       "gameTeams": "队伍管理",
       "gameWriteups": "Write-Up审核",
-      "writeups": "Write-Up审核"
+      "writeups": "Write-Up审核",
+      "cluster": "集群情况",
+      "about": "关于"
     },
     "currentPage": "当前",
     "userListSettings": "用户管理",
@@ -327,7 +329,10 @@
     "fetchStatFailed": "获取服务器资源情况失败",
     "failedToFetchPlatformVersion": "获取平台版本信息失败，当前版本可能工作不正常",
     "donate": "捐赠",
-    "report": "问题反馈"
+    "report": "问题反馈",
+    "about": {
+      "tip1": "Copyright (c) Ret2Shell, 保留所有权利。"
+    }
   },
   "errors": {
     "401": "请先登录",

@@ -141,7 +141,7 @@
     </ul>
   {/if}
   <div class="flex-1" />
-  {#if $game.current && gameLastTime >= 0}
+  {#if $game.current && $game.current.host_as_game && gameLastTime >= 0}
     <div class="px-4 hidden sm:inline">
       <RxTimer time={gameLastTime} />
     </div>

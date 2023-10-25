@@ -14,6 +14,11 @@
       icon: 'icon-[fluent--code-20-regular]',
       link: '/admin/statistics/logs',
     },
+    {
+      name: $i18n.t('admin.routes.cluster'),
+      icon: 'icon-[fluent--code-20-regular]',
+      link: '/admin/statistics/cluster',
+    },
   ]
 </script>
 

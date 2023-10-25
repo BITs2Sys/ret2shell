@@ -236,7 +236,9 @@
       "gameNotifications": "Notification management",
       "gameTeams": "Team management",
       "gameWriteups": "Write-Up review",
-      "writeups": "Write-Up review"
+      "writeups": "Write-Up review",
+      "cluster": "Cluster Statistics",
+      "about": "About"
     },
     "filter": "Filter...",
     "wikiGuide": "Welcome to the knowledge base! \nPlease select the article you want to edit on the left, or create a new one.",
@@ -327,7 +329,10 @@
     "fetchStatFailed": "Failed to fetch server resource status",
     "failedToFetchPlatformVersion": "Failed to fetch platform version. The current version may not work properly.",
     "donate": "Donate",
-    "report": "Bug Report"
+    "report": "Bug Report",
+    "about": {
+      "tip1": "Copyright (c) Ret2Shell, All Rights Reserved."
+    }
   },
   "errors": {
     "401": "Please Login First",
