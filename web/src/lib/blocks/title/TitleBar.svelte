@@ -118,7 +118,13 @@
   {:else}
     <RxLink ghost href={$game.current && $game.showGameNav ? `/games/${$game.current.id}` : '/'} exactlyMatched>
       <span class="hidden sm:inline">
-        <LogoAnimate width={28} height={28} />
+        {#if pageLoadingProgress === null}
+          <LogoAnimate width={28} height={28} />
+        {:else}
+          <div class="h-7 w-7 flex flex-row items-center justify-center">
+            <span class="loading loading-spinner loading-sm text-primary opacity-80"></span>
+          </div>
+        {/if}
       </span>
       {#if $game.showGameNav}
         <span>{$game.current?.name}</span>
@@ -205,7 +211,7 @@
   {/if}
 </div>
 {#if pageLoadingProgress !== null}
-  <div class="fixed left-0 top-16 w-screen h-[1px] z-50 animate-pulse">
+  <div class="fixed left-0 top-16 w-screen h-[1px] z-50">
     <div
       class={`h-full transition-all ${pageLoadingProgress === 100 ? 'bg-success' : 'bg-primary'}`}
       style="width: {pageLoadingProgress}%;"

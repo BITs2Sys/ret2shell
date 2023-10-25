@@ -55,13 +55,8 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
     elemPopup = document.querySelector(`[data-popup="${args.target}"]`) ?? document.createElement('div')
     Object.assign(elemPopup.style, {
       position: 'absolute',
-      opacity: '0',
-      top: '0',
-      left: '0',
-      scale: '0.95',
       display: 'none',
     })
-    elemPopup.classList.add('transition-all', 'duration-100', 'ease-in-out')
   }
   setDomElements() // init
 
@@ -108,10 +103,6 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
     render()
     // Update the DOM
     elemPopup.style.display = 'block'
-    setTimeout(() => {
-      elemPopup.style.opacity = '1'
-      elemPopup.style.scale = '1'
-    }, 10)
     elemPopup.style.pointerEvents = 'auto'
     // Trigger Floating UI autoUpdate (open only)
     // https://floating-ui.com/docs/autoUpdate
@@ -121,19 +112,12 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
   }
   function close(callback?: () => void): void {
     if (!elemPopup) return
-    // Set transition duration
-    const cssTransitionDuration =
-      parseFloat(window.getComputedStyle(elemPopup).transitionDuration.replace('s', '')) * 1000
     // Set open state to off
     popupState.open = false
     // Return the current state
     if (args.state) args.state({ state: popupState.open })
     // Update the DOM
-    elemPopup.style.opacity = '0'
-    elemPopup.style.scale = '0.95'
-    setTimeout(() => {
-      elemPopup.style.display = 'none'
-    }, cssTransitionDuration)
+    elemPopup.style.display = 'none'
     elemPopup.style.pointerEvents = 'none'
     // Cleanup Floating UI autoUpdate (close only)
     if (popupState.autoUpdateCleanup) popupState.autoUpdateCleanup()

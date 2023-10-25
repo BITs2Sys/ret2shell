@@ -109,9 +109,6 @@
           x: {
             type: 'time',
             time: {
-              displayFormats: {
-                day: 'MM.dd',
-              },
               tooltipFormat: 'DD T',
             },
             ticks: {

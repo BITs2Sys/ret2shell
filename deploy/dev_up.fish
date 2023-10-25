@@ -25,13 +25,7 @@ if not command -q pnpm
     exit 1
 end
 
-podman pull docker.io/redis:7
-podman pull docker.io/postgres:15
-podman pull docker.io/nats:2
-podman pull docker.io/rust:1
-podman pull docker.io/debian:12
-
-podman-compose -f ./deploy/compose.dev.yml up -d
+docker compose -f ./deploy/compose.dev.yml up -d
 
 tmux new-session -d -s ret2shell 'cargo run'
 tmux split-window -t ret2shell:0 -h 'cd ./web && pnpm dev --host'
