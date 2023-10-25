@@ -15,6 +15,10 @@ export async function getGame(id: number) {
   return (await api.get(`${api_root}/game/${id}`)).data as Game
 }
 
+export async function createGame(game: Game) {
+  return await api.post(`${api_root}/game`, game)
+}
+
 export async function updateGame(id: number, game: Game) {
   return await api.patch(`${api_root}/game/${id}`, game)
 }
