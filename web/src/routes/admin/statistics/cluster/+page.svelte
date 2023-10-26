@@ -6,6 +6,7 @@
   import type { AxiosError } from 'axios'
   import { onMount } from 'svelte'
   import Engine from '$lib/assets/engine.svelte'
+  import Compass from '$lib/assets/compass.svelte'
   import KubenertesLogo from '$lib/assets/kubernetes.svelte'
   import RxTag from '$lib/components/RxTag.svelte'
   import RxPopup from '$lib/components/RxPopup.svelte'
@@ -41,7 +42,7 @@
   {#if !loading}
     <h1 class="text-3xl font-bold flex flex-row space-x-4 items-center">
       {#if working}
-        <KubenertesLogo class="animate-spin-slow" level="active" width={96} height={96} />
+        <KubenertesLogo class="animate-helm" level="active" width={96} height={96} />
       {:else}
         <KubenertesLogo level="down" width={96} height={96} />
       {/if}
@@ -62,6 +63,8 @@
           <span>{$i18n.t('platform.clusterIsDown')}</span>
         {/if}
       </div>
+      <div class="flex-1"></div>
+      <Compass width={128} height={128} />
     </h1>
   {/if}
   <div class="divider"></div>
