@@ -258,14 +258,14 @@
     <CreatePanel
       class="flex-1"
       on:close={() => {
-        showCreatePanel = false
+        window.location.hash = ''
       }}
     ></CreatePanel>
   {:else if showEditPanel}
     <EditPanel
       class="flex-1"
       on:close={() => {
-        showEditPanel = false
+        window.location.hash = ''
       }}
     ></EditPanel>
   {:else}
