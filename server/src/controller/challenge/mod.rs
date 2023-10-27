@@ -100,6 +100,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
 }
 
 #[derive(Deserialize)]
+struct GameIDQuery {
+    pub game_id: i64,
+}
+
+#[derive(Deserialize)]
 struct ListQuery {
     page: Option<u64>,
     per_page: Option<u64>,
@@ -166,6 +171,7 @@ async fn get_solved_team_list(
 async fn create_challenge(
     State(config): State<GlobalState>,
     State(ref conn): State<DatabaseConnection>,
+    Query(game_query): Query<GameIDQuery>,
     Json(mut challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // TODO: there may exists a same name challenge in the same game
@@ -184,6 +190,7 @@ async fn create_challenge(
                 "failed to init challenge bucket",
             )
         })?;
+    challenge.game_id = game_query.game_id;
     let created_challenge = match challenge::create_challenge(conn, challenge).await {
         Ok(created_challenge) => created_challenge,
         Err(err) => {
