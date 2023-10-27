@@ -12,9 +12,8 @@
   import { user } from '$lib/stores/user'
   import type { AxiosError } from 'axios'
   import { onDestroy } from 'svelte'
-  import { quintOut } from 'svelte/easing'
-  import { fly } from 'svelte/transition'
   import { game } from '$lib/stores/game'
+  import SidebarLayout from '$lib/blocks/SidebarLayout.svelte'
 
   if (!$user.isLoggedIn) {
     goto(`/account/login?redirect=${$page.url.pathname}`).then(() => {
@@ -25,10 +24,6 @@
       showMessage('warning', $i18n.t('permissions.beVerifiedToView'), 5000)
     })
   }
-
-  let screenWidth: number
-  let toggleSidebar = false
-  $: showSidebar = screenWidth > 1024 // lg
 
   let playgrounds: Game[] = []
   let games: Game[] = []
@@ -188,62 +183,22 @@
   })
 </script>
 
-<svelte:window bind:innerWidth={screenWidth} />
-
-<div class="flex-1 flex flex-row overflow-x-hidden">
-  {#if showSidebar}
-    <div
-      class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 flex flex-col min-w-[24rem] max-w-[32rem] bg-neutral/20 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
-    >
-      <Sidebar
-        {loading}
-        {games}
-        {playgrounds}
-        selfSubmissions={$game.submissions}
-        activeGameChallenges={$game.challenges}
-        {tags}
-        {mayHaveMoreChallenges}
-        {mayHaveMoreGames}
-        {mayHaveMorePlaygrounds}
-        on:loadMoreChallenges={getMoreChallenges}
-        on:loadMoreGames={getMoreGames}
-        on:loadMorePlaygrounds={getMorePlaygrounds}
-      />
-    </div>
-  {:else}
-    <label
-      class="btn no-animation bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"
-    >
-      <input
-        type="checkbox"
-        on:click={() => {
-          toggleSidebar = !toggleSidebar
-        }}
-      />
-      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-6 h-6"></span>
-      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-6 h-6"></span>
-    </label>
-  {/if}
+<SidebarLayout
+  leftSidebar={Sidebar}
+  leftProps={{
+    loading,
+    games,
+    playgrounds,
+    selfSubmissions: $game.submissions,
+    activeGameChallenges: $game.challenges,
+    tags,
+    mayHaveMoreChallenges,
+    mayHaveMoreGames,
+    mayHaveMorePlaygrounds,
+    loadMoreChallengesCallback: getMoreChallenges,
+    loadMoreGamesCallback: getMoreGames,
+    loadMorePlaygroundsCallback: getMorePlaygrounds,
+  }}
+>
   <slot />
-  {#if toggleSidebar && !showSidebar}
-    <div
-      class="fixed flex flex-col w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10"
-      transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
-    >
-      <Sidebar
-        {loading}
-        {games}
-        {playgrounds}
-        selfSubmissions={$game.submissions}
-        activeGameChallenges={$game.challenges}
-        {tags}
-        {mayHaveMoreChallenges}
-        {mayHaveMoreGames}
-        {mayHaveMorePlaygrounds}
-        on:loadMoreChallenges={getMoreChallenges}
-        on:loadMoreGames={getMoreGames}
-        on:loadMorePlaygrounds={getMorePlaygrounds}
-      />
-    </div>
-  {/if}
-</div>
+</SidebarLayout>

@@ -90,9 +90,7 @@
   })
 </script>
 
-<div
-  class="fixed top-16 left-0 w-1/5 min-w-[24rem] max-w-[32rem] h-[calc(100vh_-_4rem)] flex-shrink-0 bg-neutral/20 backdrop-blur border-r border-r-base-content/10 overflow-hidden flex flex-row"
->
+<div class="flex flex-row h-full">
   <div
     class={`${
       firstLevelExpanded ? 'w-full p-4' : 'w-16 border-r p-2'
@@ -157,4 +155,3 @@
     </OverlayScrollbarsComponent>
   </div>
 </div>
-<div class="w-1/5 min-w-[24rem] max-w-[32rem]"></div>

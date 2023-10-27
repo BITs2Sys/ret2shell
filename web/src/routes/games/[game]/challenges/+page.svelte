@@ -37,12 +37,7 @@
   import type { Hint } from '$lib/models/hint'
   import ChallengePanel from '$lib/blocks/challenge/ChallengePanel.svelte'
   import SolvedPanel from '$lib/blocks/challenge/SolvedPanel.svelte'
-
-  let screenWidth: number
-  let toggleSidebar = false
-  let toggleTeamSidebar = false
-  $: showSidebar = screenWidth > 1024 // lg
-  $: showTeamSidebar = screenWidth > 1280 // lg
+  import SidebarLayout from '$lib/blocks/SidebarLayout.svelte'
 
   let challengeTotalPages: number = 0
   let challengePageSize = 200
@@ -232,36 +227,22 @@
 <svelte:head>
   <title>{$i18n.t('game.challenges')} - {$game.current?.name}</title>
 </svelte:head>
-<svelte:window bind:innerWidth={screenWidth} />
 
-<div class="flex-1 flex flex-row overflow-x-hidden">
-  {#if showSidebar}
-    <div
-      class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 flex flex-col min-w-[24rem] max-w-[32rem] bg-neutral/20 backdrop-blur border-r border-r-base-content/10 overflow-hidden"
-    >
-      <ChallengeSidebar
-        {loading}
-        selfSubmissions={$game.submissions}
-        challenges={$game.challenges}
-        {tags}
-        {mayHaveMoreChallenges}
-        on:loadMoreChallenges={getMoreChallenges}
-      />
-    </div>
-  {:else}
-    <label
-      class="btn bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed left-6 bottom-6 z-10 swap swap-rotate"
-    >
-      <input
-        type="checkbox"
-        on:click={() => {
-          toggleSidebar = !toggleSidebar
-        }}
-      />
-      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-5 h-5"></span>
-      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
-    </label>
-  {/if}
+<SidebarLayout
+  leftSidebar={ChallengeSidebar}
+  leftProps={{
+    loading,
+    selfSubmissions: $game.submissions,
+    challenges: $game.challenges,
+    tags,
+    mayHaveMoreChallenges,
+    loadMoreChallengesCallback: getMoreChallenges,
+  }}
+  rightSidebar={TeamSidebar}
+  rightProps={{
+    notifications,
+  }}
+>
   <div class="flex-1 flex flex-col overflow-x-hidden">
     <div id="info-stack" class="flex flex-col overflow-x-hidden">
       <div class="border-b border-b-base-content/10 flex flex-row h-16 overflow-hidden bg-neutral/20 backdrop-blur">
@@ -425,47 +406,4 @@
       {/if}
     </div>
   </div>
-  {#if showTeamSidebar}
-    <div
-      class="w-1/5 h-[calc(100vh_-_4rem)] flex-shrink-0 flex flex-col min-w-[24rem] max-w-[32rem] bg-neutral/20 backdrop-blur border-l border-l-base-content/10 overflow-hidden"
-    >
-      <TeamSidebar {notifications} />
-    </div>
-  {:else}
-    <label
-      class="btn no-animation bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"
-    >
-      <input
-        type="checkbox"
-        on:click={() => {
-          toggleTeamSidebar = !toggleTeamSidebar
-        }}
-      />
-      <span class="swap-off icon-[fluent--flag-20-regular] fill-current w-5 h-5"></span>
-      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
-    </label>
-  {/if}
-  {#if toggleTeamSidebar && !showTeamSidebar}
-    <div
-      class="fixed right-0 w-full flex flex-col max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-l border-l-base-content/10"
-      transition:fly={{ delay: 100, duration: 300, x: 256, y: 0, opacity: 0, easing: quintOut }}
-    >
-      <TeamSidebar {notifications} />
-    </div>
-  {/if}
-  {#if toggleSidebar && !showSidebar}
-    <div
-      class="fixed left-0 w-full flex flex-col max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10"
-      transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
-    >
-      <ChallengeSidebar
-        {loading}
-        selfSubmissions={$game.submissions}
-        challenges={$game.challenges}
-        {tags}
-        {mayHaveMoreChallenges}
-        on:loadMoreChallenges={getMoreChallenges}
-      />
-    </div>
-  {/if}
-</div>
+</SidebarLayout>

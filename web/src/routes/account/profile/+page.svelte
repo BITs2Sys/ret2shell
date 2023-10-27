@@ -12,13 +12,11 @@
   import RxArticle from '$lib/components/RxArticle.svelte'
   import type { TeamWithGameName } from '$lib/models/team'
   import { showMessage } from '$lib/stores/toast'
+  import SidebarLayout from '$lib/blocks/SidebarLayout.svelte'
 
-  let toggleSidebar = false
-  let screenWidth: number
   let loading = false
   let error = 200
   let teams: TeamWithGameName[] = []
-  $: showSidebar = screenWidth > 1024 // lg
 
   onMount(() => {
     loading = true
@@ -49,30 +47,14 @@
 </script>
 
 <svelte:head><title>{$i18n.t('account.profile')} - {$platform.name}</title></svelte:head>
-<svelte:window bind:innerWidth={screenWidth} />
 
-<div class="flex-1 flex flex-row">
-  {#if showSidebar}
-    <div
-      class="fixed w-1/5 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] bg-neutral/30 backdrop-blur border-r border-r-base-content/10 print:hidden"
-    >
-      <Sidebar {loading} user={$user.info} />
-    </div>
-    <div class="w-1/5 min-w-[24rem] max-w-[32rem] flex-shrink-0 print:hidden" />
-  {:else}
-    <label
-      class="btn no-animation bg-base-content/5 border-none backdrop-blur btn-square btn-lg fixed right-6 bottom-6 z-10 swap swap-rotate"
-    >
-      <input
-        type="checkbox"
-        on:click={() => {
-          toggleSidebar = !toggleSidebar
-        }}
-      />
-      <span class="swap-off icon-[fluent--navigation-20-regular] fill-current w-5 h-5"></span>
-      <span class="swap-on icon-[fluent--dismiss-20-regular] fill-current w-5 h-5"></span>
-    </label>
-  {/if}
+<SidebarLayout
+  leftSidebar={Sidebar}
+  leftProps={{
+    loading,
+    user: $user.info,
+  }}
+>
   {#if error - 200 < 100}
     <div class="flex-1 flex flex-col items-center p-4 lg:p-6">
       <div class="w-full max-w-5xl flex flex-col">
@@ -109,12 +91,4 @@
   {:else}
     <Error status={error} />
   {/if}
-  {#if toggleSidebar && !showSidebar}
-    <div
-      class="fixed w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-base-100/40 border-r border-r-base-content/10 print:hidden"
-      transition:fly={{ delay: 100, duration: 300, x: -256, y: 0, opacity: 0, easing: quintOut }}
-    >
-      <Sidebar {loading} user={$user.info} />
-    </div>
-  {/if}
-</div>
+</SidebarLayout>
