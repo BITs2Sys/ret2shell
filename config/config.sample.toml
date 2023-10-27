@@ -54,3 +54,9 @@ external_https = true
 api_base_path = '/api'
 cors_origins = '*'
 init_token = 'Samp1eT0k3n'
+
+[cluster]
+try_default = false
+auto_infer = true
+kube_config_path = "~/.kube/config"
+challenge_node_selector = "challenge"
