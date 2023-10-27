@@ -5,13 +5,17 @@
   import { platform } from '$lib/stores/platform'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import { getChallengeList, getTagList } from '$lib/api/challenge'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
   import RxSelect from '$lib/components/RxSelect.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
+  import { page } from '$app/stores'
+  import Error from '$lib/blocks/Error.svelte'
+  import CreatePanel from './CreatePanel.svelte'
+  import EditPanel from './EditPanel.svelte'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -187,45 +191,84 @@
       storedFilter = filterTagID
     }
   }
+
+  let showCreatePanel = false
+  let showEditPanel = false
+
+  const unsubscribe = page.subscribe((val) => {
+    if (val.url.hash && val.url.hash.replace('#', '')) {
+      const hash = val.url.hash.replace('#', '')
+      if (hash == 'create') {
+        showCreatePanel = true
+      } else if (!isNaN(parseInt(hash))) {
+        showEditPanel = true
+      }
+    } else {
+      showCreatePanel = false
+      showEditPanel = false
+    }
+  })
+
+  onDestroy(() => {
+    unsubscribe()
+  })
 </script>
 
 <svelte:head><title>{$i18n.t('admin.challengeListSettings')} - {$platform.name}</title></svelte:head>
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center space-x-2">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.challengeListSettings')}</h2>
-      <p class="text-base font-bold opacity-80">{$i18n.t('challenge.filterTag')}</p>
-      <div class="relative w-64 flex flex-row">
-        <RxSelect
-          size="sm"
-          name="tag_id"
-          availableOptions={tags
-            .map((i) => {
-              return { id: i.id, label: i.name }
-            }) //@ts-expect-error id is string | number | null
-            .concat([{ id: null, label: 'NONE' }])}
-          bind:value={filterTagID}
-        />
+  {#if !showCreatePanel && !showEditPanel}
+    <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+      <div class="h-16 flex flex-row items-center space-x-2">
+        <h2 class="text-base font-bold flex-1">{$i18n.t('admin.challengeListSettings')}</h2>
+        <p class="text-base font-bold opacity-80">{$i18n.t('challenge.filterTag')}</p>
+        <div class="relative w-64 flex flex-row">
+          <RxSelect
+            size="sm"
+            name="tag_id"
+            availableOptions={tags
+              .map((i) => {
+                return { id: i.id, label: i.name }
+              }) //@ts-expect-error id is string | number | null
+              .concat([{ id: null, label: 'NONE' }])}
+            bind:value={filterTagID}
+          />
+        </div>
+        <RxLink size="sm" level="info" href="#create">
+          <span class="icon-[fluent--add-20-regular]"></span>
+          <span>{$i18n.t('challenge.create')}</span>
+        </RxLink>
       </div>
-      <RxLink size="sm" level="info" href="#create">
-        <span class="icon-[fluent--add-20-regular]"></span>
-        <span>{$i18n.t('challenge.create')}</span>
-      </RxLink>
+      <DataTable
+        class="flex-1"
+        {actions}
+        data={renderedChallenges}
+        {colDef}
+        bind:page={currentPage}
+        {total}
+        {loading}
+        booleanIconsDef={{
+          hidden: {
+            true: 'icon-[fluent--eye-off-20-regular] text-warning',
+            false: '',
+          },
+        }}
+      />
     </div>
-    <DataTable
+  {:else if showCreatePanel}
+    <CreatePanel
       class="flex-1"
-      {actions}
-      data={renderedChallenges}
-      {colDef}
-      bind:page={currentPage}
-      {total}
-      {loading}
-      booleanIconsDef={{
-        hidden: {
-          true: 'icon-[fluent--eye-off-20-regular] text-warning',
-          false: '',
-        },
+      on:close={() => {
+        showCreatePanel = false
       }}
-    />
-  </div>
+    ></CreatePanel>
+  {:else if showEditPanel}
+    <EditPanel
+      class="flex-1"
+      on:close={() => {
+        showEditPanel = false
+      }}
+    ></EditPanel>
+  {:else}
+    <Error status={404} />
+  {/if}
 </div>

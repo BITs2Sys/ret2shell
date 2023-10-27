@@ -268,7 +268,8 @@
       "clusterDomain": "域名",
       "activeNodes": "存活节点",
       "basicInfo": "集群信息"
-    }
+    },
+    "createChallenge": "创建题目"
   },
   "docs": {
     "title": "技术文档"

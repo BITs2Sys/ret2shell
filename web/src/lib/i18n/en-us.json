@@ -268,7 +268,8 @@
       "clusterDomain": "Domain",
       "activeNodes": "Active Nodes",
       "basicInfo": "Cluster Info"
-    }
+    },
+    "createChallenge": "Create Challenge"
   },
   "docs": {
     "title": "Documents"
