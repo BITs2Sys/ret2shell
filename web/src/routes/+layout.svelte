@@ -38,7 +38,7 @@
     .catch((err) => {
       if ((err as AxiosError).response?.status === 404) {
         userReset()
-        return goto('/init')
+        return goto('/init', { replaceState: true })
       } else showMessage('error', $i18n.t('platform.backendOffline'))
     })
 

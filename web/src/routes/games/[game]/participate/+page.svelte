@@ -36,7 +36,7 @@
       loading = true
       createTeam($game.current?.id || 0, values)
         .then(() => {
-          goto(`/games/${$game.current?.id}`).then(() => {
+          goto(`/games/${$game.current?.id}`, { replaceState: true }).then(() => {
             showMessage('success', $i18n.t('game.createTeamSuccess'), 5000)
             refreshTeam()
           })

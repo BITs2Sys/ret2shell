@@ -6,11 +6,11 @@
   import { user } from '$lib/stores/user'
 
   if (!$user.isLoggedIn) {
-    goto('/account/login').then(() => {
+    goto('/account/login', { replaceState: true }).then(() => {
       showMessage('warning', $i18n.t('permissions.beLoggedInToView'), 5000)
     })
   } else if (!$user.permissions.find((p) => p === Permission.Verified)) {
-    goto('/account/profile').then(() => {
+    goto('/account/profile', { replaceState: true }).then(() => {
       showMessage('warning', $i18n.t('permissions.beVerifiedToView'), 5000)
     })
   }

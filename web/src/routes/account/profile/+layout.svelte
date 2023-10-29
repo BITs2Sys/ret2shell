@@ -4,7 +4,7 @@
   import { user } from '$lib/stores/user'
 
   if (!$user.isLoggedIn) {
-    goto(`/account/login?redirect=${$page.url.pathname}`)
+    goto(`/account/login?redirect=${$page.url.pathname}`, { replaceState: true })
   }
 </script>
 

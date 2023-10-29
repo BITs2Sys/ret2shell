@@ -108,9 +108,9 @@
         if (wiki.parent != null) {
           let pathArr = $page.url.pathname.split('/').filter((item) => item !== '')
           pathArr.pop()
-          goto(`/${pathArr.join('/')}#edit`)
+          goto(`/${pathArr.join('/')}#edit`, { replaceState: true })
         } else {
-          goto('/admin/wiki/0#create')
+          goto('/admin/wiki/0#create', { replaceState: true })
         }
       })
       .catch((err) => {
@@ -140,7 +140,7 @@
             .filter((item) => item !== '')
           if (parseInt(pathArr[pathArr.length - 1]) === 0) pathArr.pop()
           const pathName = pathArr.join('/')
-          goto(`/${pathName}/${data.id}#edit`)
+          goto(`/${pathName}/${data.id}#edit`, { replaceState: true })
         })
         .catch((err) => {
           showMessage('error', `${$i18n.t('wiki.createFailed')}: ${(err as AxiosError).response?.data}`, 5000)
@@ -157,7 +157,7 @@
         .then(() => {
           showMessage('success', $i18n.t('wiki.updateSuccess'), 5000)
           const pathName = $page.url.pathname.replace($page.url.hash, '')
-          goto(`${pathName}#edit`)
+          goto(`${pathName}#edit`, { replaceState: true })
         })
         .catch((err) => {
           showMessage('error', `${$i18n.t('wiki.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)

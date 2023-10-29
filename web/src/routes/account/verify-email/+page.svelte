@@ -13,7 +13,7 @@
     const token = $page.url.searchParams.get('token')
     if (!email || !token) {
       showMessage('error', $i18n.t('email.invalidVerifyLink'), undefined)
-      goto('/')
+      goto('/', { replaceState: true })
       return
     }
     verifyEmail({ email, token })
@@ -24,7 +24,7 @@
         showMessage('error', `${$i18n.t('email.verifyFailed')}: ${err.response?.data}`, undefined)
       })
       .finally(() => {
-        goto('/')
+        goto('/', { replaceState: true })
       })
   })
 </script>

@@ -27,7 +27,6 @@ pub struct Model {
     pub updated_at: DateTime<Utc>,
     pub decay: i32,
     pub bucket: Option<String>,
-    pub checker: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -138,7 +137,6 @@ pub async fn update_challenge(
     let active_model = ActiveModel {
         id: ActiveValue::Unchanged(id),
         updated_at: ActiveValue::Set(Utc::now()),
-        checker: ActiveValue::NotSet,
         current_score: ActiveValue::NotSet,
         bucket: ActiveValue::NotSet,
         game_id: ActiveValue::NotSet,

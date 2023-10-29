@@ -4,6 +4,6 @@ import { get } from 'svelte/store'
 
 export function load() {
   if (get(user).isLoggedIn) {
-    goto('/account/profile')
+    goto('/account/profile', { replaceState: true })
   }
 }

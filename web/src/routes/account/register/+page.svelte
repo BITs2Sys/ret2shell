@@ -53,7 +53,7 @@
     },
     onSuccess() {
       loading = false
-      goto('/magic/tutorial')
+      goto('/magic/tutorial', { replaceState: true })
     },
     onError(error) {
       loading = false

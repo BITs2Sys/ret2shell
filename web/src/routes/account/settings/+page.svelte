@@ -3,6 +3,6 @@
   import { goto } from '$app/navigation'
 
   onMount(() => {
-    goto('/account/settings/info')
+    goto('/account/settings/info', { replaceState: true })
   })
 </script>

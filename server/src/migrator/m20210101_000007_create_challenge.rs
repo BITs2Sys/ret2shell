@@ -26,7 +26,6 @@ pub enum Challenge {
     MinimumScore,
     Decay,
     Bucket,
-    Checker,
 }
 
 #[async_trait::async_trait]
@@ -81,11 +80,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Challenge::MinimumScore).integer().not_null())
                     .col(ColumnDef::new(Challenge::Decay).integer().not_null())
                     .col(ColumnDef::new(Challenge::Bucket).string_len(127).not_null())
-                    .col(
-                        ColumnDef::new(Challenge::Checker)
-                            .string_len(127)
-                            .not_null(),
-                    )
                     .to_owned(),
             )
             .await

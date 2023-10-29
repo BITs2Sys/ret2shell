@@ -5,7 +5,7 @@
 
   const unsubscribe = admin.subscribe(() => {
     if ($admin.game) {
-      goto(`/admin/games/${$admin.game?.id}/statistics`)
+      goto(`/admin/games/${$admin.game?.id}/statistics`, { replaceState: true })
     }
   })
 

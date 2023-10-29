@@ -16,11 +16,11 @@
   import SidebarLayout from '$lib/blocks/SidebarLayout.svelte'
 
   if (!$user.isLoggedIn) {
-    goto(`/account/login?redirect=${$page.url.pathname}`).then(() => {
+    goto(`/account/login?redirect=${$page.url.pathname}`, { replaceState: true }).then(() => {
       showMessage('warning', $i18n.t('permissions.beLoggedInToView'), 5000)
     })
   } else if (!$user.permissions.find((p) => p === Permission.Verified)) {
-    goto('/account/profile').then(() => {
+    goto('/account/profile', { replaceState: true }).then(() => {
       showMessage('warning', $i18n.t('permissions.beVerifiedToView'), 5000)
     })
   }

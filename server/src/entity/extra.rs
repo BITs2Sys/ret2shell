@@ -87,10 +87,7 @@ pub async fn get_extras_by_team_id(
 ) -> Result<Vec<Model>, DbErr> {
     let extras = Entity::find()
         .filter(Column::TeamId.eq(team_id))
-        .join(
-            JoinType::InnerJoin,
-            super::submission::Relation::Challenge.def(),
-        )
+        .join(JoinType::InnerJoin, Relation::Challenge.def())
         .filter(super::challenge::Column::Hidden.eq(false))
         .all(conn)
         .await?;

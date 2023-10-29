@@ -71,7 +71,7 @@
             (err as AxiosError).response?.data === 'you have not joined this game'
           ) {
             showMessage('warning', $i18n.t('games.takePartInFirst'), 5000)
-            goto(`/games/${$game.current?.id}`)
+            goto(`/games/${$game.current?.id}`, { replaceState: true })
           } else {
             showMessage(
               'error',

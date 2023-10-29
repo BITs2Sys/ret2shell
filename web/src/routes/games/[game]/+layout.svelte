@@ -29,7 +29,7 @@
       let gameId = parseInt($page.params.game) || null
       if (!gameId) {
         showMessage('error', `${$i18n.t('games.invalidGameId')}: ${$page.params.game}`, 5000)
-        goto('/errors/404')
+        goto('/errors/404', { replaceState: true })
       } else if ($game.current?.id !== gameId) {
         getGame(gameId)
           .then((res) => {
@@ -42,11 +42,11 @@
           })
           .catch((err) => {
             if ($user.permissions.find((p) => p === Permission.Verified)) {
-              goto(`/errors/${err.response?.status || 500}`).then(() => {
+              goto(`/errors/${err.response?.status || 500}`, { replaceState: true }).then(() => {
                 showMessage('error', `${$i18n.t('games.fetchGameError')}: ${(err as AxiosError).response?.data}`, 5000)
               })
             } else {
-              goto('/account/profile').then(() => {
+              goto('/account/profile', { replaceState: true }).then(() => {
                 showMessage('warning', $i18n.t('games.verifyFirst'), 5000)
               })
             }

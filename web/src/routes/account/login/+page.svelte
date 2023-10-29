@@ -46,7 +46,7 @@
     onSuccess() {
       loading = false
       showMessage('success', $i18n.t('account.loginSuccess'), 5000)
-      goto($page.url.searchParams.get('redirect') || '/')
+      goto($page.url.searchParams.get('redirect') || '/', { replaceState: true })
     },
     onError(error) {
       loading = false

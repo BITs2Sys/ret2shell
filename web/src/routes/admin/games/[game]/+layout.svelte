@@ -11,7 +11,7 @@
 
   const gameId = parseInt($page.params.game)
   if (isNaN(gameId)) {
-    goto('/errors/404')
+    goto('/errors/404', { replaceState: true })
   }
 
   getGame(gameId)
@@ -20,7 +20,7 @@
       refreshAdminRoute($page.url.pathname)
     })
     .catch((error) => {
-      goto('/errors/404').then(() => {
+      goto('/errors/404', { replaceState: true }).then(() => {
         showMessage('error', $i18n.t('games.fetchGameError') + ': ' + (error as AxiosError).response?.data, 5000)
       })
     })

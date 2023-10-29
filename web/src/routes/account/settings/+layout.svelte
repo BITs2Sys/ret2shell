@@ -11,7 +11,7 @@
   let error = 200
 
   if (!$user.isLoggedIn) {
-    goto(`/account/login?redirect=${$page.url.pathname}`)
+    goto(`/account/login?redirect=${$page.url.pathname}`, { replaceState: true })
   }
 </script>
 

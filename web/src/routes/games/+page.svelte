@@ -93,7 +93,7 @@
       getGame(gameId)
         .then((res) => {
           if (!res.host_as_game) {
-            goto(`/playground/${res.id}`)
+            goto(`/playground/${res.id}`, { replaceState: true })
             return
           }
           $game.cached = res

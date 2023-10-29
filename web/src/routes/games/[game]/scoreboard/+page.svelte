@@ -1,9 +1,13 @@
 <script lang="ts">
   import { getChallengeList, getTagList } from '$lib/api/challenge'
   import { getGameScoreboard } from '$lib/api/game'
+  import { getInstituteList } from '$lib/api/user'
+  import RxButton from '$lib/components/RxButton.svelte'
+  import RxSelect from '$lib/components/RxSelect.svelte'
   import RxPaginator from '$lib/components/RxPaginator.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
+  import type { Institute } from '$lib/models/institute'
   import type { ScoreHistory, Team } from '$lib/models/team'
   import { Permission } from '$lib/models/user'
   import { game } from '$lib/stores/game'
@@ -39,14 +43,16 @@
   let canvas: HTMLCanvasElement
   let chart: Chart
   let teams: Team[] = []
-  let page = 1
+  let currentPage = 1
   let perPage = 15
   let total = 0
   let instituteId: number | null = null
   let showAll = false
   let scoreboardTeams: Team[] = []
   let cachedGameId = 0
+  let cachedTeamId: number | null = 0
   let loading = true
+  let institutes: Institute[] = []
 
   let tagsChallengesRecord: Record<number, Challenge[]> = {}
   let tags: Tag[] = []
@@ -127,6 +133,7 @@
             },
           },
           y: {
+            position: 'right',
             suggestedMin: 0,
             suggestedMax: 2000,
           },
@@ -137,46 +144,60 @@
     unsubscribe = game.subscribe((value) => {
       if (value.current && value.current.id !== cachedGameId) {
         cachedGameId = value.current.id
-        if (
-          $game.team ||
+
+        watchFilters(currentPage, showAll, instituteId)
+
+        getTagList()
+          .then((res) => {
+            tags = res.toSorted((a, b) => (a.name > b.name ? 1 : a.name === b.name ? 0 : -1))
+          })
+          .catch((err) => {
+            showMessage(
+              'error',
+              `${$i18n.t('playground.fetchTagsFailed')}: ${(err as AxiosError).response?.data}`,
+              5000
+            )
+          })
+
+        getInstituteList()
+          .then((res) => {
+            institutes = res
+          })
+          .catch((error) => {
+            showMessage('error', `${$i18n.t('institute.fatchFailed')}: ${(error as AxiosError).response?.data}`, 5000)
+          })
+      }
+
+      if (
+        value.current &&
+        (value.team?.id || null) !== cachedTeamId &&
+        (value.team ||
           $user.permissions.find(
             (item) => item === Permission.Audit || item === Permission.Organize || item === Permission.Devops
-          )
-        ) {
-          getChallengeList(value.current.id, 1, 200)
-            .then((res) => {
-              game.update((value) => {
-                value.challenges = res.challenges
-                return value
-              })
+          ))
+      ) {
+        cachedTeamId = value.team?.id || null
+        getChallengeList(value.current.id, 1, 200)
+          .then((res) => {
+            game.update((value) => {
+              value.challenges = res.challenges
+              return value
             })
-            .catch((err) => {
-              showMessage(
-                'error',
-                `${$i18n.t('playground.fetchChallengesFailed')}: ${(err as AxiosError).response?.data}`,
-                5000
-              )
-            })
-        }
-        refreshScoreboard()
-        refreshTop10()
+          })
+          .catch((err) => {
+            showMessage(
+              'error',
+              `${$i18n.t('playground.fetchChallengesFailed')}: ${(err as AxiosError).response?.data}`,
+              5000
+            )
+          })
       }
     })
   })
 
-  onMount(() => {
-    getTagList()
-      .then((res) => {
-        tags = res.toSorted((a, b) => (a.name > b.name ? 1 : a.name === b.name ? 0 : -1))
-      })
-      .catch((err) => {
-        showMessage('error', `${$i18n.t('playground.fetchTagsFailed')}: ${(err as AxiosError).response?.data}`, 5000)
-      })
-  })
-
   function refreshScoreboard() {
     loading = true
-    getGameScoreboard($game.current?.id || 0, page, perPage, showAll, instituteId)
+    getGameScoreboard($game.current?.id || 0, currentPage, perPage, showAll, instituteId)
       .then((value) => {
         teams = value.teams
         total = value.total
@@ -233,6 +254,23 @@
     unsubscribe()
   })
 
+  let cachedPage = 0
+  let cachedShowAll = true
+  let cachedInstituteId: number | null = instituteId
+  $: watchFilters(currentPage, showAll, instituteId)
+  function watchFilters(p: number, h: boolean, i: number | null) {
+    if ($game.current && p !== cachedPage) {
+      cachedPage = p
+      refreshScoreboard()
+    }
+    if ($game.current && (h !== cachedShowAll || i !== cachedInstituteId)) {
+      cachedShowAll = h
+      cachedInstituteId = i
+      currentPage = 1
+      refreshTop10()
+    }
+  }
+
   function getSolveState(historyItem: ScoreHistory[], challengeId: number) {
     const item = historyItem.find((i) => i.challenge_id === challengeId)
     if (item) {
@@ -247,7 +285,7 @@
   <title>{$i18n.t('game.scoreboard')} - {$game.current?.name}</title>
 </svelte:head>
 <div class="flex-1 flex flex-col p-6 lg:p-12 space-y-6 relative">
-  <div class="h-80 rounded-box overflow-hidden bg-neutral/30 backdrop-blur p-6 pb-4">
+  <div class="h-80 rounded-box overflow-hidden bg-neutral/30 backdrop-blur p-6 pb-4 relative">
     <div class="w-full h-full relative">
       <canvas bind:this={canvas}></canvas>
       {#if teams.length === 0}
@@ -256,11 +294,35 @@
         </div>
       {/if}
     </div>
+    <div class="absolute top-4 left-4 flex flex-row space-x-4">
+      <RxButton size="sm" on:click={() => (showAll = !showAll)}>
+        {#if showAll}
+          <span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success"></span>
+        {:else}
+          <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"></span>
+        {/if}
+        <span>ALL</span>
+      </RxButton>
+      <div class="flex-shrink-0 w-64 flex flex-row relative">
+        <RxSelect
+          size="sm"
+          name="institute_id"
+          availableOptions={institutes
+            .map((i) => {
+              return { id: i.id, label: i.name }
+            }) //@ts-expect-error id is string | number | null
+            .concat([{ id: null, label: 'NONE' }])}
+          bind:value={instituteId}
+        />
+      </div>
+    </div>
   </div>
   <div class="flex flex-row">
     <table class="table-auto flex-1 flex-shrink-0 min-w-[32rem]">
       <thead class="border-b-4 border-b-base-content/10">
-        <tr class="h-12"></tr>
+        {#if $game.team || $user.permissions.find((item) => item === Permission.Audit || item === Permission.Organize || item === Permission.Devops)}
+          <tr class="h-12"></tr>
+        {/if}
         <tr class="border-b border-b-base-content/10 h-12">
           <th class="text-base font-bold">
             <div class="w-16"></div>
@@ -282,14 +344,14 @@
           <tr class="h-12 border-b border-b-base-content/10">
             <td class="text-base font-bold sticky z-10 left-0">
               <div class="flex flex-row justify-center items-center">
-                {#if index + 1 + (page - 1) * perPage === 1}
+                {#if index + 1 + (currentPage - 1) * perPage === 1}
                   <span class="icon-[fluent--trophy-20-filled] text-yellow-500 w-5 h-5"></span>
-                {:else if index + 1 + (page - 1) * perPage === 2}
+                {:else if index + 1 + (currentPage - 1) * perPage === 2}
                   <span class="icon-[fluent--trophy-20-filled] text-zinc-500 w-5 h-5"></span>
-                {:else if index + 1 + (page - 1) * perPage === 3}
+                {:else if index + 1 + (currentPage - 1) * perPage === 3}
                   <span class="icon-[fluent--trophy-20-filled] text-orange-500 w-5 h-5"></span>
                 {:else}
-                  <span>{index + 1 + (page - 1) * perPage}</span>
+                  <span>{index + 1 + (currentPage - 1) * perPage}</span>
                 {/if}
               </div>
             </td>
@@ -373,7 +435,7 @@
     {/if}
   </div>
   <div class="flex-1"></div>
-  <RxPaginator bind:page {total} />
+  <RxPaginator bind:page={currentPage} {total} />
   {#if loading}
     <div
       class="absolute top-0 left-0 w-full h-full z-20 backdrop-blur flex flex-row justify-center items-center"
