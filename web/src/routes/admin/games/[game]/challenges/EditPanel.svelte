@@ -16,6 +16,8 @@
   import Submissions from './Submissions.svelte'
   import Instances from './Instances.svelte'
   import { blur } from 'svelte/transition'
+  import Hints from './Hints.svelte'
+  import Answer from './Answer.svelte'
   const dispatch = createEventDispatcher()
 
   let clazz = ''
@@ -65,7 +67,9 @@
           <span>{$i18n.t('admin.loadingChallenge')}</span>
         </h1>
       {:else}
-        <h1 class="text-base font-bold">{currentChallenge?.name}</h1>
+        <h1 class="text-base font-bold max-w-[16rem] overflow-hidden truncate">
+          {currentChallenge?.name}
+        </h1>
       {/if}
       <RxButton
         class="!ml-12"
@@ -96,6 +100,12 @@
       <RxButton ghost on:click={() => (activeTab = 'instances')} active={activeTab === 'instances'} disabled={loading}>
         {$i18n.t('admin.challengeInstances')}
       </RxButton>
+      <RxButton ghost on:click={() => (activeTab = 'hints')} active={activeTab === 'hints'} disabled={loading}>
+        {$i18n.t('admin.challengeHints')}
+      </RxButton>
+      <RxButton ghost on:click={() => (activeTab = 'answer')} active={activeTab === 'answer'} disabled={loading}>
+        {$i18n.t('admin.challengeAnswer')}
+      </RxButton>
     </div>
     {#if currentChallenge}
       {#if activeTab === 'statistics'}
@@ -110,6 +120,10 @@
         <Submissions challenge={currentChallenge} />
       {:else if activeTab === 'instances'}
         <Instances challenge={currentChallenge} />
+      {:else if activeTab === 'hints'}
+        <Hints challenge={currentChallenge} />
+      {:else if activeTab === 'answer'}
+        <Answer challenge={currentChallenge} />
       {/if}
     {:else}
       <div class="w-full h-full flex flex-col justify-center items-center">

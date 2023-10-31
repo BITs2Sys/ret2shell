@@ -277,7 +277,9 @@
     "challengeSubmissions": "Submissions",
     "challengeInstances": "Instances",
     "loadingChallenge": "Loading...",
-    "noChallengeLoaded": "Challenge not loaded yet"
+    "noChallengeLoaded": "Challenge not loaded yet",
+    "challengeHints": "Hints",
+    "challengeAnswer": "Answer"
   },
   "docs": {
     "title": "Documents"

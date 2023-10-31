@@ -145,6 +145,20 @@ pub async fn update_challenge(
     active_model.update(conn).await
 }
 
+pub async fn update_challenge_bucket(
+    conn: &DatabaseConnection,
+    id: i64,
+    challenge: &Model,
+) -> Result<Model, DbErr> {
+    let active_model = ActiveModel {
+        id: ActiveValue::Unchanged(id),
+        updated_at: ActiveValue::Set(Utc::now()),
+        bucket: ActiveValue::Set(challenge.bucket.clone()),
+        ..challenge.clone().into_active_model()
+    };
+    active_model.update(conn).await
+}
+
 pub async fn get_challenge(conn: &DatabaseConnection, id: i64) -> Result<Model, DbErr> {
     let challenge = Entity::find_by_id(id).one(conn).await?;
     match challenge {

@@ -15,14 +15,16 @@ use wsvc::{
     model::{ObjectId, Record, Repository},
 };
 
-use crate::entity::challenge::Model as ChallengeModel;
+use crate::entity::challenge;
 
 #[derive(Error, Debug)]
 pub enum BucketError {
     #[error("challenge must have a bucket: {0:?}")]
-    LackOfBucketId(ChallengeModel),
+    LackOfBucketId(challenge::Model),
     #[error("bucket init conflict: {0}")]
     BucketInitConflict(String),
+    #[error("bucket not exist: {0}")]
+    BucketNotExist(String),
     #[error("io error: {0}")]
     IoError(#[from] io::Error),
     #[error("wsvc general error: {0}")]
@@ -35,7 +37,7 @@ pub enum BucketError {
 
 pub struct Bucket {
     storage_root_dir: PathBuf,
-    pub challenge: ChallengeModel,
+    pub challenge: challenge::Model,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -47,7 +49,7 @@ pub struct FileEntryItem {
 }
 
 impl Bucket {
-    fn new(storage_root_dir: impl AsRef<Path>, challenge: &ChallengeModel) -> Self {
+    fn new(storage_root_dir: impl AsRef<Path>, challenge: &challenge::Model) -> Self {
         Self {
             storage_root_dir: storage_root_dir.as_ref().to_owned(),
             challenge: challenge.clone(),
@@ -56,7 +58,7 @@ impl Bucket {
 
     pub async fn initialize(
         storage_root_dir: impl AsRef<Path>,
-        challenge: &ChallengeModel,
+        challenge: &challenge::Model,
     ) -> Result<Self, BucketError> {
         let bucket_dir = storage_root_dir.as_ref().join(
             challenge
@@ -89,7 +91,7 @@ impl Bucket {
             )
             .join("repo");
         if !bucket_dir.exists() {
-            return Err(BucketError::BucketInitConflict(
+            return Err(BucketError::BucketNotExist(
                 bucket_dir.to_string_lossy().to_string(),
             ));
         }

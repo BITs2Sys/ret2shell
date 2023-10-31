@@ -175,24 +175,8 @@ async fn create_challenge(
     Query(game_query): Query<GameIDQuery>,
     Json(mut challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    // TODO: there may exists a same name challenge in the same game
-    // Should valid?
-    challenge.bucket = Some(format!(
-        "{}_{}",
-        challenge.id,
-        deunicode_str(&challenge.name)
-    ));
-    Bucket::initialize(config.config.bucket.path, &challenge)
-        .await
-        .map_err(|err| {
-            error!("failed to init challenge bucket: {}", err);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to init challenge bucket",
-            )
-        })?;
     challenge.game_id = game_query.game_id;
-    let created_challenge = match challenge::create_challenge(conn, challenge).await {
+    let mut created_challenge = match challenge::create_challenge(conn, challenge).await {
         Ok(created_challenge) => created_challenge,
         Err(err) => {
             error!("failed to create new challenge in database: {}", err);
@@ -202,6 +186,32 @@ async fn create_challenge(
             ));
         }
     };
+    // TODO: there may exists a same name challenge in the same game
+    // Should valid?
+    created_challenge.bucket = Some(format!(
+        "{}_{}",
+        created_challenge.id,
+        deunicode_str(&created_challenge.name)
+    ));
+    Bucket::initialize(config.config.bucket.path, &created_challenge)
+        .await
+        .map_err(|err| {
+            error!("failed to init challenge bucket: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to init challenge bucket",
+            )
+        })?;
+
+    challenge::update_challenge_bucket(conn, created_challenge.id, &created_challenge)
+        .await
+        .map_err(|err| {
+            error!("failed to update challenge bucket: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to update challenge bucket",
+            )
+        })?;
 
     Ok(Json(created_challenge))
 }

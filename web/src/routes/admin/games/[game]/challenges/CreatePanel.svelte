@@ -93,16 +93,6 @@
       errors={$errors.tag_id}
       class="relative"
     >
-      <!-- <RxSelect
-        name="tag_id"
-        disabled={loading || submitting}
-        availableOptions={tags
-          .map((i) => {
-            return { id: i.id, label: i.name }
-          }) //@ts-expect-error id is string | number | null
-          .concat([{ id: null, label: 'NONE' }])}
-        value={challenge.tag_id}
-      /> -->
       <RxRadioGroup
         class="w-full"
         direction="row"

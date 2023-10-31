@@ -9,7 +9,6 @@
   import { z } from 'zod'
   import { createForm } from 'felte'
   import { validator } from '@felte/validator-zod'
-  import ExtraPanel from '$lib/blocks/ExtraPanel.svelte'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
   import { getTagList, updateChallenge } from '$lib/api/challenge'

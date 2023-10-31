@@ -277,7 +277,9 @@
     "challengeSubmissions": "提交记录",
     "challengeInstances": "实例管理",
     "loadingChallenge": "正在加载...",
-    "noChallengeLoaded": "题目尚未加载"
+    "noChallengeLoaded": "题目尚未加载",
+    "challengeHints": "提示信息",
+    "challengeAnswer": "题解"
   },
   "docs": {
     "title": "技术文档"

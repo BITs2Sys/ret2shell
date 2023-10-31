@@ -36,34 +36,34 @@
     <div class="flex flex-col flex-1 space-y-4">
       <div class="flex flex-row space-x-4">
         <RxStatistics
-          icon="icon-[fluent--flag-24-filled] w-6 h-6 text-primary"
+          icon="icon-[fluent--flag-24-filled] w-8 h-8 text-primary"
           title={$i18n.t('challenge.submissionCount')}
           value={submissions_count}
         ></RxStatistics>
         <RxStatistics
-          icon="icon-[fluent--checkmark-circle-24-filled] w-6 h-6 text-success"
+          icon="icon-[fluent--checkmark-circle-24-filled] w-8 h-8 text-success"
           title={$i18n.t('challenge.solvesCount')}
           value={solves_count}
         ></RxStatistics>
         <RxStatistics
-          icon="icon-[fluent--data-pie-24-filled] w-6 h-6 text-primary"
+          icon="icon-[fluent--data-pie-24-filled] w-8 h-8 text-primary"
           title={$i18n.t('challenge.solvesPercentage')}
           value={((solves_count / submissions_count) * 100).toFixed(0) + '%'}
         ></RxStatistics>
       </div>
       <div class="flex-1 flex flex-row space-x-4">
         <RxStatistics
-          icon="icon-[fluent--number-symbol-24-filled] w-6 h-6 text-primary"
+          icon="icon-[fluent--number-symbol-24-filled] w-8 h-8 text-primary"
           title={$i18n.t('challenge.currentScore')}
           value={challenge.current_score}
         ></RxStatistics>
         <RxStatistics
-          icon="icon-[fluent--engine-24-filled] w-6 h-6 text-primary"
+          icon="icon-[fluent--engine-24-filled] w-8 h-8 text-primary"
           title={$i18n.t('challenge.instancesCount')}
           value={instances_count}
         ></RxStatistics>
         <RxStatistics
-          icon="icon-[fluent--engine-24-filled] w-6 h-6 text-success"
+          icon="icon-[fluent--engine-24-filled] w-8 h-8 text-success"
           title={$i18n.t('challenge.runningInstancesCount')}
           value={running_instances_count}
         ></RxStatistics>
