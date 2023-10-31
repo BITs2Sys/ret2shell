@@ -58,7 +58,7 @@
         name="signing_key"
         label={$i18n.t('init.signingKey')}
         hasError={$errors.signing_key !== null}
-        errors={$errors.signing_key || ''}
+        errors={$errors.signing_key}
       >
         <RxInput
           icon="icon-[fluent--lock-20-regular]"
@@ -74,7 +74,7 @@
         name="expires_time"
         label={$i18n.t('init.expiresTime')}
         hasError={$errors.expires_time !== null}
-        errors={$errors.expires_time || ''}
+        errors={$errors.expires_time}
       >
         <RxInput
           icon="icon-[fluent--clock-20-regular]"
@@ -91,7 +91,7 @@
         name="buffer_time"
         label={$i18n.t('init.bufferTime')}
         hasError={$errors.buffer_time !== null}
-        errors={$errors.buffer_time || ''}
+        errors={$errors.buffer_time}
       >
         <RxInput
           icon="icon-[fluent--clock-20-regular]"

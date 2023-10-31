@@ -124,7 +124,7 @@
         <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <RxForm {form}>
-        <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
+        <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled}>
           <RxCheckBox id="enabled" name="enabled" label={$i18n.t('init.emailEnabled')} />
         </RxFormItem>
         <div class="flex flex-row space-x-4">
@@ -133,7 +133,7 @@
             class="flex-1"
             label={$i18n.t('init.emailHost')}
             hasError={$errors.host !== null}
-            errors={$errors.host || ''}
+            errors={$errors.host}
           >
             <RxInput
               icon="icon-[fluent--mail-20-regular]"
@@ -150,7 +150,7 @@
             name="port"
             label={$i18n.t('init.emailPort')}
             hasError={$errors.port !== null}
-            errors={$errors.port || ''}
+            errors={$errors.port}
           >
             <RxInput
               icon="icon-[fluent--code-20-regular]"
@@ -164,12 +164,7 @@
             />
           </RxFormItem>
         </div>
-        <RxFormItem
-          name="tls"
-          label={$i18n.t('init.emailTls')}
-          hasError={$errors.tls !== null}
-          errors={$errors.tls || ''}
-        >
+        <RxFormItem name="tls" label={$i18n.t('init.emailTls')} hasError={$errors.tls !== null} errors={$errors.tls}>
           <RxRadioGroup
             class="w-full"
             direction="row"
@@ -186,7 +181,7 @@
           class="flex-1"
           label={$i18n.t('init.emailSender')}
           hasError={$errors.sender !== null}
-          errors={$errors.sender || ''}
+          errors={$errors.sender}
         >
           <RxInput
             icon="icon-[fluent--mail-20-regular]"
@@ -204,7 +199,7 @@
             class="flex-1"
             label={$i18n.t('init.emailUsername')}
             hasError={$errors.username !== null}
-            errors={$errors.username || ''}
+            errors={$errors.username}
           >
             <RxInput
               icon="icon-[fluent--mail-20-regular]"
@@ -221,7 +216,7 @@
             class="flex-1"
             label={$i18n.t('init.emailPassword')}
             hasError={$errors.password !== null}
-            errors={$errors.password || ''}
+            errors={$errors.password}
           >
             <RxInput
               icon="icon-[fluent--lock-20-regular]"
@@ -241,7 +236,7 @@
           class="flex-1"
           label={$i18n.t('init.emailResetPasswordSubject')}
           hasError={$errors.reset_password_email_subject !== null}
-          errors={$errors.reset_password_email_subject || ''}
+          errors={$errors.reset_password_email_subject}
         >
           <RxInput
             class="w-full"
@@ -257,7 +252,7 @@
           class="flex-1"
           label={$i18n.t('init.emailResetPasswordBody')}
           hasError={$errors.reset_password_email_body !== null}
-          errors={$errors.reset_password_email_body || ''}
+          errors={$errors.reset_password_email_body}
         >
           <RxCodeBox
             lang="html"
@@ -274,7 +269,7 @@
           class="flex-1"
           label={$i18n.t('init.emailVerifyEmailSubject')}
           hasError={$errors.verify_email_subject !== null}
-          errors={$errors.verify_email_subject || ''}
+          errors={$errors.verify_email_subject}
         >
           <RxInput
             class="w-full"
@@ -290,7 +285,7 @@
           class="flex-1"
           label={$i18n.t('init.emailVerifyEmailBody')}
           hasError={$errors.verify_email_body !== null}
-          errors={$errors.verify_email_body || ''}
+          errors={$errors.verify_email_body}
         >
           <RxCodeBox
             lang="html"

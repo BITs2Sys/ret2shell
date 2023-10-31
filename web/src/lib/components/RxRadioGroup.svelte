@@ -10,19 +10,13 @@
   let clazz = ''
   export { clazz as class }
 
-  $: classes = [
-    'flex',
-    'flex-wrap',
-    direction === 'row' ? 'flex-row' : 'flex-col',
-    direction === 'row' ? 'space-x-4' : 'space-y-4',
-    clazz,
-  ].join(' ')
+  $: classes = ['flex', 'flex-wrap', direction === 'row' ? 'flex-row' : 'flex-col', clazz].join(' ')
 </script>
 
 <div class={classes}>
   {#each items as item}
     <RxRadioButton
-      class="flex-1"
+      class="flex-1 m-2 flex-shrink-0"
       {value}
       preset={item.value}
       label={item.label}

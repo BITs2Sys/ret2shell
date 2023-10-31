@@ -93,7 +93,7 @@
           name="password"
           label={$i18n.t('account.password')}
           hasError={$errors.password !== null}
-          errors={$errors.password || ''}
+          errors={$errors.password}
         >
           <RxInput
             icon="icon-[fluent--lock-20-regular]"
@@ -109,7 +109,7 @@
           name="passwordConfirm"
           label={$i18n.t('account.passwordConfirm')}
           hasError={$errors.passwordConfirm !== null}
-          errors={$errors.passwordConfirm || ''}
+          errors={$errors.passwordConfirm}
         >
           <RxInput
             icon="icon-[fluent--lock-20-regular]"
@@ -123,7 +123,7 @@
         <Captcha
           bind:this={captcha}
           hasError={$errors.captcha_answer !== null}
-          errors={$errors.captcha_answer || ''}
+          errors={$errors.captcha_answer}
           bind:captchaId={$data.captcha_id}
           bind:captchaAnswer={$data.captcha_answer}
         />

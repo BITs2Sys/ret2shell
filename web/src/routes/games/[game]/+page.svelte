@@ -63,10 +63,7 @@
 </svelte:head>
 <div class="h-48 bg-base-content/5 backdrop-blur relative">
   {#if $game.current?.cover_path}
-    <RxImage
-      class="absolute top-0 left-0 w-full h-full opacity-60"
-      src={$game.current?.cover_path || ''}
-      loading={false}
+    <RxImage class="absolute top-0 left-0 w-full h-full opacity-60" src={$game.current?.cover_path} loading={false}
     ></RxImage>
   {/if}
   <div class="absolute top-0 left-0 w-full h-full bg-base-100/60 flex flex-col justify-center items-center space-y-4">
@@ -107,5 +104,5 @@
     <RxTag label={$i18n.t('games.cannotTakePartIn')} level="error" />
   {/if}
 </div>
-<RxArticle class="w-full self-center max-w-5xl p-6" content={$game.current?.introduction || ''} />
+<RxArticle class="w-full self-center max-w-5xl p-6" content={$game.current?.introduction} />
 <div class="h-32"></div>

@@ -238,13 +238,20 @@ pub async fn get_solved_team_page(
     Ok((resp, num_pages))
 }
 
-pub async fn count_blood(conn: &DatabaseConnection, challenge_id: i64) -> Result<u64, DbErr> {
+pub async fn count_solves(conn: &DatabaseConnection, challenge_id: i64) -> Result<u64, DbErr> {
     Entity::find()
         .filter(Column::ChallengeId.eq(challenge_id))
         .filter(Column::Solved.eq(true))
         .filter(Column::TeamId.is_not_null())
         .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
         .distinct_on([(Entity, Column::UserId), (Entity, Column::ChallengeId)])
+        .count(conn)
+        .await
+}
+
+pub async fn count_submissions(conn: &DatabaseConnection, challenge_id: i64) -> Result<u64, DbErr> {
+    Entity::find()
+        .filter(Column::ChallengeId.eq(challenge_id))
         .count(conn)
         .await
 }

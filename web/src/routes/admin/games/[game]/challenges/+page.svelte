@@ -308,6 +308,7 @@
       on:close={() => {
         window.location.hash = ''
       }}
+      {tags}
     ></EditPanel>
   {:else}
     <Error status={404} />

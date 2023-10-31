@@ -125,7 +125,7 @@
             label=""
             class="flex-none"
             hasError={$errors.cover_path !== null}
-            errors={$errors.cover_path || ''}
+            errors={$errors.cover_path}
           >
             <input name="cover_path" class="hidden" value={userSetting?.cover_path} />
             <input class="hidden" type="file" bind:this={fileInput} accept="image/*" on:change={uploadAvatar} />
@@ -163,7 +163,7 @@
             name="name"
             label={$i18n.t('account.name')}
             hasError={$errors.name !== null}
-            errors={$errors.name || ''}
+            errors={$errors.name}
           >
             <RxInput
               icon="icon-[fluent--person-20-regular]"
@@ -179,7 +179,7 @@
           name="email"
           label={$i18n.t('account.email')}
           hasError={$errors.email !== null}
-          errors={$errors.email || ''}
+          errors={$errors.email}
         >
           <RxInput
             icon="icon-[fluent--mail-20-regular]"
@@ -194,7 +194,7 @@
           name="intro"
           label={$i18n.t('account.intro')}
           hasError={$errors.intro !== null}
-          errors={$errors.intro || ''}
+          errors={$errors.intro}
         >
           <RxCodeBox class="h-[20rem]" name="intro" hasError={$errors.intro !== null} value={userSetting.intro} />
         </RxFormItem>

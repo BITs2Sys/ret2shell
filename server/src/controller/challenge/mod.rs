@@ -2,7 +2,7 @@ use super::{
     layer::{auth, info},
     GlobalState,
 };
-use crate::entity::submission as submission_entity;
+use crate::entity::{instance, submission as submission_entity};
 use crate::utility::string::deunicode_str;
 use crate::{
     bucket::Bucket,
@@ -67,6 +67,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             "/:challenge_id",
             Router::new()
                 .route("/", patch(update_challenge).delete(delete_challenge))
+                .route("/statistics", get(get_challenge_statistics))
                 .nest("/workflow", workflow::router(state))
                 .nest("/repo", repo::router(state))
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
@@ -314,4 +315,62 @@ async fn get_challenge_info(
 
 async fn download_challenge_attachment() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     Ok(Json("to be implemented"))
+}
+
+#[derive(Serialize)]
+struct StatisticsResponse {
+    pub submissions_count: u64,
+    pub solves_count: u64,
+    pub instances_count: u64,
+    pub running_instances_count: u64,
+}
+
+async fn get_challenge_statistics(
+    State(ref db): State<DatabaseConnection>,
+    Extension(challenge): Extension<challenge::Model>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let submissions_count = submission_entity::count_submissions(db, challenge.id)
+        .await
+        .map_err(|err| {
+            error!("failed to get submissions count: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get submissions count",
+            )
+        })?;
+    let solves_count = submission_entity::count_solves(db, challenge.id)
+        .await
+        .map_err(|err| {
+            error!("failed to get solves count: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get solves count",
+            )
+        })?;
+
+    let instances_count = instance::count_challenge_instance(db, challenge.id)
+        .await
+        .map_err(|err| {
+            error!("failed to get instances count: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get instances count",
+            )
+        })?;
+    let running_instances_count = instance::count_challenge_running_instance(db, challenge.id)
+        .await
+        .map_err(|err| {
+            error!("failed to get running instances count: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get running instances count",
+            )
+        })?;
+
+    Ok(Json(StatisticsResponse {
+        submissions_count,
+        solves_count,
+        instances_count,
+        running_instances_count,
+    }))
 }

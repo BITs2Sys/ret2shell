@@ -143,7 +143,7 @@
       label=""
       class="flex-none"
       hasError={$errors.cover_path !== null}
-      errors={$errors.cover_path || ''}
+      errors={$errors.cover_path}
     >
       <input name="cover_path" class="hidden" bind:value={$data.cover_path} />
       <input class="hidden" type="file" bind:this={fileInput} accept="image/*" on:change={uploadAvatar} />
@@ -176,12 +176,7 @@
         </div>
       </div>
     </RxFormItem>
-    <RxFormItem
-      name="name"
-      label={$i18n.t('account.name')}
-      hasError={$errors.name !== null}
-      errors={$errors.name || ''}
-    >
+    <RxFormItem name="name" label={$i18n.t('account.name')} hasError={$errors.name !== null} errors={$errors.name}>
       <RxInput
         icon="icon-[fluent--person-20-regular]"
         class="w-full"
@@ -189,15 +184,10 @@
         name="name"
         hasError={$errors.name !== null}
         placeholder={$i18n.t('account.name')}
-        value={user?.name || ''}
+        value={user?.name}
       />
     </RxFormItem>
-    <RxFormItem
-      name="email"
-      label={$i18n.t('account.email')}
-      hasError={$errors.email !== null}
-      errors={$errors.email || ''}
-    >
+    <RxFormItem name="email" label={$i18n.t('account.email')} hasError={$errors.email !== null} errors={$errors.email}>
       <RxInput
         icon="icon-[fluent--mail-20-regular]"
         class="w-full"
@@ -205,27 +195,15 @@
         name="email"
         hasError={$errors.email !== null}
         placeholder={$i18n.t('account.email')}
-        value={user?.email || ''}
+        value={user?.email}
       />
     </RxFormItem>
   </div>
   <div class="flex flex-row space-x-4">
-    <RxFormItem
-      class="flex-none"
-      name="hidden"
-      label=""
-      hasError={$errors.hidden !== null}
-      errors={$errors.hidden || ''}
-    >
+    <RxFormItem class="flex-none" name="hidden" label="" hasError={$errors.hidden !== null} errors={$errors.hidden}>
       <RxCheckBox id="hidden" name="hidden" label={$i18n.t('account.hidden')} checked={user?.hidden} />
     </RxFormItem>
-    <RxFormItem
-      class="flex-none"
-      name="banned"
-      label=""
-      hasError={$errors.banned !== null}
-      errors={$errors.banned || ''}
-    >
+    <RxFormItem class="flex-none" name="banned" label="" hasError={$errors.banned !== null} errors={$errors.banned}>
       <RxCheckBox id="banned" name="banned" label={$i18n.t('account.banned')} checked={user?.banned} />
     </RxFormItem>
   </div>
@@ -234,7 +212,7 @@
     name="permissions"
     label={$i18n.t('account.permissions')}
     hasError={$errors.permissions !== null}
-    errors={$errors.permissions || ''}
+    errors={$errors.permissions}
   >
     <div class="flex flex-row space-x-4">
       <RxCheckBox label={permissionToString(0)} bind:checked={permissionChecks[0]} />
@@ -248,18 +226,13 @@
       <RxCheckBox label={permissionToString(8)} bind:checked={permissionChecks[8]} />
     </div>
   </RxFormItem>
-  <RxFormItem
-    name="intro"
-    label={$i18n.t('account.intro')}
-    hasError={$errors.intro !== null}
-    errors={$errors.intro || ''}
-  >
+  <RxFormItem name="intro" label={$i18n.t('account.intro')} hasError={$errors.intro !== null} errors={$errors.intro}>
     <RxCodeBox
       class="w-full !h-64"
       name="intro"
       hasError={$errors.intro !== null}
       placeholder={$i18n.t('account.intro')}
-      value={user?.intro || ''}
+      value={user?.intro}
     />
   </RxFormItem>
   <div class="flex flex-row space-x-4">
@@ -267,7 +240,7 @@
       name="institute_id"
       label={$i18n.t('account.institute_id')}
       hasError={$errors.institute_id !== null}
-      errors={$errors.institute_id || ''}
+      errors={$errors.institute_id}
       class="relative"
     >
       <RxSelect
@@ -284,7 +257,7 @@
       name="institute_info"
       label={$i18n.t('account.institute_info')}
       hasError={$errors.institute_info !== null}
-      errors={$errors.institute_info || ''}
+      errors={$errors.institute_info}
     >
       <RxInput
         icon="icon-[fluent--person-20-regular]"
@@ -293,7 +266,7 @@
         name="institute_info"
         hasError={$errors.institute_info !== null}
         placeholder={$i18n.t('account.institute_info')}
-        value={user?.institute_info || ''}
+        value={user?.institute_info}
       />
     </RxFormItem>
   </div>

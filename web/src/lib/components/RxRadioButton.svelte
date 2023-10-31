@@ -34,5 +34,7 @@
   <slot>
     <span class="text-base">{label}</span>
   </slot>
-  <span class={`icon-[fluent--checkmark-circle-20-regular] w-5 h-5 ${value === preset && 'text-primary'}`} />
+  <span
+    class={`icon-[fluent--checkmark-circle-20-regular] w-5 h-5 ${value === preset && 'text-primary'} flex-shrink-0`}
+  />
 </RxButton>

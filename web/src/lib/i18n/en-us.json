@@ -269,7 +269,15 @@
       "activeNodes": "Active Nodes",
       "basicInfo": "Cluster Info"
     },
-    "createChallenge": "Create Challenge"
+    "createChallenge": "Create Challenge",
+    "challengeStatistics": "Statistics",
+    "challengeInfo": "Info",
+    "challengeRepo": "Repo",
+    "challengeWorkflows": "CI/CD",
+    "challengeSubmissions": "Submissions",
+    "challengeInstances": "Instances",
+    "loadingChallenge": "Loading...",
+    "noChallengeLoaded": "Challenge not loaded yet"
   },
   "docs": {
     "title": "Documents"
@@ -740,7 +748,20 @@
     "minimum_score": "Minimum score",
     "decay": "Score decay",
     "createSuccess": "Challenge created successfully",
-    "createFailed": "Challenge created failed"
+    "createFailed": "Challenge created failed",
+    "notFound": "Challenge not found",
+    "fetchStatisticsFailed": "Failed to fetch question statistics",
+    "submissionCount": "Submssion Count",
+    "solvesCount": "Solves Count",
+    "failsCount": "Fails",
+    "solvesPercentage": "Correct rate",
+    "currentScore": "Current Score",
+    "instancesCount": "Environment opening times",
+    "runningInstancesCount": "Running container",
+    "update": "Update",
+    "updating": "Updating...",
+    "updateFailed": "Challenge update failed",
+    "updateSuccess": "Challenge update successfully"
   },
   "tag": {
     "fetchFailed": "Failed to get tags"

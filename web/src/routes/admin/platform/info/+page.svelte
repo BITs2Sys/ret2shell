@@ -113,7 +113,7 @@
           name="name"
           label={$i18n.t('init.platformName')}
           hasError={$errors.name !== null}
-          errors={$errors.name || ''}
+          errors={$errors.name}
         >
           <RxInput
             icon="icon-[fluent--flag-20-regular]"
@@ -129,7 +129,7 @@
           name="footer_info"
           label={$i18n.t('init.footerInfo')}
           hasError={$errors.footer_info !== null}
-          errors={$errors.footer_info || ''}
+          errors={$errors.footer_info}
         >
           <RxInput
             icon="icon-[fluent--info-20-regular]"
@@ -145,7 +145,7 @@
           name="footer_url"
           label={$i18n.t('init.footerUrl')}
           hasError={$errors.footer_url !== null}
-          errors={$errors.footer_url || ''}
+          errors={$errors.footer_url}
         >
           <RxInput
             icon="icon-[fluent--link-20-regular]"
@@ -161,7 +161,7 @@
           name="subject_info"
           label={$i18n.t('init.subjectInfo')}
           hasError={$errors.subject_info !== null}
-          errors={$errors.subject_info || ''}
+          errors={$errors.subject_info}
         >
           <RxInput
             icon="icon-[fluent--info-20-regular]"
@@ -177,7 +177,7 @@
           name="subject_url"
           label={$i18n.t('init.subjectUrl')}
           hasError={$errors.subject_url !== null}
-          errors={$errors.subject_url || ''}
+          errors={$errors.subject_url}
         >
           <RxInput
             icon="icon-[fluent--link-20-regular]"
@@ -193,7 +193,7 @@
           name="record"
           label={$i18n.t('init.record')}
           hasError={$errors.record !== null}
-          errors={$errors.record || ''}
+          errors={$errors.record}
         >
           <RxInput
             icon="icon-[fluent--slide-record-20-regular]"
@@ -205,7 +205,7 @@
             placeholder={$i18n.t('init.recordPlaceholder')}
           />
         </RxFormItem>
-        <RxFormItem name="hide_maker" label="" hasError={$errors.hide_maker !== null} errors={$errors.hide_maker || ''}>
+        <RxFormItem name="hide_maker" label="" hasError={$errors.hide_maker !== null} errors={$errors.hide_maker}>
           <RxCheckBox
             id="hide_maker"
             name="hide_maker"

@@ -13,7 +13,7 @@
   import type { AxiosError } from 'axios'
 
   export let hasError = false
-  export let errors: string | string[] | undefined = undefined
+  export let errors: string | string[] | undefined | unknown = undefined
   export let captchaId: string | unknown | undefined = undefined
   export let captchaAnswer: string | unknown | undefined = undefined
   let loading = true

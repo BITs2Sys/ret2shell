@@ -29,6 +29,14 @@ export async function createChallenge(game_id: number, challenge: Challenge) {
   return (await api.post(`${api_root}/challenge?game_id=${game_id}`, challenge)).data as Challenge
 }
 
+export async function updateChallenge(id: number, challenge: Challenge) {
+  return (await api.patch(`${api_root}/challenge/${id}`, challenge)).data as Challenge
+}
+
+export async function deleteChallenge(id: number) {
+  return await api.delete(`${api_root}/challenge/${id}`)
+}
+
 export async function getChallenge(id: number) {
   return (await api.get(`${api_root}/challenge/${id}`)).data as Challenge
 }
@@ -85,4 +93,13 @@ export async function getChallengeSolvedTeam(id: number, page?: number, per_page
 
 export async function getChallengeAnwser(id: number) {
   return (await api.get(`${api_root}/challenge/${id}/answer`)).data as Answer
+}
+
+export async function getChallengeStatistics(id: number) {
+  return (await api.get(`${api_root}/challenge/${id}/statistics`)).data as {
+    submissions_count: number
+    solves_count: number
+    instances_count: number
+    running_instances_count: number
+  }
 }

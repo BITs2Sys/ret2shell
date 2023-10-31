@@ -83,7 +83,7 @@
           name="account"
           label={$i18n.t('account.account')}
           hasError={$errors.account !== null}
-          errors={$errors.account || ''}
+          errors={$errors.account}
         >
           <RxInput
             icon="icon-[fluent--person-20-regular]"
@@ -94,7 +94,7 @@
             autocomplete="username"
           />
         </RxFormItem>
-        <RxFormItem name="password" label="" hasError={$errors.password !== null} errors={$errors.password || ''}>
+        <RxFormItem name="password" label="" hasError={$errors.password !== null} errors={$errors.password}>
           <span slot="label" class="text-sm font-bold opacity-60 flex flex-row justify-between w-full">
             <span>{$i18n.t('account.password')}</span>
             <a class="hover:underline" href="/account/forgot-password">{$i18n.t('account.forgotPassword')}</a>
@@ -112,7 +112,7 @@
         <Captcha
           bind:this={captcha}
           hasError={$errors.captcha_answer !== null}
-          errors={$errors.captcha_answer || ''}
+          errors={$errors.captcha_answer}
           bind:captchaId={$data.captcha_id}
           bind:captchaAnswer={$data.captcha_answer}
         />

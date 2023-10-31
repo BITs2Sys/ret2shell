@@ -51,7 +51,7 @@
         name="limit"
         label={$i18n.t('init.mediaLimit')}
         hasError={$errors.limit !== null}
-        errors={$errors.limit || ''}
+        errors={$errors.limit}
       >
         <RxInput
           icon="icon-[fluent--code-20-regular]"
@@ -64,7 +64,7 @@
           type="number"
         />
       </RxFormItem>
-      <RxFormItem name="anti_theft" label="" hasError={$errors.anti_theft !== null} errors={$errors.anti_theft || ''}>
+      <RxFormItem name="anti_theft" label="" hasError={$errors.anti_theft !== null} errors={$errors.anti_theft}>
         <RxCheckBox id="anti_theft" name="anti_theft" label={$i18n.t('init.mediaAntiTheft')} />
       </RxFormItem>
       <RxFormItem name="submitAction" label="">

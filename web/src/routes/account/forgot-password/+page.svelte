@@ -72,7 +72,7 @@
           name="email"
           label={$i18n.t('account.email')}
           hasError={$errors.email !== null}
-          errors={$errors.email || ''}
+          errors={$errors.email}
         >
           <RxInput
             icon="icon-[fluent--mail-20-regular]"
@@ -86,7 +86,7 @@
         <Captcha
           bind:this={captcha}
           hasError={$errors.captcha_answer !== null}
-          errors={$errors.captcha_answer || ''}
+          errors={$errors.captcha_answer}
           bind:captchaId={$data.captcha_id}
           bind:captchaAnswer={$data.captcha_answer}
         />

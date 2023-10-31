@@ -136,7 +136,7 @@ async fn submit_flag(
                         "failed to calc challenge score",
                     )
                 })?;
-            blood_state = submission::count_blood(&conn, challenge.id)
+            blood_state = submission::count_solves(&conn, challenge.id)
                 .await
                 .map_err(|err| {
                     error!("count_blood error: {}", err);

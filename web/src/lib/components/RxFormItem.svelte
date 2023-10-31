@@ -2,7 +2,7 @@
   export let name: string
   export let label: string
   export let hasError = false
-  export let errors: string | string[] | undefined = undefined
+  export let errors: string | string[] | undefined | unknown = undefined
   let clazz = ''
   export { clazz as class }
 
@@ -20,7 +20,7 @@
     .filter(Boolean)
     .join(' ')
 
-  $: formattedErrors = Array.isArray(errors) ? errors.join('; ') : errors
+  $: formattedErrors = Array.isArray(errors) ? errors.join('; ') : errors?.toString()
 </script>
 
 <fieldset class={classes}>

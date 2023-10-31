@@ -86,7 +86,7 @@
         <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
       </div>
       <RxForm {form}>
-        <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
+        <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled}>
           <RxCheckBox
             id="enabled"
             name="enabled"
@@ -98,7 +98,7 @@
           name="token"
           label={$i18n.t('init.pusherToken')}
           hasError={$errors.token !== null}
-          errors={$errors.token || ''}
+          errors={$errors.token}
         >
           <RxInput
             icon="icon-[fluent--lock-20-regular]"

@@ -76,12 +76,7 @@
     <div class="md:w-0 flex-1 flex-col">
       <h1 class="text-center font-bold text-base">{$i18n.t('game.createTeam')}</h1>
       <RxForm {form}>
-        <RxFormItem
-          name="name"
-          label={$i18n.t('game.teamName')}
-          hasError={$errors.name !== null}
-          errors={$errors.name || ''}
-        >
+        <RxFormItem name="name" label={$i18n.t('game.teamName')} hasError={$errors.name !== null} errors={$errors.name}>
           <RxInput
             icon="icon-[fluent--flag-20-regular]"
             class="w-full"
@@ -94,7 +89,7 @@
         <Captcha
           bind:this={captcha}
           hasError={$errors.captcha_answer !== null}
-          errors={$errors.captcha_answer || ''}
+          errors={$errors.captcha_answer}
           bind:captchaId={$data.captcha_id}
           bind:captchaAnswer={$data.captcha_answer}
         />

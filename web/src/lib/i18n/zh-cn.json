@@ -269,7 +269,15 @@
       "activeNodes": "存活节点",
       "basicInfo": "集群信息"
     },
-    "createChallenge": "创建题目"
+    "createChallenge": "创建题目",
+    "challengeStatistics": "详细数据",
+    "challengeInfo": "题目信息",
+    "challengeRepo": "仓库",
+    "challengeWorkflows": "CI/CD",
+    "challengeSubmissions": "提交记录",
+    "challengeInstances": "实例管理",
+    "loadingChallenge": "正在加载...",
+    "noChallengeLoaded": "题目尚未加载"
   },
   "docs": {
     "title": "技术文档"
@@ -740,7 +748,20 @@
     "minimum_score": "最小分数",
     "decay": "分数衰减",
     "createSuccess": "题目创建成功",
-    "createFailed": "题目创建失败"
+    "createFailed": "题目创建失败",
+    "notFound": "未找到题目",
+    "fetchStatisticsFailed": "获取题目统计数据失败",
+    "submissionCount": "总提交次数",
+    "solvesCount": "正确提交人数",
+    "failsCount": "错误提交次数",
+    "solvesPercentage": "正确率",
+    "currentScore": "当前分数",
+    "instancesCount": "环境开启次数",
+    "runningInstancesCount": "正在运行中的容器",
+    "updating": "更新中",
+    "update": "更新",
+    "updateFailed": "题目更新失败",
+    "updateSuccess": "题目更新成功"
   },
   "tag": {
     "fetchFailed": "获取标签失败"

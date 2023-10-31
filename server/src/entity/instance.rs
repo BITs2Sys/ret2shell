@@ -107,3 +107,28 @@ pub async fn get_instance_by_wsrx(
 
     Ok(instance)
 }
+
+pub async fn count_challenge_instance(
+    conn: &DatabaseConnection,
+    challenge_id: i64,
+) -> Result<u64, DbErr> {
+    let count = Entity::find()
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .count(conn)
+        .await?;
+
+    Ok(count)
+}
+
+pub async fn count_challenge_running_instance(
+    conn: &DatabaseConnection,
+    challenge_id: i64,
+) -> Result<u64, DbErr> {
+    let count = Entity::find()
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .filter(Column::Running.eq(true))
+        .count(conn)
+        .await?;
+
+    Ok(count)
+}

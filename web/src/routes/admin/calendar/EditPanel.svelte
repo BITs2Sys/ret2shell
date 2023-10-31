@@ -86,12 +86,7 @@
 >
   <RxForm class="p-4 lg:p-6" {form}>
     <div class="flex flex-row space-x-4">
-      <RxFormItem
-        name="name"
-        label={$i18n.t('calendar.name')}
-        hasError={$errors.name !== null}
-        errors={$errors.name || ''}
-      >
+      <RxFormItem name="name" label={$i18n.t('calendar.name')} hasError={$errors.name !== null} errors={$errors.name}>
         <RxInput
           icon="icon-[fluent--flag-20-regular]"
           class="w-full"
@@ -103,12 +98,7 @@
           value={calendar.name}
         />
       </RxFormItem>
-      <RxFormItem
-        name="link"
-        label={$i18n.t('calendar.link')}
-        hasError={$errors.link !== null}
-        errors={$errors.link || ''}
-      >
+      <RxFormItem name="link" label={$i18n.t('calendar.link')} hasError={$errors.link !== null} errors={$errors.link}>
         <RxInput
           icon="icon-[fluent--link-20-regular]"
           class="w-full"
@@ -127,7 +117,7 @@
         name="start_time"
         label={$i18n.t('calendar.startTime')}
         hasError={$errors.start_time !== null || $errors.end_time !== null}
-        errors={$errors.start_time || $errors.end_time || ''}
+        errors={$errors.start_time || $errors.end_time}
       >
         <RxDatePicker
           selectionStartName="start_time"
@@ -142,7 +132,7 @@
         name="intro"
         label={$i18n.t('calendar.intro')}
         hasError={$errors.intro !== null}
-        errors={$errors.intro || ''}
+        errors={$errors.intro}
       >
         <RxCodeBox name="intro" hasError={$errors.intro !== null} value={calendar.intro} placeholder="Mode = Markdown"
         ></RxCodeBox>

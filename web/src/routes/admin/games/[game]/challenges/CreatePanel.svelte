@@ -2,16 +2,16 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import RxInput from '$lib/components/RxInput.svelte'
   import RxCodeBox from '$lib/components/RxCodeBox.svelte'
-  import RxSelect from '$lib/components/RxSelect.svelte'
   import RxFormItem from '$lib/components/RxFormItem.svelte'
   import RxForm from '$lib/components/RxForm.svelte'
   import { i18n } from '$lib/i18n'
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
   import { z } from 'zod'
   import { createForm } from 'felte'
   import { validator } from '@felte/validator-zod'
   import ExtraPanel from '$lib/blocks/ExtraPanel.svelte'
   import type { Challenge, Tag } from '$lib/models/challenge'
+  import RxRadioGroup from '$lib/components/RxRadioGroup.svelte'
 
   export let challenge: Challenge
   export let loading = false
@@ -30,16 +30,13 @@
       .string()
       .trim()
       .min(1, { message: $i18n.t('challenge.contentRequired') }),
-    tag_id: z
-      .string()
-      .trim()
-      .min(1, { message: $i18n.t('challenge.tagRequired') }),
+    tag_id: z.number(),
     initial_score: z.number().min(1, { message: $i18n.t('challenge.initialScoreRequired') }),
     minimum_score: z.number().min(1, { message: $i18n.t('challenge.minimumScoreRequired') }),
     decay: z.number().min(1),
   })
 
-  const { form, errors } = createForm({
+  const { form, data, touched, errors } = createForm({
     extend: validator({ schema }),
     onSubmit(values) {
       const newChallenge: Challenge = {
@@ -52,16 +49,18 @@
   })
 
   const dispatch = createEventDispatcher()
+
+  const tagIdValue = $data.tag_id
+  $: {
+    if (tagIdValue !== $data.tag_id) {
+      $touched.tag_id = true
+    }
+  }
 </script>
 
 <ExtraPanel class={clazz} title={$i18n.t('game.create')} on:close={() => dispatch('close')}>
   <RxForm class="p-4 lg:p-6" {form}>
-    <RxFormItem
-      name="name"
-      label={$i18n.t('challenge.name')}
-      hasError={$errors.name !== null}
-      errors={$errors.name || ''}
-    >
+    <RxFormItem name="name" label={$i18n.t('challenge.name')} hasError={$errors.name !== null} errors={$errors.name}>
       <RxInput
         icon="icon-[fluent--flag-16-regular]"
         class="w-full"
@@ -73,15 +72,14 @@
         placeholder={$i18n.t('challenge.name')}
       />
     </RxFormItem>
-
     <RxFormItem
       name="content"
       label={$i18n.t('challenge.content')}
       hasError={$errors.content !== null}
-      errors={$errors.content || ''}
+      errors={$errors.content}
     >
       <RxCodeBox
-        class="h-[20rem]"
+        class="h-[16rem]"
         name="content"
         disabled={loading || submitting}
         hasError={$errors.content !== null}
@@ -92,10 +90,10 @@
       name="tag_id"
       label={$i18n.t('challenge.tag_id')}
       hasError={$errors.tag_id !== null}
-      errors={$errors.tag_id || ''}
+      errors={$errors.tag_id}
       class="relative"
     >
-      <RxSelect
+      <!-- <RxSelect
         name="tag_id"
         disabled={loading || submitting}
         availableOptions={tags
@@ -104,6 +102,14 @@
           }) //@ts-expect-error id is string | number | null
           .concat([{ id: null, label: 'NONE' }])}
         value={challenge.tag_id}
+      /> -->
+      <RxRadioGroup
+        class="w-full"
+        direction="row"
+        items={tags.map((i) => {
+          return { value: i.id, label: i.name }
+        })}
+        bind:value={$data.tag_id}
       />
     </RxFormItem>
     <div class="flex flex-row space-x-4">
@@ -111,7 +117,7 @@
         name="initial_score"
         label={$i18n.t('challenge.initial_score')}
         hasError={$errors.initial_score !== null}
-        errors={$errors.initial_score || ''}
+        errors={$errors.initial_score}
       >
         <RxInput
           icon="icon-[fluent--person-20-regular]"
@@ -128,7 +134,7 @@
         name="minimum_score"
         label={$i18n.t('challenge.minimum_score')}
         hasError={$errors.minimum_score !== null}
-        errors={$errors.minimum_score || ''}
+        errors={$errors.minimum_score}
       >
         <RxInput
           icon="icon-[fluent--person-20-regular]"
@@ -145,7 +151,7 @@
         name="decay"
         label={$i18n.t('challenge.decay')}
         hasError={$errors.decay !== null}
-        errors={$errors.decay || ''}
+        errors={$errors.decay}
       >
         <RxInput
           icon="icon-[fluent--person-20-regular]"

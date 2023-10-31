@@ -56,7 +56,7 @@
     <p class="text-base mt-2 opacity-80 text-center">{$i18n.t('init.welcome3')}</p>
     <p class="text-base mt-2 opacity-80 text-center">{$i18n.t('init.welcome4')}</p>
     <RxForm {form} class="w-full max-w-3xl mt-12">
-      <RxFormItem name="init_token" label="" hasError={$errors.init_token !== null} errors={$errors.init_token || ''}>
+      <RxFormItem name="init_token" label="" hasError={$errors.init_token !== null} errors={$errors.init_token}>
         <RxInput
           icon="icon-[fluent--lock-20-regular]"
           class="w-full"

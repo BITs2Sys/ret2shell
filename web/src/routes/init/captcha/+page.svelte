@@ -66,14 +66,14 @@
       <span class="icon-[fluent--chevron-double-left-20-regular] opacity-60" />
     </div>
     <RxForm {form}>
-      <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled || ''}>
+      <RxFormItem name="enabled" label="" hasError={$errors.enabled !== null} errors={$errors.enabled}>
         <RxCheckBox id="enabled" name="enabled" label={$i18n.t('init.captchaEnabled')} />
       </RxFormItem>
       <RxFormItem
         name="difficulty"
         label={$i18n.t('init.captchaDifficulty')}
         hasError={$errors.difficulty !== null}
-        errors={$errors.difficulty || ''}
+        errors={$errors.difficulty}
       >
         <RxInput
           icon="icon-[fluent--hand-left-20-regular]"
@@ -90,7 +90,7 @@
         name="validator"
         label={$i18n.t('init.captchaValidator')}
         hasError={$errors.validator !== null}
-        errors={$errors.validator || ''}
+        errors={$errors.validator}
       >
         <RxRadioGroup
           class="w-full"
