@@ -18,7 +18,7 @@ const ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     map.insert(b'1', vec![b'I', b'l']);
     map.insert(b'2', vec![b'Z', b'z']);
     map.insert(b'3', vec![b'E', b'e']);
-    map.insert(b'4', vec![b'#', b'a']);
+    map.insert(b'4', vec![b'@', b'a']);
     map.insert(b'5', vec![b'S', b's']);
     map.insert(b'6', vec![b'b', b'B']);
     map.insert(b'7', vec![b'T', b't']);
@@ -26,7 +26,7 @@ const ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     map.insert(b'9', vec![b'g', b'q']);
     map.insert(b'a', vec![b'@', b'4']);
     map.insert(b'b', vec![b'B', b'6']);
-    map.insert(b'c', vec![b'C', b'(']);
+    map.insert(b'c', vec![b'C', b'<']);
     map.insert(b'd', vec![b'D', b'&']);
     map.insert(b'e', vec![b'E', b'3']);
     map.insert(b'f', vec![b'F', b'7']);
@@ -52,10 +52,10 @@ const ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     map.insert(b'z', vec![b'Z', b'2']);
     map.insert(b'A', vec![b'@', b'4']);
     map.insert(b'B', vec![b'b', b'8']);
-    map.insert(b'C', vec![b'c', b'(']);
+    map.insert(b'C', vec![b'c', b'<']);
     map.insert(b'D', vec![b'd', b'&']);
     map.insert(b'E', vec![b'e', b'3']);
-    map.insert(b'F', vec![b'f', b'=']);
+    map.insert(b'F', vec![b'f', b'7']);
     map.insert(b'G', vec![b'g', b'9']);
     map.insert(b'H', vec![b'h', b'#']);
     map.insert(b'I', vec![b'i', b'1']);
@@ -76,11 +76,11 @@ const ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     map.insert(b'X', vec![b'x', b'K']);
     map.insert(b'Y', vec![b'y', b'V']);
     map.insert(b'Z', vec![b'z', b'2']);
-    map.insert(b'_', vec![b'-', b'=']);
-    map.insert(b'-', vec![b'_', b'=']);
-    map.insert(b'=', vec![b'-', b'_']);
-    map.insert(b'!', vec![b'1', b'l']);
-    map.insert(b'@', vec![b'2', b'@']);
+    map.insert(b'_', vec![b'-', b'.']);
+    map.insert(b'-', vec![b'_', b'.']);
+    map.insert(b'.', vec![b'-', b'_']);
+    map.insert(b'!', vec![b'_', b'-']);
+    map.insert(b'@', vec![b'A', b'a']);
     map
 });
 
@@ -285,16 +285,10 @@ pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagE
         )));
     }
     // turn 64 bit encrypted_user_id to u64
-    let mut encrypted_user_id = u64::from_be_bytes([
-        encrypted_user_id[0],
-        encrypted_user_id[1],
-        encrypted_user_id[2],
-        encrypted_user_id[3],
-        encrypted_user_id[4],
-        encrypted_user_id[5],
-        encrypted_user_id[6],
-        encrypted_user_id[7],
-    ]);
+    let mut encrypted_user_id =
+        u64::from_be_bytes((&encrypted_user_id[0..8]).try_into().map_err(|err| {
+            FlagError::FlagDataBroken(format!("user_id = {:?}, err = {:?}", user_id, err))
+        })?);
     // println!("encrypted_user_id = {}", encrypted_user_id);
     let mut flag = String::new();
     // iterate over flag_template
@@ -372,10 +366,10 @@ pub fn get_user_id_from_flag(flag_template: &str, flag: &str) -> Result<i64, Fla
             .0;
     }
     let user_id = decrypt_raw(&Vec::from(user_id.to_be_bytes()), "TH3-G3NU1NE-REVERIER");
-    let user_id = i64::from_be_bytes([
-        user_id[0], user_id[1], user_id[2], user_id[3], user_id[4], user_id[5], user_id[6],
-        user_id[7],
-    ]);
+    let user_id = i64::from_be_bytes((&user_id[0..8]).try_into().map_err(|err| {
+        FlagError::FlagDataBroken(format!("user_id = {:?}, err = {:?}", user_id, err))
+    })?);
+
     Ok(user_id)
 }
 
