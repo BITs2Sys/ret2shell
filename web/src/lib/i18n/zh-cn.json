@@ -758,7 +758,7 @@
     "notFound": "未找到题目",
     "fetchStatisticsFailed": "获取题目统计数据失败",
     "submissionCount": "总提交次数",
-    "solvesCount": "正确提交人数",
+    "solvesCount": "正确提交次数",
     "failsCount": "错误提交次数",
     "solvesPercentage": "正确率",
     "currentScore": "当前分数",
