@@ -50,8 +50,8 @@
 
   let actions: DTColumnAction[] = [
     {
-      icon: 'icon-[fluent--chevron-double-right-20-regular]',
-      label: $i18n.t('admin.enter'),
+      icon: 'icon-[fluent--arrow-enter-left-20-regular]',
+      label: '',
       level: 'info',
       type: 'link',
       href: '/admin/games/{id}',
