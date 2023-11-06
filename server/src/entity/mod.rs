@@ -7,6 +7,7 @@ pub mod announcement;
 pub mod answer;
 pub mod calendar;
 pub mod challenge;
+pub mod cheat_record;
 pub mod config;
 pub mod extra;
 pub mod game;

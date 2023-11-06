@@ -47,6 +47,8 @@ pub enum Relation {
     Game,
     #[sea_orm(has_many = "super::hint::Entity")]
     Hint,
+    #[sea_orm(has_many = "super::cheat_record::Entity")]
+    CheatRecord,
     #[sea_orm(has_many = "super::instance::Entity")]
     Instance,
     #[sea_orm(has_many = "super::plan2_challenge::Entity")]
@@ -90,6 +92,12 @@ impl Related<game::Entity> for Entity {
 impl Related<super::hint::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Hint.def()
+    }
+}
+
+impl Related<super::cheat_record::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::CheatRecord.def()
     }
 }
 

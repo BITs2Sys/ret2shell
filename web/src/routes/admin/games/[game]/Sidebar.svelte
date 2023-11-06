@@ -44,7 +44,7 @@
       name: $i18n.t('admin.routes.submissions'),
       icon: 'icon-[fluent--people-20-regular]',
       link: `/admin/games/${$admin.game?.id}/submissions`,
-    }
+    },
   ]
 </script>
 
