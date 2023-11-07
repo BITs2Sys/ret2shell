@@ -822,5 +822,14 @@
   },
   "submissions": {
     "fetchFailed": "获取提交记录失败"
+  },
+  "hint": {
+    "created_at": "发布时间",
+    "content": "内容",
+    "new": "添加新提示...",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败",
+    "createSuccess": "创建成功",
+    "createFailed": "创建失败"
   }
 }

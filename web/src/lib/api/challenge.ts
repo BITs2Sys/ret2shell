@@ -50,6 +50,14 @@ export async function getChallengeHints(id: number) {
   return (await api.get(`${api_root}/challenge/${id}/hint`)).data as Hint[]
 }
 
+export async function createHint(challenge_id: number, hint: Hint) {
+  return (await api.post(`${api_root}/challenge/${challenge_id}/hint`, hint)).data as Hint
+}
+
+export async function deleteHint(challenge_id: number, id: number) {
+  return await api.delete(`${api_root}/challenge/${challenge_id}/hint?hint_id=${id}`)
+}
+
 export async function submitFlag(submission: Submission) {
   return (await api.post(`${api_root}/challenge/${submission.challenge_id}/submission`, submission)).data as {
     result: boolean

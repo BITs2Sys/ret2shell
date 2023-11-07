@@ -822,5 +822,14 @@
   },
   "submissions": {
     "fetchFailed": "Failed to get submission record"
+  },
+  "hint": {
+    "created_at": "Release time",
+    "content": "Content",
+    "new": "Add a new hint...",
+    "deleteSuccess": "successfully deleted",
+    "deleteFailed": "failed to delete",
+    "createSuccess": "Created successfully",
+    "createFailed": "Creatie failed"
   }
 }
