@@ -1,7 +1,10 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::{m20210101_000002_create_user::User, m20210101_000004_create_game::Game};
+use super::{
+    m20210101_000002_create_user::User, m20210101_000004_create_game::Game,
+    m20210101_000008_create_team::Team,
+};
 
 pub struct Migration;
 
@@ -20,6 +23,7 @@ pub enum WriteUp {
     UpdatedAt,
     PublishedAt,
     AuthorId,
+    TeamId,
     GameId,
     Hidden,
     Content,
@@ -52,11 +56,19 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(WriteUp::AuthorId).big_integer())
+                    .col(ColumnDef::new(WriteUp::AuthorId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .from(WriteUp::Table, WriteUp::AuthorId)
                             .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .col(ColumnDef::new(WriteUp::TeamId).big_integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(WriteUp::Table, WriteUp::TeamId)
+                            .to(Team::Table, Team::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),
                     )

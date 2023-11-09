@@ -3,8 +3,11 @@
 use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
-use sea_orm::{ActiveValue, IntoActiveModel, Iterable, QueryOrder, QuerySelect};
+use sea_orm::{ActiveValue, FromQueryResult, IntoActiveModel, Iterable, QueryOrder, QuerySelect};
+use sea_query::JoinType;
 use serde::{Deserialize, Serialize};
+
+use super::team::get_team_by_user_id;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "write_up")]
@@ -17,10 +20,20 @@ pub struct Model {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub updated_at: DateTime<Utc>,
     pub author_id: Option<i64>,
+    pub team_id: Option<i64>,
     pub game_id: i64,
     pub hidden: bool,
     #[sea_orm(column_type = "Text")]
     pub content: Option<String>,
+}
+
+#[derive(FromQueryResult, Serialize)]
+pub struct ModelOnlyTeamInfo {
+    pub id: i64,
+    pub title: String,
+    pub team_id: Option<i64>,
+    pub team_name: String,
+    pub hidden: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -41,6 +54,14 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     User,
+    #[sea_orm(
+        belongs_to = "super::team::Entity",
+        from = "Column::TeamId",
+        to = "super::team::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    Team,
 }
 
 impl Related<super::game::Entity> for Entity {
@@ -55,6 +76,12 @@ impl Related<super::user::Entity> for Entity {
     }
 }
 
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
+    }
+}
+
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_writeup_page(
@@ -63,18 +90,20 @@ pub async fn get_writeup_page(
     show_hidden: bool,
     page: u64,
     per_page: u64,
-) -> Result<(Vec<Model>, u64), DbErr> {
+) -> Result<(Vec<ModelOnlyTeamInfo>, u64), DbErr> {
     let mut sql = Entity::find()
         .select_only()
+        .join(JoinType::InnerJoin, Relation::Team.def())
         .filter(Column::GameId.eq(game_id))
         .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
+        .column_as(super::team::Column::Name, "team_name")
         .order_by_desc(Column::PublishedAt);
     if !show_hidden {
         sql = sql.filter(Column::Hidden.eq(false))
     }
     let paginator = sql.into_model().paginate(conn, per_page);
     let num_pages = paginator.num_pages().await?;
-    let writeups: Vec<Model> = paginator.fetch_page(page - 1).await?;
+    let writeups: Vec<ModelOnlyTeamInfo> = paginator.fetch_page(page - 1).await?;
     Ok((writeups, num_pages))
 }
 
@@ -110,16 +139,22 @@ pub async fn create_writeup(
     if let Ok(Some(_)) = get_writeup_by_game_and_user_id(conn, game_id, user_id).await {
         return Err(DbErr::RecordNotInserted);
     }
-    let active_model = ActiveModel {
-        id: ActiveValue::NotSet,
-        published_at: ActiveValue::Set(Utc::now()),
-        updated_at: ActiveValue::Set(Utc::now()),
-        hidden: ActiveValue::Set(true),
-        author_id: ActiveValue::Set(Some(user_id)),
-        game_id: ActiveValue::Set(game_id),
-        ..writeup.into_active_model().reset_all()
-    };
-    active_model.insert(conn).await
+    match get_team_by_user_id(conn, game_id, user_id).await? {
+        Some(team) => {
+            let active_model = ActiveModel {
+                id: ActiveValue::NotSet,
+                published_at: ActiveValue::Set(Utc::now()),
+                updated_at: ActiveValue::Set(Utc::now()),
+                hidden: ActiveValue::Set(true),
+                author_id: ActiveValue::Set(Some(user_id)),
+                team_id: ActiveValue::Set(Some(team.id)),
+                game_id: ActiveValue::Set(game_id),
+                ..writeup.into_active_model().reset_all()
+            };
+            active_model.insert(conn).await
+        }
+        None => return Err(DbErr::RecordNotFound("team".to_string())),
+    }
 }
 
 pub async fn update_writeup(
@@ -135,6 +170,7 @@ pub async fn update_writeup(
         updated_at: ActiveValue::Set(Utc::now()),
         hidden: ActiveValue::NotSet,
         author_id: ActiveValue::NotSet,
+        team_id: ActiveValue::NotSet,
         ..writeup.into_active_model().reset_all()
     };
     active_model.update(conn).await

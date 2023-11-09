@@ -61,7 +61,7 @@ struct WriteupListQuery {
 
 #[derive(Serialize)]
 struct WriteupList {
-    pub writeups: Vec<write_up::Model>,
+    pub writeups: Vec<write_up::ModelOnlyTeamInfo>,
     pub total: u64,
 }
 

@@ -117,6 +117,8 @@ pub enum Relation {
     Institute,
     #[sea_orm(has_many = "super::cheat_record::Entity")]
     CheatRecord,
+    #[sea_orm(has_many = "super::write_up::Entity")]
+    WriteUp,
     #[sea_orm(has_many = "super::user2_team::Entity")]
     User2Team,
     #[sea_orm(has_many = "super::submission::Entity")]
@@ -140,6 +142,13 @@ impl Related<super::cheat_record::Entity> for Entity {
         Relation::CheatRecord.def()
     }
 }
+
+impl Related<super::write_up::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::WriteUp.def()
+    }
+}
+
 impl Related<super::user2_team::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::User2Team.def()
