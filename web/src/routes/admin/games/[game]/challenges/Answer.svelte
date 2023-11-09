@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    createChallengeAnswer,
-    deleteChallengeAnswer,
-    getChallengeAnswer,
-    updateChallengeAnswer,
-  } from '$lib/api/challenge'
+  import { createChallengeAnswer, getChallengeAnswer, updateChallengeAnswer } from '$lib/api/challenge'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCodeBox from '$lib/components/RxCodeBox.svelte'
   import RxForm from '$lib/components/RxForm.svelte'
@@ -45,7 +40,7 @@
       .min(1, { message: $i18n.t('answer.contentRequired') }),
   })
 
-  const { form, data, touched, errors } = createForm({
+  const { form, data, errors } = createForm({
     extend: validator({ schema }),
     onSubmit(values) {
       if (answerExists === null) return
@@ -88,7 +83,6 @@
     loading = true
     getChallengeAnswer(challenge.id)
       .then((res) => {
-        // showMessage('success', $i18n.t('answer.fetchSuccess'), 5000)
         answerExists = true
         answer = res
         data.update(() => {
@@ -101,38 +95,6 @@
       })
       .finally(() => {
         loading = false
-      })
-  }
-
-  function handleCreateAnswer() {
-    submitting = true
-    const newAnswer: Answer = {
-      ...answer,
-      ...data,
-    }
-    updateChallengeAnswer(challenge.id, newAnswer)
-      .then(() => {
-        showMessage('success', $i18n.t('answer.updateSuccess'), 5000)
-      })
-      .catch((err) => {
-        showMessage('error', `${$i18n.t('answer.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)
-      })
-      .finally(() => {
-        submitting = false
-      })
-  }
-
-  function handleDeleteAnswer() {
-    submitting = true
-    deleteChallengeAnswer(challenge.id)
-      .then(() => {
-        showMessage('success', $i18n.t('answer.deleteSuccess'), 5000)
-      })
-      .catch((err) => {
-        showMessage('error', `${$i18n.t('answer.deleteFailed')}: ${(err as AxiosError).response?.data}`, 5000)
-      })
-      .finally(() => {
-        submitting = false
       })
   }
 

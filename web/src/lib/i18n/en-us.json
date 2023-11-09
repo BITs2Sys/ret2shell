@@ -837,6 +837,12 @@
     "content": "Answer Content",
     "titleRequired": "Please enter the answer title",
     "contentRequired": "Please enter the answer content",
-    "fetchFailed": "No Answer records were got"
+    "fetchFailed": "No Answer records were got",
+    "createFailed": "Failed to create answer",
+    "createSuccess": "Create answer successfully",
+    "updateFailed": "Failed to update answer",
+    "updateSuccess": "Answer updated successfully",
+    "submiting": "Submiting",
+    "submit": "Submit"
   }
 }

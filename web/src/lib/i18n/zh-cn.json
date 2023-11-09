@@ -837,6 +837,12 @@
     "content": "题解内容",
     "titleRequired": "请输入题解标题",
     "contentRequired": "请输入题解内容",
-    "fetchFailed": "未获取到题解记录"
+    "fetchFailed": "未获取到题解记录",
+    "createFailed": "创建题解失败",
+    "createSuccess": "创建题解成功",
+    "updateFailed": "题解更新失败",
+    "updateSuccess": "题解更新成功",
+    "submiting": "正在提交",
+    "submit": "提交"
   }
 }
