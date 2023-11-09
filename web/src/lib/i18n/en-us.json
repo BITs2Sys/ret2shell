@@ -831,5 +831,12 @@
     "deleteFailed": "failed to delete",
     "createSuccess": "Created successfully",
     "createFailed": "Creatie failed"
+  },
+  "answer": {
+    "title": "Answer Title",
+    "content": "Answer Content",
+    "titleRequired": "Please enter the answer title",
+    "contentRequired": "Please enter the answer content",
+    "fetchFailed": "No Answer records were got"
   }
 }

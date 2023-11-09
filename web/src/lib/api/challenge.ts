@@ -124,3 +124,19 @@ export async function getChallengeStatistics(id: number) {
     running_instances_count: number
   }
 }
+
+export async function getChallengeAnswer(challenge_id: number) {
+  return (await api.get(`${api_root}/challenge/${challenge_id}/answer`)).data as Answer
+}
+
+export async function createChallengeAnswer(challenge_id: number, answer: Answer) {
+  return (await api.post(`${api_root}/challenge/${challenge_id}/answer`, answer)).data as Answer
+}
+
+export async function updateChallengeAnswer(challenge_id: number, answer: Answer) {
+  return (await api.patch(`${api_root}/challenge/${challenge_id}/answer`, answer)).data as Answer
+}
+
+export async function deleteChallengeAnswer(challenge_id: number) {
+  return await api.delete(`${api_root}/challenge/${challenge_id}/answer`)
+}

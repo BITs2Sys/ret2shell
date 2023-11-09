@@ -831,5 +831,12 @@
     "deleteFailed": "删除失败",
     "createSuccess": "创建成功",
     "createFailed": "创建失败"
+  },
+  "answer": {
+    "title": "题解标题",
+    "content": "题解内容",
+    "titleRequired": "请输入题解标题",
+    "contentRequired": "请输入题解内容",
+    "fetchFailed": "未获取到题解记录"
   }
 }
