@@ -848,7 +848,15 @@
   },
   "writeup": {
     "title": "Title",
-    "team_name": "Team Name"
+    "team_name": "Team Name",
+    "fetchingContent": "Fetching content...",
+    "unknownAuthor": "[Unknown]",
+    "author_name": "Author",
+    "publishedAt": "Published At",
+    "updatedAt": "Updated At",
+    "auditSuccess": "Change audit status successfully",
+    "auditFailed": "Failed to change audit status",
+    "fetchFailed": "Failed to get Write-Up"
   },
   "witeup": {
     "fetchFailed": "Failed to get Write-Up"

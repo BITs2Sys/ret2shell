@@ -2,7 +2,7 @@ import type { Game, Notification } from '$lib/models/game'
 import type { Submission, SubmissionWithInfo } from '$lib/models/submission'
 import type { Team } from '$lib/models/team'
 import type { User } from '$lib/models/user'
-import type { WriteUp, WriteUpOnlyTeamInfo } from '$lib/models/write_up'
+import type { WriteUp, WriteUpOnlyTeamInfo, WriteUpWithInfo } from '$lib/models/write_up'
 import { api, api_root } from '.'
 
 export async function getGameList(page: number, per_page: number, host_as_game?: boolean) {
@@ -139,7 +139,7 @@ export async function getGameWriteUp(game_id: number, page?: number, per_page?: 
 }
 
 export async function getGameTeamWriteUp(game_id: number, id: number) {
-  return (await api.get(`${api_root}/game/${game_id}/writeup/detail?writeup_id=${id}`)).data as WriteUp
+  return (await api.get(`${api_root}/game/${game_id}/writeup/detail?writeup_id=${id}`)).data as WriteUpWithInfo
 }
 
 export async function auditGameTeamWriteUp(game_id: number, id: number, audit: boolean) {

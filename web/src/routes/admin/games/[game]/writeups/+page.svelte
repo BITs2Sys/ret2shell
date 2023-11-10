@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
+  import type { DTColumnAction, DTColumnsDef } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import { i18n } from '$lib/i18n'
   import { platform } from '$lib/stores/platform'
@@ -7,13 +7,11 @@
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
-  import { getGameWriteUp } from '$lib/api/game'
-  import RxLink from '$lib/components/RxLink.svelte'
-  import RxButton from '$lib/components/RxButton.svelte'
-  import { blur } from 'svelte/transition'
+  import { auditGameTeamWriteUp, getGameTeamWriteUp, getGameWriteUp } from '$lib/api/game'
   import { page } from '$app/stores'
   import { onDestroy } from 'svelte'
-  import type { WriteUpOnlyTeamInfo } from '$lib/models/write_up'
+  import type { WriteUp, WriteUpOnlyTeamInfo, WriteUpWithInfo } from '$lib/models/write_up'
+  import AuditPanel from './AuditPanel.svelte'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -29,6 +27,19 @@
       team_name: `${encodeURI(a.team_name)}|${encodeURI(`/admin/games/${$admin.game?.id}/teams#${a.team_id}`)}`,
     }
   })
+  let activeWriteUp: WriteUpWithInfo = {
+    id: 0,
+    title: '',
+    content: '',
+    author_id: 0,
+    author_name: '',
+    team_id: 0,
+    team_name: '',
+    game_id: 0,
+    hidden: false,
+    published_at: 0,
+    updated_at: 0,
+  }
 
   let actions: DTColumnAction[] = [
     {
@@ -36,7 +47,7 @@
       label: '',
       level: 'info',
       type: 'link',
-      href: '#audit',
+      href: `#{id}`,
     },
   ]
 
@@ -108,14 +119,78 @@
   $: watchPage(currentPage, $admin.game)
 
   const unsubscribe = page.subscribe((val) => {
+    if (!$admin.game) {
+      window.location.hash = ''
+      return
+    }
     if (val.url.hash && val.url.hash.replace('#', '')) {
-      if (val.url.hash.replace('#', '') == 'audit') {
-        showAuditPanel = true
+      loadingWriteUp = true
+      const id = parseInt(val.url.hash.replace('#', ''))
+      showAuditPanel = true
+      if (id && !Number.isNaN(id)) {
+        let gameId = $admin.game?.id || 0
+        getGameTeamWriteUp(gameId, id)
+          .then((res) => {
+            activeWriteUp = res
+            showAuditPanel = true
+          })
+          .catch((err) => {
+            showMessage('error', `${$i18n.t('writeup.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+          })
+          .finally(() => {
+            loadingWriteUp = false
+          })
+      } else if (Number.isNaN(id)) {
+        activeWriteUp = {
+          id: 0,
+          title: '',
+          content: '',
+          author_id: 0,
+          author_name: '',
+          team_id: 0,
+          team_name: '',
+          game_id: 0,
+          hidden: false,
+          published_at: 0,
+          updated_at: 0,
+        }
+        loadingWriteUp = false
       }
     } else {
       showAuditPanel = false
+      activeWriteUp = {
+        id: 0,
+        title: '',
+        content: '',
+        author_id: 0,
+        author_name: '',
+        team_id: 0,
+        team_name: '',
+        game_id: 0,
+        hidden: false,
+        published_at: 0,
+        updated_at: 0,
+      }
     }
   })
+
+  function handleAuditWriteUp() {
+    if (!$admin.game) return
+    submitting = true
+    auditGameTeamWriteUp($admin.game.id, activeWriteUp.id, activeWriteUp.hidden)
+      .then(() => {
+        showMessage('success', $i18n.t('writeup.auditSuccess'), 5000)
+        showAuditPanel = false
+        window.location.hash = ''
+        fetchWriteUps()
+      })
+      .catch((err) => {
+        showMessage('error', `${$i18n.t('writeup.auditFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+      })
+      .finally(() => {
+        submitting = false
+      })
+  }
 
   onDestroy(() => {
     unsubscribe()
@@ -145,5 +220,7 @@
         }}
       />
     </div>
+  {:else}
+    <AuditPanel class="flex-1" writeup={activeWriteUp} {loading} {submitting} on:audit={handleAuditWriteUp} />
   {/if}
 </div>

@@ -848,7 +848,15 @@
   },
   "writeup": {
     "title": "标题",
-    "team_name": "队伍名"
+    "team_name": "战队",
+    "fetchingContent": "获取内容中...",
+    "unknownAuthor": "[未知]",
+    "author_name": "作者",
+    "publishedAt": "发布于",
+    "updatedAt": "更新于",
+    "auditSuccess": "更改审核状态成功",
+    "auditFailed": "更改审核状态失败",
+    "fetchFailed": "获取Write-Up失败"
   },
   "witeup": {
     "fetchFailed": "获取Write-Up失败"
