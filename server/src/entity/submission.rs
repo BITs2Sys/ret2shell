@@ -25,8 +25,6 @@ pub struct Model {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ModelWithInfo {
     pub id: i64,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
-    pub created_at: DateTime<Utc>,
     pub user_id: i64,
     pub challenge_id: i64,
     pub game_id: i64,
@@ -36,6 +34,8 @@ pub struct ModelWithInfo {
     pub challenge_name: String,
     pub tag_name: String,
     pub content: String,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
     pub solved: bool,
 }
 

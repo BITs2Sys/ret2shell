@@ -82,6 +82,13 @@
       sizePolicy: 'grow',
       justify: 'text-start',
     },
+    created_at: {
+      header: $i18n.t('submission.created_at'),
+      type: 'date',
+      dimmed: true,
+      sizePolicy: 'shrink',
+      justify: 'text-start',
+    },
     solved: {
       header: '',
       type: 'bool',
