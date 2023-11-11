@@ -93,6 +93,10 @@ export async function getSelfTeamMembers(game_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/team/self/members`)).data as User[]
 }
 
+export async function updateTeamInfo(game_id: number, team_id: number, team: Team) {
+  return await api.patch(`${api_root}/game/${game_id}/team/info?team_id=${team_id}`, team)
+}
+
 export async function changeTeamAudit(game_id: number, team_id: number) {
   return await api.patch(`${api_root}/game/${game_id}/team/audit?team_id=${team_id}`)
 }

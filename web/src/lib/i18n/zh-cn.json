@@ -813,7 +813,19 @@
     "name": "队伍名",
     "fetchFailed": "获取队伍信息失败",
     "auditFailed": "更改队伍审查状态失败",
-    "filterNeedAudit": "过滤待审核队伍"
+    "filterNeedAudit": "过滤待审核队伍",
+    "stateBanned": "封禁",
+    "stateNeedAudit": "需要审核",
+    "stateNormal": "正常",
+    "stateHidden": "隐藏",
+    "updating": "正在更新",
+    "update": "更新",
+    "state": "队伍状态",
+    "namePlaceholder": "请输入队伍名",
+    "edit": "队伍修改",
+    "nameRequired": "请输入队伍名",
+    "updateSuccess": "更新队伍成功",
+    "updateFailed": "更新队伍失败"
   },
   "submission": {
     "user_name": "提交者",

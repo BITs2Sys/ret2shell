@@ -813,7 +813,19 @@
     "name": "Team name",
     "fetchFailed": "Failed to get team information",
     "auditFailed": "Failed to change team audit status",
-    "filterNeedAudit": "Filter teams to be audited"
+    "filterNeedAudit": "Filter teams to be audited",
+    "stateBanned": "Banned",
+    "stateNeedAudit": "Need Audit",
+    "stateNormal": "Normal",
+    "stateHidden": "Hidden",
+    "updating": "Updating",
+    "update": "Update",
+    "state": "Team State",
+    "namePlaceholder": "Please enter team name",
+    "edit": "Edit Team",
+    "nameRequired": "Please enter team name",
+    "updateSuccess": "Update team successfully",
+    "updateFailed": "Failed to update team"
   },
   "submission": {
     "user_name": "Submitter",

@@ -7,14 +7,16 @@
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
-  import { changeTeamAudit, getGameTeamList } from '$lib/api/game'
+  import { changeTeamAudit, getGameTeamList, getTeamInfo, updateTeamInfo } from '$lib/api/game'
   import { State, type Team } from '$lib/models/team'
   import { getInstituteList } from '$lib/api/user'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { Institute } from '$lib/models/institute'
   import RxInput from '$lib/components/RxInput.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
+  import EditPanel from './EditPanel.svelte'
+  import { page } from '$app/stores'
 
   let currentPage: number = 1
   let perPage: number = 15
@@ -23,6 +25,20 @@
   let teams: Team[] = []
   let filter: string = ''
   let filterNeedAudit: boolean = false
+  let showEditPanel: boolean = false
+  let loadingTeam: boolean = false
+  let submitting: boolean = false
+  let activeTeam: Team = {
+    id: 0,
+    name: '',
+    game_id: 0,
+    token: '',
+    state: 0,
+    institute_id: 0,
+    score: 0,
+    history: [],
+    last_active_at: 0,
+  }
 
   let actions: DTColumnAction[] = [
     {
@@ -196,6 +212,23 @@
       })
   }
 
+  function handleUpdateTeam(newTeam: Team) {
+    if (!$admin.game) return
+    submitting = true
+    updateTeamInfo($admin.game.id, newTeam.id, newTeam)
+      .then(() => {
+        showMessage('success', $i18n.t('team.updateSuccess'), 5000)
+        fetchTeams()
+        window.location.hash = ''
+      })
+      .catch((err) => {
+        showMessage('error', `${$i18n.t('team.updateFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+      })
+      .finally(() => {
+        submitting = false
+      })
+  }
+
   $: {
     if (filterNeedAudit !== storedFilter) {
       currentPage = 1
@@ -203,64 +236,134 @@
       storedFilter = filterNeedAudit
     }
   }
+  const unsubscribe = page.subscribe((val) => {
+    if (!$admin.game) {
+      window.location.hash = ''
+      return
+    }
+    if (val.url.hash && val.url.hash.replace('#', '')) {
+      loadingTeam = true
+      const id = parseInt(val.url.hash.replace('#', ''))
+      if (id && !Number.isNaN(id)) {
+        let gameId = $admin.game?.id || 0
+        getTeamInfo(gameId, id)
+          .then((res) => {
+            activeTeam = res
+            showEditPanel = true
+          })
+          .catch((err) => {
+            showMessage('error', `${$i18n.t('writeup.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
+          })
+          .finally(() => {
+            loadingTeam = false
+          })
+      } else if (Number.isNaN(id)) {
+        activeTeam = {
+          id: 0,
+          name: '',
+          game_id: 0,
+          token: '',
+          state: 0,
+          institute_id: 0,
+          score: 0,
+          history: [],
+          last_active_at: 0,
+        }
+        loadingTeam = false
+      }
+    } else {
+      showEditPanel = false
+      activeTeam = {
+        id: 0,
+        name: '',
+        game_id: 0,
+        token: '',
+        state: 0,
+        institute_id: 0,
+        score: 0,
+        history: [],
+        last_active_at: 0,
+      }
+    }
+  })
 
   onMount(() => {
     fetchInstitutes()
+  })
+
+  onDestroy(() => {
+    unsubscribe()
   })
 </script>
 
 <svelte:head><title>{$i18n.t('admin.teamListSettings')} - {$platform.name}</title></svelte:head>
 <div class="w-full flex-1 flex flex-col relative">
-  <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
-    <div class="h-16 flex flex-row items-center space-x-2">
-      <h2 class="text-base font-bold flex-1">{$i18n.t('admin.teamListSettings')}</h2>
-      <RxCheckBox
-        id="needAudit"
-        name="needAudit"
-        bind:checked={filterNeedAudit}
-        label={$i18n.t('team.filterNeedAudit')}
-      />
-      <div>
-        <RxInput
-          size="sm"
-          placeholder={$i18n.t('admin.filter')}
-          icon="icon-[fluent--question-20-regular]"
-          bind:value={filter}
-        >
-          <RxButton
-            class="join-item ml-0"
+  {#if !showEditPanel}
+    <div class="w-full flex-1 flex flex-col px-6 lg:px-12">
+      <div class="h-16 flex flex-row items-center space-x-2">
+        <h2 class="text-base font-bold flex-1">{$i18n.t('admin.teamListSettings')}</h2>
+        <RxCheckBox
+          id="needAudit"
+          name="needAudit"
+          bind:checked={filterNeedAudit}
+          label={$i18n.t('team.filterNeedAudit')}
+        />
+        <div>
+          <RxInput
             size="sm"
-            on:click={() => {
-              fetchTeams()
-            }}
+            placeholder={$i18n.t('admin.filter')}
+            icon="icon-[fluent--question-20-regular]"
+            bind:value={filter}
           >
-            <span class="icon-[fluent--filter-20-regular] w-5 h-5"></span>
-          </RxButton>
-        </RxInput>
+            <RxButton
+              class="join-item ml-0"
+              size="sm"
+              on:click={() => {
+                fetchTeams()
+              }}
+            >
+              <span class="icon-[fluent--filter-20-regular] w-5 h-5"></span>
+            </RxButton>
+          </RxInput>
+        </div>
       </div>
+      <DataTable
+        class="flex-1"
+        {actions}
+        data={renderTeams}
+        {colDef}
+        bind:page={currentPage}
+        {total}
+        {loading}
+        booleanIconsDef={{
+          hidden: {
+            true: 'icon-[fluent--eye-off-20-regular] text-warning',
+            false: '',
+          },
+          banned: {
+            true: 'icon-[fluent--circle-off-20-regular] text-error',
+            false: 'icon-[fluent--checkmark-circle-20-regular] text-success',
+          },
+          needAudit: {
+            true: 'icon-[fluent--question-circle-20-regular] text-info',
+            false: '',
+          },
+        }}
+      />
     </div>
-    <DataTable
+  {:else}
+    <EditPanel
       class="flex-1"
-      {actions}
-      data={renderTeams}
-      {colDef}
-      bind:page={currentPage}
-      {total}
-      {loading}
-      booleanIconsDef={{
-        hidden: {
-          true: 'icon-[fluent--eye-off-20-regular] text-warning',
-          false: '',
-        },
-        banned: {
-          true: 'icon-[fluent--circle-off-20-regular] text-error',
-          false: 'icon-[fluent--checkmark-circle-20-regular] text-success',
-        },
-        needAudit: {
-          true: 'icon-[fluent--question-circle-20-regular] text-info',
-          false: '',
-        },
+      bind:team={activeTeam}
+      {institutes}
+      loading={loadingTeam}
+      {submitting}
+      on:close={() => {
+        window.location.hash = ''
+      }}
+      on:submit={(event) => {
+        handleUpdateTeam(event.detail)
       }}
     />
-  </div>
+  {/if}
 </div>
