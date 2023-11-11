@@ -1,5 +1,6 @@
 use crate::controller::GlobalState;
 use axum::Router;
+use serde::{Deserialize, Serialize};
 
 /*
  * Repo router
@@ -15,4 +16,11 @@ use axum::Router;
  */
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct EntryItem {
+    name: String,
+    is_dir: bool,
+    size: u64,
 }
