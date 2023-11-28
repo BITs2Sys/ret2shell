@@ -627,7 +627,8 @@
     "create": "Create game",
     "creating": "Game creating",
     "createSuccess": "Game created successfully",
-    "createFailed": "Failed to create game"
+    "createFailed": "Failed to create game",
+    "is_offline": "Offline game"
   },
   "challenges": {
     "noHint": "No hints yet",

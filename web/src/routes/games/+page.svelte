@@ -88,8 +88,11 @@
     }
     let gameId = value.url.hash ? parseInt(value.url.hash.slice(1)) || null : null
     if (gameId) {
+      // console.log('gameId', gameId)
+      // console.log('games', games)
       $game.cached = games.find((item) => item.id === gameId) || null
-      if (!$game.cached) loading = true
+      if ($game.cached) return
+      loading = true
       getGame(gameId)
         .then((res) => {
           if (!res.host_as_game) {

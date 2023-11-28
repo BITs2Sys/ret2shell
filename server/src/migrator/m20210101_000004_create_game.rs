@@ -32,6 +32,7 @@ pub enum Game {
     CanRegisterAfterStarted,
     InstituteId,
     BloodAwardRate,
+    IsOffline,
 }
 
 #[async_trait::async_trait]
@@ -78,6 +79,7 @@ impl MigrationTrait for Migration {
                             .not_null(),
                     )
                     .col(ColumnDef::new(Game::Hidden).boolean().not_null())
+                    .col(ColumnDef::new(Game::IsOffline).boolean().not_null())
                     .col(ColumnDef::new(Game::Frozen).boolean().not_null())
                     .col(ColumnDef::new(Game::HostAsGame).boolean().not_null())
                     .col(ColumnDef::new(Game::TeamSizeLimit).integer().not_null())

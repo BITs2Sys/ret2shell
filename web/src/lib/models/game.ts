@@ -11,6 +11,7 @@ export interface Game {
   hidden: boolean
   frozen: boolean
   host_as_game: boolean
+  is_offline: boolean
   team_size_limit: number
   cover_path: string | null
   enable_team_audit: boolean

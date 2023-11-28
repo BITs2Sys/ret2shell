@@ -26,6 +26,7 @@ pub struct Model {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub archive_time: DateTime<Utc>,
     pub hidden: bool,
+    pub is_offline: bool,
     pub frozen: bool,
     pub host_as_game: bool,
     pub team_size_limit: i32,

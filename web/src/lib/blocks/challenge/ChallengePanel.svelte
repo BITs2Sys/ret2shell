@@ -52,16 +52,18 @@
         solved
           ? 'icon-[fluent--checkmark-circle-24-regular] text-success'
           : 'icon-[fluent--question-circle-24-regular] text-base-content/60'
-      } transition-all transform ${challengeScrollExpanded ? 'w-16 h-16 mr-4' : 'w-6 h-6 mr-2'}`}
+      } flex-shrink-0 transition-all transform ${challengeScrollExpanded ? 'w-16 h-16 mr-4' : 'w-6 h-6 mr-2'}`}
     />
-    <div class="flex flex-col">
-      <h1
-        class={`font-bold transition-all transform ${
-          challengeScrollExpanded ? 'text-2xl' : 'text-base'
-        } flex flex-row space-x-2 items-center`}
-      >
-        <span>{challenge?.name}</span>
-      </h1>
+    <div class="flex flex-col overflow-hidden">
+      <div class="overflow-hidden">
+        <h1
+          class={`font-bold transition-all transform truncate ${
+            challengeScrollExpanded ? 'text-2xl' : 'text-base'
+          } w-full`}
+        >
+          {challenge?.name}
+        </h1>
+      </div>
       <p
         class={`overflow-hidden transition-all flex flex-col justify-end ${
           challengeScrollExpanded ? 'h-8 opacity-60' : 'h-0 opacity-0'
@@ -72,8 +74,9 @@
       </p>
     </div>
     <div class="flex-1"></div>
-    <div class={`flex ${challengeScrollExpanded ? 'flex-col' : 'flex-row space-x-2'}`}>
+    <div class={`flex flex-shrink-0 ${challengeScrollExpanded ? 'flex-col' : 'flex-row space-x-2'}`}>
       <RxButton
+        class="flex-shrink-0"
         ghost
         square={!challengeScrollExpanded}
         justify={challengeScrollExpanded ? 'start' : 'center'}

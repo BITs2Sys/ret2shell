@@ -91,6 +91,9 @@
     qq: { id: null },
     xdu: { id: null },
   }
+
+  // iterate oauthIds and find out some id that are not null
+  $: haveOauthIds = Object.values(oauthIds).some((v) => v.id !== null)
 </script>
 
 <svelte:head><title>{$i18n.t('account.login')} - {$platform.name}</title></svelte:head>
@@ -148,36 +151,38 @@
         <img class="object-fit max-h-40" src={Logo} alt="Ret2Shell" />
       </div>
       <RxLink class="w-full" href="/account/register">{$i18n.t('account.registerTips')}</RxLink>
-      <div class="divider opacity-60">{$i18n.t('account.3rdAuth')}</div>
-      <div class="w-full flex flex-row space-x-2 justify-between">
-        {#if oauthIds.xdu.id !== null}
-          <RxLink
-            href={`https://ids.xidian.edu.cn/authserver/login?service=${$page.url.origin}/account/oauth%3Fprovider=xdu`}
-            square
-            title="西安电子科技大学 统一身份认证"
-          >
-            <XDU width={32} height={32} />
-          </RxLink>
-        {/if}
-        {#if oauthIds.github.id !== null}
-          <RxLink
-            href={`https://github.com/login/oauth/authorize?client_id=${oauthIds.github.id}&redirect_uri=${$page.url.origin}/account/oauth%3Fprovider=github`}
-            title="GitHub Accounts"
-            square
-          >
-            <GitHub />
-          </RxLink>
-        {/if}
-        {#if oauthIds.gitlab.id !== null}
-          <RxLink href="" square title="GitLab Accounts"><GitLab /></RxLink>
-        {/if}
-        {#if oauthIds.google.id !== null}
-          <RxLink href="" square title="Google Accounts"><Google /></RxLink>
-        {/if}
-        {#if oauthIds.qq.id !== null}
-          <RxLink href="" title="QQ账号登录" square><QQ /></RxLink>
-        {/if}
-      </div>
+      {#if haveOauthIds}
+        <div class="divider opacity-60">{$i18n.t('account.3rdAuth')}</div>
+        <div class="w-full flex flex-row space-x-2 justify-between">
+          {#if oauthIds.xdu.id !== null}
+            <RxLink
+              href={`https://ids.xidian.edu.cn/authserver/login?service=${$page.url.origin}/account/oauth%3Fprovider=xdu%26action=login`}
+              square
+              title="西安电子科技大学 统一身份认证"
+            >
+              <XDU width={32} height={32} />
+            </RxLink>
+          {/if}
+          {#if oauthIds.github.id !== null}
+            <RxLink
+              href={`https://github.com/login/oauth/authorize?client_id=${oauthIds.github.id}&redirect_uri=${$page.url.origin}/account/oauth%3Fprovider=github%26action=login`}
+              title="GitHub Accounts"
+              square
+            >
+              <GitHub />
+            </RxLink>
+          {/if}
+          {#if oauthIds.gitlab.id !== null}
+            <RxLink href="" square title="GitLab Accounts"><GitLab /></RxLink>
+          {/if}
+          {#if oauthIds.google.id !== null}
+            <RxLink href="" square title="Google Accounts"><Google /></RxLink>
+          {/if}
+          {#if oauthIds.qq.id !== null}
+            <RxLink href="" title="QQ账号登录" square><QQ /></RxLink>
+          {/if}
+        </div>
+      {/if}
     </div>
   </RxCard>
 </div>

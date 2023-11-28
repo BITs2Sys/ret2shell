@@ -4,11 +4,9 @@
   import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
   import GitHub from '$lib/assets/brands/github.svelte'
   import Google from '$lib/assets/brands/google.svelte'
-  import Microsoft from '$lib/assets/brands/microsoft.svelte'
   import GitLab from '$lib/assets/brands/gitlab.svelte'
   import QQ from '$lib/assets/brands/qq.svelte'
   import XDU from '$lib/assets/brands/xdu.svelte'
-  import { page } from '$app/stores'
   import { queryParam } from 'sveltekit-search-params'
   import RxCard from '$lib/components/RxCard.svelte'
   import { fly, blur } from 'svelte/transition'
@@ -19,7 +17,6 @@
   $: iconSource = {
     github: GitHub,
     google: Google,
-    microsoft: Microsoft,
     gitlab: GitLab,
     qq: QQ,
     xdu: XDU,

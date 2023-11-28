@@ -627,7 +627,8 @@
     "create": "创建比赛",
     "creating": "正在创建比赛",
     "createSuccess": "创建比赛成功",
-    "createFailed": "创建比赛失败"
+    "createFailed": "创建比赛失败",
+    "is_offline": "线下断网比赛"
   },
   "challenges": {
     "noHint": "暂无提示信息",

@@ -48,6 +48,7 @@
     frozen: z.boolean(),
     host_as_game: z.boolean(),
     enable_team_audit: z.boolean(),
+    is_offline: z.boolean(),
     can_register_after_started: z.boolean(),
     start_time: z
       .number()
@@ -122,7 +123,7 @@
           />
         </RxFormItem>
         <div class="flex-1"></div>
-        <div class="flex flex-row space-x-4">
+        <div class="flex flex-row space-x-2">
           <RxFormItem
             name="host_as_game"
             label=""
@@ -162,6 +163,14 @@
               checked={game.can_register_after_started}
             />
           </RxFormItem>
+          <RxFormItem name="is_offline" label="" hasError={$errors.is_offline !== null} errors={$errors.is_offline}>
+            <RxCheckBox
+              name="is_offline"
+              label={$i18n.t('game.is_offline')}
+              disabled={loading || submitting}
+              checked={game.is_offline}
+            />
+          </RxFormItem>
           <RxFormItem name="hidden" label="" hasError={$errors.hidden !== null} errors={$errors.hidden}>
             <RxCheckBox
               name="hidden"
@@ -188,7 +197,7 @@
         hasError={$errors.cover_path !== null}
         errors={$errors.cover_path}
       >
-        <RxImageUpload class="h-64" name="cover_path" value={game.cover_path}></RxImageUpload>
+        <RxImageUpload class="h-64" name="cover_path" value={game.cover_path || ''}></RxImageUpload>
       </RxFormItem>
     </div>
     <div class="flex flex-row space-x-4">

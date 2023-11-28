@@ -73,6 +73,8 @@ pub enum Relation {
     Answer,
     #[sea_orm(has_many = "super::calendar::Entity")]
     Calendar,
+    #[sea_orm(has_many = "super::oauth::Entity")]
+    Oauth,
     #[sea_orm(has_many = "super::instance::Entity")]
     Instance,
     #[sea_orm(
@@ -116,6 +118,12 @@ impl Related<super::answer::Entity> for Entity {
 impl Related<super::cheat_record::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::CheatRecord.def()
+    }
+}
+
+impl Related<super::oauth::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Oauth.def()
     }
 }
 

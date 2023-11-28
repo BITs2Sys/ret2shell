@@ -24,6 +24,8 @@ pub enum Relation {
     Team,
     #[sea_orm(has_many = "super::user::Entity")]
     User,
+    #[sea_orm(has_many = "super::oauth::Entity")]
+    Oauth,
 }
 
 impl Related<super::game::Entity> for Entity {
@@ -35,6 +37,12 @@ impl Related<super::game::Entity> for Entity {
 impl Related<super::team::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Team.def()
+    }
+}
+
+impl Related<super::oauth::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Oauth.def()
     }
 }
 
