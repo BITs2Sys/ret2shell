@@ -12,7 +12,7 @@ pub enum FlagError {
     FlagDataBroken(String),
 }
 
-const ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
+static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     let mut map = HashMap::new();
     map.insert(b'0', vec![b'O', b'o']);
     map.insert(b'1', vec![b'I', b'l']);
@@ -91,7 +91,7 @@ fn to_bytes(v: &Vec<u32>, include_length: bool) -> Vec<u8> {
     let mut n: u32 = length << 2;
     if include_length {
         let m: u32 = v[length as usize - 1];
-        n = n - 4;
+        n -= 4;
         assert!(!((m < n - 3) || (m > n)));
         n = m;
     }
@@ -99,14 +99,14 @@ fn to_bytes(v: &Vec<u32>, include_length: bool) -> Vec<u8> {
     for i in 0..n {
         bytes[i as usize] = (v[(i >> 2) as usize] >> ((i & 3) << 3)) as u8;
     }
-    return bytes;
+    bytes
 }
 
 fn to_u32(bytes: &Vec<u8>, include_length: bool) -> Vec<u32> {
     let length: u32 = bytes.len() as u32;
     let mut n: u32 = length >> 2;
     if length & 3 != 0 {
-        n = n + 1;
+        n += 1;
     }
     let mut v;
     if include_length {
@@ -116,18 +116,18 @@ fn to_u32(bytes: &Vec<u8>, include_length: bool) -> Vec<u32> {
         v = vec![0; n as usize];
     }
     for i in 0..length {
-        v[(i >> 2) as usize] |= (bytes[i as usize] as u32) << ((i & 3) << 3) as u32;
+        v[(i >> 2) as usize] |= (bytes[i as usize] as u32) << ((i & 3) << 3);
     }
-    return v;
+    v
 }
 
-fn mx(sum: u32, y: u32, z: u32, p: u32, e: u32, k: &Vec<u32>) -> u32 {
+fn mx(sum: u32, y: u32, z: u32, p: u32, e: u32, k: &[u32]) -> u32 {
     ((z >> 5 ^ y << 2).wrapping_add(y >> 3 ^ z << 4))
         ^ ((sum ^ y).wrapping_add(k[(p & 3 ^ e) as usize] ^ z))
 }
 
-fn fixk(k: &Vec<u32>) -> Vec<u32> {
-    let mut key = k.clone();
+fn fixk(k: &[u32]) -> Vec<u32> {
+    let mut key = k.to_owned();
     if key.len() < 4 {
         let length = key.len();
         for _ in length..4 {
@@ -137,7 +137,7 @@ fn fixk(k: &Vec<u32>) -> Vec<u32> {
     key
 }
 
-fn encrypt_(v: &mut Vec<u32>, k: &Vec<u32>) -> Vec<u32> {
+fn encrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
     let length: u32 = v.len() as u32;
     let n: u32 = length - 1;
     let key: Vec<u32> = fixk(k);
@@ -151,18 +151,18 @@ fn encrypt_(v: &mut Vec<u32>, k: &Vec<u32>) -> Vec<u32> {
         e = sum >> 2 & 3;
         for p in 0..n {
             y = v[(p as usize) + 1];
-            v[p as usize] = v[p as usize].wrapping_add(mx(sum, y, z, p as u32, e, &key));
+            v[p as usize] = v[p as usize].wrapping_add(mx(sum, y, z, p, e, &key));
             z = v[p as usize];
         }
         y = v[0];
         v[n as usize] = v[n as usize].wrapping_add(mx(sum, y, z, n, e, &key));
         z = v[n as usize];
-        q = q - 1;
+        q -= 1;
     }
-    return v.clone();
+    v.clone()
 }
 
-fn decrypt_(v: &mut Vec<u32>, k: &Vec<u32>) -> Vec<u32> {
+fn decrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
     let length: u32 = v.len() as u32;
     let n: u32 = length - 1;
     let key: Vec<u32> = fixk(k);
@@ -178,14 +178,14 @@ fn decrypt_(v: &mut Vec<u32>, k: &Vec<u32>) -> Vec<u32> {
             z = v[p - 1];
             v[p] = v[p].wrapping_sub(mx(sum, y, z, p as u32, e, &key));
             y = v[p];
-            p = p - 1;
+            p -= 1;
         }
         z = v[n as usize];
         v[0] = v[0].wrapping_sub(mx(sum, y, z, 0, e, &key));
         y = v[0];
         sum = sum.wrapping_sub(DELTA);
     }
-    return v.clone();
+    v.clone()
 }
 
 /// Encrypt a u8 vector with XXTEA
@@ -214,7 +214,7 @@ fn decrypt_(v: &mut Vec<u32>, k: &Vec<u32>) -> Vec<u32> {
 pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
     let key = key.bytes().collect();
     to_bytes(
-        &encrypt_(&mut to_u32(&data, false), &to_u32(&key, false)),
+        &encrypt_(&mut to_u32(data, false), &to_u32(&key, false)),
         false,
     )
 }
@@ -242,7 +242,7 @@ pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
 pub fn decrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
     let key = key.bytes().collect();
     to_bytes(
-        &decrypt_(&mut to_u32(&data, false), &to_u32(&key, false)),
+        &decrypt_(&mut to_u32(data, false), &to_u32(&key, false)),
         false,
     )
 }
@@ -303,7 +303,7 @@ pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagE
                     ALTER_CHAR_TABLE.get(&c).unwrap()[(encrypted_user_id % 3 - 1) as usize] as char,
                 );
             }
-            encrypted_user_id = encrypted_user_id / 3;
+            encrypted_user_id /= 3;
         } else {
             flag.push(c as char);
         }
@@ -316,7 +316,7 @@ pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagE
                 ALTER_CHAR_TABLE.get(&b'0').unwrap()[(encrypted_user_id % 3 - 1) as usize] as char,
             );
         }
-        encrypted_user_id = encrypted_user_id / 3;
+        encrypted_user_id /= 3;
     }
 
     Ok(flag)
@@ -356,10 +356,10 @@ pub fn get_user_id_from_flag(flag_template: &str, flag: &str) -> Result<i64, Fla
         i += 1;
     }
     let mut user_id: i64 = 0;
-    for i in 0..encrypted_user_id.len() {
+    for (i, item) in encrypted_user_id.iter().enumerate() {
         user_id = user_id
             .overflowing_add(
-                (encrypted_user_id[i] as i64)
+                (*item as i64)
                     .overflowing_mul(3_i64.overflowing_pow(i as u32).0)
                     .0,
             )

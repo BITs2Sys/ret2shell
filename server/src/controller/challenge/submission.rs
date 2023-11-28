@@ -151,7 +151,7 @@ async fn submit_flag(
                     &conn,
                     extra::Model {
                         id: 0,
-                        created_at: updated_time.clone(),
+                        created_at: updated_time,
                         team_id: team.id,
                         reason: format!(
                             "No.{} solution for challenge {}:<{}>",
@@ -178,9 +178,7 @@ async fn submit_flag(
                         "failed to update challenge current score",
                     )
                 })?;
-            if let Err(err) =
-                team::update_team_score(&conn, &team, game.id, updated_time.clone()).await
-            {
+            if let Err(err) = team::update_team_score(&conn, &team, game.id, updated_time).await {
                 error!("failed to update team score: {}", err);
                 return Err((
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -189,36 +187,29 @@ async fn submit_flag(
             }
 
             tokio::spawn(async move {
-                if let Some(affected_teams) =
+                if let Ok(affected_teams) =
                     team::get_affected_teams_by_challenge_id(&conn, challenge.id)
                         .await
                         .map_err(|err| {
                             error!("get_affected_teams_by_challenge_id error: {}", err);
                         })
-                        .ok()
                 {
                     for mut affected_team in affected_teams {
                         if affected_team.id == team.id {
                             let score_history = TeamScoreHistory {
                                 score: affected_team.score,
-                                time: updated_time.clone(),
+                                time: updated_time,
                                 challenge_id: Some(challenge.id),
                                 blood_state: Some(blood_state),
                             };
                             affected_team.history.0.push(score_history);
                         } else {
-                            match team::update_team_score(
-                                &conn,
-                                &team,
-                                game.id,
-                                updated_time.clone(),
-                            )
-                            .await
+                            match team::update_team_score(&conn, &team, game.id, updated_time).await
                             {
                                 Ok(score) => {
                                     let score_history = TeamScoreHistory {
                                         score,
-                                        time: updated_time.clone(),
+                                        time: updated_time,
                                         challenge_id: None,
                                         blood_state: None,
                                     };

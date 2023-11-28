@@ -293,7 +293,7 @@ pub async fn update_team_score(
     active_model.score = ActiveValue::Set(team_score);
     active_model.last_active_at = ActiveValue::Set(last_active_at);
     active_model.update(conn).await?;
-    return Ok(team_score);
+    Ok(team_score)
 }
 
 pub async fn get_team_page_by_game_id(

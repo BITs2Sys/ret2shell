@@ -2,8 +2,8 @@
 //!
 
 use axum::{
-    extract::State,
-    http::{header, Request, StatusCode},
+    extract::{Request, State},
+    http::{header, StatusCode},
     middleware::Next,
     response::IntoResponse,
     Extension,
@@ -76,11 +76,11 @@ async fn distribute_token(token: &Token, key: &str, expires_time: i64) -> String
     token
 }
 
-pub async fn extract_user_info<B>(
+pub async fn extract_user_info(
     State(ref mut cache): State<RedisPool>,
     config: Option<Extension<ConfigModel>>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if let Some(Extension(config)) = config {
         let auth_config = config.auth;
@@ -173,8 +173,8 @@ macro_rules! permission_required_all {
     ($($perm:expr),*) => {
         |
             axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
-            req: axum::http::Request<_>,
-            next: axum::middleware::Next<_>,
+            req: axum::extract::Request,
+            next: axum::middleware::Next,
         | async move {
             if token.id <= 0 {
                 return Err((axum::http::StatusCode::UNAUTHORIZED, "please login first"));
@@ -194,8 +194,8 @@ macro_rules! permission_required_any {
     ($($perm:expr),*) => {
         |
             axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
-            req: axum::http::Request<_>,
-            next: axum::middleware::Next<_>,
+            req: axum::extract::Request,
+            next: axum::middleware::Next,
         | async move {
             if token.id <= 0 {
                 return Err((axum::http::StatusCode::UNAUTHORIZED, "please login first"));
@@ -221,12 +221,12 @@ macro_rules! pass_admin_for_game {
 pub(crate) use permission_required_all;
 pub(crate) use permission_required_any;
 
-pub async fn init_token_or_permission_required<B>(
+pub async fn init_token_or_permission_required(
     State(config): State<GlobalConfig>,
     Extension(token): Extension<Token>,
     platform_info: Option<Extension<ConfigModel>>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let init_token = req
         .headers()
@@ -257,13 +257,13 @@ pub async fn init_token_or_permission_required<B>(
 
 /// Check if user has permission to access the challenge.
 /// ensure: `Extension<challenge::Model>` and `Extension<game::Model>` exists
-pub async fn challenge_privilege_required<B>(
+pub async fn challenge_privilege_required(
     State(ref db): State<DatabaseConnection>,
     Extension(user): Extension<user::Model>,
     challenge: Option<Extension<challenge::Model>>,
     game: Option<Extension<game::Model>>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if challenge.is_none() {
         return Err((StatusCode::NOT_FOUND, "challenge not found"));
@@ -284,12 +284,12 @@ pub async fn challenge_privilege_required<B>(
 
 /// Check if user has permission to take part in the game.
 /// ensure: `Extension<game::Model>` exists
-pub async fn game_participate_privilege_required<B>(
+pub async fn game_participate_privilege_required(
     State(ref db): State<DatabaseConnection>,
     Extension(user): Extension<user::Model>,
     Extension(game): Extension<game::Model>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // pass admin
     if pass_admin_for_game!(user.permissions.0) {
@@ -308,6 +308,7 @@ pub async fn game_participate_privilege_required<B>(
         || game.end_but_not_archive()
         || (game.in_progress() && !game.can_register_after_started)
     {
+        #[allow(clippy::blocks_in_if_conditions)]
         if get_team_by_user_id(db, game.id, user.id)
             .map_err(|err| {
                 error!("get_team_by_user_id error: {}", err);
@@ -346,12 +347,12 @@ pub async fn game_participate_privilege_required<B>(
 
 /// Check if user has permission to access the challenge and other verified resources in this game.
 /// ensure: `Extension<game::Model>` exists
-pub async fn game_player_privilege_required<B>(
+pub async fn game_player_privilege_required(
     State(ref db): State<DatabaseConnection>,
     Extension(user): Extension<user::Model>,
     game: Option<Extension<game::Model>>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if game.is_none() {
         return Err((StatusCode::NOT_FOUND, "game not found"));
@@ -372,8 +373,9 @@ pub async fn game_player_privilege_required<B>(
         return Ok(next.run(req).await);
     }
     if game.end_and_archive() {
-        return Ok(next.run(req).await);
+        Ok(next.run(req).await)
     } else if game.in_progress() || game.end_but_not_archive() {
+        #[allow(clippy::blocks_in_if_conditions)]
         if get_team_by_user_id(db, game.id, user.id)
             .map_err(|err| {
                 error!("get_team_by_user_id error: {}", err);

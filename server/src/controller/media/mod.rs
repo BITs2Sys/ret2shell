@@ -3,17 +3,16 @@ use crate::entity::user::Permission;
 use crate::entity::{config::Model as ConfigModel, media::Model as MediaModel};
 use crate::media::{self, get_media};
 use crate::{cache::manager::RedisPool, config::GlobalConfig, controller::GlobalState};
-use axum::body::StreamBody;
-use axum::extract::Path;
-use axum::headers::Host;
 use axum::{
-    extract::{DefaultBodyLimit, Multipart, Query, State},
+    body::Body,
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
     http::{HeaderMap, StatusCode},
+    middleware,
     response::IntoResponse,
     routing::{get, post},
-    Extension, Router,
+    Extension, Json, Router,
 };
-use axum::{middleware, Json, TypedHeader};
+use axum_extra::{headers::Host, TypedHeader};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tokio_util::io::ReaderStream;
@@ -113,7 +112,7 @@ async fn download_media(
     };
 
     let stream = ReaderStream::new(file);
-    let body = StreamBody::new(stream);
+    let body = Body::from_stream(stream);
     let mut headers = HeaderMap::new();
     headers.insert(
         "Content-Type",

@@ -4,8 +4,8 @@ use crate::{
     entity::user,
 };
 use axum::{
-    extract::{Path, Query, State},
-    http::{Request, StatusCode},
+    extract::{Path, Query, Request, State},
+    http::StatusCode,
     middleware::Next,
     response::IntoResponse,
     Extension,
@@ -14,11 +14,11 @@ use sea_orm::{DatabaseConnection, DbErr};
 use serde::Deserialize;
 use tracing::{debug, error};
 
-pub async fn prepare_platform_info<B>(
+pub async fn prepare_platform_info(
     State(ref db): State<DatabaseConnection>,
     State(ref mut pool): State<RedisPool>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match Platform::get(pool, db).await {
         Ok(platform_info) => {
@@ -31,11 +31,11 @@ pub async fn prepare_platform_info<B>(
     Ok(next.run(req).await)
 }
 
-pub async fn prepare_user_full_info<B>(
+pub async fn prepare_user_full_info(
     State(ref db): State<DatabaseConnection>,
     Extension(token): Extension<Token>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let user_id = token.id;
     match user::get_user(db, user_id).await {
@@ -50,11 +50,11 @@ pub async fn prepare_user_full_info<B>(
     Ok(next.run(req).await)
 }
 
-pub async fn prepare_challenge_info<B>(
+pub async fn prepare_challenge_info(
     State(ref db): State<DatabaseConnection>,
     Path(challenge_id): Path<i64>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match crate::entity::challenge::get_challenge(db, challenge_id).await {
         Ok(challenge) => {
@@ -77,11 +77,11 @@ pub async fn prepare_challenge_info<B>(
     Ok(next.run(req).await)
 }
 
-pub async fn prepare_game_info_in_path<B>(
+pub async fn prepare_game_info_in_path(
     State(ref db): State<DatabaseConnection>,
     Path(game_id): Path<i64>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match crate::entity::game::get_game(db, game_id).await {
         Ok(Some(game)) => {
@@ -101,11 +101,11 @@ pub struct GameQuery {
     pub game_id: Option<i64>,
 }
 
-pub async fn prepare_game_info_in_query<B>(
+pub async fn prepare_game_info_in_query(
     State(ref db): State<DatabaseConnection>,
     Query(query): Query<GameQuery>,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if let Some(game_id) = query.game_id {
         match crate::entity::game::get_game(db, game_id).await {
