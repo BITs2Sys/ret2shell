@@ -13,12 +13,12 @@
 #![warn(missing_docs)]
 #![forbid(unsafe_code)]
 
-use std::{io::Write, net::SocketAddr, process::exit, str::FromStr};
+use std::{io::Write, net::SocketAddr};
 
 use clap::{command, Parser, Subcommand};
 use colored::Colorize;
 use config::GlobalConfig;
-use tokio::signal;
+// use tokio::signal;
 use tracing::{error, info, warn};
 
 use crate::controller::GlobalState;
@@ -150,14 +150,16 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
 
     let addr_str = format!("{}:{}", &config.server.host, &config.server.port);
 
-    let addr = SocketAddr::from_str(&addr_str).expect("Failed to parse server address");
-
-    info!("Server started at [ {} ]", addr_str);
-    axum::Server::bind(&addr)
-        .serve(router.into_make_service_with_connect_info::<SocketAddr>())
-        .with_graceful_shutdown(graceful_shutdown())
+    let addr = tokio::net::TcpListener::bind(addr_str.clone())
         .await
-        .expect("Failed to start server.");
+        .expect("Failed to bind server address");
+    info!("Server started at [ {} ]", addr_str);
+    axum::serve(
+        addr,
+        router.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .expect("Failed to start server.");
     Ok(())
 }
 
@@ -197,31 +199,31 @@ async fn erase(config: GlobalConfig) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn graceful_shutdown() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("Failed to install SIGTERM handler")
-    };
+// async fn graceful_shutdown() {
+//     let ctrl_c = async {
+//         signal::ctrl_c()
+//             .await
+//             .expect("Failed to install SIGTERM handler")
+//     };
 
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install SIGTERM handler")
-            .recv()
-            .await;
-    };
+//     #[cfg(unix)]
+//     let terminate = async {
+//         signal::unix::signal(signal::unix::SignalKind::terminate())
+//             .expect("failed to install SIGTERM handler")
+//             .recv()
+//             .await;
+//     };
 
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
+//     #[cfg(not(unix))]
+//     let terminate = std::future::pending::<()>();
 
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
+//     tokio::select! {
+//         _ = ctrl_c => {},
+//         _ = terminate => {},
+//     }
 
-    info!("Server is shutting down...");
-    // TODO: add `pusher module`(websocket) graceful shutdown handle code here.
-    info!("Server shutdown completed, bye bye.");
-    exit(0);
-}
+//     info!("Server is shutting down...");
+//     // TODO: add `pusher module`(websocket) graceful shutdown handle code here.
+//     info!("Server shutdown completed, bye bye.");
+//     exit(0);
+// }

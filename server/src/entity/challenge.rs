@@ -153,6 +153,7 @@ pub async fn update_challenge(
     active_model.update(conn).await
 }
 
+#[allow(dead_code)]
 pub async fn update_challenge_bucket(
     conn: &DatabaseConnection,
     id: i64,

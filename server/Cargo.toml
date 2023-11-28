@@ -23,24 +23,32 @@ async-recursion = "1.0"
 rustls = "0.21"
 rustls-native-certs = "0.6"
 # Web Framework
-axum = { version = "0.6", features = [
-    "headers",
-    "ws",
-    "http2",
-    "multipart",
-    "macros",
+axum = { version = "0.7", features = [
+  "ws",
+  "http2",
+  "multipart",
+  "macros",
+  "tower-log",
+  "tracing",
 ] }
-hyper = { version = "0.14", features = ["full"] }
+axum-extra = { version = "0.9", features = [
+  "typed-header",
+  "query",
+  "multipart",
+  "typed-routing",
+  "async-read-body",
+] }
+hyper = { version = "1.0", features = ["full"] }
 tower = "0.4"
-tower-http = { version = "0.4", features = ["cors", "fs", "trace"] }
+tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
 # Auth
 jsonwebtoken = { version = "9.1", default-features = false }
 bcrypt = "0.15"
 # ORM
 sea-orm = { version = "0.12", features = [
-    "sqlx-postgres",
-    "runtime-tokio-rustls",
-    "macros",
+  "sqlx-postgres",
+  "runtime-tokio-rustls",
+  "macros",
 ] }
 sea-orm-migration = "0.12"
 sea-query = "0.30"
@@ -75,7 +83,7 @@ regex = "1.10"
 nanoid = "0.4"
 deunicode = "1.4"
 sanitizer = "0.1"
-roxmltree = "0.18"
+roxmltree = "0.19"
 # Logger
 tracing = "0.1"
 tracing-core = "0.1"
@@ -83,42 +91,40 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
 # Cache
 redis = { version = "0.23", features = [
-    "tokio-comp",
-    "tokio-rustls-comp",
-    "cluster-async",
-    "connection-manager",
+  "tokio-comp",
+  "tokio-rustls-comp",
+  "cluster-async",
+  "connection-manager",
 ] }
 bb8 = "0.8"
 bb8-redis = "0.13"
 # Email
 lettre = { version = "0.11", features = [
-    "smtp-transport",
-    "tokio1",
-    "rustls-tls",
-    "rustls-native-certs",
-    "tokio1-rustls-tls",
-    "pool",
-    "hostname",
-    "tracing",
-    "builder",
+  "smtp-transport",
+  "tokio1",
+  "rustls-tls",
+  "rustls-native-certs",
+  "tokio1-rustls-tls",
+  "pool",
+  "hostname",
+  "tracing",
+  "builder",
 ], default-features = false }
 # Message Queue
 async-nats = "0.33"
 # Captcha
 biosvg = "0.1"
-# Version Control and Storage
-wsvc = "0.1"
 # WebSocket Reflector
-wsrx = "0.1"
+wsrx = { version = "0.1", features = ["web"] }
 # Kubernetes
 kube = { version = "0.87", features = [
-    "config",
-    "client",
-    "rustls-tls",
-    "runtime",
-    "derive",
+  "config",
+  "client",
+  "rustls-tls",
+  "runtime",
+  "derive",
 ] }
 k8s-openapi = { version = "0.20", features = ["v1_28"] }
 # System stat
-systemstat = {version = "0.2", features = ["serde"]}
+systemstat = { version = "0.2", features = ["serde"] }
 git-version = "0.3"

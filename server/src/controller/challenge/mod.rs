@@ -2,15 +2,12 @@ use super::{
     layer::{auth, info},
     GlobalState,
 };
-use crate::entity::{instance, submission as submission_entity};
-use crate::utility::string::deunicode_str;
-use crate::{
-    bucket::Bucket,
-    entity::{
-        challenge, game,
-        user::{self, Permission},
-    },
+use crate::entity::{
+    challenge, game,
+    user::{self, Permission},
 };
+use crate::entity::{instance, submission as submission_entity};
+// use crate::utility::string::deunicode_str;
 use axum::{
     extract::{Path, Query, State},
     middleware,
@@ -170,13 +167,13 @@ async fn get_solved_team_list(
 }
 
 async fn create_challenge(
-    State(config): State<GlobalState>,
+    // State(config): State<GlobalState>,
     State(ref conn): State<DatabaseConnection>,
     Query(game_query): Query<GameIDQuery>,
     Json(mut challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     challenge.game_id = game_query.game_id;
-    let mut created_challenge = match challenge::create_challenge(conn, challenge).await {
+    let created_challenge = match challenge::create_challenge(conn, challenge).await {
         Ok(created_challenge) => created_challenge,
         Err(err) => {
             error!("failed to create new challenge in database: {}", err);
@@ -188,30 +185,30 @@ async fn create_challenge(
     };
     // TODO: there may exists a same name challenge in the same game
     // Should valid?
-    created_challenge.bucket = Some(format!(
-        "{}_{}",
-        created_challenge.id,
-        deunicode_str(&created_challenge.name)
-    ));
-    Bucket::initialize(config.config.bucket.path, &created_challenge)
-        .await
-        .map_err(|err| {
-            error!("failed to init challenge bucket: {}", err);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to init challenge bucket",
-            )
-        })?;
+    // created_challenge.bucket = Some(format!(
+    //     "{}_{}",
+    //     created_challenge.id,
+    //     deunicode_str(&created_challenge.name)
+    // ));
+    // Bucket::initialize(config.config.bucket.path, &created_challenge)
+    //     .await
+    //     .map_err(|err| {
+    //         error!("failed to init challenge bucket: {}", err);
+    //         (
+    //             StatusCode::INTERNAL_SERVER_ERROR,
+    //             "failed to init challenge bucket",
+    //         )
+    //     })?;
 
-    challenge::update_challenge_bucket(conn, created_challenge.id, &created_challenge)
-        .await
-        .map_err(|err| {
-            error!("failed to update challenge bucket: {}", err);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to update challenge bucket",
-            )
-        })?;
+    // challenge::update_challenge_bucket(conn, created_challenge.id, &created_challenge)
+    //     .await
+    //     .map_err(|err| {
+    //         error!("failed to update challenge bucket: {}", err);
+    //         (
+    //             StatusCode::INTERNAL_SERVER_ERROR,
+    //             "failed to update challenge bucket",
+    //         )
+    //     })?;
 
     Ok(Json(created_challenge))
 }

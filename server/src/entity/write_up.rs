@@ -184,7 +184,7 @@ pub async fn create_writeup(
             };
             active_model.insert(conn).await
         }
-        None => return Err(DbErr::RecordNotFound("team".to_string())),
+        None => Err(DbErr::RecordNotFound("team".to_string())),
     }
 }
 

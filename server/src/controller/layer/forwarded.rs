@@ -6,8 +6,8 @@ use axum::middleware::Next;
 use axum::response::IntoResponse;
 use axum::Extension;
 use axum::{
-    extract::ConnectInfo,
-    http::{header::FORWARDED, HeaderMap, Request, StatusCode},
+    extract::{ConnectInfo, Request},
+    http::{header::FORWARDED, HeaderMap, StatusCode},
 };
 use sea_orm::DatabaseConnection;
 use thiserror::Error;
@@ -283,7 +283,7 @@ impl FromStr for ForwardedHeaderValue {
 ///
 /// In some cases, the `x-forwarded-for` header may not set, the IP record will be
 /// localhost, so please make sure the reverse proxy is configured correctly.
-pub fn get_client_ip<B: Send>(request: &Request<B>) -> Option<IpAddr> {
+pub fn get_client_ip(request: &Request) -> Option<IpAddr> {
     let headers = request.headers();
     maybe_x_forwarded_for(headers)
         .or_else(|| maybe_x_real_ip(headers))
@@ -291,11 +291,11 @@ pub fn get_client_ip<B: Send>(request: &Request<B>) -> Option<IpAddr> {
         .or_else(|| maybe_connect_info(request))
 }
 
-pub async fn record_ip_address<B: Send>(
+pub async fn record_ip_address(
     State(ref conn): State<DatabaseConnection>,
     Extension(token): Extension<Token>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let ip = match get_client_ip(&req) {
         Some(ip) => ip.to_string(),

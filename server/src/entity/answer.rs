@@ -103,7 +103,7 @@ pub async fn update_answer(
             };
             active_model.update(conn).await
         }
-        None => return Err(DbErr::RecordNotFound("answer".to_string())),
+        None => Err(DbErr::RecordNotFound("answer".to_string())),
     }
 }
 
