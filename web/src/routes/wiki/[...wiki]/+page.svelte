@@ -98,7 +98,9 @@
       <p>
         <span class="text-base opacity-80">{$i18n.t('wiki.author')}</span>
         :
-        <span class="text-base opacity-80">{user?.name || $i18n.t('wiki.unknownAuthor')}</span>
+        <span class="text-base opacity-80 hover:underline">
+          <a href={`/users/${user?.id}`}>{user?.name || $i18n.t('wiki.unknownAuthor')}</a>
+        </span>
       </p>
       <p>
         <span class="text-base opacity-80">{$i18n.t('wiki.publishedAt')}</span>
@@ -114,7 +116,7 @@
       {/if}
     </div>
     <RxArticle content={wiki.content} headingAnchors={true} class="p-6 pt-12" />
-    <RxButton square size="lg" class="fixed bottom-28 right-6 print:hidden" on:click={scrollToTop}>
+    <RxButton square size="lg" class="fixed bottom-6 right-6 print:hidden" on:click={scrollToTop}>
       <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
     </RxButton>
     <div class="h-32" />

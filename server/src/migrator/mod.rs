@@ -35,6 +35,7 @@ mod m20210101_000024_create_subscription;
 mod m20210101_000025_create_subscription_user_ref;
 mod m20210101_000026_create_extra;
 mod m20210101_000027_create_cheat_record;
+mod m20210101_000028_create_oauth;
 
 pub struct Migrator;
 

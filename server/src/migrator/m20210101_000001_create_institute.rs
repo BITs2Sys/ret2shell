@@ -14,7 +14,6 @@ pub enum Institute {
     Id,
     Name,
     Description,
-    Validator,
     Data,
     Logo,
 }
@@ -35,11 +34,6 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Institute::Name).string_len(127).not_null())
                     .col(ColumnDef::new(Institute::Description).text())
-                    .col(
-                        ColumnDef::new(Institute::Validator)
-                            .string_len(63)
-                            .not_null(),
-                    )
                     .col(ColumnDef::new(Institute::Data).text())
                     .col(ColumnDef::new(Institute::Logo).string_len(127))
                     .to_owned(),

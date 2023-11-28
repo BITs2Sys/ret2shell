@@ -74,7 +74,8 @@
     "deleteAccountTips2": "请认真阅读并确定上述内容！如果你真的确定要停用账户，请在下方输入你的完整用户名以确认：",
     "deleteAccountTips3": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
     "bye": "再见",
-    "deleteAccountFailed": "账户停用失败"
+    "deleteAccountFailed": "账户停用失败",
+    "connectOAuthServer": "正在与账户服务器通讯..."
   },
   "announcements": {
     "title": "公告",
@@ -275,8 +276,8 @@
     "createChallenge": "创建题目",
     "challengeStatistics": "详细数据",
     "challengeInfo": "题目信息",
-    "challengeRepo": "仓库",
-    "challengeWorkflows": "CI/CD",
+    "challengeRepo": "文件管理",
+    "challengeWorkflows": "环境镜像",
     "challengeSubmissions": "提交记录",
     "challengeInstances": "实例管理",
     "loadingChallenge": "正在加载...",

@@ -11,7 +11,6 @@ pub struct Model {
     pub name: String,
     #[sea_orm(column_type = "Text", nullable)]
     pub description: Option<String>,
-    pub validator: String,
     #[sea_orm(column_type = "Text", nullable)]
     pub data: Option<String>,
     pub logo: Option<String>,

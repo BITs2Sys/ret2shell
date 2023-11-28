@@ -88,6 +88,7 @@ pub async fn extract_user_info(
             ref signing_key,
             buffer_time,
             expires_time,
+            ..
         } = auth_config;
         let auth_header = req
             .headers()

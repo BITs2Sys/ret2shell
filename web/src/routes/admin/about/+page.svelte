@@ -16,16 +16,19 @@
       <a class="hover:underline" href="https://github.com/Reverier-Xu">Reverier-Xu</a>
     </RxTag>
     <RxTag class="m-1">
-      <a class="hover:underline" href="https://github.com/DX39061">DX3906</a>
+      <a class="hover:underline" href="https://github.com/DX39061">DX39061</a>
     </RxTag>
     <RxTag class="m-1">
       <a class="hover:underline" href="https://github.com/xiaoxi404">xiaoxi404</a>
     </RxTag>
     <RxTag class="m-1">
+      <a class="hover:underline" href="https://github.com/ZeroAurora">ZeroAurora</a>
+    </RxTag>
+    <RxTag class="m-1">
       <a class="hover:underline" href="https://github.com/frankli0324">frankli0324</a>
     </RxTag>
     <RxTag class="m-1">
-      <a class="hover:underline" href="https://github.com/orangecheers-x">Orange Cheers</a>
+      <a class="hover:underline" href="https://github.com/orangecheers-x">orangecheers-x</a>
     </RxTag>
   </div>
   <div class="divider"></div>

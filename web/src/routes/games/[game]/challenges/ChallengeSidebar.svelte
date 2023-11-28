@@ -7,6 +7,7 @@
   import { game } from '$lib/stores/game'
   import { theme } from '$lib/stores/theme'
   import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
+  import { onMount } from 'svelte'
 
   export let challenges: Challenge[]
   export let tags: Tag[]
@@ -25,6 +26,14 @@
   }
 
   let tagExpandedRecord: Record<number, boolean> = {}
+
+  onMount(() => {
+    tagExpandedRecord = {}
+    if (tags.length <= 3)
+      tags.forEach((tag) => {
+        tagExpandedRecord[tag.id] = true
+      })
+  })
 
   function handleTagExpand(tagId: number) {
     tagExpandedRecord[tagId] = !tagExpandedRecord[tagId]

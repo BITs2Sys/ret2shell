@@ -59,8 +59,7 @@
     justify && `justify-${justify}`,
     !uppercase && 'normal-case',
     square && 'btn-square',
-    (active || (exactlyMatched ? $page.url.pathname === href : startsWithPath(href))) &&
-      (ghost ? 'text-primary' : '!btn-primary'),
+    (active || (exactlyMatched ? $page.url.pathname === href : startsWithPath(href))) && 'text-primary',
     clazz,
   ]
     .filter(Boolean)

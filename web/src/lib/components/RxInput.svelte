@@ -44,7 +44,7 @@
 
   $: classes = [
     'input',
-    size === 'md' || size === 'lg' ? 'text-base' : 'text-sm',
+    size === 'md' || size === 'lg' ? '!text-base' : 'text-sm',
     !ghost && 'backdrop-blur',
     'ml-0',
     ghost ? 'bg-transparent' : 'bg-base-content/5',

@@ -75,7 +75,9 @@
       <p>
         <span class="text-base opacity-80">{$i18n.t('announcement.author')}</span>
         :
-        <span class="text-base opacity-80">{user?.name || $i18n.t('announcement.unknownAuthor')}</span>
+        <span class="text-base opacity-80 hover:underline">
+          <a href={`/users/${user?.id}`}>{user?.name || $i18n.t('announcement.unknownAuthor')}</a>
+        </span>
       </p>
       <p>
         <span class="text-base opacity-80">{$i18n.t('announcement.publishedAt')}</span>

@@ -1,9 +1,9 @@
 <script lang="ts">
   import 'sakana-widget/lib/index.css'
   import SakanaWidget, { type SakanaWidgetCharacter } from 'sakana-widget'
-  import xdsecMascot from '$lib/assets/xdsec-mascot.webp'
-  import vidarMascot from '$lib/assets/vidar-mascot.webp'
-  import cnssMascot from '$lib/assets/cnss-mascot.webp'
+  import xdsecMascot from '$lib/assets/imgs/xdsec-mascot.webp'
+  import vidarMascot from '$lib/assets/imgs/vidar-mascot.webp'
+  import cnssMascot from '$lib/assets/imgs/cnss-mascot.webp'
   import { platform } from '$lib/stores/platform'
   import { i18n } from '$lib/i18n'
   import RxLink from '$lib/components/RxLink.svelte'

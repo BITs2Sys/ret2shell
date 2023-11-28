@@ -16,6 +16,11 @@
   import { goto } from '$app/navigation'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
+  import GitHub from '$lib/assets/brands/github.svelte'
+  import Google from '$lib/assets/brands/google.svelte'
+  import GitLab from '$lib/assets/brands/gitlab.svelte'
+  import QQ from '$lib/assets/brands/qq.svelte'
+  import XDU from '$lib/assets/brands/xdu.svelte'
   import { page } from '$app/stores'
 
   let schema = z.object({
@@ -69,6 +74,22 @@
     if (captchaIdValue !== $data.captcha_id) {
       $touched.captcha_id = true
     }
+  }
+
+  interface OAuthIds {
+    github: { id: string | null }
+    gitlab: { id: string | null }
+    google: { id: string | null }
+    qq: { id: string | null }
+    xdu: { id: string | null }
+  }
+
+  let oauthIds: OAuthIds = {
+    github: { id: null },
+    gitlab: { id: null },
+    google: { id: null },
+    qq: { id: null },
+    xdu: { id: null },
   }
 </script>
 
@@ -124,10 +145,39 @@
     <div class="divider md:divider-horizontal opacity-60">{$i18n.t('misc.or')}</div>
     <div class="md:w-0 flex-1 flex flex-col space-y-6">
       <div class="flex-1 md:flex flex-col justify-center items-center hidden">
-        <img class="object-fit max-h-48" src={Logo} alt="Ret2Shell" />
+        <img class="object-fit max-h-40" src={Logo} alt="Ret2Shell" />
       </div>
       <RxLink class="w-full" href="/account/register">{$i18n.t('account.registerTips')}</RxLink>
-      <RxLink class="w-full" href="/account/oauth">{$i18n.t('account.3rdAuth')}</RxLink>
+      <div class="divider opacity-60">{$i18n.t('account.3rdAuth')}</div>
+      <div class="w-full flex flex-row space-x-2 justify-between">
+        {#if oauthIds.xdu.id !== null}
+          <RxLink
+            href={`https://ids.xidian.edu.cn/authserver/login?service=${$page.url.origin}/account/oauth%3Fprovider=xdu`}
+            square
+            title="西安电子科技大学 统一身份认证"
+          >
+            <XDU width={32} height={32} />
+          </RxLink>
+        {/if}
+        {#if oauthIds.github.id !== null}
+          <RxLink
+            href={`https://github.com/login/oauth/authorize?client_id=${oauthIds.github.id}&redirect_uri=${$page.url.origin}/account/oauth%3Fprovider=github`}
+            title="GitHub Accounts"
+            square
+          >
+            <GitHub />
+          </RxLink>
+        {/if}
+        {#if oauthIds.gitlab.id !== null}
+          <RxLink href="" square title="GitLab Accounts"><GitLab /></RxLink>
+        {/if}
+        {#if oauthIds.google.id !== null}
+          <RxLink href="" square title="Google Accounts"><Google /></RxLink>
+        {/if}
+        {#if oauthIds.qq.id !== null}
+          <RxLink href="" title="QQ账号登录" square><QQ /></RxLink>
+        {/if}
+      </div>
     </div>
   </RxCard>
 </div>

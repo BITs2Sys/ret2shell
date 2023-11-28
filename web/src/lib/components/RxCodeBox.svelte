@@ -22,7 +22,7 @@
     'outline-2',
     disabled && 'bg-base-200 cursor-not-allowed',
     'outline-offset-2',
-    hasError ? 'outline-error textarea-error' : 'outline-base-content/20',
+    hasError ? 'border border-error outline-error textarea-error' : 'outline-base-content/20',
     'backdrop-blur',
     'bg-base-content/5',
     clazz,

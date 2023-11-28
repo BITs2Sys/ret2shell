@@ -15,7 +15,7 @@
   import RxPing from '$lib/components/RxPing.svelte'
   import { getPlatformVersion } from '$lib/api/platform'
   import RxPopup from '$lib/components/RxPopup.svelte'
-  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
 
   let calendars: Calendar[] = []
 

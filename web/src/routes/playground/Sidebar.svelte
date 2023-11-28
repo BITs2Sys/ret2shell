@@ -8,7 +8,7 @@
   import type { Submission } from '$lib/models/submission'
   import { theme } from '$lib/stores/theme'
   import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 
   export let playgrounds: Game[]
   export let games: Game[]
@@ -36,6 +36,14 @@
   }
 
   let tagExpandedRecord: Record<number, boolean> = {}
+
+  onMount(() => {
+    tagExpandedRecord = {}
+    if (tags.length <= 3)
+      tags.forEach((tag) => {
+        tagExpandedRecord[tag.id] = true
+      })
+  })
 
   function handleTagExpand(tagId: number) {
     tagExpandedRecord[tagId] = !tagExpandedRecord[tagId]

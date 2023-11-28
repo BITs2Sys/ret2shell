@@ -26,7 +26,7 @@
     getChallengeHints(challenge.id)
       .then((res) => {
         hints = res
-        console.log(hints)
+        // console.log(hints)
       })
       .catch((err) => {
         showMessage('error', `${$i18n.t('submissions.fetchFailed')}: ${(err as AxiosError).response?.data}`, 5000)
@@ -78,7 +78,7 @@
           autoHide: 'scroll',
         },
       }}
-      class="w-full h-full relative p-12 print:hidden"
+      class="w-full h-full relative p-6 print:hidden"
       defer
     >
       <div class="flex flex-col space-y-4">

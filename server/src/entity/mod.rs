@@ -17,6 +17,7 @@ pub mod institute;
 pub mod ip_address;
 pub mod media;
 pub mod notification;
+pub mod oauth;
 pub mod plan;
 pub mod plan2_challenge;
 pub mod submission;

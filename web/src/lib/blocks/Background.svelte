@@ -1,7 +1,7 @@
 <script>
   import BackgroundLeft from '$lib/assets/background-left.svelte'
   import BackgroundRight from '$lib/assets/background-right.svelte'
-  import BgBlur from '$lib/assets/bg-blur.webp'
+  import BgBlur from '$lib/assets/imgs/bg-blur.webp'
 
   export let showBlurBg = true
 </script>

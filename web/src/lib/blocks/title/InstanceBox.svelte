@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getChallenge } from '$lib/api/challenge'
-  import Engine from '$lib/assets/engine.svelte'
+  import Engine from '$lib/assets/animates/engine.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxTimer from '$lib/components/RxTimer.svelte'
   import type { Challenge } from '$lib/models/challenge'

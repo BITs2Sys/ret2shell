@@ -17,7 +17,7 @@
   import { onDestroy } from 'svelte'
   import { goto } from '$app/navigation'
   import { game } from '$lib/stores/game'
-  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
 
   let games: Game[] = []
   $: hasCover = $game.cached?.cover_path !== null
@@ -161,8 +161,8 @@
     <div
       class="w-full lg:w-3/4 h-auto rounded-box bg-base-content/5 backdrop-blur shadow-lg aspect-video transition-all lg:-translate-x-[4rem] rounded-b-none lg:rounded-b-box overflow-clip relative"
     >
-      {#if hasCover && games.length !== 0}
-        <RxImage class="w-full h-full relative" src={$game.cached?.cover_path} {loading}></RxImage>
+      {#if hasCover && games.length !== 0 && $game.cached?.cover_path}
+        <RxImage class="w-full h-full relative" src={$game.cached.cover_path} {loading}></RxImage>
       {:else}
         <RxImage class="w-full h-full relative" src={Bg} {loading}>
           <div class="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">

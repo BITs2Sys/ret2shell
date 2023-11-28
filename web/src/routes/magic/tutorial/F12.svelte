@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
   import { step } from './store'
-  import LocationAnimate from '$lib/assets/location-animate.svelte'
+  import LocationAnimate from '$lib/assets/animates/location-animate.svelte'
   import { i18n } from '$lib/i18n'
   import { onMount } from 'svelte'
   import RxButton from '$lib/components/RxButton.svelte'

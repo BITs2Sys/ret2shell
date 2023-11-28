@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
   import { step } from './store'
-  import WaveFlag from '$lib/assets/wave-flag.svelte'
+  import WaveFlag from '$lib/assets/animates/wave-flag.svelte'
   import { i18n } from '$lib/i18n'
   import { onMount } from 'svelte'
   import RxButton from '$lib/components/RxButton.svelte'

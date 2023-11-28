@@ -1,12 +1,12 @@
 <script lang="ts">
-  import Grass from '$lib/assets/grass.svelte'
+  import Grass from '$lib/assets/animates/grass.svelte'
   import RxCard from '$lib/components/RxCard.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'
   import { platform } from '$lib/stores/platform'
-  import Thankyoujs from '$lib/assets/thankyoujs.png'
-  import xdsecMascot from '$lib/assets/xdsec-mascot.webp'
-  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import Thankyoujs from '$lib/assets/imgs/thankyoujs.png'
+  import xdsecMascot from '$lib/assets/imgs/xdsec-mascot.webp'
+  import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
   import RxToast from '$lib/components/RxToast.svelte'
 
   let showToast = false

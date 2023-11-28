@@ -74,7 +74,8 @@
     "deleteAccountTips2": "Please read carefully and confirm the above content! \nIf you're really sure you want to deactivate your account, please confirm by entering your full username below:",
     "bye": "Bye.",
     "deleteAccountFailed": "Account deactivation failed",
-    "deleteAccountTips3": "Please note that due to the deletion of identity verification-related private information, even if you contact management/operation and maintenance personnel, you cannot recover the deactivated account, so please think twice before doing so."
+    "deleteAccountTips3": "Please note that due to the deletion of identity verification-related private information, even if you contact management/operation and maintenance personnel, you cannot recover the deactivated account, so please think twice before doing so.",
+    "connectOAuthServer": "Communicating with account server..."
   },
   "playground": {
     "title": "Playground",
@@ -275,8 +276,8 @@
     "createChallenge": "Create Challenge",
     "challengeStatistics": "Statistics",
     "challengeInfo": "Info",
-    "challengeRepo": "Repo",
-    "challengeWorkflows": "CI/CD",
+    "challengeRepo": "Files",
+    "challengeWorkflows": "Images",
     "challengeSubmissions": "Submissions",
     "challengeInstances": "Instances",
     "loadingChallenge": "Loading...",

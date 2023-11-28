@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { colorDefs, theme } from '$lib/stores/theme'
+  import { colorDefs } from '$lib/stores/theme'
 
   export let width: number
   export let height: number

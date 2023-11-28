@@ -3,7 +3,7 @@
   import { page } from '$app/stores'
   import { getGame } from '$lib/api/game'
   import Background from '$lib/blocks/Background.svelte'
-  import BgBlur from '$lib/assets/bg-blur.webp'
+  import BgBlur from '$lib/assets/imgs/bg-blur.webp'
   import { i18n } from '$lib/i18n'
   import { game, refreshTeam } from '$lib/stores/game'
   import { platform } from '$lib/stores/platform'
@@ -13,7 +13,7 @@
   import { blur, fly } from 'svelte/transition'
   import { user } from '$lib/stores/user'
   import { Permission } from '$lib/models/user'
-  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
   import '$lib/styles/transitions.scss'
 
   let loading = false

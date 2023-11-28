@@ -4,7 +4,7 @@
   import { i18n } from '$lib/i18n'
   import { onMount } from 'svelte'
   import RxButton from '$lib/components/RxButton.svelte'
-  import Barometer from '$lib/assets/barometer.svelte'
+  import Barometer from '$lib/assets/animates/barometer.svelte'
   let goNext = true
 
   onMount(() => {

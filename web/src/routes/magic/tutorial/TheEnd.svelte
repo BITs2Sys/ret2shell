@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import LogoAnimate from '$lib/assets/logo-animate.svelte'
+  import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import { i18n } from '$lib/i18n'
   import { fly } from 'svelte/transition'

@@ -49,8 +49,8 @@
         ...answer,
         ...values,
       }
-      console.log(answerExists)
-      console.log(newAnswer)
+      // console.log(answerExists)
+      // console.log(newAnswer)
       if (answerExists === true) {
         updateChallengeAnswer(challenge.id, newAnswer)
           .then(() => {
@@ -125,6 +125,7 @@
       name="content"
       class="h-[16rem]"
       lang="markdown"
+      hasError={$errors.content !== null}
       placeholder="Mode = Markdown"
       {loading}
       readonly={loading || submitting}

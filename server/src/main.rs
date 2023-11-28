@@ -35,7 +35,6 @@ mod logging;
 mod media;
 mod migrator;
 mod oauth;
-mod operator;
 mod queue;
 mod service;
 mod traffic;
