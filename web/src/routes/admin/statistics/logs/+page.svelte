@@ -156,7 +156,7 @@
     )
 </script>
 
-<svelte:head><title>{$i18n.t('admin.serverLogs')} - {$platform.name}</title></svelte:head>
+<svelte:head><title>{$i18n.t('admin.routes.logs')} - {$platform.name}</title></svelte:head>
 
 <div class="flex-1 flex flex-col p-6 space-y-4 relative">
   <h2 class="py-2 text-base font-bold border-b border-b-base-content/10">CPU Load</h2>
