@@ -159,6 +159,7 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     )
     .await
     .expect("Failed to start server.");
+
     Ok(())
 }
 

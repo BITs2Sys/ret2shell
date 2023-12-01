@@ -12,6 +12,7 @@
   import RxPopup from '$lib/components/RxPopup.svelte'
   import '$lib/styles/transitions.scss'
   import { blur } from 'svelte/transition'
+  import { platform } from '$lib/stores/platform'
 
   let clusterInfo: ClusterInfo | null = null
   let loading = true
@@ -38,6 +39,7 @@
     ?.clusterDomain
 </script>
 
+<svelte:head><title>{$i18n.t('admin.routes.cluster')} - {$platform.name}</title></svelte:head>
 <div class="flex-1 flex flex-col p-6 space-y-2 relative">
   {#if !loading}
     <h1 class="text-3xl font-bold flex flex-row space-x-4 items-center">

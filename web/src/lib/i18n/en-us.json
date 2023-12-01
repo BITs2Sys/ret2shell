@@ -325,6 +325,15 @@
       "4": "Do you have any weird obsession with titles?",
       "5": "418 I'm just a teapot... No, I'm just a title",
       "6": "You seem to be very free. Have you solved the P!=NP problem?"
+    },
+    "homo": {
+      "title": "Homo Calculator"
+    },
+    "minesweeper": {
+      "title": "Mine sweeper"
+    },
+    "binarypiano": {
+      "title": "Music by Binary Numbers"
     }
   },
   "form": {

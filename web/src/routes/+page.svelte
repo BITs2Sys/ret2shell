@@ -127,7 +127,7 @@
 
   let calendarSection: HTMLElement
 
-  const suprises = ['sakana', 'wdnmd']
+  const suprises = ['sakana', 'wdnmd', 'homo', 'binarypiano']
   $: surprise = `/magic/${suprises[Math.floor(Math.random() * suprises.length)]}`
 </script>
 
