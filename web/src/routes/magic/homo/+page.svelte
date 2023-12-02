@@ -2,7 +2,7 @@
   import RxInput from '$lib/components/RxInput.svelte'
   import Homo from '$lib/assets/imgs/homo.webp'
   import { i18n } from '$lib/i18n'
-    import { platform } from '$lib/stores/platform'
+  import { platform } from '$lib/stores/platform'
 
   const homo = ((table: Record<number | string, string>) => {
     const tableReversed = Object.keys(table)
