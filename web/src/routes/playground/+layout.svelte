@@ -121,8 +121,8 @@
                 ? a.name > b.name
                   ? 1
                   : a.name === b.name
-                  ? 0
-                  : -1
+                    ? 0
+                    : -1
                 : a.current_score - b.current_score
             )
           challengeTotalPages = res.total
@@ -161,8 +161,8 @@
               ? a.name > b.name
                 ? 1
                 : a.name === b.name
-                ? 0
-                : -1
+                  ? 0
+                  : -1
               : a.current_score - b.current_score
           )
           challengeTotalPages = res.total

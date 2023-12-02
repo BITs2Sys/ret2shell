@@ -1,6 +1,6 @@
 [package]
 name = "ret2shell"
-version = "0.1.0"
+version = "0.5.1"
 edition = "2021"
 rust-version = "1.73.0"
 description = "A feature-riches CTF challenge platform."
