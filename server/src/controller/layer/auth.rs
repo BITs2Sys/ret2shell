@@ -219,6 +219,7 @@ macro_rules! pass_admin_for_game {
     }};
 }
 
+pub(crate) use pass_admin_for_game;
 pub(crate) use permission_required_all;
 pub(crate) use permission_required_any;
 

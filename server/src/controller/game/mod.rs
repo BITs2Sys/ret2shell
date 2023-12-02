@@ -1,6 +1,6 @@
 use super::{
     layer::{
-        auth::{self, Token},
+        auth::{self, pass_admin_for_game, Token},
         info,
     },
     GlobalState,
@@ -51,7 +51,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                     Permission::Devops,
                     Permission::Audit
                 )))
-                .route("/solved", get(get_self_solved))
+                .route("/solved", get(get_team_solved))
                 .route("/", get(get_game))
                 .route("/scoreboard", get(get_scoreboard))
                 .route_layer(middleware::from_fn_with_state(
@@ -233,15 +233,15 @@ pub struct TeamSolvedQuery {
     pub team_id: Option<i64>,
 }
 
-pub async fn get_self_solved(
+pub async fn get_team_solved(
     State(ref conn): State<DatabaseConnection>,
     Extension(token): Extension<Token>,
     Path(game_id): Path<i64>,
     Query(query): Query<TeamSolvedQuery>,
 ) -> Result<Response, (StatusCode, &'static str)> {
     let result = match query.team_id {
-        Some(id) => Json(
-            submission::get_solved_submission_of_team(conn, game_id, id)
+        Some(id) => {
+            let mut result = submission::get_solved_submission_of_team(conn, game_id, id)
                 .await
                 .map_err(|err| {
                     error!("failed to get team solved challenges: {:?}", err);
@@ -249,8 +249,19 @@ pub async fn get_self_solved(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "failed to get team solved challenges",
                     )
-                })?,
-        )
+                })?;
+            let admin = pass_admin_for_game!(token.permissions.0);
+            if !admin {
+                result = result
+                    .into_iter()
+                    .map(|r| submission::ModelWithInfo {
+                        content: String::new(),
+                        ..r
+                    })
+                    .collect::<Vec<_>>()
+            }
+            Json(result)
+        }
         .into_response(),
         None => Json(
             submission::get_solved_submission_of_user(conn, game_id, token.id)
