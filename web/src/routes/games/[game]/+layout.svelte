@@ -64,6 +64,7 @@
       value.cached = null
       value.team = null
       value.showGameNav = false
+      value.challenges = []
       return value
     })
   })

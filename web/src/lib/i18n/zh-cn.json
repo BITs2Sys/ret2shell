@@ -75,7 +75,8 @@
     "deleteAccountTips3": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
     "bye": "再见",
     "deleteAccountFailed": "账户停用失败",
-    "connectOAuthServer": "正在与账户服务器通讯..."
+    "connectOAuthServer": "正在与账户服务器通讯...",
+    "verifyingEmail": "正在验证邮箱..."
   },
   "announcements": {
     "title": "公告",
@@ -637,7 +638,19 @@
     "creating": "正在创建比赛",
     "createSuccess": "创建比赛成功",
     "createFailed": "创建比赛失败",
-    "is_offline": "线下断网比赛"
+    "is_offline": "线下断网比赛",
+    "teamNotFound": "队伍未找到",
+    "teamFetchFailed": "获取队伍信息失败",
+    "writeupPlaceholder": "该模板由平台自动生成，提交时请删去此行。",
+    "enterWriteupForChallengeHere": "在这里编写本题的题解，提交时请删掉此行。",
+    "writeupSubmitSuccess": "题解提交成功",
+    "writeupSubmitFailed": "题解提交失败",
+    "gameIsArchived": "比赛已经归档，不再接收新题解。",
+    "gameNotEnded": "比赛还未结束，请在结束后提交。",
+    "joinTeam": "加入队伍",
+    "teamSolved": "解题记录",
+    "eachSolvesByMember1": "被",
+    "eachSolvesByMember2": "解出，获得"
   },
   "challenges": {
     "noHint": "暂无提示信息",

@@ -11,7 +11,7 @@
 
 <div class="p-2 flex flex-col">
   {#if $game.team}
-    <RxLink justify="start" class="h-16 overflow-hidden" href="/account/profile">
+    <RxLink justify="start" class="h-16 overflow-hidden" href={`/games/${$game.current?.id}/teams/${$game.team.id}`}>
       <div class="avatar">
         <div
           class="w-10 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center"
@@ -29,10 +29,10 @@
       <span class="w-5 h-5 icon-[fluent--copy-20-regular] text-success" />
       {$i18n.t('games.copyInviteLink')}
     </RxButton>
-    <RxButton justify="start" ghost>
+    <RxLink justify="start" ghost href={`/games/${$game.current?.id}/writeups/publish`}>
       <span class="w-5 h-5 icon-[fluent--arrow-upload-20-regular] text-success" />
       {$i18n.t('games.submitWriteup')}
-    </RxButton>
+    </RxLink>
   {:else if $user.permissions.find((p) => p === Permission.Devops || p === Permission.Organize)}
     <RxButton disabled justify="start">
       <span class="w-5 h-5 icon-[fluent--thumb-dislike-20-regular]" />

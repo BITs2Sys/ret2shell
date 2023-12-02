@@ -1,4 +1,4 @@
-import { getGameTeamSubmission, getSelfTeamInfo, getSelfTeamRank } from '$lib/api/game'
+import { getGameTeamSolves, getSelfTeamInfo, getSelfTeamRank } from '$lib/api/game'
 import { getSelfRunningInstance } from '$lib/api/instance'
 import type { Challenge } from '$lib/models/challenge'
 import type { Game } from '$lib/models/game'
@@ -64,7 +64,7 @@ export function refreshTeam() {
           value.team = res
           return value
         })
-        getGameTeamSubmission(gameObj.id, res.id)
+        getGameTeamSolves(gameObj.id, res.id)
           .then((res) => {
             game.update((value) => {
               value.submissions = res

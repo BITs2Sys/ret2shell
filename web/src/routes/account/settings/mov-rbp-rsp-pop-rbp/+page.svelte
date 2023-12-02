@@ -5,6 +5,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import RxInput from '$lib/components/RxInput.svelte'
   import { i18n } from '$lib/i18n'
+  import { platform } from '$lib/stores/platform'
   import { showMessage } from '$lib/stores/toast'
   import { user, userReset } from '$lib/stores/user'
   import type { AxiosError } from 'axios'
@@ -30,6 +31,8 @@
     }
   }
 </script>
+
+<svelte:head><title>{$i18n.t('account.bye')} - {$platform.name}</title></svelte:head>
 
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
   <div class="flex-1 flex flex-col max-w-5xl">

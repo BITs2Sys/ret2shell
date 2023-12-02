@@ -39,6 +39,7 @@
     institute_id: null,
     updated_at: 0,
     blood_award_rate: 0,
+    is_offline: false,
   }
 
   $: renderedGames = games.map((a) => {
@@ -227,6 +228,7 @@
         institute_id: null,
         updated_at: 0,
         blood_award_rate: 0,
+        is_offline: false,
       }
     }
   })

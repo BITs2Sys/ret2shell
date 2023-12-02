@@ -47,6 +47,16 @@
   let currentGameIdCache: number | null = null
   let loading = false
 
+  if (!$game.inProgress()) {
+    goto(`/playground/${$game.current?.id}${$page.url.hash}`, { replaceState: true })
+  }
+
+  function removeDuplicateChallenges() {
+    $game.challenges = $game.challenges.filter((challenge, index, self) => {
+      return self.findIndex((c) => c.id === challenge.id) === index
+    })
+  }
+
   function getChallenges() {
     if ($game.current?.id) {
       loading = true
@@ -63,6 +73,7 @@
                     : -1
                 : a.current_score - b.current_score
             )
+          removeDuplicateChallenges()
           challengeTotalPages = res.total
         })
         .catch((err) => {
@@ -109,7 +120,6 @@
 
   onDestroy(() => {
     gameUnsubscribe()
-    $game.challenges = []
   })
 
   onMount(() => {

@@ -4,6 +4,6 @@
 </script>
 
 <svelte:head>
-  <title>{$i18n.t('game.challenges')} - {$game.current?.name}</title>
+  <title>{$i18n.t('game.joinTeam')} - {$game.current?.name}</title>
 </svelte:head>
 <div></div>

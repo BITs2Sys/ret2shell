@@ -36,13 +36,13 @@
   <div class="flex-1 flex flex-col justify-center items-center space-y-12">
     <div class="flex flex-row items-center space-x-8">
       <div in:fly={{ duration: 1000, x: 32, opacity: 0, easing: quintOut }}>
-        <RxCard>
+        <RxCard class="flex flex-col items-center justify-center w-40 h-40">
           <LogoAnimate width={128} height={128} />
         </RxCard>
       </div>
       <span class="loading loading-infinity w-16 text-info" in:blur={{ duration: 300, amount: 20 }}></span>
       <div in:fly={{ duration: 1000, x: -32, opacity: 0, easing: quintOut }}>
-        <RxCard>
+        <RxCard class="flex flex-col items-center justify-center w-40 h-40">
           <svelte:component this={iconSource} width={128} height={128} />
         </RxCard>
       </div>

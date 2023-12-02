@@ -2,8 +2,10 @@
   import LogoFull from '$lib/assets/logo-full.svg'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
+  import { platform } from '$lib/stores/platform'
 </script>
 
+<svelte:head><title>{$i18n.t('admin.routes.about')} - {$platform.name}</title></svelte:head>
 <div class="flex-1 flex flex-col p-6 lg:p-12 space-y-4 items-center">
   <h1 class="text-xl flex flex-row items-center space-x-4">
     <img src={LogoFull} width={480} alt="" />

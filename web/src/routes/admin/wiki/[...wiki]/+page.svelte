@@ -11,6 +11,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import { goto } from '$app/navigation'
   import { blur } from 'svelte/transition'
+  import { platform } from '$lib/stores/platform'
 
   let loading = true
   let isCreate = false
@@ -168,6 +169,8 @@
     deleteModalOpened = true
   }
 </script>
+
+<svelte:head><title>{editedWiki.title} - {$platform.name}</title></svelte:head>
 
 <div class="flex flex-col min-h-full relative backdrop-blur">
   <div class="h-16 flex-shrink-0 flex flex-row items-center px-2 border-b border-b-base-content/5 relative">

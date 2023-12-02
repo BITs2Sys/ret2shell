@@ -12,7 +12,7 @@
   })
   import { page } from '$app/stores'
   import { getChallenge, getChallengeAnwser, getChallengeHints } from '$lib/api/challenge'
-  import { getGame, getGameSelfSubmission } from '$lib/api/game'
+  import { getGame, getGameSelfSolves } from '$lib/api/game'
   import AnswerPanel from '$lib/blocks/challenge/AnswerPanel.svelte'
   import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
   import TerminalPanel from '$lib/blocks/challenge/TerminalPanel.svelte'
@@ -84,7 +84,7 @@
 
   function getSelfSubmissions() {
     if ($game.current?.id)
-      getGameSelfSubmission($game.current.id)
+      getGameSelfSolves($game.current.id)
         .then((res) => {
           $game.submissions = res
         })

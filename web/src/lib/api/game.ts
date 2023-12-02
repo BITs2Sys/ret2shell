@@ -51,11 +51,11 @@ export async function getGameSubmission(game_id: number, page: number, per_page:
   }
 }
 
-export async function getGameSelfSubmission(game_id: number) {
+export async function getGameSelfSolves(game_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/solved`)).data as Submission[]
 }
 
-export async function getGameTeamSubmission(game_id: number, team_id: number) {
+export async function getGameTeamSolves(game_id: number, team_id: number) {
   return (await api.get(`${api_root}/game/${game_id}/solved?team_id=${team_id}`)).data as Submission[]
 }
 
@@ -148,4 +148,16 @@ export async function getGameTeamWriteUp(game_id: number, id: number) {
 
 export async function auditGameTeamWriteUp(game_id: number, id: number, audit: boolean) {
   return await api.patch(`${api_root}/game/${game_id}/writeup/audit?writeup_id=${id}&audit=${audit}`)
+}
+
+export async function getGameTeamWriteUpSelf(game_id: number) {
+  return (await api.get(`${api_root}/game/${game_id}/writeup/self`)).data as WriteUp
+}
+
+export async function updateGameTeamWriteUpSelf(game_id: number, writeup: WriteUp) {
+  return await api.patch(`${api_root}/game/${game_id}/writeup/self`, writeup)
+}
+
+export async function createGameTeamWriteUpSelf(game_id: number, writeup: WriteUp) {
+  return await api.post(`${api_root}/game/${game_id}/writeup`, writeup)
 }

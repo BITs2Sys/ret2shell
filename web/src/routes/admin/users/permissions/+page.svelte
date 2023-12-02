@@ -1,6 +1,9 @@
 <script lang="ts">
   import { i18n } from '$lib/i18n'
+  import { platform } from '$lib/stores/platform'
 </script>
+
+<svelte:head><title>{$i18n.t('admin.routes.permissions')} - {$platform.name}</title></svelte:head>
 
 <div class="flex-1 flex flex-col space-y-4 p-6 lg:p-12">
   <h2 class="text-lg font-bold flex flex-row space-x-2 items-center border-b border-b-base-content/10 py-2">

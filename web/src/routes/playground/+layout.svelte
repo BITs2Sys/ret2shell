@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation'
   import { page } from '$app/stores'
   import { getChallengeList, getTagList } from '$lib/api/challenge'
-  import { getGameList, getGameSelfSubmission } from '$lib/api/game'
+  import { getGameList, getGameSelfSolves } from '$lib/api/game'
   import Sidebar from './Sidebar.svelte'
   import { i18n } from '$lib/i18n'
   import type { Tag } from '$lib/models/challenge'
@@ -135,7 +135,7 @@
 
   function getSelfSubmissions() {
     if (activeGameId)
-      getGameSelfSubmission(activeGameId)
+      getGameSelfSolves(activeGameId)
         .then((res) => {
           $game.submissions = res
         })
