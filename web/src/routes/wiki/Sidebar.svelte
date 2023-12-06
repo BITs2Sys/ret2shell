@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getWikiList } from '$lib/api/wiki'
+  import { getWikiList } from '$lib/api/v1/wiki'
   import WikiTree from '$lib/blocks/WikiTree.svelte'
   import { i18n } from '$lib/i18n'
   import { transformToWikiEntry, type WikiEntry } from '$lib/models/wiki'

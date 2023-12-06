@@ -11,7 +11,7 @@
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
   import { showMessage } from '$lib/stores/toast'
-  import { resetPassword } from '$lib/api/account'
+  import { resetPassword } from '$lib/api/v1/account'
   import { onMount } from 'svelte'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'

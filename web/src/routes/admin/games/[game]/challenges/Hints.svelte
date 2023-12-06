@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createHint, deleteHint, getChallengeHints } from '$lib/api/challenge'
+  import { createHint, deleteHint, getChallengeHints } from '$lib/api/v1/challenge'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxInput from '$lib/components/RxInput.svelte'
   import { i18n } from '$lib/i18n'
@@ -70,7 +70,7 @@
 </script>
 
 <div class="w-full flex flex-1 flex-col">
-  <div class="w-full h-full">
+  <div class="w-full h-full relative">
     <OverlayScrollbarsComponent
       options={{
         scrollbars: {
@@ -111,5 +111,10 @@
         {/each}
       </div>
     </OverlayScrollbarsComponent>
+    {#if loading}
+      <div class="absolute top-0 left-0 w-full h-full backdrop-blur flex flex-col items-center jusitfy-center">
+        <span class="loading loading-spinner loading-md"></span>
+      </div>
+    {/if}
   </div>
 </div>

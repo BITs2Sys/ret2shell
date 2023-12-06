@@ -11,7 +11,7 @@
   import { fade } from 'svelte/transition'
   import { platform } from '$lib/stores/platform'
   import { page } from '$app/stores'
-  import { getPlatformInfo } from '$lib/api/platform'
+  import { getPlatformInfo } from '$lib/api/v1/platform'
   import { goto } from '$app/navigation'
   import { removeMessage, showMessage } from '$lib/stores/toast'
   import { i18n } from '$lib/i18n'
@@ -19,7 +19,7 @@
   import type { AxiosError } from 'axios'
   import { refreshUserInfo, user, userReset } from '$lib/stores/user'
   import { Permission } from '$lib/models/user'
-  import { resendEmailVerification } from '$lib/api/account'
+  import { resendEmailVerification } from '$lib/api/v1/account'
 
   let platformTyped = ''
   let animation = $page.url.pathname === '/'

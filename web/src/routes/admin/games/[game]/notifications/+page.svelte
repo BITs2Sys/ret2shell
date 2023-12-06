@@ -7,7 +7,7 @@
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
   import type { Game, Notification } from '$lib/models/game'
-  import { createNotification, deleteGameNotification, getGameNotifications } from '$lib/api/game'
+  import { createNotification, deleteGameNotification, getGameNotifications } from '$lib/api/v1/game'
   import RxLink from '$lib/components/RxLink.svelte'
   import CreatePanel from './CreatePanel.svelte'
   import RxButton from '$lib/components/RxButton.svelte'

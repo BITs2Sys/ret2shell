@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
-  import { getAnnouncement } from '$lib/api/announcement'
-  import { getUserInfo } from '$lib/api/user'
+  import { getAnnouncement } from '$lib/api/v1/announcement'
+  import { getUserInfo } from '$lib/api/v1/user'
   import Error from '$lib/blocks/Error.svelte'
   import { i18n } from '$lib/i18n'
   import type { Announcement } from '$lib/models/announcement'

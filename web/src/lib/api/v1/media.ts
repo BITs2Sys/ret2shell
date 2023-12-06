@@ -1,6 +1,6 @@
 import type { Media } from '$lib/models/media'
 import type { Writable } from 'svelte/store'
-import { api, api_root } from '.'
+import { api, api_root } from '..'
 
 export interface UploadMediaResponse {
   model: Media
@@ -10,7 +10,7 @@ export interface UploadMediaResponse {
 export async function uploadMedia(file: File, requireThumbnail: boolean, progress?: Writable<number | undefined>) {
   const formData = new FormData()
   formData.append('data', file)
-  const resp = await api.post(`${api_root}/media/upload?require_thumbnail=${requireThumbnail}`, formData, {
+  const resp = await api.post(`${api_root}/v1/media/upload?require_thumbnail=${requireThumbnail}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (progress) {

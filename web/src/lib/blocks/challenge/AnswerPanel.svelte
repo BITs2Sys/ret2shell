@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getUserInfo } from '$lib/api/user'
+  import { getUserInfo } from '$lib/api/v1/user'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import { i18n } from '$lib/i18n'
   import type { Answer } from '$lib/models/answer'

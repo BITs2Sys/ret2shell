@@ -6,7 +6,7 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { platform } from '$lib/stores/platform'
-  import { createGame, getGameList } from '$lib/api/game'
+  import { createGame, getGameList } from '$lib/api/v1/game'
   import type { Game } from '$lib/models/game'
   import { onDestroy } from 'svelte'
   import { page } from '$app/stores'

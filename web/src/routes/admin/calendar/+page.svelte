@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createCalendar, deleteCalendar, getCalendar, getCalendarList, updateCalendar } from '$lib/api/calendar'
+  import { createCalendar, deleteCalendar, getCalendar, getCalendarList, updateCalendar } from '$lib/api/v1/calendar'
   import type { DTColumnAction, DTColumnsDef, DTDataEntry } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import RxButton from '$lib/components/RxButton.svelte'

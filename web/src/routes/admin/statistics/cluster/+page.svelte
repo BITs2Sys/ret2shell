@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getPlatformClusterInfo } from '$lib/api/platform'
+  import { getPlatformClusterInfo } from '$lib/api/v1/platform'
   import { i18n } from '$lib/i18n'
   import type { ClusterInfo } from '$lib/models/config'
   import { showMessage } from '$lib/stores/toast'

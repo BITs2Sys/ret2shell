@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { updateUser } from '$lib/api/user'
+  import { updateUser } from '$lib/api/v1/user'
   import { i18n } from '$lib/i18n'
   import type { Institute } from '$lib/models/institute'
   import { Permission, permissionToString, type User } from '$lib/models/user'
@@ -13,7 +13,7 @@
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxImage from '$lib/components/RxImage.svelte'
-  import { uploadMedia } from '$lib/api/media'
+  import { uploadMedia } from '$lib/api/v1/media'
   import { getMediaPath } from '$lib/models/media'
   import RxCodeBox from '$lib/components/RxCodeBox.svelte'
   import RxSelect from '$lib/components/RxSelect.svelte'

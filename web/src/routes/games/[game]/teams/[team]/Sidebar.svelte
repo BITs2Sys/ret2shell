@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { getGameTeamSolves, getTeamMembers } from '$lib/api/game'
   import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'
   import type { Team } from '$lib/models/team'
   import type { User } from '$lib/models/user'
-  import { showMessage } from '$lib/stores/toast'
   import RxImage from '$lib/components/RxImage.svelte'
-  import type { AxiosError } from 'axios'
 
   export let loading: boolean
   export let team: Team | null

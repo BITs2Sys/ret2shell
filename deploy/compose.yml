@@ -3,6 +3,7 @@ version: '3'
 services:
   platform:
     image: ret2shell:latest
+    build: ./server
     restart: always
     ports:
       - 8080:8080
@@ -14,7 +15,6 @@ services:
     networks:
       default:
       internal:
-      challenge:
   database:
     image: postgres:16-alpine
     restart: always
@@ -51,6 +51,4 @@ volumes:
 networks:
   default:
   internal:
-    internal: true
-  challenge:
     internal: true

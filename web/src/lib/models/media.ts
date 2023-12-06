@@ -21,9 +21,9 @@ export function getThumbnailPath(media: Media) {
 }
 
 export function appendMediaPath(media: string) {
-  return `${api_root}/media/${media}`
+  return `${api_root}/v1/media/${media}`
 }
 
 export function appendThumbnailPath(media: string) {
-  return `${api_root}/media/thumbnails/${media}`
+  return `${api_root}/v1/media/thumbnails/${media}`
 }

@@ -1,9 +1,9 @@
 mod captcha;
 
-use super::layer::auth::{permission_required_all, Token, TokenTracker};
-use super::layer::info;
 use crate::captcha::captcha_protected;
 use crate::config::GlobalConfig;
+use crate::controller::layer::auth::{permission_required_all, Token, TokenTracker};
+use crate::controller::layer::info;
 use crate::email::{send_email, Email};
 use crate::entity::config::Model as ConfigModel;
 use crate::entity::user::{self, count_user, create_user, Permissions};

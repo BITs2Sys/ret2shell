@@ -3,14 +3,12 @@
   import type { DTColumnsDef } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import { i18n } from '$lib/i18n'
-  import { platform } from '$lib/stores/platform'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
-  import { getGameSubmission } from '$lib/api/game'
   import { onDestroy } from 'svelte'
   import type { SubmissionWithInfo } from '$lib/models/submission'
-  import { getChallengeSubmission } from '$lib/api/challenge'
+  import { getChallengeSubmission } from '$lib/api/v1/challenge'
 
   export let challenge: Challenge
   let currentPage: number = 1

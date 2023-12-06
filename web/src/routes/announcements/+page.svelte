@@ -2,7 +2,7 @@
   import { platform } from '$lib/stores/platform'
   import { i18n } from '$lib/i18n'
   import type { Announcement } from '$lib/models/announcement'
-  import { getAnnouncementList } from '$lib/api/announcement'
+  import { getAnnouncementList } from '$lib/api/v1/announcement'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import RxPaginator from '$lib/components/RxPaginator.svelte'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getInstituteList } from '$lib/api/user'
+  import { getInstituteList } from '$lib/api/v1/user'
   import type { DTColumnAction, DTColumnsDef } from '$lib/blocks/DataTable'
   import DataTable from '$lib/blocks/DataTable.svelte'
   import { i18n } from '$lib/i18n'

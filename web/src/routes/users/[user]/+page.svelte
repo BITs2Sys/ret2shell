@@ -4,7 +4,7 @@
   import Sidebar from './Sidebar.svelte'
   import Error from '$lib/blocks/Error.svelte'
   import { onMount } from 'svelte'
-  import { getUserInfo, getUserTeams } from '$lib/api/user'
+  import { getUserInfo, getUserTeams } from '$lib/api/v1/user'
   import type { AxiosError } from 'axios'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import type { TeamWithGameName } from '$lib/models/team'

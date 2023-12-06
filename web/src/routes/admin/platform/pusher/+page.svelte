@@ -9,7 +9,7 @@
   import RxFormItem from '$lib/components/RxFormItem.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
-  import { getPlatformConfig, setPlatformConfig } from '$lib/api/platform'
+  import { getPlatformConfig, setPlatformConfig } from '$lib/api/v1/platform'
   import { showMessage } from '$lib/stores/toast'
   import type { Config } from '$lib/models/config'
   import { user } from '$lib/stores/user'

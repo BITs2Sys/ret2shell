@@ -8,10 +8,8 @@
   import RxInput from '$lib/components/RxInput.svelte'
   import { i18n } from '$lib/i18n'
   import type { Calendar } from '$lib/models/calendar'
-  import { theme } from '$lib/stores/theme'
   import { validator } from '@felte/validator-zod'
   import { createForm } from 'felte'
-  import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
   import { createEventDispatcher } from 'svelte'
   import { z } from 'zod'
 
@@ -21,8 +19,6 @@
 
   let clazz = ''
   export { clazz as class }
-
-  $: classes = `w-full flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
 
   const dispatch = createEventDispatcher()
 

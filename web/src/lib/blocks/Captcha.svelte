@@ -5,7 +5,7 @@
   import { i18n } from '$lib/i18n'
   import RxFormItem from '$lib/components/RxFormItem.svelte'
   import { onMount } from 'svelte'
-  import { getCaptcha } from '$lib/api/account'
+  import { getCaptcha } from '$lib/api/v1/account'
   import type { Captcha } from '$lib/models/captcha'
   import { Validator } from '$lib/models/config'
   import { encode } from 'js-base64'

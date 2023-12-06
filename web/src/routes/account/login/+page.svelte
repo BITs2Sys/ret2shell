@@ -12,7 +12,7 @@
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
-  import { login } from '$lib/api/account'
+  import { login } from '$lib/api/v1/account'
   import { goto } from '$app/navigation'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'

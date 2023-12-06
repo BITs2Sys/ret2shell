@@ -1,5 +1,5 @@
-import { getGameTeamSolves, getSelfTeamInfo, getSelfTeamRank } from '$lib/api/game'
-import { getSelfRunningInstance } from '$lib/api/instance'
+import { getGameTeamSolves, getSelfTeamInfo, getSelfTeamRank } from '$lib/api/v1/game'
+import { getSelfRunningInstance } from '$lib/api/v1/instance'
 import type { Challenge } from '$lib/models/challenge'
 import type { Game } from '$lib/models/game'
 import type { Instance } from '$lib/models/instance'

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores'
-  import { getGameTeamSolves, getTeamInfo, getTeamMembers } from '$lib/api/game'
+  import { getGameTeamSolves, getTeamInfo, getTeamMembers } from '$lib/api/v1/game'
   import SidebarLayout from '$lib/blocks/SidebarLayout.svelte'
   import { i18n } from '$lib/i18n'
   import type { Team } from '$lib/models/team'
@@ -12,7 +12,7 @@
   import Error from '$lib/blocks/Error.svelte'
   import type { Submission } from '$lib/models/submission'
   import type { User } from '$lib/models/user'
-  import { getChallengeList } from '$lib/api/challenge'
+  import { getChallengeList } from '$lib/api/v1/challenge'
 
   let team: Team | null = null
   let loading = true

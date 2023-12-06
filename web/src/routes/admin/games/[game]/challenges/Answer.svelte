@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createChallengeAnswer, getChallengeAnswer, updateChallengeAnswer } from '$lib/api/challenge'
+  import { createChallengeAnswer, getChallengeAnswer, updateChallengeAnswer } from '$lib/api/v1/challenge'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCodeBox from '$lib/components/RxCodeBox.svelte'
   import RxForm from '$lib/components/RxForm.svelte'

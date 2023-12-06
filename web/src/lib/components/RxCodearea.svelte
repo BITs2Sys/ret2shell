@@ -9,7 +9,7 @@
   import { i18n } from '$lib/i18n'
   import { writable } from 'svelte/store'
   import { nanoid } from 'nanoid'
-  import { uploadMedia } from '$lib/api/media'
+  import { uploadMedia } from '$lib/api/v1/media'
   import type { AxiosError } from 'axios'
   import { showMessage } from '$lib/stores/toast'
   import { getMediaPath } from '$lib/models/media'

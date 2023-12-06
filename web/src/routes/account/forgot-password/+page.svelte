@@ -11,7 +11,7 @@
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
   import { showMessage } from '$lib/stores/toast'
-  import { sendResetEmail } from '$lib/api/account'
+  import { sendResetEmail } from '$lib/api/v1/account'
 
   let schema = z.object({
     email: z

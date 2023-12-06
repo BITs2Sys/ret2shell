@@ -11,7 +11,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
   import { nanoid } from 'nanoid'
-  import { setPlatformConfig } from '$lib/api/platform'
+  import { setPlatformConfig } from '$lib/api/v1/platform'
 
   let schema = z.object({
     enabled: z.boolean(),

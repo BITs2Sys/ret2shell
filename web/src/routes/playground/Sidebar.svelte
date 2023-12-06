@@ -8,7 +8,7 @@
   import type { Submission } from '$lib/models/submission'
   import { theme } from '$lib/stores/theme'
   import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
 
   export let playgrounds: Game[]
   export let games: Game[]

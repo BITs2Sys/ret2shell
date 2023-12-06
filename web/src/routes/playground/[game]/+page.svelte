@@ -11,8 +11,8 @@
     ],
   })
   import { page } from '$app/stores'
-  import { getChallenge, getChallengeAnwser, getChallengeHints } from '$lib/api/challenge'
-  import { getGame, getGameSelfSolves } from '$lib/api/game'
+  import { getChallenge, getChallengeAnwser, getChallengeHints } from '$lib/api/v1/challenge'
+  import { getGame, getGameSelfSolves } from '$lib/api/v1/game'
   import AnswerPanel from '$lib/blocks/challenge/AnswerPanel.svelte'
   import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
   import TerminalPanel from '$lib/blocks/challenge/TerminalPanel.svelte'

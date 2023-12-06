@@ -12,7 +12,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import type { Config } from '$lib/models/config'
   import { onMount } from 'svelte'
-  import { getPlatformConfig, setPlatformConfig } from '$lib/api/platform'
+  import { getPlatformConfig, setPlatformConfig } from '$lib/api/v1/platform'
   import type { Obj } from '@felte/core'
   import { user } from '$lib/stores/user'
   import { showMessage } from '$lib/stores/toast'

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { getChallengeList, getTagList } from '$lib/api/challenge'
+  import { getChallengeList, getTagList } from '$lib/api/v1/challenge'
   import {
     createGameTeamWriteUpSelf,
     getGameTeamSolves,
     getGameTeamWriteUpSelf,
     getTeamMembers,
     updateGameTeamWriteUpSelf,
-  } from '$lib/api/game'
+  } from '$lib/api/v1/game'
   import RxArticle from '$lib/components/RxArticle.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCodearea from '$lib/components/RxCodearea.svelte'
@@ -144,6 +144,7 @@
     unsubscribe()
   })
 </script>
+
 <svelte:head>
   <title>{$i18n.t('games.submitWriteup')} - {$game.current?.name}</title>
 </svelte:head>

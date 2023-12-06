@@ -43,17 +43,25 @@
     const finisher = (expr: string) => {
       expr = expr.replace(/\d+|⑨/g, (n) => table[n]).replace('^', '**')
       //As long as it matches ([\*|\/])\(([^\+\-\(\)]+)\), replace it with $1$2
+      //eslint-disable-next-line
       while (expr.match(/[\*|\/]\([^\+\-\(\)]+\)/))
+        //eslint-disable-next-line
         expr = expr.replace(/([\*|\/])\(([^\+\-\(\)]+)\)/, (m, $1, $2) => $1 + $2)
       //As long as it matches ([\+|\-])\(([^\(\)]+)\)([\+|\-|\)]), replace it with $1$2$3
+      //eslint-disable-next-line
       while (expr.match(/[\+|\-]\([^\(\)]+\)[\+|\-|\)]/))
+        //eslint-disable-next-line
         expr = expr.replace(/([\+|\-])\(([^\(\)]+)\)([\+|\-|\)])/, (m, $1, $2, $3) => $1 + $2 + $3)
       //As long as it matches ([\+|\-])\(([^\(\)]+)\)$, replace it with $1$2
+      //eslint-disable-next-line
       while (expr.match(/[\+|\-]\(([^\(\)]+)\)$/))
+        //eslint-disable-next-line
         expr = expr.replace(/([\+|\-])\(([^\(\)]+)\)$/, (m, $1, $2) => $1 + $2)
       //If there is a bracket in the outermost part, remove it
+      //eslint-disable-next-line
       if (expr.match(/^\([^\(\)]+?\)$/)) expr = expr.replace(/^\(([^\(\)]+)\)$/, '$1')
 
+      //eslint-disable-next-line
       expr = expr.replace(/\+-/g, '-')
       return expr
     }

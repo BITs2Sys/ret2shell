@@ -7,7 +7,7 @@ import type {
   SubmissionOnlyUserInfo,
   SubmissionWithInfo,
 } from '$lib/models/submission'
-import { api, api_root } from '.'
+import { api, api_root } from '..'
 
 export async function getChallengeList(
   game_id: number,
@@ -15,7 +15,7 @@ export async function getChallengeList(
   per_page?: number,
   tag_id: number | null = null
 ) {
-  let uri = `${api_root}/challenge?game_id=${game_id}`
+  let uri = `${api_root}/v1/challenge?game_id=${game_id}`
   if (page && per_page) {
     uri += `&page=${page}&per_page=${per_page}`
   }
@@ -27,39 +27,39 @@ export async function getChallengeList(
 }
 
 export async function getTagList() {
-  return (await api.get(`${api_root}/challenge/tag`)).data as Tag[]
+  return (await api.get(`${api_root}/v1/challenge/tag`)).data as Tag[]
 }
 
 export async function createChallenge(game_id: number, challenge: Challenge) {
-  return (await api.post(`${api_root}/challenge?game_id=${game_id}`, challenge)).data as Challenge
+  return (await api.post(`${api_root}/v1/challenge?game_id=${game_id}`, challenge)).data as Challenge
 }
 
 export async function updateChallenge(id: number, challenge: Challenge) {
-  return (await api.patch(`${api_root}/challenge/${id}`, challenge)).data as Challenge
+  return (await api.patch(`${api_root}/v1/challenge/${id}`, challenge)).data as Challenge
 }
 
 export async function deleteChallenge(id: number) {
-  return await api.delete(`${api_root}/challenge/${id}`)
+  return await api.delete(`${api_root}/v1/challenge/${id}`)
 }
 
 export async function getChallenge(id: number) {
-  return (await api.get(`${api_root}/challenge/${id}`)).data as Challenge
+  return (await api.get(`${api_root}/v1/challenge/${id}`)).data as Challenge
 }
 
 export async function getChallengeHints(id: number) {
-  return (await api.get(`${api_root}/challenge/${id}/hint`)).data as Hint[]
+  return (await api.get(`${api_root}/v1/challenge/${id}/hint`)).data as Hint[]
 }
 
 export async function createHint(challenge_id: number, hint: Hint) {
-  return (await api.post(`${api_root}/challenge/${challenge_id}/hint`, hint)).data as Hint
+  return (await api.post(`${api_root}/v1/challenge/${challenge_id}/hint`, hint)).data as Hint
 }
 
 export async function deleteHint(challenge_id: number, id: number) {
-  return await api.delete(`${api_root}/challenge/${challenge_id}/hint?hint_id=${id}`)
+  return await api.delete(`${api_root}/v1/challenge/${challenge_id}/hint?hint_id=${id}`)
 }
 
 export async function submitFlag(submission: Submission) {
-  return (await api.post(`${api_root}/challenge/${submission.challenge_id}/submission`, submission)).data as {
+  return (await api.post(`${api_root}/v1/challenge/${submission.challenge_id}/submission`, submission)).data as {
     result: boolean
     blood_state: number
   }
@@ -71,7 +71,7 @@ export async function downloadChallengeAttachment(
   file: string,
   callback?: (progress: number) => void
 ) {
-  const resp = await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/attachment?file=${file}`, {
+  const resp = await api.get(`${api_root}/v1/game/${game_id}/challenge/${challenge_id}/attachment?file=${file}`, {
     responseType: 'blob',
     onDownloadProgress: (e) => {
       let progress = Math.floor((e.loaded * 100) / (e.total || -1))
@@ -89,7 +89,7 @@ export async function downloadChallengeAttachment(
 }
 
 export async function getChallengeSubmission(id: number, page?: number, per_page?: number) {
-  let uri = `${api_root}/challenge/${id}/submission`
+  let uri = `${api_root}/v1/challenge/${id}/submission`
   if (page && per_page) {
     uri += `?page=${page}&per_page=${per_page}`
   }
@@ -97,7 +97,7 @@ export async function getChallengeSubmission(id: number, page?: number, per_page
 }
 
 export async function getChallengeSolvedUser(id: number, page?: number, per_page?: number) {
-  let uri = `${api_root}/challenge/${id}/solved-user`
+  let uri = `${api_root}/v1/challenge/${id}/solved-user`
   if (page && per_page) {
     uri += `?page=${page}&per_page=${per_page}`
   }
@@ -105,7 +105,7 @@ export async function getChallengeSolvedUser(id: number, page?: number, per_page
 }
 
 export async function getChallengeSolvedTeam(id: number, page?: number, per_page?: number) {
-  let uri = `${api_root}/challenge/${id}/solved-team`
+  let uri = `${api_root}/v1/challenge/${id}/solved-team`
   if (page && per_page) {
     uri += `?page=${page}&per_page=${per_page}`
   }
@@ -113,11 +113,11 @@ export async function getChallengeSolvedTeam(id: number, page?: number, per_page
 }
 
 export async function getChallengeAnwser(id: number) {
-  return (await api.get(`${api_root}/challenge/${id}/answer`)).data as Answer
+  return (await api.get(`${api_root}/v1/challenge/${id}/answer`)).data as Answer
 }
 
 export async function getChallengeStatistics(id: number) {
-  return (await api.get(`${api_root}/challenge/${id}/statistics`)).data as {
+  return (await api.get(`${api_root}/v1/challenge/${id}/statistics`)).data as {
     submissions_count: number
     solves_count: number
     instances_count: number
@@ -126,17 +126,17 @@ export async function getChallengeStatistics(id: number) {
 }
 
 export async function getChallengeAnswer(challenge_id: number) {
-  return (await api.get(`${api_root}/challenge/${challenge_id}/answer`)).data as Answer
+  return (await api.get(`${api_root}/v1/challenge/${challenge_id}/answer`)).data as Answer
 }
 
 export async function createChallengeAnswer(challenge_id: number, answer: Answer) {
-  return (await api.post(`${api_root}/challenge/${challenge_id}/answer`, answer)).data as Answer
+  return (await api.post(`${api_root}/v1/challenge/${challenge_id}/answer`, answer)).data as Answer
 }
 
 export async function updateChallengeAnswer(challenge_id: number, answer: Answer) {
-  return (await api.patch(`${api_root}/challenge/${challenge_id}/answer`, answer)).data as Answer
+  return (await api.patch(`${api_root}/v1/challenge/${challenge_id}/answer`, answer)).data as Answer
 }
 
 export async function deleteChallengeAnswer(challenge_id: number) {
-  return await api.delete(`${api_root}/challenge/${challenge_id}/answer`)
+  return await api.delete(`${api_root}/v1/challenge/${challenge_id}/answer`)
 }
