@@ -41,7 +41,7 @@
       <img src="https://img.shields.io/badge/MIT-blue.svg" alt="MIT" />
     </RxTag>
     <RxTag class="m-1" level="success">
-      <a class="hover:underline" href="https://tokio.rs">svelte</a>
+      <a class="hover:underline" href="https://svelte.dev">svelte</a>
       <img src="https://img.shields.io/badge/MIT-blue.svg" alt="MIT" />
     </RxTag>
     <RxTag class="m-1">
