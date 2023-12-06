@@ -7,7 +7,7 @@
   import Logo from '$lib/assets/logo.svg'
   import LogoGray from '$lib/assets/logo-gray.svg'
   import RxTag from '$lib/components/RxTag.svelte'
-  import { getGame, getGameList } from '$lib/api/game'
+  import { getGame, getGameList } from '$lib/api/v1/game'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { blur } from 'svelte/transition'

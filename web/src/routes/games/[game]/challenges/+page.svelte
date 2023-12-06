@@ -11,8 +11,8 @@
   })
 
   import { goto } from '$app/navigation'
-  import { getChallengeHints, getChallengeList, getTagList } from '$lib/api/challenge'
-  import { getGameNotifications } from '$lib/api/game'
+  import { getChallengeHints, getChallengeList, getTagList } from '$lib/api/v1/challenge'
+  import { getGameNotifications } from '$lib/api/v1/game'
   import ChallengeSidebar from './ChallengeSidebar.svelte'
   import TeamSidebar from './TeamSidebar.svelte'
   import HintsPanel from '$lib/blocks/challenge/HintsPanel.svelte'
@@ -31,7 +31,7 @@
   import { quintOut } from 'svelte/easing'
   import { fly, blur } from 'svelte/transition'
   import { page } from '$app/stores'
-  import { getChallenge } from '$lib/api/challenge'
+  import { getChallenge } from '$lib/api/v1/challenge'
   import Split from 'split.js'
   import type { Notification } from '$lib/models/game'
   import type { Hint } from '$lib/models/hint'

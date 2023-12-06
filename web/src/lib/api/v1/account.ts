@@ -1,6 +1,6 @@
 import type { Captcha } from '$lib/models/captcha'
 import type { User } from '$lib/models/user'
-import { api, api_root } from '.'
+import { api, api_root } from '..'
 
 export interface LoginRequest {
   account: string
@@ -10,7 +10,7 @@ export interface LoginRequest {
 }
 
 export async function login(request: LoginRequest) {
-  return api.post(`${api_root}/account/login`, request)
+  return api.post(`${api_root}/v1/account/login`, request)
 }
 
 export interface RegisterRequest {
@@ -22,19 +22,19 @@ export interface RegisterRequest {
 }
 
 export async function register(request: RegisterRequest) {
-  return await api.post(`${api_root}/account/register`, request)
+  return await api.post(`${api_root}/v1/account/register`, request)
 }
 
 export async function logout() {
-  return await api.post(`${api_root}/account/logout`)
+  return await api.post(`${api_root}/v1/account/logout`)
 }
 
 export async function getCaptcha() {
-  return (await api.get(`${api_root}/account/captcha`)).data as Captcha
+  return (await api.get(`${api_root}/v1/account/captcha`)).data as Captcha
 }
 
 export async function updateSelfSetting(data: User) {
-  return await api.patch(`${api_root}/account/self`, data)
+  return await api.patch(`${api_root}/v1/account/self`, data)
 }
 
 export interface ChangeUserPasswordRequest {
@@ -45,11 +45,11 @@ export interface ChangeUserPasswordRequest {
 }
 
 export async function changeUserPassword(request: ChangeUserPasswordRequest) {
-  return await api.patch(`${api_root}/account/change-password`, request)
+  return await api.patch(`${api_root}/v1/account/change-password`, request)
 }
 
 export async function resendEmailVerification() {
-  return api.post(`${api_root}/account/send-verification-email`)
+  return api.post(`${api_root}/v1/account/send-verification-email`)
 }
 
 export interface VerifyEmailRequest {
@@ -58,7 +58,7 @@ export interface VerifyEmailRequest {
 }
 
 export async function verifyEmail(request: VerifyEmailRequest) {
-  return api.post(`${api_root}/account/verify-email`, request)
+  return api.post(`${api_root}/v1/account/verify-email`, request)
 }
 
 export interface SendResetEmailRequest {
@@ -68,7 +68,7 @@ export interface SendResetEmailRequest {
 }
 
 export async function sendResetEmail(request: SendResetEmailRequest) {
-  return api.post(`${api_root}/account/send-reset-email`, request)
+  return api.post(`${api_root}/v1/account/send-reset-email`, request)
 }
 
 export interface ResetPasswordRequest {
@@ -80,9 +80,9 @@ export interface ResetPasswordRequest {
 }
 
 export async function resetPassword(request: ResetPasswordRequest) {
-  return api.post(`${api_root}/account/reset-password`, request)
+  return api.post(`${api_root}/v1/account/reset-password`, request)
 }
 
 export async function deactivateAccount() {
-  return api.post(`${api_root}/account/delete`)
+  return api.post(`${api_root}/v1/account/delete`)
 }

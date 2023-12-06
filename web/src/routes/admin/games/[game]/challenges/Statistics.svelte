@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getChallengeStatistics } from '$lib/api/challenge'
+  import { getChallengeStatistics } from '$lib/api/v1/challenge'
   import RxStatistics from '$lib/components/RxStatistics.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge } from '$lib/models/challenge'

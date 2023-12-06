@@ -19,7 +19,7 @@ use crate::controller::GlobalState;
 use crate::entity::config::{self, Model as ConfigModel};
 use crate::entity::user::Permission;
 
-use super::layer::auth::{self, init_token_or_permission_required};
+use crate::controller::layer::auth::{self, init_token_or_permission_required};
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()

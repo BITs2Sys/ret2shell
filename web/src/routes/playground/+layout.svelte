@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import { page } from '$app/stores'
-  import { getChallengeList, getTagList } from '$lib/api/challenge'
-  import { getGameList, getGameSelfSolves } from '$lib/api/game'
+  import { getChallengeList, getTagList } from '$lib/api/v1/challenge'
+  import { getGameList, getGameSelfSolves } from '$lib/api/v1/game'
   import Sidebar from './Sidebar.svelte'
   import { i18n } from '$lib/i18n'
   import type { Tag } from '$lib/models/challenge'

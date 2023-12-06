@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getChallengeList, getTagList } from '$lib/api/challenge'
-  import { getGameScoreboard } from '$lib/api/game'
-  import { getInstituteList } from '$lib/api/user'
+  import { getChallengeList, getTagList } from '$lib/api/v1/challenge'
+  import { getGameScoreboard } from '$lib/api/v1/game'
+  import { getInstituteList } from '$lib/api/v1/user'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxSelect from '$lib/components/RxSelect.svelte'
   import RxPaginator from '$lib/components/RxPaginator.svelte'

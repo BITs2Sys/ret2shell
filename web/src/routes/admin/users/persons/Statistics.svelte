@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getUserIpAddresses, getUserTeams } from '$lib/api/user'
+  import { getUserIpAddresses, getUserTeams } from '$lib/api/v1/user'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
   import type { IpAddress } from '$lib/models/ip'

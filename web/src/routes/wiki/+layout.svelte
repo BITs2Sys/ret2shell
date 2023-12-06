@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition'
-  import { quintOut } from 'svelte/easing'
   import Sidebar from './Sidebar.svelte'
   import { transformToWikiEntry, type WikiEntry } from '$lib/models/wiki'
   import { onDestroy, onMount } from 'svelte'
-  import { getWikiList } from '$lib/api/wiki'
+  import { getWikiList } from '$lib/api/v1/wiki'
   import type { AxiosError } from 'axios'
   import { showMessage } from '$lib/stores/toast'
   import { i18n } from '$lib/i18n'

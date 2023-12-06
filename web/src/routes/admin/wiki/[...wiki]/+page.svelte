@@ -2,7 +2,7 @@
   import { i18n } from '$lib/i18n'
   import { page } from '$app/stores'
   import type { Wiki } from '$lib/models/wiki'
-  import { createWiki, deleteWiki, editWiki, getWiki } from '$lib/api/wiki'
+  import { createWiki, deleteWiki, editWiki, getWiki } from '$lib/api/v1/wiki'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { onDestroy } from 'svelte'

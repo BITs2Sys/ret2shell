@@ -1,4 +1,4 @@
-use super::{
+use crate::controller::{
     layer::{
         auth::{self, pass_admin_for_game, Token},
         info,

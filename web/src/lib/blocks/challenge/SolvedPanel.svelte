@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getChallengeSolvedTeam, getChallengeSolvedUser } from '$lib/api/challenge'
+  import { getChallengeSolvedTeam, getChallengeSolvedUser } from '$lib/api/v1/challenge'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
   import type { Challenge } from '$lib/models/challenge'

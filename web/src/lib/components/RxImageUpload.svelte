@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { uploadMedia } from '$lib/api/media'
+  import { uploadMedia } from '$lib/api/v1/media'
   import { i18n } from '$lib/i18n'
   import { getMediaPath } from '$lib/models/media'
   import { showMessage } from '$lib/stores/toast'

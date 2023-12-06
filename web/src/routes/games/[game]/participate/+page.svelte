@@ -11,7 +11,7 @@
   import { z } from 'zod'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
-  import { createTeam } from '$lib/api/game'
+  import { createTeam } from '$lib/api/v1/game'
   import type { AxiosError } from 'axios'
   import { showMessage } from '$lib/stores/toast'
   import { goto } from '$app/navigation'

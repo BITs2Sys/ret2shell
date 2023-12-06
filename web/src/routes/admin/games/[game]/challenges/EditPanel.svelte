@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores'
-  import { getChallenge } from '$lib/api/challenge'
+  import { getChallenge } from '$lib/api/v1/challenge'
   import Error from '$lib/blocks/Error.svelte'
   import ExtraPanel from '$lib/blocks/ExtraPanel.svelte'
   import RxButton from '$lib/components/RxButton.svelte'

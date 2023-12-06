@@ -12,7 +12,7 @@
   import { createEventDispatcher, onMount } from 'svelte'
   import type { Game } from '$lib/models/game'
   import type { AxiosError } from 'axios'
-  import { getInstituteList } from '$lib/api/user'
+  import { getInstituteList } from '$lib/api/v1/user'
   import { showMessage } from '$lib/stores/toast'
   import type { Institute } from '$lib/models/institute'
   import { z } from 'zod'

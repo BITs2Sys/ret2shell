@@ -1,11 +1,10 @@
 <script lang="ts">
-  import RxButton from '$lib/components/RxButton.svelte'
   import { i18n } from '$lib/i18n'
   import { page } from '$app/stores'
   import { onMount } from 'svelte'
   import { showMessage } from '$lib/stores/toast'
   import { goto } from '$app/navigation'
-  import { verifyEmail } from '$lib/api/account'
+  import { verifyEmail } from '$lib/api/v1/account'
   import { platform } from '$lib/stores/platform'
   import RxCard from '$lib/components/RxCard.svelte'
   import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'

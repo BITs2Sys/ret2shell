@@ -6,7 +6,7 @@
   import RxTag from '$lib/components/RxTag.svelte'
   import { canTakePartInGame } from '$lib/utils/auth'
   import { onDestroy } from 'svelte'
-  import { getInstituteList } from '$lib/api/user'
+  import { getInstituteList } from '$lib/api/v1/user'
   import type { Institute } from '$lib/models/institute'
   import RxTimer from '$lib/components/RxTimer.svelte'
 

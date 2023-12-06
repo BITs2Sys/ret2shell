@@ -10,7 +10,7 @@ use crate::entity::instance::{get_instance_by_user_id, get_instance_by_wsrx};
 use crate::entity::user::Permission;
 use crate::traffic;
 
-use super::layer::auth::{permission_required_all, Token};
+use crate::controller::layer::auth::{permission_required_all, Token};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()

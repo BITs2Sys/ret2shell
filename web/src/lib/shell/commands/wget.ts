@@ -5,7 +5,7 @@ import { i18n } from '$lib/i18n'
 import { get } from 'svelte/store'
 import { AxiosError } from 'axios'
 import type { RnixEnv } from '../shell'
-import { downloadChallengeAttachment } from '$lib/api/challenge'
+import { downloadChallengeAttachment } from '$lib/api/v1/challenge'
 import ansiEscapes from 'isomorphic-ansi-escapes'
 
 export class Wget implements Command {

@@ -6,7 +6,7 @@
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
-  import { getGameSubmission } from '$lib/api/game'
+  import { getGameSubmission } from '$lib/api/v1/game'
   import { onDestroy } from 'svelte'
   import type { SubmissionWithInfo } from '$lib/models/submission'
 

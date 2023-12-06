@@ -1,8 +1,6 @@
 <script lang="ts">
   import RxButton from '$lib/components/RxButton.svelte'
   import type { User } from '$lib/models/user'
-  import { theme } from '$lib/stores/theme'
-  import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
   import { createEventDispatcher } from 'svelte'
   import Info from './Info.svelte'
   import Statistics from './Statistics.svelte'
@@ -18,8 +16,6 @@
   let clazz = ''
   let activeTab = 'info'
   export { clazz as class }
-
-  $: classes = `w-full flex flex-col overflow-hidden bg-neutral/20 backdrop-blur ${clazz}`
   const dispatch = createEventDispatcher()
 </script>
 

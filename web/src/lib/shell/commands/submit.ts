@@ -6,7 +6,7 @@ import ansiColors from 'ansi-colors'
 import { i18n } from '$lib/i18n'
 import { get } from 'svelte/store'
 import { AxiosError } from 'axios'
-import { submitFlag } from '$lib/api/challenge'
+import { submitFlag } from '$lib/api/v1/challenge'
 
 export class Submit implements Command {
   name = 'submit'

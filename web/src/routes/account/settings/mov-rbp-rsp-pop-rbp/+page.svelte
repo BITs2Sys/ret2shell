@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { deactivateAccount } from '$lib/api/account'
+  import { deactivateAccount } from '$lib/api/v1/account'
   import Background from '$lib/blocks/Background.svelte'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxInput from '$lib/components/RxInput.svelte'

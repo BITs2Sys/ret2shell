@@ -8,7 +8,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import { z } from 'zod'
   import { validator } from '@felte/validator-zod'
-  import { testToken } from '$lib/api/platform'
+  import { testToken } from '$lib/api/v1/platform'
   import { createForm } from 'felte'
   import { initConfig } from '$lib/stores/init'
   import { goto } from '$app/navigation'

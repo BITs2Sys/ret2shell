@@ -22,18 +22,8 @@ use tracing::{info, Span};
 
 use crate::{audit::Auditor, cache::manager::RedisPool, config::GlobalConfig};
 
-mod account;
-mod announcement;
-mod calendar;
-mod certificate;
-mod challenge;
-mod game;
-mod instance;
 mod layer;
-mod media;
-mod platform;
-mod user;
-mod wiki;
+mod v1;
 
 use layer::forwarded::get_client_ip;
 
@@ -91,17 +81,7 @@ pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Re
 
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
-        .nest("/account", account::router(state))
-        .nest("/announcement", announcement::router(state))
-        .nest("/certificate", certificate::router(state))
-        .nest("/game", game::router(state))
-        .nest("/challenge", challenge::router(state))
-        .nest("/media", media::router(state))
-        .nest("/platform", platform::router(state))
-        .nest("/user", user::router(state))
-        .nest("/calendar", calendar::router(state))
-        .nest("/wiki", wiki::router(state))
-        .nest("/instance", instance::router(state))
+        .nest("/v1", v1::router(state))
         .route("/ping", get(ping))
         .route_layer(from_fn_with_state(state.clone(), record_ip_address))
         .route_layer(from_fn_with_state(state.clone(), extract_user_info))

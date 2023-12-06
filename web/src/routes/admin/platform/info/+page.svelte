@@ -10,7 +10,7 @@
   import RxButton from '$lib/components/RxButton.svelte'
   import RxCheckBox from '$lib/components/RxCheckBox.svelte'
   import { showMessage } from '$lib/stores/toast'
-  import { getPlatformConfig, setPlatformConfig } from '$lib/api/platform'
+  import { getPlatformConfig, setPlatformConfig } from '$lib/api/v1/platform'
   import { onMount } from 'svelte'
   import type { Config } from '$lib/models/config'
   import type { AxiosError } from 'axios'

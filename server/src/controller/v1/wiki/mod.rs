@@ -1,5 +1,7 @@
-use super::layer::auth::Token;
-use super::{layer::auth, GlobalState};
+use crate::controller::{
+    layer::auth::{self, Token},
+    GlobalState,
+};
 use crate::entity::user::Permission;
 use crate::entity::wiki::{self, Model as WikiModel};
 use axum::Extension;

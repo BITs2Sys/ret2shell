@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores'
-  import { getWikiList } from '$lib/api/wiki'
+  import { getWikiList } from '$lib/api/v1/wiki'
   import WikiTree from '$lib/blocks/WikiTree.svelte'
   import RxLink from '$lib/components/RxLink.svelte'
   import { i18n } from '$lib/i18n'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { logout } from '$lib/api/account'
+  import { logout } from '$lib/api/v1/account'
   import RxButton from '$lib/components/RxButton.svelte'
   import RxImage from '$lib/components/RxImage.svelte'
   import RxLink from '$lib/components/RxLink.svelte'

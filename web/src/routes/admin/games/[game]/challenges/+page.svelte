@@ -7,7 +7,7 @@
   import type { AxiosError } from 'axios'
   import { onDestroy, onMount } from 'svelte'
   import type { Challenge, Tag } from '$lib/models/challenge'
-  import { createChallenge, getChallengeList, getTagList } from '$lib/api/challenge'
+  import { createChallenge, getChallengeList, getTagList } from '$lib/api/v1/challenge'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
   import RxSelect from '$lib/components/RxSelect.svelte'

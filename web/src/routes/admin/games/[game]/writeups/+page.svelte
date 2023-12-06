@@ -7,10 +7,10 @@
   import type { AxiosError } from 'axios'
   import { admin } from '$lib/stores/admin'
   import type { Game } from '$lib/models/game'
-  import { auditGameTeamWriteUp, getGameTeamWriteUp, getGameWriteUp } from '$lib/api/game'
+  import { auditGameTeamWriteUp, getGameTeamWriteUp, getGameWriteUp } from '$lib/api/v1/game'
   import { page } from '$app/stores'
   import { onDestroy } from 'svelte'
-  import type { WriteUp, WriteUpOnlyTeamInfo, WriteUpWithInfo } from '$lib/models/write_up'
+  import type { WriteUpOnlyTeamInfo, WriteUpWithInfo } from '$lib/models/write_up'
   import AuditPanel from './AuditPanel.svelte'
 
   let currentPage: number = 1
@@ -211,7 +211,7 @@
         {colDef}
         bind:page={currentPage}
         {total}
-        {loading}
+        loading={loading || loadingWriteUp}
         booleanIconsDef={{
           hidden: {
             true: 'icon-[fluent--eye-off-20-regular] text-warning',

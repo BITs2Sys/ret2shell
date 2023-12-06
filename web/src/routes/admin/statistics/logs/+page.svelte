@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getPlatformStat } from '$lib/api/platform'
+  import { getPlatformStat } from '$lib/api/v1/platform'
   import { i18n } from '$lib/i18n'
   import type { CPULoad, PlatformStat } from '$lib/models/config'
   import { humanFileSize } from '$lib/shell/utils/size'

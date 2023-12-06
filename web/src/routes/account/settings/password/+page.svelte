@@ -9,7 +9,7 @@
   import { validator } from '@felte/validator-zod'
   import { createForm } from 'felte'
   import Captcha from '$lib/blocks/Captcha.svelte'
-  import { changeUserPassword } from '$lib/api/account'
+  import { changeUserPassword } from '$lib/api/v1/account'
   import { goto } from '$app/navigation'
   import { showMessage } from '$lib/stores/toast'
   import type { AxiosError } from 'axios'
