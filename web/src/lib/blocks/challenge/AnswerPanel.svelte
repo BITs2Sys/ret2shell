@@ -54,7 +54,7 @@
               <span class="flex-1"></span>
               <span class="opacity-60">{new Date(answer.published_at * 1000).toLocaleString()}</span>
             </h2>
-            <div class="flex flex-row items-center space-x-2 bg-warning/10 p-4 rounded-lg">
+            <div class="flex flex-row items-center space-x-2 bg-warning/10 p-4 rounded-lg backdrop-blur">
               <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning flex-shrink-0" />
               <span>
                 {$i18n.t('playground.challengeAnswerWarning')}

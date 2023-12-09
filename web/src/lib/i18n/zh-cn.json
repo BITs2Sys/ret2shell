@@ -292,7 +292,8 @@
     "title": "技术文档"
   },
   "about": {
-    "maker": "回归终端"
+    "maker": "回归终端",
+    "devVersionWarning": "当前发行二进制为开发版本，部分功能特性可能不完整/不可用。"
   },
   "theme": {
     "colorScheme": "颜色主题",
@@ -364,7 +365,7 @@
     "donate": "捐赠",
     "report": "问题反馈",
     "about": {
-      "tip1": "Copyright (c) Ret2Shell, 保留所有权利。"
+      "tip1": "Copyright (c) Ret2Shell，保留所有权利。"
     },
     "clusterIsDown": "集群离线了……"
   },

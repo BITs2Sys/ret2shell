@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 
-use crate::cache::{self, manager::RedisPool};
+use crate::{
+    cache::{self, manager::RedisPool},
+    captcha::traits::{Captcha, CaptchaError, CaptchaValidator, Validator},
+};
 
-use super::traits::{Captcha, CaptchaError, CaptchaValidator, Validator};
 pub struct ImageValidator;
 
 #[async_trait]

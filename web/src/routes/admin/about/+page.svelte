@@ -1,16 +1,42 @@
 <script lang="ts">
+  import { getPlatformVersion } from '$lib/api/v1/platform'
   import LogoFull from '$lib/assets/logo-full.svg'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
   import { platform } from '$lib/stores/platform'
+  import { showMessage } from '$lib/stores/toast'
+  import type { AxiosError } from 'axios'
+
+  let version = ''
+
+  getPlatformVersion()
+    .then((res) => {
+      version = res
+    })
+    .catch((err) => {
+      showMessage(
+        'error',
+        $i18n.t('platform.failedToFetchPlatformVersion') + ': ' + (err as AxiosError).response?.data,
+        5000
+      )
+    })
+
+  $: isDevVersion = version.includes('*')
 </script>
 
 <svelte:head><title>{$i18n.t('admin.routes.about')} - {$platform.name}</title></svelte:head>
-<div class="flex-1 flex flex-col p-6 lg:p-12 space-y-4 items-center">
+<div class="flex-1 flex flex-col p-6 lg:p-12 space-y-4 items-center max-w-7xl self-center">
   <h1 class="text-xl flex flex-row items-center space-x-4">
     <img src={LogoFull} width={480} alt="" />
   </h1>
-  <p class="opacity-60 text-base font-bold">{$i18n.t('platform.about.tip1')}</p>
+  <h2 class="font-bold text-xl">Version {version.replace('*', '')}</h2>
+  {#if isDevVersion}
+    <div class="flex flex-row items-center space-x-2 bg-warning/10 p-4 rounded-lg backdrop-blur w-full">
+      <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning flex-shrink-0" />
+      <span>
+        {$i18n.t('about.devVersionWarning')}
+      </span>
+    </div>{/if}
   <div class="divider"></div>
   <h2 class="opacity-80 text-base font-bold">CONTRIBUTORS</h2>
   <div class="flex flex-row flex-wrap">
@@ -125,4 +151,6 @@
       <img src="https://img.shields.io/badge/Apache_2.0-blue.svg" alt="Apache 2.0" />
     </RxTag>
   </div>
+  <div class="flex-1"></div>
+  <p class="opacity-60 text-base font-bold">{$i18n.t('platform.about.tip1')}</p>
 </div>
