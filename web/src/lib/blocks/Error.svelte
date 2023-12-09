@@ -9,6 +9,7 @@
     404: $i18n.t('errors.404'),
     418: $i18n.t('errors.418'),
     500: $i18n.t('errors.500'),
+    502: $i18n.t('errors.502'),
   }
 
   const tips: Record<number, string> = {
@@ -17,6 +18,7 @@
     404: $i18n.t('errors.404Tip'),
     418: $i18n.t('errors.418Tip'),
     500: $i18n.t('errors.500Tip'),
+    502: $i18n.t('errors.502Tip'),
   }
 
   $: message = messages[status] || $i18n.t('errors.unknown')

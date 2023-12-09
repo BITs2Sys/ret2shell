@@ -1,6 +1,8 @@
-use crate::controller::layer::{auth, info};
 use crate::{
-    controller::GlobalState,
+    controller::{
+        layer::{auth, info},
+        GlobalState,
+    },
     entity::{
         team,
         user::{self, Permission},

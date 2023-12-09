@@ -2,8 +2,10 @@
 
 use sea_orm::entity::prelude::*;
 
-use chrono::serde::ts_seconds::{deserialize as from_ts, serialize as to_ts};
-use chrono::{DateTime, Utc};
+use chrono::{
+    serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
+    DateTime, Utc,
+};
 use sea_orm::{ActiveValue, IntoActiveModel, Iterable, QueryOrder, QuerySelect};
 use serde::{Deserialize, Serialize};
 

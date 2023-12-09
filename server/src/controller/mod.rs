@@ -12,8 +12,7 @@ use axum::{
     Router,
 };
 use sea_orm::DatabaseConnection;
-use std::net::IpAddr;
-use std::time::Duration;
+use std::{net::IpAddr, time::Duration};
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::TraceLayer,
@@ -25,9 +24,10 @@ use crate::{audit::Auditor, cache::manager::RedisPool, config::GlobalConfig};
 mod layer;
 mod v1;
 
-use layer::forwarded::get_client_ip;
-
-use self::layer::{auth::extract_user_info, forwarded::record_ip_address};
+use layer::{
+    auth::extract_user_info,
+    forwarded::{get_client_ip, record_ip_address},
+};
 
 #[derive(Clone, FromRef)]
 pub struct GlobalState {

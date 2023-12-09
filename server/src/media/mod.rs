@@ -1,13 +1,14 @@
 use std::path::{Path, PathBuf};
 
-use axum::extract::multipart::MultipartError;
-use axum::extract::Multipart;
+use axum::extract::{multipart::MultipartError, Multipart};
 use image::imageops::FilterType;
 use nanoid::{alphabet, nanoid};
 use ring::digest::{Context, SHA256};
 use thiserror::Error;
-use tokio::fs::{create_dir_all, File};
-use tokio::io::AsyncWriteExt;
+use tokio::{
+    fs::{create_dir_all, File},
+    io::AsyncWriteExt,
+};
 use tracing::{debug, info, warn};
 
 use crate::entity::media::Model as MediaModel;

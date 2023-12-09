@@ -1,8 +1,10 @@
 use std::collections::BTreeSet;
 
 use aho_corasick::AhoCorasick;
-use tokio::fs::File;
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::{
+    fs::File,
+    io::{AsyncBufReadExt, BufReader},
+};
 
 use crate::config::GlobalConfig;
 

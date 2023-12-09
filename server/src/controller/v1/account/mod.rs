@@ -1,20 +1,32 @@
 mod captcha;
 
-use crate::captcha::captcha_protected;
-use crate::config::GlobalConfig;
-use crate::controller::layer::auth::{permission_required_all, Token, TokenTracker};
-use crate::controller::layer::info;
-use crate::email::{send_email, Email};
-use crate::entity::config::Model as ConfigModel;
-use crate::entity::user::{self, count_user, create_user, Permissions};
-use crate::{cache, email};
-use crate::{cache::manager::RedisPool, controller::GlobalState, entity::user::Permission};
+use crate::{
+    cache,
+    cache::manager::RedisPool,
+    captcha::captcha_protected,
+    config::GlobalConfig,
+    controller::{
+        layer::{
+            auth::{permission_required_all, Token, TokenTracker},
+            info,
+        },
+        GlobalState,
+    },
+    email,
+    email::{send_email, Email},
+    entity::{
+        config::Model as ConfigModel,
+        user::{self, count_user, create_user, Permission, Permissions},
+    },
+};
 use async_nats::jetstream;
-use axum::middleware;
-use axum::routing::patch;
 use axum::{
-    extract::State, http::StatusCode, response::IntoResponse, routing::post, Extension, Json,
-    Router,
+    extract::State,
+    http::StatusCode,
+    middleware,
+    response::IntoResponse,
+    routing::{patch, post},
+    Extension, Json, Router,
 };
 use nanoid::{alphabet, nanoid};
 use sea_orm::{DatabaseConnection, DbErr};

@@ -1,13 +1,15 @@
-use crate::controller::{
-    layer::{
-        auth::{self, pass_admin_for_game, Token},
-        info,
+use crate::{
+    controller::{
+        layer::{
+            auth::{self, pass_admin_for_game, Token},
+            info,
+        },
+        GlobalState,
     },
-    GlobalState,
-};
-use crate::entity::{
-    game, submission, team as team_entity,
-    user::{self, Permission},
+    entity::{
+        game, submission, team as team_entity,
+        user::{self, Permission},
+    },
 };
 use axum::{
     extract::{Path, Query, State},

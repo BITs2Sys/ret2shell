@@ -1,16 +1,19 @@
-use crate::controller::{
-    layer::auth::{self, Token},
-    GlobalState,
+use crate::{
+    controller::{
+        layer::auth::{self, Token},
+        GlobalState,
+    },
+    entity::{
+        user::Permission,
+        wiki::{self, Model as WikiModel},
+    },
 };
-use crate::entity::user::Permission;
-use crate::entity::wiki::{self, Model as WikiModel};
-use axum::Extension;
 use axum::{
     extract::{Path, Query, State},
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
-    Json, Router,
+    Extension, Json, Router,
 };
 use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};

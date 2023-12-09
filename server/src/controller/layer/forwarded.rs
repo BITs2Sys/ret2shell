@@ -1,13 +1,14 @@
-use std::net::{IpAddr, SocketAddr};
-use std::str::FromStr;
+use std::{
+    net::{IpAddr, SocketAddr},
+    str::FromStr,
+};
 
-use axum::extract::State;
-use axum::middleware::Next;
-use axum::response::IntoResponse;
-use axum::Extension;
 use axum::{
-    extract::{ConnectInfo, Request},
+    extract::{ConnectInfo, Request, State},
     http::{header::FORWARDED, HeaderMap, StatusCode},
+    middleware::Next,
+    response::IntoResponse,
+    Extension,
 };
 use sea_orm::DatabaseConnection;
 use thiserror::Error;
