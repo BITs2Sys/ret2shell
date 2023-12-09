@@ -9,6 +9,7 @@ use axum::{
 use git_version::git_version;
 use k8s_openapi::api::core::v1::{ConfigMap, Node};
 use kube::{api::ListParams, core::ObjectList, Api};
+use rustc_version::version;
 use sea_orm::DatabaseConnection;
 use serde::Serialize;
 use systemstat::{CPULoad, Filesystem, Memory, Platform, Swap, System};
@@ -66,8 +67,12 @@ async fn get_platform_version() -> Result<impl IntoResponse, (StatusCode, &'stat
     Ok(Json(format!(
         "{}-{}-{}",
         env!("CARGO_PKG_VERSION"),
-        git_version!(args = ["--abbrev=8", "--always"], fallback = "unknown").to_uppercase(),
-        env!("CARGO_PKG_RUST_VERSION")
+        git_version!(
+            args = ["--abbrev=8", "--always", "--dirty=*"],
+            fallback = "unknown"
+        )
+        .to_uppercase(),
+        version().unwrap().to_string()
     )))
 }
 
