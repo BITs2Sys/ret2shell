@@ -1,8 +1,14 @@
-use crate::entity::media::create_media;
-use crate::entity::user::Permission;
-use crate::entity::{config::Model as ConfigModel, media::Model as MediaModel};
-use crate::media::{self, get_media};
-use crate::{cache::manager::RedisPool, config::GlobalConfig, controller::GlobalState};
+use crate::{
+    cache::manager::RedisPool,
+    config::GlobalConfig,
+    controller::GlobalState,
+    entity::{
+        config::Model as ConfigModel,
+        media::{create_media, Model as MediaModel},
+        user::Permission,
+    },
+    media::{self, get_media},
+};
 use axum::{
     body::Body,
     extract::{DefaultBodyLimit, Multipart, Path, Query, State},

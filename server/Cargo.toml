@@ -1,8 +1,8 @@
 [package]
 name = "ret2shell"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
-rust-version = "1.73.0"
+rust-version = "1.74.0"
 description = "A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false

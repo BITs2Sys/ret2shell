@@ -6,10 +6,8 @@
 
 use crate::config::GlobalConfig;
 use std::path::Path;
-use tracing_appender::non_blocking::WorkerGuard;
-use tracing_appender::{non_blocking, rolling};
-use tracing_subscriber::fmt::Layer;
-use tracing_subscriber::prelude::*;
+use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling};
+use tracing_subscriber::{fmt::Layer, prelude::*};
 
 /// Initialize the logger.
 pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<(WorkerGuard, WorkerGuard)> {

@@ -1,17 +1,19 @@
-use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::routing::{get, patch, post};
-use axum::{middleware, Json, Router};
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    middleware,
+    response::IntoResponse,
+    routing::{get, patch, post},
+    Json, Router,
+};
 use sea_orm::DatabaseConnection;
 use serde::Deserialize;
 use tracing::error;
 
-use crate::controller::layer::auth;
-use crate::controller::GlobalState;
-use crate::entity::calendar;
-use crate::entity::calendar::Model as CalendarModel;
-use crate::entity::user::Permission;
+use crate::{
+    controller::{layer::auth, GlobalState},
+    entity::{calendar, calendar::Model as CalendarModel, user::Permission},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()

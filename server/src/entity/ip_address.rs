@@ -3,7 +3,7 @@
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde::{Deserialize, Serialize};
 
-use super::{prelude::User2IpAddress, user2_ip_address};
+use crate::entity::user2_ip_address;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "ip_address")]
@@ -55,7 +55,7 @@ pub async fn link_to_user(
             Entity::insert(model).exec(conn).await?.last_insert_id
         }
     };
-    match User2IpAddress::find()
+    match user2_ip_address::Entity::find()
         .filter(user2_ip_address::Column::UserId.eq(user_id))
         .filter(user2_ip_address::Column::IpAddressId.eq(last_insert_id))
         .count(conn)
@@ -64,7 +64,7 @@ pub async fn link_to_user(
         Ok(0) => (),
         _ => return Ok(()),
     }
-    User2IpAddress::insert(user2_ip_address::ActiveModel {
+    user2_ip_address::Entity::insert(user2_ip_address::ActiveModel {
         id: ActiveValue::NotSet,
         user_id: ActiveValue::Set(user_id),
         ip_address_id: ActiveValue::Set(last_insert_id),

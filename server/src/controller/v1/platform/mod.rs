@@ -1,23 +1,28 @@
-use axum::extract::State;
-use axum::http::StatusCode;
-use axum::middleware::{self, from_fn_with_state};
-use axum::{extract::Extension, Json};
-use axum::{response::IntoResponse, routing::get, Router};
+use axum::{
+    extract::{Extension, State},
+    http::StatusCode,
+    middleware::{self, from_fn_with_state},
+    response::IntoResponse,
+    routing::get,
+    Json, Router,
+};
 use git_version::git_version;
 use k8s_openapi::api::core::v1::{ConfigMap, Node};
-use kube::api::ListParams;
-use kube::core::ObjectList;
-use kube::Api;
+use kube::{api::ListParams, core::ObjectList, Api};
 use sea_orm::DatabaseConnection;
 use serde::Serialize;
 use systemstat::{CPULoad, Filesystem, Memory, Platform, Swap, System};
 use tracing::error;
 
-use crate::cache;
-use crate::cache::manager::RedisPool;
-use crate::controller::GlobalState;
-use crate::entity::config::{self, Model as ConfigModel};
-use crate::entity::user::Permission;
+use crate::{
+    cache,
+    cache::manager::RedisPool,
+    controller::GlobalState,
+    entity::{
+        config::{self, Model as ConfigModel},
+        user::Permission,
+    },
+};
 
 use crate::controller::layer::auth::{self, init_token_or_permission_required};
 

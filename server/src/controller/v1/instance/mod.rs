@@ -1,14 +1,22 @@
-use axum::extract::{Path, WebSocketUpgrade};
-use axum::routing::get;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Router};
-use axum::{middleware, Json};
+use axum::{
+    extract::{Path, State, WebSocketUpgrade},
+    http::StatusCode,
+    middleware,
+    response::IntoResponse,
+    routing::get,
+    Extension, Json, Router,
+};
 use sea_orm::DatabaseConnection;
 use tracing::error;
 
-use crate::controller::GlobalState;
-use crate::entity::instance::{get_instance_by_user_id, get_instance_by_wsrx};
-use crate::entity::user::Permission;
-use crate::traffic;
+use crate::{
+    controller::GlobalState,
+    entity::{
+        instance::{get_instance_by_user_id, get_instance_by_wsrx},
+        user::Permission,
+    },
+    traffic,
+};
 
 use crate::controller::layer::auth::{permission_required_all, Token};
 

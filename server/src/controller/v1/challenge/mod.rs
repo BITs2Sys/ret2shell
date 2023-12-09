@@ -1,12 +1,13 @@
-use crate::controller::{
-    layer::{auth, info},
-    GlobalState,
+use crate::{
+    controller::{
+        layer::{auth, info},
+        GlobalState,
+    },
+    entity::{
+        challenge, game, instance, submission as submission_entity,
+        user::{self, Permission},
+    },
 };
-use crate::entity::{
-    challenge, game,
-    user::{self, Permission},
-};
-use crate::entity::{instance, submission as submission_entity};
 // use crate::utility::string::deunicode_str;
 use axum::{
     extract::{Path, Query, State},
