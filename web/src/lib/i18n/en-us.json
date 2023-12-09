@@ -292,7 +292,8 @@
     "title": "Documents"
   },
   "about": {
-    "maker": "Ret2Shell"
+    "maker": "Ret2Shell",
+    "devVersionWarning": "The currently released binary is a development version, and some features may be incomplete/unavailable."
   },
   "misc": {
     "verifyCode": "Verification Code",
