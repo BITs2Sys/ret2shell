@@ -24,7 +24,7 @@ pub fn hash_password(password: &str) -> Result<String, argon2::password_hash::Er
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)?
         .to_string();
-    Ok(format!("argon2.{}", password_hash))
+    Ok(password_hash)
 }
 
 #[derive(Error, Debug)]
@@ -36,18 +36,13 @@ pub enum PasswordHashingError {
 }
 
 pub fn verify_password(password: &str, hash: &str) -> Result<bool, PasswordHashingError> {
-    if hash.starts_with("bcrypt.") {
-        let hash_content = hash.replace("bcrypt.", "");
-        Ok(bcrypt::verify(password, &hash_content)?)
-    } else if hash.starts_with("argon2.") {
-        let hash_content = hash.replace("argon2.", "");
-        let parsed_hash =
-            PasswordHash::new(&hash_content).map_err(PasswordHashingError::Argon2Error)?;
+    if hash.starts_with("$argon2") {
+        let parsed_hash = PasswordHash::new(hash).map_err(PasswordHashingError::Argon2Error)?;
         Ok(Argon2::default()
             .verify_password(password.as_bytes(), &parsed_hash)
             .is_ok())
     } else {
-        Ok(false)
+        Ok(bcrypt::verify(password, hash)?)
     }
 }
 

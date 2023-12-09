@@ -116,7 +116,7 @@ async fn login(
                 .store(true, std::sync::atomic::Ordering::Relaxed);
 
             // NOTE: update user's password hash if it's not argon2
-            if !password_hash.starts_with("argon2.") {
+            if !password_hash.starts_with("$argon2") {
                 if let Ok(password) = hash_password(&body.password).map_err(|err| {
                     warn!("failed to hash password: {:?}", err);
                 }) {
