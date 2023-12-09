@@ -42,6 +42,10 @@ interface Error {
 
 ## 申请
 
+```
+POST /start
+```
+
 响应定义：
 
 ```rust
@@ -83,6 +87,10 @@ HTTP 4xx/5xx
 ```
 
 ## 状态查询
+
+```
+GET /status
+```
 
 响应定义：
 
@@ -130,6 +138,10 @@ HTTP 4xx/5xx
 ```
 
 ## 手动停止
+
+```
+POST /stop
+```
 
 请求示例：
 
