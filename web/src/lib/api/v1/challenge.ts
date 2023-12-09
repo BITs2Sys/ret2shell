@@ -30,6 +30,14 @@ export async function getTagList() {
   return (await api.get(`${api_root}/v1/challenge/tag`)).data as Tag[]
 }
 
+export async function createTag(tag: Tag) {
+  return await api.post(`${api_root}/v1/challenge/tag`, tag)
+}
+
+export async function deleteTag(id: number) {
+  return await api.delete(`${api_root}/v1/challenge/tag/${id}`)
+}
+
 export async function createChallenge(game_id: number, challenge: Challenge) {
   return (await api.post(`${api_root}/v1/challenge?game_id=${game_id}`, challenge)).data as Challenge
 }

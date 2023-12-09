@@ -30,6 +30,12 @@
       enabled: true,
     },
     {
+      name: $i18n.t('admin.routes.images'),
+      icon: 'icon-[fluent--tag-20-regular]',
+      link: `/admin/games/${$admin.game?.id}/images`,
+      enabled: true,
+    },
+    {
       name: $i18n.t('admin.routes.gameNotifications'),
       icon: 'icon-[fluent--chat-20-regular]',
       link: `/admin/games/${$admin.game?.id}/notifications`,
