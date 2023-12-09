@@ -242,7 +242,8 @@
       "about": "About",
       "gameTags": "Tags",
       "tags": "Challenge Tags",
-      "submissions": "Submit record"
+      "submissions": "Submit record",
+      "images": "Environment image management"
     },
     "filter": "Filter...",
     "wikiGuide": "Welcome to the knowledge base! \nPlease select the article you want to edit on the left, or create a new one.",
@@ -286,7 +287,8 @@
     "challengeHints": "Hints",
     "challengeAnswer": "Answer",
     "SubmissionListSettings": "Submit records management",
-    "WriteUpListSettings": "Write-Up Audit"
+    "WriteUpListSettings": "Write-Up Audit",
+    "gameImage": "Environment image management"
   },
   "docs": {
     "title": "Documents"
@@ -799,7 +801,11 @@
     "updateSuccess": "Challenge update successfully"
   },
   "tag": {
-    "fetchFailed": "Failed to get tags"
+    "fetchFailed": "Failed to get tags",
+    "deleteSuccess": "Tag deleted successfully",
+    "deleteFailed": "Failed to delete tag",
+    "createSuccess": "Tag created successfully",
+    "createFailed": "Failed to create tag"
   },
   "notification": {
     "title": "title",

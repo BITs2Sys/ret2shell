@@ -18,6 +18,7 @@ use crate::{
         config::Model as ConfigModel,
         user::{self, count_user, create_user, Permission, Permissions},
     },
+    utility::hashing::{hash_password, verify_password},
 };
 use async_nats::jetstream;
 use axum::{
@@ -100,7 +101,9 @@ async fn login(
         return Err((StatusCode::FORBIDDEN, "account is banned"));
     }
 
-    match bcrypt::verify(body.password, &user.password.unwrap_or(String::new())) {
+    let password_hash = user.password.unwrap_or(String::new());
+
+    match verify_password(&body.password, &password_hash) {
         Ok(true) => {
             *(token_tracker.token.lock().await) = Token {
                 id: user.id,
@@ -111,6 +114,20 @@ async fn login(
             token_tracker
                 .renew_requested
                 .store(true, std::sync::atomic::Ordering::Relaxed);
+
+            // NOTE: update user's password hash if it's not argon2
+            if !password_hash.starts_with("argon2.") {
+                if let Ok(password) = hash_password(&body.password).map_err(|err| {
+                    warn!("failed to hash password: {:?}", err);
+                }) {
+                    user::update_user_password(db, user.id, password)
+                        .await
+                        .map_err(|err| {
+                            error!("failed to update user password: {:?}", err);
+                        })
+                        .ok();
+                }
+            }
 
             Ok(StatusCode::OK)
         }
@@ -156,7 +173,7 @@ async fn register(
         return Err((StatusCode::CONFLICT, "account already exists"));
     }
 
-    let password = bcrypt::hash(body.password, bcrypt::DEFAULT_COST).map_err(|err| {
+    let password = hash_password(&body.password).map_err(|err| {
         warn!("failed to hash password: {:?}", err);
         (StatusCode::INTERNAL_SERVER_ERROR, "failed to hash password")
     })?;
@@ -324,7 +341,7 @@ async fn change_password(
         &body.captcha_answer
     );
 
-    match bcrypt::verify(body.old_password, &user.password.unwrap_or(String::new())) {
+    match verify_password(&body.old_password, &user.password.unwrap_or(String::new())) {
         Ok(true) => {}
         Ok(false) => return Err((StatusCode::FORBIDDEN, "account or password is wrong")),
         Err(err) => {
@@ -335,7 +352,7 @@ async fn change_password(
             ));
         }
     }
-    let password = bcrypt::hash(body.new_password, bcrypt::DEFAULT_COST).map_err(|err| {
+    let password = hash_password(&body.new_password).map_err(|err| {
         warn!("failed to hash password: {:?}", err);
         (StatusCode::INTERNAL_SERVER_ERROR, "failed to hash password")
     })?;
@@ -516,7 +533,7 @@ async fn reset_password(
             ));
         }
     };
-    let password = bcrypt::hash(body.password, bcrypt::DEFAULT_COST).map_err(|err| {
+    let password = hash_password(&body.password).map_err(|err| {
         warn!("failed to hash password: {:?}", err);
         (StatusCode::INTERNAL_SERVER_ERROR, "failed to hash password")
     })?;
