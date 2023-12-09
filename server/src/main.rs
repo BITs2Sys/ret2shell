@@ -18,6 +18,7 @@ use std::{io::Write, net::SocketAddr};
 use clap::{command, Parser, Subcommand};
 use colored::Colorize;
 use config::GlobalConfig;
+use rustc_version::version;
 // use tokio::signal;
 use tracing::{error, info, warn};
 
@@ -96,16 +97,19 @@ async fn main() {
 /// Show greet information.
 fn greet() {
     println!(
-        "[START UP] {} {}{}",
+        "[START UP] {} {}",
         "Ret 2 Shell".bold(),
-        "v".dimmed(),
-        env!("CARGO_PKG_VERSION")
-    );
-    println!(
-        "[START UP] {} {}{}",
-        "MSRV".bold(),
-        "v".dimmed(),
-        env!("CARGO_PKG_RUST_VERSION")
+        format!(
+            "{}-{}-{}",
+            env!("CARGO_PKG_VERSION"),
+            git_version::git_version!(
+                args = ["--abbrev=8", "--always", "--dirty=*"],
+                fallback = "unknown"
+            )
+            .to_uppercase(),
+            version().unwrap().to_string()
+        )
+        .dimmed()
     );
     println!(
         "----------------------------- {} -----------------------------",

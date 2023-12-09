@@ -127,4 +127,5 @@ kube = { version = "0.87", features = [
 k8s-openapi = { version = "0.20", features = ["v1_28"] }
 # System stat
 systemstat = { version = "0.2", features = ["serde"] }
+rustc_version = "0.4"
 git-version = "0.3"

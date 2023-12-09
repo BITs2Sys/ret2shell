@@ -201,7 +201,16 @@
                   <span class="text-error">S</span>
                   <span class="opacity-80">hell</span>
                 </h2>
-                <p class="text-base font-bold opacity-60">{version}</p>
+                <p class="text-base font-bold opacity-60">
+                  {#if version.includes('*')}
+                    <span class="text-warning">DEV</span>
+                  {:else}
+                    <span class="text-primary">REL</span>
+                  {/if}
+                  <span>
+                    {version.replace('*', '')}
+                  </span>
+                </p>
               </div>
             </div>
             <div
@@ -211,6 +220,7 @@
                 <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
                 <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
               </RxLink>
+              <div class="flex-1"></div>
               <RxLink href="https://github.com/ret2shell" ghost size="sm" square title={$i18n.t('platform.donate')}>
                 <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5"></span>
               </RxLink>
