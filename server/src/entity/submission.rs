@@ -191,6 +191,18 @@ pub async fn create_submission(
     active_model.insert(conn).await
 }
 
+pub async fn check_team_solved(
+    conn: &DatabaseConnection, challenge_id: i64, team_id: i64,
+) -> Result<bool, DbErr> {
+    let sql = Entity::find()
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .filter(Column::TeamId.eq(team_id))
+        .filter(Column::Solved.eq(true))
+        .one(conn)
+        .await?;
+    Ok(sql.is_some())
+}
+
 pub async fn get_solved_user_page(
     conn: &DatabaseConnection, challenge_id: i64, page: u64, per_page: u64,
 ) -> Result<(Vec<ModelOnlyUserInfo>, u64), DbErr> {

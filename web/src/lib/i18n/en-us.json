@@ -656,7 +656,13 @@
     "writeupSubmitFailed": "Write-up submission failed",
     "gameIsArchived": "The game has been archived and no new writeups will be accepted.",
     "gameNotEnded": "The game is not over yet, please submit after it ends.",
-    "joinTeam": "Join team"
+    "joinTeam": "Join team",
+    "showSolvedStatus": "Challenge solved status",
+    "showAllPlayer": "Hidden players",
+    "lastActiveTime": "Last Active Time",
+    "teamStat": "Statistics",
+    "teamExtraScore": "Extra Scores",
+    "currentRank": "Rank"
   },
   "challenges": {
     "noHint": "No hints yet",
@@ -805,7 +811,8 @@
     "deleteSuccess": "Tag deleted successfully",
     "deleteFailed": "Failed to delete tag",
     "createSuccess": "Tag created successfully",
-    "createFailed": "Failed to create tag"
+    "createFailed": "Failed to create tag",
+    "emptyContent": "Please enter the tag name"
   },
   "notification": {
     "title": "title",

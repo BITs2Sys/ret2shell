@@ -24,21 +24,42 @@
 </script>
 
 {#if total >= 1}
-  <div class="flex justify-center mt-4 mb-12">
-    <div class="join">
-      {#each paginationKeys as key}
+  <div class="flex justify-center items-center space-x-2 mt-4 mb-12">
+    <RxButton
+      on:click={() => {
+        if (page - 1 <= 0) return
+        page = page - 1
+        dispatch('select-page', page)
+      }}
+      square
+    >
+      <span class="icon-[fluent--chevron-left-20-regular]"></span>
+    </RxButton>
+    {#each paginationKeys as key}
+      {#if key !== -1}
         <RxButton
-          class="join-item ml-0"
           active={key === page}
           on:click={() => {
             page = key
             dispatch('select-page', key)
           }}
-          disabled={key === -1}
+          square
         >
-          {key === -1 ? '..' : key}
+          {key}
         </RxButton>
-      {/each}
-    </div>
+      {:else}
+        <span class="opacity-60">...</span>
+      {/if}
+    {/each}
+    <RxButton
+      on:click={() => {
+        if (page + 1 > total) return
+        page = page + 1
+        dispatch('select-page', page)
+      }}
+      square
+    >
+      <span class="icon-[fluent--chevron-right-20-regular]"></span>
+    </RxButton>
   </div>
 {/if}

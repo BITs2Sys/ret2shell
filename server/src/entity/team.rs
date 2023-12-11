@@ -370,6 +370,31 @@ pub async fn get_team_rank_by_user_id(
     Ok(Some(res + 1))
 }
 
+pub async fn get_team_rank_by_id(
+    conn: &DatabaseConnection, game_id: i64, id: i64,
+) -> Result<Option<u64>, DbErr> {
+    let team = get_team(conn, id).await?;
+    let team = match team {
+        Some(team) => team,
+        None => {
+            return Ok(None);
+        }
+    };
+    let res = Entity::find()
+        .filter(Column::GameId.eq(game_id))
+        .filter(Column::State.eq(State::Normal))
+        .filter(
+            Condition::any().add(Column::Score.gt(team.score)).add(
+                Condition::all()
+                    .add(Column::Score.eq(team.score))
+                    .add(Column::LastActiveAt.lt(team.last_active_at)),
+            ),
+        )
+        .count(conn)
+        .await?;
+    Ok(Some(res + 1))
+}
+
 pub async fn get_team(conn: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
     let res = Entity::find_by_id(id).one(conn).await?;
     Ok(res)

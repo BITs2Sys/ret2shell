@@ -20,8 +20,8 @@ use crate::{
         GlobalState,
     },
     entity::{
-        config, game,
-        team::{self, TeamScoreHistory, TeamScoreHistoryList},
+        config, extra, game,
+        team::{self, get_team_by_user_id, TeamScoreHistory, TeamScoreHistoryList},
         user::{self, Permission},
         user2_team,
     },
@@ -36,16 +36,19 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             Permission::Organize,
             Permission::Devops
         )))
+        .route("/self", get(get_self_team_info))
         .route("/self/rank", get(get_self_team_rank))
         .route("/self/members", get(get_self_teammates))
-        .route("/self", get(get_self_team_info))
+        .route("/self/extra", get(get_self_team_extra))
         .route("/", post(create_team).patch(join_team))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth::game_participate_privilege_required,
         ))
         .route("/info", get(get_team_info))
+        .route("/info/rank", get(get_team_rank))
         .route("/info/members", get(get_team_teammates))
+        .route("/info/extra", get(get_team_extra))
         .route("/", get(get_team_list))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
@@ -311,6 +314,43 @@ async fn get_self_team_rank(
     }
 }
 
+async fn get_self_team_extra(
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Path(game_id): Path<i64>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let team = get_team_by_user_id(conn, game_id, user.id)
+        .await
+        .map_err(|err| {
+            error!("failed to get team info: {}", err);
+            (StatusCode::INTERNAL_SERVER_ERROR, "failed to get team info")
+        })?
+        .ok_or((StatusCode::NOT_FOUND, "team not found"))?;
+    match extra::get_extras_by_team_id(conn, team.id).await {
+        Ok(extras) => Ok(Json(extras)),
+        Err(err) => {
+            error!("failed to get team extra: {}", err);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get team extra",
+            ))
+        }
+    }
+}
+
+async fn get_team_rank(
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<TeamIDQuery>,
+    Path(game_id): Path<i64>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    match team::get_team_rank_by_id(conn, game_id, query.team_id).await {
+        Ok(Some(rank)) => Ok(Json(TeamRank { rank })),
+        Ok(None) => Err((StatusCode::NOT_FOUND, "team not found")),
+        Err(err) => {
+            error!("failed to get team rank: {}", err);
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to get team rank"))
+        }
+    }
+}
+
 async fn get_team_info(
     State(ref conn): State<DatabaseConnection>, Extension(op_user): Extension<user::Model>,
     Query(query): Query<TeamIDQuery>,
@@ -349,6 +389,22 @@ async fn get_team_teammates(
                 "failed to get team members",
             )
         })
+}
+
+async fn get_team_extra(
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<TeamIDQuery>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let team_id = query.team_id;
+    match extra::get_extras_by_team_id(conn, team_id).await {
+        Ok(extras) => Ok(Json(extras)),
+        Err(err) => {
+            error!("failed to get team extra: {}", err);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get team extra",
+            ))
+        }
+    }
 }
 
 async fn update_team_info(

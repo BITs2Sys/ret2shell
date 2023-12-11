@@ -655,7 +655,14 @@
     "joinTeam": "加入队伍",
     "teamSolved": "解题记录",
     "eachSolvesByMember1": "被",
-    "eachSolvesByMember2": "解出，获得"
+    "eachSolvesByMember2": "解出，获得",
+    "showSolvedStatus": "题目解出详情",
+    "showAllPlayer": "隐藏的选手",
+    "lastActiveTime": "最后活跃时间",
+    "teamStat": "统计数据",
+    "teamExtraScore": "额外分数",
+    "currentRank": "当前排名",
+    "teamMembers": "队伍成员"
   },
   "challenges": {
     "noHint": "暂无提示信息",
@@ -804,7 +811,8 @@
     "deleteSuccess": "删除标签成功",
     "deleteFailed": "标签删除失败",
     "createSuccess": "标签创建成功",
-    "createFailed": "标签创建失败"
+    "createFailed": "标签创建失败",
+    "emptyContent": "请输入标签名称"
   },
   "notification": {
     "title": "标题",

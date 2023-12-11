@@ -8,7 +8,7 @@
   import { i18n } from '$lib/i18n'
   import type { Challenge, Tag } from '$lib/models/challenge'
   import type { Institute } from '$lib/models/institute'
-  import type { ScoreHistory, Team } from '$lib/models/team'
+  import { State, type ScoreHistory, type Team } from '$lib/models/team'
   import { Permission } from '$lib/models/user'
   import { game } from '$lib/stores/game'
   import { colorDefs, theme } from '$lib/stores/theme'
@@ -42,6 +42,27 @@
 
   let canvas: HTMLCanvasElement
   let chart: Chart
+
+  theme.subscribe(() => {
+    if (chart) {
+      chart.options.color = colorDefs()['base-content']
+      if (chart.options.plugins?.tooltip) {
+        chart.options.plugins.tooltip.backgroundColor = colorDefs().neutral
+        chart.options.plugins.tooltip.borderColor = colorDefs().border
+        chart.options.plugins.tooltip.titleColor = colorDefs()['base-content']
+        chart.options.plugins.tooltip.bodyColor = colorDefs()['base-content']
+        chart.options.plugins.tooltip.footerColor = colorDefs()['base-content']
+      }
+      if (chart.options.scales?.y?.ticks) {
+        chart.options.scales.y.ticks.color = colorDefs()['base-content']
+      }
+      if (chart.options.scales?.x?.ticks) {
+        chart.options.scales.x.ticks.color = colorDefs()['base-content']
+      }
+      chart.update()
+    }
+  })
+
   let teams: Team[] = []
   let currentPage = 1
   let perPage = 15
@@ -65,26 +86,6 @@
       })
     }
   }
-
-  theme.subscribe(() => {
-    if (chart) {
-      chart.options.color = colorDefs()['base-content']
-      if (chart.options.plugins?.tooltip) {
-        chart.options.plugins.tooltip.backgroundColor = colorDefs().neutral
-        chart.options.plugins.tooltip.borderColor = colorDefs().border
-        chart.options.plugins.tooltip.titleColor = colorDefs()['base-content']
-        chart.options.plugins.tooltip.bodyColor = colorDefs()['base-content']
-        chart.options.plugins.tooltip.footerColor = colorDefs()['base-content']
-      }
-      if (chart.options.scales?.y?.ticks) {
-        chart.options.scales.y.ticks.color = colorDefs()['base-content']
-      }
-      if (chart.options.scales?.x?.ticks) {
-        chart.options.scales.x.ticks.color = colorDefs()['base-content']
-      }
-      chart.update()
-    }
-  })
 
   let unsubscribe: Unsubscriber
 
@@ -279,13 +280,18 @@
       return null
     }
   }
+
+  // show challenge solved status?
+  let showSolvedStatus = false
 </script>
 
 <svelte:head>
   <title>{$i18n.t('game.scoreboard')} - {$game.current?.name}</title>
 </svelte:head>
 <div class="flex-1 flex flex-col p-6 lg:p-12 space-y-6 relative">
-  <div class="h-80 rounded-box overflow-hidden bg-neutral/30 backdrop-blur p-6 pb-4 relative">
+  <div
+    class={`h-80 rounded-box overflow-hidden p-6 pb-4 relative ${!showSolvedStatus && 'w-full max-w-7xl self-center'}`}
+  >
     <div class="w-full h-full relative">
       <canvas bind:this={canvas}></canvas>
       {#if teams.length === 0}
@@ -294,14 +300,22 @@
         </div>
       {/if}
     </div>
-    <div class="absolute top-4 left-4 flex flex-row space-x-4">
+    <div class="absolute top-0 left-0 flex flex-row space-x-4">
       <RxButton size="sm" on:click={() => (showAll = !showAll)}>
         {#if showAll}
           <span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success"></span>
         {:else}
           <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"></span>
         {/if}
-        <span>ALL</span>
+        <span>{$i18n.t('game.showAllPlayer')}</span>
+      </RxButton>
+      <RxButton size="sm" on:click={() => (showSolvedStatus = !showSolvedStatus)}>
+        {#if showSolvedStatus}
+          <span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success"></span>
+        {:else}
+          <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"></span>
+        {/if}
+        <span>{$i18n.t('game.showSolvedStatus')}</span>
       </RxButton>
       <div class="flex-shrink-0 w-64 flex flex-row relative">
         <RxSelect
@@ -317,8 +331,8 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-row">
-    <table class="table-auto flex-1 flex-shrink-0 min-w-[32rem]">
+  <div class="flex flex-row justify-center">
+    <table class="table-auto flex-1 flex-shrink-0 min-w-[32rem] max-w-7xl">
       <thead class="border-b-4 border-b-base-content/10">
         {#if $game.team || $user.permissions.find((item) => item === Permission.Audit || item === Permission.Organize || item === Permission.Devops)}
           <tr class="h-12"></tr>
@@ -337,12 +351,19 @@
               {$i18n.t('game.score')}
             </div>
           </th>
+          {#if !showSolvedStatus}
+            <th class="text-base font-bold">
+              <div class="w-64 text-start px-2">
+                {$i18n.t('game.lastActiveTime')}
+              </div>
+            </th>
+          {/if}
         </tr>
       </thead>
       <tbody>
         {#each teams as item, index}
           <tr class="h-12 border-b border-b-base-content/10">
-            <td class="text-base font-bold sticky z-10 left-0">
+            <td class="text-base font-bold">
               <div class="flex flex-row justify-center items-center">
                 {#if index + 1 + (currentPage - 1) * perPage === 1}
                   <span class="icon-[fluent--trophy-20-filled] text-yellow-500 w-5 h-5"></span>
@@ -355,22 +376,36 @@
                 {/if}
               </div>
             </td>
-            <td class="text-base font-bold sticky z-10 left-16 min-w-64 max-w-lg overflow-hidden">
-              <div class="min-w-64 text-start whitespace-nowrap flex-nowrap truncate px-2">
+            <td class="text-base font-bold min-w-64 max-w-lg overflow-hidden">
+              <div class="min-w-64 text-start whitespace-nowrap flex-nowrap truncate px-2 flex items-center space-x-2">
+                {#if showAll}
+                  {#if item.state === State.Hidden}
+                    <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"></span>
+                  {:else}
+                    <span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success"></span>
+                  {/if}
+                {/if}
                 <a class="hover:underline" href={`/games/${$game.current?.id}/teams/${item.id}`}>{item.name}</a>
               </div>
             </td>
-            <td class="text-base font-bold sticky z-10 left-80">
+            <td class="text-base font-bold">
               <div class="px-2">
                 {item.score}
                 <span class="opacity-60">pts</span>
               </div>
             </td>
+            {#if !showSolvedStatus}
+              <td class="text-base font-bold">
+                <div class="px-2">
+                  <span class="opacity-60 w-[32rem]">{new Date(item.last_active_at * 1000).toLocaleString()}</span>
+                </div>
+              </td>
+            {/if}
           </tr>
         {/each}
       </tbody>
     </table>
-    {#if $game.team || $user.permissions.find((item) => item === Permission.Audit || item === Permission.Organize || item === Permission.Devops)}
+    {#if showSolvedStatus && ($game.team || $user.permissions.find((item) => item === Permission.Audit || item === Permission.Organize || item === Permission.Devops))}
       <OverlayScrollbarsComponent
         options={{
           scrollbars: {
@@ -400,7 +435,7 @@
                 {#if tagsChallengesRecord[item.id].length > 0}
                   {#each tagsChallengesRecord[item.id] as challenge}
                     <th class="text-base border-l border-l-base-content/5" title={challenge.name}>
-                      <div class="w-20 overflow-hidden whitespace-nowrap truncate opacity-80">{challenge.name}</div>
+                      <div class="w-16 overflow-hidden whitespace-nowrap truncate opacity-80 m-1">{challenge.name}</div>
                     </th>
                   {/each}
                 {/if}

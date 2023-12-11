@@ -23,8 +23,10 @@
   }, 3000)
 
   onMount(() => {
-    loading = true
-    delayedLoading = true
+    if ($page.url.pathname === `/games/${$page.params.game}`) {
+      loading = true
+      delayedLoading = true
+    }
     if ($page.params.game) {
       let gameId = parseInt($page.params.game) || null
       if (!gameId) {

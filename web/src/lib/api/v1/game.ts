@@ -1,3 +1,4 @@
+import type { Extra } from '$lib/models/extra'
 import type { Game, Notification } from '$lib/models/game'
 import type { Submission, SubmissionWithInfo } from '$lib/models/submission'
 import type { Team } from '$lib/models/team'
@@ -160,4 +161,12 @@ export async function updateGameTeamWriteUpSelf(game_id: number, writeup: WriteU
 
 export async function createGameTeamWriteUpSelf(game_id: number, writeup: WriteUp) {
   return await api.post(`${api_root}/v1/game/${game_id}/writeup`, writeup)
+}
+
+export async function getGameTeamExtras(game_id: number, team_id: number) {
+  return (await api.get(`${api_root}/v1/game/${game_id}/team/info/extra?team_id=${team_id}`)).data as Extra[]
+}
+
+export async function getGameTeamRank(game_id: number, team_id: number) {
+  return (await api.get(`${api_root}/v1/game/${game_id}/team/info/rank?team_id=${team_id}`)).data as { rank: number }
 }

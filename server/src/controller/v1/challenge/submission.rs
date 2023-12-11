@@ -110,7 +110,23 @@ async fn submit_flag(
             })?;
         if let Some(team) = team.clone() {
             submission.team_id = Some(team.id);
-            with_score = true;
+            if !submission::check_team_solved(conn, challenge.id, team.id)
+                .await
+                .map_err(|err| {
+                    error!("check_team_solved error: {}", err);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "failed to check team solved",
+                    )
+                })?
+            {
+                with_score = true;
+            } else {
+                return Err((
+                    StatusCode::BAD_REQUEST,
+                    "your team have already solved this challenge",
+                ));
+            }
         }
     }
     if let Err(err) = submission::create_submission(conn, submission).await {

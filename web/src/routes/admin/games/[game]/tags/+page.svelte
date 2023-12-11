@@ -40,9 +40,13 @@
   }
 
   function handleCreateTag() {
+    if (!content.trim()) {
+      showMessage('warning', $i18n.t('tag.emptyContent'), 5000)
+      return
+    }
     createTag({
       id: -1,
-      name: content,
+      name: content.trim(),
     })
       .then(() => {
         refreshTags()
