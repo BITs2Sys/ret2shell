@@ -41,9 +41,7 @@ impl Related<super::game::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn create_notification(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    notification: Model,
+    conn: &DatabaseConnection, game_id: i64, notification: Model,
 ) -> Result<(), DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
@@ -55,10 +53,7 @@ pub async fn create_notification(
 }
 
 pub async fn get_notification_page(
-    conn: &DatabaseConnection,
-    page: u64,
-    per_page: u64,
-    game_id: i64,
+    conn: &DatabaseConnection, page: u64, per_page: u64, game_id: i64,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let sql = Entity::find()
         .filter(Column::GameId.eq(game_id))

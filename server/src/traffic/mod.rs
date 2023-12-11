@@ -1,6 +1,4 @@
 //! Provides TCP <-> WS proxy service for players.
-//!
-//!
 use axum::extract::ws::WebSocket;
 use tokio::net::TcpStream;
 use tracing::error;

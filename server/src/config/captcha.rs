@@ -1,5 +1,6 @@
-use crate::captcha::Validator;
 use serde::{Deserialize, Serialize};
+
+use crate::captcha::Validator;
 
 /// Captcha configuration struct.
 ///

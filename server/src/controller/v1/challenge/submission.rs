@@ -1,11 +1,3 @@
-use crate::{
-    controller::{layer::auth, GlobalState},
-    entity::{
-        challenge, extra, game, submission,
-        team::{self, TeamScoreHistory},
-        user::{self, Permission},
-    },
-};
 use axum::{
     extract::{Query, State},
     middleware,
@@ -18,6 +10,15 @@ use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::error;
+
+use crate::{
+    controller::{layer::auth, GlobalState},
+    entity::{
+        challenge, extra, game, submission,
+        team::{self, TeamScoreHistory},
+        user::{self, Permission},
+    },
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -43,8 +44,7 @@ struct SubmissionList {
 }
 
 async fn get_challenge_submission_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(challenge): Extension<challenge::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(challenge): Extension<challenge::Model>,
     Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -68,8 +68,7 @@ struct SubmitResult {
 }
 
 async fn submit_flag(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Extension(mut challenge): Extension<challenge::Model>,
     Json(mut submission): Json<submission::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {

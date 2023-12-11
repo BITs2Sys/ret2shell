@@ -1,19 +1,16 @@
 //! Platform cache functions
-//!
 
 use redis::RedisError;
 use sea_orm::DatabaseConnection;
 
-use crate::entity::config::{self, Model as PlatformInfoModel};
-
 use super::manager::{CacheError, PoolLike, PooledConnectionLike, RedisPool};
+use crate::entity::config::{self, Model as PlatformInfoModel};
 
 pub struct Platform;
 
 impl Platform {
     pub async fn refresh_cache(
-        conn: &mut RedisPool,
-        db: &DatabaseConnection,
+        conn: &mut RedisPool, db: &DatabaseConnection,
     ) -> Result<PlatformInfoModel, CacheError<RedisError>> {
         let config = config::get_config(db).await?;
         let mut conn = conn.get().await?;
@@ -22,8 +19,7 @@ impl Platform {
     }
 
     pub async fn get(
-        pool: &mut RedisPool,
-        db: &DatabaseConnection,
+        pool: &mut RedisPool, db: &DatabaseConnection,
     ) -> Result<PlatformInfoModel, CacheError<RedisError>> {
         let _pool = pool.clone();
         let mut conn = _pool.get().await?;

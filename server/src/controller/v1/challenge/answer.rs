@@ -1,10 +1,3 @@
-use crate::{
-    controller::{layer::auth, GlobalState},
-    entity::{
-        answer, challenge, game,
-        user::{self, Permission},
-    },
-};
 use axum::{
     extract::{Path, State},
     middleware,
@@ -15,6 +8,14 @@ use axum::{
 use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use tracing::error;
+
+use crate::{
+    controller::{layer::auth, GlobalState},
+    entity::{
+        answer, challenge, game,
+        user::{self, Permission},
+    },
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -35,8 +36,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn get_challenge_answer(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(game): Extension<game::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(game): Extension<game::Model>,
     Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if game.host_as_game && !game.end_and_archive() {
@@ -53,10 +53,8 @@ async fn get_challenge_answer(
 }
 
 async fn create_challenge_answer(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(challenge): Extension<challenge::Model>,
-    Json(data): Json<answer::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(challenge): Extension<challenge::Model>, Json(data): Json<answer::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match answer::create_answer(conn, user.id, challenge.id, data).await {
         Ok(_) => Ok(StatusCode::CREATED),
@@ -68,10 +66,8 @@ async fn create_challenge_answer(
 }
 
 async fn update_challenge_answer(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(challenge): Extension<challenge::Model>,
-    Json(data): Json<answer::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(challenge): Extension<challenge::Model>, Json(data): Json<answer::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match answer::update_answer(conn, user.id, challenge.id, data).await {
         Ok(_) => Ok(StatusCode::OK),
@@ -83,8 +79,7 @@ async fn update_challenge_answer(
 }
 
 async fn delete_challenge_answer(
-    State(ref conn): State<DatabaseConnection>,
-    Path(challenge_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(challenge_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match answer::delete_answer_by_challenge_id(conn, challenge_id).await {
         Ok(_) => Ok(StatusCode::OK),

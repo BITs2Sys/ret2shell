@@ -1,13 +1,3 @@
-use crate::{
-    controller::{
-        layer::{auth, info},
-        GlobalState,
-    },
-    entity::{
-        team,
-        user::{self, Permission},
-    },
-};
 use axum::{
     extract::{Path, Query, State},
     middleware,
@@ -19,6 +9,17 @@ use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::error;
+
+use crate::{
+    controller::{
+        layer::{auth, info},
+        GlobalState,
+    },
+    entity::{
+        team,
+        user::{self, Permission},
+    },
+};
 
 mod institute;
 
@@ -68,8 +69,7 @@ struct UserList {
 }
 
 async fn get_user_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(op_user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(op_user): Extension<user::Model>,
     Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -90,8 +90,7 @@ async fn get_user_list(
 }
 
 async fn get_user_info(
-    State(ref conn): State<DatabaseConnection>,
-    op_user: Option<Extension<user::Model>>,
+    State(ref conn): State<DatabaseConnection>, op_user: Option<Extension<user::Model>>,
     Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let user = match user::get_user(conn, id).await {
@@ -115,8 +114,7 @@ async fn get_user_info(
 }
 
 async fn get_user_ip_addresses(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match user::get_ip_address_of_user(conn, id).await {
         Ok(ip_addresses) => Ok(Json(ip_addresses)),
@@ -132,9 +130,7 @@ async fn get_user_ip_addresses(
 }
 
 async fn update_user(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
-    Json(user): Json<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>, Json(user): Json<user::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match user::update_user(conn, id, user).await {
         Ok(_) => Ok(StatusCode::OK),
@@ -147,8 +143,7 @@ async fn update_user(
 }
 
 async fn delete_user(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match user::delete_user(conn, id).await {
         Ok(_) => Ok(StatusCode::OK),
@@ -161,8 +156,7 @@ async fn delete_user(
 }
 
 async fn get_user_teams(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_teams_by_user_id(conn, id).await {
         Ok(teams) => Ok(Json(teams)),

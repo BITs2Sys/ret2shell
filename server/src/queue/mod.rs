@@ -1,9 +1,8 @@
 //! Provides message queue for other modules.
-//!
-//!
+
+use async_nats::jetstream;
 
 use crate::config::GlobalConfig;
-use async_nats::jetstream;
 
 pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<jetstream::Context> {
     let mut options =

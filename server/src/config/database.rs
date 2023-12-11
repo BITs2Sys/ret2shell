@@ -19,7 +19,8 @@ pub struct DatabaseConfig {
 }
 
 impl DatabaseConfig {
-    /// Constructs a Data Source Name (DSN) string from the current configuration.
+    /// Constructs a Data Source Name (DSN) string from the current
+    /// configuration.
     pub fn dsn(&self) -> String {
         format!(
             "postgresql://{}:{}@{}:{}/{}?sslmode={}",

@@ -59,8 +59,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_answer_by_challenge_id(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
+    conn: &DatabaseConnection, challenge_id: i64,
 ) -> Result<Option<Model>, DbErr> {
     let answer = Entity::find()
         .filter(Column::ChallengeId.eq(challenge_id))
@@ -70,10 +69,7 @@ pub async fn get_answer_by_challenge_id(
 }
 
 pub async fn create_answer(
-    conn: &DatabaseConnection,
-    user_id: i64,
-    challenge_id: i64,
-    answer: Model,
+    conn: &DatabaseConnection, user_id: i64, challenge_id: i64, answer: Model,
 ) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
@@ -87,10 +83,7 @@ pub async fn create_answer(
 }
 
 pub async fn update_answer(
-    conn: &DatabaseConnection,
-    user_id: i64,
-    challenge_id: i64,
-    answer: Model,
+    conn: &DatabaseConnection, user_id: i64, challenge_id: i64, answer: Model,
 ) -> Result<Model, DbErr> {
     match get_answer_by_challenge_id(conn, challenge_id).await? {
         Some(old_answer) => {
@@ -109,8 +102,7 @@ pub async fn update_answer(
 }
 
 pub async fn delete_answer_by_challenge_id(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
+    conn: &DatabaseConnection, challenge_id: i64,
 ) -> Result<(), DbErr> {
     match get_answer_by_challenge_id(conn, challenge_id).await {
         Ok(Some(answer)) => Entity::delete_by_id(answer.id).exec(conn).await.map(|_| ()),

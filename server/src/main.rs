@@ -1,14 +1,13 @@
 //! # Intro
 //!
-//! `ret2shell`: a feature-riches CTF challenge platform. This website contains the
-//! implementation details of `ret2shell`, not the user manual.
+//! `ret2shell`: a feature-riches CTF challenge platform. This website contains
+//! the implementation details of `ret2shell`, not the user manual.
 //!
 //! This documentation is generated from the source code of `ret2shell`.
 //! If you want to contribute to this project, refer this.
 //!
 //! > **DO NOT USE THIS PROJECT AS A LIBRARY IN YOUR PROJECT.
 //! ALL THE MEMBERS ARE PRIVATE AND WILL CHANGE WITHOUT NOTICE.**
-//!
 
 #![warn(missing_docs)]
 #![forbid(unsafe_code)]
@@ -68,7 +67,8 @@ struct Args {
 enum Commands {
     /// Run the server.
     Up,
-    /// Remove all data and drop database, NEVER USE IT AT PRODUCTION ENVIRONMENT.
+    /// Remove all data and drop database, NEVER USE IT AT PRODUCTION
+    /// ENVIRONMENT.
     Erase,
 }
 
@@ -227,7 +227,7 @@ async fn erase(config: GlobalConfig) -> anyhow::Result<()> {
 //     }
 
 //     info!("Server is shutting down...");
-//     // TODO: add `pusher module`(websocket) graceful shutdown handle code here.
-//     info!("Server shutdown completed, bye bye.");
+//     // TODO: add `pusher module`(websocket) graceful shutdown handle code
+// here.     info!("Server shutdown completed, bye bye.");
 //     exit(0);
 // }

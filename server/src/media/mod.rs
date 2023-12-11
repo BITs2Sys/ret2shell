@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use axum::extract::{multipart::MultipartError, Multipart};
 use image::imageops::FilterType;
+use mime_util::get_media_extension;
 use nanoid::{alphabet, nanoid};
 use ring::digest::{Context, SHA256};
 use thiserror::Error;
@@ -12,7 +13,6 @@ use tokio::{
 use tracing::{debug, info, warn};
 
 use crate::entity::media::Model as MediaModel;
-use mime_util::get_media_extension;
 
 mod mime_util;
 
@@ -42,10 +42,7 @@ pub fn convert_model_to_path(model: &MediaModel) -> String {
 }
 
 pub async fn save_media(
-    folder: &str,
-    mut req: Multipart,
-    temp_folder: &str,
-    require_thumbnail: bool,
+    folder: &str, mut req: Multipart, temp_folder: &str, require_thumbnail: bool,
 ) -> Result<MediaModel, MediaError> {
     if let Some(mut file) = req.next_field().await? {
         let content_type = file.content_type().unwrap_or("unknown").to_string();
@@ -104,11 +101,12 @@ pub async fn get_media(folder: &str, path: &str) -> Result<File, MediaError> {
     Ok(file)
 }
 
-async fn make_thumbnail<PA, PB>(original: PA, dest: PB, longest_edge: u32) -> Result<(), MediaError>
+async fn make_thumbnail<PA, PB>(
+    original: PA, dest: PB, longest_edge: u32,
+) -> Result<(), MediaError>
 where
     PA: AsRef<Path>,
-    PB: AsRef<Path>,
-{
+    PB: AsRef<Path>, {
     // prevent generate thumbnail repeatedly
     if tokio::fs::metadata(&dest).await.is_ok() {
         return Ok(());

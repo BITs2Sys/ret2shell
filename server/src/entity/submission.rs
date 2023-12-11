@@ -109,10 +109,7 @@ impl Related<super::team::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_submission_page(
-    conn: &DatabaseConnection,
-    challenge_id: Option<i64>,
-    game_id: Option<i64>,
-    page: u64,
+    conn: &DatabaseConnection, challenge_id: Option<i64>, game_id: Option<i64>, page: u64,
     per_page: u64,
 ) -> Result<(Vec<ModelWithInfo>, u64), DbErr> {
     let mut sql = Entity::find();
@@ -143,9 +140,7 @@ pub async fn get_submission_page(
 }
 
 pub async fn get_solved_submission_of_team(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    team_id: i64,
+    conn: &DatabaseConnection, game_id: i64, team_id: i64,
 ) -> Result<Vec<ModelWithInfo>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
@@ -173,9 +168,7 @@ pub async fn get_solved_submission_of_team(
 }
 
 pub async fn get_solved_submission_of_user(
-    db: &DatabaseConnection,
-    game_id: i64,
-    user_id: i64,
+    db: &DatabaseConnection, game_id: i64, user_id: i64,
 ) -> Result<Vec<Model>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
@@ -188,8 +181,7 @@ pub async fn get_solved_submission_of_user(
 }
 
 pub async fn create_submission(
-    conn: &DatabaseConnection,
-    submission: Model,
+    conn: &DatabaseConnection, submission: Model,
 ) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
@@ -200,10 +192,7 @@ pub async fn create_submission(
 }
 
 pub async fn get_solved_user_page(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
-    page: u64,
-    per_page: u64,
+    conn: &DatabaseConnection, challenge_id: i64, page: u64, per_page: u64,
 ) -> Result<(Vec<ModelOnlyUserInfo>, u64), DbErr> {
     let sql = Entity::find()
         .select_only()
@@ -223,10 +212,7 @@ pub async fn get_solved_user_page(
 }
 
 pub async fn get_solved_team_page(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
-    page: u64,
-    per_page: u64,
+    conn: &DatabaseConnection, challenge_id: i64, page: u64, per_page: u64,
 ) -> Result<(Vec<ModelOnlyTeamInfo>, u64), DbErr> {
     let sql = Entity::find()
         .select_only()
@@ -258,9 +244,7 @@ pub async fn count_solves(conn: &DatabaseConnection, challenge_id: i64) -> Resul
 }
 
 pub async fn count_submissions(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
-    solved: Option<bool>,
+    conn: &DatabaseConnection, challenge_id: i64, solved: Option<bool>,
 ) -> Result<u64, DbErr> {
     let mut sql = Entity::find().filter(Column::ChallengeId.eq(challenge_id));
     if let Some(solved) = solved {

@@ -1,13 +1,3 @@
-use crate::{
-    controller::{
-        layer::auth::{self, Token},
-        GlobalState,
-    },
-    entity::{
-        user::Permission,
-        wiki::{self, Model as WikiModel},
-    },
-};
 use axum::{
     extract::{Path, Query, State},
     middleware,
@@ -19,6 +9,17 @@ use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::Deserialize;
 use tracing::error;
+
+use crate::{
+    controller::{
+        layer::auth::{self, Token},
+        GlobalState,
+    },
+    entity::{
+        user::Permission,
+        wiki::{self, Model as WikiModel},
+    },
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -37,8 +38,7 @@ struct ListParams {
 }
 
 async fn get_wiki_list(
-    State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<ListParams>,
+    State(ref conn): State<DatabaseConnection>, Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match wiki::get_wiki_page(conn, params.parent_id).await {
         Ok(wikis) => Ok(Json(wikis)),
@@ -50,8 +50,7 @@ async fn get_wiki_list(
 }
 
 async fn create_wiki(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(token): Extension<Token>,
+    State(ref conn): State<DatabaseConnection>, Extension(token): Extension<Token>,
     Json(data): Json<WikiModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let data = WikiModel {
@@ -68,9 +67,7 @@ async fn create_wiki(
 }
 
 async fn update_wiki(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
-    Json(data): Json<WikiModel>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>, Json(data): Json<WikiModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match wiki::update_wiki(conn, id, data).await {
         Ok(data) => Ok((StatusCode::OK, Json(data))),
@@ -83,8 +80,7 @@ async fn update_wiki(
 }
 
 async fn delete_wiki(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match wiki::delete_wiki(conn, id).await {
         Ok(_) => Ok(StatusCode::OK),
@@ -97,8 +93,7 @@ async fn delete_wiki(
 }
 
 async fn get_wiki(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match wiki::get_wiki_by_id(conn, id).await {
         Ok(Some(wiki)) => Ok(Json(wiki)),

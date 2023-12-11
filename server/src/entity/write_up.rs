@@ -106,11 +106,7 @@ impl Related<super::team::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_writeup_page(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    show_hidden: bool,
-    page: u64,
-    per_page: u64,
+    conn: &DatabaseConnection, game_id: i64, show_hidden: bool, page: u64, per_page: u64,
 ) -> Result<(Vec<ModelOnlyTeamInfo>, u64), DbErr> {
     let mut sql = Entity::find()
         .select_only()
@@ -133,9 +129,7 @@ pub async fn get_writeup(conn: &DatabaseConnection, id: i64) -> Result<Option<Mo
 }
 
 pub async fn get_writeup_detail(
-    conn: &DatabaseConnection,
-    id: i64,
-    filter_hidden: bool,
+    conn: &DatabaseConnection, id: i64, filter_hidden: bool,
 ) -> Result<Option<ModelWithInfo>, DbErr> {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::User.def())
@@ -154,9 +148,7 @@ pub async fn get_writeup_detail(
 }
 
 pub async fn get_writeup_by_game_and_user_id(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    user_id: i64,
+    conn: &DatabaseConnection, game_id: i64, user_id: i64,
 ) -> Result<Option<Model>, DbErr> {
     Entity::find()
         .filter(Column::GameId.eq(game_id))
@@ -166,10 +158,7 @@ pub async fn get_writeup_by_game_and_user_id(
 }
 
 pub async fn create_writeup(
-    conn: &DatabaseConnection,
-    user_id: i64,
-    game_id: i64,
-    writeup: Model,
+    conn: &DatabaseConnection, user_id: i64, game_id: i64, writeup: Model,
 ) -> Result<Model, DbErr> {
     if let Ok(Some(_)) = get_writeup_by_game_and_user_id(conn, game_id, user_id).await {
         return Err(DbErr::RecordNotInserted);
@@ -193,10 +182,7 @@ pub async fn create_writeup(
 }
 
 pub async fn update_writeup(
-    conn: &DatabaseConnection,
-    id: i64,
-    game_id: i64,
-    writeup: Model,
+    conn: &DatabaseConnection, id: i64, game_id: i64, writeup: Model,
 ) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::Unchanged(id),
@@ -222,9 +208,7 @@ pub async fn audit_writeup(conn: &DatabaseConnection, id: i64, hidden: bool) -> 
 }
 
 pub async fn delete_writeup_by_game_and_user_id(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    user_id: i64,
+    conn: &DatabaseConnection, game_id: i64, user_id: i64,
 ) -> Result<(), DbErr> {
     match get_writeup_by_game_and_user_id(conn, game_id, user_id).await {
         Ok(Some(writeup)) => Entity::delete_by_id(writeup.id)

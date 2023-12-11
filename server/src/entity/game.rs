@@ -128,13 +128,11 @@ pub async fn create_game(conn: &DatabaseConnection, game: Model) -> Result<(), D
 /// * `conn` - Database connection
 /// * `page` - Page number
 /// * `per_page` - Number of items per page
-/// * `host_as_game` - Whether the game will be hosted as a `Game`, or it will be treated as `Playground`, which is open to all users.
+/// * `host_as_game` - Whether the game will be hosted as a `Game`, or it will
+///   be treated as `Playground`, which is open to all users.
 /// * `filter_hidden` - Whether to filter hidden games
 pub async fn get_game_page(
-    conn: &DatabaseConnection,
-    page: u64,
-    per_page: u64,
-    host_as_game: Option<bool>,
+    conn: &DatabaseConnection, page: u64, per_page: u64, host_as_game: Option<bool>,
     filter_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find()

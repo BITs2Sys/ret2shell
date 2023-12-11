@@ -46,9 +46,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn link_team_user(
-    conn: &DatabaseConnection,
-    user_id: i64,
-    team_id: i64,
+    conn: &DatabaseConnection, user_id: i64, team_id: i64,
 ) -> Result<(), DbErr> {
     let res = Entity::find()
         .filter(Column::UserId.eq(user_id).and(Column::TeamId.eq(team_id)))

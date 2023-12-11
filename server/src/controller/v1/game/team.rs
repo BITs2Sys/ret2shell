@@ -1,3 +1,16 @@
+use axum::{
+    extract::{Path, Query, State},
+    middleware,
+    response::IntoResponse,
+    routing::{get, patch, post},
+    Extension, Json, Router,
+};
+use chrono::Utc;
+use hyper::StatusCode;
+use sea_orm::{DatabaseConnection, DbErr};
+use serde::{Deserialize, Serialize};
+use tracing::error;
+
 use crate::{
     audit::{word_filter::check_text, Auditor},
     cache::manager::RedisPool,
@@ -13,18 +26,6 @@ use crate::{
         user2_team,
     },
 };
-use axum::{
-    extract::{Path, Query, State},
-    middleware,
-    response::IntoResponse,
-    routing::{get, patch, post},
-    Extension, Json, Router,
-};
-use chrono::Utc;
-use hyper::StatusCode;
-use sea_orm::{DatabaseConnection, DbErr};
-use serde::{Deserialize, Serialize};
-use tracing::error;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -80,8 +81,7 @@ struct TeamList {
 }
 
 async fn get_team_list(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(game_id): Path<i64>,
     Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -109,12 +109,9 @@ struct CreateTeamRequest {
 }
 
 async fn create_team(
-    State(ref conn): State<DatabaseConnection>,
-    State(mut cache): State<RedisPool>,
-    State(ref auditor): State<Auditor>,
-    Extension(config): Extension<config::Model>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
+    State(ref conn): State<DatabaseConnection>, State(mut cache): State<RedisPool>,
+    State(ref auditor): State<Auditor>, Extension(config): Extension<config::Model>,
+    Extension(user): Extension<user::Model>, Extension(game): Extension<game::Model>,
     Json(req): Json<CreateTeamRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     captcha_protected!(
@@ -201,12 +198,9 @@ struct JoinTeamRequest {
 }
 
 async fn join_team(
-    State(ref conn): State<DatabaseConnection>,
-    State(mut cache): State<RedisPool>,
-    Extension(config): Extension<config::Model>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
-    Json(request): Json<JoinTeamRequest>,
+    State(ref conn): State<DatabaseConnection>, State(mut cache): State<RedisPool>,
+    Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
+    Extension(game): Extension<game::Model>, Json(request): Json<JoinTeamRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let id = request.captcha_id;
     let answer = request.captcha_answer;
@@ -261,8 +255,7 @@ async fn join_team(
 }
 
 async fn get_self_team_info(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_team_by_user_id(conn, game_id, user.id).await {
@@ -276,8 +269,7 @@ async fn get_self_team_info(
 }
 
 async fn get_self_teammates(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let team = match team::get_team_by_user_id(conn, game_id, user.id).await {
@@ -306,8 +298,7 @@ struct TeamRank {
 }
 
 async fn get_self_team_rank(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match team::get_team_rank_by_user_id(conn, game_id, user.id).await {
@@ -321,8 +312,7 @@ async fn get_self_team_rank(
 }
 
 async fn get_team_info(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(op_user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(op_user): Extension<user::Model>,
     Query(query): Query<TeamIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let team_id = query.team_id;
@@ -346,8 +336,7 @@ async fn get_team_info(
 }
 
 async fn get_team_teammates(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<TeamIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<TeamIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let team_id = query.team_id;
     team::get_team_members(conn, team_id)
@@ -363,8 +352,7 @@ async fn get_team_teammates(
 }
 
 async fn update_team_info(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<TeamIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<TeamIDQuery>,
     Json(data): Json<team::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let team_id = query.team_id;
@@ -378,8 +366,7 @@ async fn update_team_info(
 }
 
 async fn change_team_audit(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<TeamIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<TeamIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let team_id = query.team_id;
     let mut current_team = match team::get_team(conn, team_id).await {

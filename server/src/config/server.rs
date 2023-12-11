@@ -21,7 +21,8 @@ pub struct ServerConfig {
 }
 
 impl ServerConfig {
-    /// Returns the external link prefix for the server, including the protocol (http or https).
+    /// Returns the external link prefix for the server, including the protocol
+    /// (http or https).
     ///
     /// # Example
     ///

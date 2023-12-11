@@ -1,3 +1,15 @@
+use axum::{
+    extract::{Path, Query, State},
+    middleware,
+    response::{IntoResponse, Response},
+    routing::{get, patch, post},
+    Extension, Json, Router,
+};
+use hyper::StatusCode;
+use sea_orm::DatabaseConnection;
+use serde::{Deserialize, Serialize};
+use tracing::{error, warn};
+
 use crate::{
     controller::{
         layer::{
@@ -11,17 +23,6 @@ use crate::{
         user::{self, Permission},
     },
 };
-use axum::{
-    extract::{Path, Query, State},
-    middleware,
-    response::{IntoResponse, Response},
-    routing::{get, patch, post},
-    Extension, Json, Router,
-};
-use hyper::StatusCode;
-use sea_orm::DatabaseConnection;
-use serde::{Deserialize, Serialize};
-use tracing::{error, warn};
 
 mod notification;
 mod team;
@@ -71,8 +72,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn create_game(
-    State(ref conn): State<DatabaseConnection>,
-    Json(game): Json<game::Model>,
+    State(ref conn): State<DatabaseConnection>, Json(game): Json<game::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match game::create_game(conn, game).await {
         Ok(_) => Ok(StatusCode::CREATED),
@@ -97,8 +97,7 @@ struct GameList {
 }
 
 async fn get_game_list(
-    State(ref conn): State<DatabaseConnection>,
-    op_user: Option<Extension<user::Model>>,
+    State(ref conn): State<DatabaseConnection>, op_user: Option<Extension<user::Model>>,
     Query(query): Query<GameListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = query.page.unwrap_or(1);
@@ -122,8 +121,7 @@ async fn get_game_list(
 }
 
 async fn get_game(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(op_user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(op_user): Extension<user::Model>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match game::get_game(conn, game_id).await {
@@ -146,8 +144,7 @@ async fn get_game(
 }
 
 async fn update_game(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(game_id): Path<i64>,
     Json(game): Json<game::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match game::update_game(conn, game_id, game).await {
@@ -172,8 +169,7 @@ struct SubmissionList {
 }
 
 async fn get_game_submission_list(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(game_id): Path<i64>,
     Query(params): Query<SubmissionListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -206,8 +202,7 @@ struct ScoreboardList {
 }
 
 async fn get_scoreboard(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(game_id): Path<i64>,
     Query(params): Query<ScoreboardListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -236,10 +231,8 @@ pub struct TeamSolvedQuery {
 }
 
 pub async fn get_team_solved(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(token): Extension<Token>,
-    Path(game_id): Path<i64>,
-    Query(query): Query<TeamSolvedQuery>,
+    State(ref conn): State<DatabaseConnection>, Extension(token): Extension<Token>,
+    Path(game_id): Path<i64>, Query(query): Query<TeamSolvedQuery>,
 ) -> Result<Response, (StatusCode, &'static str)> {
     let result = match query.team_id {
         Some(id) => {

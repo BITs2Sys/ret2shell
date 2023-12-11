@@ -18,14 +18,15 @@ use tracing::error;
 use crate::{
     cache,
     cache::manager::RedisPool,
-    controller::GlobalState,
+    controller::{
+        layer::auth::{self, init_token_or_permission_required},
+        GlobalState,
+    },
     entity::{
         config::{self, Model as ConfigModel},
         user::Permission,
     },
 };
-
-use crate::controller::layer::auth::{self, init_token_or_permission_required};
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -205,8 +206,7 @@ async fn get_platform_config(
 }
 
 async fn set_platform_config(
-    State(ref db): State<DatabaseConnection>,
-    State(ref mut cache): State<RedisPool>,
+    State(ref db): State<DatabaseConnection>, State(ref mut cache): State<RedisPool>,
     Json(new_model): Json<ConfigModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     config::update_config(db, new_model).await.map_err(|err| {

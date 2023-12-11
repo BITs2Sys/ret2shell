@@ -210,7 +210,6 @@ fn decrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
 /// // encrypted data will be 8 bytes (3 zeroes appended to the end)
 /// println!("Encrypted data: {:?}", encrypted_data);
 /// ```
-///
 pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
     let key = key.bytes().collect();
     to_bytes(
@@ -238,7 +237,6 @@ pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
 /// let decrypted_data = xxtea::decrypt_raw(&data.to_vec(), &key);
 /// println!("Decrypted data: {:?}", decrypted_data);
 /// ```
-///
 pub fn decrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
     let key = key.bytes().collect();
     to_bytes(

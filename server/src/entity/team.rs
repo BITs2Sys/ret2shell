@@ -2,10 +2,6 @@
 
 use std::collections::HashSet;
 
-use super::{
-    extra,
-    user::{self, Entity as User},
-};
 use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
@@ -19,6 +15,11 @@ use sea_orm::{
 use sea_query::{Condition, Func, JoinType};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use super::{
+    extra,
+    user::{self, Entity as User},
+};
 
 #[derive(
     Clone,
@@ -180,11 +181,7 @@ impl Related<user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_scoreboard(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    page: u64,
-    per_page: u64,
-    all: Option<bool>,
+    conn: &DatabaseConnection, game_id: i64, page: u64, per_page: u64, all: Option<bool>,
     institute: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find()
@@ -206,8 +203,7 @@ pub async fn get_scoreboard(
 }
 
 pub async fn get_team_members(
-    conn: &DatabaseConnection,
-    id: i64,
+    conn: &DatabaseConnection, id: i64,
 ) -> Result<Vec<user::Model>, DbErr> {
     let team = Entity::find_by_id(id).one(conn).await?;
     if let Some(team) = team {
@@ -222,9 +218,7 @@ pub async fn get_team_members(
 }
 
 pub async fn get_team_by_user_id(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    user_id: i64,
+    conn: &DatabaseConnection, game_id: i64, user_id: i64,
 ) -> Result<Option<Model>, DbErr> {
     let (_, team): (user::Model, Option<Model>) = match user::Entity::find_by_id(user_id)
         .find_also_related(Entity)
@@ -246,9 +240,7 @@ struct ChallengeScore {
 }
 
 async fn calc_team_score(
-    conn: &DatabaseConnection,
-    team: &Model,
-    game_id: i64,
+    conn: &DatabaseConnection, team: &Model, game_id: i64,
 ) -> Result<i32, DbErr> {
     let mut sql = super::submission::Entity::find()
         .filter(super::submission::Column::TeamId.eq(team.id))
@@ -289,10 +281,7 @@ async fn calc_team_score(
 }
 
 pub async fn update_team_score(
-    conn: &DatabaseConnection,
-    team: &Model,
-    game_id: i64,
-    last_active_at: DateTime<Utc>,
+    conn: &DatabaseConnection, team: &Model, game_id: i64, last_active_at: DateTime<Utc>,
 ) -> Result<i32, DbErr> {
     let team_score = calc_team_score(conn, team, game_id).await?;
     let mut active_model = team.clone().into_active_model();
@@ -303,11 +292,7 @@ pub async fn update_team_score(
 }
 
 pub async fn get_team_page_by_game_id(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    page: u64,
-    per_page: u64,
-    filter: Option<String>,
+    conn: &DatabaseConnection, game_id: i64, page: u64, per_page: u64, filter: Option<String>,
     need_audit: Option<bool>,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let sql = Entity::find()
@@ -350,9 +335,7 @@ pub async fn create_team(conn: &DatabaseConnection, team: Model) -> Result<Model
 }
 
 pub async fn get_team_by_game_id_and_name(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    name: &str,
+    conn: &DatabaseConnection, game_id: i64, name: &str,
 ) -> Result<Option<Model>, DbErr> {
     let res = Entity::find()
         .filter(Column::GameId.eq(game_id))
@@ -363,9 +346,7 @@ pub async fn get_team_by_game_id_and_name(
 }
 
 pub async fn get_team_rank_by_user_id(
-    conn: &DatabaseConnection,
-    game_id: i64,
-    user_id: i64,
+    conn: &DatabaseConnection, game_id: i64, user_id: i64,
 ) -> Result<Option<u64>, DbErr> {
     let team = get_team_by_user_id(conn, game_id, user_id).await?;
     let team = match team {
@@ -407,8 +388,7 @@ pub async fn update_team(conn: &DatabaseConnection, id: i64, team: Model) -> Res
 }
 
 pub async fn get_team_by_token(
-    conn: &DatabaseConnection,
-    token: &str,
+    conn: &DatabaseConnection, token: &str,
 ) -> Result<Option<Model>, DbErr> {
     let res = Entity::find()
         .filter(Column::Token.eq(token))
@@ -418,8 +398,7 @@ pub async fn get_team_by_token(
 }
 
 pub async fn get_teams_by_user_id(
-    conn: &DatabaseConnection,
-    user_id: i64,
+    conn: &DatabaseConnection, user_id: i64,
 ) -> Result<Vec<ModelWithGameName>, DbErr> {
     let res = Entity::find()
         .join(JoinType::InnerJoin, Relation::User2Team.def())
@@ -433,8 +412,7 @@ pub async fn get_teams_by_user_id(
 }
 
 pub async fn get_affected_teams_by_challenge_id(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
+    conn: &DatabaseConnection, challenge_id: i64,
 ) -> Result<Vec<Model>, DbErr> {
     let submissions = super::submission::Entity::find()
         .filter(super::submission::Column::ChallengeId.eq(challenge_id))

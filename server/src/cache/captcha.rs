@@ -6,9 +6,7 @@ pub struct Captcha;
 
 impl Captcha {
     pub async fn store(
-        conn: &mut RedisPool,
-        id: &str,
-        criteria: &str,
+        conn: &mut RedisPool, id: &str, criteria: &str,
     ) -> Result<(), CacheError<RedisError>> {
         let mut conn = conn.get().await?;
         conn.pset_ex(format!("captcha:{}", id), criteria, 5 * 60 * 1000)

@@ -14,9 +14,8 @@ use sea_orm::DatabaseConnection;
 use thiserror::Error;
 use tracing::{debug, error, warn};
 
-use crate::entity::ip_address::link_to_user;
-
 use super::auth::Token;
+use crate::entity::ip_address::link_to_user;
 
 const X_REAL_IP: &str = "x-real-ip";
 const X_FORWARDED_FOR: &str = "x-forwarded-for";
@@ -269,7 +268,8 @@ impl FromStr for ForwardedHeaderValue {
 
 /// Get the client IP address from the request.
 ///
-/// This function will try to get the client IP address from the following sources:
+/// This function will try to get the client IP address from the following
+/// sources:
 ///
 /// - `x-forwarded-for` header
 /// - `x-real-ip` header
@@ -277,13 +277,13 @@ impl FromStr for ForwardedHeaderValue {
 /// - `ConnectInfo` extension
 ///
 /// The order of precedence is as listed above. We put headers first because the
-/// physical IP address from `ConnectInfo` extension is not always correct. Nginx
-/// and other reverse proxies will shadow the real IP with `127.0.0.1`, to solve this
-/// problem, then will set the `x-forwarded-for` header to the client IP address,
-/// so we just use it.
+/// physical IP address from `ConnectInfo` extension is not always correct.
+/// Nginx and other reverse proxies will shadow the real IP with `127.0.0.1`, to
+/// solve this problem, then will set the `x-forwarded-for` header to the client
+/// IP address, so we just use it.
 ///
-/// In some cases, the `x-forwarded-for` header may not set, the IP record will be
-/// localhost, so please make sure the reverse proxy is configured correctly.
+/// In some cases, the `x-forwarded-for` header may not set, the IP record will
+/// be localhost, so please make sure the reverse proxy is configured correctly.
 pub fn get_client_ip(request: &Request) -> Option<IpAddr> {
     let headers = request.headers();
     maybe_x_forwarded_for(headers)
@@ -293,9 +293,7 @@ pub fn get_client_ip(request: &Request) -> Option<IpAddr> {
 }
 
 pub async fn record_ip_address(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(token): Extension<Token>,
-    req: Request,
+    State(ref conn): State<DatabaseConnection>, Extension(token): Extension<Token>, req: Request,
     next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let ip = match get_client_ip(&req) {

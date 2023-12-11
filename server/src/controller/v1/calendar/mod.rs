@@ -33,8 +33,7 @@ struct ListParams {
 }
 
 async fn get_calendar_list(
-    State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<ListParams>,
+    State(ref conn): State<DatabaseConnection>, Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match calendar::get_calendar_list(conn, params.start_time, params.end_time).await {
         Ok(calendars) => Ok(Json(calendars)),
@@ -49,8 +48,7 @@ async fn get_calendar_list(
 }
 
 async fn get_calendar(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match calendar::get_calendar_by_id(conn, id).await {
         Ok(calendar) => Ok(Json(calendar)),
@@ -62,8 +60,7 @@ async fn get_calendar(
 }
 
 async fn create_calendar(
-    State(ref conn): State<DatabaseConnection>,
-    Json(data): Json<CalendarModel>,
+    State(ref conn): State<DatabaseConnection>, Json(data): Json<CalendarModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match calendar::create_calendar(conn, data).await {
         Ok(_) => Ok(StatusCode::CREATED),
@@ -78,8 +75,7 @@ async fn create_calendar(
 }
 
 async fn update_calendar(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
     Json(data): Json<CalendarModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match calendar::update_calendar(conn, id, data).await {
@@ -95,8 +91,7 @@ async fn update_calendar(
 }
 
 async fn delete_calendar(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match calendar::delete_calendar(conn, id).await {
         Ok(_) => Ok(StatusCode::OK),

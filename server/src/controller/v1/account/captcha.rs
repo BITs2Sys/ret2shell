@@ -16,8 +16,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn get_captcha(
-    State(mut cache): State<RedisPool>,
-    Extension(platform_info): Extension<ConfigModel>,
+    State(mut cache): State<RedisPool>, Extension(platform_info): Extension<ConfigModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let captcha = platform_info.captcha;
     if !captcha.enabled {

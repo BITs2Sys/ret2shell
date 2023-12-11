@@ -1,18 +1,16 @@
 use async_trait::async_trait;
 
+use super::traits::{Captcha, CaptchaError, CaptchaValidator, Validator};
 use crate::{
     cache::{self, manager::RedisPool},
     utility::hashing::sha256sum_str,
 };
-
-use super::traits::{Captcha, CaptchaError, CaptchaValidator, Validator};
 pub struct PowValidator;
 
 #[async_trait]
 impl CaptchaValidator for PowValidator {
     async fn generate_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
+        conn: &mut RedisPool, difficulty: u16,
     ) -> Result<Captcha, CaptchaError> {
         let id = nanoid::nanoid!();
         let challenge = nanoid::nanoid!(16);
@@ -26,10 +24,7 @@ impl CaptchaValidator for PowValidator {
     }
 
     async fn check_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
-        id: &str,
-        answer: &str,
+        conn: &mut RedisPool, difficulty: u16, id: &str, answer: &str,
     ) -> Result<bool, CaptchaError> {
         let criteria = cache::Captcha::get(conn, id).await?;
         if answer.trim().starts_with(criteria.trim())

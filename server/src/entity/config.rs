@@ -81,7 +81,8 @@ pub struct Email {
     pub password: String,
     /// The TLS configuration for secure email communication.
     pub tls: String,
-    /// The email body for reset password emails, could be 'none' | 'tls' | 'starttls'
+    /// The email body for reset password emails, could be 'none' | 'tls' |
+    /// 'starttls'
     pub reset_password_email_body: String,
     /// The email subject for reset password emails.
     pub reset_password_email_subject: String,
@@ -93,7 +94,8 @@ pub struct Email {
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Media {
-    /// `anti_theft` is a flag to enable or disable anti-theft protection for media files.
+    /// `anti_theft` is a flag to enable or disable anti-theft protection for
+    /// media files.
     pub anti_theft: bool,
     /// `limit` is the maximum allowed size (in bytes) for media files.
     pub limit: i64,

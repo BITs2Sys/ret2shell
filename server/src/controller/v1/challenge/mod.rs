@@ -1,13 +1,3 @@
-use crate::{
-    controller::{
-        layer::{auth, info},
-        GlobalState,
-    },
-    entity::{
-        challenge, game, instance, submission as submission_entity,
-        user::{self, Permission},
-    },
-};
 // use crate::utility::string::deunicode_str;
 use axum::{
     extract::{Path, Query, State},
@@ -20,6 +10,17 @@ use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::error;
+
+use crate::{
+    controller::{
+        layer::{auth, info},
+        GlobalState,
+    },
+    entity::{
+        challenge, game, instance, submission as submission_entity,
+        user::{self, Permission},
+    },
+};
 
 mod tag;
 // for challenge answer
@@ -116,8 +117,7 @@ struct SolvedUserList {
 }
 
 async fn get_solved_user_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(challenge): Extension<challenge::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(challenge): Extension<challenge::Model>,
     Query(params): Query<ListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -145,8 +145,7 @@ struct SolvedTeamList {
 }
 
 async fn get_solved_team_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(challenge): Extension<challenge::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(challenge): Extension<challenge::Model>,
     Query(params): Query<ListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -201,8 +200,8 @@ async fn create_challenge(
     //         )
     //     })?;
 
-    // challenge::update_challenge_bucket(conn, created_challenge.id, &created_challenge)
-    //     .await
+    // challenge::update_challenge_bucket(conn, created_challenge.id,
+    // &created_challenge)     .await
     //     .map_err(|err| {
     //         error!("failed to update challenge bucket: {}", err);
     //         (
@@ -247,8 +246,7 @@ struct ChallengeList {
 }
 
 async fn get_challenge_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(current_user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(current_user): Extension<user::Model>,
     Query(params): Query<ChallengeListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let current_game = match params.game_id {
@@ -299,8 +297,7 @@ async fn get_challenge_list(
 }
 
 async fn delete_challenge(
-    State(ref conn): State<DatabaseConnection>,
-    Path(challenge_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(challenge_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // TODO: delete additional models like build actions, containers, etc.
     match challenge::delete_challenge(conn, challenge_id).await {
@@ -334,8 +331,7 @@ struct StatisticsResponse {
 }
 
 async fn get_challenge_statistics(
-    State(ref db): State<DatabaseConnection>,
-    Extension(challenge): Extension<challenge::Model>,
+    State(ref db): State<DatabaseConnection>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let submissions_count = submission_entity::count_submissions(db, challenge.id, None)
         .await

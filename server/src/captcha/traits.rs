@@ -1,8 +1,9 @@
-use crate::cache::manager::RedisPool;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use thiserror::Error;
+
+use crate::cache::manager::RedisPool;
 
 /// Validator enum for different types of captcha validation
 #[derive(Serialize_repr, Deserialize_repr, Default, Clone, Debug, PartialEq, Eq)]
@@ -45,14 +46,10 @@ pub enum CaptchaError {
 #[async_trait]
 pub trait CaptchaValidator: Send + Sync {
     async fn generate_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
+        conn: &mut RedisPool, difficulty: u16,
     ) -> Result<Captcha, CaptchaError>;
 
     async fn check_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
-        id: &str,
-        answer: &str,
+        conn: &mut RedisPool, difficulty: u16, id: &str, answer: &str,
     ) -> Result<bool, CaptchaError>;
 }

@@ -1,14 +1,3 @@
-use crate::{
-    controller::{
-        layer::{auth, info},
-        GlobalState,
-    },
-    entity::{
-        game,
-        user::{self, Permission},
-        write_up,
-    },
-};
 use axum::{
     extract::{Query, State},
     middleware,
@@ -20,6 +9,18 @@ use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::{error, warn};
+
+use crate::{
+    controller::{
+        layer::{auth, info},
+        GlobalState,
+    },
+    entity::{
+        game,
+        user::{self, Permission},
+        write_up,
+    },
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -66,10 +67,8 @@ struct WriteupList {
 }
 
 async fn get_writeup_list(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(game): Extension<game::Model>,
-    Extension(user): Extension<user::Model>,
-    Query(params): Query<WriteupListQuery>,
+    State(ref conn): State<DatabaseConnection>, Extension(game): Extension<game::Model>,
+    Extension(user): Extension<user::Model>, Query(params): Query<WriteupListQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(10);
@@ -99,10 +98,8 @@ async fn get_writeup_list(
 }
 
 async fn submit_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
-    Json(data): Json<write_up::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(game): Extension<game::Model>, Json(data): Json<write_up::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if !user.permissions.0.iter().any(|p| {
         matches!(
@@ -136,10 +133,8 @@ async fn submit_writeup(
 }
 
 async fn get_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
-    Query(query): Query<WriteupIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(game): Extension<game::Model>, Query(query): Query<WriteupIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let writeup_id = query.writeup_id;
     let is_admin = user.permissions.0.iter().any(|p| {
@@ -163,8 +158,7 @@ async fn get_writeup(
 }
 
 async fn get_self_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match write_up::get_writeup_by_game_and_user_id(conn, game.id, user.id).await {
@@ -178,10 +172,8 @@ async fn get_self_writeup(
 }
 
 pub async fn update_self_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
-    Json(data): Json<write_up::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(game): Extension<game::Model>, Json(data): Json<write_up::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "cannot update writeup in this time"));
@@ -200,8 +192,7 @@ pub async fn update_self_writeup(
 }
 
 pub async fn delete_self_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
     Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if game.end_and_archive() {
@@ -227,8 +218,7 @@ struct WriteupAduitQuery {
 }
 
 async fn audit_writeup(
-    State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<WriteupAduitQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(params): Query<WriteupAduitQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let writeup_id = match params.writeup_id {
         Some(id) => id,

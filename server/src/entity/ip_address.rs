@@ -37,9 +37,7 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 pub async fn link_to_user(
-    conn: &DatabaseConnection,
-    user_id: i64,
-    ip_address: &str,
+    conn: &DatabaseConnection, user_id: i64, ip_address: &str,
 ) -> anyhow::Result<()> {
     let last_insert_id = match Entity::find()
         .filter(Column::Address.eq(ip_address))

@@ -1,6 +1,4 @@
 //! Generating captcha and verifying the captcha.
-//!
-//!
 
 pub mod hcaptcha;
 pub mod image;
@@ -14,9 +12,7 @@ pub use self::traits::{CaptchaError, CaptchaValidator};
 use crate::cache::manager::RedisPool;
 
 pub async fn generate_captcha(
-    validator: &Validator,
-    conn: &mut RedisPool,
-    difficulty: &u16,
+    validator: &Validator, conn: &mut RedisPool, difficulty: &u16,
 ) -> Result<Captcha, CaptchaError> {
     match validator {
         Validator::None => Ok(Captcha {
@@ -37,11 +33,7 @@ pub async fn generate_captcha(
 }
 
 pub async fn check_captcha(
-    validator: &Validator,
-    conn: &mut RedisPool,
-    difficulty: &u16,
-    id: &str,
-    answer: &str,
+    validator: &Validator, conn: &mut RedisPool, difficulty: &u16, id: &str, answer: &str,
 ) -> Result<bool, CaptchaError> {
     match validator {
         Validator::None => Ok(true),

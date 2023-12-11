@@ -1,5 +1,6 @@
 //! Authentication & Authorization middlewares.
-//!
+
+use std::sync::{atomic::AtomicBool, Arc};
 
 use axum::{
     extract::{Request, State},
@@ -13,7 +14,6 @@ use futures::TryFutureExt;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
-use std::sync::{atomic::AtomicBool, Arc};
 use tokio::sync::Mutex;
 use tracing::{debug, error};
 
@@ -77,10 +77,8 @@ async fn distribute_token(token: &Token, key: &str, expires_time: i64) -> String
 }
 
 pub async fn extract_user_info(
-    State(ref mut cache): State<RedisPool>,
-    config: Option<Extension<ConfigModel>>,
-    mut req: Request,
-    next: Next,
+    State(ref mut cache): State<RedisPool>, config: Option<Extension<ConfigModel>>,
+    mut req: Request, next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if let Some(Extension(config)) = config {
         let auth_config = config.auth;
@@ -161,7 +159,8 @@ pub async fn extract_user_info(
 
 /// Construct a middleware closure that validate permissions from token.
 ///
-/// all the permissions appeared here should be in the `permissions` field in user's token.
+/// all the permissions appeared here should be in the `permissions` field in
+/// user's token.
 ///
 /// Usage:
 ///
@@ -224,11 +223,8 @@ pub(crate) use permission_required_all;
 pub(crate) use permission_required_any;
 
 pub async fn init_token_or_permission_required(
-    State(config): State<GlobalConfig>,
-    Extension(token): Extension<Token>,
-    platform_info: Option<Extension<ConfigModel>>,
-    req: Request,
-    next: Next,
+    State(config): State<GlobalConfig>, Extension(token): Extension<Token>,
+    platform_info: Option<Extension<ConfigModel>>, req: Request, next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let init_token = req
         .headers()
@@ -260,12 +256,9 @@ pub async fn init_token_or_permission_required(
 /// Check if user has permission to access the challenge.
 /// ensure: `Extension<challenge::Model>` and `Extension<game::Model>` exists
 pub async fn challenge_privilege_required(
-    State(ref db): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    challenge: Option<Extension<challenge::Model>>,
-    game: Option<Extension<game::Model>>,
-    req: Request,
-    next: Next,
+    State(ref db): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    challenge: Option<Extension<challenge::Model>>, game: Option<Extension<game::Model>>,
+    req: Request, next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if challenge.is_none() {
         return Err((StatusCode::NOT_FOUND, "challenge not found"));
@@ -287,11 +280,8 @@ pub async fn challenge_privilege_required(
 /// Check if user has permission to take part in the game.
 /// ensure: `Extension<game::Model>` exists
 pub async fn game_participate_privilege_required(
-    State(ref db): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    Extension(game): Extension<game::Model>,
-    req: Request,
-    next: Next,
+    State(ref db): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    Extension(game): Extension<game::Model>, req: Request, next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // pass admin
     if pass_admin_for_game!(user.permissions.0) {
@@ -347,14 +337,11 @@ pub async fn game_participate_privilege_required(
     }
 }
 
-/// Check if user has permission to access the challenge and other verified resources in this game.
-/// ensure: `Extension<game::Model>` exists
+/// Check if user has permission to access the challenge and other verified
+/// resources in this game. ensure: `Extension<game::Model>` exists
 pub async fn game_player_privilege_required(
-    State(ref db): State<DatabaseConnection>,
-    Extension(user): Extension<user::Model>,
-    game: Option<Extension<game::Model>>,
-    req: Request,
-    next: Next,
+    State(ref db): State<DatabaseConnection>, Extension(user): Extension<user::Model>,
+    game: Option<Extension<game::Model>>, req: Request, next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if game.is_none() {
         return Err((StatusCode::NOT_FOUND, "game not found"));

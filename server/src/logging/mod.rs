@@ -1,13 +1,15 @@
 //! This module setup the logger of `tracing`.
 //!
-//! In the initialization stage, the log writer will be guarded by their file descriptor,
-//! the lifetime of the file descriptor is the same as the log writer. You should keep
-//! the file descriptor until application exit.
+//! In the initialization stage, the log writer will be guarded by their file
+//! descriptor, the lifetime of the file descriptor is the same as the log
+//! writer. You should keep the file descriptor until application exit.
 
-use crate::config::GlobalConfig;
 use std::path::Path;
+
 use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling};
 use tracing_subscriber::{fmt::Layer, prelude::*};
+
+use crate::config::GlobalConfig;
 
 /// Initialize the logger.
 pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<(WorkerGuard, WorkerGuard)> {

@@ -8,7 +8,8 @@ use tokio::{
 
 use crate::config::GlobalConfig;
 
-/// Reads a file containing sensitive words and returns a `BTreeSet` of those words.
+/// Reads a file containing sensitive words and returns a `BTreeSet` of those
+/// words.
 pub async fn read_sensitive_word_file(path: &str) -> anyhow::Result<BTreeSet<String>> {
     let mut set = BTreeSet::<String>::new();
     let f = File::open(path).await?;
@@ -32,7 +33,8 @@ pub async fn initialize(config: &GlobalConfig) -> anyhow::Result<AhoCorasick> {
     Ok(AhoCorasick::new(Vec::<String>::new())?)
 }
 
-/// Checks if a given text contains any sensitive words using the Aho-Corasick automaton.
+/// Checks if a given text contains any sensitive words using the Aho-Corasick
+/// automaton.
 #[allow(dead_code)]
 pub fn check_text(ac: &AhoCorasick, src: &str) -> bool {
     ac.find(

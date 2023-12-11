@@ -1,4 +1,5 @@
-//! This module loads the configuration from the file and provided them to other modules.
+//! This module loads the configuration from the file and provided them to other
+//! modules.
 //!
 //! # Configuration file
 //!
@@ -14,19 +15,20 @@
 //!
 //! # Management
 //!
-//! In previous Cyber Terminal implementations, the config file could be modified on-the-fly
-//! and the server will reload the configuration automatically. This affects the ability to
-//! implement cluster deployment and load balancing on the server, so we removed this
-//! feature on `ret2shell`. The configuration file will be readonly after the server started.
+//! In previous Cyber Terminal implementations, the config file could be
+//! modified on-the-fly and the server will reload the configuration
+//! automatically. This affects the ability to implement cluster deployment and
+//! load balancing on the server, so we removed this feature on `ret2shell`. The
+//! configuration file will be readonly after the server started.
 //!
-//! If you want to change the configuration, you should manually edit it through DevOps tools
-//! then restart the server.
+//! If you want to change the configuration, you should manually edit it through
+//! DevOps tools then restart the server.
 //!
-//! For convenience, we move some configurations into the database, so that you can still
-//! change them through the web interface.
-//!
-use serde::{Deserialize, Serialize};
+//! For convenience, we move some configurations into the database, so that you
+//! can still change them through the web interface.
 use std::path::Path;
+
+use serde::{Deserialize, Serialize};
 
 pub mod audit;
 pub mod bucket;
@@ -75,7 +77,8 @@ const CONFIG_PREDEFINED_FILE_NAME: &str = "config.toml";
 
 impl GlobalConfig {
     /// Load the GlobalConfig from a configuration file.
-    /// It searches for the configuration file in predefined paths and returns the loaded configuration.
+    /// It searches for the configuration file in predefined paths and returns
+    /// the loaded configuration.
     pub fn load() -> anyhow::Result<Self> {
         // load config str from predefined paths
         let mut config_str = String::new();

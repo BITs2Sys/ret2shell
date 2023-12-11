@@ -1,5 +1,4 @@
 use axum::async_trait;
-
 use redis::{
     cluster::{ClusterClient, ClusterClientBuilder},
     ErrorKind, IntoConnectionInfo, RedisError,
@@ -44,8 +43,9 @@ impl bb8::ManageConnection for RedisClusterConnectionManager {
         }
     }
 
-    /// Synchronously determine if the connection is no longer usable, if possible.
-    /// This implemention has no effect and always returns false, just for bb8 traits.
+    /// Synchronously determine if the connection is no longer usable, if
+    /// possible. This implemention has no effect and always returns false,
+    /// just for bb8 traits.
     fn has_broken(&self, _: &mut Self::Connection) -> bool {
         false
     }

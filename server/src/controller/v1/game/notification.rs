@@ -1,7 +1,3 @@
-use crate::{
-    controller::{layer::auth, GlobalState},
-    entity::{notification, user::Permission},
-};
 use axum::{
     extract::{Path, Query, State},
     middleware,
@@ -13,6 +9,11 @@ use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error};
+
+use crate::{
+    controller::{layer::auth, GlobalState},
+    entity::{notification, user::Permission},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -29,8 +30,7 @@ struct NotificationIDQuery {
 }
 
 async fn create_notification(
-    State(ref conn): State<DatabaseConnection>,
-    Path(game_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(game_id): Path<i64>,
     Json(notification): Json<notification::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("game_id={}", game_id);
@@ -60,8 +60,7 @@ struct NotificationList {
 }
 
 async fn get_notification_list(
-    State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<NotificationListQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(params): Query<NotificationListQuery>,
     Path(game_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
@@ -86,8 +85,7 @@ async fn get_notification_list(
 }
 
 async fn delete_notification(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<NotificationIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<NotificationIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let notification_id = query.notification_id;
     match notification::delete_notification(conn, notification_id).await {

@@ -1,7 +1,6 @@
 //! Provides dynamic challenge container service management for players.
 //!
 //! backend using kube and k3s.
-//!
 
 use kube::{
     config::{KubeConfigOptions, Kubeconfig},

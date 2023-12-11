@@ -83,8 +83,7 @@ pub async fn create_extra(conn: &DatabaseConnection, extra: Model) -> Result<(),
 }
 
 pub async fn get_extras_by_team_id(
-    conn: &DatabaseConnection,
-    team_id: i64,
+    conn: &DatabaseConnection, team_id: i64,
 ) -> Result<Vec<Model>, DbErr> {
     let extras = Entity::find()
         .filter(Column::TeamId.eq(team_id))

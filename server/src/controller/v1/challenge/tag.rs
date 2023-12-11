@@ -1,7 +1,3 @@
-use crate::{
-    controller::{layer::auth::permission_required_all, GlobalState},
-    entity::{tag, user::Permission},
-};
 use axum::{
     extract::{Path, State},
     middleware,
@@ -12,6 +8,11 @@ use axum::{
 use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use tracing::{error, warn};
+
+use crate::{
+    controller::{layer::auth::permission_required_all, GlobalState},
+    entity::{tag, user::Permission},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -36,8 +37,7 @@ async fn get_tag_list(
 }
 
 async fn create_tag(
-    State(ref conn): State<DatabaseConnection>,
-    Json(tag): Json<tag::Model>,
+    State(ref conn): State<DatabaseConnection>, Json(tag): Json<tag::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match tag::create_tag(conn, tag).await {
         Ok(_) => Ok(StatusCode::CREATED),
@@ -49,8 +49,7 @@ async fn create_tag(
 }
 
 async fn delete_tag(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match tag::delete_tag(conn, id).await {
         Ok(_) => Ok(StatusCode::OK),

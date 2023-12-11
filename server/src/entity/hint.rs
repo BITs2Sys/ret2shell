@@ -48,9 +48,7 @@ impl Related<super::extra::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn create_hint(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
-    hint: Model,
+    conn: &DatabaseConnection, challenge_id: i64, hint: Model,
 ) -> Result<(), DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
@@ -66,8 +64,7 @@ pub async fn delete_hint(conn: &DatabaseConnection, id: i64) -> Result<(), DbErr
 }
 
 pub async fn get_hint_list(
-    conn: &DatabaseConnection,
-    challenge_id: i64,
+    conn: &DatabaseConnection, challenge_id: i64,
 ) -> Result<Vec<Model>, DbErr> {
     let hints = Entity::find()
         .filter(Column::ChallengeId.eq(challenge_id))

@@ -1,14 +1,3 @@
-use crate::{
-    cache::manager::RedisPool,
-    config::GlobalConfig,
-    controller::GlobalState,
-    entity::{
-        config::Model as ConfigModel,
-        media::{create_media, Model as MediaModel},
-        user::Permission,
-    },
-    media::{self, get_media},
-};
 use axum::{
     body::Body,
     extract::{DefaultBodyLimit, Multipart, Path, Query, State},
@@ -24,7 +13,20 @@ use serde::{Deserialize, Serialize};
 use tokio_util::io::ReaderStream;
 use tracing::{error, warn};
 
-use crate::controller::layer::auth::{permission_required_all, Token};
+use crate::{
+    cache::manager::RedisPool,
+    config::GlobalConfig,
+    controller::{
+        layer::auth::{permission_required_all, Token},
+        GlobalState,
+    },
+    entity::{
+        config::Model as ConfigModel,
+        media::{create_media, Model as MediaModel},
+        user::Permission,
+    },
+    media::{self, get_media},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -49,12 +51,9 @@ struct UploadMediaResponse {
 }
 
 async fn upload_media(
-    State(config): State<GlobalConfig>,
-    State(ref conn): State<DatabaseConnection>,
-    State(ref _cache): State<RedisPool>,
-    Extension(token): Extension<Token>,
-    Extension(hot_config): Extension<ConfigModel>,
-    Query(query): Query<UploadMediaQuery>,
+    State(config): State<GlobalConfig>, State(ref conn): State<DatabaseConnection>,
+    State(ref _cache): State<RedisPool>, Extension(token): Extension<Token>,
+    Extension(hot_config): Extension<ConfigModel>, Query(query): Query<UploadMediaQuery>,
     multipart: Multipart,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let require_thumbnail = query.require_thumbnail.unwrap_or(false);
@@ -89,10 +88,8 @@ async fn upload_media(
 }
 
 async fn download_media(
-    State(config): State<GlobalConfig>,
-    Extension(hot_config): Extension<ConfigModel>,
-    Path(path): Path<String>,
-    TypedHeader(host): TypedHeader<Host>,
+    State(config): State<GlobalConfig>, Extension(hot_config): Extension<ConfigModel>,
+    Path(path): Path<String>, TypedHeader(host): TypedHeader<Host>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     // open localhost for local debugging
     if hot_config.media.anti_theft

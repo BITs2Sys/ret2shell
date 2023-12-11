@@ -1,4 +1,3 @@
-use crate::{config::GlobalConfig, entity::config::get_config};
 use async_nats::jetstream::{
     consumer::{pull::Config, Consumer, StreamError},
     context::PublishErrorKind,
@@ -18,6 +17,8 @@ use thiserror::Error;
 use tokio_stream::StreamExt;
 use tracing::{debug, error, info};
 
+use crate::{config::GlobalConfig, entity::config::get_config};
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Email {
     pub name: String,
@@ -26,20 +27,20 @@ pub struct Email {
     pub content: String,
 }
 
-/// Constructs an email message using the given `Email` struct and `CybertermConfig`.
+/// Constructs an email message using the given `Email` struct and
+/// `CybertermConfig`.
 ///
 /// # Arguments
 ///
 /// * `email` - A reference to an `Email` struct containing the email details.
-/// * `config` - A reference to a `CybertermConfig` containing the email configuration.
+/// * `config` - A reference to a `CybertermConfig` containing the email
+///   configuration.
 ///
 /// # Returns
 ///
 /// * A `Message` containing the constructed email.
 async fn construct_email(
-    email: &Email,
-    sender: impl AsRef<str>,
-    username: impl AsRef<str>,
+    email: &Email, sender: impl AsRef<str>, username: impl AsRef<str>,
 ) -> Message {
     Message::builder()
         .from(
@@ -58,9 +59,7 @@ async fn construct_email(
 }
 
 pub async fn initialize(
-    _config: &GlobalConfig,
-    db: &DatabaseConnection,
-    queue: &Context,
+    _config: &GlobalConfig, db: &DatabaseConnection, queue: &Context,
 ) -> anyhow::Result<()> {
     let stream = queue
         .get_or_create_stream(async_nats::jetstream::stream::Config {
@@ -102,8 +101,7 @@ pub enum EmailError {
 }
 
 async fn email_worker(
-    subscriber: Consumer<Config>,
-    db_conn: DatabaseConnection,
+    subscriber: Consumer<Config>, db_conn: DatabaseConnection,
 ) -> anyhow::Result<()> {
     let mut messages = subscriber
         .stream()
@@ -176,8 +174,7 @@ async fn send_email_impl(email: Email, db_conn: &DatabaseConnection) -> Result<(
 }
 
 pub async fn send_email(
-    email: &Email,
-    queue: &async_nats::jetstream::Context,
+    email: &Email, queue: &async_nats::jetstream::Context,
 ) -> Result<(), EmailError> {
     queue
         .publish("email".to_owned(), serde_json::to_vec(email)?.into())

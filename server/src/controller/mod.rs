@@ -1,6 +1,6 @@
 //! The controller, which is used to handle the HTTP requests.
-//!
-//!
+
+use std::{net::IpAddr, time::Duration};
 
 use axum::{
     body::Body,
@@ -12,7 +12,6 @@ use axum::{
     Router,
 };
 use sea_orm::DatabaseConnection;
-use std::{net::IpAddr, time::Duration};
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::TraceLayer,

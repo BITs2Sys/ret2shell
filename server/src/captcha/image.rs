@@ -10,8 +10,7 @@ pub struct ImageValidator;
 #[async_trait]
 impl CaptchaValidator for ImageValidator {
     async fn generate_captcha(
-        conn: &mut RedisPool,
-        difficulty: u16,
+        conn: &mut RedisPool, difficulty: u16,
     ) -> Result<Captcha, CaptchaError> {
         let (answer, challenge) = biosvg::BiosvgBuilder::new()
             .length(4)
@@ -39,10 +38,7 @@ impl CaptchaValidator for ImageValidator {
     }
 
     async fn check_captcha(
-        conn: &mut RedisPool,
-        _difficulty: u16,
-        id: &str,
-        answer: &str,
+        conn: &mut RedisPool, _difficulty: u16, id: &str, answer: &str,
     ) -> Result<bool, CaptchaError> {
         let criteria = cache::Captcha::get(conn, id).await?;
         Ok(criteria.trim().to_lowercase() == answer.trim().to_lowercase())

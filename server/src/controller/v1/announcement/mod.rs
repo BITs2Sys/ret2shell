@@ -1,4 +1,3 @@
-use crate::controller::layer::auth;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -12,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use tracing::error;
 
 use crate::{
-    controller::GlobalState,
+    controller::{layer::auth, GlobalState},
     entity::{
         announcement::{self, Model as AnnouncementModel},
         user::Permission,
@@ -46,8 +45,7 @@ struct AnnouncementList {
 }
 
 async fn get_announcement_list(
-    State(ref conn): State<DatabaseConnection>,
-    Query(params): Query<ListParams>,
+    State(ref conn): State<DatabaseConnection>, Query(params): Query<ListParams>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(10);
@@ -71,8 +69,7 @@ async fn get_announcement_list(
 }
 
 async fn get_announcement(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match announcement::get_announcement_by_id(conn, id).await {
         Ok(Some(announcement)) => Ok(Json(announcement)),
@@ -88,8 +85,7 @@ async fn get_announcement(
 }
 
 async fn create_announcement(
-    State(ref conn): State<DatabaseConnection>,
-    Json(data): Json<AnnouncementModel>,
+    State(ref conn): State<DatabaseConnection>, Json(data): Json<AnnouncementModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match announcement::create_announcement(conn, data.clone()).await {
         Ok(_) => Ok(StatusCode::CREATED),
@@ -106,12 +102,12 @@ async fn create_announcement(
     //     is_created: true,
     //     title: data.title,
     // };
-    // let _ = push_announcement_released_event(PusherEventLevel::Public, data, cache.pusher).await;
+    // let _ = push_announcement_released_event(PusherEventLevel::Public, data,
+    // cache.pusher).await;
 }
 
 async fn update_announcement(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
     Json(data): Json<AnnouncementModel>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match announcement::update_announcement(conn, id, data.clone()).await {
@@ -129,12 +125,12 @@ async fn update_announcement(
     //     is_created: false,
     //     title: data.title,
     // };
-    // let _ = push_announcement_released_event(PusherEventLevel::Public, data, cache.pusher).await;
+    // let _ = push_announcement_released_event(PusherEventLevel::Public, data,
+    // cache.pusher).await;
 }
 
 async fn delete_announcement(
-    State(ref conn): State<DatabaseConnection>,
-    Path(id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match announcement::delete_announcement(conn, id).await {
         Ok(_) => Ok(StatusCode::OK),

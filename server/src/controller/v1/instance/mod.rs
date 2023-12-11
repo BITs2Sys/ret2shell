@@ -10,15 +10,16 @@ use sea_orm::DatabaseConnection;
 use tracing::error;
 
 use crate::{
-    controller::GlobalState,
+    controller::{
+        layer::auth::{permission_required_all, Token},
+        GlobalState,
+    },
     entity::{
         instance::{get_instance_by_user_id, get_instance_by_wsrx},
         user::Permission,
     },
     traffic,
 };
-
-use crate::controller::layer::auth::{permission_required_all, Token};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -31,8 +32,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn get_self_running_instance(
-    State(ref db): State<DatabaseConnection>,
-    Extension(token): Extension<Token>,
+    State(ref db): State<DatabaseConnection>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let instance = get_instance_by_user_id(db, token.id)
         .await
@@ -48,8 +48,7 @@ async fn get_self_running_instance(
 }
 
 async fn start_proxy(
-    State(ref conn): State<DatabaseConnection>,
-    Path(instance): Path<String>,
+    State(ref conn): State<DatabaseConnection>, Path(instance): Path<String>,
     ws: Option<WebSocketUpgrade>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let inst = get_instance_by_wsrx(conn, &instance)

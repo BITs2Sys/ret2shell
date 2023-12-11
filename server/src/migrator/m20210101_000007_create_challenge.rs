@@ -52,7 +52,8 @@ impl MigrationTrait for Migration {
                             .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             // do not allow delete a game if it contains challenges
-                            // hidden it instead or delete all challenges to prevent dangling references
+                            // hidden it instead or delete all challenges to prevent dangling
+                            // references
                             .on_delete(ForeignKeyAction::Restrict),
                     )
                     .col(ColumnDef::new(Challenge::TagId).big_integer().not_null())

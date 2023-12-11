@@ -1,7 +1,3 @@
-use crate::{
-    controller::{layer::auth, GlobalState},
-    entity::{hint, user::Permission},
-};
 use axum::{
     extract::{Path, Query, State},
     middleware,
@@ -13,6 +9,11 @@ use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, DbErr};
 use serde::Deserialize;
 use tracing::error;
+
+use crate::{
+    controller::{layer::auth, GlobalState},
+    entity::{hint, user::Permission},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -34,8 +35,7 @@ struct HintIDQuery {
 }
 
 async fn create_hint(
-    State(ref conn): State<DatabaseConnection>,
-    Path(challenge_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(challenge_id): Path<i64>,
     Json(hint): Json<hint::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match hint::create_hint(conn, challenge_id, hint).await {
@@ -49,8 +49,7 @@ async fn create_hint(
 }
 
 async fn get_hint_list(
-    State(ref conn): State<DatabaseConnection>,
-    Path(challenge_id): Path<i64>,
+    State(ref conn): State<DatabaseConnection>, Path(challenge_id): Path<i64>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match hint::get_hint_list(conn, challenge_id).await {
         Ok(hints) => Ok(Json(hints)),
@@ -63,8 +62,7 @@ async fn get_hint_list(
 }
 
 async fn delete_hint(
-    State(ref conn): State<DatabaseConnection>,
-    Query(query): Query<HintIDQuery>,
+    State(ref conn): State<DatabaseConnection>, Query(query): Query<HintIDQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let hint_id = query.hint_id;
     match hint::delete_hint(conn, hint_id).await {

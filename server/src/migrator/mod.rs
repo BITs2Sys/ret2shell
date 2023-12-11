@@ -1,6 +1,4 @@
 //! Used to init the new database and migrate the database from old versions.
-//!
-//!
 
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use sea_orm_migration::prelude::*;

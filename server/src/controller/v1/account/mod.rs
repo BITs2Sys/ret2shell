@@ -1,5 +1,19 @@
 mod captcha;
 
+use async_nats::jetstream;
+use axum::{
+    extract::State,
+    http::StatusCode,
+    middleware,
+    response::IntoResponse,
+    routing::{patch, post},
+    Extension, Json, Router,
+};
+use nanoid::{alphabet, nanoid};
+use sea_orm::{DatabaseConnection, DbErr};
+use serde::{Deserialize, Serialize};
+use tracing::{debug, error, info, warn};
+
 use crate::{
     cache,
     cache::manager::RedisPool,
@@ -20,19 +34,6 @@ use crate::{
     },
     utility::hashing::{hash_password, verify_password},
 };
-use async_nats::jetstream;
-use axum::{
-    extract::State,
-    http::StatusCode,
-    middleware,
-    response::IntoResponse,
-    routing::{patch, post},
-    Extension, Json, Router,
-};
-use nanoid::{alphabet, nanoid};
-use sea_orm::{DatabaseConnection, DbErr};
-use serde::{Deserialize, Serialize};
-use tracing::{debug, error, info, warn};
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -65,12 +66,9 @@ struct LoginRequest {
 }
 
 async fn login(
-    State(ref db): State<DatabaseConnection>,
-    State(ref mut cache): State<RedisPool>,
-    Extension(config): Extension<ConfigModel>,
-    Extension(token): Extension<Token>,
-    Extension(token_tracker): Extension<TokenTracker>,
-    Json(body): Json<LoginRequest>,
+    State(ref db): State<DatabaseConnection>, State(ref mut cache): State<RedisPool>,
+    Extension(config): Extension<ConfigModel>, Extension(token): Extension<Token>,
+    Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("login request: {:?}", body);
     if token.id >= 0 {
@@ -152,12 +150,9 @@ struct RegisterRequest {
 }
 
 async fn register(
-    State(ref db): State<DatabaseConnection>,
-    State(ref mut cache): State<RedisPool>,
-    State(ref queue): State<jetstream::Context>,
-    State(global_config): State<GlobalConfig>,
-    Extension(config): Extension<ConfigModel>,
-    Extension(token_tracker): Extension<TokenTracker>,
+    State(ref db): State<DatabaseConnection>, State(ref mut cache): State<RedisPool>,
+    State(ref queue): State<jetstream::Context>, State(global_config): State<GlobalConfig>,
+    Extension(config): Extension<ConfigModel>, Extension(token_tracker): Extension<TokenTracker>,
     Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("register request: {:?}", body);
@@ -279,8 +274,7 @@ async fn register(
 }
 
 async fn logout(
-    State(ref mut cache): State<RedisPool>,
-    Extension(token): Extension<Token>,
+    State(ref mut cache): State<RedisPool>, Extension(token): Extension<Token>,
     Extension(token_tracker): Extension<TokenTracker>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     debug!("logout request");
@@ -301,8 +295,7 @@ async fn logout(
 }
 
 async fn update_self_setting(
-    State(ref conn): State<DatabaseConnection>,
-    Extension(op_user): Extension<user::Model>,
+    State(ref conn): State<DatabaseConnection>, Extension(op_user): Extension<user::Model>,
     Json(data): Json<user::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     match user::update_self_profile(conn, op_user.id, data).await {
@@ -326,12 +319,9 @@ struct ChangePasswordRequest {
 }
 
 async fn change_password(
-    State(ref conn): State<DatabaseConnection>,
-    State(ref mut cache): State<RedisPool>,
-    Extension(config): Extension<ConfigModel>,
-    Extension(token_tracker): Extension<TokenTracker>,
-    Extension(user): Extension<user::Model>,
-    Json(body): Json<ChangePasswordRequest>,
+    State(ref conn): State<DatabaseConnection>, State(ref mut cache): State<RedisPool>,
+    Extension(config): Extension<ConfigModel>, Extension(token_tracker): Extension<TokenTracker>,
+    Extension(user): Extension<user::Model>, Json(body): Json<ChangePasswordRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let captcha_config = &config.captcha;
     captcha_protected!(
@@ -392,12 +382,9 @@ struct ResetEmailRequest {
 }
 
 async fn send_reset_email(
-    State(ref mut cache): State<RedisPool>,
-    State(ref conn): State<DatabaseConnection>,
-    State(ref queue): State<jetstream::Context>,
-    State(global_config): State<GlobalConfig>,
-    Extension(config): Extension<ConfigModel>,
-    Json(body): Json<ResetEmailRequest>,
+    State(ref mut cache): State<RedisPool>, State(ref conn): State<DatabaseConnection>,
+    State(ref queue): State<jetstream::Context>, State(global_config): State<GlobalConfig>,
+    Extension(config): Extension<ConfigModel>, Json(body): Json<ResetEmailRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let captcha_config = &config.captcha;
     captcha_protected!(
@@ -491,10 +478,8 @@ struct ResetPasswordRequest {
 }
 
 async fn reset_password(
-    State(ref mut cache): State<RedisPool>,
-    State(ref conn): State<DatabaseConnection>,
-    Extension(config): Extension<ConfigModel>,
-    Extension(token_tracker): Extension<TokenTracker>,
+    State(ref mut cache): State<RedisPool>, State(ref conn): State<DatabaseConnection>,
+    Extension(config): Extension<ConfigModel>, Extension(token_tracker): Extension<TokenTracker>,
     Json(body): Json<ResetPasswordRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let captcha_config = &config.captcha;
@@ -562,10 +547,8 @@ async fn reset_password(
 }
 
 async fn resend_verification_email(
-    State(ref mut cache): State<RedisPool>,
-    State(global_config): State<GlobalConfig>,
-    State(ref queue): State<jetstream::Context>,
-    Extension(config): Extension<ConfigModel>,
+    State(ref mut cache): State<RedisPool>, State(global_config): State<GlobalConfig>,
+    State(ref queue): State<jetstream::Context>, Extension(config): Extension<ConfigModel>,
     Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     if user.permissions.0.contains(&Permission::Verified) {
@@ -645,10 +628,8 @@ struct VerifyEmailRequest {
 }
 
 async fn verify_email(
-    State(ref mut cache): State<RedisPool>,
-    State(ref conn): State<DatabaseConnection>,
-    Extension(token_tracker): Extension<TokenTracker>,
-    Json(body): Json<VerifyEmailRequest>,
+    State(ref mut cache): State<RedisPool>, State(ref conn): State<DatabaseConnection>,
+    Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<VerifyEmailRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let checked_email = match cache::Email::check_validation(cache, &body.token).await {
         Ok(Some(email)) => email,
@@ -722,8 +703,7 @@ async fn verify_email(
 }
 
 async fn delete_self(
-    State(ref conn): State<DatabaseConnection>,
-    State(ref mut cache): State<RedisPool>,
+    State(ref conn): State<DatabaseConnection>, State(ref mut cache): State<RedisPool>,
     Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let mut user = user::get_user(conn, token.id).await.map_err(|err| {
