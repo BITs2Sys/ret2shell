@@ -31,6 +31,7 @@ mod config;
 mod controller;
 mod email;
 mod entity;
+mod license;
 mod logging;
 mod media;
 mod migrator;
@@ -124,6 +125,20 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     warn!(">> Server initialization started <<");
     // debug!("LOGGER TEST: DEBUG MESSAGE");
 
+    let license = match license::check_license() {
+        Ok(license) => license,
+        Err(err) => {
+            error!("License check failed: {}", err.to_string().red());
+            error!("Please contact tech support <ret2shell@woooo.tech>.");
+            return Err(err.into());
+        }
+    };
+
+    info!(
+        "Licensed to {} ({}), will expire at {}",
+        license.issuer, license.website, license.date
+    );
+
     info!("Loading module: < Audit >");
     let auditor = audit::initialize(&config).await?;
     info!("Loading module: < Database >");
@@ -143,6 +158,7 @@ async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         cache,
         queue,
         cluster,
+        license,
     };
     let router = controller::initialize(&config, state).await?;
     info!("Router constructed.");

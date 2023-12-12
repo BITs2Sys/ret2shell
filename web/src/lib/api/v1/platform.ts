@@ -32,3 +32,11 @@ export async function getPlatformStat() {
 export async function getPlatformClusterInfo() {
   return (await api.get(`${api_root}/v1/platform/cluster`)).data as ClusterInfo
 }
+
+export async function getPlatformLicense() {
+  return (await api.get(`${api_root}/v1/platform/license`)).data as {
+    issuer: string
+    website: string
+    date: string
+  }
+}

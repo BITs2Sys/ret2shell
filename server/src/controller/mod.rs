@@ -18,7 +18,7 @@ use tower_http::{
 };
 use tracing::{info, Span};
 
-use crate::{audit::Auditor, cache::manager::RedisPool, config::GlobalConfig};
+use crate::{audit::Auditor, cache::manager::RedisPool, config::GlobalConfig, license::License};
 
 mod layer;
 mod v1;
@@ -36,6 +36,7 @@ pub struct GlobalState {
     pub auditor: Auditor,
     pub queue: async_nats::jetstream::Context,
     pub cluster: kube::Client,
+    pub license: License,
 }
 
 pub async fn initialize(config: &GlobalConfig, state: GlobalState) -> anyhow::Result<Router> {

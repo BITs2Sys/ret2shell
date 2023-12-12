@@ -19,3 +19,4 @@ data/*
 !data/.gitkeep
 
 config/config.toml
+config/license

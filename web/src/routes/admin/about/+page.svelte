@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getPlatformVersion } from '$lib/api/v1/platform'
+  import { getPlatformLicense, getPlatformVersion } from '$lib/api/v1/platform'
   import LogoFull from '$lib/assets/logo-full.svg'
   import RxTag from '$lib/components/RxTag.svelte'
   import { i18n } from '$lib/i18n'
@@ -10,9 +10,23 @@
   let version = ''
 
   getPlatformVersion()
-    .then((res) => {
-      version = res
+    .then((res) => (version = res))
+    .catch((err) => {
+      showMessage(
+        'error',
+        $i18n.t('platform.failedToFetchPlatformVersion') + ': ' + (err as AxiosError).response?.data,
+        5000
+      )
     })
+
+  let license = {
+    issuer: '',
+    date: '',
+    website: '',
+  }
+
+  getPlatformLicense()
+    .then((res) => (license = res))
     .catch((err) => {
       showMessage(
         'error',
@@ -30,13 +44,21 @@
     <img src={LogoFull} width={480} alt="" />
   </h1>
   <h2 class="font-bold text-xl">Version {version.replace('*', '')}</h2>
+  <div class="flex flex-row items-center space-x-2 bg-info/10 p-4 rounded-lg backdrop-blur w-full">
+    <span class="icon-[fluent--document-ribbon-20-regular] w-5 h-5 text-success flex-shrink-0" />
+    <span>
+      Licensed to <a class="hover:underline" href="https://{license.website}">{license.issuer}</a>
+      &lt;{license.website}&gt;, will expire at {license.date}
+    </span>
+  </div>
   {#if isDevVersion}
     <div class="flex flex-row items-center space-x-2 bg-warning/10 p-4 rounded-lg backdrop-blur w-full">
       <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning flex-shrink-0" />
       <span>
         {$i18n.t('about.devVersionWarning')}
       </span>
-    </div>{/if}
+    </div>
+  {/if}
   <div class="divider"></div>
   <h2 class="opacity-80 text-base font-bold">CONTRIBUTORS</h2>
   <div class="flex flex-row flex-wrap">

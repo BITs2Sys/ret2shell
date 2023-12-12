@@ -1,4 +1,4 @@
 [workspace]
-members = ['server']
+members = ['server', 'keygen']
 default-members = ['server']
 resolver = "2"

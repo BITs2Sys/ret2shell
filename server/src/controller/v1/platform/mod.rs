@@ -26,6 +26,7 @@ use crate::{
         config::{self, Model as ConfigModel},
         user::Permission,
     },
+    license::License,
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -45,6 +46,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             Router::new()
                 .route("/cluster", get(get_cluster_stat))
                 .route("/stat", get(get_platform_stat))
+                .route("/license", get(get_license))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::Devops
                 ))),
@@ -273,6 +275,12 @@ async fn get_cluster_stat(
         nodes,
         configs,
     }))
+}
+
+async fn get_license(
+    State(license): State<License>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    Ok(Json(license))
 }
 
 #[cfg(test)]

@@ -99,7 +99,7 @@ impl GlobalConfig {
                 Err(_) => continue,
             }
         }
-        if file_path.is_empty() {
+        if file_path.is_empty() || config_str.is_empty() {
             return Err(anyhow::anyhow!("No config file found"));
         }
         // load config from config str
