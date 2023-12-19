@@ -12,7 +12,6 @@ use sanitizer::StringSanitizer;
 ///
 /// It maybe slow due to a huge map lookup, so plz do not use it with a long
 /// input.
-#[allow(dead_code)]
 pub fn deunicode_str(s: impl AsRef<str>) -> String {
     let mut sanitizer = StringSanitizer::from(deunicode_with_tofu(s.as_ref(), "_"));
     sanitizer.trim().to_snake_case();
