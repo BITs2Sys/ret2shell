@@ -257,7 +257,7 @@
     <div id="info-stack" class="flex flex-col overflow-x-hidden">
       <div class="border-b border-b-base-content/10 flex flex-row h-16 overflow-hidden bg-neutral/20 backdrop-blur">
         <div class="sticky left-0 p-2 flex-shrink-0 z-20">
-          <RxLink ghost active={activeChallenge === null} href="#">
+          <RxLink ghost active={activeChallenge === null} href="">
             <span class="w-5 h-5 icon-[fluent--pin-20-regular]" />
             <span>
               {$i18n.t('playground.gameIntro')}

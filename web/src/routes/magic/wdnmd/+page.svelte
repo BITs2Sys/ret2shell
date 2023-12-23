@@ -98,7 +98,8 @@
       fullExpr = `${exprs[prevClickIndex]} >= ${exprs[index]} && ${exprs[prevClickIndex]} <= ${exprs[index]}`
     } else fullExpr = `${exprs[prevClickIndex]} ${operator} ${exprs[index]}`
     // console.log(fullExpr)
-    if (eval(fullExpr) === true) {
+    let func = Function(`return ${fullExpr}`)
+    if (func() === true) {
       score += combo + 1
       combo++
       resetColRow(prevClickIndex)

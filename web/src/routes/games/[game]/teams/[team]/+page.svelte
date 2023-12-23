@@ -285,9 +285,9 @@
           <div class="flex-1 flex flex-col p-4">
             <div class="h-12 border-b border-b-base-content/5 flex flex-row items-center px-4 space-x-2">
               <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-error"></span>
-              <a class="hover:underline font-bold" href="#">
+              <span class="font-bold">
                 {team?.name}
-              </a>
+              </span>
               <RxTag class="m-0"><span>{$i18n.t('game.currentRank')} #{rank}</span></RxTag>
               <div class="flex-1"></div>
               <span class="font-bold">
