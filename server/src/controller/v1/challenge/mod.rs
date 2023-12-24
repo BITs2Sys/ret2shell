@@ -72,6 +72,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route("/", patch(update_challenge).delete(delete_challenge))
                 .route("/statistics", get(get_challenge_statistics))
                 .nest("/workflow", workflow::router(state))
+                .nest("/repo", repo::router(state))
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Organize,
                     Permission::Devops
@@ -98,10 +99,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 ))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::Verified
-                )))
-                // * note: this repo router should be inside admin layer, but platform auto sync feature requires custom token validation,
-                // * so we put it here, and do permission check inside the router.
-                .nest("/repo", repo::router(state)),
+                ))),
         )
 }
 

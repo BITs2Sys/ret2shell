@@ -239,7 +239,7 @@ impl PoolLike for ClusteredRedisPool {
 }
 
 pub async fn new_redis_pool(
-    nodes: &Vec<String>, max_connections: u16,
+    nodes: &[String], max_connections: u16,
 ) -> Result<RedisPool, RedisError> {
     match nodes.len() {
         0 => Err(RedisError::from((

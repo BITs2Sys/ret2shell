@@ -54,7 +54,7 @@ pub fn check_license() -> Result<License, LicenseError> {
     if file_path.is_empty() || config_str.is_empty() {
         return Err(LicenseError::Missing);
     }
-    let (cert, sig) = config_str.split_once(".").ok_or(LicenseError::Invalid)?;
+    let (cert, sig) = config_str.split_once('.').ok_or(LicenseError::Invalid)?;
     let cert = base64::engine::general_purpose::STANDARD
         .decode(cert)
         .map_err(|_| LicenseError::Invalid)?;

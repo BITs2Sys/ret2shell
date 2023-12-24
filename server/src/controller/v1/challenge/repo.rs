@@ -1,6 +1,5 @@
 use axum::{
     extract::{Multipart, Query, State},
-    middleware,
     response::IntoResponse,
     routing::get,
     Extension, Json, Router,
@@ -9,12 +8,7 @@ use hyper::StatusCode;
 use serde::Deserialize;
 use tracing::error;
 
-use crate::{
-    bucket,
-    config::GlobalConfig,
-    controller::{layer::auth, GlobalState},
-    entity::{challenge, user::Permission},
-};
+use crate::{bucket, config::GlobalConfig, controller::GlobalState, entity::challenge};
 
 /*
  * Repo router
@@ -27,11 +21,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         "/",
         get(get_file_list)
             .post(upload_attachment)
-            .delete(delete_attachment)
-            .route_layer(middleware::from_fn(auth::permission_required_any!(
-                Permission::Organize,
-                Permission::Devops
-            ))),
+            .delete(delete_attachment),
     )
 }
 
@@ -47,7 +37,7 @@ async fn get_file_list(
                 "failed to get static attachment list",
             )
         })?;
-    return Ok(Json(files));
+    Ok(Json(files))
 }
 
 async fn upload_attachment(

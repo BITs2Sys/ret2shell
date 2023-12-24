@@ -108,7 +108,7 @@ fn greet() {
                 fallback = "unknown"
             )
             .to_uppercase(),
-            version().unwrap().to_string()
+            version().unwrap()
         )
         .dimmed()
     );

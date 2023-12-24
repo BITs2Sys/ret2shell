@@ -1,5 +1,4 @@
 //! Bucket module
-//!
 
 // TODO: should implement dynamic attachments feature in right way.
 
@@ -58,7 +57,7 @@ pub async fn init_challenge_bucket(
         tokio::fs::create_dir_all(&bucket_path).await?;
         tokio::fs::create_dir_all(&bucket_path.join("static")).await?;
         // tokio::fs::create_dir_all(&bucket_path.join("dynamic")).await?;
-        Database::create(&bucket_path.join("files.db")).map_err(|e| RedbError::from(e))?;
+        Database::create(bucket_path.join("files.db")).map_err(RedbError::from)?;
     }
     Ok(challenge::Model {
         bucket: Some(bucket_name),
@@ -74,7 +73,7 @@ pub struct AttachmentMeta {
 
 impl PartialOrd for AttachmentMeta {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.hash.partial_cmp(&other.hash)
+        Some(self.cmp(other))
     }
 }
 
@@ -102,7 +101,7 @@ macro_rules! check_bucket_db {
             return Err(BucketError::BucketNotInitialized);
         };
         let db_path = bucket_path.join(&challenge_folder).join("files.db");
-        let db = Database::open(&db_path).map_err(|e| RedbError::from(e))?;
+        let db = Database::open(&db_path).map_err(RedbError::from)?;
         let bucket_path = bucket_path.join(&challenge_folder).join($t);
         if !bucket_path.exists() {
             return Err(BucketError::BucketNotInitialized);
@@ -137,16 +136,16 @@ pub async fn upload_static_attachment(
             name: filename.clone(),
             hash: hash.clone(),
         };
-        let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
+        let write_txn = db.begin_write().map_err(RedbError::from)?;
         {
             let mut table = write_txn
                 .open_table(FILES_HASH_TABLE)
-                .map_err(|e| RedbError::from(e))?;
+                .map_err(RedbError::from)?;
             table
                 .insert(&*hash, &*format!("static/{hash}"))
-                .map_err(|e| RedbError::from(e))?;
+                .map_err(RedbError::from)?;
         }
-        write_txn.commit().map_err(|e| RedbError::from(e))?;
+        write_txn.commit().map_err(RedbError::from)?;
         tokio::fs::write(format!("{filename}.meta"), serde_json::to_string(&meta)?).await?;
     }
 
@@ -173,11 +172,11 @@ pub async fn upload_static_attachment(
 //     let mut ok = true;
 //     let mut flag_files = Vec::new();
 //     let mut attachment_files = Vec::new();
-//     let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
+//     let write_txn = db.begin_write().map_err(RedbError::from)?;
 //     {
 //         let mut table = write_txn
 //             .open_table(FILES_HASH_TABLE)
-//             .map_err(|e| RedbError::from(e))?;
+//             .map_err(RedbError::from)?;
 //         while let Some(mut will_send) = req.next_field().await? {
 //             let filename = will_send
 //                 .file_name()
@@ -203,24 +202,25 @@ pub async fn upload_static_attachment(
 //                 {
 //                     table
 //                         .insert(&*hash, &*format!("dynamic/{filename}"))
-//                         .map_err(|e| RedbError::from(e))?;
+//                         .map_err(RedbError::from)?;
 //                 }
-//                 tokio::fs::write(format!("{filename}.meta"), serde_json::to_string(&meta)?).await?;
-//             }
+//                 tokio::fs::write(format!("{filename}.meta"),
+// serde_json::to_string(&meta)?).await?;             }
 //         }
 //         for attachment in attachment_files {
 //             if !flag_files.contains(&format!("{}.flag", attachment.name)) {
-//                 tokio::fs::remove_file(&bucket_path.join(&attachment.name)).await?;
-//                 tokio::fs::remove_file(&bucket_path.join(&format!("{}.meta", attachment.name)))
-//                     .await?;
+//
+// tokio::fs::remove_file(&bucket_path.join(&attachment.name)).await?;
+//                 tokio::fs::remove_file(&bucket_path.join(&format!("{}.meta",
+// attachment.name)))                     .await?;
 //                 table
 //                     .remove(&*attachment.hash)
-//                     .map_err(|e| RedbError::from(e))?;
+//                     .map_err(RedbError::from)?;
 //                 ok = false;
 //             }
 //         }
 //     }
-//     write_txn.commit().map_err(|e| RedbError::from(e))?;
+//     write_txn.commit().map_err(RedbError::from)?;
 //     if ok {
 //         Ok(())
 //     } else {
@@ -260,7 +260,8 @@ pub async fn get_static_attachment_list(
 //     while let Some(entry) = files.next_entry().await? {
 //         if entry.path().extension().unwrap_or_default() == "meta" {
 //             let meta: AttachmentMeta = serde_json::from_str(
-//                 &tokio::fs::read_to_string(entry.path().to_str().unwrap_or_default()).await?,
+//
+// &tokio::fs::read_to_string(entry.path().to_str().unwrap_or_default()).await?,
 //             )?;
 //             if meta.name.starts_with(&user_id.to_string()) {
 //                 result.push(meta);
@@ -281,13 +282,13 @@ pub async fn get_file_by_hash(
 ) -> Result<(AttachmentMeta, File), BucketError> {
     let (db, bucket_path) = check_bucket_db!("", config, challenge);
 
-    let read_txn = db.begin_read().map_err(|e| RedbError::from(e))?;
+    let read_txn = db.begin_read().map_err(RedbError::from)?;
     let table = read_txn
         .open_table(FILES_HASH_TABLE)
-        .map_err(|e| RedbError::from(e))?;
+        .map_err(RedbError::from)?;
     let path = table
-        .get(&*hash)
-        .map_err(|e| RedbError::from(e))?
+        .get(hash)
+        .map_err(RedbError::from)?
         .ok_or(BucketError::FileNotFound)?;
     let full_path = bucket_path.join(path.value());
     let meta: AttachmentMeta = serde_json::from_str(
@@ -300,14 +301,14 @@ pub async fn get_file_by_hash(
         .await?,
     )?;
     if !full_path.exists() {
-        let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
+        let write_txn = db.begin_write().map_err(RedbError::from)?;
         {
             let mut table = write_txn
                 .open_table(FILES_HASH_TABLE)
-                .map_err(|e| RedbError::from(e))?;
-            table.remove(&*hash).map_err(|e| RedbError::from(e))?;
+                .map_err(RedbError::from)?;
+            table.remove(hash).map_err(RedbError::from)?;
         }
-        write_txn.commit().map_err(|e| RedbError::from(e))?;
+        write_txn.commit().map_err(RedbError::from)?;
         return Err(BucketError::FileNotFound);
     }
     let file = File::open(full_path).await?;
@@ -322,20 +323,20 @@ pub async fn delete_file_by_hash(
 
     let rel_path;
 
-    let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
+    let write_txn = db.begin_write().map_err(RedbError::from)?;
     {
         let mut table = write_txn
             .open_table(FILES_HASH_TABLE)
-            .map_err(|e| RedbError::from(e))?;
+            .map_err(RedbError::from)?;
         rel_path = table
-            .get(&*hash)
-            .map_err(|e| RedbError::from(e))?
+            .get(hash)
+            .map_err(RedbError::from)?
             .ok_or(BucketError::FileNotFound)?
             .value()
             .to_owned();
-        table.remove(&*hash).map_err(|e| RedbError::from(e))?;
+        table.remove(hash).map_err(RedbError::from)?;
     }
-    write_txn.commit().map_err(|e| RedbError::from(e))?;
+    write_txn.commit().map_err(RedbError::from)?;
 
     let full_path = bucket_path.join(rel_path);
     tokio::fs::remove_file(&full_path).await?;

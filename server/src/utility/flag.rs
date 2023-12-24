@@ -86,7 +86,7 @@ static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
 
 const DELTA: u32 = 0x9E3779B9;
 
-fn to_bytes(v: &Vec<u32>, include_length: bool) -> Vec<u8> {
+fn to_bytes(v: &[u32], include_length: bool) -> Vec<u8> {
     let length: u32 = v.len() as u32;
     let mut n: u32 = length << 2;
     if include_length {
@@ -102,7 +102,7 @@ fn to_bytes(v: &Vec<u32>, include_length: bool) -> Vec<u8> {
     bytes
 }
 
-fn to_u32(bytes: &Vec<u8>, include_length: bool) -> Vec<u32> {
+fn to_u32(bytes: &[u8], include_length: bool) -> Vec<u32> {
     let length: u32 = bytes.len() as u32;
     let mut n: u32 = length >> 2;
     if length & 3 != 0 {
@@ -137,7 +137,7 @@ fn fixk(k: &[u32]) -> Vec<u32> {
     key
 }
 
-fn encrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
+fn encrypt_(v: &mut [u32], k: &[u32]) -> Vec<u32> {
     let length: u32 = v.len() as u32;
     let n: u32 = length - 1;
     let key: Vec<u32> = fixk(k);
@@ -159,10 +159,10 @@ fn encrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
         z = v[n as usize];
         q -= 1;
     }
-    v.clone()
+    v.to_owned()
 }
 
-fn decrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
+fn decrypt_(v: &mut [u32], k: &[u32]) -> Vec<u32> {
     let length: u32 = v.len() as u32;
     let n: u32 = length - 1;
     let key: Vec<u32> = fixk(k);
@@ -185,7 +185,7 @@ fn decrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
         y = v[0];
         sum = sum.wrapping_sub(DELTA);
     }
-    v.clone()
+    v.to_owned()
 }
 
 /// Encrypt a u8 vector with XXTEA
@@ -210,10 +210,10 @@ fn decrypt_(v: &mut Vec<u32>, k: &[u32]) -> Vec<u32> {
 /// // encrypted data will be 8 bytes (3 zeroes appended to the end)
 /// println!("Encrypted data: {:?}", encrypted_data);
 /// ```
-pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
-    let key = key.bytes().collect();
+pub fn encrypt_raw(data: &[u8], key: &str) -> Vec<u8> {
+    let key = key.as_bytes();
     to_bytes(
-        &encrypt_(&mut to_u32(data, false), &to_u32(&key, false)),
+        &encrypt_(&mut to_u32(data, false), &to_u32(key, false)),
         false,
     )
 }
@@ -237,10 +237,10 @@ pub fn encrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
 /// let decrypted_data = xxtea::decrypt_raw(&data.to_vec(), &key);
 /// println!("Decrypted data: {:?}", decrypted_data);
 /// ```
-pub fn decrypt_raw(data: &Vec<u8>, key: &str) -> Vec<u8> {
-    let key = key.bytes().collect();
+pub fn decrypt_raw(data: &[u8], key: &str) -> Vec<u8> {
+    let key = key.as_bytes();
     to_bytes(
-        &decrypt_(&mut to_u32(data, false), &to_u32(&key, false)),
+        &decrypt_(&mut to_u32(data, false), &to_u32(key, false)),
         false,
     )
 }
