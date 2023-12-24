@@ -1,17 +1,21 @@
 // use crate::utility::string::deunicode_str;
 use axum::{
+    body::Body,
     extract::{Path, Query, State},
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
     Extension, Json, Router,
 };
-use hyper::StatusCode;
+use hyper::{HeaderMap, StatusCode};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
+use tokio_util::io::ReaderStream;
 use tracing::error;
 
 use crate::{
+    bucket,
+    config::GlobalConfig,
     controller::{
         layer::{auth, info},
         GlobalState,
@@ -68,7 +72,6 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route("/", patch(update_challenge).delete(delete_challenge))
                 .route("/statistics", get(get_challenge_statistics))
                 .nest("/workflow", workflow::router(state))
-                .nest("/repo", repo::router(state))
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Organize,
                     Permission::Devops
@@ -95,7 +98,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 ))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::Verified
-                ))),
+                )))
+                // * note: this repo router should be inside admin layer, but platform auto sync feature requires custom token validation,
+                // * so we put it here, and do permission check inside the router.
+                .nest("/repo", repo::router(state)),
         )
 }
 
@@ -167,10 +173,8 @@ async fn get_solved_team_list(
 }
 
 async fn create_challenge(
-    // State(config): State<GlobalState>,
-    State(ref conn): State<DatabaseConnection>,
-    Query(game_query): Query<GameIDQuery>,
-    Json(mut challenge): Json<challenge::Model>,
+    State(config): State<GlobalConfig>, State(ref conn): State<DatabaseConnection>,
+    Query(game_query): Query<GameIDQuery>, Json(mut challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     challenge.game_id = game_query.game_id;
     let created_challenge = match challenge::create_challenge(conn, challenge).await {
@@ -183,32 +187,26 @@ async fn create_challenge(
             ));
         }
     };
-    // TODO: there may exists a same name challenge in the same game
-    // Should valid?
-    // created_challenge.bucket = Some(format!(
-    //     "{}_{}",
-    //     created_challenge.id,
-    //     deunicode_str(&created_challenge.name)
-    // ));
-    // Bucket::initialize(config.config.bucket.path, &created_challenge)
-    //     .await
-    //     .map_err(|err| {
-    //         error!("failed to init challenge bucket: {}", err);
-    //         (
-    //             StatusCode::INTERNAL_SERVER_ERROR,
-    //             "failed to init challenge bucket",
-    //         )
-    //     })?;
 
-    // challenge::update_challenge_bucket(conn, created_challenge.id,
-    // &created_challenge)     .await
-    //     .map_err(|err| {
-    //         error!("failed to update challenge bucket: {}", err);
-    //         (
-    //             StatusCode::INTERNAL_SERVER_ERROR,
-    //             "failed to update challenge bucket",
-    //         )
-    //     })?;
+    let created_challenge = bucket::init_challenge_bucket(&config, &created_challenge)
+        .await
+        .map_err(|err| {
+            error!("failed to init challenge bucket: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to init challenge bucket",
+            )
+        })?;
+
+    challenge::update_challenge_bucket(conn, created_challenge.id, &created_challenge)
+        .await
+        .map_err(|err| {
+            error!("failed to update challenge bucket: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to update challenge bucket",
+            )
+        })?;
 
     Ok(Json(created_challenge))
 }
@@ -318,8 +316,57 @@ async fn get_challenge_info(
     Ok(Json(challenge))
 }
 
-async fn download_challenge_attachment() -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    Ok(Json("to be implemented"))
+#[derive(Deserialize, Clone, Debug)]
+struct AttachmentQuery {
+    pub file: Option<String>,
+}
+
+async fn download_challenge_attachment(
+    State(config): State<GlobalConfig>, Extension(challenge): Extension<challenge::Model>,
+    Query(params): Query<AttachmentQuery>,
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    let Some(hash) = params.file else {
+        let files = bucket::get_static_attachment_list(&config, &challenge)
+            .await
+            .map_err(|err| {
+                error!("failed to get static attachment list: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to get static attachment list",
+                )
+            })?;
+        if files.len() != 1 {
+            return Err((StatusCode::BAD_REQUEST, "invalid file parameter"));
+        }
+        return Ok(Json(files).into_response());
+    };
+    let (meta, file) = bucket::get_file_by_hash(&config, &challenge, &hash)
+        .await
+        .map_err(|err| {
+            error!("failed to get file by hash: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to get file by hash",
+            )
+        })?;
+    let stream = ReaderStream::new(file);
+    let body = Body::from_stream(stream);
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "Content-Disposition",
+        format!("attachment; filename={}", meta.name)
+            .parse()
+            .map_err(|err| {
+                error!("failed to parse content disposition: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to parse content disposition",
+                )
+            })?,
+    );
+    let response = (StatusCode::OK, headers, body).into_response();
+
+    Ok(response)
 }
 
 #[derive(Serialize)]

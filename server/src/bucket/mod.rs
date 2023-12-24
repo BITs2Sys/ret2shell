@@ -1,7 +1,11 @@
+//! Bucket module
+//!
+
+// TODO: should implement dynamic attachments feature in right way.
+
 use std::path::PathBuf;
 
 use axum::extract::{multipart::MultipartError, Multipart};
-use num::Integer;
 use redb::{Database, Error as RedbError, ReadableTable, TableDefinition};
 use ring::digest::{Context, SHA256};
 use serde::{Deserialize, Serialize};
@@ -20,8 +24,6 @@ pub enum BucketError {
     BucketDirNotExist,
     #[error("Bucket is not initialized")]
     BucketNotInitialized,
-    #[error("file does not have a name")]
-    NoFileName,
     #[error("failed to extract file info from request")]
     ExtractError(#[from] MultipartError),
     #[error("serde error: {0}")]
@@ -30,8 +32,8 @@ pub enum BucketError {
     FileNotFound,
     #[error("redb error: {0}")]
     RedbError(#[from] RedbError),
-    #[error("particial files upload failed")]
-    ParticialUploadFailed,
+    // #[error("particial files upload failed")]
+    // ParticialUploadFailed,
 }
 
 fn generate_bucket_name_for_challenge(challenge: &challenge::Model) -> String {
@@ -55,7 +57,7 @@ pub async fn init_challenge_bucket(
     if !bucket_path.exists() {
         tokio::fs::create_dir_all(&bucket_path).await?;
         tokio::fs::create_dir_all(&bucket_path.join("static")).await?;
-        tokio::fs::create_dir_all(&bucket_path.join("dynamic")).await?;
+        // tokio::fs::create_dir_all(&bucket_path.join("dynamic")).await?;
         Database::create(&bucket_path.join("files.db")).map_err(|e| RedbError::from(e))?;
     }
     Ok(challenge::Model {
@@ -151,80 +153,80 @@ pub async fn upload_static_attachment(
     Ok(())
 }
 
-pub async fn clean_dynamic_attachment_folder(
-    config: &GlobalConfig, challenge: &challenge::Model,
-) -> Result<(), BucketError> {
-    let (_, bucket_path) = check_bucket_db!("dynamic", config, challenge);
+// pub async fn clean_dynamic_attachment_folder(
+//     config: &GlobalConfig, challenge: &challenge::Model,
+// ) -> Result<(), BucketError> {
+//     let (_, bucket_path) = check_bucket_db!("dynamic", config, challenge);
 
-    tokio::fs::remove_dir_all(&bucket_path).await?;
-    tokio::fs::create_dir_all(&bucket_path).await?;
+//     tokio::fs::remove_dir_all(&bucket_path).await?;
+//     tokio::fs::create_dir_all(&bucket_path).await?;
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn clean_and_reupload_dynamic_attachment(
-    config: &GlobalConfig, challenge: &challenge::Model, mut req: Multipart,
-) -> Result<(), BucketError> {
-    let (db, bucket_path) = check_bucket_db!("dynamic", config, challenge);
-    clean_dynamic_attachment_folder(config, challenge).await?;
+// pub async fn clean_and_reupload_dynamic_attachment(
+//     config: &GlobalConfig, challenge: &challenge::Model, mut req: Multipart,
+// ) -> Result<(), BucketError> {
+//     let (db, bucket_path) = check_bucket_db!("dynamic", config, challenge);
+//     clean_dynamic_attachment_folder(config, challenge).await?;
 
-    let mut ok = true;
-    let mut flag_files = Vec::new();
-    let mut attachment_files = Vec::new();
-    let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
-    {
-        let mut table = write_txn
-            .open_table(FILES_HASH_TABLE)
-            .map_err(|e| RedbError::from(e))?;
-        while let Some(mut will_send) = req.next_field().await? {
-            let filename = will_send
-                .file_name()
-                .map(str::to_string)
-                .unwrap_or(nanoid::nanoid!(21, &nanoid::alphabet::SAFE));
-            let filename = deunicode_str(&filename);
-            let file_path = bucket_path.join(&filename);
-            let mut file = File::create(&file_path).await?;
-            let mut context = Context::new(&SHA256);
-            while let Some(chunk) = will_send.chunk().await? {
-                context.update(&chunk);
-                file.write_all(&chunk).await?;
-            }
-            let hash = hex::encode(context.finish().as_ref());
-            let meta = AttachmentMeta {
-                name: filename.clone(),
-                hash: hash.clone(),
-            };
-            if file_path.extension().unwrap_or_default() == "flag" {
-                flag_files.push(filename.clone());
-            } else {
-                attachment_files.push(meta.clone());
-                {
-                    table
-                        .insert(&*hash, &*format!("dynamic/{filename}"))
-                        .map_err(|e| RedbError::from(e))?;
-                }
-                tokio::fs::write(format!("{filename}.meta"), serde_json::to_string(&meta)?).await?;
-            }
-        }
-        for attachment in attachment_files {
-            if !flag_files.contains(&format!("{}.flag", attachment.name)) {
-                tokio::fs::remove_file(&bucket_path.join(&attachment.name)).await?;
-                tokio::fs::remove_file(&bucket_path.join(&format!("{}.meta", attachment.name)))
-                    .await?;
-                table
-                    .remove(&*attachment.hash)
-                    .map_err(|e| RedbError::from(e))?;
-                ok = false;
-            }
-        }
-    }
-    write_txn.commit().map_err(|e| RedbError::from(e))?;
-    if ok {
-        Ok(())
-    } else {
-        Err(BucketError::ParticialUploadFailed)
-    }
-}
+//     let mut ok = true;
+//     let mut flag_files = Vec::new();
+//     let mut attachment_files = Vec::new();
+//     let write_txn = db.begin_write().map_err(|e| RedbError::from(e))?;
+//     {
+//         let mut table = write_txn
+//             .open_table(FILES_HASH_TABLE)
+//             .map_err(|e| RedbError::from(e))?;
+//         while let Some(mut will_send) = req.next_field().await? {
+//             let filename = will_send
+//                 .file_name()
+//                 .map(str::to_string)
+//                 .unwrap_or(nanoid::nanoid!(21, &nanoid::alphabet::SAFE));
+//             let filename = deunicode_str(&filename);
+//             let file_path = bucket_path.join(&filename);
+//             let mut file = File::create(&file_path).await?;
+//             let mut context = Context::new(&SHA256);
+//             while let Some(chunk) = will_send.chunk().await? {
+//                 context.update(&chunk);
+//                 file.write_all(&chunk).await?;
+//             }
+//             let hash = hex::encode(context.finish().as_ref());
+//             let meta = AttachmentMeta {
+//                 name: filename.clone(),
+//                 hash: hash.clone(),
+//             };
+//             if file_path.extension().unwrap_or_default() == "flag" {
+//                 flag_files.push(filename.clone());
+//             } else {
+//                 attachment_files.push(meta.clone());
+//                 {
+//                     table
+//                         .insert(&*hash, &*format!("dynamic/{filename}"))
+//                         .map_err(|e| RedbError::from(e))?;
+//                 }
+//                 tokio::fs::write(format!("{filename}.meta"), serde_json::to_string(&meta)?).await?;
+//             }
+//         }
+//         for attachment in attachment_files {
+//             if !flag_files.contains(&format!("{}.flag", attachment.name)) {
+//                 tokio::fs::remove_file(&bucket_path.join(&attachment.name)).await?;
+//                 tokio::fs::remove_file(&bucket_path.join(&format!("{}.meta", attachment.name)))
+//                     .await?;
+//                 table
+//                     .remove(&*attachment.hash)
+//                     .map_err(|e| RedbError::from(e))?;
+//                 ok = false;
+//             }
+//         }
+//     }
+//     write_txn.commit().map_err(|e| RedbError::from(e))?;
+//     if ok {
+//         Ok(())
+//     } else {
+//         Err(BucketError::ParticialUploadFailed)
+//     }
+// }
 
 pub async fn get_static_attachment_list(
     config: &GlobalConfig, challenge: &challenge::Model,
@@ -248,31 +250,31 @@ pub async fn get_static_attachment_list(
     Ok(result)
 }
 
-pub async fn get_dynamic_attachment_by_user_id(
-    config: &GlobalConfig, challenge: &challenge::Model, user_id: i64,
-) -> Result<AttachmentMeta, BucketError> {
-    let (_, bucket_path) = check_bucket_db!("dynamic", config, challenge);
+// pub async fn get_dynamic_attachment_by_user_id(
+//     config: &GlobalConfig, challenge: &challenge::Model, user_id: i64,
+// ) -> Result<AttachmentMeta, BucketError> {
+//     let (_, bucket_path) = check_bucket_db!("dynamic", config, challenge);
 
-    let mut files = tokio::fs::read_dir(&bucket_path).await?;
-    let mut result = Vec::new();
-    while let Some(entry) = files.next_entry().await? {
-        if entry.path().extension().unwrap_or_default() == "meta" {
-            let meta: AttachmentMeta = serde_json::from_str(
-                &tokio::fs::read_to_string(entry.path().to_str().unwrap_or_default()).await?,
-            )?;
-            if meta.name.starts_with(&user_id.to_string()) {
-                result.push(meta);
-            }
-        }
-    }
+//     let mut files = tokio::fs::read_dir(&bucket_path).await?;
+//     let mut result = Vec::new();
+//     while let Some(entry) = files.next_entry().await? {
+//         if entry.path().extension().unwrap_or_default() == "meta" {
+//             let meta: AttachmentMeta = serde_json::from_str(
+//                 &tokio::fs::read_to_string(entry.path().to_str().unwrap_or_default()).await?,
+//             )?;
+//             if meta.name.starts_with(&user_id.to_string()) {
+//                 result.push(meta);
+//             }
+//         }
+//     }
 
-    if result.len() == 0 {
-        return Err(BucketError::FileNotFound);
-    }
+//     if result.len() == 0 {
+//         return Err(BucketError::FileNotFound);
+//     }
 
-    result.sort();
-    Ok(result[user_id.mod_floor(&(result.len() as i64)) as usize].clone())
-}
+//     result.sort();
+//     Ok(result[user_id.mod_floor(&(result.len() as i64)) as usize].clone())
+// }
 
 pub async fn get_file_by_hash(
     config: &GlobalConfig, challenge: &challenge::Model, hash: &str,

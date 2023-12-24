@@ -120,76 +120,80 @@
       </div>
       <RxForm {form}>
         <div class="flex flex-row space-x-4">
-          <RxFormItem
-            name="cover_path"
-            label=""
-            class="flex-none"
-            hasError={$errors.cover_path !== null}
-            errors={$errors.cover_path}
-          >
-            <input name="cover_path" class="hidden" value={userSetting?.cover_path} />
-            <input class="hidden" type="file" bind:this={fileInput} accept="image/*" on:change={uploadAvatar} />
-            <div class="avatar">
-              <div
-                class="w-16 h-16 rounded-full ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center relative"
-              >
-                {#if userSetting?.cover_path}
-                  <RxImage src={userSetting.cover_path} loading={loadingAvatar} />
-                {:else}
-                  <span class="w-5 h-5 icon-[fluent--person-20-regular]" />
-                {/if}
-                <RxButton
-                  class="absolute w-full h-full top-0 left-0 opacity-0 hover:opacity-100"
-                  on:click={() => {
-                    if (userSetting?.cover_path) {
-                      userSetting.cover_path = null
-                      $data.cover_path = null
-                      $touched.cover_path = true
-                    } else if (userSetting) {
-                      fileInput.click()
-                    }
-                  }}
+          <div class="flex flex-col space-y-2 flex-1">
+            <RxFormItem
+              name="name"
+              label={$i18n.t('account.name')}
+              hasError={$errors.name !== null}
+              errors={$errors.name}
+            >
+              <RxInput
+                icon="icon-[fluent--person-20-regular]"
+                class="w-full"
+                id="name"
+                name="name"
+                hasError={$errors.name !== null}
+                value={userSetting.name}
+              />
+            </RxFormItem>
+            <RxFormItem
+              name="email"
+              label={$i18n.t('account.email')}
+              hasError={$errors.email !== null}
+              errors={$errors.email}
+            >
+              <RxInput
+                icon="icon-[fluent--mail-20-regular]"
+                class="w-full"
+                id="email"
+                name="email"
+                hasError={$errors.email !== null}
+                value={userSetting.email}
+              />
+            </RxFormItem>
+          </div>
+          <div class="flex flex-row items-center justify-center">
+            <RxFormItem
+              name="cover_path"
+              label="^_^"
+              class="flex-none"
+              hasError={$errors.cover_path !== null}
+              errors={$errors.cover_path}
+            >
+              <input name="cover_path" class="hidden" value={userSetting?.cover_path} />
+              <input class="hidden" type="file" bind:this={fileInput} accept="image/*" on:change={uploadAvatar} />
+              <div class="avatar p-2">
+                <div
+                  class="w-28 h-28 rounded-lg ring-2 ring-offset-base-100 ring-offset-2 !flex flex-col justify-center items-center relative"
                 >
                   {#if userSetting?.cover_path}
-                    <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 text-error" />
+                    <RxImage src={userSetting.cover_path} loading={loadingAvatar} />
                   {:else}
-                    <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
+                    <span class="w-5 h-5 icon-[fluent--person-20-regular]" />
                   {/if}
-                </RxButton>
+                  <RxButton
+                    class="absolute w-full h-full top-0 left-0 opacity-0 hover:opacity-100"
+                    on:click={() => {
+                      if (userSetting?.cover_path) {
+                        userSetting.cover_path = null
+                        $data.cover_path = null
+                        $touched.cover_path = true
+                      } else if (userSetting) {
+                        fileInput.click()
+                      }
+                    }}
+                  >
+                    {#if userSetting?.cover_path}
+                      <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 text-error" />
+                    {:else}
+                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
+                    {/if}
+                  </RxButton>
+                </div>
               </div>
-            </div>
-          </RxFormItem>
-          <RxFormItem
-            name="name"
-            label={$i18n.t('account.name')}
-            hasError={$errors.name !== null}
-            errors={$errors.name}
-          >
-            <RxInput
-              icon="icon-[fluent--person-20-regular]"
-              class="w-full"
-              id="name"
-              name="name"
-              hasError={$errors.name !== null}
-              value={userSetting.name}
-            />
-          </RxFormItem>
+            </RxFormItem>
+          </div>
         </div>
-        <RxFormItem
-          name="email"
-          label={$i18n.t('account.email')}
-          hasError={$errors.email !== null}
-          errors={$errors.email}
-        >
-          <RxInput
-            icon="icon-[fluent--mail-20-regular]"
-            class="w-full"
-            id="email"
-            name="email"
-            hasError={$errors.email !== null}
-            value={userSetting.email}
-          />
-        </RxFormItem>
         <RxFormItem
           name="intro"
           label={$i18n.t('account.intro')}
