@@ -75,7 +75,7 @@ async fn get_platform_version() -> Result<impl IntoResponse, (StatusCode, &'stat
             fallback = "unknown"
         )
         .to_uppercase(),
-        version().unwrap().to_string()
+        version().unwrap()
     )))
 }
 

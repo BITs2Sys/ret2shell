@@ -110,6 +110,7 @@ async fn submit_flag(
             })?;
         if let Some(team) = team.clone() {
             submission.team_id = Some(team.id);
+            #[allow(clippy::blocks_in_if_conditions)]
             if !submission::check_team_solved(conn, challenge.id, team.id)
                 .await
                 .map_err(|err| {

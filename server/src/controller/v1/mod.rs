@@ -4,6 +4,7 @@ use super::GlobalState;
 
 mod account;
 mod announcement;
+mod automate;
 mod calendar;
 mod certificate;
 mod challenge;
@@ -18,6 +19,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .nest("/account", account::router(state))
         .nest("/announcement", announcement::router(state))
+        .nest("/automate", automate::router(state))
         .nest("/certificate", certificate::router(state))
         .nest("/game", game::router(state))
         .nest("/challenge", challenge::router(state))
