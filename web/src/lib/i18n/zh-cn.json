@@ -173,7 +173,8 @@
     "takePartInAs": "已参与",
     "teamAsAdmin": "管理员测试",
     "teamAsAdminTips": "不允许参赛，不参与成绩计算",
-    "submitWriteup": "提交比赛题解"
+    "submitWriteup": "提交比赛题解",
+    "noGame": "未举办过比赛"
   },
   "certs": {
     "title": "证书"

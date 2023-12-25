@@ -123,15 +123,17 @@
 
 <svelte:head><title>{$i18n.t('games.title')} - {$platform.name}</title></svelte:head>
 <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
-  <div
-    class={`max-w-[32rem] flex-shrink-0 hidden lg:flex flex-col pt-16 pl-16 pr-8 space-y-1 ${
-      games.length > 0 ? 'w-1/4 min-w-[24rem]' : 'w-0'
-    }`}
-  >
+  <div class="max-w-[32rem] flex-shrink-0 hidden lg:flex flex-col pt-16 pl-16 pr-8 space-y-1 w-1/4 min-w-[24rem]">
     <RxButton class="w-full !bg-transparent" ghost disabled={!hasPrevPage} on:click={fetchPrevPage}>
       <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
     </RxButton>
     <div class="divider m-0"></div>
+    {#if games.length === 0}
+      <div class="h-32 flex flex-col justify-center items-center space-y-4">
+        <span class="icon-[fluent--flag-32-filled] w-8 h-8 text-primary" />
+        <span class="text-base font-bold text-center">{$i18n.t('games.noGame')}</span>
+      </div>
+    {/if}
     {#each games as item}
       <RxLink href={`/games#${item.id}`} class="w-full" ghost justify="start">
         <span

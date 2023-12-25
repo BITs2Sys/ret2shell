@@ -166,7 +166,8 @@
     "intro": "Intro",
     "teamAsAdmin": "Administrator test",
     "teamAsAdminTips": "Not allowed to participate and will not be included in the score calculation",
-    "submitWriteup": "Submit Write-Up"
+    "submitWriteup": "Submit Write-Up",
+    "noGame": "No games here"
   },
   "announcements": {
     "title": "Announcements",
