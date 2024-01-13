@@ -44,7 +44,7 @@ export class MarkTo {
         this.processor?.use(rehypeKatex.default)
       }
       if (options?.prism) {
-        const rehypePrismPlus = await import('rehype-prism-plus/common')
+        const rehypePrismPlus = await import('rehype-prism-plus/all')
         await import('$lib/styles/prism.scss')
         // @ts-expect-error remark has not updated
         this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true })

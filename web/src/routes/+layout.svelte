@@ -11,7 +11,7 @@
   import { fade } from 'svelte/transition'
   import { platform } from '$lib/stores/platform'
   import { page } from '$app/stores'
-  import { getPlatformInfo } from '$lib/api/v1/platform'
+  import { getPlatformInfo, getPlatformVersion } from '$lib/api/v1/platform'
   import { goto } from '$app/navigation'
   import { removeMessage, showMessage } from '$lib/stores/toast'
   import { i18n } from '$lib/i18n'
@@ -31,6 +31,7 @@
           accept_cookies: value.accept_cookies,
           see_custom_box: value.see_custom_box,
           see_magic_category: value.see_magic_category,
+          version: value.version,
           ...data,
         }
       })
@@ -40,6 +41,39 @@
         userReset()
         return goto('/init', { replaceState: true })
       } else showMessage('error', $i18n.t('platform.backendOffline'))
+    })
+
+  getPlatformVersion()
+    .then((res) => {
+      $platform.version = res
+      console.log(
+        `\n%cR%cet %c2 %cS%chell %cv%c${$platform.version}\n\n%cCopyright (c) 2022 - 2024 %cRet 2 Shell%c, All rights reserved.\n`,
+        'color: #0078D6; font-weight: bold; font-size: 1.5rem;',
+        'color: currentColor; font-weight: bold; font-size: 1.5rem;',
+        'color: #808080; font-weight: bold; font-size: 1.5rem;',
+        'color: #f83030; font-weight: bold; font-size: 1.5rem;',
+        'color: currentColor; font-weight: bold; font-size: 1.5rem;',
+        'color: #0078D6',
+        'color: #808080',
+        'color: #808080',
+        'color: #808080;text-decoration: underline;',
+        'color: #808080;'
+      )
+      console.log(
+        `\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n`,
+        'color: currentColor;'
+      )
+      console.log(
+        `\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n`,
+        'color: currentColor;'
+      )
+    })
+    .catch((err) => {
+      showMessage(
+        'error',
+        $i18n.t('platform.failedToFetchPlatformVersion') + ': ' + (err as AxiosError).response?.data,
+        5000
+      )
     })
 
   refreshUserInfo()

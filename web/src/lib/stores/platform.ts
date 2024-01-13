@@ -13,6 +13,7 @@ class PlatformStore {
   // 备案
   record: string | null
   hide_maker: boolean
+  version: string = 'unknown'
 
   constructor() {
     if (browser) {

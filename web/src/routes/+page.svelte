@@ -34,7 +34,6 @@
   let calendarBtns: CalendarBtn[] = []
   let gameDescription: Promise<string | null> = Promise.resolve(null)
   let currentDate = new Date()
-  let version = 'unknown'
 
   $: {
     calendarBtns = calendars.map((c) => ({
@@ -102,17 +101,6 @@
 
   onMount(() => {
     fetchCalendar()
-    getPlatformVersion()
-      .then((res) => {
-        version = res
-      })
-      .catch((err) => {
-        showMessage(
-          'error',
-          $i18n.t('platform.failedToFetchPlatformVersion') + ': ' + (err as AxiosError).response?.data,
-          5000
-        )
-      })
   })
 
   function fetchSelected() {
@@ -202,13 +190,13 @@
                   <span class="opacity-80">hell</span>
                 </h2>
                 <p class="text-base font-bold opacity-60">
-                  {#if version.includes('*')}
+                  {#if $platform.version.includes('*')}
                     <span class="text-warning">DEV</span>
                   {:else}
                     <span class="text-primary">REL</span>
                   {/if}
                   <span>
-                    {version.replace('*', '')}
+                    {$platform.version.replace('*', '')}
                   </span>
                 </p>
               </div>
