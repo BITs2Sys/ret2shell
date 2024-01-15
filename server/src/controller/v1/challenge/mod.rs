@@ -1,20 +1,18 @@
 // use crate::utility::string::deunicode_str;
 use axum::{
-    body::Body,
     extract::{Path, Query, State},
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
     Extension, Json, Router,
 };
-use hyper::{HeaderMap, StatusCode};
+use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
-use tokio_util::io::ReaderStream;
 use tracing::error;
 
 use crate::{
-    bucket,
+    bucket::init_challenge_bucket,
     config::GlobalConfig,
     controller::{
         layer::{auth, info},
@@ -33,8 +31,8 @@ mod answer;
 mod env;
 // user hint, organizers publish
 mod hint;
-// for challenge storage, devops only
-mod repo;
+// attachment files access
+mod bucket;
 // user submit, organizers audit
 mod submission;
 // for traffic audit, organizers only
@@ -72,14 +70,14 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route("/", patch(update_challenge).delete(delete_challenge))
                 .route("/statistics", get(get_challenge_statistics))
                 .nest("/workflow", workflow::router(state))
-                .nest("/repo", repo::router(state))
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Organize,
                     Permission::Devops
                 )))
                 .route("/", get(get_challenge_info))
-                .route("/attachment", get(download_challenge_attachment))
+                // .route("/attachment", get(download_challenge_attachment))
                 .nest("/env", env::router(state))
+                .nest("/bucket", bucket::router(state))
                 .nest("/submission", submission::router(state))
                 .route("/solved-team", get(get_solved_team_list))
                 .route("/solved-user", get(get_solved_user_list))
@@ -186,7 +184,7 @@ async fn create_challenge(
         }
     };
 
-    let created_challenge = bucket::init_challenge_bucket(&config, &created_challenge)
+    let created_challenge = init_challenge_bucket(&config, &created_challenge)
         .await
         .map_err(|err| {
             error!("failed to init challenge bucket: {}", err);
@@ -314,58 +312,58 @@ async fn get_challenge_info(
     Ok(Json(challenge))
 }
 
-#[derive(Deserialize, Clone, Debug)]
-struct AttachmentQuery {
-    pub file: Option<String>,
-}
+// #[derive(Deserialize, Clone, Debug)]
+// struct AttachmentQuery {
+//     pub file: Option<String>,
+// }
 
-async fn download_challenge_attachment(
-    State(config): State<GlobalConfig>, Extension(challenge): Extension<challenge::Model>,
-    Query(params): Query<AttachmentQuery>,
-) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-    let Some(hash) = params.file else {
-        let files = bucket::get_static_attachment_list(&config, &challenge)
-            .await
-            .map_err(|err| {
-                error!("failed to get static attachment list: {}", err);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "failed to get static attachment list",
-                )
-            })?;
-        if files.len() != 1 {
-            return Err((StatusCode::BAD_REQUEST, "invalid file parameter"));
-        }
-        return Ok(Json(files).into_response());
-    };
-    let (meta, file) = bucket::get_file_by_hash(&config, &challenge, &hash)
-        .await
-        .map_err(|err| {
-            error!("failed to get file by hash: {}", err);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "failed to get file by hash",
-            )
-        })?;
-    let stream = ReaderStream::new(file);
-    let body = Body::from_stream(stream);
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "Content-Disposition",
-        format!("attachment; filename={}", meta.name)
-            .parse()
-            .map_err(|err| {
-                error!("failed to parse content disposition: {}", err);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "failed to parse content disposition",
-                )
-            })?,
-    );
-    let response = (StatusCode::OK, headers, body).into_response();
+// async fn download_challenge_attachment(
+//     State(config): State<GlobalConfig>, Extension(challenge): Extension<challenge::Model>,
+//     Query(params): Query<AttachmentQuery>,
+// ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+//     let Some(hash) = params.file else {
+//         let files = bucket::get_static_attachment_list(&config, &challenge)
+//             .await
+//             .map_err(|err| {
+//                 error!("failed to get static attachment list: {}", err);
+//                 (
+//                     StatusCode::INTERNAL_SERVER_ERROR,
+//                     "failed to get static attachment list",
+//                 )
+//             })?;
+//         if files.len() != 1 {
+//             return Err((StatusCode::BAD_REQUEST, "invalid file parameter"));
+//         }
+//         return Ok(Json(files).into_response());
+//     };
+//     let (meta, file) = bucket::get_file_by_hash(&config, &challenge, &hash)
+//         .await
+//         .map_err(|err| {
+//             error!("failed to get file by hash: {}", err);
+//             (
+//                 StatusCode::INTERNAL_SERVER_ERROR,
+//                 "failed to get file by hash",
+//             )
+//         })?;
+//     let stream = ReaderStream::new(file);
+//     let body = Body::from_stream(stream);
+//     let mut headers = HeaderMap::new();
+//     headers.insert(
+//         "Content-Disposition",
+//         format!("attachment; filename={}", meta.name)
+//             .parse()
+//             .map_err(|err| {
+//                 error!("failed to parse content disposition: {}", err);
+//                 (
+//                     StatusCode::INTERNAL_SERVER_ERROR,
+//                     "failed to parse content disposition",
+//                 )
+//             })?,
+//     );
+//     let response = (StatusCode::OK, headers, body).into_response();
 
-    Ok(response)
-}
+//     Ok(response)
+// }
 
 #[derive(Serialize)]
 struct StatisticsResponse {
