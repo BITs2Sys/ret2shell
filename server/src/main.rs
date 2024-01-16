@@ -27,6 +27,7 @@ mod audit;
 mod bucket;
 mod cache;
 mod captcha;
+mod checker;
 mod config;
 mod controller;
 mod email;
@@ -218,32 +219,3 @@ async fn erase(config: GlobalConfig) -> anyhow::Result<()> {
     warn!(">> Server cleanup finished <<");
     Ok(())
 }
-
-// async fn graceful_shutdown() {
-//     let ctrl_c = async {
-//         signal::ctrl_c()
-//             .await
-//             .expect("Failed to install SIGTERM handler")
-//     };
-
-//     #[cfg(unix)]
-//     let terminate = async {
-//         signal::unix::signal(signal::unix::SignalKind::terminate())
-//             .expect("failed to install SIGTERM handler")
-//             .recv()
-//             .await;
-//     };
-
-//     #[cfg(not(unix))]
-//     let terminate = std::future::pending::<()>();
-
-//     tokio::select! {
-//         _ = ctrl_c => {},
-//         _ = terminate => {},
-//     }
-
-//     info!("Server is shutting down...");
-//     // TODO: add `pusher module`(websocket) graceful shutdown handle code
-// here.     info!("Server shutdown completed, bye bye.");
-//     exit(0);
-// }
