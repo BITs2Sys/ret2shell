@@ -339,6 +339,21 @@
     },
     "binarypiano": {
       "title": "Music by Binary Numbers"
+    },
+    "sillywisher": {
+      "title": "Gacha Game",
+      "wishonce": "Wish Once",
+      "wish10s": "Wish 10 Times",
+      "detail": "Detail",
+      "history": "History",
+      "malicious": "Malicious",
+      "payload": "Payload",
+      "opened": "Probablity increased!",
+      "limitedRoleWish": "Event Wish for Role",
+      "limitedWeaponWish": "Event Wish for Weapon",
+      "residentWish": "Standard Wish",
+      "justSuoha": "It's a big gamble, my friend",
+      "justSuoha10Times": "How about giving it a try, my friend"
     }
   },
   "form": {

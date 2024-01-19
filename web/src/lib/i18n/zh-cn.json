@@ -339,6 +339,21 @@
     },
     "binarypiano": {
       "title": "二进制钢琴曲"
+    },
+    "sillywisher": {
+      "title": "抽卡游戏",
+      "wishonce": "祈愿一次",
+      "wish10s": "祈愿十次",
+      "limitedRoleWish": "角色活动祈愿",
+      "limitedWeaponWish": "武器活动祈愿",
+      "residentWish": "常驻角色祈愿",
+      "detail": "详情",
+      "history": "历史记录",
+      "malicious": "攻击",
+      "payload": "载荷",
+      "opened": "祈愿开启！",
+      "justSuoha": "这是一场豪赌，朋友",
+      "justSuoha10Times": "要不放手一搏，朋友"
     }
   },
   "form": {

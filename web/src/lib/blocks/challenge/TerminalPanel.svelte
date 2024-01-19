@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { theme } from '$lib/stores/theme'
+  import { colorDefs } from '$lib/stores/theme'
   import { Terminal, type ITerminalOptions } from 'xterm'
   import { FitAddon } from 'xterm-addon-fit'
   import { WebLinksAddon } from 'xterm-addon-web-links'
@@ -46,6 +46,8 @@
     allowNonHttpProtocols: true,
   }
 
+  let colors = colorDefs()
+
   const term = new Terminal({
     convertEol: true,
     allowTransparency: true,
@@ -53,14 +55,14 @@
     cursorStyle: 'underline',
     drawBoldTextInBrightColors: false,
     theme: {
-      foreground: $theme.colorScheme === 'dark' ? '#dddddd' : '#222222',
+      foreground: colors['base-content'],
       background: '#00000000',
-      cursor: '#0078D6',
+      cursor: colors.primary,
       selectionBackground: '#88888840',
-      blue: '#0078D6',
-      yellow: '#FBBD23',
-      green: '#36D399',
-      red: '#F83030',
+      blue: colors.info,
+      yellow: colors.warning,
+      green: colors.success,
+      red: colors.error,
     },
     fontFamily: 'JetBrains Mono',
     fontSize: 16,
