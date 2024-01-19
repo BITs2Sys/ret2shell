@@ -12,7 +12,6 @@
 <RxLink
   square
   class={`fixed top-20 right-4 ${$page.url.pathname === '/magic' && 'hidden'}`}
-  size="lg"
   href="/magic"
   exactlyMatched
 >

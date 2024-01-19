@@ -9,6 +9,7 @@
   import LogoAnimate from '$lib/assets/animates/logo-animate.svelte'
   import Homo from '$lib/assets/imgs/homo.webp'
   import GoodMusic from '$lib/assets/imgs/goodmusic.webp'
+  import SillyWisher from '$lib/assets/imgs/gacha-game.webp'
   import RxToast from '$lib/components/RxToast.svelte'
 
   let showToast = false
@@ -83,6 +84,13 @@
         <img class="rounded-lg h-2/3" src={GoodMusic} alt="" />
         <h2 class="text-xl font-bold">{$i18n.t('surprise.binarypiano.title')}</h2>
         <RxLink class="w-full" href="/magic/binarypiano">ENTER</RxLink>
+      </div>
+    </RxCard>
+    <RxCard class="m-6">
+      <div class="flex flex-col items-center space-y-4 w-80 h-80">
+        <img class="rounded-lg h-2/3" src={SillyWisher} alt="" />
+        <h2 class="text-xl font-bold">{$i18n.t('surprise.sillywisher.title')}</h2>
+        <RxLink class="w-full" href="/magic/silly-wisher">ENTER</RxLink>
       </div>
     </RxCard>
   </div>
