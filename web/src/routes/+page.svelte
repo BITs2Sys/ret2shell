@@ -138,12 +138,12 @@
           class="m-2 p-3 py-2 h-full backdrop-blur backdrop-brightness-100 rounded-box text-gray-500 shadow-sm border border-base-content/5 inline-flex justify-center items-center flex-wrap"
         >
           (C) 2022 - {new Date().getFullYear()}&nbsp;
-          <a href={$platform.footer_url} class="link">{$platform.footer_info}</a>
+          <a href={$platform.footer_url} class="link" target="_blank">{$platform.footer_info}</a>
           {#if !$platform.hide_maker}
             &nbsp;
             <span class="opacity-60">|</span>
             &nbsp;By&nbsp;
-            <a href="https://github.com/ret2shell" class="link">
+            <a href="https://github.com/ret2shell" class="link" target="_blank">
               {$i18n.t('about.maker')}
             </a>
           {/if}
@@ -151,7 +151,7 @@
             &nbsp;
             <span class="opacity-60">|</span>
             &nbsp;
-            <a href="https://beian.miit.gov.cn" class="link">{$platform.record}</a>
+            <a href="https://beian.miit.gov.cn" class="link" target="_blank">{$platform.record}</a>
           {/if}
           <a class="btn no-animation btn-sm btn-ghost btn-square ml-2 relative" href={surprise}>
             <span class="icon-[fluent--gift-20-regular] w-5 h-5 opacity-80" />

@@ -36,10 +36,10 @@
         </p>
         <ul>
           <li>
-            <a href="https://ctf-wiki.org/">CTF Wiki</a>
+            <a href="https://ctf-wiki.org/" target="_blank">CTF Wiki</a>
           </li>
           <li>
-            <a href="https://ctf.probius.xyz/">Hello CTF! (CN version only)</a>
+            <a href="https://ctf.probius.xyz/" target="_blank">Hello CTF! (CN version only)</a>
           </li>
           <li>
             <span>...</span>
