@@ -29,7 +29,7 @@ flag的生成与验证是插件的核心：
 ```rust
 pub trait FlagChecker {
   async fn check(&self, user: &User, challenge: &Challenge, flag: &str) -> Result<bool, CheckerError>;
-  async fn generate(&self, user: &User, challenge: &Challenge) -> Result<String, CheckerError>;
+  async fn flag(&self, user: &User, challenge: &Challenge) -> Result<String, CheckerError>;
   async fn env_vars(&self, user: &User, challenge: &Challenge) -> Result<HashMap<String, String>, CheckerError>;
 }
 
