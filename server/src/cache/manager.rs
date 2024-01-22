@@ -1,4 +1,3 @@
-use axum::async_trait;
 use bb8::{Pool, RunError};
 use bb8_redis::RedisMultiplexedConnectionManager;
 use redis::{FromRedisValue, RedisError, RedisResult, ToRedisArgs};
@@ -31,7 +30,6 @@ pub enum PooledConnection<'a> {
     NonClustered(NonClusteredPooledConnection<'a>),
 }
 
-#[async_trait]
 pub trait PooledConnectionLike {
     /// Send a redis command to the server and return the result.
     async fn query_async<T: FromRedisValue>(&mut self, cmd: redis::Cmd) -> RedisResult<T>;
@@ -153,7 +151,6 @@ pub trait PooledConnectionLike {
     }
 }
 
-#[async_trait]
 impl<'a> PooledConnectionLike for PooledConnection<'a> {
     async fn query_async<T: FromRedisValue>(&mut self, cmd: redis::Cmd) -> RedisResult<T> {
         match self {
@@ -204,12 +201,10 @@ impl<'a> ClusteredPooledConnection<'a> {
     }
 }
 
-#[async_trait]
 pub trait PoolLike {
     async fn get(&self) -> Result<PooledConnection, RunError<RedisError>>;
 }
 
-#[async_trait]
 impl PoolLike for RedisPool {
     async fn get(&self) -> Result<PooledConnection, RunError<RedisError>> {
         match self {
@@ -219,7 +214,6 @@ impl PoolLike for RedisPool {
     }
 }
 
-#[async_trait]
 impl PoolLike for NonClusteredRedisPool {
     async fn get(&self) -> Result<PooledConnection, RunError<RedisError>> {
         let con = self.pool.get().await?;
@@ -228,7 +222,6 @@ impl PoolLike for NonClusteredRedisPool {
     }
 }
 
-#[async_trait]
 impl PoolLike for ClusteredRedisPool {
     async fn get(&self) -> Result<PooledConnection, RunError<RedisError>> {
         let con = ClusteredPooledConnection {

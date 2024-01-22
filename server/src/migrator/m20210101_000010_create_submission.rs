@@ -26,7 +26,7 @@ pub enum Submission {
     TeamId,
 }
 
-#[async_trait::async_trait]
+#[axum::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
