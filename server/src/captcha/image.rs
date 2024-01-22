@@ -1,5 +1,3 @@
-use async_trait::async_trait;
-
 use crate::{
     cache::{self, manager::RedisPool},
     captcha::traits::{Captcha, CaptchaError, CaptchaValidator, Validator},
@@ -7,7 +5,6 @@ use crate::{
 
 pub struct ImageValidator;
 
-#[async_trait]
 impl CaptchaValidator for ImageValidator {
     async fn generate_captcha(
         conn: &mut RedisPool, difficulty: u16,

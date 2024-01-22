@@ -37,7 +37,7 @@ mod m20210101_000028_create_oauth;
 
 pub struct Migrator;
 
-#[async_trait::async_trait]
+#[axum::async_trait]
 impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![

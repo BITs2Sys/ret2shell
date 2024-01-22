@@ -1,10 +1,7 @@
-use async_trait::async_trait;
-
 use super::traits::{Captcha, CaptchaError, CaptchaValidator};
 use crate::cache::manager::RedisPool;
 pub struct HCaptchaValidator;
 
-#[async_trait]
 impl CaptchaValidator for HCaptchaValidator {
     async fn generate_captcha(
         _conn: &mut RedisPool, _difficulty: u16,
