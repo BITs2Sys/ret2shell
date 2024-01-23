@@ -62,9 +62,10 @@
         <span class="loading loading-spinner loading-sm" />
         <span class="text-base">{$i18n.t('game.fetchingList')}</span>
       </div>
-    {/if}
-    {#if challenges.length === 0}
-      <p class="text-base font-semibold p-4 opacity-60 text-center">{$i18n.t('playground.emptyCategory')}</p>
+    {:else if challenges.length === 0}
+      <div class="min-h-full flex flex-col justify-center items-center">
+        <p class="text-base font-bold p-4 opacity-60 text-center">{$i18n.t('playground.emptyCategory')}</p>
+      </div>
     {/if}
     <div class="flex-1 flex-col p-4 overflow-x-hidden">
       <ul class="relative space-y-2">

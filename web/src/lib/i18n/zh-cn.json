@@ -678,7 +678,10 @@
     "teamStat": "统计数据",
     "teamExtraScore": "额外分数",
     "currentRank": "当前排名",
-    "teamMembers": "队伍成员"
+    "teamMembers": "队伍成员",
+    "submitWriteup": "提交题解",
+    "gameNotEndedYet": "比赛尚未结束",
+    "gameNotArchiveYet": "比赛尚未归档"
   },
   "challenges": {
     "noHint": "暂无提示信息",

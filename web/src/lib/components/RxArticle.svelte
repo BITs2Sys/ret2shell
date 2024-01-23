@@ -3,8 +3,11 @@
   import '$lib/styles/article.scss'
 
   export let content: string
+  export let showRenderTips = true
   export let headingAnchors: boolean = false
   $: contentRendered = render(content)
+  let ready = false
+  let contentHtml = ''
   let clazz = ''
   export { clazz as class }
   $: classes = `prose max-w-5xl w-full ${clazz}`
@@ -17,12 +20,15 @@
   }
 
   $: {
-    contentRendered.then(() => {
+    contentRendered.then((val) => {
+      ready = true
+      contentHtml = val
       scrollToView()
     })
   }
 
   const render = async (content: string) => {
+    ready = false
     let { MarkTo } = await import('$lib/markto')
     let dompurify = await import('isomorphic-dompurify')
     const markTo = new MarkTo()
@@ -32,11 +38,11 @@
 </script>
 
 <article class={classes}>
-  {#await contentRendered}
+  {#if showRenderTips && !ready}
     <span class="loading loading-spinner loading-sm" />
     <span>{$i18n.t('wiki.rendering')}</span>
-  {:then desc}
+  {:else}
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html desc}
-  {/await}
+    {@html contentHtml}
+  {/if}
 </article>

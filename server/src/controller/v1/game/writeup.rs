@@ -178,15 +178,24 @@ pub async fn update_self_writeup(
     if game.end_and_archive() {
         return Err((StatusCode::FORBIDDEN, "cannot update writeup in this time"));
     }
-    match write_up::update_writeup(conn, game.id, user.id, data).await {
-        Ok(writeup) => Ok(Json(writeup)),
-        Err(DbErr::RecordNotFound(_)) => Err((StatusCode::NOT_FOUND, "writeup not found")),
+    match write_up::get_writeup_by_game_and_user_id(conn, game.id, user.id).await {
+        Ok(Some(writeup)) => {
+            match write_up::update_writeup(conn, writeup.id, game.id, data).await {
+                Ok(writeup) => Ok(Json(writeup)),
+                Err(DbErr::RecordNotFound(_)) => Err((StatusCode::NOT_FOUND, "writeup not found")),
+                Err(e) => {
+                    error!("Failed to update writeup: {}", e);
+                    Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Failed to update writeup",
+                    ))
+                }
+            }
+        }
+        Ok(None) => Err((StatusCode::NOT_FOUND, "writeup not found")),
         Err(e) => {
-            error!("Failed to update writeup: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to update writeup",
-            ))
+            error!("Failed to get writeup: {}", e);
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "Failed to get writeup"))
         }
     }
 }

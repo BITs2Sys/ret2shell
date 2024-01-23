@@ -20,24 +20,12 @@
   import { user } from '$lib/stores/user'
   import type { AxiosError } from 'axios'
   import { OverlayScrollbarsComponent } from 'overlayscrollbars-svelte'
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy } from 'svelte'
 
   let content = ''
   let loading = false
   let constructingTemplate = false
   let isCreate = false
-
-  onMount(() => {
-    if ($game.current) {
-      if ($game.current.archive_time * 1000 < Date.now()) {
-        showMessage('warning', $i18n.t('game.gameIsArchived'), 5000)
-        goto(`/games/${$game.current.id}`, { replaceState: true })
-      } else if ($game.current.end_time * 1000 > Date.now()) {
-        showMessage('warning', $i18n.t('game.gameNotEnded'), 5000)
-        goto(`/games/${$game.current.id}`, { replaceState: true })
-      }
-    }
-  })
 
   function initNewContent() {
     constructingTemplate = true
@@ -90,6 +78,15 @@
   }
 
   const unsubscribe = game.subscribe((val) => {
+    if (val.current) {
+      if (val.current.archive_time * 1000 < Date.now()) {
+        showMessage('warning', $i18n.t('game.gameIsArchived'), 5000)
+        goto(`/games/${val.current.id}`, { replaceState: true })
+      } else if (val.current.end_time * 1000 > Date.now()) {
+        showMessage('warning', $i18n.t('game.gameNotEnded'), 5000)
+        goto(`/games/${val.current.id}`, { replaceState: true })
+      }
+    }
     if (val.team) {
       loading = true
       getGameTeamWriteUpSelf(val.team.game_id)
@@ -148,35 +145,37 @@
 <svelte:head>
   <title>{$i18n.t('games.submitWriteup')} - {$game.current?.name}</title>
 </svelte:head>
-<div class="h-16 border-b-2 border-base-content/5 flex flex-row justify-between items-center px-2 backdrop-blur">
-  <h1 class="font-bold px-2">{$i18n.t('games.submitWriteup')}</h1>
-  <RxButton on:click={submitWriteup}>{$i18n.t('answer.submit')}</RxButton>
-</div>
-<div class="flex-1 flex flex-row">
-  <div class="flex-1 backdrop-blur flex-shrink-0 relative">
-    <RxCodearea bind:value={content} lang="markdown"></RxCodearea>
-    {#if constructingTemplate || loading}
-      <div class="absolute top-0 left-0 w-full h-full flex justify-center items-center backdrop-blur">
-        <span class="loading loading-spinner loading-md" />
-      </div>
-    {/if}
+<div class="flex flex-1 flex-col">
+  <div class="h-16 border-b-2 border-base-content/5 flex flex-row justify-between items-center px-2 backdrop-blur">
+    <h1 class="font-bold px-2">{$i18n.t('games.submitWriteup')}</h1>
+    <RxButton on:click={submitWriteup}>{$i18n.t('answer.submit')}</RxButton>
   </div>
-  <div class="flex-1 flex-shrink-0 border-l-2 border-base-content/5 relative">
-    <div class="absolute w-full h-full top-0 left-0">
-      <OverlayScrollbarsComponent
-        options={{
-          scrollbars: {
-            theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
-            autoHide: 'scroll',
-          },
-        }}
-        class="w-full h-full relative print:hidden"
-        defer
-      >
-        <div class="p-8">
-          <RxArticle {content}></RxArticle>
+  <div class="flex-1 flex flex-row">
+    <div class="flex-1 backdrop-blur flex-shrink-0 relative">
+      <RxCodearea bind:value={content} lang="markdown"></RxCodearea>
+      {#if constructingTemplate || loading}
+        <div class="absolute top-0 left-0 w-full h-full flex justify-center items-center backdrop-blur">
+          <span class="loading loading-spinner loading-md" />
         </div>
-      </OverlayScrollbarsComponent>
+      {/if}
+    </div>
+    <div class="flex-1 flex-shrink-0 border-l-2 border-base-content/5 relative">
+      <div class="absolute w-full h-full top-0 left-0">
+        <OverlayScrollbarsComponent
+          options={{
+            scrollbars: {
+              theme: $theme.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+              autoHide: 'scroll',
+            },
+          }}
+          class="w-full h-full relative print:hidden"
+          defer
+        >
+          <div class="p-8">
+            <RxArticle showRenderTips={false} {content}></RxArticle>
+          </div>
+        </OverlayScrollbarsComponent>
+      </div>
     </div>
   </div>
 </div>

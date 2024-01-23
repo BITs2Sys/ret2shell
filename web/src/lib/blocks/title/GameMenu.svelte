@@ -28,7 +28,7 @@
     {$i18n.t('games.scoreboard')}
   </RxLink>
 </li>
-{#if new Date(($game.current?.archive_time || 0) * 1000) < new Date()}
+{#if new Date(($game.current?.end_time || 0) * 1000) < new Date()}
   <li>
     <RxLink ghost justify="start" href={`/games/${$game.current?.id}/writeups`}>
       <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />

@@ -678,7 +678,10 @@
     "lastActiveTime": "Last Active Time",
     "teamStat": "Statistics",
     "teamExtraScore": "Extra Scores",
-    "currentRank": "Rank"
+    "currentRank": "Rank",
+    "submitWriteup": "Submit Write-up",
+    "gameNotEndedYet": "The game is not over yet",
+    "gameNotArchiveYet": "The game has not been archived yet"
   },
   "challenges": {
     "noHint": "No hints yet",
