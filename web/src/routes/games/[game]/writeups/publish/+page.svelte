@@ -29,7 +29,7 @@
 
   function initNewContent() {
     constructingTemplate = true
-    content = `# ${$game.current?.name} Writeup by ${$game.team?.name}\n\n> ${$i18n.t('game.writeupPlaceholder')}\n\n`
+    content = `> ${$i18n.t('game.writeupPlaceholder')}\n\n`
     getTagList()
       .then((tags) => {
         getGameTeamSolves($game.current?.id || -1, $game.team?.id || -1)

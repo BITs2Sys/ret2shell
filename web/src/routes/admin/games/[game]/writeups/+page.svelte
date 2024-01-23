@@ -24,6 +24,7 @@
   $: readerWriteUps = writeUps.map((a) => {
     return {
       ...a,
+      title: `${encodeURI(a.title)}|${encodeURI(`/admin/games/${$admin.game?.id}/writeups#${a.id}`)}`,
       team_name: `${encodeURI(a.team_name)}|${encodeURI(`/admin/games/${$admin.game?.id}/teams#${a.team_id}`)}`,
     }
   })
@@ -63,7 +64,7 @@
       header: $i18n.t('writeup.title'),
       type: 'plain',
       dimmed: false,
-      sizePolicy: 'shrink',
+      sizePolicy: 'grow',
       justify: 'text-start',
     },
     team_id: {
@@ -77,7 +78,7 @@
       header: $i18n.t('writeup.team_name'),
       type: 'plain',
       dimmed: false,
-      sizePolicy: 'grow',
+      sizePolicy: 'shrink',
       justify: 'text-start',
     },
     hidden: {

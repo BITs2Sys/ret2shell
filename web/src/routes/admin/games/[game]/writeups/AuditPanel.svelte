@@ -59,9 +59,9 @@
           </p>
         {/if}
       </div>
-      <RxArticle content={writeup.content} headingAnchors={true} class="p-6 pt-12" />
+      <RxArticle content={writeup.content} headingAnchors={false} class="p-6 pt-12" />
       <RxButton
-        square
+        level={writeup.hidden ? 'success' : 'warning'}
         size="lg"
         class="fixed bottom-56 right-6 print:hidden"
         disabled={loading || submitting}
@@ -69,8 +69,10 @@
       >
         {#if writeup.hidden}
           <span class="icon-[fluent--checkmark-20-regular] w-5 h-5"></span>
+          <span>PASS</span>
         {:else}
-          <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--eye-off-20-regular] w-5 h-5"></span>
+          <span>HIDE</span>
         {/if}
       </RxButton>
       <RxButton
