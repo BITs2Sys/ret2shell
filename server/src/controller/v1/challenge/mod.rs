@@ -1,12 +1,12 @@
 // use crate::utility::string::deunicode_str;
 use axum::{
     extract::{Path, Query, State},
+    http::StatusCode,
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
     Extension, Json, Router,
 };
-use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::error;
@@ -318,8 +318,8 @@ async fn get_challenge_info(
 // }
 
 // async fn download_challenge_attachment(
-//     State(config): State<GlobalConfig>, Extension(challenge): Extension<challenge::Model>,
-//     Query(params): Query<AttachmentQuery>,
+//     State(config): State<GlobalConfig>, Extension(challenge):
+// Extension<challenge::Model>,     Query(params): Query<AttachmentQuery>,
 // ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
 //     let Some(hash) = params.file else {
 //         let files = bucket::get_static_attachment_list(&config, &challenge)

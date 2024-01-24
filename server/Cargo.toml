@@ -1,8 +1,8 @@
 [package]
 name = "ret2shell"
-version = "0.5.5"
+version = "0.5.6"
 edition = "2021"
-rust-version = "1.74.0"
+rust-version = "1.75.0"
 description = "A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false
@@ -16,11 +16,7 @@ resolver = "2"
 tokio = { version = "1.35", features = ["full"] }
 tokio-util = "0.7"
 tokio-stream = "0.1"
-bytes = "1.5"
 futures = "0.3"
-async-recursion = "1.0"
-rustls = "0.22"
-rustls-native-certs = "0.7"
 # Web Framework
 axum = { version = "0.7", features = [
   "ws",
@@ -37,7 +33,6 @@ axum-extra = { version = "0.9", features = [
   "typed-routing",
   "async-read-body",
 ] }
-hyper = { version = "1.1", features = ["full"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
 # Auth
@@ -63,12 +58,6 @@ toml = "0.8"
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "1.0"
 hex = "0.4"
-# reqwest = { version = "0.11", features = [
-#     "rustls-tls",
-#     "cookies",
-#     "gzip",
-#     "json",
-# ], default-features = false }
 num = "0.4"
 num-derive = "0.4"
 num-traits = "0.2"

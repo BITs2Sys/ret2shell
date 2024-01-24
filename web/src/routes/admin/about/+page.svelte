@@ -109,10 +109,6 @@
       <img src="https://img.shields.io/badge/Apache_2.0-blue.svg" alt="Apache 2.0" />
     </RxTag>
     <RxTag class="m-1">
-      <a class="hover:underline" href="https://hyper.rs/">hyper</a>
-      <img src="https://img.shields.io/badge/MIT-blue.svg" alt="MIT" />
-    </RxTag>
-    <RxTag class="m-1">
       <a class="hover:underline" href="https://github.com/tower-rs/tower">tower</a>
       <img src="https://img.shields.io/badge/MIT-blue.svg" alt="MIT" />
     </RxTag>

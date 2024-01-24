@@ -1,11 +1,11 @@
 use axum::{
     extract::{Path, Query, State},
+    http::StatusCode,
     middleware,
     response::{IntoResponse, Response},
     routing::{get, patch, post},
     Extension, Json, Router,
 };
-use hyper::StatusCode;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use tracing::{error, warn};

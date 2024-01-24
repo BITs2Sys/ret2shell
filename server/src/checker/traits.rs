@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 
-use crate::entity::challenge;
-use crate::entity::submission;
-use crate::entity::user;
-
 use thiserror::Error;
+
+use crate::entity::{challenge, submission, user};
 
 #[derive(Error, Debug)]
 pub enum CheckerError {}
