@@ -11,9 +11,10 @@ export const [accountStore, setAccountStore] = makePersisted(
         account: null as string | null,
         nickname: null as string | null,
         token: null as string | null,
-        permissions: [] as Permission[],
         info: null as User | null,
+        permissions: [] as Permission[],
         institutes: [] as Institute[],
+        warnedCodeGeneration: false,
     }),
     { name: "account" }
 );
@@ -38,6 +39,7 @@ export const resetUser = () => {
         token: null,
         info: null,
         permissions: [],
+        warnedCodeGeneration: false,
     });
 };
 

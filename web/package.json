@@ -5,7 +5,7 @@
     "private": true,
     "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
     "dependencies": {
-        "@ark-ui/solid": "^3.2.2",
+        "@ark-ui/solid": "^3.3.0",
         "@fontsource/jetbrains-mono": "^5.0.20",
         "@jsdevtools/rehype-toc": "^3.0.2",
         "@modular-forms/solid": "^0.21.0",

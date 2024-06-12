@@ -1,22 +1,18 @@
-import { generateAccountCode, getAccountCode, logout } from "@api/account";
+import { logout } from "@api/account";
 import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, refreshUser, resetUser } from "@storage/account";
 import { canParticipate, gameStore } from "@storage/game";
 import { t } from "@storage/theme";
-import { addToast, clearToasts } from "@storage/toast";
+import { clearToasts } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
-import Dialog from "@widgets/dialog";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import TimeProgress from "@widgets/time-progress";
-import Timer from "@widgets/timer";
-import type { HTTPError } from "ky";
-import type { DateTime } from "luxon";
-import { Match, Show, Switch, createEffect, createSignal, onMount, untrack } from "solid-js";
+import { Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import UserCodeDialog from "./user-code-dialog";
 
 export default function UserBox() {
     createEffect(() => {
@@ -27,8 +23,7 @@ export default function UserBox() {
 
     const navigate = useNavigate();
     const [loading, setLoading] = createSignal(false);
-    const [code, setCode] = createSignal(null as { code: number; generate_at: DateTime } | null);
-    const [loadingCode, setLoadingCode] = createSignal(true);
+
     function handleLogout() {
         setLoading(true);
         setTimeout(() => {
@@ -40,38 +35,6 @@ export default function UserBox() {
             });
         }, 1000);
     }
-    function getCode() {
-        setLoadingCode(true);
-        void getAccountCode()
-            .then(setCode)
-            .catch(() => setCode(null))
-            .finally(() => setLoadingCode(false));
-    }
-    function refreshCode() {
-        setCode(null);
-        setLoadingCode(true);
-        setTimeout(() => {
-            generateAccountCode()
-                .then(setCode)
-                .catch((err: HTTPError) => {
-                    err.response.text().then((text) => {
-                        addToast({
-                            level: "error",
-                            description: text,
-                            duration: 5000,
-                        });
-                    });
-                })
-                .finally(() => setLoadingCode(false));
-        }, 500);
-    }
-    createEffect(() => {
-        if (accountStore.token) {
-            untrack(getCode);
-        } else {
-            setCode(null);
-        }
-    });
 
     return (
         <Show
@@ -119,58 +82,9 @@ export default function UserBox() {
                         </Link>
                     </Card>
                     <Card contentClass="p-2 flex flex-col space-y-2">
-                        <Dialog
-                            size="sm"
-                            justify="start"
-                            ghost
-                            btnContent={
-                                <>
-                                    <span class="icon-[fluent--person-link-20-regular] w-5 h-5" />
-                                    <span>{t("account.code.title")}</span>
-                                </>
-                            }
-                        >
-                            <div class="flex flex-col w-64">
-                                <div class="w-full h-32 flex flex-col items-center justify-center p-4 space-y-3">
-                                    <Show
-                                        when={code()}
-                                        fallback={
-                                            <>
-                                                <span class="icon-[fluent--person-link-20-regular] w-10 h-10 opacity-60" />
-                                                <span class="opacity-60">{t("account.code.null")}</span>
-                                            </>
-                                        }
-                                    >
-                                        <span class="font-extrabold text-5xl tracking-widest">
-                                            {code()?.code.toString(16).toUpperCase().padStart(6, "0")}
-                                        </span>
-                                        <TimeProgress
-                                            class="w-full"
-                                            startAt={code()!.generate_at}
-                                            endAt={code()!.generate_at.plus({ seconds: 300 })}
-                                            onTimeout={() => {
-                                                setCode(null);
-                                            }}
-                                        />
-                                        <Timer class="opacity-80" end={code()!.generate_at.plus({ seconds: 300 })} />
-                                    </Show>
-                                </div>
-                                <Button
-                                    level="primary"
-                                    size="sm"
-                                    square
-                                    title={t("account.code.refresh")}
-                                    onClick={refreshCode}
-                                    loading={loadingCode()}
-                                    disabled={loadingCode()}
-                                >
-                                    <Show when={!loadingCode()}>
-                                        <span class="icon-[fluent--arrow-clockwise-16-regular] w-4 h-4" />
-                                    </Show>
-                                    <span class="truncate">{t("account.code.refresh")}</span>
-                                </Button>
-                            </div>
-                        </Dialog>
+                        <UserCodeDialog />
+                    </Card>
+                    <Card contentClass="p-2 flex flex-col space-y-2">
                         <div class="flex flex-row space-x-2">
                             <Link href="/account/settings" ghost size="sm" justify="start" class="flex-1">
                                 <span class="icon-[fluent--settings-20-regular] w-5 h-5" />

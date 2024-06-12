@@ -13,10 +13,17 @@ export type ArticleProps = {
     extra?: boolean;
     headingAnchors?: boolean;
     toc?: boolean;
+    noExtraPaddings?: boolean;
 };
 
 export default function (props: ComponentProps<"article"> & ArticleProps) {
-    const [articleProps, nativeProps] = splitProps(props, ["content", "extra", "headingAnchors", "toc"]);
+    const [articleProps, nativeProps] = splitProps(props, [
+        "content",
+        "extra",
+        "headingAnchors",
+        "toc",
+        "noExtraPaddings",
+    ]);
     const [ready, setReady] = createSignal(false);
     const [markdown, setMarkdown] = createSignal(null as Markdown | null);
     const initMarkdown = async () => {
@@ -36,7 +43,6 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
         }
     };
     const render = async (content: string) => {
-        setReady(false);
         await initMarkdown();
         await markdown()!.renderContent(content);
         // console.log(markdown.toc());
@@ -52,23 +58,25 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     createEffect(() => {
         if (articleProps.content) {
             setReady(false);
-            render(articleProps.content)
-                .then(() =>
-                    untrack(() => {
+            untrack(() => {
+                render(articleProps.content)
+                    .then(() => {
                         setReady(true);
                         scrollToView();
                     })
-                )
-                .catch((err: Error) => {
-                    addToast({
-                        level: "error",
-                        description: err.message,
-                        duration: 5000,
+                    .catch((err: Error) => {
+                        addToast({
+                            level: "error",
+                            description: err.message,
+                            duration: 5000,
+                        });
                     });
-                });
+            });
         } else {
-            markdown()?.reset();
-            setReady(true);
+            untrack(() => {
+                markdown()?.reset();
+                setReady(true);
+            });
         }
     });
     return (
@@ -87,7 +95,9 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
                 class={`article !max-w-5xl w-full ${nativeProps.class}`}
                 innerHTML={markdown()?.html()}
             />
-            <div class="h-64" />
+            <Show when={!articleProps.noExtraPaddings}>
+                <div class="h-64" />
+            </Show>
             <Show when={articleProps.toc && ready() && markdown()?.toc()}>
                 <Popover
                     class="fixed right-3 bottom-16 lg:bottom-3 print:hidden"

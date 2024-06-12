@@ -5,11 +5,11 @@ import { createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {
     const [content, setContent] = createSignal(null as null | string);
-    const comps = import.meta.glob("./contents/*.md");
+    const comps = import.meta.glob("../../_blocks/contents/*.md");
     createEffect(() => {
         if (themeStore.locale) {
             untrack(() => {
-                const match = comps[`./contents/welcome.${themeStore.locale}.md`];
+                const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
                 match().then((content) => {
                     setContent((content as { default: string }).default);
                 });

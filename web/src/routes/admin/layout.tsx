@@ -1,4 +1,8 @@
+import { Permission } from "@/lib/models/user";
+import { accountStore } from "@/lib/storage/account";
+import { addToast } from "@/lib/storage/toast";
 import SidebarLayout from "@blocks/sidebar-layout";
+import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -6,18 +10,24 @@ import type { JSX } from "solid-js";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
+    const navigate = useNavigate();
+    if (
+        !accountStore.permissions.includes(Permission.Statistics) &&
+        !accountStore.permissions.includes(Permission.User) &&
+        !accountStore.permissions.includes(Permission.DevOps)
+    ) {
+        addToast({
+            level: "error",
+            description: t("admin.permissionDenied")!,
+            duration: 5000,
+        });
+        navigate("/sigtrap/403");
+        return null;
+    }
     return (
         <>
             <Title title={`${t("admin.title")} - ${platformStore.config.name || t("platform.name")}`} />
-            <SidebarLayout
-                leftBar={
-                    <>
-                        <SideBar />
-                    </>
-                }
-            >
-                {props.children}
-            </SidebarLayout>
+            <SidebarLayout leftBar={<SideBar />}>{props.children}</SidebarLayout>
         </>
     );
 }
