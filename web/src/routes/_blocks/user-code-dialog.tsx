@@ -60,8 +60,8 @@ export default function UserCodeDialog() {
                 </>
             }
         >
-            <div class="flex flex-col w-64">
-                <div class="w-full min-h-36 flex flex-col items-center justify-center p-4 space-y-3">
+            <div class="flex flex-col w-64 space-y-2">
+                <div class="w-full min-h-36 flex flex-col items-center justify-center space-y-2">
                     <Switch>
                         <Match when={!accountStore.warnedCodeGeneration}>
                             <span class="icon-[fluent--warning-20-regular] w-10 h-10 flex-shrink-0 text-warning" />
@@ -89,7 +89,6 @@ export default function UserCodeDialog() {
                 </div>
                 <Button
                     level="primary"
-                    size="sm"
                     square
                     title={t("account.code.refresh")}
                     onClick={refreshCode}

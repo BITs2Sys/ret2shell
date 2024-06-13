@@ -141,15 +141,15 @@ export default function () {
                         <Field
                             name="accepted"
                             type="boolean"
-                            validate={[custom((value) => value === true, t("game.team.create.acceptedRequired")!)]}
+                            validate={[required(t("game.team.create.acceptedRequired")!)]}
                         >
                             {(field, props) => (
                                 <>
                                     <input type="checkbox" class="hidden" {...props} checked={field.value} />
                                     <Dialog
                                         justify="start"
-                                        immediate
                                         ghost
+                                        level={field.error ? "error" : undefined}
                                         btnContent={
                                             <>
                                                 <Show
@@ -165,7 +165,7 @@ export default function () {
                                         }
                                     >
                                         <div class="w-[calc(100vw-3rem)] max-w-5xl max-h-[calc(100vh-3rem)] overflow-scroll">
-                                            <h2 class="text-center text-3xl font-bold p-4">
+                                            <h2 class="text-center text-3xl font-bold p-4 pb-0">
                                                 {t("game.team.create.rulesTitle")}
                                             </h2>
                                             <Article class="self-center" content={content() || ""} noExtraPaddings />
@@ -173,7 +173,7 @@ export default function () {
                                         <div class="flex space-x-2">
                                             <Button
                                                 class="flex-1"
-                                                level="primary"
+                                                level="success"
                                                 onClick={() => setValue(form, "accepted", true)}
                                                 disabled={field.value}
                                             >
@@ -192,7 +192,7 @@ export default function () {
                                 </>
                             )}
                         </Field>
-                        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+                        <Button type="submit" level="primary" loading={loading()} disabled={loading()}>
                             {t("form.create")}
                         </Button>
                     </Form>

@@ -70,7 +70,7 @@ export default function (
                 <Dialog.Backdrop class="fixed backdrop-blur bg-layer/60 top-0 left-0 w-screen h-screen" />
                 <Dialog.Positioner class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center">
                     <Dialog.Content class="card">
-                        <div class="card-content p-2">{contents.children}</div>
+                        <div class="card-content p-3 lg:p-6">{contents.children}</div>
                     </Dialog.Content>
                 </Dialog.Positioner>
             </Portal>
