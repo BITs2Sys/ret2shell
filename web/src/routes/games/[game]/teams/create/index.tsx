@@ -5,9 +5,10 @@ import Button from "@/lib/widgets/button";
 import Card from "@/lib/widgets/card";
 import Dialog from "@/lib/widgets/dialog";
 import Input from "@/lib/widgets/input";
+import Link from "@/lib/widgets/link";
 import Popover from "@/lib/widgets/popover";
 import { createForm, custom, maxLength, minLength, required, setValue } from "@modular-forms/solid";
-import { useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { canParticipate, gameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { fullTheme, t, themeStore } from "@storage/theme";
@@ -195,6 +196,13 @@ export default function () {
                         <Button type="submit" level="primary" loading={loading()} disabled={loading()}>
                             {t("form.create")}
                         </Button>
+                        <A
+                            href={`/games/${gameStore.current?.id}/teams/join`}
+                            class="flex items-center space-x-2 justify-center h-12 hover:underline opacity-60"
+                        >
+                            <span>{t("game.team.joinTips")}</span>
+                            <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
+                        </A>
                     </Form>
                 </Card>
             </div>

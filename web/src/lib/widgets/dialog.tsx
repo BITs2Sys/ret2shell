@@ -69,8 +69,11 @@ export default function (
             <Portal>
                 <Dialog.Backdrop class="fixed backdrop-blur bg-layer/60 top-0 left-0 w-screen h-screen" />
                 <Dialog.Positioner class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center">
-                    <Dialog.Content class="card">
+                    <Dialog.Content class="card relative">
                         <div class="card-content p-3 lg:p-6">{contents.children}</div>
+                        <Dialog.CloseTrigger class="btn btn-sm btn-square flex items-center justify-center btn-ghost absolute right-2 top-2">
+                            <span class="icon-[fluent--dismiss-20-regular] w-5 h-5" />
+                        </Dialog.CloseTrigger>
                     </Dialog.Content>
                 </Dialog.Positioner>
             </Portal>

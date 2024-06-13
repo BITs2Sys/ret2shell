@@ -209,7 +209,8 @@
       "joinFirst": "請先參賽",
       "title": "隊伍詳情",
       "canNotJoin": "不符合參賽條件",
-      "joinGame": "報名參賽"
+      "joinGame": "報名參賽",
+      "joinTips": "已有隊伍？\n點擊加入"
     },
     "archivedGotoTraining": "已歸檔，請前往練習場",
     "canNotParticipate": "不符合參與條件",

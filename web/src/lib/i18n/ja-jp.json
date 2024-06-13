@@ -209,7 +209,8 @@
       "joinFirst": "まずはご入力ください",
       "title": "チーム詳細",
       "canNotJoin": "エントリー条件を満たしていない",
-      "joinGame": "参加するにはサインアップしてください"
+      "joinGame": "参加するにはサインアップしてください",
+      "joinTips": "すでにチームをお持ちですか?\nクリックして参加"
     },
     "archivedGotoTraining": "アーカイブ済み、ゴルフ練習場へ行ってください",
     "canNotParticipate": "参加資格がありません",

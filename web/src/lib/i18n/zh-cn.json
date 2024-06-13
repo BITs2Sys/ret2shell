@@ -226,7 +226,8 @@
       "joinFirst": "请先参赛",
       "title": "队伍详情",
       "canNotJoin": "不符合参赛条件",
-      "joinGame": "报名参赛"
+      "joinGame": "报名参赛",
+      "joinTips": "已有队伍？点击加入"
     },
     "archivedGotoTraining": "已归档，请前往练习场",
     "canNotParticipate": "不符合参与条件",

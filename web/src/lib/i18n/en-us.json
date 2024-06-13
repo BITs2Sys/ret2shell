@@ -209,7 +209,8 @@
       "joinFirst": "Please take part in first",
       "title": "Team details",
       "canNotJoin": "Not meeting the conditions for entry",
-      "joinGame": "Sign up to participate"
+      "joinGame": "Sign up to participate",
+      "joinTips": "Already have a team? \nClick to join"
     },
     "archivedGotoTraining": "Archived, please goto training board",
     "canNotParticipate": "Not eligible to participate",
