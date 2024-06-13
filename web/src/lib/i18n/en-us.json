@@ -190,7 +190,6 @@
         "acceptRules": "I have read the entry instructions carefully and agree to the entry rules",
         "rulesTitle": "Game Rules",
         "accept": "I agree to the above terms and conditions.",
-        "notAccept": "No, I don't agree",
         "accepted": "Agree, press Esc to close",
         "reject": "No, I reject"
       },

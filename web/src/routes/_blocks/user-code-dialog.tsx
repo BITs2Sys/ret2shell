@@ -8,7 +8,7 @@ import TimeProgress from "@/lib/widgets/time-progress";
 import Timer from "@/lib/widgets/timer";
 import type { HTTPError } from "ky";
 import type { DateTime } from "luxon";
-import { Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { Match, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function UserCodeDialog() {
     const [code, setCode] = createSignal(null as { code: number; generate_at: DateTime } | null);

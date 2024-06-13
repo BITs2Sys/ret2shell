@@ -116,7 +116,7 @@ export default function () {
                                         </Card>
                                         <Card contentClass="flex flex-row p-2 space-x-2">
                                             <Link
-                                                href="mailto:ret2shell@woooo.tech"
+                                                href="mailto:admin@ret.sh.cn"
                                                 ghost
                                                 size="sm"
                                                 class="flex-1"
@@ -125,7 +125,7 @@ export default function () {
                                                 target="_blank"
                                             >
                                                 <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
-                                                <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
+                                                <span class="font-normal opacity-60">admin@ret.sh.cn</span>
                                             </Link>
                                             <Link
                                                 href="https://afdian.net/a/reverier"
