@@ -1,8 +1,8 @@
 [package]
 name = "r2s-queue"
-version = "1.4.2"
+version = "1.4.3"
 edition = "2021"
-rust-version = "1.78.0"
+rust-version = "1.79.0"
 description = "Message queue for Ret2Shell - A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false
@@ -18,7 +18,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 futures = "0.3"
 
-r2s-config = { version = "1.4.2", path = "../config" }
+r2s-config = { version = "1.4.3", path = "../config" }
 
 [lib]
 path = "src/lib.rs"

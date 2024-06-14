@@ -1,8 +1,8 @@
 [package]
 name = "r2s-server"
-version = "1.4.2"
+version = "1.4.3"
 edition = "2021"
-rust-version = "1.78.0"
+rust-version = "1.79.0"
 description = "Server for Ret2Shell - A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false
@@ -65,21 +65,21 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tracing-appender = "0.2"
 
 # local crates
-r2s-auditor = { version = "1.4.2", path = "../auditor" }
-r2s-bucket = { version = "1.4.2", path = "../bucket" }
-r2s-cache = { version = "1.4.2", path = "../cache" }
-r2s-captcha = { version = "1.4.2", path = "../captcha" }
-r2s-checker = { version = "1.4.2", path = "../checker" }
-r2s-cluster = { version = "1.4.2", path = "../cluster" }
-r2s-config = { version = "1.4.2", path = "../config" }
-r2s-database = { version = "1.4.2", path = "../database" }
-r2s-email = { version = "1.4.2", path = "../email" }
-r2s-license = { version = "1.4.2", path = "../license" }
-r2s-media = { version = "1.4.2", path = "../media" }
-r2s-migrator = { version = "1.4.2", path = "../migrator" }
-r2s-oauth = { version = "1.4.2", path = "../oauth" }
-r2s-queue = { version = "1.4.2", path = "../queue" }
-r2s-traffic = { version = "1.4.2", path = "../traffic" }
+r2s-auditor = { version = "1.4.3", path = "../auditor" }
+r2s-bucket = { version = "1.4.3", path = "../bucket" }
+r2s-cache = { version = "1.4.3", path = "../cache" }
+r2s-captcha = { version = "1.4.3", path = "../captcha" }
+r2s-checker = { version = "1.4.3", path = "../checker" }
+r2s-cluster = { version = "1.4.3", path = "../cluster" }
+r2s-config = { version = "1.4.3", path = "../config" }
+r2s-database = { version = "1.4.3", path = "../database" }
+r2s-email = { version = "1.4.3", path = "../email" }
+r2s-license = { version = "1.4.3", path = "../license" }
+r2s-media = { version = "1.4.3", path = "../media" }
+r2s-migrator = { version = "1.4.3", path = "../migrator" }
+r2s-oauth = { version = "1.4.3", path = "../oauth" }
+r2s-queue = { version = "1.4.3", path = "../queue" }
+r2s-traffic = { version = "1.4.3", path = "../traffic" }
 
 [lib]
 path = "src/lib.rs"

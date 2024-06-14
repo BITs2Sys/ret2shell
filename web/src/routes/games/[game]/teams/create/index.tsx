@@ -150,7 +150,7 @@ export default function () {
                                     <Dialog
                                         justify="start"
                                         ghost
-                                        level={field.error ? "error" : undefined}
+                                        level={field.error ? "error" : null}
                                         btnContent={
                                             <>
                                                 <Show
@@ -185,7 +185,7 @@ export default function () {
                                             </Button>
                                             <Show when={field.value}>
                                                 <Button level="error" onClick={() => setValue(form, "accepted", false)}>
-                                                    {t("game.team.create.reject")}
+                                                    <span>{t("game.team.create.reject")}</span>
                                                 </Button>
                                             </Show>
                                         </div>
