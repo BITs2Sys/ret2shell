@@ -97,6 +97,12 @@ impl Model {
             ..self
         }
     }
+
+    pub fn in_progress(&self) -> bool {
+        self.host_type == HostType::CTFGame
+            && self.start_at <= Utc::now()
+            && self.end_at >= Utc::now()
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]

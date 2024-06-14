@@ -72,3 +72,16 @@ pub async fn initialize(config: &Option<bucket::Config>) -> Result<Bucket, Bucke
         Err(BucketError::ConfigNotFound)
     }
 }
+
+pub async fn down(config: &Option<bucket::Config>) -> Result<(), BucketError> {
+    if let Some(config) = config {
+        let path: PathBuf = config.path.clone().into();
+        if !path.exists() {
+            return Err(BucketError::PathDoesNotExist(format!("{}", path.display())));
+        }
+        remove_dir_all(path).await?;
+        Ok(())
+    } else {
+        Err(BucketError::ConfigNotFound)
+    }
+}

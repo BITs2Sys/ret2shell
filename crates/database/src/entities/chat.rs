@@ -19,6 +19,7 @@ pub struct Model {
     pub game_id: i64,
     pub challenge_id: i64,
     pub checked: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -36,6 +37,7 @@ pub struct ExModel {
     pub challenge_id: i64,
     pub challenge_name: String,
     pub checked: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -51,6 +53,7 @@ pub struct SessionModel {
     pub last_active_at: DateTime<Utc>,
     pub last_message: Option<String>,
     pub last_user_id: Option<i64>,
+    pub is_admin: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -117,7 +120,8 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_sessions<C>(conn: &C, game_id: i64) -> Result<Vec<SessionModel>, DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
+    C: sea_orm::ConnectionTrait,
+{
     let mut sql = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .select_only()
@@ -126,12 +130,14 @@ where
             Column::TeamId,
             Column::GameId,
             Column::Checked,
+            Column::IsAdmin,
         ]);
     sql = sql
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Game.def())
         .order_by(Column::Checked, Order::Desc)
+        .order_by(Column::IsAdmin, Order::Asc)
         .order_by(Column::CreatedAt, Order::Desc)
         .column_as(super::challenge::Column::Name, "challenge_name")
         .column_as(super::team::Column::Name, "team_name")
@@ -147,7 +153,8 @@ where
 
 pub async fn get_list<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
+    C: sea_orm::ConnectionTrait,
+{
     let sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::Team.def())
@@ -165,9 +172,46 @@ where
     Ok(chats)
 }
 
+pub async fn get_last<C>(
+    conn: &C, team_id: i64, challenge_id: i64,
+) -> Result<Option<ExModel>, DbErr>
+where
+    C: sea_orm::ConnectionTrait,
+{
+    let sql = Entity::find()
+        .join(JoinType::InnerJoin, Relation::Challenge.def())
+        .join(JoinType::InnerJoin, Relation::Team.def())
+        .join(JoinType::InnerJoin, Relation::User.def())
+        .order_by(Column::CreatedAt, Order::Desc)
+        .column_as(super::challenge::Column::Name, "challenge_name")
+        .column_as(super::team::Column::Name, "team_name")
+        .column_as(super::user::Column::Account, "user_name")
+        .column_as(super::user::Column::Avatar, "avatar")
+        .filter(Column::TeamId.eq(team_id))
+        .filter(Column::ChallengeId.eq(challenge_id));
+    let chat = sql.into_model().one(conn).await?;
+    Ok(chat)
+}
+
+pub async fn get_unchecked<C>(conn: &C, team_id: i64, is_admin: bool) -> Result<Vec<Model>, DbErr>
+where
+    C: sea_orm::ConnectionTrait,
+{
+    let chats = Entity::find()
+        .filter(Column::TeamId.eq(team_id))
+        .filter(Column::Checked.eq(false))
+        .filter(Column::IsAdmin.eq(is_admin))
+        .order_by(Column::CreatedAt, Order::Asc)
+        .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
+        .all(conn)
+        .await?;
+    Ok(chats)
+}
+
 pub async fn create<C>(conn: &C, chat: Model) -> Result<Model, DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
+    C: sea_orm::ConnectionTrait,
+{
     let chat = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -176,32 +220,34 @@ where
     chat.insert(conn).await
 }
 
-pub async fn mark_checked<C>(conn: &C, id: i64) -> Result<Model, DbErr>
+pub async fn mark_checked<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<(), DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
-    let model = ActiveModel {
-        id: ActiveValue::Unchanged(id),
-        checked: ActiveValue::Set(true),
-        created_at: ActiveValue::NotSet,
-        content: ActiveValue::NotSet,
-        user_id: ActiveValue::NotSet,
-        team_id: ActiveValue::NotSet,
-        game_id: ActiveValue::NotSet,
-        challenge_id: ActiveValue::NotSet,
-    };
-    model.update(conn).await
+    C: sea_orm::ConnectionTrait,
+{
+    let mut active_model = ActiveModel::new();
+    active_model.checked = ActiveValue::Set(true);
+
+    Entity::update_many()
+        .set(active_model)
+        .filter(Column::TeamId.eq(team_id))
+        .filter(Column::ChallengeId.eq(challenge_id))
+        .exec(conn)
+        .await?;
+    Ok(())
 }
 
 pub async fn delete<C>(conn: &C, id: i64) -> Result<(), DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
+    C: sea_orm::ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(conn).await?;
     Ok(())
 }
 
 pub async fn delete_session<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<(), DbErr>
 where
-    C: sea_orm::ConnectionTrait, {
+    C: sea_orm::ConnectionTrait,
+{
     Entity::delete_many()
         .filter(Column::TeamId.eq(team_id))
         .filter(Column::ChallengeId.eq(challenge_id))

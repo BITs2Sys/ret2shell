@@ -169,9 +169,18 @@ pub async fn down(config: GlobalConfig) -> anyhow::Result<()> {
         warn!("Cleanup aborted");
         return Ok(());
     }
+    let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
     warn!(">> Server cleanup started <<");
     r2s_migrator::down(&config.database).await?;
     info!("Cleanup done: < Database >");
+    r2s_cache::down(&config.cache).await?;
+    info!("Cleanup done: < Cache >");
+    r2s_bucket::down(&config.bucket).await?;
+    info!("Cleanup done: < Bucket >");
+
     warn!(">> Server cleanup finished <<");
+
+    drop(console_guard);
+    drop(file_guard);
     Ok(())
 }

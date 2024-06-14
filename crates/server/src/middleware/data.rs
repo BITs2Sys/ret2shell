@@ -6,6 +6,7 @@ use axum::{
 };
 use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
+use r2s_database::game;
 use r2s_migrator::Database;
 use tracing::debug;
 
@@ -46,6 +47,27 @@ pub async fn prepare_user_info(
             Ok(next.run(req).await)
         }
         None => Err(ResponseError::Unauthorized("please login first".into())),
+    }
+}
+
+pub async fn prepare_team_info(
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Extension(game): Extension<game::Model>, mut req: Request, next: Next,
+) -> Result<impl IntoResponse, ResponseError> {
+    let team = r2s_database::team::get_by_user_id(&db.conn, game.id, token.id).await?;
+    match team {
+        Some(team) => {
+            req.extensions_mut()
+                .insert::<r2s_database::team::Model>(team);
+            Ok(next.run(req).await)
+        }
+        None => Err(ResponseError::Forbidden(
+            "permission denied".into(),
+            format!(
+                "user {}:'{}' ({}) want to access game {}:'{}' without team",
+                token.id, token.account, token.nickname, game.id, game.name
+            ),
+        )),
     }
 }
 
@@ -91,7 +113,7 @@ macro_rules! prepare_data {
                             Some(data) => {
                                 cache
                                     .at(stringify!($model))
-                                    .set(id.to_string(), &data)
+                                    .set_ex(id.to_string(), &data, 60 * 60 * 24)
                                     .await?;
                                 Some(data)
                             }

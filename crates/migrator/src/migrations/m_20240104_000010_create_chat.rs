@@ -24,6 +24,7 @@ pub enum Chat {
     TeamId,
     GameId,
     ChallengeId,
+    IsAdmin,
     Checked, // whether the message has been seen.
 }
 
@@ -80,6 +81,7 @@ impl MigrationTrait for Migration {
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
+                    .col(ColumnDef::new(Chat::IsAdmin).boolean().not_null())
                     .col(ColumnDef::new(Chat::Checked).boolean().not_null())
                     .to_owned(),
             )

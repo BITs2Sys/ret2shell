@@ -182,6 +182,11 @@ impl Cache {
         self.client.lrem(domain_key, 0, value).await?;
         Ok(())
     }
+
+    pub async fn flush(&self) -> Result<(), CacheError> {
+        self.client.flushall(false).await?;
+        Ok(())
+    }
 }
 
 /// Init the cache manager.
@@ -196,4 +201,14 @@ pub async fn initialize(config: &Option<cache::Config>) -> Result<Cache, CacheEr
     let client = RedisClient::new(config, None, None, None);
     client.init().await?;
     Ok(Cache::new(client))
+}
+
+pub async fn down(config: &Option<cache::Config>) -> Result<(), CacheError> {
+    let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
+    debug!("down cache manager with url: {:?}", config.url);
+    let config = RedisConfig::from_url(&config.url)?;
+    let client = RedisClient::new(config, None, None, None);
+    client.init().await?;
+    client.flushall(false).await?;
+    Ok(())
 }

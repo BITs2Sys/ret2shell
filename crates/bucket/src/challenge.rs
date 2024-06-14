@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::{
-    fs::{create_dir, read_to_string, write},
+    fs::{create_dir, read_dir, read_to_string, write, File},
     io::AsyncRead,
 };
 
@@ -90,7 +90,8 @@ impl ChallengeBucket {
         &self.path
     }
 
-    pub async fn set_config(&self, config: ChallengeConfig) -> Result<(), BucketError> {
+    pub async fn set_config(&self, config: Value) -> Result<(), BucketError> {
+        let config: ChallengeConfig = serde_json::from_value(config)?;
         write(
             &self.path.join("config.toml"),
             toml::to_string_pretty(&config)?,
@@ -101,20 +102,6 @@ impl ChallengeBucket {
 
     pub async fn config(&self) -> Result<ChallengeConfig, BucketError> {
         let config = toml::from_str(&read_to_string(&self.path.join("config.toml")).await?)?;
-        Ok(config)
-    }
-
-    pub async fn set_checker_config(&self, config: Value) -> Result<(), BucketError> {
-        write(
-            &self.path.join("checkers.toml"),
-            toml::to_string_pretty(&config)?,
-        )
-        .await?;
-        Ok(())
-    }
-
-    pub async fn checker_config(&self) -> Result<Value, BucketError> {
-        let config = toml::from_str(&read_to_string(&self.path.join("checkers.toml")).await?)?;
         Ok(config)
     }
 
@@ -163,6 +150,59 @@ impl ChallengeBucket {
         &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("src", name, stdin).await
+    }
+
+    pub async fn get_static_files(&self) -> Result<Vec<String>, BucketError> {
+        let mut files = vec![];
+        let mut dir = read_dir(&self.path.join("static")).await?;
+        while let Some(entry) = dir.next_entry().await? {
+            files.push(entry.file_name().to_string_lossy().to_string());
+        }
+        Ok(files)
+    }
+
+    pub async fn get_mapped_files(&self) -> Result<Vec<String>, BucketError> {
+        let mut files = vec![];
+        let mut dir = read_dir(&self.path.join("mapped")).await?;
+        while let Some(entry) = dir.next_entry().await? {
+            files.push(entry.file_name().to_string_lossy().to_string());
+        }
+        Ok(files)
+    }
+
+    pub async fn get_mapped_file(&self, requested_id: i64) -> Result<Option<String>, BucketError> {
+        let files = self.get_mapped_files().await?;
+        if files.is_empty() {
+            return Ok(None);
+        }
+        let file_index = requested_id as usize % files.len();
+        Ok(Some(files[file_index].clone()))
+    }
+
+    pub async fn download_file(&self, path: impl AsRef<Path>) -> Result<File, BucketError> {
+        Ok(File::open(path).await?)
+    }
+
+    fn ensure_prefix(
+        &self, sub_folder: impl AsRef<str>, file: impl AsRef<str>,
+    ) -> Result<PathBuf, BucketError> {
+        let sub_folder = self.path.join(sub_folder.as_ref()).canonicalize()?;
+        let file_path = self.path.join(file.as_ref()).canonicalize()?;
+        if !file_path.starts_with(sub_folder) {
+            Err(BucketError::PathTraversal)
+        } else {
+            Ok(file_path)
+        }
+    }
+
+    pub async fn download_static(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
+        self.download_file(&self.ensure_prefix("static", name)?)
+            .await
+    }
+
+    pub async fn download_mapped(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
+        self.download_file(&self.ensure_prefix("mapped", name)?)
+            .await
     }
 
     pub fn hash(&self) -> String {

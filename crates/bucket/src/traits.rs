@@ -24,6 +24,8 @@ pub enum BucketError {
     DataConvertError(#[from] std::string::FromUtf8Error),
     #[error("need locking before write operation")]
     NeedLocking,
+    #[error("path traversal detected")]
+    PathTraversal,
 }
 
 macro_rules! init_dir {
