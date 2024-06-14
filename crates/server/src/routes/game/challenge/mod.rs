@@ -224,7 +224,7 @@ async fn submit_flag() -> Result<impl IntoResponse, ResponseError> {
     Ok("not implemented")
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 enum FileType {
     Static,
@@ -265,20 +265,21 @@ async fn get_player_attachment(
                 game.id, game.name
             )))?)
         .await?;
+    let files = get_files(db, &challenge_bucket, game, token).await?;
     if query.file.is_none() || query.folder.is_none() {
-        Ok(get_files(db, &challenge_bucket, game, token)
-            .await?
-            .into_response())
+        Ok(Json(files).into_response())
     } else {
-        let file = match query.folder.unwrap() {
-            FileType::Static => {
-                let file = query.file.unwrap();
-                challenge_bucket.download_static(&file).await?
-            }
-            FileType::Mapped => {
-                let file = query.file.unwrap();
-                challenge_bucket.download_mapped(&file).await?
-            }
+        let file = query.file.unwrap();
+        let folder = query.folder.unwrap();
+        let checked_file = files
+            .into_iter()
+            .find(|f| f.folder == folder && f.file == file);
+        if checked_file.is_none() {
+            return Err(ResponseError::NotFound("file".to_string()));
+        }
+        let file = match folder {
+            FileType::Static => challenge_bucket.download_static(&file).await?,
+            FileType::Mapped => challenge_bucket.download_mapped(&file).await?,
         };
 
         let stream = ReaderStream::new(file);
@@ -288,7 +289,7 @@ async fn get_player_attachment(
 
 async fn get_files(
     db: &Database, bucket: &ChallengeBucket, game: game::Model, token: Token,
-) -> Result<impl IntoResponse, ResponseError> {
+) -> Result<Vec<FileResponse>, ResponseError> {
     let static_files = bucket.get_static_files().await?;
     let mapped_file = if game.in_progress() {
         let team = team::get_by_user_id(&db.conn, game.id, token.id).await?;
@@ -323,5 +324,5 @@ async fn get_files(
             file: mapped_file,
         });
     }
-    Ok(Json(files))
+    Ok(files)
 }
