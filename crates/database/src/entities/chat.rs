@@ -231,6 +231,7 @@ where
         .set(active_model)
         .filter(Column::TeamId.eq(team_id))
         .filter(Column::ChallengeId.eq(challenge_id))
+        .filter(Column::Checked.eq(false))
         .exec(conn)
         .await?;
     Ok(())

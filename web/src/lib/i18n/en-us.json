@@ -280,7 +280,10 @@
       "inGameChallenges": "Challenges in games",
       "totalChallenges": "Total challenges",
       "instituteUsers": "Distribution of user institutes",
-      "others": "other"
+      "others": "other",
+      "users": "Users",
+      "challenges": "Challenge status",
+      "submissions": "Player submission"
     },
     "edit": {
       "title": "Edit platform settings"

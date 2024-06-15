@@ -61,7 +61,7 @@ impl GameBucket {
         root_path: impl AsRef<Path>, name: impl AsRef<str>, should_lock: bool,
     ) -> Result<Self, BucketError> {
         let game_path = root_path.as_ref().join(name.as_ref());
-        if game_path.join(".lock").exists() {
+        if should_lock && game_path.join(".lock").exists() {
             return Err(BucketError::LockError);
         }
         let git = Git::try_open(&game_path).await?;

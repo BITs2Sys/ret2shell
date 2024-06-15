@@ -36,7 +36,7 @@ fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &st
 /// Clap arg definition.
 #[derive(Parser, Debug)]
 #[command(
-    author = "Reverier-Xu <reverier.xu@private.ret.sh.cn>",
+    author = "Reverier-Xu <reverier.xu@woooo.tech>",
     version,
     about = "Keygen for Ret 2 Shell Challenge API Platform",
     long_about = r#"
@@ -46,7 +46,7 @@ THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
 UNAUTHORIZED COPYING, TRANSFERRING OR REPRODUCTION OF THE CONTENTS OF THIS PROJECT,
 VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 
-If you have any problems, please contact tech support <ret2shell@private.ret.sh.cn>.
+If you have any problems, please contact tech support <support@ret.sh.cn>.
 "#
 )]
 struct Args {

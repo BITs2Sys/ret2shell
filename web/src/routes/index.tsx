@@ -116,14 +116,14 @@ export default function () {
                                         </Card>
                                         <Card contentClass="flex flex-row p-2 space-x-2">
                                             <a
-                                                href="mailto:admin@ret.sh.cn"
+                                                href="mailto:support@ret.sh.cn"
                                                 class="flex-1 btn btn-sm btn-ghost justify-start"
                                                 title={t("about.contactTips")}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
                                                 <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
-                                                <span class="font-normal opacity-60">admin@ret.sh.cn</span>
+                                                <span class="font-normal opacity-60">support@ret.sh.cn</span>
                                             </a>
                                             <Link
                                                 href="https://afdian.net/a/reverier"

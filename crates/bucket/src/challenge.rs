@@ -91,6 +91,9 @@ impl ChallengeBucket {
     }
 
     pub async fn set_config(&self, config: Value) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         let config: ChallengeConfig = serde_json::from_value(config)?;
         write(
             &self.path.join("config.toml"),
@@ -109,6 +112,9 @@ impl ChallengeBucket {
         &self, dest: impl AsRef<str>, name: impl AsRef<str>,
         mut stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         if !matches!(
             dest.as_ref(),
             "images" | "mapped" | "scripts" | "src" | "static"

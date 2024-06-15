@@ -280,7 +280,10 @@
       "inGameChallenges": "賽中題目數量",
       "totalChallenges": "總題目數量",
       "instituteUsers": "使用者組織分佈狀況",
-      "others": "其他"
+      "others": "其他",
+      "users": "平台用戶",
+      "challenges": "題目狀態",
+      "submissions": "選手提交"
     },
     "edit": {
       "title": "編輯平台設定"

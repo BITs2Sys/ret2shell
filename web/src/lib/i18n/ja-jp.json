@@ -280,7 +280,10 @@
       "inGameChallenges": "コンテストの問題数",
       "totalChallenges": "総質問数",
       "instituteUsers": "ユーザー組織の分布",
-      "others": "他の"
+      "others": "他の",
+      "users": "プラットフォームユーザー",
+      "challenges": "質問ステータス",
+      "submissions": "プレイヤーの提出"
     },
     "edit": {
       "title": "プラットフォーム設定を編集する"

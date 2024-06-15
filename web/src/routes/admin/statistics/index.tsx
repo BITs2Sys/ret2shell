@@ -204,7 +204,7 @@ export default function () {
                     </div>
                 </div>
                 <Divider class="hidden xl:flex col-span-3" />
-                <Card class="col-span-1 h-32 lg:h-48" contentClass="p-3 lg:p-6 flex flex-row items-center space-x-8">
+                <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
                     <div class="h-full aspect-square flex items-center justify-center">
                         <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
                             <Chart
@@ -247,6 +247,7 @@ export default function () {
                         </Show>
                     </div>
                     <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
+                        <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.users")}</h3>
                         <div class="flex flex-row space-x-4 items-center flex-1">
                             <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
                             <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
@@ -258,8 +259,8 @@ export default function () {
                             <span class="opacity-60">{t("admin.statistics.totalUsers")}</span>
                         </div>
                     </div>
-                </Card>
-                <Card class="col-span-1 h-32 lg:h-48" contentClass="p-3 lg:p-6 flex flex-row items-center space-x-8">
+                </div>
+                <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
                     <div class="h-full aspect-square flex items-center justify-center">
                         <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
                             <Chart
@@ -310,6 +311,7 @@ export default function () {
                         </Show>
                     </div>
                     <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
+                        <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.challenges")}</h3>
                         <div class="flex flex-row space-x-4 items-center flex-1">
                             <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
                             <span class="font-bold text-3xl text-warning">{statistics()?.challenges.in_game}</span>
@@ -321,8 +323,8 @@ export default function () {
                             <span class="opacity-60">{t("admin.statistics.totalChallenges")}</span>
                         </div>
                     </div>
-                </Card>
-                <Card class="col-span-1 h-32 lg:h-48" contentClass="p-3 lg:p-6 flex flex-row items-center space-x-8">
+                </div>
+                <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
                     <div class="h-full aspect-square flex items-center justify-center">
                         <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
                             <Chart
@@ -373,6 +375,7 @@ export default function () {
                         </Show>
                     </div>
                     <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
+                        <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.submissions")}</h3>
                         <div class="flex flex-row space-x-4 items-center flex-1">
                             <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
                             <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
@@ -384,11 +387,8 @@ export default function () {
                             <span class="opacity-60">{t("admin.statistics.totalSubmissions")}</span>
                         </div>
                     </div>
-                </Card>
-                <Card
-                    class="col-span-1 xl:col-span-3 min-h-64 lg:min-h-80"
-                    contentClass="p-3 lg:p-6 flex flex-row items-center"
-                >
+                </div>
+                <div class="col-span-1 xl:col-span-3 min-h-64 lg:min-h-80 p-3 lg:p-6 flex flex-row items-center">
                     <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
                         <Chart
                             option={{
@@ -428,7 +428,7 @@ export default function () {
                             }}
                         />
                     </Show>
-                </Card>
+                </div>
             </div>
         </>
     );

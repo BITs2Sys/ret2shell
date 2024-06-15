@@ -18,7 +18,7 @@ THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
 UNAUTHORIZED COPYING, TRANSFERRING OR REPRODUCTION OF THE CONTENTS OF THIS PROJECT,
 VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 
-If you have any problems, please contact tech support <ret2shell@woooo.tech>.
+If you have any problems, please contact tech support <support@ret.sh.cn>.
     "#
 )]
 struct Args {
@@ -44,7 +44,7 @@ async fn main() {
         Err(e) => {
             eprintln!("{}: {e}", "Failed to load server config".red().bold());
             eprintln!("Please check your configuration file and try again.");
-            eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <ret2shell@woooo.tech>.");
+            eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>.");
             exit(1)
         }
     };
@@ -60,7 +60,7 @@ async fn main() {
         Err(e) => {
             eprintln!("{}: {e}", "Failed to start server".red().bold());
             eprintln!("Please check your configuration file and try again.");
-            eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <ret2shell@woooo.tech>.");
+            eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>.");
             exit(1)
         }
     }

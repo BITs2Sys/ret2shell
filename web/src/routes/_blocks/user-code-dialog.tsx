@@ -4,7 +4,6 @@ import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import Button from "@/lib/widgets/button";
 import Dialog from "@/lib/widgets/dialog";
-import TimeProgress from "@/lib/widgets/time-progress";
 import Timer from "@/lib/widgets/timer";
 import type { HTTPError } from "ky";
 import type { DateTime } from "luxon";
@@ -71,15 +70,7 @@ export default function UserCodeDialog() {
                             <span class="font-extrabold text-5xl tracking-widest">
                                 {code()?.code.toString(16).toUpperCase().padStart(6, "0")}
                             </span>
-                            <TimeProgress
-                                class="w-full"
-                                startAt={code()!.generate_at}
-                                endAt={code()!.generate_at.plus({ seconds: 300 })}
-                                onTimeout={() => {
-                                    setCode(null);
-                                }}
-                            />
-                            <Timer class="opacity-80" end={code()!.generate_at.plus({ seconds: 300 })} />
+                            <Timer class="opacity-80 font-bold" end={code()!.generate_at.plus({ seconds: 300 })} />
                         </Match>
                         <Match when={true}>
                             <span class="icon-[fluent--person-link-20-regular] w-10 h-10 opacity-60" />

@@ -297,7 +297,10 @@
       "inGameChallenges": "赛中题目数量",
       "totalChallenges": "总题目数量",
       "instituteUsers": "用户组织分布情况",
-      "others": "其他"
+      "others": "其他",
+      "users": "平台用户",
+      "challenges": "题目状态",
+      "submissions": "选手提交"
     },
     "edit": {
       "title": "编辑平台设置"
