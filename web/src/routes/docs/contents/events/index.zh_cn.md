@@ -2,6 +2,10 @@
 
 在回归终端中，事件 API 是双向的，即可以通过事件 API 来获取平台产生的事件数据，也可以通过事件 API 来向平台发送事件数据。事件 API 通过正向 WebSocket 实现，开发者需要主动连接到回归终端的事件 API 端点并建立 WebSocket 连接，然后通过 WebSocket 协议来进行事件数据的传输。
 
+## 快速开始
+
+我们提供了一个与 [NoneBot 2](https://nonebot.dev/) 集成的插件，如果你不想看下面的实现细节，你可以直接部署 [这个](https://github.com/ret2shell/ret2nonebot)。
+
 ## 连接
 
 事件 API 的连接地址可以在比赛的管理页面复制，大概长这个样子：

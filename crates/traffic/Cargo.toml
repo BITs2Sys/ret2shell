@@ -1,6 +1,6 @@
 [package]
 name = "r2s-traffic"
-version = "1.4.3"
+version = "1.4.4"
 edition = "2021"
 rust-version = "1.79.0"
 description = "Websocket proxy for Ret2Shell - A feature-riches CTF challenge platform."
