@@ -148,7 +148,7 @@ export default function SideBar() {
             </li>
             <Divider />
             <li class="w-full">
-                <Link activeMatch="exact" class="w-full" ghost href="/admin/about" justify="start">
+                <Link activeMatch="exact" class="w-full" ghost href="/magic/about" justify="start">
                     <span class="icon-[fluent--info-20-regular] w-5 h-5" />
                     <span>{t("admin.about.title")}</span>
                 </Link>

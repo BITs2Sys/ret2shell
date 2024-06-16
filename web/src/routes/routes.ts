@@ -282,10 +282,6 @@ export const routes = {
                     path: "/oauth",
                     component: lazy(() => import("./admin/oauth/index")),
                 },
-                {
-                    path: "/about",
-                    component: lazy(() => import("./admin/about/index")),
-                },
             ],
         },
         {
@@ -313,6 +309,10 @@ export const routes = {
                 {
                     path: "/sakana",
                     component: lazy(() => import("./magic/sakana/index")),
+                },
+                {
+                    path: "/about",
+                    component: lazy(() => import("./magic/about/index")),
                 },
             ],
         },
