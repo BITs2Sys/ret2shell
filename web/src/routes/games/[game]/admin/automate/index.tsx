@@ -58,6 +58,7 @@ export default function () {
                     {(device) => (
                         <>
                             <div class="h-12 border-b border-b-layer-content/10 flex flex-row items-center space-x-4 px-2">
+                                <span class="w-2 h-2 mx-2 rounded-full bg-success" />
                                 <span class="font-bold">{device.ip}</span>
                                 <span class="flex-1 opacity-60 truncate" title={device.ua}>
                                     {device.ua}

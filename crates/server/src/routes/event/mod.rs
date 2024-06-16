@@ -9,7 +9,6 @@ use r2s_event::EventManager;
 use r2s_migrator::Database;
 use serde::Deserialize;
 
-// use serde::Deserialize;
 use crate::traits::{GlobalState, ResponseError};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
