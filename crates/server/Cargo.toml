@@ -55,8 +55,6 @@ rustls = { version = "0.23", features = ["ring"] }
 
 # System stat
 systemstat = { version = "0.2", features = ["serde"] }
-rustc_version = "0.4"
-git-version = "0.3"
 
 # Logger
 tracing = "0.1"
@@ -81,6 +79,10 @@ r2s-migrator = { version = "1", path = "../migrator" }
 r2s-oauth = { version = "1", path = "../oauth" }
 r2s-queue = { version = "1", path = "../queue" }
 r2s-traffic = { version = "1", path = "../traffic" }
+
+[build-dependencies]
+rustc_version = "0.4"
+git-version = "0.3"
 
 [lib]
 path = "src/lib.rs"

@@ -2,7 +2,6 @@ use std::{io::Write, net::SocketAddr, process};
 
 use colored::Colorize;
 use r2s_config::GlobalConfig;
-use rustc_version::version;
 use rustls::crypto;
 use tracing::{error, info, warn};
 
@@ -15,23 +14,14 @@ mod traits;
 mod utility;
 
 const PUB_KEY: &[u8] = include_bytes!("../../../config/pub.bin");
+include!(concat!(env!("OUT_DIR"), "/constants.rs"));
 
 /// Show greet information.
 pub fn greet() {
     println!(
         "[START UP] {} {}",
         "Ret 2 Shell".bold(),
-        format!(
-            "{}-{}-{}",
-            env!("CARGO_PKG_VERSION"),
-            git_version::git_version!(
-                args = ["--abbrev=8", "--always", "--dirty=*"],
-                fallback = "unknown"
-            )
-            .to_uppercase(),
-            version().unwrap()
-        )
-        .dimmed()
+        RET2SHELL_FULL_VERSION.dimmed()
     );
     println!(
         "----------------------------- {} -----------------------------",
@@ -105,16 +95,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         cluster,
         checker,
         media,
-        version: format!(
-            "{}-{}-{}",
-            env!("CARGO_PKG_VERSION"),
-            git_version::git_version!(
-                args = ["--abbrev=8", "--always", "--dirty=*"],
-                fallback = "unknown"
-            )
-            .to_uppercase(),
-            version().unwrap()
-        ),
+        version: RET2SHELL_FULL_VERSION.to_string(),
     };
     info!("Modules loaded, constructing router...");
 
