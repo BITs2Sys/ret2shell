@@ -1,6 +1,7 @@
 import { isMobile } from "@solid-primitives/platform";
 import { mergeRefs } from "@solid-primitives/refs";
 import { type Size, createElementSize } from "@solid-primitives/resize-observer";
+import { fullTheme } from "@storage/theme";
 import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from "echarts/charts";
 import {
     DataZoomComponent,
@@ -18,7 +19,6 @@ import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import { nanoid } from "nanoid";
 import { passiveSupport } from "passive-events-support/src/utils";
 import { type JSX, type Ref, createEffect, on, onCleanup, onMount } from "solid-js";
-import { fullTheme } from "../storage/theme";
 import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
 

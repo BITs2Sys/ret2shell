@@ -1,10 +1,10 @@
-import { generateAccountCode, getAccountCode } from "@/lib/api/account";
-import { accountStore, setAccountStore } from "@/lib/storage/account";
-import { t } from "@/lib/storage/theme";
-import { addToast } from "@/lib/storage/toast";
-import Button from "@/lib/widgets/button";
-import Dialog from "@/lib/widgets/dialog";
-import Timer from "@/lib/widgets/timer";
+import { generateAccountCode, getAccountCode } from "@api/account";
+import { accountStore, setAccountStore } from "@storage/account";
+import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
+import Button from "@widgets/button";
+import Dialog from "@widgets/dialog";
+import Timer from "@widgets/timer";
 import type { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { Match, Switch, createEffect, createSignal, untrack } from "solid-js";

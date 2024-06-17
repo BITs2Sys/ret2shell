@@ -1,4 +1,4 @@
-import { t } from "../storage/theme";
+import { t } from "@storage/theme";
 
 export function randomTips(prev?: string): string {
     const randomIndex = Math.floor(Math.random() * 16);

@@ -5,7 +5,7 @@ import Card from "./card";
 import ace from "ace-builds";
 import "ace-builds/esm-resolver";
 import { type FormStore, setValue } from "@modular-forms/solid";
-import { themeStore } from "../storage/theme";
+import { themeStore } from "@storage/theme";
 
 export type EditorProps = {
     value?: string;

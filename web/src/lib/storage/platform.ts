@@ -3,6 +3,8 @@ import { createStore } from "solid-js/store";
 import type { PlatformLicense } from "../api/platform";
 import type { ServerConfig } from "../models/config";
 
+export const frontendCompatVersion = import.meta.env.VITE_COMPAT_VERSION as string;
+
 export const [platformStore, setPlatformStore] = makePersisted(
     createStore({
         config: {
@@ -20,13 +22,16 @@ export const [platformStore, setPlatformStore] = makePersisted(
             record: null as string | null,
             hide_maker: false as boolean | null,
         } as ServerConfig,
-        version: "UNKNOWN" as string,
+        version: `${frontendCompatVersion}-UNKNOWN-0.0.0`,
         accept_cookies: false,
         under_maintenance: false,
         backend_online: false,
         license: null as null | PlatformLicense,
         get isOnline() {
             return this.backend_online && !this.under_maintenance;
+        },
+        get isCompatible() {
+            return this.version === frontendCompatVersion;
         },
     }),
     { name: "platform" }

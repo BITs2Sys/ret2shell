@@ -1,19 +1,17 @@
-import { accountStore } from "@/lib/storage/account";
-import { generateRandomName } from "@/lib/utils/random-names";
-import Article from "@/lib/widgets/article";
-import Button from "@/lib/widgets/button";
-import Card from "@/lib/widgets/card";
-import Dialog from "@/lib/widgets/dialog";
-import Input from "@/lib/widgets/input";
-import Link from "@/lib/widgets/link";
-import Popover from "@/lib/widgets/popover";
-import { createForm, custom, maxLength, minLength, required, setValue } from "@modular-forms/solid";
+import { generateRandomName } from "@lib/utils/random-names";
+import { createForm, maxLength, required, setValue } from "@modular-forms/solid";
 import { A, useNavigate } from "@solidjs/router";
+import { accountStore } from "@storage/account";
 import { canParticipate, gameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { fullTheme, t, themeStore } from "@storage/theme";
+import { t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import Article from "@widgets/article";
+import Button from "@widgets/button";
+import Card from "@widgets/card";
+import Dialog from "@widgets/dialog";
+import Input from "@widgets/input";
+import Popover from "@widgets/popover";
 import { Show, createEffect, createSignal, untrack } from "solid-js";
 
 type TeamCreateForm = {

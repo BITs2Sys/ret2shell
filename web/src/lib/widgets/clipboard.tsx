@@ -1,5 +1,5 @@
 import { Clipboard, type ClipboardRootProps } from "@ark-ui/solid";
-import { t } from "../storage/theme";
+import { t } from "@storage/theme";
 
 export default function (props: ClipboardRootProps) {
     return (

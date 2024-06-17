@@ -5,9 +5,9 @@ import "@fontsource/jetbrains-mono";
 import "overlayscrollbars/overlayscrollbars.css";
 import "@widgets/styles/base.scss";
 import { Router } from "@solidjs/router";
+import { fullTheme, initTheme } from "@storage/theme";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { onMount } from "solid-js";
-import { fullTheme, initTheme } from "./lib/storage/theme";
 
 function checkEdition() {
     const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string;

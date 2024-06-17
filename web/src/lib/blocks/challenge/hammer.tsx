@@ -1,9 +1,9 @@
-import { Permission } from "@/lib/models/user";
-import { accountStore } from "@/lib/storage/account";
-import { gameStore } from "@/lib/storage/game";
+import { Permission } from "@models/user";
 import xdsecMascotNormal from "@assets/imgs/xdsec-mascot-normal.webp";
 import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import { A } from "@solidjs/router";
+import { accountStore } from "@storage/account";
+import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";

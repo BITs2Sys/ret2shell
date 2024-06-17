@@ -1,6 +1,6 @@
+import { t } from "@storage/theme";
+import { type ToastMessage, removeToast } from "@storage/toast";
 import { type ComponentProps, Show, onMount, splitProps } from "solid-js";
-import { t } from "../storage/theme";
-import { type ToastMessage, removeToast } from "../storage/toast";
 import Button from "./button";
 import Card from "./card";
 

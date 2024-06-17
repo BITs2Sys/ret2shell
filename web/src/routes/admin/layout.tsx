@@ -1,11 +1,11 @@
-import { Permission } from "@/lib/models/user";
-import { accountStore } from "@/lib/storage/account";
-import { addToast } from "@/lib/storage/toast";
+import { Permission } from "@models/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import { useNavigate } from "@solidjs/router";
+import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import type { JSX } from "solid-js";
 import SideBar from "./_blocks/sidebar";
 

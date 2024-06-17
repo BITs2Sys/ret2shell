@@ -9,7 +9,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/r
 import { accountStore } from "@storage/account";
 import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
 import { Title, setupTitleResolver } from "@storage/header";
-import { platformStore, setPlatformStore } from "@storage/platform";
+import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast, removeToast, toastStore } from "@storage/toast";
 import Button from "@widgets/button";
@@ -492,7 +492,9 @@ export default function (props: { children?: JSX.Element }) {
                 "color: currentColor;"
             );
         })
-        .catch(() => {});
+        .catch(() => {
+            setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
+        });
     getPlatformLicense()
         .then((resp) => {
             setPlatformStore({ license: resp });
