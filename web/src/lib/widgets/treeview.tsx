@@ -1,3 +1,4 @@
+import { useSearchParams } from "@solidjs/router";
 import { For, type JSX, Show, createEffect, createSignal, untrack } from "solid-js";
 import Button from "./button";
 import Link from "./link";
@@ -7,11 +8,13 @@ export type TreeNode = {
     children: TreeNode[];
     name: string;
     icon: string;
+    extraClasses?: string;
 } & (
     | {
           type: "item";
           link?: string;
           extraPart?: JSX.Element;
+          searchValue?: string;
           onClick?: () => void;
       }
     | {
@@ -23,9 +26,12 @@ export type TreeViewProps = {
     tree: TreeNode[];
     size?: "sm" | "md";
     highlightPaths?: string[];
+    activeMatch?: "exact" | "partial";
+    activeSearchParams?: string;
 };
 
 export default function TreeView(props: TreeViewProps) {
+    const [searchParams, _] = useSearchParams();
     const renderNode = (node: TreeNode, level = 0) => {
         const [showChildren, setShowChildren] = createSignal(false);
         createEffect(() => {
@@ -47,9 +53,14 @@ export default function TreeView(props: TreeViewProps) {
                             justify="start"
                             ghost
                             title={node.name}
-                            class="w-full overflow-hidden"
+                            class={`w-full overflow-hidden ${node.extraClasses}`}
                             href={node.type === "item" && node.link ? node.link : "#"}
-                            activeMatch="exact"
+                            activeMatch={props.activeMatch}
+                            active={
+                                node.type === "item" &&
+                                !!props.activeSearchParams &&
+                                searchParams[props.activeSearchParams] === node.searchValue
+                            }
                         >
                             <span class={`${node.icon} w-5 h-5`} />
                             <span class="flex-1 text-start truncate">{node.name}</span>
@@ -64,7 +75,7 @@ export default function TreeView(props: TreeViewProps) {
                         title={node.name}
                         size={props.size}
                         justify="start"
-                        class="w-full overflow-hidden"
+                        class={`w-full overflow-hidden ${node.extraClasses}`}
                         onClick={() => {
                             setShowChildren(!showChildren());
                         }}

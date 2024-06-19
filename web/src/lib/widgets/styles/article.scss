@@ -41,6 +41,10 @@ article.prose img {
   @apply rounded-lg #{!important};
 }
 
+article > *:first-child {
+  @apply mt-6;
+}
+
 article > h1 > a,
 article > h2 > a,
 article > h3 > a,

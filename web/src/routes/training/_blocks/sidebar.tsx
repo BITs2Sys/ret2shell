@@ -1,11 +1,31 @@
-import { gameStore } from "@storage/game";
+import { getGame } from "@/lib/api/game";
+import ChallengeList from "@/lib/blocks/challenge/list";
+import { useNavigate, useParams } from "@solidjs/router";
+import { gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
-import { Show } from "solid-js";
-import Challenges from "./challenges";
+import type { HTTPError } from "ky";
+import { Show, createEffect, untrack } from "solid-js";
 import Playgrounds from "./playgrounds";
 
 export default function SideBar() {
+    const params = useParams();
+    const selectedGameId = () => Number.parseInt(params.game) ?? null;
+    const navigate = useNavigate();
+    createEffect(() => {
+        if (selectedGameId()) {
+            untrack(() => {
+                getGame(selectedGameId())
+                    .then((resp) => {
+                        // console.log(resp);
+                        setGameStore({ current: resp });
+                    })
+                    .catch((err: HTTPError) => {
+                        navigate(`/sigtrap/${err.response.status}`, { replace: true });
+                    });
+            });
+        }
+    });
     return (
         <div class="flex flex-col overflow-hidden w-full h-full">
             <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
@@ -24,8 +44,8 @@ export default function SideBar() {
                     </Link>
                 </Show>
             </div>
-            <Show when={gameStore.current} fallback={<Playgrounds />}>
-                <Challenges />
+            <Show when={selectedGameId()} fallback={<Playgrounds />}>
+                <ChallengeList />
             </Show>
         </div>
     );

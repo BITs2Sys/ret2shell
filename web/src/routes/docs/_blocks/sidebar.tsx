@@ -86,7 +86,7 @@ export default function () {
             defer
         >
             <div class="p-3 lg:p-6 flex flex-col space-y-2 flex-1 min-h-[calc(100%-4rem)]">
-                <TreeView tree={tree} size="sm" highlightPaths={paths()} />
+                <TreeView tree={tree} size="sm" activeMatch="exact" highlightPaths={paths()} />
             </div>
         </OverlayScrollbarsComponent>
     );

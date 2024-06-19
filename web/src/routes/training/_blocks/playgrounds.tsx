@@ -1,6 +1,8 @@
-import { getGames } from "@api/game";
+import { gameStore, setGameStore } from "@/lib/storage/game";
+import { getGame, getGames } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { Permission } from "@models/user";
+import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -10,7 +12,7 @@ import Link from "@widgets/link";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function Playgrounds() {
     const [playgrounds, setPlaygrounds] = createSignal([] as Game[]);

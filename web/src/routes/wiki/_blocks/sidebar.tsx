@@ -73,7 +73,7 @@ export default function SideBar() {
                         <Divider class="!mt-6 !mb-4" />
                     </>
                 </Show>
-                <TreeView tree={toc()} size="sm" highlightPaths={wikiStore.current?.path} />
+                <TreeView tree={toc()} activeMatch="exact" size="sm" highlightPaths={wikiStore.current?.path} />
             </div>
             <a
                 class="sticky bottom-0 h-16 border-t border-t-layer-content/10 flex flex-row items-center justify-center px-4 space-x-2"

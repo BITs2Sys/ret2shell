@@ -45,6 +45,7 @@
         "rehype-sanitize": "^6.0.0",
         "rehype-slug": "^6.0.0",
         "rehype-stringify": "^10.0.0",
+        "remark-gfm": "^4.0.0",
         "remark-math": "^6.0.0",
         "remark-parse": "^11.0.0",
         "remark-rehype": "^11.1.0",
@@ -53,7 +54,7 @@
         "solid-js": "^1.8.17",
         "solid-transition-group": "^0.2.3",
         "strip-ansi": "^7.1.0",
-        "unified": "^11.0.4"
+        "unified": "^11.0.5"
     },
     "devDependencies": {
         "@biomejs/biome": "1.8.1",

@@ -1,4 +1,6 @@
+import LoadingTips from "@/lib/widgets/loading-tips";
 import Challenge from "@blocks/challenge";
+import ChallengeList from "@blocks/challenge/list";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import { Permission } from "@models/user";
@@ -11,7 +13,6 @@ import Link from "@widgets/link";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
-import Challenges from "./_blocks/challenges";
 import Create from "./_blocks/create";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
@@ -25,6 +26,8 @@ export default function () {
     }
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || "NaN") || null);
+    const [selectedChallenge, setSelectedChallenge] = createSignal(null as null | ChallengeModel);
+
     const inCreate = createMemo(() => searchParams.create === "true");
     const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
     function appendChallengeHistory(challenge: ChallengeModel) {
@@ -38,7 +41,22 @@ export default function () {
         <>
             <Title title={`${t("game.challenge.title")} - ${gameStore.current?.name || "CTF"}`} />
             <SidebarLayout
-                leftBar={<Challenges />}
+                leftBar={
+                    <>
+                        <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
+                            <Link
+                                class="w-full"
+                                ghost
+                                justify="start"
+                                href={`/games/${gameStore.current?.id}/challenges`}
+                            >
+                                <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
+                                <span>{t("game.challenge.list")}</span>
+                            </Link>
+                        </div>
+                        <ChallengeList showScore />
+                    </>
+                }
                 rightBar={
                     <div class="flex flex-col">
                         <Team />
@@ -98,22 +116,13 @@ export default function () {
                         <Match when={inCreate()}>
                             <Create />
                         </Match>
+                        <Match when={selectedChallenge()}>
+                            <Challenge inGame challenge={selectedChallenge()!} />
+                        </Match>
                         <Match when={selectedChallengeId() !== null}>
-                            <Challenge
-                                inGame
-                                challenge={{
-                                    id: selectedChallengeId()!,
-                                    name: "Challenge",
-                                    score: 100,
-                                    game_id: 1,
-                                    content: "Content",
-                                    updated_at: DateTime.now(),
-                                    hidden: false,
-                                    tag: [{ name: "Reverse", primary: true }],
-                                    score_rule: { initial: 1000, minimum: 500, decay: 10 },
-                                    bucket: "",
-                                }}
-                            />
+                            <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
+                                <LoadingTips />
+                            </div>
                         </Match>
                     </Switch>
                 </div>
