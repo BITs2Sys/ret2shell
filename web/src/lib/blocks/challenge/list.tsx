@@ -1,16 +1,17 @@
+import LoadingTips from "@/lib/widgets/loading-tips";
 import TreeView, { type TreeNode } from "@/lib/widgets/treeview";
 import { useSearchParams } from "@solidjs/router";
 import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
-import Link from "@widgets/link";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createMemo } from "solid-js";
+import { Match, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function ChallengeList(props: { showScore?: boolean }) {
     const [searchParams, _] = useSearchParams();
     const selectedChallengeId = createMemo(() => {
         return Number.parseInt(searchParams.challenge || "") ?? null;
     });
+    const [loading, setLoading] = createSignal(false);
     const selectedChallenge = createMemo(() => gameStore.challenges.find((c) => c.id === selectedChallengeId()));
     const challengesEx = createMemo(() => {
         const result = [];
@@ -53,6 +54,13 @@ export default function ChallengeList(props: { showScore?: boolean }) {
         }
         return tree;
     });
+    createEffect(() => {
+        if (gameStore.current) {
+            untrack(() => {
+                // fetch challenges and set them.
+            });
+        }
+    });
     return (
         <>
             <div class="flex-1 overflow-hidden">
@@ -67,8 +75,7 @@ export default function ChallengeList(props: { showScore?: boolean }) {
                     defer
                 >
                     <div class="flex flex-col space-y-2 p-3 lg:p-6">
-                        <Show
-                            when={gameStore.challenges.length > 0}
+                        <Switch
                             fallback={
                                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
                                     <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
@@ -76,20 +83,28 @@ export default function ChallengeList(props: { showScore?: boolean }) {
                                 </div>
                             }
                         >
-                            <TreeView
-                                tree={challengesEx()}
-                                activeSearchParams="challenge"
-                                highlightPaths={
-                                    selectedChallengeId()
-                                        ? [
-                                              selectedChallenge()?.tag.find((t) => t.primary)?.name ??
-                                                  t("game.challenge.unknownTag")!,
-                                              selectedChallengeId().toString(),
-                                          ]
-                                        : undefined
-                                }
-                            />
-                        </Show>
+                            <Match when={loading()}>
+                                <div class="flex flex-row items-center justify-center p-3">
+                                    <LoadingTips />
+                                </div>
+                            </Match>
+
+                            <Match when={gameStore.challenges.length > 0}>
+                                <TreeView
+                                    tree={challengesEx()}
+                                    activeSearchParams="challenge"
+                                    highlightPaths={
+                                        selectedChallengeId()
+                                            ? [
+                                                  selectedChallenge()?.tag.find((t) => t.primary)?.name ??
+                                                      t("game.challenge.unknownTag")!,
+                                                  selectedChallengeId().toString(),
+                                              ]
+                                            : undefined
+                                    }
+                                />
+                            </Match>
+                        </Switch>
                     </div>
                 </OverlayScrollbarsComponent>
             </div>
