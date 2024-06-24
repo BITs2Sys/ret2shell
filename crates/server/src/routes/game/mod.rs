@@ -176,7 +176,7 @@ async fn update_game(
         .set_config(serde_json::to_value(&model)?)
         .await?;
     game_bucket
-        .take_shot(
+        .commit(
             ":construction: update game config",
             "platform",
             "platform@private.ret.sh.cn",
@@ -261,7 +261,7 @@ async fn update_game_intro(
         .set_introduction(&result.clone().content.unwrap_or("NO CONTENT".into()))
         .await?;
     game_bucket
-        .take_shot(
+        .commit(
             ":memo: update README.md",
             "platform",
             "platform@private.ret.sh.cn",

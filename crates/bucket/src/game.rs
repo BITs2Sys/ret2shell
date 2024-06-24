@@ -26,7 +26,7 @@ pub struct GameBucket {
 #[repr(i32)]
 pub enum HostType {
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -111,7 +111,7 @@ impl GameBucket {
             .await
     }
 
-    pub async fn take_shot(
+    pub async fn commit(
         &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
     ) -> Result<(), BucketError> {
         if !self.locked {

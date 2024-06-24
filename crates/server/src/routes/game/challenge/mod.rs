@@ -127,7 +127,7 @@ async fn create_challenge(
         .create(serde_json::to_value(&challenge)?)
         .await?;
     game_bucket
-        .take_shot(
+        .commit(
             format!("create challenge {}", challenge.name),
             &token.account,
             format!("{}@private.ret.sh.cn", token.account),
@@ -183,7 +183,7 @@ async fn update_challenge(
         .await?;
 
     game_bucket
-        .take_shot(
+        .commit(
             format!("update challenge config {}", challenge.name),
             &token.account,
             format!("{}@private.ret.sh.cn", token.account),
@@ -242,7 +242,7 @@ async fn delete_challenge(
         )
         .await?;
     game_bucket
-        .take_shot(
+        .commit(
             format!("delete challenge {}", challenge.name),
             &token.account,
             format!("{}@private.ret.sh.cn", token.account),
