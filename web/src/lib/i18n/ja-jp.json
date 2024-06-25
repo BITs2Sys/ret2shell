@@ -116,7 +116,14 @@
       "createHintCost": "消費したポイント",
       "hintRequired": "プロンプトの内容を入力してください",
       "unknownTag": "未知",
-      "noChallenges": "何もない"
+      "noChallenges": "何もない",
+      "name": "質問名",
+      "content": "質問内容",
+      "maxScore": "初期スコア",
+      "minScore": "最低スコア",
+      "scoreDecay": "減衰時間",
+      "scoreRange": "スコア範囲",
+      "tag": "ラベル"
     },
     "scoreboard": {
       "title": "スコアボード",

@@ -116,7 +116,14 @@
       "createHintCost": "分數花費",
       "hintRequired": "請填寫提示內容",
       "unknownTag": "未知",
-      "noChallenges": "什麼也沒有"
+      "noChallenges": "什麼也沒有",
+      "name": "題目名稱",
+      "content": "題目內容",
+      "maxScore": "初始分數",
+      "minScore": "最低分數",
+      "scoreDecay": "衰減次數",
+      "scoreRange": "分數範圍",
+      "tag": "標籤"
     },
     "scoreboard": {
       "title": "積分板",

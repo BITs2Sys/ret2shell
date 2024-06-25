@@ -14,6 +14,7 @@ import Files from "./files";
 import Hammer from "./hammer";
 import Hints from "./hints";
 import Instances from "./instances";
+import Intro from "./intro";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
@@ -116,7 +117,7 @@ export default function (props: {
     return (
         <div class="flex-1">
             <Splitter
-                startPanel={<div />}
+                startPanel={<Intro />}
                 endPanel={
                     <BottomPanel
                         inGame={props.inGame}

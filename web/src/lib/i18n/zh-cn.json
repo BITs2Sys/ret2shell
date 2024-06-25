@@ -133,7 +133,14 @@
       "createHintCost": "分数花费",
       "hintRequired": "请填写提示内容",
       "unknownTag": "未知",
-      "noChallenges": "什么也没有"
+      "noChallenges": "什么也没有",
+      "name": "题目名称",
+      "content": "题目内容",
+      "maxScore": "初始分数",
+      "minScore": "最低分数",
+      "scoreDecay": "衰减次数",
+      "scoreRange": "分数范围",
+      "tag": "标签"
     },
     "scoreboard": {
       "title": "积分板",

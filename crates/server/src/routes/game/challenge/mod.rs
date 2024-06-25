@@ -59,21 +59,20 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
 struct ChallengeQuery {
     page: Option<u64>,
     page_size: Option<u64>,
-    with_hidden: Option<bool>,
 }
 
 async fn get_challenge_list(
-    State(ref db): State<Database>, Extension(game): Extension<game::Model>,
-    Query(query): Query<ChallengeQuery>,
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Extension(game): Extension<game::Model>, Query(query): Query<ChallengeQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+    let with_hidden =
+        game.admins.0.contains(&token.id) && token.permissions.0.contains(&Permission::Game);
     if query.page.is_none() || query.page_size.is_none() {
-        let challenges =
-            challenge::get_list(&db.conn, game.id, query.with_hidden.unwrap_or(false)).await?;
+        let challenges = challenge::get_list(&db.conn, game.id, with_hidden).await?;
         return Ok(Json((challenges, 1)));
     }
     let page = query.page.unwrap_or(1);
     let page_size = query.page_size.unwrap_or(15);
-    let with_hidden = query.with_hidden.unwrap_or(false);
     Ok(Json(
         challenge::get_page(&db.conn, page, page_size, game.id, with_hidden).await?,
     ))

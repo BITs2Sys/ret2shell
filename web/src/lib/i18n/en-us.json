@@ -116,7 +116,14 @@
       "createHintCost": "Score cost",
       "hintRequired": "Please fill in the hint content",
       "unknownTag": "unknown",
-      "noChallenges": "Nothing here"
+      "noChallenges": "Nothing here",
+      "content": "Challenge content",
+      "maxScore": "initial score",
+      "minScore": "lowest score",
+      "name": "Challenge name",
+      "scoreDecay": "Decay times",
+      "scoreRange": "Score range",
+      "tag": "Tag"
     },
     "scoreboard": {
       "title": "Scoreboard",

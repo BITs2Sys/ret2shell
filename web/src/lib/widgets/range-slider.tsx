@@ -1,5 +1,5 @@
 import { Slider, type SliderRootProps } from "@ark-ui/solid";
-import { createEffect, createSignal, splitProps } from "solid-js";
+import { splitProps } from "solid-js";
 
 export type SliderProps = {
     label?: string;
@@ -21,6 +21,9 @@ export default function (props: SliderRootProps & SliderProps) {
                     <Slider.Range class="slider-range" />
                 </Slider.Track>
                 <Slider.Thumb index={0} class="slider-thumb group-hover:border-2">
+                    <Slider.HiddenInput />
+                </Slider.Thumb>
+                <Slider.Thumb index={1} class="slider-thumb group-hover:border-2">
                     <Slider.HiddenInput />
                 </Slider.Thumb>
             </Slider.Control>

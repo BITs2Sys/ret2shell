@@ -1,3 +1,4 @@
+import Form, { type ChallengeForm } from "@/lib/blocks/challenge/form";
 import LoadingTips from "@/lib/widgets/loading-tips";
 import Challenge from "@blocks/challenge";
 import ChallengeList from "@blocks/challenge/list";
@@ -10,10 +11,8 @@ import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import Link from "@widgets/link";
-import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
-import Create from "./_blocks/create";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
@@ -36,6 +35,7 @@ export default function () {
         }
         setChallengeHistory([...challengeHistory(), { id: challenge.id, name: challenge.name }]);
     }
+    function onCreateChallenge(challenge: ChallengeForm) {}
     // TODO: fetchSelfTeam and redirect
     return (
         <>
@@ -114,7 +114,7 @@ export default function () {
                     </OverlayScrollbarsComponent>
                     <Switch fallback={<Welcome />}>
                         <Match when={inCreate()}>
-                            <Create />
+                            <Form onDone={onCreateChallenge} />
                         </Match>
                         <Match when={selectedChallenge()}>
                             <Challenge inGame challenge={selectedChallenge()!} />
