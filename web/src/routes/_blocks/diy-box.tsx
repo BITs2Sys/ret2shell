@@ -35,7 +35,7 @@ export function DiyBoxContent() {
                         </Button>
                     </li>
                     */}
-                    <li class="w-32" />
+                    <li class="w-16" />
                     <li>
                         <Button
                             size="sm"

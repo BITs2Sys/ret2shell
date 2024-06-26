@@ -141,7 +141,14 @@
             "scoreDecay": "衰减次数",
             "scoreRange": "分数范围",
             "tag": "标签",
-            "fetchFailed": "获取题目列表失败"
+            "fetchFailed": "获取题目列表失败",
+            "fetchChallengeFailed": "获取题目失败",
+            "createFailed": "创建题目失败",
+            "nameRequired": "请输入题目名称",
+            "tagRequired": "请输入题目标签",
+            "tagPlaceholder": "题目标签，以 `/` 作为分隔，第一个标签将成为题目分类...",
+            "contentRequired": "请输入题目内容",
+            "fetchFilesFailed": "获取题目附件失败"
         },
         "scoreboard": {
             "title": "积分板",

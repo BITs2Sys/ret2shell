@@ -162,7 +162,11 @@ impl ChallengeBucket {
         let mut files = vec![];
         let mut dir = read_dir(&self.path.join("static")).await?;
         while let Some(entry) = dir.next_entry().await? {
-            files.push(entry.file_name().to_string_lossy().to_string());
+            let entry_file = entry.file_name().to_string_lossy().to_string();
+            if entry_file.starts_with(".") {
+                continue;
+            }
+            files.push(entry_file);
         }
         Ok(files)
     }
@@ -171,7 +175,11 @@ impl ChallengeBucket {
         let mut files = vec![];
         let mut dir = read_dir(&self.path.join("mapped")).await?;
         while let Some(entry) = dir.next_entry().await? {
-            files.push(entry.file_name().to_string_lossy().to_string());
+            let entry_file = entry.file_name().to_string_lossy().to_string();
+            if entry_file.starts_with(".") {
+                continue;
+            }
+            files.push(entry_file);
         }
         Ok(files)
     }

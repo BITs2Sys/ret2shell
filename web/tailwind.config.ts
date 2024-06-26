@@ -37,6 +37,7 @@ export default {
         extend: {
             transitionProperty: {
                 size: "width, height",
+                font: "font-size",
             },
         },
     },

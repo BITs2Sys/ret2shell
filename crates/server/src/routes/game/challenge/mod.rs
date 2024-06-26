@@ -22,6 +22,7 @@ use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tokio_util::io::ReaderStream;
+use tracing::debug;
 
 use crate::{
     middleware::{
@@ -123,14 +124,6 @@ async fn create_challenge(
     Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let txn = db.conn.begin().await?;
-    let challenge = challenge::create(
-        &txn,
-        challenge::Model {
-            game_id: game.id,
-            ..challenge
-        },
-    )
-    .await?;
     let game_bucket = bucket
         .at_mut(
             game.bucket
@@ -140,9 +133,19 @@ async fn create_challenge(
                 )))?,
         )
         .await?;
-    game_bucket
+    let challenge_bucket = game_bucket
         .create(serde_json::to_value(&challenge)?)
         .await?;
+    let challenge = challenge::create(
+        &txn,
+        challenge::Model {
+            game_id: game.id,
+            hidden: true,
+            bucket: Some(challenge_bucket.name),
+            ..challenge
+        },
+    )
+    .await?;
     game_bucket
         .commit(
             format!("create challenge {}", challenge.name),
@@ -341,6 +344,7 @@ async fn get_files(
     db: &Database, bucket: &ChallengeBucket, game: game::Model, token: Token,
 ) -> Result<Vec<FileResponse>, ResponseError> {
     let static_files = bucket.get_static_files().await?;
+    debug!("files: {:?}", static_files);
     let mapped_file = if game.in_progress() {
         let team = team::get_by_user_id(&db.conn, game.id, token.id).await?;
         if team.is_none()

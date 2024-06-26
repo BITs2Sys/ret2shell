@@ -3,7 +3,7 @@ import { fullTheme, t } from "@/lib/storage/theme";
 import Button from "@/lib/widgets/button";
 import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
-import { createForm, setValue } from "@modular-forms/solid";
+import { createForm, required, setValue } from "@modular-forms/solid";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, untrack } from "solid-js";
 import ScorePicker from "./score-picker";
@@ -57,7 +57,7 @@ export default function (props: {
                 >
                     <div class="flex flex-col p-3 lg:p-6 w-full items-center">
                         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-                            <Field name="name">
+                            <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]}>
                                 {(field, props) => (
                                     <Input
                                         icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -70,12 +70,12 @@ export default function (props: {
                                     />
                                 )}
                             </Field>
-                            <Field name="tag">
+                            <Field name="tag" validate={[required(t("game.challenge.tagRequired")!)]}>
                                 {(field, props) => (
                                     <Input
                                         icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
                                         title={t("game.challenge.tag")}
-                                        placeholder={t("game.challenge.tag")}
+                                        placeholder={t("game.challenge.tagPlaceholder")}
                                         {...props}
                                         value={field.value}
                                         error={field.error}
@@ -158,7 +158,7 @@ export default function (props: {
                                     )}
                                 </Field>
                             </div>
-                            <Field name="content">
+                            <Field name="content" validate={[required(t("game.challenge.contentRequired")!)]}>
                                 {(field) => (
                                     <Editor
                                         form={form}

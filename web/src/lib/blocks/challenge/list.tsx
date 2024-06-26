@@ -1,15 +1,12 @@
-import { getChallengeList } from "@/lib/api/game";
-import { addToast } from "@/lib/storage/toast";
 import LoadingTips from "@/lib/widgets/loading-tips";
 import TreeView, { type TreeNode } from "@/lib/widgets/treeview";
 import { useSearchParams } from "@solidjs/router";
-import { gameStore, setGameStore } from "@storage/game";
+import { gameStore, refreshChallenges } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
-import { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Match, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
-export default function ChallengeList(props: { showScore?: boolean }) {
+export default function ChallengeList(props: { showScore?: boolean; paginated?: boolean }) {
     const [searchParams, _] = useSearchParams();
     const selectedChallengeId = createMemo(() => {
         return Number.parseInt(searchParams.challenge || "") ?? null;
@@ -47,10 +44,14 @@ export default function ChallengeList(props: { showScore?: boolean }) {
                     searchValue: c.challenge.id.toString(),
                     link: `/games/${gameStore.current?.id}/challenges?challenge=${c.challenge.id}`,
                     extraClasses: c.solved ? "opacity-60" : "",
-                    icon: c.solved
-                        ? "icon-[fluent--checkmark-circle-20-regular] text-success"
-                        : "icon-[fluent--flag-20-regular]",
-                    extraPart: props.showScore ? <span class="font-bold">{c.challenge.score} pts</span> : null,
+                    icon: c.challenge.hidden
+                        ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
+                        : c.solved
+                          ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+                          : "icon-[fluent--flag-20-regular]",
+                    extraPart: props.showScore ? (
+                        <span class="font-bold opacity-60">{c.challenge.score} pts</span>
+                    ) : null,
                     children: [],
                 })),
             });
@@ -62,21 +63,9 @@ export default function ChallengeList(props: { showScore?: boolean }) {
             untrack(() => {
                 // fetch challenges and set them.
                 setLoading(true);
-                getChallengeList(gameStore.current!.id)
-                    .then((result) => {
-                        setGameStore({ challenges: result[0] });
-                    })
-                    .catch((e: HTTPError) => {
-                        e.response.text().then((text) => {
-                            addToast({
-                                level: "error",
-                                description: `${t("game.challenge.fetchFailed")}: ${text}`,
-                            });
-                        });
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
+                refreshChallenges().finally(() => {
+                    setLoading(false);
+                });
             });
         }
     });

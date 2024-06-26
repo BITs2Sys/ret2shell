@@ -7,17 +7,20 @@ import type { Challenge as ChallengeModel } from "@models/challenge";
 import { Permission } from "@models/user";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore } from "@storage/game";
+import { gameStore, refreshChallenges } from "@storage/game";
 import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import Link from "@widgets/link";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
 import { DateTime } from "luxon";
-import { createChallenge } from "@/lib/api/game";
+import { createChallenge, getChallenge } from "@/lib/api/game";
+import type { HTTPError } from "ky";
+import { addToast } from "@/lib/storage/toast";
+import Button from "@/lib/widgets/button";
 
 export default function () {
     const navigate = useNavigate();
@@ -25,11 +28,38 @@ export default function () {
         navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ""}`);
         return null;
     }
+    const [loadingChallenge, setLoadingChallenge] = createSignal(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || "NaN") || null);
     const [selectedChallenge, setSelectedChallenge] = createSignal(null as null | ChallengeModel);
-
+    createEffect(() => {
+        if (selectedChallengeId() && gameStore.current) {
+            untrack(() => {
+                setLoadingChallenge(true);
+                getChallenge(gameStore.current!.id, selectedChallengeId()!)
+                    .then((resp) => {
+                        setSelectedChallenge(resp);
+                        appendChallengeHistory(resp);
+                    })
+                    .catch((e: HTTPError) => {
+                        e.response.text().then((text) => {
+                            addToast({
+                                level: "error",
+                                description: `${t("game.challenge.fetchChallengeFailed")}: ${text}`,
+                                duration: 5000,
+                            });
+                        });
+                    })
+                    .finally(() => {
+                        setLoadingChallenge(false);
+                    });
+            });
+        } else {
+            setSelectedChallenge(null);
+        }
+    });
     const inCreate = createMemo(() => searchParams.create === "true");
+    const [creating, setCreating] = createSignal(false);
     const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
     function appendChallengeHistory(challenge: ChallengeModel) {
         if (challengeHistory().find((c) => c.id === challenge.id)) {
@@ -38,6 +68,7 @@ export default function () {
         setChallengeHistory([...challengeHistory(), { id: challenge.id, name: challenge.name }]);
     }
     function onCreateChallenge(result: ChallengeForm) {
+        setCreating(true);
         const tags = result.tag.split("/").map((t) => {
             return { name: t, primary: false };
         });
@@ -59,12 +90,26 @@ export default function () {
             score: result.initial,
             bucket: null,
         } as ChallengeModel;
-        createChallenge(gameStore.current!.id, challenge).then((result) => {
-            setSearchParams({
-                create: null,
-                challenge: result.id,
+        createChallenge(gameStore.current!.id, challenge)
+            .then((result) => {
+                setSearchParams({
+                    create: null,
+                    challenge: result.id,
+                });
+                refreshChallenges();
+            })
+            .catch((e: HTTPError) => {
+                e.response.text().then((text) => {
+                    addToast({
+                        level: "error",
+                        description: `${t("game.challenge.createFailed")}: ${text}`,
+                        duration: 5000,
+                    });
+                });
+            })
+            .finally(() => {
+                setCreating(false);
             });
-        });
     }
     // TODO: fetchSelfTeam and redirect
     return (
@@ -140,11 +185,16 @@ export default function () {
                                     </Link>
                                 )}
                             </For>
+                            <Show when={loadingChallenge()}>
+                                <Button loading ghost>
+                                    <span>{t("form.loading")}</span>
+                                </Button>
+                            </Show>
                         </div>
                     </OverlayScrollbarsComponent>
                     <Switch fallback={<Welcome />}>
                         <Match when={inCreate()}>
-                            <Form onDone={onCreateChallenge} />
+                            <Form onDone={onCreateChallenge} loading={creating()} />
                         </Match>
                         <Match when={selectedChallenge()}>
                             <Challenge inGame challenge={selectedChallenge()!} />

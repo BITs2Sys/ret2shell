@@ -7,6 +7,9 @@ import { DateTime } from "luxon";
 import { createStore } from "solid-js/store";
 import { accountStore } from "./account";
 import { t } from "./theme";
+import { getChallengeList } from "../api/game";
+import { HTTPError } from "ky";
+import { addToast } from "./toast";
 
 export const [gameStore, setGameStore] = createStore({
     games: [] as Game[],
@@ -89,6 +92,7 @@ export function canAccessChallenges(): [boolean, string] {
     }
     return [false, t("game.team.joinFirst")!];
 }
+
 export function isGameAdmin() {
     if (!accountStore.id) return false;
     if (
@@ -99,4 +103,19 @@ export function isGameAdmin() {
         return true;
     }
     return false;
+}
+
+export async function refreshChallenges() {
+    try {
+        const result = await getChallengeList(gameStore.current!.id);
+        setGameStore({ challenges: result[0] });
+    } catch (e) {
+        const err = e as HTTPError;
+        const text = await err.response.text();
+        addToast({
+            level: "error",
+            description: `${t("game.challenge.fetchFailed")}: ${text}`,
+            duration: 5000,
+        });
+    }
 }

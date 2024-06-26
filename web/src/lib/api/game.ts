@@ -120,3 +120,9 @@ export async function deleteChallengeHint(game_id: number, challenge_id: number,
         })
         .json<void>();
 }
+
+export async function getChallengeAttachments(game_id: number, challenge_id: number) {
+    return await api
+        .get(`${api_root}/game/${game_id}/challenge/${challenge_id}/files`)
+        .json<{ folder: "static" | "mapped"; file: string }[]>();
+}

@@ -117,7 +117,7 @@ export default function (props: {
     return (
         <div class="flex-1">
             <Splitter
-                startPanel={<Intro />}
+                startPanel={<Intro challenge={props.challenge} />}
                 endPanel={
                     <BottomPanel
                         inGame={props.inGame}
