@@ -1,5 +1,5 @@
 import { Slider, type SliderRootProps } from "@ark-ui/solid";
-import { createEffect, createSignal, splitProps } from "solid-js";
+import { splitProps } from "solid-js";
 
 export type SliderProps = {
     label?: string;

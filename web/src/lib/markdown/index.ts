@@ -1,4 +1,4 @@
-import rehypeToc, { type HtmlElementNode } from "@jsdevtools/rehype-toc";
+import rehypeToc from "@jsdevtools/rehype-toc";
 import { toHtml } from "hast-util-to-html";
 import type { Nodes } from "hast-util-to-html/lib";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";

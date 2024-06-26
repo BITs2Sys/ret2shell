@@ -8,7 +8,7 @@ import { Permission } from "@models/user";
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
-import { Title, setupTitleResolver } from "@storage/header";
+import { setupTitleResolver } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast, removeToast, toastStore } from "@storage/toast";

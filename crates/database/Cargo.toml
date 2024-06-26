@@ -30,3 +30,4 @@ r2s-config = { version = "1", path = "../config" }
 
 [lib]
 path = "src/lib.rs"
+

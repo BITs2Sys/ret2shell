@@ -1,7 +1,7 @@
 import IconCheckbox from "@/lib/widgets/icon-checkbox";
 import { createWiki, updateWiki } from "@api/wiki";
 import { type Article, ArticleAccessPolicy } from "@models/article";
-import { createForm, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, required, setValues } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";

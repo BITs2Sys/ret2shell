@@ -1,6 +1,3 @@
-import BgBlurNight from "@assets/imgs/bg-blur-stars.webp";
-import BgBlurDay from "@assets/imgs/bg-blur-suzume.webp";
-import { themeStore } from "@storage/theme";
 import "./background.scss";
 import { onMount } from "solid-js";
 
@@ -15,35 +12,12 @@ export default function () {
     });
     return (
         <div class="fixed -left-1 -right-1 -top-1 -bottom-1 -z-10 print:hidden">
-            {/* <div class="w-full h-full relative">
-                <img
-                    src={BgBlurNight}
-                    alt=""
-                    class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
-                        themeStore.colorScheme === "dark" ? "opacity-100" : "opacity-0"
-                    }`.trim()}
-                    onContextMenu={() => {
-                        return false;
-                    }}
-                />
-                <img
-                    src={BgBlurDay}
-                    alt=""
-                    class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
-                        themeStore.colorScheme === "light" ? "opacity-100" : "opacity-0"
-                    }`.trim()}
-                    onContextMenu={() => {
-                        return false;
-                    }}
-                />
-            </div> */}
             <div class="fixed left-0 right-0 top-0 bottom-0 bg-layer/90 transition-colors duration-700" />
             <svg
                 viewBox="0 0 960 1080"
                 xmlns="http://www.w3.org/2000/svg"
                 class="fixed left-0 bottom-0 h-screen opacity-30 print:hidden"
             >
-                {/* <animate attributeName="stroke-dashoffset" dur="2s" values="1000;0" fill="freeze" /> */}
                 <path
                     fill="none"
                     stroke="#0078d6"
@@ -58,7 +32,6 @@ export default function () {
                 xmlns="http://www.w3.org/2000/svg"
                 class="fixed right-0 top-0 h-screen opacity-30 print:hidden"
             >
-                {/* <animate attributeName="stroke-dashoffset" dur="2s" values="1000;0" fill="freeze" /> */}
                 <path
                     fill="none"
                     stroke="#0078d6"

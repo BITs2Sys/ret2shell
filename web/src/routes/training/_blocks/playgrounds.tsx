@@ -1,8 +1,6 @@
-import { gameStore, setGameStore } from "@/lib/storage/game";
-import { getGame, getGames } from "@api/game";
+import { getGames } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { Permission } from "@models/user";
-import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";

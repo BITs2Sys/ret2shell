@@ -7,9 +7,10 @@ use axum::{
     routing::{get, patch, post},
     Extension, Json, Router,
 };
+use chrono::Utc;
 use r2s_bucket::{challenge::ChallengeBucket, Bucket};
 use r2s_database::{
-    challenge, game, team,
+    challenge, extra, game, hint, team,
     user::{self, Permission},
 };
 use r2s_event::{
@@ -42,17 +43,34 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             "/:challenge",
             Router::new()
                 .route("/files", get(get_player_attachment))
+                .route(
+                    "/hint",
+                    post(create_challenge_hint).delete(delete_challenge_hint),
+                )
                 .route("/", patch(update_challenge).delete(delete_challenge))
                 .route_layer(middleware::from_fn_with_state(
                     state.clone(),
                     auth::game_admin_required,
                 ))
+                .route("/hint", get(get_challenge_hints))
                 .route("/", get(get_challenge).post(submit_flag))
-                .layer(middleware::from_fn_with_state(
+                .route_layer(middleware::from_fn_with_state(
+                    state.clone(),
+                    auth::challenge_access_required,
+                ))
+                .route_layer(middleware::from_fn_with_state(
                     state.clone(),
                     data::prepare_data!(challenge, true),
                 )),
         )
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            data::prepare_team_info,
+        ))
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth::game_access_required,
+        ))
 }
 
 #[derive(Deserialize)]
@@ -357,4 +375,79 @@ async fn get_files(
         });
     }
     Ok(files)
+}
+
+async fn get_challenge_hints(
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+    team_ext: Option<Extension<team::Model>>,
+) -> Result<impl IntoResponse, ResponseError> {
+    if game.start_at < Utc::now() {
+        return Err(ResponseError::Forbidden(
+            "game is not start".to_owned(),
+            format!("user {}:'{}' ({}) wants to access challenge {}:'{}' hint before game {}:'{}' start", token.id, token.account, token.nickname, challenge.id, challenge.name, game.id, game.name))
+        );
+    }
+    let team = if game.in_progress()
+        && !(game.admins.0.contains(&token.id) && token.permissions.0.contains(&Permission::Game))
+    {
+        if let Some(Extension(team)) = team_ext {
+            Some(team)
+        } else {
+            return Err(ResponseError::Forbidden(
+                "please take part in first".to_owned(),
+                format!(
+                    "user {}:'{}' ({}) wants to access challenge {}:'{}' hint without permission",
+                    token.id, token.account, token.nickname, challenge.id, challenge.name
+                ),
+            ));
+        }
+    } else {
+        None
+    };
+    let hints = hint::get_list(&db.conn, challenge.id).await?;
+    if let Some(team) = team {
+        let extras = extra::get_list(&db.conn, team.id).await?;
+        let hints = hints
+            .iter()
+            .map(|h| {
+                if h.cost > 0 && extras.iter().find(|e| e.hint_id == Some(h.id)).is_none() {
+                    h.clone().desensitize()
+                } else {
+                    h.clone()
+                }
+            })
+            .collect();
+        Ok(Json(hints))
+    } else {
+        Ok(Json(hints))
+    }
+}
+
+async fn create_challenge_hint(
+    State(ref db): State<Database>, Extension(challenge): Extension<challenge::Model>,
+    Json(hint): Json<hint::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    Ok(Json(
+        hint::create(
+            &db.conn,
+            hint::Model {
+                challenge_id: challenge.id,
+                ..hint
+            },
+        )
+        .await?,
+    ))
+}
+
+#[derive(Deserialize)]
+struct DeleteHintQuery {
+    pub id: i64,
+}
+
+async fn delete_challenge_hint(
+    State(ref db): State<Database>, Query(query): Query<DeleteHintQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+    hint::delete(&db.conn, query.id).await?;
+    Ok(())
 }

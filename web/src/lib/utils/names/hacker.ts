@@ -56,9 +56,11 @@ export const suffix = [
     "script",
 ];
 
-export default {
+const hacker = {
     prefix,
     semi,
     suffix,
     withLeet,
 };
+
+export default hacker;

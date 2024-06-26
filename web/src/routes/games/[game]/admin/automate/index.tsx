@@ -2,7 +2,6 @@ import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
-import Divider from "@widgets/divider";
 import { For, createSignal } from "solid-js";
 
 export default function () {

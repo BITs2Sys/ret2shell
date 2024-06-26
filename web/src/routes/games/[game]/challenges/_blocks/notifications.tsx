@@ -1,7 +1,7 @@
 import { createNotification, deleteNotification, getNotifications } from "@api/notification";
 import type { Notification } from "@models/notification";
 import { Permission } from "@models/user";
-import { createForm, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, required, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";

@@ -44,7 +44,7 @@ export default function () {
             const match = comps[`./contents/${path}/index.${themeStore.locale}.md`];
             const content = (await match()) as { default: string };
             setContent(content.default);
-        } catch (e) {
+        } catch (_se) {
             // console.error(e);
             setNotFound(true);
         }

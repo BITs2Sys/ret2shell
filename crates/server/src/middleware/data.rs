@@ -59,16 +59,10 @@ pub async fn prepare_team_info(
         Some(team) => {
             req.extensions_mut()
                 .insert::<r2s_database::team::Model>(team);
-            Ok(next.run(req).await)
         }
-        None => Err(ResponseError::Forbidden(
-            "permission denied".into(),
-            format!(
-                "user {}:'{}' ({}) want to access game {}:'{}' without team",
-                token.id, token.account, token.nickname, game.id, game.name
-            ),
-        )),
+        None => (),
     }
+    Ok(next.run(req).await)
 }
 
 macro_rules! get_path_param_i64 {

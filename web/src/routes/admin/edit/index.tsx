@@ -2,7 +2,7 @@ import Checkbox from "@/lib/widgets/checkbox";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
-import { createForm, custom, setValue, setValues } from "@modular-forms/solid";
+import { createForm, custom, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -10,7 +10,7 @@ import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import type { HTTPError } from "ky";
-import { Show, createSignal, onMount } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 
 type PlatformConfigForm = {
     name?: string;

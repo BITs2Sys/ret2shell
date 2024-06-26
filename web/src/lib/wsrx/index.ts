@@ -27,8 +27,11 @@ export class Wsrx {
     async checkConnection() {
         try {
             const resp = await ky.get(`${this.apiAddr()}/connect`);
-            if (resp.status === 201) this.setConnected(WsrxState.Pending);
-            else this.setConnected(WsrxState.Connected);
+            if (resp.status === 201) {
+                this.setConnected(WsrxState.Pending);
+            } else {
+                this.setConnected(WsrxState.Connected);
+            }
         } catch {
             this.setConnected(WsrxState.Disconnected);
         }

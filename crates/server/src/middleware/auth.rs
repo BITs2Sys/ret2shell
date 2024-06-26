@@ -12,7 +12,7 @@ use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, 
 use r2s_cache::Cache;
 use r2s_config::auth;
 use r2s_database::{
-    config, game, team,
+    challenge, config, game, team,
     user::{Permission, Permissions},
 };
 use r2s_migrator::Database;
@@ -265,7 +265,6 @@ pub async fn game_admin_required(
     }
 }
 
-#[allow(dead_code)]
 pub async fn game_access_required(
     State(ref db): State<Database>, Extension(token): Extension<Token>,
     Extension(game): Extension<game::Model>, req: Request, next: Next,
@@ -295,6 +294,31 @@ pub async fn game_access_required(
             format!(
                 "user {}:'{}' ({}) want to access game {}:'{}' api with out participation or banned",
                 token.id, token.account, token.nickname, game.id, game.name
+            ),
+        ));
+    }
+    Ok(next.run(req).await)
+}
+
+pub async fn challenge_access_required(
+    Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+    Extension(challenge): Extension<challenge::Model>, req: Request, next: Next,
+) -> Result<impl IntoResponse, ResponseError> {
+    if token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id) {
+        return Ok(next.run(req).await);
+    }
+    if game.hidden || challenge.hidden {
+        return Err(ResponseError::Forbidden(
+            "permission denied".to_owned(),
+            format!(
+                "user {}:'{}' ({}) want to access hidden game {}:'{}' challenge {}:{}",
+                token.id,
+                token.account,
+                token.nickname,
+                game.id,
+                game.name,
+                challenge.id,
+                challenge.name
             ),
         ));
     }

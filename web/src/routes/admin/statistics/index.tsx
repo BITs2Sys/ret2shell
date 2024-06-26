@@ -6,7 +6,6 @@ import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
 import type { HTTPError } from "ky";

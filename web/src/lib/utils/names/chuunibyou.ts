@@ -84,9 +84,11 @@ export const suffix = [
 
 export const withLeet = false;
 
-export default {
+const chuunibyou = {
     prefix,
     semi,
     suffix,
     withLeet,
 };
+
+export default chuunibyou;

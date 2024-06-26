@@ -7,7 +7,7 @@ import vidarMascot from "@assets/imgs/vidar-mascot.webp";
 import xdsecMascot from "@assets/imgs/xdsec-mascot.webp";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
-import SakanaWidget, { type SakanaWidgetCharacter } from "sakana-widget";
+import SakanaWidget from "sakana-widget";
 import { onMount } from "solid-js";
 
 export default function () {

@@ -1,6 +1,6 @@
 import { createGame } from "@api/game";
 import { type Game, HostType } from "@models/game";
-import { createForm, required, setValues } from "@modular-forms/solid";
+import { createForm, required } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
