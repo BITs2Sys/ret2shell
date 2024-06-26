@@ -5,7 +5,7 @@ import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
 import { createForm, setValue } from "@modular-forms/solid";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, untrack } from "solid-js";
 import ScorePicker from "./score-picker";
 
 export type ChallengeForm = {
@@ -20,9 +20,9 @@ export type ChallengeForm = {
 export default function (props: {
     onDone: (challenge: ChallengeForm) => void;
     editSource?: Challenge;
+    loading?: boolean;
 }) {
     const [form, { Form, Field }] = createForm<ChallengeForm>();
-    const [loading, setLoading] = createSignal(false);
     function onSubmit(result: ChallengeForm) {
         props.onDone(result);
     }
@@ -177,8 +177,8 @@ export default function (props: {
                                 type="submit"
                                 level="primary"
                                 class="!mt-4"
-                                loading={loading()}
-                                disabled={loading()}
+                                loading={props.loading}
+                                disabled={props.loading}
                             >
                                 {t("form.create")}
                             </Button>

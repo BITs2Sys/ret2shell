@@ -25,7 +25,7 @@
       @apply flex-row;
 
       .slider-label {
-        @apply flex-row [writing-mode:sideways-lr] w-4;
+        @apply flex-row [writing-mode:vertical-rl] w-4;
       }
 
       .slider-control {

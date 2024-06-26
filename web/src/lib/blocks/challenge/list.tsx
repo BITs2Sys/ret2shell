@@ -1,8 +1,11 @@
+import { getChallengeList } from "@/lib/api/game";
+import { addToast } from "@/lib/storage/toast";
 import LoadingTips from "@/lib/widgets/loading-tips";
 import TreeView, { type TreeNode } from "@/lib/widgets/treeview";
 import { useSearchParams } from "@solidjs/router";
-import { gameStore } from "@storage/game";
+import { gameStore, setGameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
+import { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Match, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
@@ -58,6 +61,22 @@ export default function ChallengeList(props: { showScore?: boolean }) {
         if (gameStore.current) {
             untrack(() => {
                 // fetch challenges and set them.
+                setLoading(true);
+                getChallengeList(gameStore.current!.id)
+                    .then((result) => {
+                        setGameStore({ challenges: result[0] });
+                    })
+                    .catch((e: HTTPError) => {
+                        e.response.text().then((text) => {
+                            addToast({
+                                level: "error",
+                                description: `${t("game.challenge.fetchFailed")}: ${text}`,
+                            });
+                        });
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
             });
         }
     });

@@ -16,6 +16,8 @@ import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
+import { DateTime } from "luxon";
+import { createChallenge } from "@/lib/api/game";
 
 export default function () {
     const navigate = useNavigate();
@@ -35,7 +37,35 @@ export default function () {
         }
         setChallengeHistory([...challengeHistory(), { id: challenge.id, name: challenge.name }]);
     }
-    function onCreateChallenge(challenge: ChallengeForm) {}
+    function onCreateChallenge(result: ChallengeForm) {
+        const tags = result.tag.split("/").map((t) => {
+            return { name: t, primary: false };
+        });
+        tags[0].primary = true;
+
+        const challenge = {
+            id: 0,
+            name: result.name,
+            updated_at: DateTime.now(),
+            hidden: true,
+            content: result.content,
+            game_id: gameStore.current?.id,
+            tag: tags,
+            score_rule: {
+                initial: result.initial,
+                minimum: result.minimum,
+                decay: result.decay,
+            },
+            score: result.initial,
+            bucket: null,
+        } as ChallengeModel;
+        createChallenge(gameStore.current!.id, challenge).then((result) => {
+            setSearchParams({
+                create: null,
+                challenge: result.id,
+            });
+        });
+    }
     // TODO: fetchSelfTeam and redirect
     return (
         <>

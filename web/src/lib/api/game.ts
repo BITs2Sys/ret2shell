@@ -4,6 +4,7 @@ import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
 import type { SearchParamsOption } from "ky";
 import api, { api_root } from ".";
+import type { Hint } from "../models/hint";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
     return (
@@ -96,4 +97,26 @@ export async function updateChallenge(game_id: number, challenge: Challenge) {
 
 export async function deleteChallenge(game_id: number, challenge_id: number) {
     return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>();
+}
+
+export async function getChallengeHint(game_id: number, challenge_id: number) {
+    return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`).json<Hint[]>();
+}
+
+export async function createChallengeHint(game_id: number, challenge_id: number, hint: Hint) {
+    return await api
+        .post(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+            json: hint,
+        })
+        .json<Hint[]>();
+}
+
+export async function deleteChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
+    return await api
+        .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+            searchParams: {
+                id: hint_id,
+            },
+        })
+        .json<void>();
 }
