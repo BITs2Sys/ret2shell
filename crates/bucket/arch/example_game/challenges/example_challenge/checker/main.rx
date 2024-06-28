@@ -1,6 +1,9 @@
 use ret2api::audit;
 use ret2api::utils;
 
+const key = "kamisato_ayaka";
+const template = "you_said_right_but_you_should_play_genshin_impact";
+
 /// Check flag submitted by user.
 /// 
 /// * bucket: the challenge bucket path
@@ -16,21 +19,21 @@ use ret2api::utils;
 pub async fn check(bucket, user, team, submission) {
   let flag = utils::Flag::parse(submission.content)?;
 
-  let enc_id = if let Some(id) = team.get(id) {
+  let enc_id = if let Some(id) = team.get("id") {
     id
   } else {
     user.id
   };
 
-  let correct_content = audit::encode("you_said_right_but_you_should_play_genshin_impact", "kamisato_ayaka", enc_id);
+  let correct_content = audit::encode(template, key, enc_id);
 
   if correct_content == flag.content() {
     return Ok((true, "Correct!", None));
   }
 
   // the flag is wrong, we try extract peer_team id here.
-  let dec_id = audit::decode("you_said_right_but_you_should_play_genshin_impact", "kamisato_ayaka", flag.content())?;
-  if let Some(id) = team.get(id) {
+  let dec_id = audit::decode(template, key, flag.content())?;
+  if let Some(id) = team.get("id") {
     if dec_id != id {
       return Ok((false, "Incorrect!", Some(#{
         peer_team: dec_id,
@@ -50,12 +53,12 @@ pub async fn check(bucket, user, team, submission) {
 /// 
 /// Returns: { key: string, value: string }[]
 pub async fn environ(bucket, user, team) {
-  let enc_id = if let Some(id) = team.get(id) {
+  let enc_id = if let Some(id) = team.get("id") {
     id
   } else {
     user.id
   };
-  let content = audit::encode("you_said_right_but_you_should_play_genshin_impact", "kamisato_ayaka", enc_id);
+  let content = audit::encode(template, key, enc_id);
   Ok(#{
     FLAG: utils::Flag::new().with_prefix("flag").with_content(content).to_string(),
   })
