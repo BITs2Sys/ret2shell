@@ -2,6 +2,7 @@ use ret2api::audit;
 use ret2api::utils;
 
 const key = "kamisato_ayaka";
+const prefix = "flag";
 const template = "you_said_right_but_you_should_play_genshin_impact";
 
 /// Check flag submitted by user.
@@ -18,6 +19,9 @@ const template = "you_said_right_but_you_should_play_genshin_impact";
 /// The audit message will be validate again in the platform, so don't worry about false positives.
 pub async fn check(bucket, user, team, submission) {
   let flag = utils::Flag::parse(submission.content)?;
+  if flag.prefix() != prefix {
+    return Ok((false, "Incorrect!", None))
+  }
 
   let enc_id = if let Some(id) = team.get("id") {
     id
