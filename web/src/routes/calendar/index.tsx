@@ -528,8 +528,8 @@ export default function () {
                                 <span
                                     classList={{
                                         "text-primary":
-                                            currentDate.year === year() &&
-                                            currentDate.month === month() &&
+                                            currentDate.year === day.year &&
+                                            currentDate.month === day.month &&
                                             currentDate.day === day.day,
                                     }}
                                 >
