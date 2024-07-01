@@ -1,7 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
 use axum::{
-    body::Body,
     extract::{
         ws::{Message, WebSocket},
         Query, State, WebSocketUpgrade,
