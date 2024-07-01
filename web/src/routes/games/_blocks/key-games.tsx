@@ -28,7 +28,9 @@ import CreateGame from "./create";
 export default function () {
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = createSignal(1);
+    const pageSize = 5;
     const [total, setTotal] = createSignal(0);
+    const totalPages = createMemo(() => Math.ceil(total() / pageSize));
     const [loading, setLoading] = createSignal(true);
     const showCreate = () => searchParams.create === "true";
     const selectedGameId = createMemo(() => {
@@ -42,7 +44,7 @@ export default function () {
         return gameStore.games
             .filter((game) => game.weight >= 3 && game.host_type === HostType.CTFGame)
             .sort((a, b) => b.start_at.diff(a.start_at).seconds)
-            .slice((page() - 1) * 5, page() * 5 + 1);
+            .slice((page() - 1) * pageSize, page() * pageSize + 1);
     });
 
     const selectedGame = createMemo(() => {
@@ -54,7 +56,7 @@ export default function () {
 
     function fetchGames() {
         /// fetch games from server
-        getGames(page(), 5, HostType.CTFGame, 3)
+        getGames(page(), pageSize, HostType.CTFGame, 3)
             .then(([games, total]) => {
                 appendGames(games);
                 setTotal(total);
@@ -156,7 +158,7 @@ export default function () {
                     )}
                 </For>
                 <Divider class="w-4/5" />
-                <Button ghost class="w-4/5" disabled={page() >= total()} onClick={() => setPage(page() + 1)}>
+                <Button ghost class="w-4/5" disabled={page() >= totalPages()} onClick={() => setPage(page() + 1)}>
                     <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60" />
                 </Button>
                 <Divider class="w-4/5" />

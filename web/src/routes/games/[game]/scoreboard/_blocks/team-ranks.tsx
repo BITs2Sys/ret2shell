@@ -16,6 +16,7 @@ export default function TeamRanks(props: {
     teams: Team[];
     page: number;
     pageSize: number;
+    total: number;
     showTime?: boolean;
     loading?: boolean;
     onPageChange?: (page: number) => void;
@@ -82,7 +83,7 @@ export default function TeamRanks(props: {
             </ul>
             <Pagination
                 class="pt-6"
-                count={props.page * props.pageSize}
+                count={props.total}
                 pageSize={props.pageSize}
                 page={props.page}
                 onPageChange={(e) => props.onPageChange?.(e.page)}

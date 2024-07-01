@@ -81,6 +81,7 @@ export default function () {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [teams, setTeams] = createSignal<Team[]>([]);
+    const [total, setTotal] = createSignal(0);
     const [topTeams, setTopTeams] = createSignal<Team[]>([]);
     const [page, setPage] = createSignal(1);
     const [pageSize, setPageSize] = createSignal(10);
@@ -313,7 +314,15 @@ export default function () {
                                 <TeamDetails topTeams={topTeams().slice(0, 3)} challenges={[]} />
                             </Match>
                             <Match when={showChallengeDetail()}>
-                                <TeamRanks teams={teams()} page={page()} pageSize={pageSize()} />
+                                <TeamRanks
+                                    teams={teams()}
+                                    page={page()}
+                                    pageSize={pageSize()}
+                                    total={total()}
+                                    showTime={false}
+                                    loading={loading()}
+                                    onPageChange={(p) => setPage(p)}
+                                />
                             </Match>
                         </Switch>
                     </div>
@@ -333,6 +342,7 @@ export default function () {
                                     showTime={!showLargePanel()}
                                     loading={loading()}
                                     onPageChange={(p) => setPage(p)}
+                                    total={total()}
                                 />
                             </>
                         }

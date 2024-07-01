@@ -213,13 +213,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, user_id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::find_by_id(user_id).one(db).await
 }
 
 pub async fn get_by_account_or_email<C>(db: &C, n: &str) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::find()
         .filter(
             Condition::any()
@@ -235,7 +237,8 @@ pub async fn get_page<C>(
     with_hidden: bool, with_institute_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find().select_only().columns(
         Column::iter().filter(|col| !matches!(col, Column::Password | Column::Description)),
     );
@@ -247,9 +250,9 @@ where
     }
     let sql = filter_and_order(sql, order, filter)?;
     let paginator = sql.into_model().paginate(db, page_size);
-    let num_pages = paginator.num_pages().await?;
+    let total = paginator.num_items().await?;
     let users: Vec<Model> = paginator.fetch_page(page - 1).await?;
-    Ok((users, num_pages))
+    Ok((users, total))
 }
 
 fn filter_and_order(
@@ -292,7 +295,8 @@ fn filter_and_order(
 
 pub async fn count<C>(db: &C, with_banned: bool, institute_id: Option<i64>) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if !with_banned {
         sql = sql.filter(Column::Banned.eq(false));
@@ -305,7 +309,8 @@ where
 
 pub async fn create<C>(db: &C, user: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::NotSet,
         ..user.into_active_model().reset_all()
@@ -315,7 +320,8 @@ where
 
 pub async fn update<C>(db: &C, user: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::Unchanged(user.id),
         password: ActiveValue::NotSet,
@@ -326,7 +332,8 @@ where
 
 pub async fn update_password<C>(db: &C, user_id: i64, password: String) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::Set(user_id),
         password: ActiveValue::Set(Some(password)),
@@ -337,6 +344,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

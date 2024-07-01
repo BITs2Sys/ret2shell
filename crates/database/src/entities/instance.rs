@@ -32,8 +32,8 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending  = 0,
-    Running  = 1,
+    Pending = 0,
+    Running = 1,
     Finished = 2,
 }
 
@@ -133,7 +133,8 @@ pub async fn get_page<C>(
     team_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -148,7 +149,7 @@ where
         .order_by_asc(Column::State)
         .order_by_desc(Column::StartedAt);
     let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_pages().await?;
+    let total = paginator.num_items().await?;
     let instances = paginator.fetch_page(page - 1).await?;
     Ok((instances, total))
 }
@@ -158,7 +159,8 @@ pub async fn get_page_ex<C>(
     team_id: Option<i64>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -179,16 +181,15 @@ where
         .order_by_asc(Column::State)
         .order_by_desc(Column::StartedAt);
     let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_pages().await?;
+    let total = paginator.num_items().await?;
     let instances = paginator.fetch_page(page - 1).await?;
     Ok((instances, total))
 }
 
-pub async fn get_by_user_id<C>(
-    db: &C, user_id: i64, with_all: bool,
-) -> Result<Option<Model>, DbErr>
+pub async fn get_by_user_id<C>(db: &C, user_id: i64, with_all: bool) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find().filter(Column::UserId.eq(user_id));
     if !with_all {
         sql = sql.filter(Column::State.lte(State::Running));
@@ -200,7 +201,8 @@ pub async fn get_by_user_id_ex<C>(
     db: &C, user_id: i64, with_all: bool,
 ) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -219,7 +221,8 @@ pub async fn get_list_by_team_id<C>(
     db: &C, team_id: i64, with_all: bool,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find().filter(Column::TeamId.eq(team_id));
     if !with_all {
         sql = sql.filter(Column::State.lte(State::Running));
@@ -231,7 +234,8 @@ pub async fn get_list_by_team_id_ex<C>(
     db: &C, team_id: i64, with_all: bool,
 ) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -248,7 +252,8 @@ where
 
 pub async fn create<C>(db: &C, instance: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let instance = ActiveModel {
         id: ActiveValue::NotSet,
         ..instance.into_active_model().reset_all()
@@ -258,7 +263,8 @@ where
 
 pub async fn update<C>(db: &C, instance: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let instance = ActiveModel {
         id: ActiveValue::Unchanged(instance.id),
         ..instance.into_active_model().reset_all()
@@ -268,6 +274,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

@@ -3,7 +3,7 @@
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
     entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, Iterable, JoinType,
-    QuerySelect,
+    QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +20,9 @@ pub struct Model {
     pub team_id: Option<i64>,
     #[sea_orm(column_type = "Text")]
     pub content: Option<String>,
-    pub solved: bool,
+    pub solved: Option<bool>,
+    #[sea_orm(column_type = "Text")]
+    pub result: Option<String>,
 }
 
 impl Model {
@@ -110,7 +112,8 @@ pub async fn get_page<C>(
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -127,10 +130,10 @@ where
     if !with_content {
         sql = sql
             .select_only()
-            .columns(Column::iter().filter(|c| !matches!(c, Column::Content)));
+            .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
     }
     let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_pages().await?;
+    let total = paginator.num_items().await?;
     let submissions = paginator.fetch_page(page - 1).await?;
     Ok((submissions, total))
 }
@@ -141,7 +144,8 @@ pub async fn get_page_ex<C>(
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -164,10 +168,13 @@ where
     if !with_content {
         sql = sql
             .select_only()
-            .columns(Column::iter().filter(|c| !matches!(c, Column::Content)));
+            .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
     }
-    let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_pages().await?;
+    let paginator = sql
+        .order_by_asc(Column::CreatedAt)
+        .into_model()
+        .paginate(db, page_size);
+    let total = paginator.num_items().await?;
     let submissions = paginator.fetch_page(page - 1).await?;
     Ok((submissions, total))
 }
@@ -177,7 +184,8 @@ pub async fn count<C>(
     user_id: Option<i64>,
 ) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -196,7 +204,8 @@ where
 
 pub async fn create<C>(db: &C, submission: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let submission = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -207,6 +216,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

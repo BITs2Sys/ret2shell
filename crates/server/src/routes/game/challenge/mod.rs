@@ -54,7 +54,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                     auth::game_admin_required,
                 ))
                 .route("/hint", get(get_challenge_hints))
-                .route("/", get(get_challenge).post(submit_flag))
+                .route(
+                    "/submit",
+                    get(get_challenge_solves_status).post(submit_flag),
+                )
+                .route("/", get(get_challenge))
                 .route_layer(middleware::from_fn_with_state(
                     state.clone(),
                     auth::challenge_access_required,
@@ -268,6 +272,34 @@ async fn delete_challenge(
     Ok(())
 }
 
+#[derive(Serialize)]
+struct SolvesStatus {
+    pub solved: bool,
+    pub solves: u64,
+    pub top: Vec<submission::ExModel>,
+}
+
+async fn get_challenge_solves_status(
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Extension(game): Extension<game::Model>, team_ext: Option<Extension<team::Model>>,
+    Extension(challenge): Extension<challenge::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let team = extract_team!(game, team_ext, token);
+    let (top, solves) =
+        submission::get_page_ex(&db.conn, 1, 3, true, false, Some(challenge.id), None, None)
+            .await?;
+    let solved = if let Some(team) = team {
+        submission::count(&db.conn, true, Some(challenge.id), Some(team.id), None).await? > 0
+    } else {
+        submission::count(&db.conn, true, Some(challenge.id), None, Some(token.id)).await? > 0
+    };
+    Ok(Json(SolvesStatus {
+        solved,
+        solves,
+        top,
+    }))
+}
+
 #[derive(Deserialize)]
 struct SubmitRequest {
     pub content: String,
@@ -288,7 +320,8 @@ async fn submit_flag(
         created_at: Utc::now(),
         challenge_id: challenge.id,
         content: Some(req.content),
-        solved: false,
+        solved: None,
+        result: None,
         team_id: if let Some(team) = team {
             Some(team.id)
         } else {

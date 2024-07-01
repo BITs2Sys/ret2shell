@@ -96,7 +96,7 @@ export default function () {
             </div>
             <Pagination
                 class="p-6 lg:p-9"
-                count={page() * total()}
+                count={total()}
                 pageSize={10}
                 page={page()}
                 onPageChange={(page) => setPage(page.page)}

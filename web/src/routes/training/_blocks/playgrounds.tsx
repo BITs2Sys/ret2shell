@@ -10,7 +10,7 @@ import Link from "@widgets/link";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function Playgrounds() {
     const [playgrounds, setPlaygrounds] = createSignal([] as Game[]);
@@ -18,10 +18,12 @@ export default function Playgrounds() {
     const [playgroundPage, setPlaygroundPage] = createSignal(1);
     const pageSize = 6;
     const [playgroundTotal, setPlaygroundTotal] = createSignal(1);
+    const playgroundTotalPages = createMemo(() => Math.ceil(playgroundTotal() / pageSize));
     const [games, setGames] = createSignal([] as Game[]);
     const [loadingGames, setLoadingGames] = createSignal(false);
     const [gamePage, setGamePage] = createSignal(1);
     const [gameTotal, setGameTotal] = createSignal(1);
+    const gameTotalPages = createMemo(() => Math.ceil(gameTotal() / pageSize));
 
     /// TODO: move requests outside
 
@@ -115,7 +117,7 @@ export default function Playgrounds() {
                             square
                             ghost
                             size="sm"
-                            disabled={playgroundPage() >= playgroundTotal()}
+                            disabled={playgroundPage() >= playgroundTotalPages()}
                             onClick={() => setPlaygroundPage(playgroundPage() + 1)}
                         >
                             <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
@@ -173,7 +175,7 @@ export default function Playgrounds() {
                             square
                             ghost
                             size="sm"
-                            disabled={gamePage() >= gameTotal()}
+                            disabled={gamePage() >= gameTotalPages()}
                             onClick={() => setGamePage(gamePage() + 1)}
                         >
                             <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />

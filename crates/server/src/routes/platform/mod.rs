@@ -25,12 +25,12 @@ use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
 use tokio::{fs, io::AsyncBufReadExt};
-use tokio_util::io::ReaderStream;
 use tracing::{debug, error};
 
 use crate::{
     middleware::auth,
     traits::{GlobalState, ResponseError},
+    utility::file::send_file,
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
@@ -270,10 +270,8 @@ async fn get_logs_list(
             debug!("get_logs_list: {:?}", file_path);
             debug!("log_dir: {:?}", log_dir);
             // avoid path traversal
-            if file_path.starts_with(log_dir.canonicalize()?) && file_path.exists() {
-                let file = fs::File::open(file_path).await?;
-                let stream = ReaderStream::new(file);
-                Ok(Response::new(Body::from_stream(stream)))
+            if file_path.starts_with(log_dir.canonicalize()?) {
+                send_file(file_path).await
             } else {
                 Err(ResponseError::NotFound("file not found".to_owned()))
             }

@@ -27,10 +27,10 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum AccessPolicy {
     #[default]
     Bulletin = 0,
-    Wiki     = 1,
-    Game     = 2,
-    WriteUp  = 3,
-    Answer   = 4,
+    Wiki = 1,
+    Game = 2,
+    WriteUp = 3,
+    Answer = 4,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -115,13 +115,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, article_id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::find_by_id(article_id).one(db).await
 }
 
 pub async fn get_ex<C>(db: &C, article_id: i64) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::find_by_id(article_id)
         .join(JoinType::InnerJoin, Relation::Publisher.def())
         .column_as(super::user::Column::Nickname, "publisher_name")
@@ -135,7 +137,8 @@ pub async fn get_page<C>(
     with_all: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     sql = sql
         .select_only()
@@ -152,7 +155,7 @@ where
         .order_by_desc(Column::CreatedAt)
         .into_model()
         .paginate(db, page_size);
-    let total = paginator.num_pages().await?;
+    let total = paginator.num_items().await?;
     let articles = paginator.fetch_page(page - 1).await?;
     Ok((articles, total))
 }
@@ -161,7 +164,8 @@ pub async fn get_tree<C>(
     db: &C, access_policy: AccessPolicy, with_draft: bool, with_all: bool,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     sql = sql
         .select_only()
@@ -181,7 +185,8 @@ where
 
 pub async fn create<C>(db: &C, article: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let article = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -193,7 +198,8 @@ where
 
 pub async fn update<C>(db: &C, article_id: i64, article: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let article = ActiveModel {
         id: ActiveValue::Set(article_id),
         updated_at: ActiveValue::Set(Utc::now()),
@@ -204,6 +210,7 @@ where
 }
 pub async fn delete<C>(db: &C, article_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(article_id).exec(db).await.map(|_| ())
 }

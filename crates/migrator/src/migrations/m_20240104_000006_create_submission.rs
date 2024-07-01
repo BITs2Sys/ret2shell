@@ -24,6 +24,7 @@ pub enum Submission {
     ChallengeId,
     Content,
     Solved,
+    Result,
 }
 
 #[async_trait::async_trait]
@@ -75,7 +76,8 @@ impl MigrationTrait for Migration {
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Submission::Content).text().not_null())
-                    .col(ColumnDef::new(Submission::Solved).boolean().not_null())
+                    .col(ColumnDef::new(Submission::Solved).boolean())
+                    .col(ColumnDef::new(Submission::Result).text())
                     .to_owned(),
             )
             .await

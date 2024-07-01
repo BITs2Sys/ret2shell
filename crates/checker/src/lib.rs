@@ -199,7 +199,7 @@ impl Checker {
 
     pub async fn cleanup_worker(&mut self) {
         loop {
-            tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+            tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
             tracing::debug!("Running checker cleanup...");
             self.cleanup().await;
             tracing::trace!("Live checkers: {:?}", self.contexts.read().await.keys());
