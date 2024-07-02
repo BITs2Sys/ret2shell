@@ -6,11 +6,13 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
-    IntoActiveModel, Iterable, Order, QueryOrder, QuerySelect,
+    IntoActiveModel, Iterable, JoinType, Order, QueryOrder, QuerySelect,
 };
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::institute;
 
 #[derive(
     FromPrimitive, ToPrimitive, Clone, Copy, Debug, PartialEq, Serialize_repr, Deserialize_repr, Eq,
@@ -216,6 +218,18 @@ where
     C: ConnectionTrait,
 {
     Entity::find_by_id(user_id).one(db).await
+}
+
+pub async fn get_ex<C>(db: &C, user_id: i64) -> Result<Option<ExModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
+    Entity::find_by_id(user_id)
+        .join(JoinType::LeftJoin, Relation::Institute.def())
+        .column_as(institute::Column::Name, "institute_name")
+        .into_model::<ExModel>()
+        .one(db)
+        .await
 }
 
 pub async fn get_by_account_or_email<C>(db: &C, n: &str) -> Result<Option<Model>, DbErr>

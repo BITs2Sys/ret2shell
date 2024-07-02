@@ -8,8 +8,16 @@ use axum::{
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
-use r2s_database::{article, game, user::Permission};
+use r2s_database::{
+    article, game,
+    user::{self, Permission},
+};
+use r2s_event::{
+    events::{EventContainer, GameEvent, GameEventType},
+    Event,
+};
 use r2s_migrator::Database;
+use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tracing::warn;
@@ -159,9 +167,9 @@ async fn create_game(
 }
 
 async fn update_game(
-    State(ref db): State<Database>, State(ref cache): State<Cache>,
+    State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref queue): State<Queue>,
     State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-    Json(model): Json<game::Model>,
+    Extension(token): Extension<Token>, Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let txn = db.conn.begin().await?;
     let model = game::update(
@@ -175,7 +183,7 @@ async fn update_game(
     )
     .await?;
     cache.at("game").del(game.id).await?;
-    let game_bucket = get_game_bucket_mut!(bucket, game);
+    let game_bucket = get_game_bucket_mut!(bucket, model);
     game_bucket
         .set_config(serde_json::to_value(&model)?)
         .await?;
@@ -187,6 +195,25 @@ async fn update_game(
         )
         .await?;
     txn.commit().await?;
+    if game.frozen != model.frozen {
+        let payload = EventContainer {
+            game_id: game.id.clone(),
+            event: Event::Game(GameEvent {
+                event_type: if model.frozen {
+                    GameEventType::Freeze
+                } else {
+                    GameEventType::Unfreeze
+                },
+                operator: user::Model {
+                    id: token.id.clone(),
+                    account: token.account.clone(),
+                    nickname: token.nickname.clone(),
+                    ..Default::default()
+                },
+            }),
+        };
+        queue.publish("event", payload).await.ok();
+    }
     Ok(Json(model))
 }
 

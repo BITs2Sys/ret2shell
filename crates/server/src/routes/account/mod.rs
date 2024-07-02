@@ -169,7 +169,7 @@ async fn query_code_for_account(
     let user_id: Option<i64> = cache.at("account-code-rev").getdel(code).await?;
     if let Some(user_id) = user_id {
         cache.at("account-code").del(user_id).await.ok();
-        if let Some(user) = user::get(&db.conn, user_id).await? {
+        if let Some(user) = user::get_ex(&db.conn, user_id).await? {
             Ok(Json(user))
         } else {
             Err(ResponseError::NotFound("user not found".to_owned()))
