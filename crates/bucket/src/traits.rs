@@ -32,7 +32,11 @@ macro_rules! init_dir {
     ($root:expr, $name:literal) => {{
         let path = $root.join($name);
         tokio::fs::create_dir(&path).await?;
-        tokio::fs::write(path.join(".gitkeep"), "").await?;
+        tokio::fs::write(
+            path.join(".gitkeep"),
+            "Keep directory structure.\n\nDO NOT DELETE!!!\n",
+        )
+        .await?;
     }};
 }
 

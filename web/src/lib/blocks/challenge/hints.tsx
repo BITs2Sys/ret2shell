@@ -4,7 +4,7 @@ import { addToast } from "@/lib/storage/toast";
 import type { Extra } from "@models/extra";
 import type { Hint } from "@models/hint";
 import { Permission } from "@models/user";
-import { createForm, required, setValue } from "@modular-forms/solid";
+import { createForm, required, setValue, setValues } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
@@ -50,6 +50,10 @@ export default function (props: { challenge?: Challenge }) {
                     duration: 5000,
                 });
                 refreshHint();
+                setValues(form, {
+                    content: undefined,
+                    cost: undefined,
+                });
             })
             .catch((e: HTTPError) => {
                 e.response.text().then((text) => {

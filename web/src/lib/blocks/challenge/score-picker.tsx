@@ -15,7 +15,7 @@ export default function ScorePicker(props: {
     function getScore(d: number) {
         if (d < 1) return props.max;
         if (d >= props.decay) return props.min;
-        return props.max + ((props.min - props.max) * (d * d - 1)) / (props.decay * props.decay);
+        return Math.round(props.max + ((props.min - props.max) * (d * d - 1)) / (props.decay * props.decay));
     }
     function getFunctionPlots() {
         const data = [];

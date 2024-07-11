@@ -82,10 +82,9 @@ impl ChallengeBucket {
         create_dir(&challenge_path).await?;
         init_dir!(challenge_path, "images");
         init_dir!(challenge_path, "mapped");
-        init_dir!(challenge_path, "scripts");
+        init_dir!(challenge_path, "checker");
         init_dir!(challenge_path, "src");
         init_dir!(challenge_path, "static");
-        write(&challenge_path.join("checkers.toml"), "").await?;
         write(
             &challenge_path.join("config.toml"),
             toml::to_string_pretty(&config)?,

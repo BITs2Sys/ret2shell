@@ -151,16 +151,20 @@ export default function (props: { challenge?: Challenge; solved?: boolean; solve
                                         class={`icon-[fluent--play-20-regular] w-5 h-5 ${instance() ? "text-success" : ""}`.trim()}
                                     />
                                     <Switch
-                                        fallback={<span class="opacity-80">{t("game.challenge.envNotStart")}</span>}
+                                        fallback={
+                                            <span class="opacity-80 flex-1 truncate">
+                                                {t("game.challenge.envNotStart")}
+                                            </span>
+                                        }
                                     >
                                         <Match when={instance()}>
-                                            <span>
+                                            <span class="flex-1 truncate">
                                                 {t("game.challenge.envIsRunning")}:{" "}
                                                 {localAddr() ?? instance()?.proxy_addr}
                                             </span>
                                         </Match>
                                         <Match when={userExplicitInstance()}>
-                                            <span class="text-warning">
+                                            <span class="text-warning flex-1 truncate">
                                                 {t("game.challenge.otherChallengeEnvIsRunning")}:{" "}
                                                 {userExplicitInstance()?.challenge_name}
                                             </span>
@@ -193,10 +197,9 @@ export default function (props: { challenge?: Challenge; solved?: boolean; solve
                                             </Button>
                                         </Match>
                                         <Match when={userExplicitInstance()}>
-                                            <span class="text-warning">
-                                                {t("game.challenge.otherChallengeEnvIsRunning")}:{" "}
-                                                {userExplicitInstance()?.challenge_name}
-                                            </span>
+                                            <Button ghost size="sm" square>
+                                                <span class="icon-[fluent--record-stop-20-regular]" />
+                                            </Button>
                                         </Match>
                                     </Switch>
                                 </div>

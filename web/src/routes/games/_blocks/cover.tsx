@@ -62,7 +62,9 @@ export default function (props: ComponentProps<"div">) {
                         bgGameDefault
                     }
                 />
-                <div class="absolute top-0 left-0 w-screen h-screen bg-layer/80 flex flex-col items-center justify-center">
+                <div
+                    class={`absolute top-0 left-0 w-screen h-screen flex flex-col items-center justify-center transition-all duration-1000 ${expanded() ? "bg-layer/80" : "bg-layer/20"}`.trim()}
+                >
                     <div
                         class={`aspect-square h-48 transition-all ease-out duration-500 delay-500 ${
                             expanded() ? "" : "scale-150 blur-xl opacity-0 rotate-90"
