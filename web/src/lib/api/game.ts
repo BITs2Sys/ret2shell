@@ -2,7 +2,7 @@ import type { Article } from "@models/article";
 import type { Challenge } from "@models/challenge";
 import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
-import type { SearchParamsOption } from "ky";
+import type { DownloadProgress, SearchParamsOption } from "ky";
 import api, { api_root } from ".";
 import type { Hint } from "../models/hint";
 import type { Extra } from "../models/extra";

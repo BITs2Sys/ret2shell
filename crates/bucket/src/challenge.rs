@@ -6,6 +6,7 @@ use tokio::{
     fs::{create_dir, read_dir, read_to_string, write, File},
     io::AsyncRead,
 };
+use tracing::debug;
 
 use crate::traits::{init_dir, BucketError};
 
@@ -229,6 +230,7 @@ impl ChallengeBucket {
     }
 
     pub async fn download_file(&self, path: impl AsRef<Path>) -> Result<File, BucketError> {
+        debug!("downloading file at path: {:?}", path.as_ref());
         Ok(File::open(path).await?)
     }
 
@@ -245,12 +247,14 @@ impl ChallengeBucket {
     }
 
     pub async fn download_static(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
-        self.download_file(&self.ensure_prefix("static", name)?)
+        debug!("downloading static file {}", name.as_ref());
+        self.download_file(&self.ensure_prefix("static", format!("static/{}", name.as_ref()))?)
             .await
     }
 
     pub async fn download_mapped(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
-        self.download_file(&self.ensure_prefix("mapped", name)?)
+        debug!("downloading mapped file {}", name.as_ref());
+        self.download_file(&self.ensure_prefix("mapped", format!("mapped/{}", name.as_ref()))?)
             .await
     }
 

@@ -1,4 +1,6 @@
-import { api_root } from "@api";
+import { api_root } from "@/lib/api";
+import { downloadFile } from "@/lib/api/file";
+import DownloadButton from "@/lib/blocks/download-button";
 import { getPlatformLogs } from "@api/platform";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
@@ -47,21 +49,6 @@ export default function () {
                 });
             });
         });
-
-    const [downloadingFile, setDownloadingFile] = createSignal(null as string | null);
-
-    function downloadLog(file: string) {
-        setDownloadingFile(file);
-        void getPlatformLogs(file).then((blob) => {
-            const url = window.URL.createObjectURL(blob as Blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = file;
-            a.click();
-            window.URL.revokeObjectURL(url);
-            setDownloadingFile(null);
-        });
-    }
 
     function disable() {
         if (ws) {
@@ -162,19 +149,14 @@ export default function () {
                 <div class="inline-flex flex-row items-center flex-wrap p-3 lg:p-6 !pb-0">
                     <For each={logFiles()}>
                         {(file) => (
-                            <Button
+                            <DownloadButton
                                 class="m-1 overflow-hidden"
                                 size="sm"
-                                loading={downloadingFile() === file}
-                                onClick={() => downloadLog(file)}
-                            >
-                                <Show when={downloadingFile() !== file}>
-                                    <span class="icon-[fluent--folder-zip-20-regular] w-4 h-4 flex-shrink-0" />
-                                </Show>
-                                <span class="truncate flex-1 text-start">
-                                    {file.replace("ret2shell.", "").replace(".log", "")}
-                                </span>
-                            </Button>
+                                url={`${api_root}/platform/logs`}
+                                searchParams={{ file }}
+                                file={file.replace("ret2shell.", "").replace(".log", "")}
+                                icon="icon-[fluent--folder-zip-16-regular]"
+                            />
                         )}
                     </For>
                 </div>

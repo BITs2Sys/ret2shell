@@ -1,7 +1,7 @@
 use axum::{
     body::Body,
     extract::{Query, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     middleware,
     response::{IntoResponse, Response},
     routing::{get, patch, post},
@@ -424,8 +424,11 @@ async fn get_player_attachment(
             FileType::Mapped => challenge_bucket.download_mapped(&file).await?,
         };
 
+        let mut header = HeaderMap::new();
+        header.insert("Content-Length", file.metadata().await?.len().into());
+
         let stream = ReaderStream::new(file);
-        Ok((StatusCode::OK, Body::from_stream(stream)).into_response())
+        Ok((StatusCode::OK, header, Body::from_stream(stream)).into_response())
     }
 }
 

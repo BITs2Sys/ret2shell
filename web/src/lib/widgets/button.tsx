@@ -1,7 +1,7 @@
 import Spin from "@assets/animates/spin";
 import { type ComponentProps, type JSX, Show, createMemo, splitProps } from "solid-js";
 
-export type ButtonProps = {
+export type ButtonProps = ComponentProps<"button"> & {
     level?: "primary" | "info" | "success" | "warning" | "error" | null;
     size?: "sm" | "md";
     ghost?: boolean;
@@ -12,7 +12,7 @@ export type ButtonProps = {
     square?: boolean;
 };
 
-export default function (props: ComponentProps<"button"> & ButtonProps & { children?: JSX.Element }) {
+export default function (props: ButtonProps & { children?: JSX.Element }) {
     const [buttonProps, _1] = splitProps(props, [
         "level",
         "size",

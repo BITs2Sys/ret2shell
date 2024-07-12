@@ -14,6 +14,8 @@ import TimeProgress from "@widgets/time-progress";
 import { wsrx } from "@lib/wsrx";
 import { accountStore } from "@/lib/storage/account";
 import Divider from "@/lib/widgets/divider";
+import DownloadButton from "../download-button";
+import { api_root } from "@/lib/api";
 
 passiveSupport({
     events: ["mousewheel", "wheel"],
@@ -129,10 +131,14 @@ export default function (props: { challenge?: Challenge; solved?: boolean; solve
                                 <div class="w-4" />
                                 <For each={files()}>
                                     {(file) => (
-                                        <Button class="m-1" size="sm">
-                                            <span class="icon-[fluent--arrow-download-20-regular] w-5 h-5 flex-shrink-0" />
-                                            <span class="truncate flex-1 text-start">{file.file}</span>
-                                        </Button>
+                                        <DownloadButton
+                                            class="m-1"
+                                            size="sm"
+                                            file={file.file}
+                                            icon="icon-[fluent--arrow-download-20-regular]"
+                                            url={`${api_root}/game/${props.challenge!.game_id}/challenge/${props.challenge!.id}/files`}
+                                            searchParams={{ file: file.file, folder: file.folder }}
+                                        />
                                     )}
                                 </For>
                             </section>

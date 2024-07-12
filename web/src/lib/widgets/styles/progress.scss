@@ -7,6 +7,10 @@
     &-range {
       @apply h-[2px] rounded-full;
 
+      &.progress-range-primary {
+        @apply bg-primary;
+      }
+
       &.progress-range-success {
         @apply bg-success;
       }
