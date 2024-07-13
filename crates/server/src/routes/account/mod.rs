@@ -9,7 +9,7 @@ use axum::{
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use nanoid::{alphabet, nanoid};
 use r2s_cache::Cache;
-use r2s_config::email;
+use r2s_config::{captcha::ValidatorType, email};
 use r2s_database::{
     config,
     user::{self, Permission, Permissions},
@@ -188,7 +188,8 @@ struct LoginRequest {
 }
 
 async fn login(
-    State(ref db): State<Database>, State(cache): State<Cache>, Extension(token): Extension<Token>,
+    State(ref db): State<Database>, State(cache): State<Cache>,
+    Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
     Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
     debug!("login request: {:?}", body);
@@ -197,8 +198,12 @@ async fn login(
             "you have already logged in".to_owned(),
         ));
     }
-    captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
-
+    if config
+        .captcha
+        .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+    {
+        captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    }
     let user = get_user_by_account!(db, &body.account);
 
     if user.banned || !user.permissions.0.contains(&Permission::Basic) {
@@ -336,7 +341,13 @@ async fn register(
     Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
     debug!("register request: {:?}", body);
-    captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    if config
+        .captcha
+        .clone()
+        .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+    {
+        captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    }
 
     // if user::get_user_by_account(db, &body.email).await.is_ok() {
     //     return Err((StatusCode::CONFLICT, "account already exists"));
@@ -498,7 +509,13 @@ async fn forgot_password(
     State(cache): State<Cache>, State(db): State<Database>, State(ref queue): State<Queue>,
     Extension(config): Extension<config::Model>, Json(body): Json<ForgotPasswordRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    if config
+        .captcha
+        .clone()
+        .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+    {
+        captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    }
     let user = user::get_by_account_or_email(&db.conn, &body.email).await?;
     let user = match user {
         Some(u) => u,
@@ -532,9 +549,15 @@ struct ResetPasswordRequest {
 
 async fn reset_password(
     State(cache): State<Cache>, State(ref db): State<Database>,
-    Json(body): Json<ResetPasswordRequest>,
+    Extension(config): Extension<config::Model>, Json(body): Json<ResetPasswordRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    if config
+        .captcha
+        .clone()
+        .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+    {
+        captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
+    }
 
     let checked_email = check_email_validation!(cache, &body.token, &body.email);
 

@@ -345,7 +345,13 @@
             "title": "邮箱设置"
         },
         "captcha": {
-            "title": "验证码保护"
+            "title": "验证码保护",
+            "difficulty": "验证难度",
+            "pow": "工作量证明",
+            "image": "图像识别",
+            "validator": "验证器",
+            "select": "选择一个验证器",
+            "validatorRequired": "需要指定验证器"
         },
         "media": {
             "title": "媒体存储设置"

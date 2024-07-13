@@ -122,6 +122,7 @@ export default function () {
         )
             .then((data) => {
                 setTeams(data[0]);
+                setTotal(data[1]);
             })
             .catch((err: HTTPError) => {
                 void err.response.text().then((text: string) => {

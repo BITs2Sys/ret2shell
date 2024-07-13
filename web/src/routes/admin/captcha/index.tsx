@@ -1,10 +1,15 @@
-import { getPlatformConfig } from "@/lib/api/platform";
+import { getPlatformConfig, updatePlatformConfig } from "@/lib/api/platform";
 import type { CaptchaConfig, Config } from "@/lib/models/config";
+import { addToast } from "@/lib/storage/toast";
+import Button from "@/lib/widgets/button";
 import Checkbox from "@/lib/widgets/checkbox";
-import { createForm, setValues } from "@modular-forms/solid";
+import Select from "@/lib/widgets/select";
+import Slider from "@/lib/widgets/slider";
+import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
+import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
 
 export default function () {
@@ -21,7 +26,44 @@ export default function () {
             });
         });
     });
-    function onSubmit(form: CaptchaConfig) {}
+    function onSubmit(result: CaptchaConfig) {
+        setLoading(true);
+        if (!config()) {
+            addToast({
+                level: "error",
+                description: t("admin.platform.fetchNotReady")!,
+                duration: 5000,
+            });
+            return;
+        }
+        const mergedConfig = {
+            ...config(),
+            captcha: {
+                enabled: result.enabled,
+                difficulty: result.difficulty,
+                validator: result.validator,
+            },
+        } as Config;
+        updatePlatformConfig(mergedConfig)
+            .then(() => {
+                setConfig(mergedConfig);
+                addToast({
+                    level: "success",
+                    description: t("admin.platform.updateSuccess")!,
+                    duration: 5000,
+                });
+            })
+            .catch((err: HTTPError) => {
+                err.response.text().then((text) => {
+                    addToast({
+                        level: "error",
+                        description: `${t("admin.platform.updateFailed")}: ${text}`,
+                        duration: 5000,
+                    });
+                });
+            })
+            .finally(() => setLoading(false));
+    }
     return (
         <>
             <Title title={`${t("admin.captcha.title")} - ${platformStore.config.name || t("platform.name")}`} />
@@ -32,18 +74,75 @@ export default function () {
                         <span>{t("admin.captcha.title")}</span>
                     </h3>
                     <Form onSubmit={onSubmit} class="w-full flex flex-col space-y-2">
-                        <Field name="enabled" type="boolean">
+                        <div class="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-2 lg:items-end">
+                            <Field name="enabled" type="boolean">
+                                {(field, props) => (
+                                    <Checkbox
+                                        class="flex-1"
+                                        inputProps={props}
+                                        checked={field.value}
+                                        error={field.error}
+                                        title={t("captcha.enabled")}
+                                    >
+                                        <span class="flex-1 text-start">{t("captcha.enabled")}</span>
+                                    </Checkbox>
+                                )}
+                            </Field>
+                            <Field name="validator" validate={[required(t("admin.captcha.validatorRequired")!)]}>
+                                {(field, props) => (
+                                    <Select
+                                        label={t("admin.captcha.validator")!}
+                                        disabled={getValue(form, "enabled") === false}
+                                        class="flex-1"
+                                        error={field.error}
+                                        placeholder={t("admin.captcha.select")}
+                                        name={props.name}
+                                        items={[
+                                            {
+                                                value: "pow",
+                                                label: t("admin.captcha.pow")!,
+                                                icon: "icon-[fluent--code-20-regular]",
+                                            },
+                                            {
+                                                value: "image",
+                                                label: t("admin.captcha.image")!,
+                                                icon: "icon-[fluent--image-20-regular]",
+                                            },
+                                        ]}
+                                        value={field.value ? [field.value as string] : undefined}
+                                        onValueChange={(v) => {
+                                            setValue(form, "validator", v.value[0] as "pow" | "image");
+                                        }}
+                                    />
+                                )}
+                            </Field>
+                        </div>
+                        <Field name="difficulty" type="number">
                             {(field, props) => (
-                                <Checkbox
-                                    inputProps={props}
-                                    checked={field.value}
-                                    error={field.error}
-                                    title={t("captcha.enabled")}
-                                >
-                                    <span class="flex-1 text-start">{t("captcha.enabled")}</span>
-                                </Checkbox>
+                                <Slider
+                                    disabled={getValue(form, "enabled") === false}
+                                    class="flex-1"
+                                    label={t("admin.captcha.difficulty")!}
+                                    name={props.name}
+                                    max={10}
+                                    min={1}
+                                    step={1}
+                                    value={[field.value ?? 1]}
+                                    onValueChange={(v) => {
+                                        setValue(form, "difficulty", v.value[0]);
+                                    }}
+                                />
                             )}
                         </Field>
+                        <Button
+                            type="submit"
+                            level="primary"
+                            class="!mt-4"
+                            loading={loading()}
+                            disabled={!config() || loading()}
+                        >
+                            {t("form.save")}
+                        </Button>
                     </Form>
                 </div>
             </div>

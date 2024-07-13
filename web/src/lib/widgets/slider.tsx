@@ -21,7 +21,7 @@ export default function (props: SliderRootProps & SliderProps) {
                     <Slider.Range class="slider-range" />
                 </Slider.Track>
                 <Slider.Thumb index={0} class="slider-thumb group-hover:border-2">
-                    <Slider.HiddenInput />
+                    <Slider.HiddenInput id={props.name} value={props.value?.[0] ?? 0} />
                 </Slider.Thumb>
             </Slider.Control>
         </Slider.Root>

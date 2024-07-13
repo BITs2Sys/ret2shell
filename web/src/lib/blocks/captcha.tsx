@@ -34,6 +34,7 @@ export default function (
                 if (resp.validator === "pow") startPow();
                 else if (resp.validator === "none") {
                     setValue(props.captchaForm, "captcha_answer", "0xDEADBEEF");
+                    setValue(props.captchaForm, "captcha_id", "0xCAFEBABE");
                 }
                 setValue(props.captchaForm, "captcha_id", resp.id);
             })
@@ -43,7 +44,7 @@ export default function (
             })
             .finally(() => {
                 setLoading(false);
-                setValue(props.captchaForm, "captcha_answer", "");
+                if (captcha()?.validator !== "none") setValue(props.captchaForm, "captcha_answer", "");
             });
     }
 

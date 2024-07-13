@@ -8,6 +8,7 @@ export type SelectProps = {
     placeholder?: string;
     size?: "sm" | "md";
     ghost?: boolean;
+    error?: string;
 };
 
 export interface SelectItemType {
@@ -18,7 +19,7 @@ export interface SelectItemType {
 }
 
 export default function <T extends CollectionItem & SelectItemType>(props: SelectRootProps<T> & SelectProps) {
-    const [selectProps, others] = splitProps(props, ["label", "placeholder", "size", "ghost"]);
+    const [selectProps, others] = splitProps(props, ["label", "placeholder", "size", "ghost", "error"]);
     return (
         <Select.Root
             {...others}
@@ -34,9 +35,21 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
                 <Select.Trigger
                     class={`btn flex flex-row ${
                         selectProps.size === "sm" ? "px-0" : "px-2"
-                    } gap-0 items-center w-full btn-${selectProps.size} ${selectProps.ghost ? "btn-ghost" : ""}`.trim()}
+                    } gap-0 items-center w-full btn-${selectProps.size} ${selectProps.ghost ? "btn-ghost" : ""} ${
+                        selectProps.error ? "border-error" : ""
+                    }`.trim()}
                 >
-                    <Select.ValueText class="px-4 flex-1 text-start truncate" placeholder={selectProps.placeholder} />
+                    <Show
+                        when={props.error}
+                        fallback={
+                            <Select.ValueText
+                                class={`px-4 text-start truncate ${props.error ? "" : "flex-1"}`.trim()}
+                                placeholder={selectProps.placeholder}
+                            />
+                        }
+                    >
+                        <span class="text-error flex-1 px-4 text-start">{props.error}</span>
+                    </Show>
                     <Select.Indicator class="btn btn-sm btn-square btn-ghost items-center justify-center">
                         <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
                     </Select.Indicator>
@@ -72,6 +85,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
                     </Select.Content>
                 </Select.Positioner>
             </Portal>
+            <Select.HiddenSelect id={props.name} value={props.value} />
         </Select.Root>
     );
 }

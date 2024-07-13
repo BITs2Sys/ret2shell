@@ -63,8 +63,14 @@ struct CaptchaAnswer {
 }
 
 async fn check_captcha_for_devops(
-    State(ref cache): State<Cache>, Json(captcha): Json<CaptchaAnswer>,
+    State(ref cache): State<Cache>, Extension(config): Extension<config::Model>,
+    Json(captcha): Json<CaptchaAnswer>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    captcha_protected!(cache, &captcha.id, &captcha.answer);
+    if config
+        .captcha
+        .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+    {
+        captcha_protected!(cache, &captcha.id, &captcha.answer);
+    }
     Ok(())
 }
