@@ -12,110 +12,110 @@ import type { HTTPError } from "ky";
 import { addToast } from "./toast";
 
 export const [gameStore, setGameStore] = createStore({
-    games: [] as Game[],
-    current: null as Game | null,
-    preload: null as Game | null,
-    team: null as Team | null,
-    rank: null as number | null,
-    score: null as number | null,
-    members: [] as User[],
-    challenges: [] as Challenge[],
-    solves: [] as Submission[],
+  games: [] as Game[],
+  current: null as Game | null,
+  preload: null as Game | null,
+  team: null as Team | null,
+  rank: null as number | null,
+  score: null as number | null,
+  members: [] as User[],
+  challenges: [] as Challenge[],
+  solves: [] as Submission[],
 });
 
 export type GameStoreType = typeof gameStore;
 
 export function appendGames(games: Game[]) {
-    const ids = new Set(gameStore.games.map((g) => g.id));
-    setGameStore({
-        games: [...gameStore.games.filter((g) => !ids.has(g.id)), ...games],
-    });
+  const ids = new Set(gameStore.games.map((g) => g.id));
+  setGameStore({
+    games: [...gameStore.games.filter((g) => !ids.has(g.id)), ...games],
+  });
 }
 
 export const canParticipate = () => {
+  if (
+    !gameStore.current?.can_register_after_started &&
+    gameStore.current?.start_at &&
+    gameStore.current.start_at < DateTime.now()
+  ) {
+    return false;
+  }
+  if (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()) {
+    return false;
+  }
+  if (
+    accountStore.id &&
+    accountStore.permissions.includes(Permission.Game) &&
+    gameStore.current?.admins.includes(accountStore.id)
+  ) {
+    return false;
+  }
+  if (accountStore.permissions.includes(Permission.Host)) {
+    return false;
+  }
+  if (gameStore.current?.access_policy.restrict) {
     if (
-        !gameStore.current?.can_register_after_started &&
-        gameStore.current?.start_at &&
-        gameStore.current.start_at < DateTime.now()
-    ) {
-        return false;
-    }
-    if (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()) {
-        return false;
-    }
-    if (
-        accountStore.id &&
-        accountStore.permissions.includes(Permission.Game) &&
-        gameStore.current?.admins.includes(accountStore.id)
-    ) {
-        return false;
-    }
-    if (accountStore.permissions.includes(Permission.Host)) {
-        return false;
-    }
-    if (gameStore.current?.access_policy.restrict) {
-        if (
-            accountStore.info?.institute_id &&
-            gameStore.current.access_policy.institutes.includes(accountStore.info.institute_id)
-        )
-            return true;
-        return false;
-    }
+      accountStore.info?.institute_id &&
+      gameStore.current.access_policy.institutes.includes(accountStore.info.institute_id)
+    )
+      return true;
+    return false;
+  }
 
-    return true;
+  return true;
 };
 
 export function canAccessChallenges(): [boolean, string] {
-    if (!accountStore.id) return [false, t("game.team.loginThenBack")!];
-    if (
-        gameStore.current?.admins &&
-        (accountStore.permissions.includes(Permission.Host) ||
-            (gameStore.current.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)))
-    ) {
-        return [true, ""];
+  if (!accountStore.id) return [false, t("game.team.loginThenBack")!];
+  if (
+    gameStore.current?.admins &&
+    (accountStore.permissions.includes(Permission.Host) ||
+      (gameStore.current.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)))
+  ) {
+    return [true, ""];
+  }
+  if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+    return [false, t("game.challenge.notStarted")!];
+  }
+  if (gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()) {
+    return [false, t("game.ended")!];
+  }
+  if (
+    gameStore.current?.start_at &&
+    gameStore.current.start_at < DateTime.now() &&
+    gameStore.current.archive_at &&
+    gameStore.current.archive_at > DateTime.now()
+  ) {
+    if (gameStore.team) {
+      return [true, ""];
     }
-    if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
-        return [false, t("game.challenge.notStarted")!];
-    }
-    if (gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()) {
-        return [false, t("game.ended")!];
-    }
-    if (
-        gameStore.current?.start_at &&
-        gameStore.current.start_at < DateTime.now() &&
-        gameStore.current.archive_at &&
-        gameStore.current.archive_at > DateTime.now()
-    ) {
-        if (gameStore.team) {
-            return [true, ""];
-        }
-    }
-    return [false, t("game.team.joinFirst")!];
+  }
+  return [false, t("game.team.joinFirst")!];
 }
 
 export function isGameAdmin() {
-    if (!accountStore.id) return false;
-    if (
-        gameStore.current?.admins &&
-        (accountStore.permissions.includes(Permission.Host) ||
-            (gameStore.current.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)))
-    ) {
-        return true;
-    }
-    return false;
+  if (!accountStore.id) return false;
+  if (
+    gameStore.current?.admins &&
+    (accountStore.permissions.includes(Permission.Host) ||
+      (gameStore.current.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)))
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export async function refreshChallenges() {
-    try {
-        const result = await getChallengeList(gameStore.current!.id);
-        setGameStore({ challenges: result[0] });
-    } catch (e) {
-        const err = e as HTTPError;
-        const text = await err.response.text();
-        addToast({
-            level: "error",
-            description: `${t("game.challenge.fetchFailed")}: ${text}`,
-            duration: 5000,
-        });
-    }
+  try {
+    const result = await getChallengeList(gameStore.current!.id);
+    setGameStore({ challenges: result[0] });
+  } catch (e) {
+    const err = e as HTTPError;
+    const text = await err.response.text();
+    addToast({
+      level: "error",
+      description: `${t("game.challenge.fetchFailed")}: ${text}`,
+      duration: 5000,
+    });
+  }
 }

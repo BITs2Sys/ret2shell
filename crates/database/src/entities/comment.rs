@@ -2,7 +2,7 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
+  entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -11,108 +11,104 @@ use super::{article, user};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "comment")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    pub article_id: i64,
-    pub publisher_id: i64,
-    #[sea_orm(column_type = "Text")]
-    pub content: String,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub article_id: i64,
+  pub publisher_id: i64,
+  #[sea_orm(column_type = "Text")]
+  pub content: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    pub article_id: i64,
-    pub article_title: String,
-    pub publisher_id: i64,
-    pub publisher_name: String,
-    pub content: String,
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub article_id: i64,
+  pub article_title: String,
+  pub publisher_id: i64,
+  pub publisher_name: String,
+  pub content: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::article::Entity",
-        from = "Column::ArticleId",
-        to = "super::article::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Article,
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::PublisherId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Publisher,
+  #[sea_orm(
+    belongs_to = "super::article::Entity",
+    from = "Column::ArticleId",
+    to = "super::article::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Article,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::PublisherId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Publisher,
 }
 
 impl Related<super::article::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Article.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Article.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Publisher.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Publisher.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(
-    db: &C, page: u64, page_size: u64, article_id: i64,
+  db: &C, page: u64, page_size: u64, article_id: i64,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let sql = Entity::find().filter(Column::ArticleId.eq(article_id));
-    let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let comments = paginator.fetch_page(page - 1).await?;
-    Ok((comments, total))
+  C: ConnectionTrait, {
+  let sql = Entity::find().filter(Column::ArticleId.eq(article_id));
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let comments = paginator.fetch_page(page - 1).await?;
+  Ok((comments, total))
 }
 
 pub async fn get_list_ex<C>(
-    db: &C, page: u64, page_size: u64, article_id: i64,
+  db: &C, page: u64, page_size: u64, article_id: i64,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let sql = Entity::find()
-        .join(JoinType::InnerJoin, Relation::Publisher.def())
-        .join(JoinType::InnerJoin, Relation::Article.def())
-        .column_as(user::Column::Nickname, "publisher_name")
-        .column_as(article::Column::Title, "article_title")
-        .filter(Column::ArticleId.eq(article_id));
-    let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let comments = paginator.fetch_page(page - 1).await?;
-    Ok((comments, total))
+  C: ConnectionTrait, {
+  let sql = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Publisher.def())
+    .join(JoinType::InnerJoin, Relation::Article.def())
+    .column_as(user::Column::Nickname, "publisher_name")
+    .column_as(article::Column::Title, "article_title")
+    .filter(Column::ArticleId.eq(article_id));
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let comments = paginator.fetch_page(page - 1).await?;
+  Ok((comments, total))
 }
 
 pub async fn create<C>(db: &C, comment: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let comment = ActiveModel {
-        id: ActiveValue::NotSet,
-        created_at: ActiveValue::Set(Utc::now()),
-        ..comment.into_active_model().reset_all()
-    };
-    comment.insert(db).await
+  C: ConnectionTrait, {
+  let comment = ActiveModel {
+    id: ActiveValue::NotSet,
+    created_at: ActiveValue::Set(Utc::now()),
+    ..comment.into_active_model().reset_all()
+  };
+  comment.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

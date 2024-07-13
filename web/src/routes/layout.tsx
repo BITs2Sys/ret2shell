@@ -31,526 +31,512 @@ import Toasts from "./_blocks/toasts";
 import UserBox from "./_blocks/user-box";
 
 function GlobalTitleLink() {
-    const location = useLocation();
-    const inDocs = () => location.pathname.startsWith("/docs");
-    return (
-        <Link ghost href={inDocs() ? "/docs" : "/"}>
-            <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
-            <span />
-            <span>
-                {inDocs()
-                    ? `${t("docs.title")} - ${t("platform.name")}`
-                    : platformStore.config.name || t("platform.name")}
-            </span>
-        </Link>
-    );
+  const location = useLocation();
+  const inDocs = () => location.pathname.startsWith("/docs");
+  return (
+    <Link ghost href={inDocs() ? "/docs" : "/"}>
+      <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+      <span />
+      <span>
+        {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
+      </span>
+    </Link>
+  );
 }
 
 function GameTitleLink() {
-    return (
-        <Link ghost href={`/games/${gameStore.current?.id}/`}>
-            <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
-                <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
-            </Show>
-            <span />
-            <span>{gameStore.current?.name}</span>
-        </Link>
-    );
+  return (
+    <Link ghost href={`/games/${gameStore.current?.id}/`}>
+      <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
+        <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
+      </Show>
+      <span />
+      <span>{gameStore.current?.name}</span>
+    </Link>
+  );
 }
 
 function GlobalNav(props: { size: "sm" | "md" }) {
-    return (
-        <>
-            <li class="nav">
-                <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
-                    <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
-                    <span>{t("wiki.title")}</span>
-                </Link>
-            </li>
-            <li class="nav">
-                <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
-                    <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
-                    <span>{t("training.title")}</span>
-                </Link>
-            </li>
-            <li class="nav">
-                <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
-                    <span>{t("game.title")}</span>
-                </Link>
-            </li>
-            <li class="nav">
-                <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
-                    <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
-                    <span>{t("bulletin.title")}</span>
-                </Link>
-            </li>
-            <Show
-                when={
-                    accountStore.token &&
-                    accountStore.info &&
-                    (accountStore.info?.permissions.includes(Permission.Statistics) ||
-                        accountStore.info?.permissions.includes(Permission.DevOps) ||
-                        accountStore.info?.permissions.includes(Permission.User))
-                }
-            >
-                <li class="nav">
-                    <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
-                        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-                        <span>{t("admin.title")}</span>
-                    </Link>
-                </li>
-            </Show>
-        </>
-    );
+  return (
+    <>
+      <li class="nav">
+        <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
+          <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
+          <span>{t("wiki.title")}</span>
+        </Link>
+      </li>
+      <li class="nav">
+        <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
+          <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
+          <span>{t("training.title")}</span>
+        </Link>
+      </li>
+      <li class="nav">
+        <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
+          <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+          <span>{t("game.title")}</span>
+        </Link>
+      </li>
+      <li class="nav">
+        <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
+          <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
+          <span>{t("bulletin.title")}</span>
+        </Link>
+      </li>
+      <Show
+        when={
+          accountStore.token &&
+          accountStore.info &&
+          (accountStore.info?.permissions.includes(Permission.Statistics) ||
+            accountStore.info?.permissions.includes(Permission.DevOps) ||
+            accountStore.info?.permissions.includes(Permission.User))
+        }
+      >
+        <li class="nav">
+          <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
+            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span>{t("admin.title")}</span>
+          </Link>
+        </li>
+      </Show>
+    </>
+  );
 }
 
 function GameNav(props: { size: "sm" | "md" }) {
-    return (
-        <>
-            <li class="nav">
-                <Link
-                    class="w-full"
-                    href={`/games/${gameStore.current?.id}/challenges`}
-                    activeMatch="partial"
-                    ghost
-                    justify="start"
-                    size={props.size}
-                    disabled={!canAccessChallenges()[0]}
-                    title={canAccessChallenges()[1]}
-                >
-                    <span class="icon-[fluent--code-20-regular] w-5 h-5" />
-                    <span>{t("game.challenge.title")}</span>
-                </Link>
-            </li>
-            <li class="nav">
-                <Link
-                    class="w-full"
-                    href={`/games/${gameStore.current?.id}/scoreboard`}
-                    activeMatch="partial"
-                    ghost
-                    justify="start"
-                    size={props.size}
-                >
-                    <span class="icon-[fluent--trophy-20-regular] w-5 h-5" />
-                    <span>{t("game.scoreboard.title")}</span>
-                </Link>
-            </li>
-            <Show when={gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()}>
-                <li class="nav">
-                    <Link
-                        class="w-full"
-                        href={`/games/${gameStore.current?.id}/writeups`}
-                        activeMatch="partial"
-                        ghost
-                        justify="start"
-                        size={props.size}
-                    >
-                        <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />
-                        <span>{t("game.writeup.title")}</span>
-                    </Link>
-                </li>
-            </Show>
-            <Show when={isGameAdmin()}>
-                <li class="nav">
-                    <Link
-                        class="w-full"
-                        href={`/games/${gameStore.current?.id}/admin`}
-                        activeMatch="partial"
-                        ghost
-                        justify="start"
-                        size={props.size}
-                    >
-                        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-                        <span>{t("game.admin.title")}</span>
-                    </Link>
-                </li>
-            </Show>
-            <li class="nav">
-                <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
-                    <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
-                    <span>{t("game.exit")}</span>
-                </Link>
-            </li>
-        </>
-    );
+  return (
+    <>
+      <li class="nav">
+        <Link
+          class="w-full"
+          href={`/games/${gameStore.current?.id}/challenges`}
+          activeMatch="partial"
+          ghost
+          justify="start"
+          size={props.size}
+          disabled={!canAccessChallenges()[0]}
+          title={canAccessChallenges()[1]}
+        >
+          <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+          <span>{t("game.challenge.title")}</span>
+        </Link>
+      </li>
+      <li class="nav">
+        <Link
+          class="w-full"
+          href={`/games/${gameStore.current?.id}/scoreboard`}
+          activeMatch="partial"
+          ghost
+          justify="start"
+          size={props.size}
+        >
+          <span class="icon-[fluent--trophy-20-regular] w-5 h-5" />
+          <span>{t("game.scoreboard.title")}</span>
+        </Link>
+      </li>
+      <Show when={gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()}>
+        <li class="nav">
+          <Link
+            class="w-full"
+            href={`/games/${gameStore.current?.id}/writeups`}
+            activeMatch="partial"
+            ghost
+            justify="start"
+            size={props.size}
+          >
+            <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />
+            <span>{t("game.writeup.title")}</span>
+          </Link>
+        </li>
+      </Show>
+      <Show when={isGameAdmin()}>
+        <li class="nav">
+          <Link
+            class="w-full"
+            href={`/games/${gameStore.current?.id}/admin`}
+            activeMatch="partial"
+            ghost
+            justify="start"
+            size={props.size}
+          >
+            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span>{t("game.admin.title")}</span>
+          </Link>
+        </li>
+      </Show>
+      <li class="nav">
+        <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
+          <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
+          <span>{t("game.exit")}</span>
+        </Link>
+      </li>
+    </>
+  );
 }
 
 function TitleBar() {
-    const [additionalMobileBox, setAdditionalMobileBox] = createSignal<"wsrx" | "notification" | "diy" | null>(null);
-    const params = useParams();
-    const location = useLocation();
-    const inDocs = () => location.pathname.startsWith("/docs");
-    const [offlineLoading, setOfflineLoading] = createSignal(false);
-    function reloadPage() {
-        setOfflineLoading(true);
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
-    }
+  const [additionalMobileBox, setAdditionalMobileBox] = createSignal<"wsrx" | "notification" | "diy" | null>(null);
+  const params = useParams();
+  const location = useLocation();
+  const inDocs = () => location.pathname.startsWith("/docs");
+  const [offlineLoading, setOfflineLoading] = createSignal(false);
+  function reloadPage() {
+    setOfflineLoading(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  }
 
-    return (
-        <>
-            <div id="page-top" class="print:hidden" />
-            <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-                <span>{inDocs() ? t("docs.titleTips") : platformStore.config.name || t("platform.name")}</span>
-                <span class="flex-1" />
-                <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
-            </div>
-            <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
-                <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
-                    <div class="xl:hidden">
-                        <Popover
-                            btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
-                            square
-                            ghost
-                            popContentClass="pt-2"
-                        >
-                            <div class="flex flex-col space-y-2 max-w-64">
-                                <Card contentClass="p-2 flex flex-col space-y-2">
-                                    <ul class="flex flex-col space-y-2">
-                                        <Switch>
-                                            <Match when={platformStore.isOnline}>
-                                                <GlobalNav size="sm" />
-                                            </Match>
-                                            <Match
-                                                when={
-                                                    platformStore.isOnline &&
-                                                    gameStore.current &&
-                                                    gameStore.current.host_type === HostType.CTFGame
-                                                }
-                                            >
-                                                <GameNav size="sm" />
-                                            </Match>
-                                        </Switch>
-                                        <Divider direction="horizontal" />
-                                        <Show
-                                            when={
-                                                platformStore.isOnline &&
-                                                accountStore.token !== null &&
-                                                gameStore.current
-                                            }
-                                        >
-                                            <Button
-                                                justify="start"
-                                                size="sm"
-                                                ghost={additionalMobileBox() !== "wsrx"}
-                                                onClick={() => setAdditionalMobileBox("wsrx")}
-                                            >
-                                                <span
-                                                    class={`${
-                                                        wsrx.instances().length > 0
-                                                            ? "icon-[fluent--fluid-20-filled]"
-                                                            : "icon-[fluent--fluid-20-regular]"
-                                                    } w-5 h-5 ${
-                                                        wsrx.instances().length > 0
-                                                            ? wsrx.connected()
-                                                                ? "text-success"
-                                                                : "text-warning"
-                                                            : ""
-                                                    }`.trim()}
-                                                />
-                                                <span>{t("instance.box")}</span>
-                                            </Button>
-                                        </Show>
-                                        <li>
-                                            <Button
-                                                justify="start"
-                                                class="w-full"
-                                                size="sm"
-                                                ghost={additionalMobileBox() !== "notification"}
-                                                onClick={() => setAdditionalMobileBox("notification")}
-                                            >
-                                                <span
-                                                    class={`${
-                                                        toastStore.toasts.length > 0
-                                                            ? "icon-[fluent--alert-badge-20-filled] text-primary"
-                                                            : "icon-[fluent--alert-20-regular]"
-                                                    } w-5 h-5`}
-                                                />
-                                                <span>{t("platform.notificationBox")}</span>
-                                            </Button>
-                                        </li>
-                                        <li>
-                                            <Button
-                                                justify="start"
-                                                class="w-full"
-                                                size="sm"
-                                                ghost={additionalMobileBox() !== "diy"}
-                                                onClick={() => setAdditionalMobileBox("diy")}
-                                            >
-                                                <span class="icon-[fluent--wand-20-regular] w-5 h-5" />
-                                                <span>{t("platform.diyBox")}</span>
-                                            </Button>
-                                        </li>
-                                    </ul>
-                                </Card>
-                                <Switch fallback={null}>
-                                    <Match when={additionalMobileBox() === "wsrx"}>
-                                        <InstanceBoxContent />
-                                    </Match>
-                                    <Match when={additionalMobileBox() === "notification"}>
-                                        <NotificationBoxContent />
-                                    </Match>
-                                    <Match when={additionalMobileBox() === "diy"}>
-                                        <DiyBoxContent />
-                                    </Match>
-                                </Switch>
-                            </div>
-                        </Popover>
-                    </div>
-                    <Switch fallback={<GlobalTitleLink />}>
-                        <Match
-                            when={
-                                gameStore.current &&
-                                gameStore.current.host_type === HostType.CTFGame &&
-                                params.game &&
-                                location.pathname.startsWith(`/games/${params.game}`)
-                            }
-                        >
-                            <GameTitleLink />
-                        </Match>
+  return (
+    <>
+      <div id="page-top" class="print:hidden" />
+      <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
+        <span>{inDocs() ? t("docs.titleTips") : platformStore.config.name || t("platform.name")}</span>
+        <span class="flex-1" />
+        <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+      </div>
+      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
+        <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
+          <div class="xl:hidden">
+            <Popover
+              btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
+              square
+              ghost
+              popContentClass="pt-2"
+            >
+              <div class="flex flex-col space-y-2 max-w-64">
+                <Card contentClass="p-2 flex flex-col space-y-2">
+                  <ul class="flex flex-col space-y-2">
+                    <Switch>
+                      <Match when={platformStore.isOnline}>
+                        <GlobalNav size="sm" />
+                      </Match>
+                      <Match
+                        when={
+                          platformStore.isOnline &&
+                          gameStore.current &&
+                          gameStore.current.host_type === HostType.CTFGame
+                        }
+                      >
+                        <GameNav size="sm" />
+                      </Match>
                     </Switch>
-                    <div class="w-4" />
-                    <ul class="xl:flex flex-row space-x-2 items-center hidden">
-                        <Switch fallback={<LoadingTips class="opacity-60" />}>
-                            <Match
-                                when={
-                                    platformStore.isOnline &&
-                                    gameStore.current &&
-                                    gameStore.current.host_type === HostType.CTFGame &&
-                                    params.game &&
-                                    location.pathname.startsWith(`/games/${params.game}`)
-                                }
-                            >
-                                <GameNav size="md" />
-                            </Match>
-                            <Match when={inDocs()}>
-                                <span class="flex flex-row items-center space-x-2">
-                                    <span class="opacity-60">{t("docs.forVersion")}:</span>
-                                    <span class="font-bold opacity-80">{platformStore.version}</span>
-                                </span>
-                            </Match>
-                            <Match when={platformStore.isOnline}>
-                                <GlobalNav size="md" />
-                            </Match>
-                        </Switch>
-                    </ul>
-                    <div class="flex-1" />
-                    <div class="flex flex-row space-x-2">
-                        <div class="hidden xl:flex flex-row space-x-2">
-                            <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
-                                <Switch>
-                                    <Match
-                                        when={gameStore.current && gameStore.current.host_type === HostType.CTFTraining}
-                                    >
-                                        <div class="flex flex-col items-center justify-center px-4 relative">
-                                            <span>{t("training.openForever")}</span>
-                                            <TimeProgress
-                                                class="w-full"
-                                                startAt={gameStore.current!.start_at}
-                                                endAt={gameStore.current!.start_at}
-                                            />
-                                        </div>
-                                    </Match>
-                                    <Match
-                                        when={
-                                            gameStore.current &&
-                                            gameStore.current.start_at < DateTime.now() &&
-                                            gameStore.current.end_at > DateTime.now()
-                                        }
-                                    >
-                                        <div class="flex flex-col items-center justify-center px-4 relative">
-                                            <Timer end={gameStore.current!.end_at} />
-                                            <TimeProgress
-                                                class="w-full"
-                                                startAt={gameStore.current!.start_at}
-                                                endAt={gameStore.current!.end_at}
-                                            />
-                                        </div>
-                                    </Match>
-                                </Switch>
-                                <InstanceBox />
-                            </Show>
-                            <NotificationBox />
-                            <DiyBox />
-                        </div>
-                        <Switch
-                            fallback={
-                                <Button level="error" loading={offlineLoading()} onClick={reloadPage}>
-                                    <Show when={!offlineLoading()}>
-                                        <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
-                                    </Show>
-                                    <span>{t("platform.unavailable")}</span>
-                                </Button>
-                            }
-                        >
-                            <Match when={platformStore.isOnline}>
-                                <UserBox />
-                            </Match>
-                            <Match when={platformStore.under_maintenance}>
-                                <Button level="warning" loading={offlineLoading()} onClick={reloadPage}>
-                                    <Show when={!offlineLoading()}>
-                                        <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
-                                    </Show>
-                                    <span>{t("platform.underMaintenance")}</span>
-                                </Button>
-                            </Match>
-                        </Switch>
+                    <Divider direction="horizontal" />
+                    <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
+                      <Button
+                        justify="start"
+                        size="sm"
+                        ghost={additionalMobileBox() !== "wsrx"}
+                        onClick={() => setAdditionalMobileBox("wsrx")}
+                      >
+                        <span
+                          class={`${
+                            wsrx.instances().length > 0
+                              ? "icon-[fluent--fluid-20-filled]"
+                              : "icon-[fluent--fluid-20-regular]"
+                          } w-5 h-5 ${
+                            wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
+                          }`.trim()}
+                        />
+                        <span>{t("instance.box")}</span>
+                      </Button>
+                    </Show>
+                    <li>
+                      <Button
+                        justify="start"
+                        class="w-full"
+                        size="sm"
+                        ghost={additionalMobileBox() !== "notification"}
+                        onClick={() => setAdditionalMobileBox("notification")}
+                      >
+                        <span
+                          class={`${
+                            toastStore.toasts.length > 0
+                              ? "icon-[fluent--alert-badge-20-filled] text-primary"
+                              : "icon-[fluent--alert-20-regular]"
+                          } w-5 h-5`}
+                        />
+                        <span>{t("platform.notificationBox")}</span>
+                      </Button>
+                    </li>
+                    <li>
+                      <Button
+                        justify="start"
+                        class="w-full"
+                        size="sm"
+                        ghost={additionalMobileBox() !== "diy"}
+                        onClick={() => setAdditionalMobileBox("diy")}
+                      >
+                        <span class="icon-[fluent--wand-20-regular] w-5 h-5" />
+                        <span>{t("platform.diyBox")}</span>
+                      </Button>
+                    </li>
+                  </ul>
+                </Card>
+                <Switch fallback={null}>
+                  <Match when={additionalMobileBox() === "wsrx"}>
+                    <InstanceBoxContent />
+                  </Match>
+                  <Match when={additionalMobileBox() === "notification"}>
+                    <NotificationBoxContent />
+                  </Match>
+                  <Match when={additionalMobileBox() === "diy"}>
+                    <DiyBoxContent />
+                  </Match>
+                </Switch>
+              </div>
+            </Popover>
+          </div>
+          <Switch fallback={<GlobalTitleLink />}>
+            <Match
+              when={
+                gameStore.current &&
+                gameStore.current.host_type === HostType.CTFGame &&
+                params.game &&
+                location.pathname.startsWith(`/games/${params.game}`)
+              }
+            >
+              <GameTitleLink />
+            </Match>
+          </Switch>
+          <div class="w-4" />
+          <ul class="xl:flex flex-row space-x-2 items-center hidden">
+            <Switch fallback={<LoadingTips class="opacity-60" />}>
+              <Match
+                when={
+                  platformStore.isOnline &&
+                  gameStore.current &&
+                  gameStore.current.host_type === HostType.CTFGame &&
+                  params.game &&
+                  location.pathname.startsWith(`/games/${params.game}`)
+                }
+              >
+                <GameNav size="md" />
+              </Match>
+              <Match when={inDocs()}>
+                <span class="flex flex-row items-center space-x-2">
+                  <span class="opacity-60">{t("docs.forVersion")}:</span>
+                  <span class="font-bold opacity-80">{platformStore.version}</span>
+                </span>
+              </Match>
+              <Match when={platformStore.isOnline}>
+                <GlobalNav size="md" />
+              </Match>
+            </Switch>
+          </ul>
+          <div class="flex-1" />
+          <div class="flex flex-row space-x-2">
+            <div class="hidden xl:flex flex-row space-x-2">
+              <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
+                <Switch>
+                  <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFTraining}>
+                    <div class="flex flex-col items-center justify-center px-4 relative">
+                      <span>{t("training.openForever")}</span>
+                      <TimeProgress
+                        class="w-full"
+                        startAt={gameStore.current!.start_at}
+                        endAt={gameStore.current!.start_at}
+                      />
                     </div>
-                </div>
+                  </Match>
+                  <Match
+                    when={
+                      gameStore.current &&
+                      gameStore.current.start_at < DateTime.now() &&
+                      gameStore.current.end_at > DateTime.now()
+                    }
+                  >
+                    <div class="flex flex-col items-center justify-center px-4 relative">
+                      <Timer end={gameStore.current!.end_at} />
+                      <TimeProgress
+                        class="w-full"
+                        startAt={gameStore.current!.start_at}
+                        endAt={gameStore.current!.end_at}
+                      />
+                    </div>
+                  </Match>
+                </Switch>
+                <InstanceBox />
+              </Show>
+              <NotificationBox />
+              <DiyBox />
             </div>
-        </>
-    );
+            <Switch
+              fallback={
+                <Button level="error" loading={offlineLoading()} onClick={reloadPage}>
+                  <Show when={!offlineLoading()}>
+                    <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
+                  </Show>
+                  <span>{t("platform.unavailable")}</span>
+                </Button>
+              }
+            >
+              <Match when={platformStore.isOnline}>
+                <UserBox />
+              </Match>
+              <Match when={platformStore.under_maintenance}>
+                <Button level="warning" loading={offlineLoading()} onClick={reloadPage}>
+                  <Show when={!offlineLoading()}>
+                    <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
+                  </Show>
+                  <span>{t("platform.underMaintenance")}</span>
+                </Button>
+              </Match>
+            </Switch>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
 function checkCookiePolicy() {
-    if (!platformStore.accept_cookies) {
-        const toastId = addToast({
-            level: "info",
-            description: t("platform.cookiePolicy")!,
-            accept: () => {
-                setPlatformStore({ accept_cookies: true });
-                setTimeout(() => {
-                    removeToast(toastId);
-                }, 50);
-            },
-            acceptLabel: t("platform.ok"),
-            reject: () => {
-                setPlatformStore({ accept_cookies: true });
-                setTimeout(() => {
-                    removeToast(toastId);
-                }, 50);
-            },
-            rejectLabel: t("platform.yes"),
-        });
-    }
+  if (!platformStore.accept_cookies) {
+    const toastId = addToast({
+      level: "info",
+      description: t("platform.cookiePolicy")!,
+      accept: () => {
+        setPlatformStore({ accept_cookies: true });
+        setTimeout(() => {
+          removeToast(toastId);
+        }, 50);
+      },
+      acceptLabel: t("platform.ok"),
+      reject: () => {
+        setPlatformStore({ accept_cookies: true });
+        setTimeout(() => {
+          removeToast(toastId);
+        }, 50);
+      },
+      rejectLabel: t("platform.yes"),
+    });
+  }
 }
 
 export default function (props: { children?: JSX.Element }) {
-    let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
-    const [platformTyped, setPlatformTyped] = createSignal("");
-    const [hideAnimation, setHideAnimation] = createSignal(false);
-    const showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
-    const navigate = useNavigate();
-    const location = useLocation();
-    const inDocs = () => location.pathname.startsWith("/docs");
-    checkCookiePolicy();
-    setupTitleResolver();
-    getPlatformInfo()
-        .then((res) => {
-            setPlatformStore({
-                config: res,
-                under_maintenance: false,
-                backend_online: true,
-            });
-        })
-        .catch((err: HTTPError) => {
-            if (err.response?.status === 503) {
-                setPlatformStore({ under_maintenance: true });
-                navigate("/");
-            } else if (err.response?.status === 502 && !inDocs()) {
-                addToast({
-                    level: "error",
-                    description: `${t("platform.offline")}`,
-                });
-                navigate(`/sigtrap/${err.response?.status || 502}`);
-            } else if (!inDocs()) {
-                addToast({
-                    level: "error",
-                    description: `${t("platform.error")}: ${err.response?.statusText || err.message}`,
-                });
-                navigate(`/sigtrap/${err.response?.status || 500}`);
+  let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+  const [platformTyped, setPlatformTyped] = createSignal("");
+  const [hideAnimation, setHideAnimation] = createSignal(false);
+  const showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const inDocs = () => location.pathname.startsWith("/docs");
+  checkCookiePolicy();
+  setupTitleResolver();
+  getPlatformInfo()
+    .then((res) => {
+      setPlatformStore({
+        config: res,
+        under_maintenance: false,
+        backend_online: true,
+      });
+    })
+    .catch((err: HTTPError) => {
+      if (err.response?.status === 503) {
+        setPlatformStore({ under_maintenance: true });
+        navigate("/");
+      } else if (err.response?.status === 502 && !inDocs()) {
+        addToast({
+          level: "error",
+          description: `${t("platform.offline")}`,
+        });
+        navigate(`/sigtrap/${err.response?.status || 502}`);
+      } else if (!inDocs()) {
+        addToast({
+          level: "error",
+          description: `${t("platform.error")}: ${err.response?.statusText || err.message}`,
+        });
+        navigate(`/sigtrap/${err.response?.status || 500}`);
+      }
+      setPlatformStore({ backend_online: false });
+    })
+    .finally(() => {
+      platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+      if (showAnimation) {
+        setTimeout(() => {
+          const typeTimer = setInterval(() => {
+            if (platformTyped().length < platformName.length) {
+              setPlatformTyped(platformName.slice(0, platformTyped().length + 1));
+            } else {
+              clearInterval(typeTimer);
+              setTimeout(() => {
+                setHideAnimation(true);
+              }, 500);
             }
-            setPlatformStore({ backend_online: false });
-        })
-        .finally(() => {
-            platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
-            if (showAnimation) {
-                setTimeout(() => {
-                    const typeTimer = setInterval(() => {
-                        if (platformTyped().length < platformName.length) {
-                            setPlatformTyped(platformName.slice(0, platformTyped().length + 1));
-                        } else {
-                            clearInterval(typeTimer);
-                            setTimeout(() => {
-                                setHideAnimation(true);
-                            }, 500);
-                        }
-                    }, 100);
-                }, 1000);
-            }
+          }, 100);
+        }, 1000);
+      }
+    });
+  getVersion()
+    .then((version) => {
+      setPlatformStore({ version });
+      console.log(
+        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - 2024 %cRet 2 Shell%c, All rights reserved.\n`,
+        "color: #0078D6; font-weight: bold; font-size: 1.5rem;",
+        "color: currentColor; font-weight: bold; font-size: 1.5rem;",
+        "color: #808080; font-weight: bold; font-size: 1.5rem;",
+        "color: #f83030; font-weight: bold; font-size: 1.5rem;",
+        "color: currentColor; font-weight: bold; font-size: 1.5rem;",
+        "color: #0078D6",
+        "color: #808080",
+        "color: #808080",
+        "color: #808080;text-decoration: underline;",
+        "color: #808080;"
+      );
+      console.log(
+        "\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n",
+        "color: currentColor;"
+      );
+      console.log(
+        "\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n",
+        "color: currentColor;"
+      );
+    })
+    .catch(() => {
+      setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
+    });
+  getPlatformLicense()
+    .then((resp) => {
+      setPlatformStore({ license: resp });
+    })
+    .catch((err: HTTPError) => {
+      void err.response.text().then((text) => {
+        addToast({
+          level: "error",
+          description: `${t("admin.about.failedToFetchLicense")}: ${text}`,
+          duration: 5000,
         });
-    getVersion()
-        .then((version) => {
-            setPlatformStore({ version });
-            console.log(
-                `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - 2024 %cRet 2 Shell%c, All rights reserved.\n`,
-                "color: #0078D6; font-weight: bold; font-size: 1.5rem;",
-                "color: currentColor; font-weight: bold; font-size: 1.5rem;",
-                "color: #808080; font-weight: bold; font-size: 1.5rem;",
-                "color: #f83030; font-weight: bold; font-size: 1.5rem;",
-                "color: currentColor; font-weight: bold; font-size: 1.5rem;",
-                "color: #0078D6",
-                "color: #808080",
-                "color: #808080",
-                "color: #808080;text-decoration: underline;",
-                "color: #808080;"
-            );
-            console.log(
-                "\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n",
-                "color: currentColor;"
-            );
-            console.log(
-                "\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n",
-                "color: currentColor;"
-            );
-        })
-        .catch(() => {
-            setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
-        });
-    getPlatformLicense()
-        .then((resp) => {
-            setPlatformStore({ license: resp });
-        })
-        .catch((err: HTTPError) => {
-            void err.response.text().then((text) => {
-                addToast({
-                    level: "error",
-                    description: `${t("admin.about.failedToFetchLicense")}: ${text}`,
-                    duration: 5000,
-                });
-            });
-        });
-    return (
-        <>
+      });
+    });
+  return (
+    <>
+      <Background />
+      <TitleBar />
+      {props.children}
+      <Toasts />
+      <Transition
+        onExit={(el, done) => {
+          const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+            duration: 300,
+          });
+          void a.finished.then(done);
+        }}
+      >
+        <Show when={showAnimation && !hideAnimation()}>
+          <div class="fixed top-0 left-0 w-screen h-screen bg-layer z-50 print:hidden">
             <Background />
-            <TitleBar />
-            {props.children}
-            <Toasts />
-            <Transition
-                onExit={(el, done) => {
-                    const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
-                        duration: 300,
-                    });
-                    void a.finished.then(done);
-                }}
-            >
-                <Show when={showAnimation && !hideAnimation()}>
-                    <div class="fixed top-0 left-0 w-screen h-screen bg-layer z-50 print:hidden">
-                        <Background />
-                        <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
-                            <div class="flex-1" />
-                            <h1 class="text-3xl font-bold z-50 opacity-80">
-                                {platformTyped()}
-                                <span class="text-primary animate-ping">_</span>
-                            </h1>
-                            <div class="text-xl opacity-0 mt-8">&nbsp;</div>
-                            <div class="flex-1" />
-                        </div>
-                    </div>
-                </Show>
-            </Transition>
-        </>
-    );
+            <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
+              <div class="flex-1" />
+              <h1 class="text-3xl font-bold z-50 opacity-80">
+                {platformTyped()}
+                <span class="text-primary animate-ping">_</span>
+              </h1>
+              <div class="text-xl opacity-0 mt-8">&nbsp;</div>
+              <div class="flex-1" />
+            </div>
+          </div>
+        </Show>
+      </Transition>
+    </>
+  );
 }

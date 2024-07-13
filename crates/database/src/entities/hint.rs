@@ -7,78 +7,78 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "hint")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    pub challenge_id: i64,
-    #[sea_orm(column_type = "Text")]
-    pub content: String,
-    /// Use score to unlock this hint.
-    pub cost: i32,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub challenge_id: i64,
+  #[sea_orm(column_type = "Text")]
+  pub content: String,
+  /// Use score to unlock this hint.
+  pub cost: i32,
 }
 
 impl Model {
-    pub fn desensitize(self) -> Self {
-        Self {
-            content: String::new(),
-            ..self
-        }
+  pub fn desensitize(self) -> Self {
+    Self {
+      content: String::new(),
+      ..self
     }
+  }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::challenge::Entity",
-        from = "Column::ChallengeId",
-        to = "super::challenge::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Challenge,
-    #[sea_orm(has_many = "super::extra::Entity")]
-    Extra,
+  #[sea_orm(
+    belongs_to = "super::challenge::Entity",
+    from = "Column::ChallengeId",
+    to = "super::challenge::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Challenge,
+  #[sea_orm(has_many = "super::extra::Entity")]
+  Extra,
 }
 
 impl Related<super::challenge::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Challenge.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Challenge.def()
+  }
 }
 
 impl Related<super::extra::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Extra.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Extra.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, challenge_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find()
-        .filter(Column::ChallengeId.eq(challenge_id))
-        .all(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .all(db)
+    .await
 }
 
 pub async fn create<C>(db: &C, hint: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let hint = ActiveModel {
-        id: ActiveValue::NotSet,
-        created_at: ActiveValue::Set(Utc::now()),
-        ..hint.into_active_model().reset_all()
-    };
-    hint.insert(db).await
+  C: ConnectionTrait, {
+  let hint = ActiveModel {
+    id: ActiveValue::NotSet,
+    created_at: ActiveValue::Set(Utc::now()),
+    ..hint.into_active_model().reset_all()
+  };
+  hint.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, hint_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
 }
 
 // #[cfg(test)]

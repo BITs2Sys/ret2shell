@@ -5,8 +5,8 @@ use std::str::FromStr;
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
-    IntoActiveModel, Iterable, JoinType, Order, QueryOrder, QuerySelect,
+  entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
+  IntoActiveModel, Iterable, JoinType, Order, QueryOrder, QuerySelect,
 };
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
@@ -15,20 +15,20 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::institute;
 
 #[derive(
-    FromPrimitive, ToPrimitive, Clone, Copy, Debug, PartialEq, Serialize_repr, Deserialize_repr, Eq,
+  FromPrimitive, ToPrimitive, Clone, Copy, Debug, PartialEq, Serialize_repr, Deserialize_repr, Eq,
 )]
 #[repr(i32)]
 pub enum Permission {
-    Basic,
-    Verified,
-    Calendar,
-    Wiki,
-    Bulletin,
-    Game,
-    Host,
-    User,
-    Statistics,
-    DevOps,
+  Basic,
+  Verified,
+  Calendar,
+  Wiki,
+  Bulletin,
+  Game,
+  Host,
+  User,
+  Statistics,
+  DevOps,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -37,328 +37,319 @@ pub struct Permissions(pub Vec<Permission>);
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "user")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub registered_at: DateTime<Utc>,
-    #[sea_orm(unique)]
-    pub account: String,
-    pub nickname: String,
-    #[serde(skip_serializing)]
-    pub password: Option<String>,
-    #[sea_orm(unique)]
-    pub email: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub description: Option<String>,
-    pub avatar: Option<String>,
-    pub institute_id: Option<i64>,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub permissions: Permissions,
-    pub hidden: bool,
-    pub banned: bool,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub registered_at: DateTime<Utc>,
+  #[sea_orm(unique)]
+  pub account: String,
+  pub nickname: String,
+  #[serde(skip_serializing)]
+  pub password: Option<String>,
+  #[sea_orm(unique)]
+  pub email: Option<String>,
+  #[sea_orm(column_type = "Text", nullable)]
+  pub description: Option<String>,
+  pub avatar: Option<String>,
+  pub institute_id: Option<i64>,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub permissions: Permissions,
+  pub hidden: bool,
+  pub banned: bool,
 }
 
 impl Model {
-    pub fn desensitize(self) -> Self {
-        Self {
-            password: None,
-            email: None,
-            ..self
-        }
+  pub fn desensitize(self) -> Self {
+    Self {
+      password: None,
+      email: None,
+      ..self
     }
+  }
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub registered_at: DateTime<Utc>,
-    pub account: String,
-    pub nickname: String,
-    #[serde(skip_serializing)]
-    pub password: Option<String>,
-    pub email: Option<String>,
-    pub description: Option<String>,
-    pub avatar: Option<String>,
-    pub institute_id: Option<i64>,
-    pub institute_name: Option<String>,
-    pub permissions: Permissions,
-    pub hidden: bool,
-    pub banned: bool,
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub registered_at: DateTime<Utc>,
+  pub account: String,
+  pub nickname: String,
+  #[serde(skip_serializing)]
+  pub password: Option<String>,
+  pub email: Option<String>,
+  pub description: Option<String>,
+  pub avatar: Option<String>,
+  pub institute_id: Option<i64>,
+  pub institute_name: Option<String>,
+  pub permissions: Permissions,
+  pub hidden: bool,
+  pub banned: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::article::Entity")]
-    Article,
-    #[sea_orm(has_many = "super::audit::Entity")]
-    Audit,
-    #[sea_orm(has_many = "super::calendar::Entity")]
-    Calendar,
-    #[sea_orm(has_many = "super::comment::Entity")]
-    Comment,
-    #[sea_orm(has_many = "super::instance::Entity")]
-    Instance,
-    #[sea_orm(
-        belongs_to = "super::institute::Entity",
-        from = "Column::InstituteId",
-        to = "super::institute::Column::Id",
-        on_update = "Cascade",
-        on_delete = "SetNull"
-    )]
-    Institute,
-    #[sea_orm(has_many = "super::media::Entity")]
-    Media,
-    #[sea_orm(has_many = "super::oauth::Entity")]
-    Oauth,
-    #[sea_orm(has_many = "super::submission::Entity")]
-    Submission,
-    #[sea_orm(has_many = "super::user2_ip::Entity")]
-    User2Ip,
-    #[sea_orm(has_many = "super::user2_team::Entity")]
-    User2Team,
-    #[sea_orm(has_many = "super::notification::Entity")]
-    Notification,
+  #[sea_orm(has_many = "super::article::Entity")]
+  Article,
+  #[sea_orm(has_many = "super::audit::Entity")]
+  Audit,
+  #[sea_orm(has_many = "super::calendar::Entity")]
+  Calendar,
+  #[sea_orm(has_many = "super::comment::Entity")]
+  Comment,
+  #[sea_orm(has_many = "super::instance::Entity")]
+  Instance,
+  #[sea_orm(
+    belongs_to = "super::institute::Entity",
+    from = "Column::InstituteId",
+    to = "super::institute::Column::Id",
+    on_update = "Cascade",
+    on_delete = "SetNull"
+  )]
+  Institute,
+  #[sea_orm(has_many = "super::media::Entity")]
+  Media,
+  #[sea_orm(has_many = "super::oauth::Entity")]
+  Oauth,
+  #[sea_orm(has_many = "super::submission::Entity")]
+  Submission,
+  #[sea_orm(has_many = "super::user2_ip::Entity")]
+  User2Ip,
+  #[sea_orm(has_many = "super::user2_team::Entity")]
+  User2Team,
+  #[sea_orm(has_many = "super::notification::Entity")]
+  Notification,
 }
 
 impl Related<super::article::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Article.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Article.def()
+  }
 }
 
 impl Related<super::audit::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Audit.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Audit.def()
+  }
 }
 
 impl Related<super::calendar::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Calendar.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Calendar.def()
+  }
 }
 
 impl Related<super::comment::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Comment.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Comment.def()
+  }
 }
 
 impl Related<super::instance::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Instance.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Instance.def()
+  }
 }
 
 impl Related<super::institute::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Institute.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Institute.def()
+  }
 }
 
 impl Related<super::media::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Media.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Media.def()
+  }
 }
 
 impl Related<super::oauth::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Oauth.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Oauth.def()
+  }
 }
 
 impl Related<super::submission::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Submission.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Submission.def()
+  }
 }
 
 impl Related<super::user2_ip::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User2Ip.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User2Ip.def()
+  }
 }
 
 impl Related<super::ip::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::user2_ip::Relation::Ip.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::user2_ip::Relation::User.def().rev())
-    }
+  fn to() -> RelationDef {
+    super::user2_ip::Relation::Ip.def()
+  }
+  fn via() -> Option<RelationDef> {
+    Some(super::user2_ip::Relation::User.def().rev())
+  }
 }
 
 impl Related<super::user2_team::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User2Team.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User2Team.def()
+  }
 }
 
 impl Related<super::team::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::user2_team::Relation::Team.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::user2_team::Relation::User.def().rev())
-    }
+  fn to() -> RelationDef {
+    super::user2_team::Relation::Team.def()
+  }
+  fn via() -> Option<RelationDef> {
+    Some(super::user2_team::Relation::User.def().rev())
+  }
 }
 
 impl Related<super::notification::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Notification.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Notification.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, user_id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(user_id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(user_id).one(db).await
 }
 
 pub async fn get_ex<C>(db: &C, user_id: i64) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(user_id)
-        .join(JoinType::LeftJoin, Relation::Institute.def())
-        .column_as(institute::Column::Name, "institute_name")
-        .into_model::<ExModel>()
-        .one(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find_by_id(user_id)
+    .join(JoinType::LeftJoin, Relation::Institute.def())
+    .column_as(institute::Column::Name, "institute_name")
+    .into_model::<ExModel>()
+    .one(db)
+    .await
 }
 
 pub async fn get_by_account_or_email<C>(db: &C, n: &str) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find()
-        .filter(
-            Condition::any()
-                .add(Column::Account.eq(n))
-                .add(Expr::expr(Func::lower(Expr::col(Column::Email))).eq(n.to_lowercase())),
-        )
-        .one(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(
+      Condition::any()
+        .add(Column::Account.eq(n))
+        .add(Expr::expr(Func::lower(Expr::col(Column::Email))).eq(n.to_lowercase())),
+    )
+    .one(db)
+    .await
 }
 
 pub async fn get_page<C>(
-    db: &C, page: u64, page_size: u64, order: Option<String>, filter: Option<String>,
-    with_hidden: bool, with_institute_id: Option<i64>,
+  db: &C, page: u64, page_size: u64, order: Option<String>, filter: Option<String>,
+  with_hidden: bool, with_institute_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find().select_only().columns(
-        Column::iter().filter(|col| !matches!(col, Column::Password | Column::Description)),
-    );
-    if !with_hidden {
-        sql = sql.filter(Column::Hidden.eq(false));
-    }
-    if let Some(institute_id) = with_institute_id {
-        sql = sql.filter(Column::InstituteId.eq(institute_id));
-    }
-    let sql = filter_and_order(sql, order, filter)?;
-    let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let users: Vec<Model> = paginator.fetch_page(page - 1).await?;
-    Ok((users, total))
+  C: ConnectionTrait, {
+  let mut sql = Entity::find()
+    .select_only()
+    .columns(Column::iter().filter(|col| !matches!(col, Column::Password | Column::Description)));
+  if !with_hidden {
+    sql = sql.filter(Column::Hidden.eq(false));
+  }
+  if let Some(institute_id) = with_institute_id {
+    sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  let sql = filter_and_order(sql, order, filter)?;
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let users: Vec<Model> = paginator.fetch_page(page - 1).await?;
+  Ok((users, total))
 }
 
 fn filter_and_order(
-    mut sql: Select<Entity>, order: Option<String>, filter: Option<String>,
+  mut sql: Select<Entity>, order: Option<String>, filter: Option<String>,
 ) -> Result<Select<Entity>, DbErr> {
-    if let Some(filter) = filter {
-        let mut cond = Condition::any();
-        if let Ok(id) = filter.parse::<i64>() {
-            cond = cond.add(Column::Id.eq(id));
+  if let Some(filter) = filter {
+    let mut cond = Condition::any();
+    if let Ok(id) = filter.parse::<i64>() {
+      cond = cond.add(Column::Id.eq(id));
+    }
+    let filter = format!("%{}%", filter.to_ascii_lowercase());
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Nickname))).like(filter.clone()));
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Account))).like(filter.clone()));
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Email))).like(filter.clone()));
+    sql = sql.filter(cond);
+  };
+  if let Some(order) = order {
+    let order = order.split(',').collect::<Vec<&str>>();
+    for o in order {
+      let mut is_desc = true;
+      let o = match o.starts_with('-') {
+        true => &o[1..],
+        false => {
+          is_desc = false;
+          o
         }
-        let filter = format!("%{}%", filter.to_ascii_lowercase());
-        cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Nickname))).like(filter.clone()));
-        cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Account))).like(filter.clone()));
-        cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Email))).like(filter.clone()));
-        sql = sql.filter(cond);
-    };
-    if let Some(order) = order {
-        let order = order.split(',').collect::<Vec<&str>>();
-        for o in order {
-            let mut is_desc = true;
-            let o = match o.starts_with('-') {
-                true => &o[1..],
-                false => {
-                    is_desc = false;
-                    o
-                }
-            };
-            let col = match Column::from_str(o) {
-                Ok(col) => col,
-                Err(_) => return Err(DbErr::Custom("invalid order column".to_string())),
-            };
-            match is_desc {
-                true => sql = sql.order_by(col, Order::Desc),
-                false => sql = sql.order_by(col, Order::Asc),
-            }
-        }
-    };
-    Ok(sql)
+      };
+      let col = match Column::from_str(o) {
+        Ok(col) => col,
+        Err(_) => return Err(DbErr::Custom("invalid order column".to_string())),
+      };
+      match is_desc {
+        true => sql = sql.order_by(col, Order::Desc),
+        false => sql = sql.order_by(col, Order::Asc),
+      }
+    }
+  };
+  Ok(sql)
 }
 
 pub async fn count<C>(db: &C, with_banned: bool, institute_id: Option<i64>) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find();
-    if !with_banned {
-        sql = sql.filter(Column::Banned.eq(false));
-    }
-    if let Some(institute_id) = institute_id {
-        sql = sql.filter(Column::InstituteId.eq(institute_id));
-    }
-    sql.count(db).await
+  C: ConnectionTrait, {
+  let mut sql = Entity::find();
+  if !with_banned {
+    sql = sql.filter(Column::Banned.eq(false));
+  }
+  if let Some(institute_id) = institute_id {
+    sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  sql.count(db).await
 }
 
 pub async fn create<C>(db: &C, user: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let active_model: ActiveModel = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..user.into_active_model().reset_all()
-    };
-    active_model.insert(db).await
+  C: ConnectionTrait, {
+  let active_model: ActiveModel = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..user.into_active_model().reset_all()
+  };
+  active_model.insert(db).await
 }
 
 pub async fn update<C>(db: &C, user: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let active_model: ActiveModel = ActiveModel {
-        id: ActiveValue::Unchanged(user.id),
-        password: ActiveValue::NotSet,
-        ..user.into_active_model().reset_all()
-    };
-    active_model.update(db).await
+  C: ConnectionTrait, {
+  let active_model: ActiveModel = ActiveModel {
+    id: ActiveValue::Unchanged(user.id),
+    password: ActiveValue::NotSet,
+    ..user.into_active_model().reset_all()
+  };
+  active_model.update(db).await
 }
 
 pub async fn update_password<C>(db: &C, user_id: i64, password: String) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let active_model: ActiveModel = ActiveModel {
-        id: ActiveValue::Set(user_id),
-        password: ActiveValue::Set(Some(password)),
-        ..Default::default()
-    };
-    active_model.update(db).await
+  C: ConnectionTrait, {
+  let active_model: ActiveModel = ActiveModel {
+    id: ActiveValue::Set(user_id),
+    password: ActiveValue::Set(Some(password)),
+    ..Default::default()
+  };
+  active_model.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

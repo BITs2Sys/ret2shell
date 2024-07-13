@@ -2,7 +2,7 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
+  entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,110 +10,110 @@ use super::{challenge, team};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "extra")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    #[sea_orm(column_type = "Text")]
-    pub reason: String,
-    pub score: i32,
-    pub hint_id: Option<i64>,
-    pub team_id: i64,
-    pub challenge_id: Option<i64>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  #[sea_orm(column_type = "Text")]
+  pub reason: String,
+  pub score: i32,
+  pub hint_id: Option<i64>,
+  pub team_id: i64,
+  pub challenge_id: Option<i64>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    pub reason: String,
-    pub score: i32,
-    pub hint_id: Option<i64>,
-    pub team_id: i64,
-    pub team_name: String,
-    pub challenge_id: Option<i64>,
-    pub challenge_name: Option<String>,
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub reason: String,
+  pub score: i32,
+  pub hint_id: Option<i64>,
+  pub team_id: i64,
+  pub team_name: String,
+  pub challenge_id: Option<i64>,
+  pub challenge_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::challenge::Entity",
-        from = "Column::ChallengeId",
-        to = "super::challenge::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Challenge,
-    #[sea_orm(
-        belongs_to = "super::hint::Entity",
-        from = "Column::HintId",
-        to = "super::hint::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Hint,
-    #[sea_orm(
-        belongs_to = "super::team::Entity",
-        from = "Column::TeamId",
-        to = "super::team::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Team,
+  #[sea_orm(
+    belongs_to = "super::challenge::Entity",
+    from = "Column::ChallengeId",
+    to = "super::challenge::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Challenge,
+  #[sea_orm(
+    belongs_to = "super::hint::Entity",
+    from = "Column::HintId",
+    to = "super::hint::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Hint,
+  #[sea_orm(
+    belongs_to = "super::team::Entity",
+    from = "Column::TeamId",
+    to = "super::team::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Team,
 }
 
 impl Related<super::challenge::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Challenge.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Challenge.def()
+  }
 }
 
 impl Related<super::hint::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Hint.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Hint.def()
+  }
 }
 
 impl Related<super::team::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Team.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Team.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, team_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    let sql = Entity::find().filter(Column::TeamId.eq(team_id));
-    sql.all(db).await
+  C: ConnectionTrait, {
+  let sql = Entity::find().filter(Column::TeamId.eq(team_id));
+  sql.all(db).await
 }
 pub async fn get_list_ex<C>(db: &C, team_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
-    let sql = Entity::find()
-        .join(JoinType::InnerJoin, Relation::Team.def())
-        .join(JoinType::InnerJoin, Relation::Challenge.def())
-        .column_as(team::Column::Name, "team_name")
-        .column_as(challenge::Column::Name, "challenge_name")
-        .filter(Column::TeamId.eq(team_id));
-    sql.into_model().all(db).await
+  C: ConnectionTrait, {
+  let sql = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Team.def())
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .column_as(team::Column::Name, "team_name")
+    .column_as(challenge::Column::Name, "challenge_name")
+    .filter(Column::TeamId.eq(team_id));
+  sql.into_model().all(db).await
 }
 
 pub async fn create<C>(db: &C, extra: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let extra = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..extra.into_active_model().reset_all()
-    };
-    extra.insert(db).await
+  C: ConnectionTrait, {
+  let extra = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..extra.into_active_model().reset_all()
+  };
+  extra.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

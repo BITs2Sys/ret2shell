@@ -2,7 +2,7 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
+  entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,104 +10,104 @@ use super::user;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "notification")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    pub title: String,
-    #[sea_orm(column_type = "Text")]
-    pub content: String,
-    #[serde(with = "ts_seconds")]
-    pub published_at: DateTime<Utc>,
-    pub game_id: i64,
-    pub publisher_id: i64,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  pub title: String,
+  #[sea_orm(column_type = "Text")]
+  pub content: String,
+  #[serde(with = "ts_seconds")]
+  pub published_at: DateTime<Utc>,
+  pub game_id: i64,
+  pub publisher_id: i64,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    pub title: String,
-    pub content: String,
-    #[serde(with = "ts_seconds")]
-    pub published_at: DateTime<Utc>,
-    pub game_id: i64,
-    pub publisher_id: i64,
-    pub publisher_name: String,
+  pub id: i64,
+  pub title: String,
+  pub content: String,
+  #[serde(with = "ts_seconds")]
+  pub published_at: DateTime<Utc>,
+  pub game_id: i64,
+  pub publisher_id: i64,
+  pub publisher_name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::game::Entity",
-        from = "Column::GameId",
-        to = "super::game::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Game,
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::PublisherId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Publisher,
+  #[sea_orm(
+    belongs_to = "super::game::Entity",
+    from = "Column::GameId",
+    to = "super::game::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Game,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::PublisherId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Publisher,
 }
 
 impl Related<super::game::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Game.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Game.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Publisher.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Publisher.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    let notifications = Entity::find()
-        .filter(Column::GameId.eq(game_id))
-        .all(db)
-        .await?;
-    Ok(notifications)
+  C: ConnectionTrait, {
+  let notifications = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .all(db)
+    .await?;
+  Ok(notifications)
 }
 
 pub async fn get_list_ex<C>(db: &C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
-    let notifications = Entity::find()
-        .join(JoinType::InnerJoin, Relation::Publisher.def())
-        .column_as(user::Column::Nickname, "publisher_name")
-        .filter(Column::GameId.eq(game_id))
-        .into_model()
-        .all(db)
-        .await?;
-    Ok(notifications)
+  C: ConnectionTrait, {
+  let notifications = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Publisher.def())
+    .column_as(user::Column::Nickname, "publisher_name")
+    .filter(Column::GameId.eq(game_id))
+    .into_model()
+    .all(db)
+    .await?;
+  Ok(notifications)
 }
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find_by_id(id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
 }
 
 pub async fn create<C>(db: &C, notification: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let notification = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..notification.into_active_model().reset_all()
-    };
-    notification.insert(db).await
+  C: ConnectionTrait, {
+  let notification = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..notification.into_active_model().reset_all()
+  };
+  notification.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

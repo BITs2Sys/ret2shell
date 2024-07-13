@@ -1,45 +1,45 @@
 use clap::{Parser, Subcommand};
 use r2s_license::codec::encode;
 use ring::{
-    rand,
-    signature::{self, KeyPair},
+  rand,
+  signature::{self, KeyPair},
 };
 
 fn generate_keypair(output_path: &str) {
-    let rng = rand::SystemRandom::new();
-    let pks8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
-    std::fs::write(format!("{}/priv.bin", output_path), pks8_bytes.as_ref()).unwrap();
-    let keypair = signature::Ed25519KeyPair::from_pkcs8(pks8_bytes.as_ref()).unwrap();
-    std::fs::write(
-        format!("{}/pub.bin", output_path),
-        keypair.public_key().as_ref(),
-    )
-    .unwrap();
+  let rng = rand::SystemRandom::new();
+  let pks8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
+  std::fs::write(format!("{}/priv.bin", output_path), pks8_bytes.as_ref()).unwrap();
+  let keypair = signature::Ed25519KeyPair::from_pkcs8(pks8_bytes.as_ref()).unwrap();
+  std::fs::write(
+    format!("{}/pub.bin", output_path),
+    keypair.public_key().as_ref(),
+  )
+  .unwrap();
 }
 
 fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &str, level: &str) {
-    chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").expect("Invalid date string");
-    let ca_bytes = std::fs::read(ca).unwrap();
-    let ca_keypair = signature::Ed25519KeyPair::from_pkcs8(ca_bytes.as_ref()).unwrap();
-    let cert = serde_json::json!({
-        "issuer": issuer,
-        "website": website,
-        "date": date,
-        "level": level,
-    });
-    let cert = serde_json::to_string(&cert).unwrap();
-    let sig = ca_keypair.sign(cert.as_bytes());
-    let cert = format!("{}\n{}", encode(cert.as_bytes()), encode(sig.as_ref()));
-    std::fs::write(format!("{}/license", path), cert).unwrap();
+  chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").expect("Invalid date string");
+  let ca_bytes = std::fs::read(ca).unwrap();
+  let ca_keypair = signature::Ed25519KeyPair::from_pkcs8(ca_bytes.as_ref()).unwrap();
+  let cert = serde_json::json!({
+      "issuer": issuer,
+      "website": website,
+      "date": date,
+      "level": level,
+  });
+  let cert = serde_json::to_string(&cert).unwrap();
+  let sig = ca_keypair.sign(cert.as_bytes());
+  let cert = format!("{}\n{}", encode(cert.as_bytes()), encode(sig.as_ref()));
+  std::fs::write(format!("{}/license", path), cert).unwrap();
 }
 
 /// Clap arg definition.
 #[derive(Parser, Debug)]
 #[command(
-    author = "Reverier-Xu <reverier.xu@woooo.tech>",
-    version,
-    about = "Keygen for Ret 2 Shell Challenge API Platform",
-    long_about = r#"
+  author = "Reverier-Xu <reverier.xu@woooo.tech>",
+  version,
+  about = "Keygen for Ret 2 Shell Challenge API Platform",
+  long_about = r#"
 Keygen for Ret 2 Shell Challenge API Platform
 
 THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
@@ -50,51 +50,51 @@ If you have any problems, please contact tech support <support@ret.sh.cn>.
 "#
 )]
 struct Args {
-    #[command(subcommand)]
-    command: Option<Commands>,
+  #[command(subcommand)]
+  command: Option<Commands>,
 }
 
 /// Clap subcommands.
 #[derive(Subcommand, Debug)]
 enum Commands {
-    Init {
-        /// The path to the output file.
-        #[arg(short, long)]
-        path: String,
-    },
-    New {
-        /// The path to the CA file.
-        #[arg(short, long)]
-        ca: String,
-        /// The path to the output file.
-        #[arg(short, long)]
-        path: String,
-        /// Issuer name.
-        #[arg(short, long)]
-        issuer: String,
-        /// Issuer Website.
-        #[arg(short, long)]
-        website: String,
-        /// Expiration date.
-        #[arg(short, long)]
-        date: String,
-        #[arg(short, long)]
-        level: String,
-    },
+  Init {
+    /// The path to the output file.
+    #[arg(short, long)]
+    path: String,
+  },
+  New {
+    /// The path to the CA file.
+    #[arg(short, long)]
+    ca: String,
+    /// The path to the output file.
+    #[arg(short, long)]
+    path: String,
+    /// Issuer name.
+    #[arg(short, long)]
+    issuer: String,
+    /// Issuer Website.
+    #[arg(short, long)]
+    website: String,
+    /// Expiration date.
+    #[arg(short, long)]
+    date: String,
+    #[arg(short, long)]
+    level: String,
+  },
 }
 
 fn main() {
-    let args: Args = Args::parse();
-    match args.command {
-        Some(Commands::Init { path }) => generate_keypair(&path),
-        Some(Commands::New {
-            ca,
-            path,
-            issuer,
-            website,
-            date,
-            level,
-        }) => generate_new_key(&ca, &path, &issuer, &website, &date, &level),
-        None => {}
-    }
+  let args: Args = Args::parse();
+  match args.command {
+    Some(Commands::Init { path }) => generate_keypair(&path),
+    Some(Commands::New {
+      ca,
+      path,
+      issuer,
+      website,
+      date,
+      level,
+    }) => generate_new_key(&ca, &path, &issuer, &website, &date, &level),
+    None => {}
+  }
 }

@@ -4,10 +4,10 @@ import { t } from "@storage/theme";
 import ErrorSection from "./error";
 
 export default function () {
-    return (
-        <>
-            <Title title={`${t("errors.403")} - ${platformStore.config.name || t("platform.name")}`} />
-            <ErrorSection status={403} />
-        </>
-    );
+  return (
+    <>
+      <Title title={`${t("errors.403")} - ${platformStore.config.name || t("platform.name")}`} />
+      <ErrorSection status={403} />
+    </>
+  );
 }

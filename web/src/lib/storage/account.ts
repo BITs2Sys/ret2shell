@@ -6,59 +6,59 @@ import { fromBase64 } from "js-base64";
 import { createStore } from "solid-js/store";
 
 export const [accountStore, setAccountStore] = makePersisted(
-    createStore({
-        id: null as number | null,
-        account: null as string | null,
-        nickname: null as string | null,
-        token: null as string | null,
-        info: null as User | null,
-        permissions: [] as Permission[],
-        institutes: [] as Institute[],
-        warnedCodeGeneration: false,
-    }),
-    { name: "account" }
+  createStore({
+    id: null as number | null,
+    account: null as string | null,
+    nickname: null as string | null,
+    token: null as string | null,
+    info: null as User | null,
+    permissions: [] as Permission[],
+    institutes: [] as Institute[],
+    warnedCodeGeneration: false,
+  }),
+  { name: "account" }
 );
 
 export const storeToken = (token: string) => {
-    setAccountStore({ token });
-    const tokenRaw = fromBase64(token.split(".")[1]);
-    const tokenJson = JSON.parse(tokenRaw) as Token;
-    setAccountStore({
-        id: tokenJson.id,
-        account: tokenJson.account,
-        nickname: tokenJson.nickname,
-        permissions: tokenJson.permissions,
-    });
+  setAccountStore({ token });
+  const tokenRaw = fromBase64(token.split(".")[1]);
+  const tokenJson = JSON.parse(tokenRaw) as Token;
+  setAccountStore({
+    id: tokenJson.id,
+    account: tokenJson.account,
+    nickname: tokenJson.nickname,
+    permissions: tokenJson.permissions,
+  });
 };
 
 export const resetUser = () => {
-    setAccountStore({
-        id: null,
-        account: null,
-        nickname: null,
-        token: null,
-        info: null,
-        permissions: [],
-        warnedCodeGeneration: false,
-    });
+  setAccountStore({
+    id: null,
+    account: null,
+    nickname: null,
+    token: null,
+    info: null,
+    permissions: [],
+    warnedCodeGeneration: false,
+  });
 };
 
 export const refreshUser = () => {
-    if (!accountStore.token) return;
-    getProfile()
-        .then((info) => {
-            setAccountStore({ info });
-        })
-        .catch(() => {
-            resetUser();
-        });
+  if (!accountStore.token) return;
+  getProfile()
+    .then((info) => {
+      setAccountStore({ info });
+    })
+    .catch(() => {
+      resetUser();
+    });
 };
 
 export const refreshInstitutes = async () => {
-    try {
-        const institutes = await getInstitutes();
-        setAccountStore({ institutes });
-    } catch {
-        // make eslint happy
-    }
+  try {
+    const institutes = await getInstitutes();
+    setAccountStore({ institutes });
+  } catch {
+    // make eslint happy
+  }
 };

@@ -2,35 +2,35 @@
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
-    Iterable, JoinType, QueryOrder, QuerySelect,
+  entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel, Iterable,
+  JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(
-    Clone,
-    Debug,
-    Default,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Serialize_repr,
-    Deserialize_repr,
-    EnumIter,
-    DeriveActiveEnum,
-    FromPrimitive,
-    ToPrimitive,
+  Clone,
+  Debug,
+  Default,
+  PartialEq,
+  Eq,
+  PartialOrd,
+  Serialize_repr,
+  Deserialize_repr,
+  EnumIter,
+  DeriveActiveEnum,
+  FromPrimitive,
+  ToPrimitive,
 )]
 #[repr(i32)]
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum AccessPolicy {
-    #[default]
-    Bulletin = 0,
-    Wiki = 1,
-    Game = 2,
-    WriteUp = 3,
-    Answer = 4,
+  #[default]
+  Bulletin = 0,
+  Wiki     = 1,
+  Game     = 2,
+  WriteUp  = 3,
+  Answer   = 4,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -39,178 +39,170 @@ pub struct ArticlePath(pub Vec<String>);
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "article")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
-    pub title: String,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub path: ArticlePath,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub content: Option<String>,
-    pub publisher_id: i64,
-    pub access_policy: AccessPolicy,
-    pub enable_comment: bool,
-    pub weight: i32,
-    pub draft: bool,
-    pub published: bool,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
+  pub title: String,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub path: ArticlePath,
+  #[sea_orm(column_type = "Text", nullable)]
+  pub content: Option<String>,
+  pub publisher_id: i64,
+  pub access_policy: AccessPolicy,
+  pub enable_comment: bool,
+  pub weight: i32,
+  pub draft: bool,
+  pub published: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
-    pub title: String,
-    pub path: ArticlePath,
-    pub content: Option<String>,
-    pub publisher_id: i64,
-    pub publisher_name: String,
-    pub access_policy: AccessPolicy,
-    pub enable_comment: bool,
-    pub weight: i32,
-    pub draft: bool,
-    pub published: bool,
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
+  pub title: String,
+  pub path: ArticlePath,
+  pub content: Option<String>,
+  pub publisher_id: i64,
+  pub publisher_name: String,
+  pub access_policy: AccessPolicy,
+  pub enable_comment: bool,
+  pub weight: i32,
+  pub draft: bool,
+  pub published: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::comment::Entity")]
-    Comment,
-    #[sea_orm(has_many = "super::game::Entity")]
-    Game,
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::PublisherId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Publisher,
+  #[sea_orm(has_many = "super::comment::Entity")]
+  Comment,
+  #[sea_orm(has_many = "super::game::Entity")]
+  Game,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::PublisherId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Publisher,
 }
 
 impl Related<super::comment::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Comment.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Comment.def()
+  }
 }
 
 impl Related<super::game::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Game.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Game.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Publisher.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Publisher.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, article_id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(article_id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(article_id).one(db).await
 }
 
 pub async fn get_ex<C>(db: &C, article_id: i64) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(article_id)
-        .join(JoinType::InnerJoin, Relation::Publisher.def())
-        .column_as(super::user::Column::Nickname, "publisher_name")
-        .into_model()
-        .one(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find_by_id(article_id)
+    .join(JoinType::InnerJoin, Relation::Publisher.def())
+    .column_as(super::user::Column::Nickname, "publisher_name")
+    .into_model()
+    .one(db)
+    .await
 }
 
 pub async fn get_page<C>(
-    db: &C, page: u64, page_size: u64, access_policy: AccessPolicy, with_draft: bool,
-    with_all: bool,
+  db: &C, page: u64, page_size: u64, access_policy: AccessPolicy, with_draft: bool, with_all: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find();
-    sql = sql
-        .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
-        .filter(Column::AccessPolicy.eq(access_policy));
-    if !with_draft {
-        sql = sql.filter(Column::Draft.eq(false));
-    }
-    if !with_all {
-        sql = sql.filter(Column::Published.eq(true));
-    }
-    let paginator = sql
-        .order_by_desc(Column::Weight)
-        .order_by_desc(Column::CreatedAt)
-        .into_model()
-        .paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let articles = paginator.fetch_page(page - 1).await?;
-    Ok((articles, total))
+  C: ConnectionTrait, {
+  let mut sql = Entity::find();
+  sql = sql
+    .select_only()
+    .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
+    .filter(Column::AccessPolicy.eq(access_policy));
+  if !with_draft {
+    sql = sql.filter(Column::Draft.eq(false));
+  }
+  if !with_all {
+    sql = sql.filter(Column::Published.eq(true));
+  }
+  let paginator = sql
+    .order_by_desc(Column::Weight)
+    .order_by_desc(Column::CreatedAt)
+    .into_model()
+    .paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let articles = paginator.fetch_page(page - 1).await?;
+  Ok((articles, total))
 }
 
 pub async fn get_tree<C>(
-    db: &C, access_policy: AccessPolicy, with_draft: bool, with_all: bool,
+  db: &C, access_policy: AccessPolicy, with_draft: bool, with_all: bool,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find();
-    sql = sql
-        .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
-        .filter(Column::AccessPolicy.eq(access_policy));
-    if !with_draft {
-        sql = sql.filter(Column::Draft.eq(false));
-    }
-    if !with_all {
-        sql = sql.filter(Column::Published.eq(true));
-    }
-    sql = sql
-        .order_by_desc(Column::Weight)
-        .order_by_desc(Column::CreatedAt);
-    sql.all(db).await
+  C: ConnectionTrait, {
+  let mut sql = Entity::find();
+  sql = sql
+    .select_only()
+    .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
+    .filter(Column::AccessPolicy.eq(access_policy));
+  if !with_draft {
+    sql = sql.filter(Column::Draft.eq(false));
+  }
+  if !with_all {
+    sql = sql.filter(Column::Published.eq(true));
+  }
+  sql = sql
+    .order_by_desc(Column::Weight)
+    .order_by_desc(Column::CreatedAt);
+  sql.all(db).await
 }
 
 pub async fn create<C>(db: &C, article: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let article = ActiveModel {
-        id: ActiveValue::NotSet,
-        created_at: ActiveValue::Set(Utc::now()),
-        updated_at: ActiveValue::Set(Utc::now()),
-        ..article.into_active_model().reset_all()
-    };
-    article.insert(db).await
+  C: ConnectionTrait, {
+  let article = ActiveModel {
+    id: ActiveValue::NotSet,
+    created_at: ActiveValue::Set(Utc::now()),
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..article.into_active_model().reset_all()
+  };
+  article.insert(db).await
 }
 
 pub async fn update<C>(db: &C, article_id: i64, article: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let article = ActiveModel {
-        id: ActiveValue::Set(article_id),
-        updated_at: ActiveValue::Set(Utc::now()),
-        created_at: ActiveValue::Unchanged(article.created_at),
-        ..article.into_active_model().reset_all()
-    };
-    article.update(db).await
+  C: ConnectionTrait, {
+  let article = ActiveModel {
+    id: ActiveValue::Set(article_id),
+    updated_at: ActiveValue::Set(Utc::now()),
+    created_at: ActiveValue::Unchanged(article.created_at),
+    ..article.into_active_model().reset_all()
+  };
+  article.update(db).await
 }
 pub async fn delete<C>(db: &C, article_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::delete_by_id(article_id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(article_id).exec(db).await.map(|_| ())
 }

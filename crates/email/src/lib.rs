@@ -7,7 +7,7 @@ pub use traits::{EmailCtx, EmailError, EmailRequest};
 use worker::email_worker;
 
 pub async fn initialize(messages: Stream) -> Result<(), EmailError> {
-    let future = email_worker(messages);
-    tokio::spawn(future);
-    Ok(())
+  let future = email_worker(messages);
+  tokio::spawn(future);
+  Ok(())
 }

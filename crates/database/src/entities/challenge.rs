@@ -2,8 +2,8 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Iterable, JoinType,
-    QueryOrder, QuerySelect,
+  entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Iterable, JoinType,
+  QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -11,15 +11,15 @@ use crate::game;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ScoreRule {
-    pub initial: i32,
-    pub minimum: i32,
-    pub decay: i32,
+  pub initial: i32,
+  pub minimum: i32,
+  pub decay: i32,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Tag {
-    name: String,
-    primary: bool,
+  name: String,
+  primary: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -28,187 +28,180 @@ pub struct TagList(pub Vec<Tag>);
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "challenge")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    pub name: String,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
-    #[sea_orm(column_type = "Text")]
-    pub content: Option<String>,
-    pub hidden: bool,
-    pub game_id: i64,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub tag: TagList,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub score_rule: ScoreRule,
-    pub score: i32,
-    pub bucket: Option<String>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  pub name: String,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
+  #[sea_orm(column_type = "Text")]
+  pub content: Option<String>,
+  pub hidden: bool,
+  pub game_id: i64,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub tag: TagList,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub score_rule: ScoreRule,
+  pub score: i32,
+  pub bucket: Option<String>,
 }
 
 impl Model {
-    pub fn desensitize(self) -> Self {
-        Self {
-            bucket: None,
-            ..self
-        }
+  pub fn desensitize(self) -> Self {
+    Self {
+      bucket: None,
+      ..self
     }
+  }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::audit::Entity")]
-    Audit,
-    #[sea_orm(has_many = "super::extra::Entity")]
-    Extra,
-    #[sea_orm(
-        belongs_to = "super::game::Entity",
-        from = "Column::GameId",
-        to = "super::game::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Restrict"
-    )]
-    Game,
-    #[sea_orm(has_many = "super::hint::Entity")]
-    Hint,
-    #[sea_orm(has_many = "super::instance::Entity")]
-    Instance,
-    #[sea_orm(has_many = "super::submission::Entity")]
-    Submission,
+  #[sea_orm(has_many = "super::audit::Entity")]
+  Audit,
+  #[sea_orm(has_many = "super::extra::Entity")]
+  Extra,
+  #[sea_orm(
+    belongs_to = "super::game::Entity",
+    from = "Column::GameId",
+    to = "super::game::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Restrict"
+  )]
+  Game,
+  #[sea_orm(has_many = "super::hint::Entity")]
+  Hint,
+  #[sea_orm(has_many = "super::instance::Entity")]
+  Instance,
+  #[sea_orm(has_many = "super::submission::Entity")]
+  Submission,
 }
 
 impl Related<super::audit::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Audit.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Audit.def()
+  }
 }
 
 impl Related<super::extra::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Extra.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Extra.def()
+  }
 }
 
 impl Related<super::game::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Game.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Game.def()
+  }
 }
 
 impl Related<super::hint::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Hint.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Hint.def()
+  }
 }
 
 impl Related<super::instance::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Instance.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Instance.def()
+  }
 }
 
 impl Related<super::submission::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Submission.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Submission.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
 }
 
 pub async fn get_page<C>(
-    db: &C, page: u64, page_size: u64, game_id: i64, with_hidden: bool,
+  db: &C, page: u64, page_size: u64, game_id: i64, with_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find()
-        .filter(Column::GameId.eq(game_id))
-        .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Bucket)));
-    if !with_hidden {
-        sql = sql.filter(Column::Hidden.eq(false));
-    }
-    let paginator = sql
-        .order_by_asc(Column::Id)
-        .into_model()
-        .paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let challenges = paginator.fetch_page(page - 1).await?;
-    Ok((challenges, total))
+  C: ConnectionTrait, {
+  let mut sql = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .select_only()
+    .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Bucket)));
+  if !with_hidden {
+    sql = sql.filter(Column::Hidden.eq(false));
+  }
+  let paginator = sql
+    .order_by_asc(Column::Id)
+    .into_model()
+    .paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let challenges = paginator.fetch_page(page - 1).await?;
+  Ok((challenges, total))
 }
 
 pub async fn get_list<C>(db: &C, game_id: i64, with_hidden: bool) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find()
-        .filter(Column::GameId.eq(game_id))
-        .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Bucket)));
-    if !with_hidden {
-        sql = sql.filter(Column::Hidden.eq(false));
-    }
-    sql.all(db).await
+  C: ConnectionTrait, {
+  let mut sql = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .select_only()
+    .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Bucket)));
+  if !with_hidden {
+    sql = sql.filter(Column::Hidden.eq(false));
+  }
+  sql.all(db).await
 }
 
 pub async fn count<C>(
-    db: &C, game_id: Option<i64>, game_type: Option<game::HostType>, with_hidden: bool,
+  db: &C, game_id: Option<i64>, game_type: Option<game::HostType>, with_hidden: bool,
 ) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find();
-    if let Some(game_id) = game_id {
-        sql = sql.filter(Column::GameId.eq(game_id));
-    }
-    if let Some(game_type) = game_type {
-        sql = sql
-            .join(JoinType::InnerJoin, Relation::Game.def())
-            .filter(game::Column::HostType.eq(game_type));
-    }
-    if !with_hidden {
-        sql = sql.filter(Column::Hidden.eq(false));
-    }
-    sql.count(db).await
+  C: ConnectionTrait, {
+  let mut sql = Entity::find();
+  if let Some(game_id) = game_id {
+    sql = sql.filter(Column::GameId.eq(game_id));
+  }
+  if let Some(game_type) = game_type {
+    sql = sql
+      .join(JoinType::InnerJoin, Relation::Game.def())
+      .filter(game::Column::HostType.eq(game_type));
+  }
+  if !with_hidden {
+    sql = sql.filter(Column::Hidden.eq(false));
+  }
+  sql.count(db).await
 }
 
 pub async fn create<C>(db: &C, challenge: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let challenge = ActiveModel {
-        id: ActiveValue::NotSet,
-        updated_at: ActiveValue::Set(Utc::now()),
-        score: ActiveValue::Set(challenge.score_rule.initial),
-        ..challenge.into_active_model().reset_all()
-    };
-    challenge.insert(db).await
+  C: ConnectionTrait, {
+  let challenge = ActiveModel {
+    id: ActiveValue::NotSet,
+    updated_at: ActiveValue::Set(Utc::now()),
+    score: ActiveValue::Set(challenge.score_rule.initial),
+    ..challenge.into_active_model().reset_all()
+  };
+  challenge.insert(db).await
 }
 
 pub async fn update<C>(db: &C, challenge: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let challenge = ActiveModel {
-        id: ActiveValue::Unchanged(challenge.id),
-        updated_at: ActiveValue::Set(Utc::now()),
-        score: ActiveValue::NotSet,
-        bucket: ActiveValue::NotSet,
-        game_id: ActiveValue::NotSet,
-        ..challenge.into_active_model().reset_all()
-    };
-    challenge.update(db).await
+  C: ConnectionTrait, {
+  let challenge = ActiveModel {
+    id: ActiveValue::Unchanged(challenge.id),
+    updated_at: ActiveValue::Set(Utc::now()),
+    score: ActiveValue::NotSet,
+    bucket: ActiveValue::NotSet,
+    game_id: ActiveValue::NotSet,
+    ..challenge.into_active_model().reset_all()
+  };
+  challenge.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

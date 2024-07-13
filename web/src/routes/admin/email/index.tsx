@@ -3,9 +3,9 @@ import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 
 export default function () {
-    return (
-        <>
-            <Title title={`${t("admin.logs.title")} - ${platformStore.config.name || t("platform.name")}`} />
-        </>
-    );
+  return (
+    <>
+      <Title title={`${t("admin.logs.title")} - ${platformStore.config.name || t("platform.name")}`} />
+    </>
+  );
 }

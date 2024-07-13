@@ -8,137 +8,137 @@ import type { Hint } from "../models/hint";
 import type { Extra } from "../models/extra";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
-    return (
-        await api.get(`${api_root}/game`, {
-            searchParams: JSON.parse(
-                JSON.stringify({
-                    page,
-                    page_size,
-                    host_type,
-                    weight,
-                })
-            ) as SearchParamsOption,
+  return (
+    await api.get(`${api_root}/game`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          page,
+          page_size,
+          host_type,
+          weight,
         })
-    ).json<[Game[], number]>();
+      ) as SearchParamsOption,
+    })
+  ).json<[Game[], number]>();
 }
 
 export async function getGame(id: number) {
-    return await api.get(`${api_root}/game/${id}`).json<Game>();
+  return await api.get(`${api_root}/game/${id}`).json<Game>();
 }
 
 export async function createGame(game: Game) {
-    return await api.post(`${api_root}/game`, { json: game }).json<Game>();
+  return await api.post(`${api_root}/game`, { json: game }).json<Game>();
 }
 
 export async function updateGame(id: number, game: Game) {
-    return await api.patch(`${api_root}/game/${id}`, { json: game }).json<Game>();
+  return await api.patch(`${api_root}/game/${id}`, { json: game }).json<Game>();
 }
 
 export async function deleteGame(id: number) {
-    return await api.delete(`${api_root}/game/${id}`).json<null>();
+  return await api.delete(`${api_root}/game/${id}`).json<null>();
 }
 
 export async function getGameIntroduction(id: number) {
-    return await api.get(`${api_root}/game/${id}/introduction`).json<Article>();
+  return await api.get(`${api_root}/game/${id}/introduction`).json<Article>();
 }
 
 export async function updateGameIntroduction(id: number, article: Article) {
-    return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>();
+  return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>();
 }
 
 export async function getGameScoreboard(
-    id: number,
-    page?: number,
-    page_size?: number,
-    with_hidden?: boolean,
-    institute_id?: number
+  id: number,
+  page?: number,
+  page_size?: number,
+  with_hidden?: boolean,
+  institute_id?: number
 ) {
-    return (
-        await api.get(`${api_root}/game/${id}/team`, {
-            searchParams: JSON.parse(
-                JSON.stringify({
-                    min_state: with_hidden ? TeamState.Hidden : TeamState.Passed,
-                    page,
-                    page_size,
-                    institute_id,
-                    asc: false,
-                    order_by: "score",
-                })
-            ) as SearchParamsOption,
+  return (
+    await api.get(`${api_root}/game/${id}/team`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          min_state: with_hidden ? TeamState.Hidden : TeamState.Passed,
+          page,
+          page_size,
+          institute_id,
+          asc: false,
+          order_by: "score",
         })
-    ).json<[Team[], number]>();
+      ) as SearchParamsOption,
+    })
+  ).json<[Team[], number]>();
 }
 
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
-    return (
-        await api.get(`${api_root}/game/${game_id}/challenge`, {
-            searchParams: JSON.parse(
-                JSON.stringify({
-                    page,
-                    page_size,
-                })
-            ) as SearchParamsOption,
+  return (
+    await api.get(`${api_root}/game/${game_id}/challenge`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          page,
+          page_size,
         })
-    ).json<[Challenge[], number]>();
+      ) as SearchParamsOption,
+    })
+  ).json<[Challenge[], number]>();
 }
 
 export async function getChallenge(game_id: number, challenge_id: number) {
-    return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<Challenge>();
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<Challenge>();
 }
 
 export async function createChallenge(game_id: number, challenge: Challenge) {
-    return await api.post(`${api_root}/game/${game_id}/challenge`, { json: challenge }).json<Challenge>();
+  return await api.post(`${api_root}/game/${game_id}/challenge`, { json: challenge }).json<Challenge>();
 }
 
 export async function updateChallenge(game_id: number, challenge: Challenge) {
-    return await api
-        .patch(`${api_root}/game/${game_id}/challenge/${challenge.id}`, { json: challenge })
-        .json<Challenge>();
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge.id}`, { json: challenge })
+    .json<Challenge>();
 }
 
 export async function deleteChallenge(game_id: number, challenge_id: number) {
-    return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>();
 }
 
 export async function getChallengeHint(game_id: number, challenge_id: number) {
-    return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`).json<Hint[]>();
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`).json<Hint[]>();
 }
 
 export async function createChallengeHint(game_id: number, challenge_id: number, hint: Hint) {
-    return await api
-        .post(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
-            json: hint,
-        })
-        .json<Hint[]>();
+  return await api
+    .post(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+      json: hint,
+    })
+    .json<Hint[]>();
 }
 
 export async function deleteChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
-    return await api
-        .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
-            searchParams: {
-                id: hint_id,
-            },
-        })
-        .json<void>();
+  return await api
+    .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+      searchParams: {
+        id: hint_id,
+      },
+    })
+    .json<void>();
 }
 
 export async function getChallengeAttachments(game_id: number, challenge_id: number) {
-    return await api
-        .get(`${api_root}/game/${game_id}/challenge/${challenge_id}/files`)
-        .json<{ folder: "static" | "mapped"; file: string }[]>();
+  return await api
+    .get(`${api_root}/game/${game_id}/challenge/${challenge_id}/files`)
+    .json<{ folder: "static" | "mapped"; file: string }[]>();
 }
 
 export async function getChallengeEnv(game_id: number, challenge_id: number) {
-    return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<{
-        port: number;
-        images: { tag: string; cpu: number; mem: string }[];
-    } | null>();
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<{
+    port: number;
+    images: { tag: string; cpu: number; mem: string }[];
+  } | null>();
 }
 
 export async function getTeamInfo(game_id: number, team_id: number) {
-    return await api.get(`${api_root}/game/${game_id}/team/${team_id}`).json<Team>();
+  return await api.get(`${api_root}/game/${game_id}/team/${team_id}`).json<Team>();
 }
 
 export async function getTeamExtras(game_id: number, team_id: number) {
-    return await api.get(`${api_root}/game/${game_id}/team/${team_id}/extra`).json<Extra[]>();
+  return await api.get(`${api_root}/game/${game_id}/team/${team_id}/extra`).json<Extra[]>();
 }

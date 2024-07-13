@@ -6,79 +6,79 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "institute")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    pub name: String,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub description: Option<String>,
-    pub logo: Option<String>,
-    pub provider: Option<String>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  pub name: String,
+  #[sea_orm(column_type = "Text", nullable)]
+  pub description: Option<String>,
+  pub logo: Option<String>,
+  pub provider: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::oauth::Entity")]
-    Oauth,
-    #[sea_orm(has_many = "super::team::Entity")]
-    Team,
-    #[sea_orm(has_many = "super::user::Entity")]
-    User,
+  #[sea_orm(has_many = "super::oauth::Entity")]
+  Oauth,
+  #[sea_orm(has_many = "super::team::Entity")]
+  Team,
+  #[sea_orm(has_many = "super::user::Entity")]
+  User,
 }
 
 impl Related<super::oauth::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Oauth.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Oauth.def()
+  }
 }
 
 impl Related<super::team::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Team.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Team.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find().all(db).await
+  C: ConnectionTrait, {
+  Entity::find().all(db).await
 }
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find_by_id(id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
 }
 
 pub async fn create<C>(db: &C, institute: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let institute = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..institute.into_active_model().reset_all()
-    };
-    institute.insert(db).await
+  C: ConnectionTrait, {
+  let institute = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..institute.into_active_model().reset_all()
+  };
+  institute.insert(db).await
 }
 
 pub async fn update<C>(db: &C, id: i64, institute: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let institute = ActiveModel {
-        id: ActiveValue::Unchanged(id),
-        ..institute.into_active_model().reset_all()
-    };
-    institute.update(db).await
+  C: ConnectionTrait, {
+  let institute = ActiveModel {
+    id: ActiveValue::Unchanged(id),
+    ..institute.into_active_model().reset_all()
+  };
+  institute.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

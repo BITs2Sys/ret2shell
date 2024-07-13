@@ -6,68 +6,68 @@ import type { DateTime } from "luxon";
 import api, { api_root } from ".";
 
 export async function getPlatformInfo() {
-    return await api.get(`${api_root}/platform/info`).json<ServerConfig>();
+  return await api.get(`${api_root}/platform/info`).json<ServerConfig>();
 }
 
 export async function getAuthConfig() {
-    return await api.get(`${api_root}/platform/auth`).json<AuthConfig>();
+  return await api.get(`${api_root}/platform/auth`).json<AuthConfig>();
 }
 
 export async function getVersion() {
-    return await api.get(`${api_root}/platform/version`).json<string>();
+  return await api.get(`${api_root}/platform/version`).json<string>();
 }
 
 export type PlatformStatistics = {
-    users: {
-        total: number;
-        valid: number;
-        institutes: [number, number][];
-        ips: number;
-    };
-    institutes: Institute[];
-    games: {
-        id: number;
-        name: string;
-        start_at: DateTime;
-        end_at: DateTime;
-        register_at: DateTime;
-        archive_at: DateTime;
-        host_type: HostType;
-        teams: number;
-    }[];
-    submissions: {
-        total: number;
-        solved: number;
-    };
-    challenges: {
-        total: number;
-        in_game: number;
-    };
+  users: {
+    total: number;
+    valid: number;
+    institutes: [number, number][];
+    ips: number;
+  };
+  institutes: Institute[];
+  games: {
+    id: number;
+    name: string;
+    start_at: DateTime;
+    end_at: DateTime;
+    register_at: DateTime;
+    archive_at: DateTime;
+    host_type: HostType;
+    teams: number;
+  }[];
+  submissions: {
+    total: number;
+    solved: number;
+  };
+  challenges: {
+    total: number;
+    in_game: number;
+  };
 };
 
 export async function getPlatformStatistics() {
-    return await api.get(`${api_root}/platform/statistics`).json<PlatformStatistics>();
+  return await api.get(`${api_root}/platform/statistics`).json<PlatformStatistics>();
 }
 
 export async function getPlatformLogs() {
-    return await api.get(`${api_root}/platform/logs`).json<string[]>();
+  return await api.get(`${api_root}/platform/logs`).json<string[]>();
 }
 
 export type PlatformLicense = {
-    issuer: string;
-    website: string;
-    date: string;
-    level: string;
+  issuer: string;
+  website: string;
+  date: string;
+  level: string;
 };
 
 export async function getPlatformLicense() {
-    return await api.get(`${api_root}/platform/license`).json<PlatformLicense>();
+  return await api.get(`${api_root}/platform/license`).json<PlatformLicense>();
 }
 
 export async function getPlatformConfig() {
-    return await api.get(`${api_root}/platform/config`).json<Config>();
+  return await api.get(`${api_root}/platform/config`).json<Config>();
 }
 
 export async function updatePlatformConfig(config: Config) {
-    return await api.patch(`${api_root}/platform/config`, { json: config }).json<Config>();
+  return await api.patch(`${api_root}/platform/config`, { json: config }).json<Config>();
 }

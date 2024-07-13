@@ -8,61 +8,61 @@ import { createStore } from "solid-js/store";
 const prefersDark = createPrefersDark();
 
 let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
-    .replace("-", "_")
-    .toLowerCase() as Locale;
+  .replace("-", "_")
+  .toLowerCase() as Locale;
 
 if (!hasLocale(systemPrefersLocale)) {
-    systemPrefersLocale = "zh_cn" as Locale;
+  systemPrefersLocale = "zh_cn" as Locale;
 }
 
 export const [themeStore, setThemeStore] = makePersisted(
-    createStore({
-        theme: "cyber",
-        locale: systemPrefersLocale,
-        colorScheme: "dark",
-        colorSchemeFollowsSystem: false,
-    }),
-    { name: "theme" }
+  createStore({
+    theme: "cyber",
+    locale: systemPrefersLocale,
+    colorScheme: "dark",
+    colorSchemeFollowsSystem: false,
+  }),
+  { name: "theme" }
 );
 
 export function setTheme(theme: string) {
-    setThemeStore({ theme });
+  setThemeStore({ theme });
 }
 
 export function setColorScheme(colorScheme: "dark" | "light") {
-    setThemeStore({ colorScheme });
+  setThemeStore({ colorScheme });
 }
 
 export function setLocale(locale: Locale) {
-    setThemeStore({ locale });
-    setTimeout(() => location.reload());
+  setThemeStore({ locale });
+  setTimeout(() => location.reload());
 }
 
 export function fullTheme() {
-    return `${themeStore.theme}-${themeStore.colorScheme}`;
+  return `${themeStore.theme}-${themeStore.colorScheme}`;
 }
 
 export function initTheme() {
-    createEffect(() => {
-        document.documentElement.setAttribute("data-theme", fullTheme());
-        document.documentElement.setAttribute("data-style", themeStore.colorScheme);
-    });
-    createEffect(() => {
-        if (themeStore.colorSchemeFollowsSystem)
-            if (prefersDark()) untrack(() => setColorScheme("dark"));
-            else untrack(() => setColorScheme("light"));
-    });
+  createEffect(() => {
+    document.documentElement.setAttribute("data-theme", fullTheme());
+    document.documentElement.setAttribute("data-style", themeStore.colorScheme);
+  });
+  createEffect(() => {
+    if (themeStore.colorSchemeFollowsSystem)
+      if (prefersDark()) untrack(() => setColorScheme("dark"));
+      else untrack(() => setColorScheme("light"));
+  });
 
-    function onBeforePrint() {
-        document.documentElement.setAttribute("data-theme", `${themeStore.theme}-light`);
-        document.documentElement.setAttribute("data-style", "light");
-    }
-    function onAfterPrint() {
-        document.documentElement.setAttribute("data-theme", fullTheme());
-        document.documentElement.setAttribute("data-style", themeStore.colorScheme);
-    }
-    window.onbeforeprint = onBeforePrint;
-    window.onafterprint = onAfterPrint;
+  function onBeforePrint() {
+    document.documentElement.setAttribute("data-theme", `${themeStore.theme}-light`);
+    document.documentElement.setAttribute("data-style", "light");
+  }
+  function onAfterPrint() {
+    document.documentElement.setAttribute("data-theme", fullTheme());
+    document.documentElement.setAttribute("data-style", themeStore.colorScheme);
+  }
+  window.onbeforeprint = onBeforePrint;
+  window.onafterprint = onAfterPrint;
 }
 
 const [dict] = createResource(themeStore.locale || "zh_cn", fetchDictionary);

@@ -8,108 +8,108 @@ use super::{user, user2_ip};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "ip")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[sea_orm(unique)]
-    pub address: String,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[sea_orm(unique)]
+  pub address: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::user2_ip::Entity")]
-    User2Ip,
+  #[sea_orm(has_many = "super::user2_ip::Entity")]
+  User2Ip,
 }
 
 impl Related<super::user2_ip::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User2Ip.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User2Ip.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::user2_ip::Relation::User.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::user2_ip::Relation::Ip.def().rev())
-    }
+  fn to() -> RelationDef {
+    super::user2_ip::Relation::User.def()
+  }
+  fn via() -> Option<RelationDef> {
+    Some(super::user2_ip::Relation::Ip.def().rev())
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, user_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    let user = user::Entity::find()
-        .filter(Column::Id.eq(user_id))
-        .one(db)
-        .await?;
-    match user {
-        Some(user) => Ok(user.find_related(Entity).all(db).await?),
-        None => Err(DbErr::RecordNotFound("user".to_string())),
-    }
+  C: ConnectionTrait, {
+  let user = user::Entity::find()
+    .filter(Column::Id.eq(user_id))
+    .one(db)
+    .await?;
+  match user {
+    Some(user) => Ok(user.find_related(Entity).all(db).await?),
+    None => Err(DbErr::RecordNotFound("user".to_string())),
+  }
 }
 
 pub async fn get_or_create<C>(db: &C, address: &str) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    match Entity::find()
-        .filter(Column::Address.eq(address))
-        .one(db)
-        .await?
-    {
-        Some(ip) => Ok(ip),
-        None => {
-            create(
-                db,
-                Model {
-                    id: 0,
-                    address: address.to_string(),
-                },
-            )
-            .await
-        }
+  C: ConnectionTrait, {
+  match Entity::find()
+    .filter(Column::Address.eq(address))
+    .one(db)
+    .await?
+  {
+    Some(ip) => Ok(ip),
+    None => {
+      create(
+        db,
+        Model {
+          id: 0,
+          address: address.to_string(),
+        },
+      )
+      .await
     }
+  }
 }
 
 pub async fn count<C>(db: &C) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find().count(db).await
+  C: ConnectionTrait, {
+  Entity::find().count(db).await
 }
 
 pub async fn create<C>(db: &C, ip: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let ip = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..ip.into_active_model().reset_all()
-    };
-    ip.insert(db).await
+  C: ConnectionTrait, {
+  let ip = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..ip.into_active_model().reset_all()
+  };
+  ip.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
 pub async fn link_user<C>(db: &C, user_id: i64, ip_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    if user2_ip::Entity::find()
-        .filter(user2_ip::Column::UserId.eq(user_id))
-        .filter(user2_ip::Column::IpAddressId.eq(ip_id))
-        .one(db)
-        .await?
-        .is_some()
-    {
-        return Ok(());
-    }
-    let user2ip = user2_ip::ActiveModel {
-        id: ActiveValue::NotSet,
-        user_id: ActiveValue::Set(user_id),
-        ip_address_id: ActiveValue::Set(ip_id),
-    };
-    user2ip.insert(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  if user2_ip::Entity::find()
+    .filter(user2_ip::Column::UserId.eq(user_id))
+    .filter(user2_ip::Column::IpAddressId.eq(ip_id))
+    .one(db)
+    .await?
+    .is_some()
+  {
+    return Ok(());
+  }
+  let user2ip = user2_ip::ActiveModel {
+    id: ActiveValue::NotSet,
+    user_id: ActiveValue::Set(user_id),
+    ip_address_id: ActiveValue::Set(ip_id),
+  };
+  user2ip.insert(db).await.map(|_| ())
 }

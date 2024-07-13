@@ -2,131 +2,131 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, Condition, FromQueryResult, IntoActiveModel, Iterable,
-    JoinType, QuerySelect,
+  entity::prelude::*, ActiveValue, Condition, FromQueryResult, IntoActiveModel, Iterable, JoinType,
+  QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "calendar")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    pub name: String,
-    #[sea_orm(column_type = "Text")]
-    pub intro: Option<String>,
-    pub link: String,
-    #[serde(with = "ts_seconds")]
-    pub start_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub end_at: DateTime<Utc>,
-    pub reporter_id: Option<i64>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  pub name: String,
+  #[sea_orm(column_type = "Text")]
+  pub intro: Option<String>,
+  pub link: String,
+  #[serde(with = "ts_seconds")]
+  pub start_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub end_at: DateTime<Utc>,
+  pub reporter_id: Option<i64>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    pub name: String,
-    pub intro: Option<String>,
-    pub link: String,
-    #[serde(with = "ts_seconds")]
-    pub start_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub end_at: DateTime<Utc>,
-    pub reporter_id: Option<i64>,
-    pub reporter_name: Option<String>,
+  pub id: i64,
+  pub name: String,
+  pub intro: Option<String>,
+  pub link: String,
+  #[serde(with = "ts_seconds")]
+  pub start_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub end_at: DateTime<Utc>,
+  pub reporter_id: Option<i64>,
+  pub reporter_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::ReporterId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "SetNull"
-    )]
-    Reporter,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::ReporterId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "SetNull"
+  )]
+  Reporter,
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Reporter.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Reporter.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(
-    db: &C, start_time: DateTime<Utc>, end_time: DateTime<Utc>,
+  db: &C, start_time: DateTime<Utc>, end_time: DateTime<Utc>,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    let models = Entity::find()
-        .select_only()
-        .columns(Column::iter().filter(|c| !matches!(c, Column::Intro)))
-        .filter(
-            Condition::any()
-                .add(
-                    Condition::all()
-                        .add(Column::StartAt.gt(start_time))
-                        .add(Column::StartAt.lt(end_time)),
-                )
-                .add(
-                    Condition::all()
-                        .add(Column::EndAt.gt(start_time))
-                        .add(Column::EndAt.lt(end_time)),
-                )
-                .add(
-                    Condition::all()
-                        .add(Column::StartAt.lt(start_time))
-                        .add(Column::EndAt.gt(end_time)),
-                ),
+  C: ConnectionTrait, {
+  let models = Entity::find()
+    .select_only()
+    .columns(Column::iter().filter(|c| !matches!(c, Column::Intro)))
+    .filter(
+      Condition::any()
+        .add(
+          Condition::all()
+            .add(Column::StartAt.gt(start_time))
+            .add(Column::StartAt.lt(end_time)),
         )
-        .all(db)
-        .await?;
-    Ok(models)
+        .add(
+          Condition::all()
+            .add(Column::EndAt.gt(start_time))
+            .add(Column::EndAt.lt(end_time)),
+        )
+        .add(
+          Condition::all()
+            .add(Column::StartAt.lt(start_time))
+            .add(Column::EndAt.gt(end_time)),
+        ),
+    )
+    .all(db)
+    .await?;
+  Ok(models)
 }
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find_by_id(id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
 }
 
 pub async fn get_ex<C>(db: &C, id: i64) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find_by_id(id)
-        .join(JoinType::InnerJoin, Relation::Reporter.def())
-        .column_as(super::user::Column::Nickname, "reporter_name")
-        .into_model()
-        .one(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id)
+    .join(JoinType::InnerJoin, Relation::Reporter.def())
+    .column_as(super::user::Column::Nickname, "reporter_name")
+    .into_model()
+    .one(db)
+    .await
 }
 
 pub async fn create<C>(db: &C, calendar: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let active_model = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..calendar.into_active_model().reset_all()
-    };
-    active_model.insert(db).await
+  C: ConnectionTrait, {
+  let active_model = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..calendar.into_active_model().reset_all()
+  };
+  active_model.insert(db).await
 }
 
 pub async fn update<C>(db: &C, id: i64, calendar: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let active_model = ActiveModel {
-        id: ActiveValue::Unchanged(id),
-        ..calendar.into_active_model().reset_all()
-    };
-    active_model.update(db).await
+  C: ConnectionTrait, {
+  let active_model = ActiveModel {
+    id: ActiveValue::Unchanged(id),
+    ..calendar.into_active_model().reset_all()
+  };
+  active_model.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

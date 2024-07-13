@@ -13,131 +13,131 @@ import { DateTime } from "luxon";
 import { createEffect, createSignal, untrack } from "solid-js";
 
 type BulletinForm = {
-    title: string;
-    content: string;
-    enable_comment: boolean;
-    weight: boolean;
+  title: string;
+  content: string;
+  enable_comment: boolean;
+  weight: boolean;
 };
 
 export default function (props: {
-    onDone: (calendar: Article) => void;
-    editSource?: Article;
+  onDone: (calendar: Article) => void;
+  editSource?: Article;
 }) {
-    const [form, { Form, Field }] = createForm<BulletinForm>();
-    const [loading, setLoading] = createSignal(false);
-    createEffect(() => {
-        if (props.editSource) {
-            untrack(() => {
-                setValues(form, {
-                    title: props.editSource?.title || "",
-                    content: props.editSource?.content || "",
-                    enable_comment: props.editSource?.enable_comment || false,
-                    weight: !!props.editSource?.weight,
-                });
-            });
-        } else {
-            untrack(() => {
-                setValues(form, {
-                    title: undefined,
-                    content: undefined,
-                    enable_comment: true,
-                    weight: false,
-                });
-            });
-        }
-    });
-    function onSubmit(result: BulletinForm) {
-        setLoading(true);
-        (props.editSource ? updateBulletin : createBulletin)({
-            ...result,
-            weight: result.weight ? 1 : 0,
-            id: props.editSource?.id || 0,
-            created_at: props.editSource?.created_at || DateTime.now(),
-            updated_at: props.editSource?.updated_at || DateTime.now(),
-            publisher_id: accountStore.id || 0,
-            access_policy: ArticleAccessPolicy.Bulletin,
-            draft: false,
-            published: true,
-            path: [],
-        })
-            .then((resp) => props.onDone(resp))
-            .catch((err: HTTPError) => {
-                void err.response.text().then((resp) => {
-                    addToast({
-                        level: "error",
-                        description: `${props.editSource ? t("form.saveFailed") : t("form.createFailed")}: ${resp}`,
-                        duration: 5000,
-                    });
-                });
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+  const [form, { Form, Field }] = createForm<BulletinForm>();
+  const [loading, setLoading] = createSignal(false);
+  createEffect(() => {
+    if (props.editSource) {
+      untrack(() => {
+        setValues(form, {
+          title: props.editSource?.title || "",
+          content: props.editSource?.content || "",
+          enable_comment: props.editSource?.enable_comment || false,
+          weight: !!props.editSource?.weight,
+        });
+      });
+    } else {
+      untrack(() => {
+        setValues(form, {
+          title: undefined,
+          content: undefined,
+          enable_comment: true,
+          weight: false,
+        });
+      });
     }
-    return (
-        <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
-            <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
-                {(field, props) => (
-                    <Input
-                        icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
-                        placeholder={t("bulletin.titlePlaceholder")}
-                        title={t("bulletin.titlePlaceholder")}
-                        {...props}
-                        value={field.value}
-                        error={field.error}
-                        required
-                        extraBtn={
-                            <>
-                                <Field name="weight" type="boolean">
-                                    {(field, props) => (
-                                        <IconCheckbox
-                                            class="!rounded-none"
-                                            uncheckedIcon="icon-[fluent--pin-20-regular]"
-                                            checkedIcon="icon-[fluent--pin-20-filled]"
-                                            inputProps={props}
-                                            checked={field.value}
-                                            error={field.error}
-                                            name="weight"
-                                        />
-                                    )}
-                                </Field>
-                                <Field name="enable_comment" type="boolean">
-                                    {(field, props) => (
-                                        <IconCheckbox
-                                            class="!rounded-l-none"
-                                            title={t("bulletin.enableComment")}
-                                            uncheckedIcon="icon-[fluent--chat-20-regular]"
-                                            checkedIcon="icon-[fluent--chat-20-filled]"
-                                            inputProps={props}
-                                            checked={field.value}
-                                            error={field.error}
-                                            name="enable_comment"
-                                        />
-                                    )}
-                                </Field>
-                            </>
-                        }
+  });
+  function onSubmit(result: BulletinForm) {
+    setLoading(true);
+    (props.editSource ? updateBulletin : createBulletin)({
+      ...result,
+      weight: result.weight ? 1 : 0,
+      id: props.editSource?.id || 0,
+      created_at: props.editSource?.created_at || DateTime.now(),
+      updated_at: props.editSource?.updated_at || DateTime.now(),
+      publisher_id: accountStore.id || 0,
+      access_policy: ArticleAccessPolicy.Bulletin,
+      draft: false,
+      published: true,
+      path: [],
+    })
+      .then((resp) => props.onDone(resp))
+      .catch((err: HTTPError) => {
+        void err.response.text().then((resp) => {
+          addToast({
+            level: "error",
+            description: `${props.editSource ? t("form.saveFailed") : t("form.createFailed")}: ${resp}`,
+            duration: 5000,
+          });
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  return (
+    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+      <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
+        {(field, props) => (
+          <Input
+            icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
+            placeholder={t("bulletin.titlePlaceholder")}
+            title={t("bulletin.titlePlaceholder")}
+            {...props}
+            value={field.value}
+            error={field.error}
+            required
+            extraBtn={
+              <>
+                <Field name="weight" type="boolean">
+                  {(field, props) => (
+                    <IconCheckbox
+                      class="!rounded-none"
+                      uncheckedIcon="icon-[fluent--pin-20-regular]"
+                      checkedIcon="icon-[fluent--pin-20-filled]"
+                      inputProps={props}
+                      checked={field.value}
+                      error={field.error}
+                      name="weight"
                     />
-                )}
-            </Field>
-            <Field name="content" validate={[required(t("bulletin.contentRequired")!)]}>
-                {(field) => (
-                    <Editor
-                        form={form}
-                        lineNumbers
-                        class="flex-1"
-                        lang="markdown"
-                        placeholder="MARKDOWN"
-                        title={t("bulletin.contentPlaceholder")}
-                        name="content"
-                        value={field.value}
-                        error={field.error}
+                  )}
+                </Field>
+                <Field name="enable_comment" type="boolean">
+                  {(field, props) => (
+                    <IconCheckbox
+                      class="!rounded-l-none"
+                      title={t("bulletin.enableComment")}
+                      uncheckedIcon="icon-[fluent--chat-20-regular]"
+                      checkedIcon="icon-[fluent--chat-20-filled]"
+                      inputProps={props}
+                      checked={field.value}
+                      error={field.error}
+                      name="enable_comment"
                     />
-                )}
-            </Field>
-            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-                {props.editSource ? t("form.save") : t("form.create")}
-            </Button>
-        </Form>
-    );
+                  )}
+                </Field>
+              </>
+            }
+          />
+        )}
+      </Field>
+      <Field name="content" validate={[required(t("bulletin.contentRequired")!)]}>
+        {(field) => (
+          <Editor
+            form={form}
+            lineNumbers
+            class="flex-1"
+            lang="markdown"
+            placeholder="MARKDOWN"
+            title={t("bulletin.contentPlaceholder")}
+            name="content"
+            value={field.value}
+            error={field.error}
+          />
+        )}
+      </Field>
+      <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+        {props.editSource ? t("form.save") : t("form.create")}
+      </Button>
+    </Form>
+  );
 }

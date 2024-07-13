@@ -11,94 +11,94 @@ import { DateTime } from "luxon";
 import { createSignal } from "solid-js";
 
 type CreatePlaygroundForm = {
-    name: string;
-    brief: string;
+  name: string;
+  brief: string;
 };
 
 export default function CreatePlayground(props: { onDone: (game: Game) => void }) {
-    const [_, { Form, Field }] = createForm<CreatePlaygroundForm>();
-    const [loading, setLoading] = createSignal(false);
-    function onSubmit(result: CreatePlaygroundForm) {
-        setLoading(true);
-        const req: Game = {
-            ...result,
-            start_at: DateTime.fromFormat("2002-05-05", "yyyy-MM-dd"),
-            end_at: DateTime.fromFormat("2077-01-01", "yyyy-MM-dd"),
-            register_at: DateTime.fromFormat("2002-05-05", "yyyy-MM-dd"),
-            archive_at: DateTime.fromFormat("2077-01-01", "yyyy-MM-dd"),
-            host_type: HostType.CTFTraining,
-            id: 0,
-            hidden: true,
-            frozen: false,
-            updated_at: DateTime.now(),
-            introduction_id: null,
-            access_policy: { restrict: false, institutes: [], sync: 2 },
-            cover: null,
-            logo: null,
-            award_rate: 0,
-            admins: [accountStore.id!],
-            token: null,
-            offline: false,
-            team_size: 1,
-            can_register_after_started: true,
-            enable_audit: false,
-            weight: 1,
-        };
-        createGame(req)
-            .then((resp) => {
-                props.onDone(resp);
-            })
-            .catch((err: HTTPError) => {
-                void err.response.text().then((reason) => {
-                    addToast({
-                        level: "error",
-                        description: `${t("game.createFailed")}: ${reason}`,
-                        duration: 5000,
-                    });
-                });
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }
-    return (
-        <div class="flex-1 self-center w-full max-w-5xl flex flex-col">
-            <h1 class="text-3xl text-center font-bold mt-8">
-                {t("training.create")} - {t("training.title")}
-            </h1>
-            <Form onSubmit={onSubmit} class="flex flex-col space-y-2 py-3 lg:py-6">
-                <Field name="name" validate={[required(t("training.nameRequired")!)]}>
-                    {(field, props) => (
-                        <Input
-                            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                            placeholder={t("training.namePlaceholder")}
-                            title={t("training.namePlaceholder")}
-                            {...props}
-                            value={field.value}
-                            error={field.error}
-                            required
-                            class="flex-1"
-                        />
-                    )}
-                </Field>
-                <Field name="brief" validate={[required(t("training.briefRequired")!)]}>
-                    {(field, props) => (
-                        <Input
-                            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                            placeholder={t("training.briefPlaceholder")}
-                            title={t("training.briefPlaceholder")}
-                            {...props}
-                            value={field.value}
-                            error={field.error}
-                            required
-                            class="flex-1"
-                        />
-                    )}
-                </Field>
-                <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-                    {t("form.create")}
-                </Button>
-            </Form>
-        </div>
-    );
+  const [_, { Form, Field }] = createForm<CreatePlaygroundForm>();
+  const [loading, setLoading] = createSignal(false);
+  function onSubmit(result: CreatePlaygroundForm) {
+    setLoading(true);
+    const req: Game = {
+      ...result,
+      start_at: DateTime.fromFormat("2002-05-05", "yyyy-MM-dd"),
+      end_at: DateTime.fromFormat("2077-01-01", "yyyy-MM-dd"),
+      register_at: DateTime.fromFormat("2002-05-05", "yyyy-MM-dd"),
+      archive_at: DateTime.fromFormat("2077-01-01", "yyyy-MM-dd"),
+      host_type: HostType.CTFTraining,
+      id: 0,
+      hidden: true,
+      frozen: false,
+      updated_at: DateTime.now(),
+      introduction_id: null,
+      access_policy: { restrict: false, institutes: [], sync: 2 },
+      cover: null,
+      logo: null,
+      award_rate: 0,
+      admins: [accountStore.id!],
+      token: null,
+      offline: false,
+      team_size: 1,
+      can_register_after_started: true,
+      enable_audit: false,
+      weight: 1,
+    };
+    createGame(req)
+      .then((resp) => {
+        props.onDone(resp);
+      })
+      .catch((err: HTTPError) => {
+        void err.response.text().then((reason) => {
+          addToast({
+            level: "error",
+            description: `${t("game.createFailed")}: ${reason}`,
+            duration: 5000,
+          });
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  return (
+    <div class="flex-1 self-center w-full max-w-5xl flex flex-col">
+      <h1 class="text-3xl text-center font-bold mt-8">
+        {t("training.create")} - {t("training.title")}
+      </h1>
+      <Form onSubmit={onSubmit} class="flex flex-col space-y-2 py-3 lg:py-6">
+        <Field name="name" validate={[required(t("training.nameRequired")!)]}>
+          {(field, props) => (
+            <Input
+              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              placeholder={t("training.namePlaceholder")}
+              title={t("training.namePlaceholder")}
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              class="flex-1"
+            />
+          )}
+        </Field>
+        <Field name="brief" validate={[required(t("training.briefRequired")!)]}>
+          {(field, props) => (
+            <Input
+              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              placeholder={t("training.briefPlaceholder")}
+              title={t("training.briefPlaceholder")}
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              class="flex-1"
+            />
+          )}
+        </Field>
+        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          {t("form.create")}
+        </Button>
+      </Form>
+    </div>
+  );
 }

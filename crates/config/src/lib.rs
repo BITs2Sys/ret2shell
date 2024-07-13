@@ -47,30 +47,30 @@ pub mod traits;
 
 #[derive(Error, Debug)]
 pub enum ConfigError {
-    #[error("Configuration file not found")]
-    NotFound,
-    #[error("Configuration file is invalid")]
-    Invalid,
-    #[error("deserialize failed: {0}")]
-    DeserializeFailed(#[from] toml::de::Error),
+  #[error("Configuration file not found")]
+  NotFound,
+  #[error("Configuration file is invalid")]
+  Invalid,
+  #[error("deserialize failed: {0}")]
+  DeserializeFailed(#[from] toml::de::Error),
 }
 
 /// Represents the configuration for the whole application.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GlobalConfig {
-    pub auditor: Option<auditor::Config>,
-    pub auth: Option<auth::Config>,
-    pub automate: Option<automate::Config>,
-    pub bucket: Option<bucket::Config>,
-    pub cache: Option<cache::Config>,
-    pub captcha: Option<captcha::Config>,
-    pub cluster: Option<cluster::Config>,
-    pub database: Option<database::Config>,
-    pub email: Option<email::Config>,
-    pub logging: Option<logging::Config>,
-    pub media: Option<media::Config>,
-    pub queue: Option<queue::Config>,
-    pub server: Option<server::Config>,
+  pub auditor: Option<auditor::Config>,
+  pub auth: Option<auth::Config>,
+  pub automate: Option<automate::Config>,
+  pub bucket: Option<bucket::Config>,
+  pub cache: Option<cache::Config>,
+  pub captcha: Option<captcha::Config>,
+  pub cluster: Option<cluster::Config>,
+  pub database: Option<database::Config>,
+  pub email: Option<email::Config>,
+  pub logging: Option<logging::Config>,
+  pub media: Option<media::Config>,
+  pub queue: Option<queue::Config>,
+  pub server: Option<server::Config>,
 }
 
 // Predefined paths for the configuration file.
@@ -80,40 +80,40 @@ const CONFIG_PREDEFINED_PATH: [&str; 3] = ["/etc/ret2shell/", "~/.config/ret2she
 const CONFIG_PREDEFINED_FILE_NAME: &str = "config.toml";
 
 impl GlobalConfig {
-    /// Load the GlobalConfig from a configuration file.
-    /// It searches for the configuration file in predefined paths and returns
-    /// the loaded configuration.
-    pub fn load() -> Result<Self, ConfigError> {
-        // load config str from predefined paths
-        let mut config_str = String::new();
-        let mut ok = false;
-        for path in CONFIG_PREDEFINED_PATH.iter() {
-            let path = match Path::new(path).canonicalize() {
-                Ok(p) => p,
-                Err(_) => {
-                    // println!("[stage 1] config path error: {err:?}, original path: {path}");
-                    continue;
-                }
-            };
-            // println!("config file path is: {path:?}");
-            let file_path = path.join(CONFIG_PREDEFINED_FILE_NAME);
-            match std::fs::read_to_string(&file_path) {
-                Ok(s) => {
-                    config_str = s;
-                    ok = true;
-                    break;
-                }
-                Err(_) => {
-                    // println!("[stage 2] config path error: {err:?}, original path: {path:?}");
-                    continue;
-                }
-            }
+  /// Load the GlobalConfig from a configuration file.
+  /// It searches for the configuration file in predefined paths and returns
+  /// the loaded configuration.
+  pub fn load() -> Result<Self, ConfigError> {
+    // load config str from predefined paths
+    let mut config_str = String::new();
+    let mut ok = false;
+    for path in CONFIG_PREDEFINED_PATH.iter() {
+      let path = match Path::new(path).canonicalize() {
+        Ok(p) => p,
+        Err(_) => {
+          // println!("[stage 1] config path error: {err:?}, original path: {path}");
+          continue;
         }
-        if !ok || config_str.is_empty() {
-            return Err(ConfigError::NotFound);
+      };
+      // println!("config file path is: {path:?}");
+      let file_path = path.join(CONFIG_PREDEFINED_FILE_NAME);
+      match std::fs::read_to_string(&file_path) {
+        Ok(s) => {
+          config_str = s;
+          ok = true;
+          break;
         }
-        // load config from config str
-        let config: GlobalConfig = toml::from_str(&config_str)?;
-        Ok(config)
+        Err(_) => {
+          // println!("[stage 2] config path error: {err:?}, original path: {path:?}");
+          continue;
+        }
+      }
     }
+    if !ok || config_str.is_empty() {
+      return Err(ConfigError::NotFound);
+    }
+    // load config from config str
+    let config: GlobalConfig = toml::from_str(&config_str)?;
+    Ok(config)
+  }
 }

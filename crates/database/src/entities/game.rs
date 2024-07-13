@@ -3,8 +3,8 @@
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
-    IntoSimpleExpr, Order, QueryOrder, QuerySelect,
+  entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
+  IntoSimpleExpr, Order, QueryOrder, QuerySelect,
 };
 use sea_query::{BinOper, Query, SimpleExpr};
 use serde::{Deserialize, Serialize};
@@ -13,40 +13,40 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::team;
 
 #[derive(
-    Clone,
-    Debug,
-    Default,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Serialize_repr,
-    Deserialize_repr,
-    EnumIter,
-    DeriveActiveEnum,
-    FromPrimitive,
-    ToPrimitive,
+  Clone,
+  Debug,
+  Default,
+  PartialEq,
+  Eq,
+  PartialOrd,
+  Serialize_repr,
+  Deserialize_repr,
+  EnumIter,
+  DeriveActiveEnum,
+  FromPrimitive,
+  ToPrimitive,
 )]
 #[repr(i32)]
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum HostType {
-    #[default]
-    CTFTraining = 0,
-    CTFGame = 1,
+  #[default]
+  CTFTraining = 0,
+  CTFGame     = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct AccessPolicy {
-    pub restrict: bool,
-    /// institutes that are allowed to register and be ranked.
-    pub institutes: Vec<i64>,
-    /// for platform sync.
-    ///
-    /// 0. sync without restrictions
-    /// 1. sync with game admin access
-    /// 2. no sync
-    ///
-    /// note that sync will only be allowed when the game is archived.
-    pub sync: i32,
+  pub restrict: bool,
+  /// institutes that are allowed to register and be ranked.
+  pub institutes: Vec<i64>,
+  /// for platform sync.
+  ///
+  /// 0. sync without restrictions
+  /// 1. sync with game admin access
+  /// 2. no sync
+  ///
+  /// note that sync will only be allowed when the game is archived.
+  pub sync: i32,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -55,213 +55,205 @@ pub struct Admins(pub Vec<i64>);
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "game")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
-    pub name: String,
-    pub brief: String,
-    pub introduction_id: Option<i64>,
-    #[serde(with = "ts_seconds")]
-    pub start_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub end_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub register_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub archive_at: DateTime<Utc>,
-    pub hidden: bool,
-    pub offline: bool,
-    pub frozen: bool,
-    pub host_type: HostType,
-    pub team_size: i32,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub access_policy: AccessPolicy,
-    pub cover: Option<String>,
-    pub logo: Option<String>,
-    pub enable_audit: bool,
-    pub can_register_after_started: bool,
-    pub award_rate: i32,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub admins: Admins,
-    pub weight: i32,
-    pub bucket: Option<String>,
-    pub token: Option<String>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
+  pub name: String,
+  pub brief: String,
+  pub introduction_id: Option<i64>,
+  #[serde(with = "ts_seconds")]
+  pub start_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub end_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub register_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub archive_at: DateTime<Utc>,
+  pub hidden: bool,
+  pub offline: bool,
+  pub frozen: bool,
+  pub host_type: HostType,
+  pub team_size: i32,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub access_policy: AccessPolicy,
+  pub cover: Option<String>,
+  pub logo: Option<String>,
+  pub enable_audit: bool,
+  pub can_register_after_started: bool,
+  pub award_rate: i32,
+  #[sea_orm(column_type = "JsonBinary")]
+  pub admins: Admins,
+  pub weight: i32,
+  pub bucket: Option<String>,
+  pub token: Option<String>,
 }
 
 impl Model {
-    pub fn desensitize(self) -> Self {
-        Self {
-            bucket: None,
-            token: None,
-            ..self
-        }
+  pub fn desensitize(self) -> Self {
+    Self {
+      bucket: None,
+      token: None,
+      ..self
     }
+  }
 
-    pub fn in_progress(&self) -> bool {
-        self.host_type == HostType::CTFGame
-            && self.start_at <= Utc::now()
-            && self.end_at >= Utc::now()
-    }
+  pub fn in_progress(&self) -> bool {
+    self.host_type == HostType::CTFGame && self.start_at <= Utc::now() && self.end_at >= Utc::now()
+  }
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct StatisticsModel {
-    pub id: i64,
-    pub name: String,
-    #[serde(with = "ts_seconds")]
-    pub start_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub end_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub register_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub archive_at: DateTime<Utc>,
-    // NOTE: should be u64, but sqlx does not support u64
-    pub teams: i64,
-    pub host_type: HostType,
+  pub id: i64,
+  pub name: String,
+  #[serde(with = "ts_seconds")]
+  pub start_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub end_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub register_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub archive_at: DateTime<Utc>,
+  // NOTE: should be u64, but sqlx does not support u64
+  pub teams: i64,
+  pub host_type: HostType,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::article::Entity",
-        from = "Column::IntroductionId",
-        to = "super::article::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Introduction,
-    #[sea_orm(has_many = "super::challenge::Entity")]
-    Challenge,
-    #[sea_orm(has_many = "super::notification::Entity")]
-    Notification,
-    #[sea_orm(has_many = "super::team::Entity")]
-    Team,
+  #[sea_orm(
+    belongs_to = "super::article::Entity",
+    from = "Column::IntroductionId",
+    to = "super::article::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  Introduction,
+  #[sea_orm(has_many = "super::challenge::Entity")]
+  Challenge,
+  #[sea_orm(has_many = "super::notification::Entity")]
+  Notification,
+  #[sea_orm(has_many = "super::team::Entity")]
+  Team,
 }
 
 impl Related<super::article::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Introduction.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Introduction.def()
+  }
 }
 
 impl Related<super::challenge::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Challenge.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Challenge.def()
+  }
 }
 
 impl Related<super::notification::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Notification.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Notification.def()
+  }
 }
 
 impl Related<super::team::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Team.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Team.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, game_id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::find_by_id(game_id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(game_id).one(db).await
 }
 
 pub async fn get_page<C>(
-    db: &C, page: u64, page_size: u64, host_type: Option<HostType>, weight: Option<i32>,
-    with_hidden: bool,
+  db: &C, page: u64, page_size: u64, host_type: Option<HostType>, weight: Option<i32>,
+  with_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find();
-    if let Some(host_type) = host_type {
-        sql = sql.filter(Column::HostType.eq(host_type));
-    }
-    if let Some(weight) = weight {
-        sql = sql.filter(Column::Weight.eq(weight));
-    }
-    if !with_hidden {
-        sql = sql.filter(Column::Hidden.eq(false));
-    }
-    sql = sql.order_by(Column::StartAt, Order::Desc);
-    let paginator = sql.into_model().paginate(db, page_size);
-    let total = paginator.num_items().await?;
-    let games: Vec<Model> = paginator.fetch_page(page - 1).await?;
-    Ok((
-        games.iter().map(|g| g.clone().desensitize()).collect(),
-        total,
-    ))
+  C: ConnectionTrait, {
+  let mut sql = Entity::find();
+  if let Some(host_type) = host_type {
+    sql = sql.filter(Column::HostType.eq(host_type));
+  }
+  if let Some(weight) = weight {
+    sql = sql.filter(Column::Weight.eq(weight));
+  }
+  if !with_hidden {
+    sql = sql.filter(Column::Hidden.eq(false));
+  }
+  sql = sql.order_by(Column::StartAt, Order::Desc);
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let games: Vec<Model> = paginator.fetch_page(page - 1).await?;
+  Ok((
+    games.iter().map(|g| g.clone().desensitize()).collect(),
+    total,
+  ))
 }
 
 pub async fn get_statistics<C>(db: &C) -> Result<Vec<StatisticsModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let mut sql = Entity::find().select_only().columns(vec![
-        Column::Id,
-        Column::Name,
-        Column::StartAt,
-        Column::EndAt,
-        Column::RegisterAt,
-        Column::ArchiveAt,
-        Column::HostType,
-    ]);
-    sql = sql.column_as(
-        SimpleExpr::SubQuery(
-            None,
-            Box::new(
-                Query::select()
-                    .expr(team::Column::GameId.count())
-                    .and_where(SimpleExpr::Binary(
-                        Box::new(Column::Id.into_simple_expr()),
-                        BinOper::Equal,
-                        Box::new(team::Column::GameId.into_simple_expr()),
-                    ))
-                    .from(team::Entity)
-                    .take()
-                    .into_sub_query_statement(),
-            ),
-        ),
-        "teams",
-    );
+  C: ConnectionTrait, {
+  let mut sql = Entity::find().select_only().columns(vec![
+    Column::Id,
+    Column::Name,
+    Column::StartAt,
+    Column::EndAt,
+    Column::RegisterAt,
+    Column::ArchiveAt,
+    Column::HostType,
+  ]);
+  sql = sql.column_as(
+    SimpleExpr::SubQuery(
+      None,
+      Box::new(
+        Query::select()
+          .expr(team::Column::GameId.count())
+          .and_where(SimpleExpr::Binary(
+            Box::new(Column::Id.into_simple_expr()),
+            BinOper::Equal,
+            Box::new(team::Column::GameId.into_simple_expr()),
+          ))
+          .from(team::Entity)
+          .take()
+          .into_sub_query_statement(),
+      ),
+    ),
+    "teams",
+  );
 
-    sql.into_model::<StatisticsModel>().all(db).await
+  sql.into_model::<StatisticsModel>().all(db).await
 }
 
 pub async fn create<C>(db: &C, game: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let game = ActiveModel {
-        id: ActiveValue::NotSet,
-        updated_at: ActiveValue::Set(Utc::now()),
-        ..game.into_active_model().reset_all()
-    };
-    game.insert(db).await
+  C: ConnectionTrait, {
+  let game = ActiveModel {
+    id: ActiveValue::NotSet,
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..game.into_active_model().reset_all()
+  };
+  game.insert(db).await
 }
 
 pub async fn update<C>(db: &C, game: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
-    let game = ActiveModel {
-        id: ActiveValue::Unchanged(game.id),
-        updated_at: ActiveValue::Set(Utc::now()),
-        ..game.into_active_model().reset_all()
-    };
-    game.update(db).await
+  C: ConnectionTrait, {
+  let game = ActiveModel {
+    id: ActiveValue::Unchanged(game.id),
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..game.into_active_model().reset_all()
+  };
+  game.update(db).await
 }
 
 pub async fn delete<C>(db: &C, game_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
-    Entity::delete_by_id(game_id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(game_id).exec(db).await.map(|_| ())
 }

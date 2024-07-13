@@ -2,7 +2,7 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
+  entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -11,118 +11,118 @@ use super::{institute, user};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "oauth")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    pub user_id: i64,
-    pub institute_id: Option<i64>,
-    pub provider: String,
-    #[sea_orm(unique)]
-    pub auth_key: String,
-    #[sea_orm(column_type = "JsonBinary", nullable)]
-    pub data: Option<Json>,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  pub user_id: i64,
+  pub institute_id: Option<i64>,
+  pub provider: String,
+  #[sea_orm(unique)]
+  pub auth_key: String,
+  #[sea_orm(column_type = "JsonBinary", nullable)]
+  pub data: Option<Json>,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
-    pub id: i64,
-    pub user_id: i64,
-    pub user_name: String,
-    pub institute_id: Option<i64>,
-    pub institute_name: Option<String>,
-    pub provider: String,
-    pub data: Option<Json>,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds")]
-    pub updated_at: DateTime<Utc>,
+  pub id: i64,
+  pub user_id: i64,
+  pub user_name: String,
+  pub institute_id: Option<i64>,
+  pub institute_name: Option<String>,
+  pub provider: String,
+  pub data: Option<Json>,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::institute::Entity",
-        from = "Column::InstituteId",
-        to = "super::institute::Column::Id",
-        on_update = "Cascade",
-        on_delete = "SetNull"
-    )]
-    Institute,
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::UserId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    User,
+  #[sea_orm(
+    belongs_to = "super::institute::Entity",
+    from = "Column::InstituteId",
+    to = "super::institute::Column::Id",
+    on_update = "Cascade",
+    on_delete = "SetNull"
+  )]
+  Institute,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::UserId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  User,
 }
 
 impl Related<super::institute::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Institute.def()
-    }
+  fn to() -> RelationDef {
+    Relation::Institute.def()
+  }
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, user_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find()
-        .filter(Column::UserId.eq(user_id))
-        .all(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::UserId.eq(user_id))
+    .all(db)
+    .await
 }
 
 pub async fn get_list_ex<C>(db: &C, user_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find()
-        .join(JoinType::InnerJoin, Relation::User.def())
-        .join(JoinType::InnerJoin, Relation::Institute.def())
-        .column_as(user::Column::Nickname, "user_name")
-        .column_as(institute::Column::Name, "institute_name")
-        .filter(Column::UserId.eq(user_id))
-        .into_model()
-        .all(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find()
+    .join(JoinType::InnerJoin, Relation::User.def())
+    .join(JoinType::InnerJoin, Relation::Institute.def())
+    .column_as(user::Column::Nickname, "user_name")
+    .column_as(institute::Column::Name, "institute_name")
+    .filter(Column::UserId.eq(user_id))
+    .into_model()
+    .all(db)
+    .await
 }
 
 pub async fn create<C>(db: &C, oauth: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let oauth = ActiveModel {
-        id: ActiveValue::NotSet,
-        created_at: ActiveValue::Set(Utc::now()),
-        updated_at: ActiveValue::Set(Utc::now()),
-        ..oauth.into_active_model().reset_all()
-    };
-    oauth.insert(db).await
+  C: ConnectionTrait, {
+  let oauth = ActiveModel {
+    id: ActiveValue::NotSet,
+    created_at: ActiveValue::Set(Utc::now()),
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..oauth.into_active_model().reset_all()
+  };
+  oauth.insert(db).await
 }
 
 pub async fn update<C>(db: &C, id: i64, oauth: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let oauth = ActiveModel {
-        id: ActiveValue::Unchanged(id),
-        updated_at: ActiveValue::Set(Utc::now()),
-        ..oauth.into_active_model().reset_all()
-    };
-    oauth.update(db).await
+  C: ConnectionTrait, {
+  let oauth = ActiveModel {
+    id: ActiveValue::Unchanged(id),
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..oauth.into_active_model().reset_all()
+  };
+  oauth.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

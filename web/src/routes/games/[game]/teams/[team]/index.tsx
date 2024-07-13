@@ -7,11 +7,11 @@ import { createSignal } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
 
 export default function () {
-    const [team, setTeam] = createSignal(null as Team | null);
-    return (
-        <>
-            <Title title={`${team()?.name ?? t("game.team.title")} - ${gameStore.current?.name ?? "CTF"}`} />
-            <SidebarLayout leftBar={() => <Sidebar />}>{null}</SidebarLayout>
-        </>
-    );
+  const [team, setTeam] = createSignal(null as Team | null);
+  return (
+    <>
+      <Title title={`${team()?.name ?? t("game.team.title")} - ${gameStore.current?.name ?? "CTF"}`} />
+      <SidebarLayout leftBar={() => <Sidebar />}>{null}</SidebarLayout>
+    </>
+  );
 }

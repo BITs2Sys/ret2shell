@@ -5,55 +5,53 @@ use crate::traits::Merge;
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
-    /// Whether email functionality is enabled or not.
-    pub enabled: bool,
-    /// The email server host.
-    pub host: String,
-    /// The email server port.
-    pub port: u16,
-    /// The email address used as the sender.
-    pub sender: String,
-    /// The username for authentication with the email server.
-    pub username: String,
-    /// The password for authentication with the email server.
-    pub password: String,
-    /// The TLS configuration for secure email communication.
-    pub tls: String,
-    /// The email body for reset password emails
-    /// could be 'none' | 'tls' | 'starttls'
-    pub reset_password_email_body: Option<String>,
-    /// The email subject for reset password emails.
-    pub reset_password_email_subject: Option<String>,
-    /// The email body for email verification emails.
-    pub verify_email_body: Option<String>,
-    /// The email subject for email verification emails.
-    pub verify_email_subject: Option<String>,
+  /// Whether email functionality is enabled or not.
+  pub enabled: bool,
+  /// The email server host.
+  pub host: String,
+  /// The email server port.
+  pub port: u16,
+  /// The email address used as the sender.
+  pub sender: String,
+  /// The username for authentication with the email server.
+  pub username: String,
+  /// The password for authentication with the email server.
+  pub password: String,
+  /// The TLS configuration for secure email communication.
+  pub tls: String,
+  /// The email body for reset password emails
+  /// could be 'none' | 'tls' | 'starttls'
+  pub reset_password_email_body: Option<String>,
+  /// The email subject for reset password emails.
+  pub reset_password_email_subject: Option<String>,
+  /// The email body for email verification emails.
+  pub verify_email_body: Option<String>,
+  /// The email subject for email verification emails.
+  pub verify_email_subject: Option<String>,
 }
 
 impl Merge for Option<Config> {
-    fn merge(self, other: Self) -> Self {
-        // prefers fields in `other`
-        match (self, other) {
-            (Some(a), Some(b)) => Some(Config {
-                enabled: b.enabled,
-                host: b.host,
-                port: b.port,
-                sender: b.sender,
-                username: b.username,
-                password: b.password,
-                tls: b.tls,
-                reset_password_email_body: b
-                    .reset_password_email_body
-                    .or(a.reset_password_email_body),
-                reset_password_email_subject: b
-                    .reset_password_email_subject
-                    .or(a.reset_password_email_subject),
-                verify_email_body: b.verify_email_body.or(a.verify_email_body),
-                verify_email_subject: b.verify_email_subject.or(a.verify_email_subject),
-            }),
-            (Some(a), None) => Some(a),
-            (None, Some(b)) => Some(b),
-            (None, None) => None,
-        }
+  fn merge(self, other: Self) -> Self {
+    // prefers fields in `other`
+    match (self, other) {
+      (Some(a), Some(b)) => Some(Config {
+        enabled: b.enabled,
+        host: b.host,
+        port: b.port,
+        sender: b.sender,
+        username: b.username,
+        password: b.password,
+        tls: b.tls,
+        reset_password_email_body: b.reset_password_email_body.or(a.reset_password_email_body),
+        reset_password_email_subject: b
+          .reset_password_email_subject
+          .or(a.reset_password_email_subject),
+        verify_email_body: b.verify_email_body.or(a.verify_email_body),
+        verify_email_subject: b.verify_email_subject.or(a.verify_email_subject),
+      }),
+      (Some(a), None) => Some(a),
+      (None, Some(b)) => Some(b),
+      (None, None) => None,
     }
+  }
 }

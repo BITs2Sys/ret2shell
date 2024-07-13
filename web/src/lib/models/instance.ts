@@ -1,38 +1,38 @@
 import type { DateTime } from "luxon";
 
 export type EnvConfig = {
-    port: number;
-    images: { tag: string; cpu: number; mem: string }[];
+  port: number;
+  images: { tag: string; cpu: number; mem: string }[];
 };
 
 export enum InstanceState {
-    Pending = 0,
-    Running = 1,
-    Succeeded = 2,
-    Failed = 3,
+  Pending = 0,
+  Running = 1,
+  Succeeded = 2,
+  Failed = 3,
 }
 
 export type Instance = {
-    id: number;
-    name: string;
-    inner_addr: string | null;
-    proxy_addr: string | null;
-    data: { [key: string]: string } | null;
-    renew_count: number;
-    started_at: DateTime;
-    created_at: DateTime;
-    stoped_at: DateTime | null;
-    user_id: number;
-    user_name?: string;
-    team_id: number | null;
-    team_name?: string | null;
-    challenge_id: number;
-    challenge_name?: string;
-    state: InstanceState;
+  id: number;
+  name: string;
+  inner_addr: string | null;
+  proxy_addr: string | null;
+  data: { [key: string]: string } | null;
+  renew_count: number;
+  started_at: DateTime;
+  created_at: DateTime;
+  stoped_at: DateTime | null;
+  user_id: number;
+  user_name?: string;
+  team_id: number | null;
+  team_name?: string | null;
+  challenge_id: number;
+  challenge_name?: string;
+  state: InstanceState;
 };
 
 export type Traffic = {
-    instance_id: number;
-    local_addr: string;
-    delay: number;
+  instance_id: number;
+  local_addr: string;
+  delay: number;
 };

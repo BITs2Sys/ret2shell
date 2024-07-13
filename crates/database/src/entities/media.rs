@@ -6,88 +6,90 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "media")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i64,
-    #[sea_orm(unique)]
-    pub hash: String,
-    pub uploader_id: i64,
+  #[sea_orm(primary_key)]
+  pub id: i64,
+  #[sea_orm(unique)]
+  pub hash: String,
+  pub uploader_id: i64,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::UploaderId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    User,
+  #[sea_orm(
+    belongs_to = "super::user::Entity",
+    from = "Column::UploaderId",
+    to = "super::user::Column::Id",
+    on_update = "Cascade",
+    on_delete = "Cascade"
+  )]
+  User,
 }
 
 impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User.def()
-    }
+  fn to() -> RelationDef {
+    Relation::User.def()
+  }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find_by_id(id).one(db).await
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
 }
 
 pub async fn get_by_hash<C>(db: &C, hash: &str) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find().filter(Column::Hash.eq(hash)).one(db).await
+  C: ConnectionTrait, {
+  Entity::find().filter(Column::Hash.eq(hash)).one(db).await
 }
 
 pub async fn get_list<C>(db: &C, uploader_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::find()
-        .filter(Column::UploaderId.eq(uploader_id))
-        .all(db)
-        .await
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::UploaderId.eq(uploader_id))
+    .all(db)
+    .await
 }
 
 pub async fn exists<C>(db: &C, hash: &str) -> Result<bool, DbErr>
 where
-    C: ConnectionTrait, {
-    Ok(Entity::find()
-        .filter(Column::Hash.eq(hash))
-        .one(db)
-        .await?
-        .is_some())
+  C: ConnectionTrait, {
+  Ok(
+    Entity::find()
+      .filter(Column::Hash.eq(hash))
+      .one(db)
+      .await?
+      .is_some(),
+  )
 }
 
 pub async fn create<C>(db: &C, media: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
-    let media = ActiveModel {
-        id: ActiveValue::NotSet,
-        ..media.into_active_model().reset_all()
-    };
-    media.insert(db).await
+  C: ConnectionTrait, {
+  let media = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..media.into_active_model().reset_all()
+  };
+  media.insert(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
 pub async fn delete_by_user_id<C>(db: &C, user_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
-    Entity::delete(ActiveModel {
-        uploader_id: ActiveValue::Set(user_id),
-        ..Default::default()
-    })
-    .exec(db)
-    .await
-    .map(|_| ())
+  C: ConnectionTrait, {
+  Entity::delete(ActiveModel {
+    uploader_id: ActiveValue::Set(user_id),
+    ..Default::default()
+  })
+  .exec(db)
+  .await
+  .map(|_| ())
 }

@@ -4,13 +4,13 @@ import { type Size, createElementSize } from "@solid-primitives/resize-observer"
 import { fullTheme } from "@storage/theme";
 import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from "echarts/charts";
 import {
-    DataZoomComponent,
-    DatasetComponent,
-    GridComponent,
-    TitleComponent,
-    ToolboxComponent,
-    TooltipComponent,
-    TransformComponent,
+  DataZoomComponent,
+  DatasetComponent,
+  GridComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  TransformComponent,
 } from "echarts/components";
 import { init, registerTheme, use } from "echarts/core";
 import type { EChartsCoreOption, EChartsType, ResizeOpts } from "echarts/core";
@@ -23,189 +23,189 @@ import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
 
 use([
-    LabelLayout,
-    UniversalTransition,
-    TitleComponent,
-    TooltipComponent,
-    GridComponent,
-    DatasetComponent,
-    DataZoomComponent,
-    TransformComponent,
-    ToolboxComponent,
+  LabelLayout,
+  UniversalTransition,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DatasetComponent,
+  DataZoomComponent,
+  TransformComponent,
+  ToolboxComponent,
 
-    LineChart,
-    BarChart,
-    SunburstChart,
-    RadarChart,
-    GaugeChart,
+  LineChart,
+  BarChart,
+  SunburstChart,
+  RadarChart,
+  GaugeChart,
 
-    SVGRenderer,
-    CanvasRenderer,
+  SVGRenderer,
+  CanvasRenderer,
 ]);
 
 export type InitOptions = {
-    locale?: string;
-    renderer?: "canvas" | "svg";
-    devicePixelRatio?: number;
-    useDirtyRect?: boolean;
-    useCoarsePointer?: boolean;
-    pointerSize?: number;
+  locale?: string;
+  renderer?: "canvas" | "svg";
+  devicePixelRatio?: number;
+  useDirtyRect?: boolean;
+  useCoarsePointer?: boolean;
+  pointerSize?: number;
 };
 
 // biome-ignore lint/suspicious/noConfusingVoidType: the event handler returns void to pass the event by default
 // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
 export type EChartsEventHandler = (event: any) => void | boolean;
 export type EChartsEventHandlerDefinition = {
-    query: string | object;
-    handler: EChartsEventHandler;
+  query: string | object;
+  handler: EChartsEventHandler;
 };
 
 export type EventHandlers = Record<string, EChartsEventHandler | EChartsEventHandlerDefinition>;
 
 export interface EChartsBaseProps {
-    id?: string;
-    ref?: Ref<HTMLDivElement>;
+  id?: string;
+  ref?: Ref<HTMLDivElement>;
 
-    class?: string;
-    style?: JSX.CSSProperties;
+  class?: string;
+  style?: JSX.CSSProperties;
 
-    initOptions?: InitOptions;
-    option: EChartsCoreOption;
+  initOptions?: InitOptions;
+  option: EChartsCoreOption;
 
-    notMerge?: boolean;
-    lazyUpdate?: boolean;
+  notMerge?: boolean;
+  lazyUpdate?: boolean;
 
-    isLoading?: boolean;
-    // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
-    loadingOptions?: any;
+  isLoading?: boolean;
+  // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
+  loadingOptions?: any;
 
-    resizeOptions?: Omit<ResizeOpts, "width" | "height">;
+  resizeOptions?: Omit<ResizeOpts, "width" | "height">;
 
-    eventHandlers?: EventHandlers;
-    onInit?: (chartInstance: EChartsType) => void;
+  eventHandlers?: EventHandlers;
+  onInit?: (chartInstance: EChartsType) => void;
 }
 
 export const bindEvents = (chartInstance: EChartsType, eventHandlers: EventHandlers) => {
-    for (const [eventName, handler] of Object.entries(eventHandlers)) {
-        if ("query" in handler) {
-            chartInstance.on(eventName, handler.query, handler.handler);
-        } else {
-            chartInstance.on(eventName, handler);
-        }
+  for (const [eventName, handler] of Object.entries(eventHandlers)) {
+    if ("query" in handler) {
+      chartInstance.on(eventName, handler.query, handler.handler);
+    } else {
+      chartInstance.on(eventName, handler);
     }
+  }
 };
 
 export const unbindEvents = (chartInstance: EChartsType, eventHandlers: EventHandlers) => {
-    for (const [eventName, handler] of Object.entries(eventHandlers)) {
-        chartInstance.off(eventName, "handler" in handler ? handler.handler : handler);
-    }
+  for (const [eventName, handler] of Object.entries(eventHandlers)) {
+    chartInstance.off(eventName, "handler" in handler ? handler.handler : handler);
+  }
 };
 
 export default function Chart(props: EChartsBaseProps) {
-    let chartElement: HTMLDivElement;
-    let chartInstance: EChartsType;
-    let size: Readonly<Size>;
+  let chartElement: HTMLDivElement;
+  let chartInstance: EChartsType;
+  let size: Readonly<Size>;
 
-    const id = props.id ?? `echarts-${nanoid()}`;
+  const id = props.id ?? `echarts-${nanoid()}`;
 
-    passiveSupport({
-        events: ["mousewheel", "wheel"],
-        listeners: [
-            {
-                element: id,
-                event: "mousewheel",
-            },
-        ],
-    });
+  passiveSupport({
+    events: ["mousewheel", "wheel"],
+    listeners: [
+      {
+        element: id,
+        event: "mousewheel",
+      },
+    ],
+  });
 
-    registerTheme("cyber-dark", cyberDark);
-    registerTheme("cyber-light", cyberLight);
+  registerTheme("cyber-dark", cyberDark);
+  registerTheme("cyber-light", cyberLight);
 
-    onMount(() => {
-        size = createElementSize(chartElement);
-    });
+  onMount(() => {
+    size = createElementSize(chartElement);
+  });
 
-    onCleanup(() => {
+  onCleanup(() => {
+    chartInstance?.dispose();
+  });
+
+  createEffect(
+    on(
+      () => [size.width, size.height],
+      ([width, height]) => {
+        // console.log('resize', width, height)
+        chartInstance.resize({ width, height, ...props.resizeOptions });
+      },
+      { defer: true }
+    )
+  );
+
+  createEffect(
+    on(
+      () => props.option,
+      (option) => {
+        chartInstance.setOption(option, props.notMerge, props.lazyUpdate);
+      },
+      { defer: true }
+    )
+  );
+
+  createEffect(
+    on(
+      () => fullTheme(),
+      (theme) => {
         chartInstance?.dispose();
-    });
+        chartInstance = init(chartElement, theme, {
+          width: size.width ?? 0,
+          height: size.height ?? 0,
+          renderer: isMobile ? "svg" : "canvas",
+          useDirtyRect: true,
+          ...(props.initOptions ?? {}),
+        });
+        chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);
+        props.onInit?.(chartInstance);
+      }
+    )
+  );
 
-    createEffect(
-        on(
-            () => [size.width, size.height],
-            ([width, height]) => {
-                // console.log('resize', width, height)
-                chartInstance.resize({ width, height, ...props.resizeOptions });
-            },
-            { defer: true }
-        )
-    );
+  createEffect(
+    on(
+      () => props.isLoading,
+      (isLoading) => {
+        if (isLoading) {
+          chartInstance.showLoading(props.loadingOptions as unknown as object | undefined);
+        } else {
+          chartInstance.hideLoading();
+        }
+      },
+      { defer: true }
+    )
+  );
 
-    createEffect(
-        on(
-            () => props.option,
-            (option) => {
-                chartInstance.setOption(option, props.notMerge, props.lazyUpdate);
-            },
-            { defer: true }
-        )
-    );
+  createEffect(
+    on(
+      () => props.eventHandlers,
+      (eventHandlers, prevEventHandlers) => {
+        if (prevEventHandlers) {
+          unbindEvents(chartInstance, prevEventHandlers);
+        }
 
-    createEffect(
-        on(
-            () => fullTheme(),
-            (theme) => {
-                chartInstance?.dispose();
-                chartInstance = init(chartElement, theme, {
-                    width: size.width ?? 0,
-                    height: size.height ?? 0,
-                    renderer: isMobile ? "svg" : "canvas",
-                    useDirtyRect: true,
-                    ...(props.initOptions ?? {}),
-                });
-                chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);
-                props.onInit?.(chartInstance);
-            }
-        )
-    );
+        if (eventHandlers) {
+          bindEvents(chartInstance, eventHandlers);
+        }
+      },
+      { defer: true }
+    )
+  );
 
-    createEffect(
-        on(
-            () => props.isLoading,
-            (isLoading) => {
-                if (isLoading) {
-                    chartInstance.showLoading(props.loadingOptions as unknown as object | undefined);
-                } else {
-                    chartInstance.hideLoading();
-                }
-            },
-            { defer: true }
-        )
-    );
-
-    createEffect(
-        on(
-            () => props.eventHandlers,
-            (eventHandlers, prevEventHandlers) => {
-                if (prevEventHandlers) {
-                    unbindEvents(chartInstance, prevEventHandlers);
-                }
-
-                if (eventHandlers) {
-                    bindEvents(chartInstance, eventHandlers);
-                }
-            },
-            { defer: true }
-        )
-    );
-
-    return (
-        <div
-            id={id}
-            style={props.style}
-            class={`w-full h-full ${props.class}`.trim()}
-            ref={mergeRefs(props.ref, (el) => {
-                chartElement = el;
-            })}
-        />
-    );
+  return (
+    <div
+      id={id}
+      style={props.style}
+      class={`w-full h-full ${props.class}`.trim()}
+      ref={mergeRefs(props.ref, (el) => {
+        chartElement = el;
+      })}
+    />
+  );
 }

@@ -1,3 +1,3 @@
 pub trait Merge {
-    fn merge(self, other: Self) -> Self;
+  fn merge(self, other: Self) -> Self;
 }

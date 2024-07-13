@@ -1,145 +1,143 @@
 use chrono::{DateTime, Utc};
 use futures_io::AsyncBufRead;
 use k8s_openapi::{
-    api::core::v1::{ConfigMap, Namespace, Node, Pod},
-    apimachinery::pkg::version::Info,
+  api::core::v1::{ConfigMap, Namespace, Node, Pod},
+  apimachinery::pkg::version::Info,
 };
 use kube::{
-    api::{ListParams, LogParams, ObjectList, ObjectMeta},
-    Api, Client,
+  api::{ListParams, LogParams, ObjectList, ObjectMeta},
+  Api, Client,
 };
 
 use super::traits::ClusterError;
 
 #[derive(Clone)]
 pub struct Cluster {
-    client: Option<Client>,
-    namespace: Option<String>,
+  client: Option<Client>,
+  namespace: Option<String>,
 }
 
 macro_rules! with_namespace {
-    ($ns: expr, $reason: expr) => {
-        $ns.clone()
-            .ok_or(ClusterError::NeedNamespace($reason.to_owned()))
-    };
+  ($ns: expr, $reason: expr) => {
+    $ns
+      .clone()
+      .ok_or(ClusterError::NeedNamespace($reason.to_owned()))
+  };
 }
 
 macro_rules! check_enabled {
-    ($client: expr) => {
-        if let Some(c) = $client.clone() {
-            Ok(c)
-        } else {
-            Err(super::traits::ClusterError::ClusterDisabled)
-        }
-    };
+  ($client: expr) => {
+    if let Some(c) = $client.clone() {
+      Ok(c)
+    } else {
+      Err(super::traits::ClusterError::ClusterDisabled)
+    }
+  };
 }
 
 impl Cluster {
-    pub fn new(client: Option<Client>) -> Self {
-        Self {
-            client,
-            namespace: Some(String::from("default")),
-        }
+  pub fn new(client: Option<Client>) -> Self {
+    Self {
+      client,
+      namespace: Some(String::from("default")),
     }
+  }
 
-    /// Set the namespace for the cluster
-    ///
-    /// Example:
-    ///
-    /// ```rust
-    /// cluster.at("challenge").some_operations().await;
-    /// ```
-    pub fn at(&self, namespace: &str) -> Self {
-        Self {
-            namespace: Some(namespace.to_owned()),
-            ..self.to_owned()
-        }
+  /// Set the namespace for the cluster
+  ///
+  /// Example:
+  ///
+  /// ```rust
+  /// cluster.at("challenge").some_operations().await;
+  /// ```
+  pub fn at(&self, namespace: &str) -> Self {
+    Self {
+      namespace: Some(namespace.to_owned()),
+      ..self.to_owned()
     }
+  }
 
-    pub async fn version(&self) -> Result<Info, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let version = client.apiserver_version().await?;
-        Ok(version)
-    }
+  pub async fn version(&self) -> Result<Info, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let version = client.apiserver_version().await?;
+    Ok(version)
+  }
 
-    pub async fn nodes(&self) -> Result<ObjectList<Node>, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Node> = Api::all(client);
-        let nodes = api.list(&ListParams::default()).await?;
-        Ok(nodes)
-    }
+  pub async fn nodes(&self) -> Result<ObjectList<Node>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Node> = Api::all(client);
+    let nodes = api.list(&ListParams::default()).await?;
+    Ok(nodes)
+  }
 
-    pub async fn namespaces(&self) -> Result<ObjectList<Namespace>, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Namespace> = Api::all(client);
-        let namespaces = api.list(&ListParams::default()).await?;
-        Ok(namespaces)
-    }
+  pub async fn namespaces(&self) -> Result<ObjectList<Namespace>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Namespace> = Api::all(client);
+    let namespaces = api.list(&ListParams::default()).await?;
+    Ok(namespaces)
+  }
 
-    pub async fn configs(&self) -> Result<ObjectList<ConfigMap>, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<ConfigMap> = Api::all(client);
-        let configs = api.list(&ListParams::default()).await?;
-        Ok(configs)
-    }
+  pub async fn configs(&self) -> Result<ObjectList<ConfigMap>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<ConfigMap> = Api::all(client);
+    let configs = api.list(&ListParams::default()).await?;
+    Ok(configs)
+  }
 
-    pub async fn logs(
-        &self, pod: String, container: Option<String>, follow: bool, tail_lines: Option<i64>,
-        since_time: Option<DateTime<Utc>>,
-    ) -> Result<impl AsyncBufRead, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let pods: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "logs")?);
-        let logs = pods
-            .log_stream(
-                &pod,
-                &LogParams {
-                    follow,
-                    container,
-                    tail_lines,
-                    since_time,
-                    timestamps: true,
-                    ..LogParams::default()
-                },
-            )
-            .await?;
-        Ok(logs)
-    }
+  pub async fn logs(
+    &self, pod: String, container: Option<String>, follow: bool, tail_lines: Option<i64>,
+    since_time: Option<DateTime<Utc>>,
+  ) -> Result<impl AsyncBufRead, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let pods: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "logs")?);
+    let logs = pods
+      .log_stream(
+        &pod,
+        &LogParams {
+          follow,
+          container,
+          tail_lines,
+          since_time,
+          timestamps: true,
+          ..LogParams::default()
+        },
+      )
+      .await?;
+    Ok(logs)
+  }
 
-    pub async fn create_namespace(&self, name: &str) -> Result<Namespace, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Namespace> = Api::all(client);
-        let namespace = Namespace {
-            metadata: ObjectMeta {
-                name: Some(name.to_owned()),
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-        let namespace = api.create(&Default::default(), &namespace).await?;
-        Ok(namespace)
-    }
+  pub async fn create_namespace(&self, name: &str) -> Result<Namespace, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Namespace> = Api::all(client);
+    let namespace = Namespace {
+      metadata: ObjectMeta {
+        name: Some(name.to_owned()),
+        ..Default::default()
+      },
+      ..Default::default()
+    };
+    let namespace = api.create(&Default::default(), &namespace).await?;
+    Ok(namespace)
+  }
 
-    pub async fn create_pod(&self, pod: Pod) -> Result<Pod, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Pod> =
-            Api::namespaced(client, &with_namespace!(&self.namespace, "create pod")?);
-        let pod = api.create(&Default::default(), &pod).await?;
-        Ok(pod)
-    }
+  pub async fn create_pod(&self, pod: Pod) -> Result<Pod, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "create pod")?);
+    let pod = api.create(&Default::default(), &pod).await?;
+    Ok(pod)
+  }
 
-    pub async fn delete_pod(&self, name: &str) -> Result<(), ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Pod> =
-            Api::namespaced(client, &with_namespace!(&self.namespace, "delete pod")?);
-        api.delete(name, &Default::default()).await?;
-        Ok(())
-    }
+  pub async fn delete_pod(&self, name: &str) -> Result<(), ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "delete pod")?);
+    api.delete(name, &Default::default()).await?;
+    Ok(())
+  }
 
-    pub async fn infer_pod(&self, name: &str) -> Result<Pod, ClusterError> {
-        let client = check_enabled!(self.client)?;
-        let api: Api<Pod> =
-            Api::namespaced(client, &with_namespace!(&self.namespace, "infer pod")?);
-        let pod = api.get(name).await?;
-        Ok(pod)
-    }
+  pub async fn infer_pod(&self, name: &str) -> Result<Pod, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "infer pod")?);
+    let pod = api.get(name).await?;
+    Ok(pod)
+  }
 }
