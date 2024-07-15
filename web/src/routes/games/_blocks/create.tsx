@@ -1,4 +1,3 @@
-import IconCheckbox from "@widgets/icon-checkbox";
 import { createGame } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { createForm, maxRange, minRange, required, setValue, setValues } from "@modular-forms/solid";
@@ -6,6 +5,7 @@ import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
+import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import TimePicker from "@widgets/timepicker";
 import type { HTTPError } from "ky";

@@ -152,8 +152,8 @@ async fn get_platform_statistics(
     solved: submission::count(&db.conn, true, None, None, None).await?,
   };
   let challenges = ChallengeStatistics {
-    total: challenge::count(&db.conn, None, None, false).await?,
-    in_game: challenge::count(&db.conn, None, Some(HostType::CTFGame), false).await?,
+    total: challenge::count(&db.conn, None, None, true).await?,
+    in_game: challenge::count(&db.conn, None, Some(HostType::CTFGame), true).await?,
   };
   let statistics = Statistics {
     users,

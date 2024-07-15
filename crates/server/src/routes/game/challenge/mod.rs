@@ -43,8 +43,6 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .nest(
       "/:challenge",
       Router::new()
-        .route("/files", get(get_player_attachment))
-        .route("/env", get(get_challenge_env))
         .route(
           "/hint",
           post(create_challenge_hint).delete(delete_challenge_hint),
@@ -54,6 +52,8 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           state.clone(),
           auth::game_admin_required,
         ))
+        .route("/files", get(get_player_attachment))
+        .route("/env", get(get_challenge_env))
         .route("/hint", get(get_challenge_hints))
         .route(
           "/submit",

@@ -254,7 +254,8 @@
         "rulesTitle": "参赛须知",
         "accept": "我同意以上规约，继续参赛",
         "accepted": "已同意，按Esc关闭",
-        "reject": "不行，我有意见"
+        "reject": "不行，我有意见",
+        "failed": "创建队伍失败"
       },
       "manage": {
         "title": "查看我的队伍"
@@ -273,7 +274,8 @@
       "title": "队伍详情",
       "canNotJoin": "不符合参赛条件",
       "joinGame": "报名参赛",
-      "joinTips": "已有队伍？点击加入"
+      "joinTips": "已有队伍？点击加入",
+      "coming": "登场！"
     },
     "archivedGotoTraining": "已归档，请前往练习场",
     "canNotParticipate": "不符合参与条件",
@@ -308,7 +310,9 @@
     "startAtRequired": "请选择开始时间",
     "endAtRequired": "请选择结束时间",
     "registerAtRequired": "请选择注册时间",
-    "archiveAtRequired": "请选择归档时间"
+    "archiveAtRequired": "请选择归档时间",
+    "registerNotStarted": "未到注册时间",
+    "registerEnded": "太晚了，无法参与比赛"
   },
   "bulletin": {
     "title": "公告",

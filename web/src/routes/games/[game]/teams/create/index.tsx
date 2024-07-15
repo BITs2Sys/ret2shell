@@ -1,8 +1,10 @@
+import { createTeam } from "@/lib/api/game";
+import Link from "@/lib/widgets/link";
 import { generateRandomName } from "@lib/utils/random-names";
 import { createForm, maxLength, required, setValue } from "@modular-forms/solid";
-import { A, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canParticipate, gameStore } from "@storage/game";
+import { canParticipate, gameParticipateState, gameStore, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -12,6 +14,7 @@ import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
+import type { HTTPError } from "ky";
 import { Show, createEffect, createSignal, untrack } from "solid-js";
 
 type TeamCreateForm = {
@@ -37,12 +40,33 @@ export default function () {
     if (gameStore.current) {
       untrack(() => {
         setCustomDisabled(gameStore.current?.team_size === 1);
-        setValue(form, "name", accountStore.nickname!);
+        if (gameStore.current?.team_size === 1) setValue(form, "name", accountStore.nickname!);
       });
     }
   });
   const [loading, setLoading] = createSignal(false);
-  function onSubmit(data: TeamCreateForm) {}
+  function onSubmit(data: TeamCreateForm) {
+    setLoading(true);
+    createTeam(gameStore.current!.id, data)
+      .then((team) => {
+        setGameStore({ team, showTeamCover: true });
+        setTimeout(() => {
+          navigate(`/games/${gameStore.current?.id}`);
+        }, 2000);
+      })
+      .catch((e: HTTPError) => {
+        e.response.text().then((text) => {
+          addToast({
+            level: "error",
+            description: `${t("game.team.create.failed")}: ${text}`,
+            duration: 5000,
+          });
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
   const [generator, setGenerator] = createSignal<"chuunibyou" | "hacker">("hacker");
   const [content, setContent] = createSignal(null as null | string);
   const comps = import.meta.glob("../../_blocks/contents/*.md");
@@ -177,16 +201,21 @@ export default function () {
                 </>
               )}
             </Field>
-            <Button type="submit" level="primary" loading={loading()} disabled={loading()}>
-              {t("form.create")}
-            </Button>
-            <A
-              href={`/games/${gameStore.current?.id}/teams/join`}
-              class="flex items-center space-x-2 justify-center h-12 hover:underline opacity-60"
-            >
-              <span>{t("game.team.joinTips")}</span>
-              <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
-            </A>
+            <div class="flex flex-row space-x-2">
+              <Button
+                type="submit"
+                level="primary"
+                class="flex-1"
+                loading={loading()}
+                disabled={loading() || !gameParticipateState()[0]}
+              >
+                {gameParticipateState()[0] ? t("form.create") : gameParticipateState()[1]}
+              </Button>
+              <Link href={`/games/${gameStore.current?.id}/teams/join`}>
+                <span>{t("game.team.join.title")}</span>
+                <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
+              </Link>
+            </div>
           </Form>
         </Card>
       </div>

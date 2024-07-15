@@ -2,29 +2,52 @@ use axum::{
   extract::{Query, State},
   middleware,
   response::IntoResponse,
-  routing::get,
+  routing::{get, post},
   Extension, Json, Router,
 };
-use r2s_database::{extra, game, team, user::Permission};
+use chrono::Utc;
+use nanoid::nanoid;
+use r2s_auditor::Auditor;
+use r2s_database::{extra, game, team, user::Permission, user2_team};
 use r2s_migrator::Database;
 use serde::Deserialize;
 
 use crate::{
-  middleware::{auth::Token, data},
+  middleware::{
+    auth::{self, Token},
+    data,
+  },
   traits::{GlobalState, ResponseError},
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
-  Router::new().route("/", get(get_team_list)).nest(
-    "/:team",
-    Router::new()
-      .route("/", get(get_team_info))
-      .route("/extra", get(get_team_extra))
-      .route_layer(middleware::from_fn_with_state(
-        state.clone(),
-        data::prepare_data!(team, false),
-      )),
-  )
+  Router::new()
+    .route("/self", get(get_self_team))
+    .route_layer(middleware::from_fn_with_state(
+      state.clone(),
+      data::prepare_team_info,
+    ))
+    .route("/", post(create_team))
+    .route_layer(middleware::from_fn(auth::permission_required_all!(
+      Permission::Verified
+    )))
+    .route("/", get(get_team_list))
+    .nest(
+      "/:team",
+      Router::new()
+        .route("/", get(get_team_info))
+        .route("/extra", get(get_team_extra))
+        .route_layer(middleware::from_fn_with_state(
+          state.clone(),
+          data::prepare_data!(team, false),
+        )),
+    )
+}
+
+async fn get_self_team(
+  Extension(team): Extension<team::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  Ok(Json(team))
 }
 
 #[derive(Deserialize)]
@@ -91,4 +114,57 @@ async fn get_team_extra(
   State(ref db): State<Database>, Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   Ok(Json(extra::get_list_ex(&db.conn, team.id).await?))
+}
+
+#[derive(Deserialize)]
+struct CreateTeamRequest {
+  pub name: String,
+}
+
+async fn create_team(
+  State(ref db): State<Database>, State(ref auditor): State<Auditor>,
+  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+  Json(req): Json<CreateTeamRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if game.register_at > Utc::now() {
+    return Err(ResponseError::PreconditionFailed(
+      "game has not start yet".to_owned(),
+    ));
+  }
+  if (game.start_at < Utc::now() && !game.can_register_after_started) || game.end_at < Utc::now() {
+    return Err(ResponseError::PreconditionFailed(
+      "too late to participate".to_owned(),
+    ));
+  }
+  if team::get_by_user_id(&db.conn, game.id, token.id)
+    .await?
+    .is_some()
+  {
+    return Err(ResponseError::Conflict(
+      "can not join multiple teams".to_owned(),
+    ));
+  }
+  let state = if game.enable_audit {
+    if auditor.audit_content(&req.name) {
+      team::State::Pending
+    } else {
+      team::State::Passed
+    }
+  } else {
+    team::State::Passed
+  };
+  let team_token = Some(nanoid!());
+  let team = team::create(
+    &db.conn,
+    team::Model {
+      name: req.name,
+      game_id: game.id,
+      state,
+      token: team_token,
+      ..Default::default()
+    },
+  )
+  .await?;
+  user2_team::user_join_team(&db.conn, token.id, team.id).await?;
+  Ok(Json(team))
 }

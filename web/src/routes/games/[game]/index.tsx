@@ -366,12 +366,12 @@ export default function () {
             </div>
           </div>
           <Show when={gameStore.team}>
-            <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4 print:hidden">
+            <Card contentClass="p-3 lg:px-6 flex flex-row space-x-2 lg:space-x-4 print:hidden">
               <div class="lg:p-2 flex items-center justify-center">
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60" />
               </div>
               <div class="flex flex-col justify-center flex-1">
-                <h3 class="font-bold lg:text-xl px-2">
+                <h3 class="font-bold px-2">
                   <span>{gameStore.team?.name}</span>
                   <span>&nbsp;</span>
                   <span class="text-primary">#</span>
@@ -385,7 +385,7 @@ export default function () {
                   <span>{gameStore.team?.score || 0} pts</span>
                 </p>
               </div>
-              <p class="flex items-center justify-center font-bold lg:text-xl">
+              <p class="flex items-center justify-center font-bold">
                 <span class="opacity-60">No.</span>
                 <span class="text-primary">{gameStore.rank || "NULL"}</span>
               </p>

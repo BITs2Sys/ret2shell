@@ -3,7 +3,7 @@ import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, refreshUser, resetUser } from "@storage/account";
-import { canParticipate, gameStore } from "@storage/game";
+import { canParticipate, gameParticipateState, gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { clearToasts } from "@storage/toast";
 import Avatar from "@widgets/avatar";
@@ -140,9 +140,12 @@ export default function UserBox() {
                     size="sm"
                     justify="start"
                     class="flex-1"
+                    disabled={!gameParticipateState()[0]}
                   >
                     <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
-                    <span class="flex-1 truncate text-start">{t("game.team.joinGame")}</span>
+                    <span class="flex-1 truncate text-start">
+                      {gameParticipateState()[0] ? t("game.team.joinGame") : gameParticipateState()[1]}
+                    </span>
                   </Link>
                 </Match>
                 <Match when={!canParticipate()}>

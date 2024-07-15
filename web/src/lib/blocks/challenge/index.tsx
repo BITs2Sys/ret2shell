@@ -66,7 +66,6 @@ function BottomPanel(props: {
             <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("game.challenge.answer")}</span>
           </Button>
-          <Divider direction="vertical" class="h-8" />
           <Show
             when={
               !!accountStore.id &&
@@ -74,6 +73,7 @@ function BottomPanel(props: {
               gameStore.current?.admins.includes(accountStore.id)
             }
           >
+            <Divider direction="vertical" class="h-8" />
             <Button onClick={() => setPage(5)} ghost={page() !== 5}>
               <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
               <span>{t("game.challenge.statistics")}</span>

@@ -2,10 +2,10 @@ import type { Article } from "@models/article";
 import type { Challenge } from "@models/challenge";
 import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
-import type { DownloadProgress, SearchParamsOption } from "ky";
+import type { SearchParamsOption } from "ky";
 import api, { api_root } from ".";
-import type { Hint } from "../models/hint";
 import type { Extra } from "../models/extra";
+import type { Hint } from "../models/hint";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -139,6 +139,19 @@ export async function getTeamInfo(game_id: number, team_id: number) {
   return await api.get(`${api_root}/game/${game_id}/team/${team_id}`).json<Team>();
 }
 
+export async function getSelfTeam(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/team/self`).json<Team>();
+}
+
 export async function getTeamExtras(game_id: number, team_id: number) {
   return await api.get(`${api_root}/game/${game_id}/team/${team_id}/extra`).json<Extra[]>();
+}
+
+export async function createTeam(
+  game_id: number,
+  team: {
+    name: string;
+  }
+) {
+  return await api.post(`${api_root}/game/${game_id}/team`, { json: team }).json<Team>();
 }

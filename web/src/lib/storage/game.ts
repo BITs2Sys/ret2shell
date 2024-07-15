@@ -3,12 +3,12 @@ import type { Game } from "@models/game";
 import type { Submission } from "@models/submission";
 import type { Team } from "@models/team";
 import { Permission, type User } from "@models/user";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { createStore } from "solid-js/store";
+import { getChallengeList } from "../api/game";
 import { accountStore } from "./account";
 import { t } from "./theme";
-import { getChallengeList } from "../api/game";
-import type { HTTPError } from "ky";
 import { addToast } from "./toast";
 
 export const [gameStore, setGameStore] = createStore({
@@ -21,6 +21,7 @@ export const [gameStore, setGameStore] = createStore({
   members: [] as User[],
   challenges: [] as Challenge[],
   solves: [] as Submission[],
+  showTeamCover: false,
 });
 
 export type GameStoreType = typeof gameStore;
@@ -103,6 +104,20 @@ export function isGameAdmin() {
     return true;
   }
   return false;
+}
+
+export function gameParticipateState() {
+  if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
+    return [false, t("game.registerNotStarted")!];
+  }
+  if (
+    gameStore.current?.start_at &&
+    gameStore.current.start_at < DateTime.now() &&
+    !gameStore.current.can_register_after_started
+  ) {
+    return [false, t("game.registerEnded")!];
+  }
+  return [true, ""];
 }
 
 export async function refreshChallenges() {

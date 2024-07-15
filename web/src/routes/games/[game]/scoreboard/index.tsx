@@ -148,7 +148,6 @@ export default function () {
       untrack(getTeams);
     }
   });
-  // TODO: fetch scoreboard, change scoreboard page.
 
   let autoPageSizeWatcher: HTMLDivElement;
   let pageHeight: Readonly<Size>;
