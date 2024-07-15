@@ -1,4 +1,4 @@
-import Checkbox from "@/lib/widgets/checkbox";
+import Checkbox from "@widgets/checkbox";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";

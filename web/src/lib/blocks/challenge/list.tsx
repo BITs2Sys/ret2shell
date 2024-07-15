@@ -1,5 +1,5 @@
-import LoadingTips from "@/lib/widgets/loading-tips";
-import TreeView, { type TreeNode } from "@/lib/widgets/treeview";
+import LoadingTips from "@widgets/loading-tips";
+import TreeView, { type TreeNode } from "@widgets/treeview";
 import { useSearchParams } from "@solidjs/router";
 import { gameStore, refreshChallenges } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";

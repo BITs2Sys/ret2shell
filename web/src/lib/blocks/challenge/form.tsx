@@ -1,8 +1,8 @@
-import type { Challenge } from "@/lib/models/challenge";
-import { fullTheme, t } from "@/lib/storage/theme";
-import Button from "@/lib/widgets/button";
-import Editor from "@/lib/widgets/editor";
-import Input from "@/lib/widgets/input";
+import type { Challenge } from "@models/challenge";
+import { fullTheme, t } from "@storage/theme";
+import Button from "@widgets/button";
+import Editor from "@widgets/editor";
+import Input from "@widgets/input";
 import { createForm, required, setValue } from "@modular-forms/solid";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, Show, untrack } from "solid-js";
@@ -58,6 +58,10 @@ export default function (props: {
         >
           <div class="flex flex-col p-3 lg:p-6 w-full items-center">
             <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+              <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                <span>{t("game.challenge.create")}</span>
+              </h3>
               <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]}>
                 {(field, props) => (
                   <Input

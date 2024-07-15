@@ -1,4 +1,4 @@
-import NotImplemented from "@/lib/blocks/not-implemented";
+import NotImplemented from "@blocks/not-implemented";
 
 export default function () {
   return (

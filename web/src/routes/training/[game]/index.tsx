@@ -1,18 +1,20 @@
-import type { Challenge as ChallengeModel } from "@/lib/models/challenge";
-import { gameStore, refreshChallenges, setGameStore } from "@/lib/storage/game";
-import { t } from "@/lib/storage/theme";
-import LoadingTips from "@/lib/widgets/loading-tips";
+import type { Challenge as ChallengeModel } from "@models/challenge";
+import { gameStore, refreshChallenges, setGameStore } from "@storage/game";
+import { fullTheme, t } from "@storage/theme";
+import LoadingTips from "@widgets/loading-tips";
 import Challenge from "@blocks/challenge";
 import { useSearchParams } from "@solidjs/router";
 import { Match, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import Intro from "../_blocks/intro";
 
-import Form, { type ChallengeForm } from "@/lib/blocks/challenge/form";
+import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import { DateTime } from "luxon";
-import { createChallenge, getChallenge } from "@/lib/api/game";
+import { createChallenge, getChallenge } from "@api/game";
 import type { HTTPError } from "ky";
-import { addToast } from "@/lib/storage/toast";
-import Tabs from "@/lib/blocks/challenge/tabs";
+import { addToast } from "@storage/toast";
+import Tabs from "@blocks/challenge/tabs";
+import GameEdit, { type GameForm } from "@blocks/game/form";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,6 +67,7 @@ export default function () {
       });
   }
   const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || "NaN") || null);
+  const inEdit = createMemo(() => searchParams.edit === "true");
   const [selectedChallenge, setSelectedChallenge] = createSignal(null as null | ChallengeModel);
   createEffect(() => {
     if (selectedChallengeId() && gameStore.current) {
@@ -96,10 +99,32 @@ export default function () {
     setGameStore({ current: null });
   });
 
+  function onEditGame(result: GameForm) {}
+
   return (
     <div class="flex-1 flex flex-col w-0">
       <Tabs baseUrl={`/training/${gameStore.current?.id}`} current={selectedChallenge()} loading={loadingChallenge()} />
       <Switch fallback={<Intro />}>
+        <Match when={inEdit()}>
+          <div class="flex-1 w-full relative">
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+              <OverlayScrollbarsComponent
+                options={{
+                  scrollbars: {
+                    theme: `os-theme-${fullTheme()}`,
+                    autoHide: "scroll",
+                  },
+                }}
+                class="relative w-full h-full print:h-auto print:overflow-auto"
+                defer
+              >
+                <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                  <GameEdit onDone={onEditGame} />
+                </div>
+              </OverlayScrollbarsComponent>
+            </div>
+          </div>
+        </Match>
         <Match when={loadingChallenge()}>
           <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
             <LoadingTips />

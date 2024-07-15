@@ -1,4 +1,4 @@
-import IconCheckbox from "@/lib/widgets/icon-checkbox";
+import IconCheckbox from "@widgets/icon-checkbox";
 import { createGame } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { createForm, maxRange, minRange, required, setValue, setValues } from "@modular-forms/solid";
@@ -75,147 +75,18 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       });
   }
   return (
-    <div class="flex-1 self-center w-full max-w-5xl flex flex-col">
-      <h1 class="text-3xl text-center font-bold mt-8">
-        {t("game.create")} - {t("game.title")}
-      </h1>
-      <Form onSubmit={onSubmit} class="flex flex-col space-y-2 py-3 lg:py-6">
-        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
-          <Field name="name" validate={[required(t("game.nameRequired")!)]}>
-            {(field, props) => (
-              <Input
-                icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                placeholder={t("game.namePlaceholder")}
-                title={t("game.namePlaceholder")}
-                {...props}
-                value={field.value}
-                error={field.error}
-                required
-                class="flex-1"
-              />
-            )}
-          </Field>
-          <Field
-            name="team_size"
-            type="number"
-            validate={[
-              required(t("game.team.sizeRequired")!),
-              minRange(1, t("game.team.sizeMinExceeded")!),
-              maxRange(99, t("game.team.sizeMaxExceeded")!),
-            ]}
-          >
-            {(field, props) => (
-              <Input
-                icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-                placeholder={t("game.teamSizePlaceholder")}
-                title={t("game.teamSizePlaceholder")}
-                {...props}
-                value={field.value}
-                type="number"
-                error={field.error}
-                required
-                class="min-w-48"
-                min={1}
-                max={99}
-              />
-            )}
-          </Field>
-          <div class="flex flex-col space-y-1">
-            <label class="label">{t("game.miscSettings")}</label>
-            <div class="flex flex-row">
-              <Field name="can_register_after_started" type="boolean">
-                {(field, props) => (
-                  <IconCheckbox
-                    class="!rounded-r-none"
-                    title={t("game.canRegisterAfterStarted")}
-                    uncheckedIcon="icon-[fluent--accessibility-checkmark-20-regular]"
-                    checkedIcon="icon-[fluent--accessibility-checkmark-20-filled]"
-                    inputProps={props}
-                    checked={field.value}
-                    error={field.error}
-                    name="can_register_after_started"
-                  />
-                )}
-              </Field>
-              <Field name="offline" type="boolean">
-                {(field, props) => (
-                  <IconCheckbox
-                    class="!rounded-none"
-                    title={t("game.offline")}
-                    uncheckedIcon="icon-[fluent--wifi-off-20-regular]"
-                    checkedIcon="icon-[fluent--wifi-off-20-filled]"
-                    inputProps={props}
-                    checked={field.value}
-                    error={field.error}
-                    name="offline"
-                  />
-                )}
-              </Field>
-              <Field name="enable_audit" type="boolean">
-                {(field, props) => (
-                  <IconCheckbox
-                    class="!rounded-l-none"
-                    title={t("game.enableAudit")}
-                    uncheckedIcon="icon-[fluent--people-audience-20-regular]"
-                    checkedIcon="icon-[fluent--people-audience-20-filled]"
-                    inputProps={props}
-                    checked={field.value}
-                    error={field.error}
-                    name="enable_audit"
-                  />
-                )}
-              </Field>
-            </div>
-          </div>
-          <Field name="weight" type="number">
-            {(field, props) => (
-              <div class="flex flex-col space-y-1">
-                <label class="label" for={props.name}>
-                  {t("game.weight")}
-                  <input class="hidden" type="number" {...props} value={field.value} />
-                </label>
-                <div class="flex flex-row">
-                  <Button
-                    type="button"
-                    square
-                    class={`!rounded-r-none ${field.value === 1 ? "text-primary" : ""}`.trim()}
-                    onClick={() => {
-                      setValue(form, "weight", 1);
-                    }}
-                  >
-                    1
-                  </Button>
-                  <Button
-                    type="button"
-                    square
-                    class={`!rounded-none ${field.value === 2 ? "text-primary" : ""}`.trim()}
-                    onClick={() => {
-                      setValue(form, "weight", 2);
-                    }}
-                  >
-                    2
-                  </Button>
-                  <Button
-                    type="button"
-                    square
-                    class={`!rounded-l-none ${field.value === 3 ? "text-primary" : ""}`.trim()}
-                    onClick={() => {
-                      setValue(form, "weight", 3);
-                    }}
-                  >
-                    3
-                  </Button>
-                </div>
-              </div>
-            )}
-          </Field>
-        </div>
-        <Field name="brief" validate={[required(t("game.briefRequired")!)]}>
+    <Form onSubmit={onSubmit} class="flex flex-col self-center w-full max-w-5xl space-y-2 py-3 lg:py-6">
+      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span>{t("game.admin.edit.title")}</span>
+      </h3>
+      <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
+        <Field name="name" validate={[required(t("game.nameRequired")!)]}>
           {(field, props) => (
             <Input
               icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-              placeholder={t("game.briefPlaceholder")}
-              title={t("game.briefPlaceholder")}
+              placeholder={t("game.namePlaceholder")}
+              title={t("game.namePlaceholder")}
               {...props}
               value={field.value}
               error={field.error}
@@ -224,61 +95,189 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
             />
           )}
         </Field>
-        <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
-          {(startAtField) => (
-            <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
-              {(endAtField) => (
-                <Field name="register_at" type="number" validate={[required(t("game.registerAtRequired")!)]}>
-                  {(registerAtField) => (
-                    <Field name="archive_at" type="number" validate={[required(t("game.archiveAtRequired")!)]}>
-                      {(archiveAtField) => (
-                        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
-                          <TimePicker
-                            class="flex-1"
-                            form={form}
-                            type="time"
-                            range
-                            title={t("game.startEndTime")}
-                            placeholder={t("game.startEndTime")}
-                            name={startAtField.name}
-                            value={startAtField.value}
-                            nameNext={endAtField.name}
-                            valueNext={endAtField.value}
-                            error={startAtField.error || endAtField.error}
-                            startEdge={
-                              (registerAtField.value && DateTime.fromSeconds(registerAtField.value)) || undefined
-                            }
-                            endEdge={(archiveAtField.value && DateTime.fromSeconds(archiveAtField.value)) || undefined}
-                          />
-                          <TimePicker
-                            class="flex-1"
-                            form={form}
-                            type="time"
-                            range
-                            title={t("game.registerArchiveTime")}
-                            placeholder={t("game.registerArchiveTime")}
-                            name={registerAtField.name}
-                            value={registerAtField.value}
-                            nameNext={archiveAtField.name}
-                            valueNext={archiveAtField.value}
-                            error={registerAtField.error || archiveAtField.error}
-                            startEdge={(startAtField.value && DateTime.fromSeconds(startAtField.value)) || undefined}
-                            endEdge={(endAtField.value && DateTime.fromSeconds(endAtField.value)) || undefined}
-                            reverseEdge
-                          />
-                        </div>
-                      )}
-                    </Field>
-                  )}
-                </Field>
-              )}
-            </Field>
+        <Field
+          name="team_size"
+          type="number"
+          validate={[
+            required(t("game.team.sizeRequired")!),
+            minRange(1, t("game.team.sizeMinExceeded")!),
+            maxRange(99, t("game.team.sizeMaxExceeded")!),
+          ]}
+        >
+          {(field, props) => (
+            <Input
+              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+              placeholder={t("game.teamSizePlaceholder")}
+              title={t("game.teamSizePlaceholder")}
+              {...props}
+              value={field.value}
+              type="number"
+              error={field.error}
+              required
+              class="min-w-48"
+              min={1}
+              max={99}
+            />
           )}
         </Field>
-        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {t("form.create")}
-        </Button>
-      </Form>
-    </div>
+        <div class="flex flex-col space-y-1">
+          <label class="label">{t("game.miscSettings")}</label>
+          <div class="flex flex-row">
+            <Field name="can_register_after_started" type="boolean">
+              {(field, props) => (
+                <IconCheckbox
+                  class="!rounded-r-none"
+                  title={t("game.canRegisterAfterStarted")}
+                  uncheckedIcon="icon-[fluent--accessibility-checkmark-20-regular]"
+                  checkedIcon="icon-[fluent--accessibility-checkmark-20-filled]"
+                  inputProps={props}
+                  checked={field.value}
+                  error={field.error}
+                  name="can_register_after_started"
+                />
+              )}
+            </Field>
+            <Field name="offline" type="boolean">
+              {(field, props) => (
+                <IconCheckbox
+                  class="!rounded-none"
+                  title={t("game.offline")}
+                  uncheckedIcon="icon-[fluent--wifi-off-20-regular]"
+                  checkedIcon="icon-[fluent--wifi-off-20-filled]"
+                  inputProps={props}
+                  checked={field.value}
+                  error={field.error}
+                  name="offline"
+                />
+              )}
+            </Field>
+            <Field name="enable_audit" type="boolean">
+              {(field, props) => (
+                <IconCheckbox
+                  class="!rounded-l-none"
+                  title={t("game.enableAudit")}
+                  uncheckedIcon="icon-[fluent--people-audience-20-regular]"
+                  checkedIcon="icon-[fluent--people-audience-20-filled]"
+                  inputProps={props}
+                  checked={field.value}
+                  error={field.error}
+                  name="enable_audit"
+                />
+              )}
+            </Field>
+          </div>
+        </div>
+        <Field name="weight" type="number">
+          {(field, props) => (
+            <div class="flex flex-col space-y-1">
+              <label class="label" for={props.name}>
+                {t("game.weight")}
+                <input class="hidden" type="number" {...props} value={field.value} />
+              </label>
+              <div class="flex flex-row">
+                <Button
+                  type="button"
+                  square
+                  class={`!rounded-r-none ${field.value === 1 ? "text-primary" : ""}`.trim()}
+                  onClick={() => {
+                    setValue(form, "weight", 1);
+                  }}
+                >
+                  1
+                </Button>
+                <Button
+                  type="button"
+                  square
+                  class={`!rounded-none ${field.value === 2 ? "text-primary" : ""}`.trim()}
+                  onClick={() => {
+                    setValue(form, "weight", 2);
+                  }}
+                >
+                  2
+                </Button>
+                <Button
+                  type="button"
+                  square
+                  class={`!rounded-l-none ${field.value === 3 ? "text-primary" : ""}`.trim()}
+                  onClick={() => {
+                    setValue(form, "weight", 3);
+                  }}
+                >
+                  3
+                </Button>
+              </div>
+            </div>
+          )}
+        </Field>
+      </div>
+      <Field name="brief" validate={[required(t("game.briefRequired")!)]}>
+        {(field, props) => (
+          <Input
+            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+            placeholder={t("game.briefPlaceholder")}
+            title={t("game.briefPlaceholder")}
+            {...props}
+            value={field.value}
+            error={field.error}
+            required
+            class="flex-1"
+          />
+        )}
+      </Field>
+      <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
+        {(startAtField) => (
+          <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
+            {(endAtField) => (
+              <Field name="register_at" type="number" validate={[required(t("game.registerAtRequired")!)]}>
+                {(registerAtField) => (
+                  <Field name="archive_at" type="number" validate={[required(t("game.archiveAtRequired")!)]}>
+                    {(archiveAtField) => (
+                      <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
+                        <TimePicker
+                          class="flex-1"
+                          form={form}
+                          type="time"
+                          range
+                          title={t("game.startEndTime")}
+                          placeholder={t("game.startEndTime")}
+                          name={startAtField.name}
+                          value={startAtField.value}
+                          nameNext={endAtField.name}
+                          valueNext={endAtField.value}
+                          error={startAtField.error || endAtField.error}
+                          startEdge={
+                            (registerAtField.value && DateTime.fromSeconds(registerAtField.value)) || undefined
+                          }
+                          endEdge={(archiveAtField.value && DateTime.fromSeconds(archiveAtField.value)) || undefined}
+                        />
+                        <TimePicker
+                          class="flex-1"
+                          form={form}
+                          type="time"
+                          range
+                          title={t("game.registerArchiveTime")}
+                          placeholder={t("game.registerArchiveTime")}
+                          name={registerAtField.name}
+                          value={registerAtField.value}
+                          nameNext={archiveAtField.name}
+                          valueNext={archiveAtField.value}
+                          error={registerAtField.error || archiveAtField.error}
+                          startEdge={(startAtField.value && DateTime.fromSeconds(startAtField.value)) || undefined}
+                          endEdge={(endAtField.value && DateTime.fromSeconds(endAtField.value)) || undefined}
+                          reverseEdge
+                        />
+                      </div>
+                    )}
+                  </Field>
+                )}
+              </Field>
+            )}
+          </Field>
+        )}
+      </Field>
+      <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+        {t("form.create")}
+      </Button>
+    </Form>
   );
 }

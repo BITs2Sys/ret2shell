@@ -1,14 +1,18 @@
 import { Select, type SelectRootProps } from "@ark-ui/solid";
 import type { CollectionItem } from "@ark-ui/solid/dist/types/types";
-import { Index, Show, splitProps } from "solid-js";
+import { setValue, type FormStore } from "@modular-forms/solid";
+import { type ComponentProps, Index, Show, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 export type SelectProps = {
   label?: string;
   placeholder?: string;
+  inputProps?: ComponentProps<"select">;
   size?: "sm" | "md";
   ghost?: boolean;
   error?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
+  form?: FormStore<any, undefined>;
 };
 
 export interface SelectItemType {
@@ -19,7 +23,15 @@ export interface SelectItemType {
 }
 
 export default function <T extends CollectionItem & SelectItemType>(props: SelectRootProps<T> & SelectProps) {
-  const [selectProps, others] = splitProps(props, ["label", "placeholder", "size", "ghost", "error"]);
+  const [selectProps, others] = splitProps(props, [
+    "label",
+    "placeholder",
+    "size",
+    "ghost",
+    "error",
+    "inputProps",
+    "form",
+  ]);
   return (
     <Select.Root
       {...others}
@@ -85,7 +97,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
           </Select.Content>
         </Select.Positioner>
       </Portal>
-      <Select.HiddenSelect id={props.name} value={props.value} />
+      <Select.HiddenSelect {...selectProps.inputProps} />
     </Select.Root>
   );
 }

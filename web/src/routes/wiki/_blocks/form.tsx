@@ -1,4 +1,4 @@
-import IconCheckbox from "@/lib/widgets/icon-checkbox";
+import IconCheckbox from "@widgets/icon-checkbox";
 import { createWiki, updateWiki } from "@api/wiki";
 import { type Article, ArticleAccessPolicy } from "@models/article";
 import { createForm, required, setValues } from "@modular-forms/solid";

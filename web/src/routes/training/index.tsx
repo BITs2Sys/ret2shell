@@ -1,4 +1,4 @@
-import { addToast } from "@/lib/storage/toast";
+import { addToast } from "@storage/toast";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
 import { Show } from "solid-js";

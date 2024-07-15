@@ -1,6 +1,6 @@
-import { createChallengeHint, deleteChallengeHint, getChallengeHint, getTeamExtras } from "@/lib/api/game";
-import type { Challenge } from "@/lib/models/challenge";
-import { addToast } from "@/lib/storage/toast";
+import { createChallengeHint, deleteChallengeHint, getChallengeHint, getTeamExtras } from "@api/game";
+import type { Challenge } from "@models/challenge";
+import { addToast } from "@storage/toast";
 import type { Extra } from "@models/extra";
 import type { Hint } from "@models/hint";
 import { Permission } from "@models/user";

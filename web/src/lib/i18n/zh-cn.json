@@ -155,7 +155,8 @@
       "envNotStart": "题目可开启在线环境",
       "envIsRunning": "环境已开启",
       "otherChallengeEnvIsRunning": "另一道题目环境正在运行",
-      "startEnv": "启动！"
+      "startEnv": "启动！",
+      "create": "创建题目"
     },
     "scoreboard": {
       "title": "积分板",
@@ -168,6 +169,15 @@
     "admin": {
       "title": "管理",
       "manageChallenges": "管理赛事题目",
+      "namePlaceholder": "比赛名称",
+      "briefPlaceholder": "比赛简介",
+      "teamSizePlaceholder": "队伍最大人数",
+      "enableAudit": "启用队伍审核",
+      "canRegisterAfterStarted": "开赛后可参赛",
+      "awardRate": "一血奖励分数比例",
+      "hidden": "隐藏",
+      "frozen": "冻结",
+      "offline": "启用线下赛事特性",
       "statistics": {
         "title": "统计数据"
       },
@@ -584,6 +594,7 @@
   "form": {
     "save": "保存",
     "create": "创建",
+    "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
     "createSuccess": "创建成功",
     "createFailed": "创建失败",

@@ -1,6 +1,5 @@
-import { api_root } from "@/lib/api";
-import { downloadFile } from "@/lib/api/file";
-import DownloadButton from "@/lib/blocks/download-button";
+import { api_root } from "@api";
+import DownloadButton from "@blocks/download-button";
 import { getPlatformLogs } from "@api/platform";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";

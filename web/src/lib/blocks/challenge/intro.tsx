@@ -1,9 +1,9 @@
-import { getChallengeAttachments, getChallengeEnv } from "@/lib/api/game";
-import type { Challenge } from "@/lib/models/challenge";
-import { fullTheme, t } from "@/lib/storage/theme";
-import { addToast } from "@/lib/storage/toast";
-import Article from "@/lib/widgets/article";
-import Button from "@/lib/widgets/button";
+import { getChallengeAttachments, getChallengeEnv } from "@api/game";
+import type { Challenge } from "@models/challenge";
+import { fullTheme, t } from "@storage/theme";
+import { addToast } from "@storage/toast";
+import Article from "@widgets/article";
+import Button from "@widgets/button";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
@@ -12,10 +12,10 @@ import Tag from "@widgets/tag";
 import type { EnvConfig } from "@models/instance";
 import TimeProgress from "@widgets/time-progress";
 import { wsrx } from "@lib/wsrx";
-import { accountStore } from "@/lib/storage/account";
-import Divider from "@/lib/widgets/divider";
+import { accountStore } from "@storage/account";
+import Divider from "@widgets/divider";
 import DownloadButton from "../download-button";
-import { api_root } from "@/lib/api";
+import { api_root } from "@api";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],

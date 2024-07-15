@@ -13,11 +13,13 @@ export default function Tabs(props: {
   baseUrl: string;
   current: Challenge | null;
   loading?: boolean;
+  inGame?: boolean;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || "NaN") || null);
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
   const inCreate = createMemo(() => searchParams.create === "true");
+  const inEditGame = createMemo(() => searchParams.edit === "true");
   function appendChallengeHistory(challenge: Challenge) {
     if (challengeHistory().find((c) => c.id === challenge.id)) {
       setTimeout(() => {
@@ -61,7 +63,7 @@ export default function Tabs(props: {
               square={challengeHistory().length > 0}
               ghost
               class="transition-all duration-300 overflow-hidden"
-              active={selectedChallengeId() === null && inCreate() === false}
+              active={selectedChallengeId() === null && inCreate() === false && inEditGame() === false}
             >
               <span class="icon-[fluent--home-20-regular] w-5 h-5" />
               <Show when={challengeHistory().length === 0}>
@@ -69,9 +71,24 @@ export default function Tabs(props: {
               </Show>
             </Link>
             <Show when={accountStore.permissions.includes(Permission.Game)}>
+              <Show when={!props.inGame}>
+                <Link
+                  active={inEditGame()}
+                  title={t("game.admin.edit.title")}
+                  square={challengeHistory().length > 0}
+                  ghost
+                  class="transition-all duration-300 overflow-hidden"
+                  href={`${props.baseUrl}?edit=true`}
+                >
+                  <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                  <Show when={challengeHistory().length === 0}>
+                    <span>{t("game.admin.edit.title")}</span>
+                  </Show>
+                </Link>
+              </Show>
               <Link
                 active={inCreate()}
-                title={t("form.create")}
+                title={t("game.challenge.create")}
                 square={challengeHistory().length > 0}
                 ghost
                 class="transition-all duration-300 overflow-hidden"
@@ -79,7 +96,7 @@ export default function Tabs(props: {
               >
                 <span class="icon-[fluent--add-20-regular] w-5 h-5" />
                 <Show when={challengeHistory().length === 0}>
-                  <span>{t("form.create")}</span>
+                  <span>{t("game.challenge.create")}</span>
                 </Show>
               </Link>
             </Show>

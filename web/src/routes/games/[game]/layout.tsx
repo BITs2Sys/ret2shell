@@ -1,4 +1,4 @@
-import { HostType } from "@/lib/models/game";
+import { HostType } from "@models/game";
 import { getGame } from "@api/game";
 import { useNavigate, useParams } from "@solidjs/router";
 import { gameStore, setGameStore } from "@storage/game";

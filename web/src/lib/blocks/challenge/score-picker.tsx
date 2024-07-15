@@ -1,7 +1,7 @@
-import { t } from "@/lib/storage/theme";
-import Chart from "@/lib/widgets/chart";
-import RangeSlider from "@/lib/widgets/range-slider";
-import Slider from "@/lib/widgets/slider";
+import { t } from "@storage/theme";
+import Chart from "@widgets/chart";
+import RangeSlider from "@widgets/range-slider";
+import Slider from "@widgets/slider";
 
 export default function ScorePicker(props: {
   class?: string;

@@ -26,7 +26,7 @@ pub struct GameBucket {
 #[repr(i32)]
 pub enum HostType {
   CTFTraining = 0,
-  CTFGame     = 1,
+  CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -37,6 +37,8 @@ pub struct AccessPolicy {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GameConfig {
   pub name: String,
+  #[serde(with = "ts_seconds")]
+  pub updated_at: DateTime<Utc>,
   pub brief: String,
   #[serde(with = "ts_seconds")]
   pub start_at: DateTime<Utc>,

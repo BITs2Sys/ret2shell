@@ -20,7 +20,7 @@ export default function (
   const classes = () => `btn ${checkboxProps.ghost ? "btn-ghost" : ""} ${rest.disabled ? "btn-disabled" : ""}`.trim();
   return (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
-      <Popover.Anchor class="flex flex-col space-y-1">
+      <Popover.Anchor class="flex flex-col space-y-1 flex-1">
         <label class="label">{props.title}</label>
         <Checkbox.Root {...rest} class={classes()}>
           <Checkbox.Label asChild={() => children} />

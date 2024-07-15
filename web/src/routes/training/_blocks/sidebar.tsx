@@ -1,5 +1,5 @@
-import { getGame } from "@/lib/api/game";
-import ChallengeList from "@/lib/blocks/challenge/list";
+import { getGame } from "@api/game";
+import ChallengeList from "@blocks/challenge/list";
 import { useNavigate, useParams } from "@solidjs/router";
 import { gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";

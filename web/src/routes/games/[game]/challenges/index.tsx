@@ -1,5 +1,5 @@
-import Form, { type ChallengeForm } from "@/lib/blocks/challenge/form";
-import LoadingTips from "@/lib/widgets/loading-tips";
+import Form, { type ChallengeForm } from "@blocks/challenge/form";
+import LoadingTips from "@widgets/loading-tips";
 import Challenge from "@blocks/challenge";
 import ChallengeList from "@blocks/challenge/list";
 import SidebarLayout from "@blocks/sidebar-layout";
@@ -16,11 +16,11 @@ import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
 import { DateTime } from "luxon";
-import { createChallenge, getChallenge } from "@/lib/api/game";
+import { createChallenge, getChallenge } from "@api/game";
 import type { HTTPError } from "ky";
-import { addToast } from "@/lib/storage/toast";
+import { addToast } from "@storage/toast";
 
-import Tabs from "@/lib/blocks/challenge/tabs";
+import Tabs from "@blocks/challenge/tabs";
 
 export default function () {
   const navigate = useNavigate();
@@ -134,6 +134,7 @@ export default function () {
             baseUrl={`/games/${gameStore.current?.id}/challenges`}
             current={selectedChallenge()}
             loading={loadingChallenge()}
+            inGame
           />
           <Switch fallback={<Welcome />}>
             <Match when={loadingChallenge()}>
