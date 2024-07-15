@@ -301,22 +301,27 @@ async fn send_email(
     EmailType::Reset => (reset_password_subject, reset_password_body),
   };
 
+  let link = match email_type {
+    EmailType::Verify => format!(
+      "{}/account/verify?email={}&token={}",
+      config.server.as_ref().unwrap().external_origin(),
+      email,
+      verification_id
+    ),
+    EmailType::Reset => format!(
+      "{}/account/reset?email={}&token={}",
+      config.server.as_ref().unwrap().external_origin(),
+      email,
+      verification_id
+    ),
+  };
+
   let email_req = EmailRequest {
     email: EmailCtx {
       name: nickname.to_owned(),
       email: email.to_owned(),
       subject,
-      content: body
-        .replace(
-          "%LINK%",
-          &format!(
-            "{}/account/verify?email={}&token={}",
-            config.server.as_ref().unwrap().external_origin(),
-            email,
-            verification_id
-          ),
-        )
-        .replace("%USER%", nickname),
+      content: body.replace("%LINK%", &link).replace("%USER%", nickname),
     },
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),

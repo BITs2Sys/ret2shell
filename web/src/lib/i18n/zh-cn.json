@@ -352,7 +352,29 @@
       "title": "编辑平台设置"
     },
     "email": {
-      "title": "邮箱设置"
+      "title": "邮箱设置",
+      "enabled": "启用邮箱",
+      "host": "邮箱服务器地址",
+      "hostRequired": "请填写邮箱服务器地址",
+      "port": "端口",
+      "portRequired": "请填写端口",
+      "portRangeNotMatch": "端口号在 1 - 65535 之间",
+      "sender": "发信人名称",
+      "senderRequired": "请填写发信人名称",
+      "username": "发信邮箱",
+      "usernameRequired": "请填写发信邮箱",
+      "password": "发信邮箱 SMTP 密码",
+      "passwordRequired": "请填写密码",
+      "tls": "加密方式",
+      "tlsRequired": "请选择加密方式",
+      "verifyEmailSubject": "验证邮件标题",
+      "resetEmailSubject": "重置密码邮件标题",
+      "verifyEmailSubjectRequired": "请填写验证邮件标题",
+      "resetEmailSubjectRequired": "请填写重置密码邮件标题",
+      "verifyEmailBody": "验证邮件内容",
+      "resetEmailBody": "重置密码邮件内容",
+      "verifyEmailBodyRequired": "请填写验证邮件内容",
+      "resetEmailBodyRequired": "请填写重置密码邮件内容"
     },
     "captcha": {
       "title": "验证码保护",

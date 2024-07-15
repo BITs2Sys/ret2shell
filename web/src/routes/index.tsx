@@ -121,7 +121,7 @@ export default function () {
                         <span class="font-normal opacity-60">support@ret.sh.cn</span>
                       </a>
                       <Link
-                        href="https://afdian.net/a/reverier"
+                        href="https://github.com/ret2shell"
                         ghost
                         size="sm"
                         square

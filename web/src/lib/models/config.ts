@@ -49,7 +49,7 @@ export type EmailConfig = {
   sender: string;
   username: string;
   password: string;
-  tls: boolean;
+  tls: "none" | "tls" | "starttls";
   reset_password_email_body: string | null;
   reset_password_email_subject: string | null;
   verify_email_body: string | null;

@@ -17,7 +17,8 @@ export default function (
   const [checkboxProps, _1] = splitProps(props, ["ghost", "error", "inputProps"]);
   const [{ children }, rest] = splitProps(_1, ["children"]);
 
-  const classes = () => `btn ${checkboxProps.ghost ? "btn-ghost" : ""} ${rest.disabled ? "btn-disabled" : ""}`.trim();
+  const classes = () =>
+    `btn ${checkboxProps.ghost ? "btn-ghost" : ""} data-[state=checked]:border-2 data-[state=checked]:border-primary ${rest.disabled ? "btn-disabled" : ""}`.trim();
   return (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
       <Popover.Anchor class="flex flex-col space-y-1 flex-1">

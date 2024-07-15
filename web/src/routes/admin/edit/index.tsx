@@ -186,7 +186,7 @@ export default function () {
                   title={t("platform.form.hideMaker")}
                   disabled={platformStore.license?.level !== "enterprise"}
                 >
-                  <span>{t("platform.form.hideMaker")}</span>
+                  <span class="flex-1 text-start">{t("platform.form.hideMaker")}</span>
                 </Checkbox>
               )}
             </Field>

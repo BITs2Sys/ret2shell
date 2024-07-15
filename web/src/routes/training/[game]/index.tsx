@@ -9,7 +9,7 @@ import Intro from "../_blocks/intro";
 
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import { DateTime } from "luxon";
-import { createChallenge, getChallenge } from "@api/game";
+import { createChallenge, getChallenge, updateGame } from "@api/game";
 import type { HTTPError } from "ky";
 import { addToast } from "@storage/toast";
 import Tabs from "@blocks/challenge/tabs";
@@ -99,7 +99,39 @@ export default function () {
     setGameStore({ current: null });
   });
 
-  function onEditGame(result: GameForm) {}
+  const [editing, setEditing] = createSignal(false);
+
+  function onEditGame(result: GameForm) {
+    setEditing(true);
+    updateGame(gameStore.current!.id, {
+      ...gameStore.current!,
+      ...result,
+      start_at: DateTime.fromSeconds(result.start_at),
+      end_at: DateTime.fromSeconds(result.end_at),
+      archive_at: DateTime.fromSeconds(result.archive_at),
+      register_at: DateTime.fromSeconds(result.register_at),
+    })
+      .then((game) => {
+        setGameStore({ current: game });
+        addToast({
+          level: "success",
+          description: t("form.saveSuccess")!,
+          duration: 5000,
+        });
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then((text) => {
+          addToast({
+            level: "error",
+            description: `${t("form.saveFailed")}: ${text}`,
+            duration: 5000,
+          });
+        });
+      })
+      .finally(() => {
+        setEditing(false);
+      });
+  }
 
   return (
     <div class="flex-1 flex flex-col w-0">
@@ -119,7 +151,7 @@ export default function () {
                 defer
               >
                 <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                  <GameEdit onDone={onEditGame} />
+                  <GameEdit onDone={onEditGame} loading={editing()} editSource={gameStore.current || undefined} />
                 </div>
               </OverlayScrollbarsComponent>
             </div>

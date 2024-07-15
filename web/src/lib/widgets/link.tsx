@@ -34,16 +34,20 @@ export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & 
       .join(" ");
   });
   return (
-    <A
-      {...props}
-      href={props.disabled ? "#" : props.href ?? "#"}
-      type={props.type}
-      class={`${className()} ${props.class}`.trim()}
+    <Show
+      when={!props.disabled}
+      fallback={
+        <div class={`${className()} ${props.class}`.trim()} title={props.title}>
+          {children(() => props.children)()}
+        </div>
+      }
     >
-      <Show when={props.loading}>
-        <Spin />
-      </Show>
-      {children(() => props.children)()}
-    </A>
+      <A {...props} href={props.href ?? "#"} type={props.type} class={`${className()} ${props.class}`.trim()}>
+        <Show when={props.loading}>
+          <Spin />
+        </Show>
+        {children(() => props.children)()}
+      </A>
+    </Show>
   );
 }
