@@ -20,7 +20,9 @@ pub struct ChallengeEvent {
 #[serde(rename_all = "snake_case")]
 pub enum SubmissionEventType {
   Correct,
-  TooManyRequests,
+  Cheated,
+  TooManySubmits,
+  TooQuick,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -29,6 +31,8 @@ pub struct SubmissionEvent {
   pub blood_state: Option<u64>,
   pub operator: user::Model,
   pub team: team::Model,
+  pub peer_team: Option<team::Model>,
+  pub reason: Option<String>,
   pub event_type: SubmissionEventType,
 }
 
