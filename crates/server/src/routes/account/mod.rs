@@ -3,7 +3,7 @@ use axum::{
   http::StatusCode,
   middleware,
   response::IntoResponse,
-  routing::{get, post},
+  routing::{get, patch, post},
   Extension, Json, Router,
 };
 use chrono::{serde::ts_seconds, DateTime, Utc};
@@ -45,6 +45,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       state.clone(),
       data::prepare_user_info,
     ))
+    .route("/password", patch(change_password))
     .route("/logout", post(logout))
     .route_layer(middleware::from_fn(permission_required_all!(
       Permission::Basic
@@ -450,7 +451,6 @@ async fn verify_email(
 
   user::update(&db.conn, user.clone()).await?;
 
-  // TODO: connect user and institute by email here.
   info!(
     "User verified: {} ({}) <{}>",
     user.account,
@@ -588,6 +588,46 @@ async fn reset_password(
   Ok(())
 }
 
+#[derive(Deserialize)]
+struct ChangePasswordRequest {
+  pub old_password: String,
+  pub new_password: String,
+}
+
+async fn change_password(
+  State(ref db): State<Database>, State(cache): State<Cache>, Extension(token): Extension<Token>,
+  Json(body): Json<ChangePasswordRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let user = user::get(&db.conn, token.id).await?;
+  let user = match user {
+    Some(u) => u,
+    None => {
+      return Err(ResponseError::NotFound("user not found".to_owned()));
+    }
+  };
+
+  let password_hash = user.password.unwrap_or_default();
+  match verify_password(&body.old_password, &password_hash)? {
+    true => {
+      let password = hash_password(&body.new_password)?;
+      user::update_password(&db.conn, user.id, password).await?;
+      while let Some(token_str) = cache
+        .at("token")
+        .pop::<String>(format!("user-{}", user.id))
+        .await?
+      {
+        cache.at("token").del(&token_str).await.ok();
+      }
+      cache.at("token").del(format!("user-{}", user.id)).await?;
+      Ok(StatusCode::OK)
+    }
+    false => Err(ResponseError::Forbidden(
+      "old password is wrong".to_owned(),
+      format!("user {} password is wrong", user.id),
+    )),
+  }
+}
+
 async fn logout(
   State(cache): State<Cache>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>,
@@ -611,7 +651,7 @@ async fn logout(
 async fn get_profile(
   Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(user.desensitize()))
+  Ok(Json(user))
 }
 
 async fn change_profile(
@@ -674,14 +714,9 @@ async fn delete_self(
     ));
   }
   let user = user::Model {
-    account: format!("[DELETED]{}", user.id),
-    nickname: format!("[DELETED]{}", user.id),
-    email: Some(format!(
-      "{}.deleted",
-      user
-        .email
-        .unwrap_or(format!("deleted-{}@ret2shell", user.id))
-    )),
+    account: format!("[DELETED]_{}", user.id),
+    nickname: format!("[DELETED]_{}", user.id),
+    email: Some(format!("deleted-{}@private.ret.sh.cn", user.id)),
     description: Some(format!(
       "**[DELETED]** This account has been ~~deleted~~ at {}",
       Utc::now().to_rfc3339()

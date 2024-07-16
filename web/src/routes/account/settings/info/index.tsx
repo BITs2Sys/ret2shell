@@ -1,3 +1,238 @@
+import { changeProfile } from "@/lib/api/account";
+import { uploadMedia } from "@/lib/api/media";
+import { Permission } from "@/lib/models/user";
+import { accountStore, refreshUser, setAccountStore } from "@/lib/storage/account";
+import { addToast } from "@/lib/storage/toast";
+import { mediaPath } from "@/lib/utils/media";
+import Avatar from "@/lib/widgets/avatar";
+import Button from "@/lib/widgets/button";
+import Card from "@/lib/widgets/card";
+import Editor from "@/lib/widgets/editor";
+import { createForm, email, required, setValue, setValues } from "@modular-forms/solid";
+import { t } from "@storage/theme";
+import Input from "@widgets/input";
+import type { HTTPError } from "ky";
+import { Show, createEffect, createSignal, untrack } from "solid-js";
+
+export type UserForm = {
+  nickname: string;
+  email: string;
+  avatar: string;
+  description: string;
+};
+
 export default function () {
-  return <></>;
+  const [form, { Form, Field }] = createForm<UserForm>();
+  createEffect(() => {
+    if (accountStore.info) {
+      untrack(() => {
+        setValues(form, {
+          nickname: accountStore.info?.nickname || "",
+          email: accountStore.info?.email || "",
+          avatar: accountStore.info?.avatar || "",
+          description: accountStore.info?.description || "",
+        });
+        setAvatarSet(!!accountStore.info?.avatar);
+      });
+    }
+  });
+  const [loading, setLoading] = createSignal(false);
+  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
+  const [avatarSet, setAvatarSet] = createSignal(false);
+  const [avatarUploading, setAvatarUploading] = createSignal(false);
+  let avatarInput: HTMLInputElement;
+  function handleSelectAvatar() {
+    avatarInput.click();
+  }
+  function handleSelectedAvatar(event: Event) {
+    if (
+      event.target &&
+      (event.target as HTMLInputElement).files &&
+      (event.target as HTMLInputElement).files!.length > 0
+    ) {
+      setAvatarFile((event.target as HTMLInputElement).files![0]);
+      handleUploadAvatar();
+    }
+  }
+  function handleUploadAvatar() {
+    if (avatarFile()) {
+      setAvatarUploading(true);
+      uploadMedia(avatarFile()!, false)
+        .then((resp) => {
+          if (accountStore.info)
+            setAccountStore({
+              info: {
+                ...accountStore.info,
+                avatar: resp.hash,
+              },
+            });
+          setValue(form, "avatar", resp.hash);
+          setAvatarSet(true);
+        })
+        .catch((err: HTTPError) => {
+          void err.response.text().then((text) => {
+            addToast({
+              level: "error",
+              description: `${t("account.settings.info.avatarUploadFailed")}: ${text}`,
+              duration: 5000,
+            });
+          });
+        })
+        .finally(() => {
+          setAvatarUploading(false);
+        });
+    }
+  }
+  function onSubmit(result: UserForm) {
+    setLoading(true);
+    changeProfile({
+      ...accountStore.info!,
+      ...result,
+    })
+      .then(() => {
+        addToast({
+          level: "success",
+          description: t("form.saveSuccess")!,
+          duration: 5000,
+        });
+        refreshUser();
+      })
+      .catch((e: HTTPError) => {
+        e.response.text().then((text) => {
+          addToast({
+            level: "error",
+            description: `${t("form.saveFailed")}: ${text}`,
+            duration: 5000,
+          });
+        });
+      })
+      .finally(() => setLoading(false));
+  }
+  return (
+    <div class="flex flex-col p-3 lg:p-6 w-full items-center">
+      <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+        <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+          <span>{t("account.settings.info.title")}</span>
+        </h3>
+        <div class="flex flex-row space-x-4 items-center">
+          <div class="flex flex-col space-y-2 flex-1">
+            <Input
+              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+              title={t("account.settings.info.account")}
+              placeholder={t("account.settings.info.account")}
+              value={accountStore.account!}
+              disabled
+            />
+            <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+              {(field, props) => (
+                <Input
+                  icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                  title={t("account.settings.info.nickname")}
+                  placeholder={t("account.settings.info.nickname")}
+                  {...props}
+                  value={field.value}
+                  error={field.error}
+                  required
+                />
+              )}
+            </Field>
+          </div>
+          <Field name="avatar">
+            {(field, props) => (
+              <Avatar
+                class="w-28 h-28 relative m-2"
+                src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
+                fallback={accountStore.info?.nickname}
+              >
+                <Button
+                  loading={avatarUploading()}
+                  disabled={avatarUploading()}
+                  type="button"
+                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
+                  onClick={() => {
+                    if (avatarSet()) {
+                      setAvatarSet(false);
+                      setAvatarFile(null);
+                      setValue(form, "avatar", "");
+                      setAccountStore({
+                        info: {
+                          ...accountStore.info!,
+                          avatar: "",
+                        },
+                      });
+                    } else {
+                      handleSelectAvatar();
+                    }
+                  }}
+                >
+                  <input
+                    type="file"
+                    class="hidden"
+                    id={field.name}
+                    {...props}
+                    value={field.value}
+                    ref={avatarInput!}
+                    onChange={handleSelectedAvatar}
+                  />
+                  <Show
+                    when={accountStore.info?.avatar}
+                    fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                  >
+                    <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                  </Show>
+                </Button>
+              </Avatar>
+            )}
+          </Field>
+        </div>
+        <Field
+          name="email"
+          validate={[
+            required(t("account.settings.info.emailRequired")!),
+            email(t("account.settings.info.emailInvalid")!),
+          ]}
+        >
+          {(field, props) => (
+            <Input
+              icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+              title={t("account.settings.info.email")}
+              placeholder={t("account.settings.info.email")}
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+            />
+          )}
+        </Field>
+        <Show when={!accountStore.permissions.includes(Permission.Verified)}>
+          <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
+            <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
+            <span class="flex-1 text-start">{t("account.settings.info.emailNotVerified")}</span>
+            <Button size="sm" type="button">
+              <span>{t("account.resendVerifyEmail")}</span>
+            </Button>
+          </Card>
+        </Show>
+        <Field name="description">
+          {(field) => (
+            <Editor
+              form={form}
+              lineNumbers
+              class="h-80"
+              lang="markdown"
+              placeholder="MARKDOWN"
+              title={t("account.settings.info.description")}
+              name="description"
+              value={field.value}
+              error={field.error}
+            />
+          )}
+        </Field>
+        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          {t("form.save")}
+        </Button>
+      </Form>
+    </div>
+  );
 }

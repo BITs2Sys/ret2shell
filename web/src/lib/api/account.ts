@@ -67,7 +67,7 @@ export async function changeProfile(req: User) {
 }
 
 export async function deleteSelf() {
-  return await api.delete(`${api_root}/account/profile`).json();
+  return await api.delete(`${api_root}/account/profile`).json<void>();
 }
 
 export async function getInstitutes() {
@@ -80,4 +80,8 @@ export async function getAccountCode() {
 
 export async function generateAccountCode() {
   return await api.post(`${api_root}/account/code`).json<{ code: number; generate_at: DateTime }>();
+}
+
+export async function changePassword(req: { old_password: string; new_password: string }) {
+  return await api.patch(`${api_root}/account/password`, { json: req }).json();
 }

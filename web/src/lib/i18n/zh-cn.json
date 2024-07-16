@@ -95,6 +95,7 @@
     "401": "请先登录",
     "403": "权限不足，拒绝访问",
     "404": "资源不存在",
+    "412": "前置条件出错",
     "418": "我是个茶壶",
     "500": "服务器内部错误",
     "502": "系统宕机",
@@ -106,7 +107,8 @@
     "unknownTip": "你坠入了虚空",
     "418Tip": "用茶壶泡咖啡真的不会串味吗",
     "502Tip": "随机挑一个运维祭天",
-    "gotoDocs": "如果你是运维，可以查看"
+    "gotoDocs": "如果你是运维，可以查看",
+    "412Tip": "也许你漏掉了什么东西？"
   },
   "game": {
     "title": "赛事",
@@ -524,10 +526,30 @@
       "successMascotTip": "欢迎回来 ^_^",
       "failMascotTip": "失败了，坏耶 x_x"
     },
+    "deleteAccountTitle": "警告！账号停用后不可恢复！",
+    "deleteAccountTipsTitle1": "请明确你的账户并不是真的被删除了，而是被置于删除并无法恢复的状态，以下操作将被执行：",
+    "deleteAccountTips1": "请明确你的账户并不是真的被删除了，而是被置于停用并无法恢复的状态，以下操作将被执行：",
+    "deleteAccountTipsList1": "你的账户将被重命名为 [DELETED]_<hash>；",
+    "deleteAccountTipsList2": "你的账户将被移除所有权限并禁止登录，也不能通过邮箱找回，邮箱可以用于注册另一个账号；",
+    "deleteAccountTipsList3": "账户隐私信息将被移除，但是公开发布的内容将保留；",
+    "deleteAccountTipsList4": "与账户绑定的竞赛成绩、数据等会留存，但无法提供信息来证明这是你的。",
+    "deleteAccountTips2": "请认真阅读并确定上述内容！如果你真的确定要停用账户，请在下方输入你的完整用户名 {{name}} 以确认：",
+    "deleteAccountTips3": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
+    "bye": "再见",
+    "deleteAccountFailed": "账户停用失败",
     "settings": {
       "title": "用户设置",
       "info": {
-        "title": "用户信息"
+        "title": "用户信息",
+        "nicknameRequired": "请填写昵称",
+        "nickname": "昵称",
+        "account": "用户名",
+        "emailRequired": "请填写邮箱",
+        "emailInvalid": "邮箱格式不正确",
+        "email": "邮箱",
+        "avatarUploadFailed": "头像上传失败",
+        "description": "主页内容",
+        "emailNotVerified": "你的邮箱尚未通过验证，部分功能受限制。"
       },
       "oauth": {
         "title": "第三方认证"
@@ -537,6 +559,17 @@
       },
       "delete": {
         "title": "删号跑路"
+      },
+      "password": {
+        "title": "修改密码",
+        "oldPasswordRequired": "请填写旧密码",
+        "oldPassword": "旧密码",
+        "newPasswordRequired": "请填写新密码",
+        "newPassword": "新密码",
+        "confirmPasswordRequired": "请再次输入新密码",
+        "confirmPassword": "再次输入新密码",
+        "confirmPasswordMismatch": "两次输入的密码不一致",
+        "success": "修改成功，请重新登录"
       }
     },
     "logout": "退出登录",
@@ -576,6 +609,14 @@
       "title": "临时用户识别码",
       "warn": "此验证码用于向第三方服务提供你的完整账户信息，包括你的邮箱、组织认证信息等，比赛主办方可能会使用此验证码来确认你的身份。请勿在未知用途的情况下随意提供此验证码！",
       "confirmWarn": "我已知晓，继续"
+    },
+    "resendVerifyEmail": "重新发送验证邮件",
+    "verifyingEmail": "正在验证你的邮箱",
+    "emailVerified": "邮箱验证成功",
+    "emailVerifyBroken": "验证链接存在问题，请确保邮件链接正确",
+    "emailVerifyFailed": "邮箱验证失败",
+    "forgot": {
+      "title": "忘记密码"
     }
   },
   "instance": {

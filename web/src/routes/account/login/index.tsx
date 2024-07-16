@@ -11,7 +11,7 @@ import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import Captcha from "@blocks/captcha";
 import type { AuthConfig } from "@models/config";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
-import { useLocation, useNavigate } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
@@ -140,6 +140,12 @@ export default function () {
                   type="password"
                   placeholder={t("account.login.passwordPlaceholder")}
                   title={t("account.login.passwordPlaceholder")}
+                  extraLabel={
+                    <A href="/account/forgot" class="hover:underline flex items-center space-x-1">
+                      <span class="icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />
+                      <span>{t("account.forgot.title")}</span>
+                    </A>
+                  }
                   autocomplete="current-password"
                   {...props}
                   value={field.value}

@@ -52,7 +52,7 @@ export default function (props: ComponentProps<"div">) {
     >
       <div class="w-screen h-screen relative">
         <img
-          class={`w-screen h-screen transition-all ease-out duration-[2000ms] ${
+          class={`w-screen h-screen transition-all ease-out duration-[2000ms] object-cover ${
             expanded() ? "scale-125 blur-md" : ""
           }`.trim()}
           alt="Cover"

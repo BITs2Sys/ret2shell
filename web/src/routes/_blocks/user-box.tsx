@@ -13,6 +13,7 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import { Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 import UserCodeDialog from "./user-code-dialog";
+import { mediaPath } from "@/lib/utils/media";
 
 export default function UserBox() {
   createEffect(() => {
@@ -51,7 +52,7 @@ export default function UserBox() {
         btnContent={
           <Avatar
             class="w-8 h-8"
-            src={accountStore.info?.avatar || undefined}
+            src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
             fallback={accountStore.info?.account || undefined}
           />
         }
@@ -69,7 +70,7 @@ export default function UserBox() {
             >
               <Avatar
                 class="w-10 h-10"
-                src={accountStore.info?.avatar || undefined}
+                src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
                 fallback={accountStore.info?.account || undefined}
                 loading={loading()}
               />

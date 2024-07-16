@@ -53,6 +53,10 @@ export const routes = {
               component: lazy(() => import("./account/settings/info/index")),
             },
             {
+              path: "/password",
+              component: lazy(() => import("./account/settings/password/index")),
+            },
+            {
               path: "/oauth",
               component: lazy(() => import("./account/settings/oauth/index")),
             },
@@ -331,6 +335,10 @@ export const routes = {
         {
           path: "/404",
           component: lazy(() => import("./sigtrap/e404")),
+        },
+        {
+          path: "/412",
+          component: lazy(() => import("./sigtrap/e412")),
         },
         {
           path: "/418",
