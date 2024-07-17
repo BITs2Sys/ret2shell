@@ -1,6 +1,6 @@
 [package]
 name = "r2s-auditor"
-version = "1.5.8"
+version = "3.0.7"
 edition = "2021"
 rust-version = "1.79.0"
 description = "Auditor for Ret2Shell - A feature-riches CTF challenge platform."
@@ -17,7 +17,7 @@ thiserror = "1.0"
 tracing = "0.1"
 once_cell = "1.19"
 
-r2s-config = { version = "1", path = "../config" }
+r2s-config = { version = "3", path = "../config" }
 
 [lib]
 path = "src/lib.rs"
