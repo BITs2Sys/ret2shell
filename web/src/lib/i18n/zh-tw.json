@@ -1,13 +1,13 @@
 {
   "shell": {
     "ls": {
-      "permissionDenied": "權限不足，拒絕存取。",
+      "permissionDenied": "",
       "error": "",
       "invalidPath": "",
       "man": "",
       "noSuchFileOrDirectory": "",
       "tooManyArgs": "",
-      "invalidOption": "未知選項: `{{option}}`；請注意 ls 指令是 /bin/ls -l 的別名，不接收其他參數選項。"
+      "invalidOption": ""
     },
     "cat": {
       "error": "",

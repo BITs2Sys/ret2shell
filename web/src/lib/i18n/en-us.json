@@ -673,11 +673,11 @@
     "ls": {
       "error": "",
       "man": "",
-      "tooManyArgs": "Too many arguments.",
-      "noSuchFileOrDirectory": "No such file or directory.",
-      "invalidPath": "Directory traversal was denied by the remote host.",
-      "permissionDenied": "Permission denied.",
-      "invalidOption": "Unknown option: `{{option}}`; Please note that the ls command is an alias of /bin/ls -l and does not accept other parameter options."
+      "tooManyArgs": "",
+      "noSuchFileOrDirectory": "",
+      "invalidPath": "",
+      "permissionDenied": "",
+      "invalidOption": ""
     },
     "noChallengeSpecified": "",
     "noChallengeSpecifiedTips": "",
@@ -695,13 +695,13 @@
     "cat": {
       "man": "",
       "noFileSpecified": "",
-      "tooManyFiles": "Too many arguments.",
-      "error": "An error occurred while reading the file.",
-      "fileNotFound": "No such file or directory.",
-      "permissionDenied": "Permission denied."
+      "tooManyFiles": "",
+      "error": "",
+      "fileNotFound": "",
+      "permissionDenied": ""
     },
     "whoami": {
-      "man": "Print the user name associated with the current effective user ID."
+      "man": ""
     }
   },
   "theme": {

@@ -673,11 +673,11 @@
     "ls": {
       "error": "",
       "man": "",
-      "tooManyArgs": "パラメータが多すぎます。",
-      "noSuchFileOrDirectory": "ファイルが存在しません。",
-      "invalidPath": "ディレクトリ トラバーサルがリモート ホストによって拒否されました。",
-      "permissionDenied": "権限が不十分なため、アクセスが拒否されました。",
-      "invalidOption": "不明なオプション: `{{option}}`; ls コマンドは /bin/ls -l のエイリアスであり、他のパラメータ オプションを受け入れないことに注意してください。"
+      "tooManyArgs": "",
+      "noSuchFileOrDirectory": "",
+      "invalidPath": "",
+      "permissionDenied": "",
+      "invalidOption": ""
     },
     "noChallengeSpecified": "",
     "noChallengeSpecifiedTips": "",
@@ -695,13 +695,13 @@
     "cat": {
       "man": "",
       "noFileSpecified": "",
-      "tooManyFiles": "パラメータが多すぎます。",
-      "error": "ファイルの読み取り中にエラーが発生しました。",
-      "fileNotFound": "ファイルが存在しません。",
-      "permissionDenied": "権限が不十分なため、アクセスが拒否されました。"
+      "tooManyFiles": "",
+      "error": "",
+      "fileNotFound": "",
+      "permissionDenied": ""
     },
     "whoami": {
-      "man": "現在の実効ユーザー ID に関連付けられているユーザー名を表示します。"
+      "man": ""
     }
   },
   "theme": {
