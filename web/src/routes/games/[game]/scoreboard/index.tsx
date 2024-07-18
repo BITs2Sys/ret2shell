@@ -171,8 +171,12 @@ export default function () {
   });
 
   createEffect(() => {
-    if (gameStore.current && gameStore.challenges.length === 0) {
-      untrack(refreshChallenges);
+    if (gameStore.current) {
+      untrack(() => {
+        if (gameStore.challenges.length === 0) {
+          void refreshChallenges();
+        }
+      });
     }
   });
 
