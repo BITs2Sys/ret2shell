@@ -11,6 +11,8 @@ use chrono::Utc;
 use futures::TryStreamExt;
 use r2s_bucket::{challenge::ChallengeBucket, Bucket};
 use r2s_checker::Checker;
+use r2s_cluster::Cluster;
+use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, extra, game, hint, submission, team,
   user::{self, Permission},
@@ -48,6 +50,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route(
           "/files",
           post(upload_challenge_attachment).delete(delete_challenge_attachment),
+        )
+        .route(
+          "/env",
+          patch(update_challenge_env).delete(delete_challenge_env),
         )
         .route(
           "/checker",
@@ -116,6 +122,11 @@ macro_rules! get_challenge_bucket {
 
 macro_rules! get_challenge_bucket_mut {
   ($bucket:expr, $game:expr, $challenge:expr) => {{
+    if !$challenge.hidden {
+      return Err(ResponseError::PreconditionFailed(
+        "please hidden challenge before update it".to_owned(),
+      ));
+    }
     let game_bucket = $bucket
       .at_mut(
         $game
@@ -276,12 +287,6 @@ async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if !prev_challenge.hidden {
-    return Err(ResponseError::PreconditionFailed(
-      "please hidden challenge before update it".to_owned(),
-    ));
-  }
-
   // refuse to change some columns when challenge is cloned from another challenge.
   // if prev_challenge.ref_id.is_some() {
   //   check_const_columns!(
@@ -827,28 +832,78 @@ async fn sync_challenge_hint_with_bucket(
 }
 
 async fn get_challenge_env(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  State(ref bucket): State<Bucket>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
   let env_config = challenge_bucket.env().await?;
-
-  Ok(Json(env_config))
+  if game.admins.0.contains(&token.id) && token.permissions.0.contains(&Permission::Game) {
+    Ok(Json(env_config))
+  } else {
+    Ok(Json(env_config.map(|c| c.desensitize())))
+  }
 }
 
 async fn start_challenge_env(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  State(ref bucket): State<Bucket>, State(cluster): State<Cluster>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(token): Extension<Token>, team_ext: Option<Extension<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
-  if let Some(_env) = challenge_bucket.env().await? {
-    // TODO: start env here
+  let challenge_bucket = get_challenge_bucket!(bucket, game.clone(), challenge);
+  let team = extract_team!(game, team_ext, token);
+  if let Some(env) = challenge_bucket.env().await? {
+    cluster
+      .at("ret2shell-challenge")
+      .create_challenge_env(
+        token.id,
+        team.map(|t| t.id),
+        challenge.id,
+        &challenge.name,
+        env,
+      )
+      .await?;
     Ok(())
   } else {
     Err(ResponseError::PreconditionFailed(
       "challenge does not have online environment".to_owned(),
     ))
   }
+}
+
+async fn update_challenge_env(
+  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+  Json(env): Json<ChallengeEnv>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
+  challenge_bucket
+    .set_env(serde_json::to_value(&env)?)
+    .await?;
+  game_bucket
+    .commit(
+      format!("update env for challenge {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+
+  Ok(())
+}
+
+async fn delete_challenge_env(
+  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
+  challenge_bucket.delete_env().await?;
+  game_bucket
+    .commit(
+      format!("delete env for challenge {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  Ok(())
 }
 
 #[derive(Serialize)]

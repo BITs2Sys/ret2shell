@@ -138,6 +138,14 @@ impl ChallengeBucket {
     Ok(Some(config))
   }
 
+  pub async fn delete_env(&self) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    tokio::fs::remove_file(self.path.join("env.toml")).await?;
+    Ok(())
+  }
+
   pub async fn set_hints(&self, hints: Vec<Hint>) -> Result<(), BucketError> {
     if !self.locked {
       return Err(BucketError::NeedLocking);

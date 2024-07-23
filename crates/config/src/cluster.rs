@@ -64,10 +64,31 @@ pub struct ChallengeImage {
   pub cpu: f64,
   pub mem: String,
   pub port: Option<u16>,
+  pub description: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChallengeEnv {
   pub internet: bool,
   pub images: Vec<ChallengeImage>,
+}
+
+impl ChallengeImage {
+  pub fn desensitize(self) -> Self {
+    Self {
+      tag: "ret.sh.cn/shadowed:latest".to_string(),
+      cpu: 0.0,
+      mem: "NaN".to_string(),
+      ..self
+    }
+  }
+}
+
+impl ChallengeEnv {
+  pub fn desensitize(self) -> Self {
+    Self {
+      internet: false,
+      images: self.images.into_iter().map(|i| i.desensitize()).collect(),
+    }
+  }
 }
