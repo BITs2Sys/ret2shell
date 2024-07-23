@@ -9,6 +9,7 @@ use axum::{
 };
 use chrono::Utc;
 use futures::TryStreamExt;
+use nanoid::nanoid;
 use r2s_bucket::{challenge::ChallengeBucket, Bucket};
 use r2s_checker::Checker;
 use r2s_cluster::Cluster;
@@ -855,10 +856,35 @@ async fn start_challenge_env(
     cluster
       .at("ret2shell-challenge")
       .create_challenge_env(
-        token.id,
-        team.map(|t| t.id),
-        challenge.id,
-        &challenge.name,
+        [
+          ("ret.sh.cn/challenge", challenge.id.to_string()),
+          (
+            "ret.sh.cn/team",
+            team.clone().map(|t| t.id.to_string()).unwrap_or_default(),
+          ),
+          ("ret.sh.cn/game", game.id.to_string()),
+          ("ret.sh.cn/user", token.id.to_string()),
+          ("ret.sh.cn/wsrx", nanoid!()),
+          ("ret.sh.cn/renew", 0.to_string()),
+          ("ret.sh.cn/internet", env.internet.to_string()),
+        ]
+        .iter()
+        .cloned()
+        .map(|(k, v)| (k.to_owned(), v.to_owned()))
+        .collect(),
+        [
+          ("ret.sh.cn/challenge", challenge.name.to_string()),
+          (
+            "ret.sh.cn/team",
+            team.map(|t| t.name.to_string()).unwrap_or_default(),
+          ),
+          ("ret.sh.cn/game", game.name.to_string()),
+          ("ret.sh.cn/user", token.account.to_string()),
+        ]
+        .iter()
+        .cloned()
+        .map(|(k, v)| (k.to_owned(), v.to_owned()))
+        .collect(),
         env,
       )
       .await?;

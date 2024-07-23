@@ -71,8 +71,6 @@ pub enum Relation {
   Game,
   #[sea_orm(has_many = "super::hint::Entity")]
   Hint,
-  #[sea_orm(has_many = "super::instance::Entity")]
-  Instance,
   #[sea_orm(has_many = "super::submission::Entity")]
   Submission,
   #[sea_orm(belongs_to = "Entity", from = "Column::RefId", to = "Column::Id")]
@@ -100,12 +98,6 @@ impl Related<super::game::Entity> for Entity {
 impl Related<super::hint::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::Hint.def()
-  }
-}
-
-impl Related<super::instance::Entity> for Entity {
-  fn to() -> RelationDef {
-    Relation::Instance.def()
   }
 }
 

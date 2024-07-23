@@ -10,7 +10,6 @@ pub mod config;
 pub mod extra;
 pub mod game;
 pub mod hint;
-pub mod instance;
 pub mod institute;
 pub mod ip;
 pub mod media;

@@ -143,8 +143,6 @@ pub enum Relation {
     on_delete = "Cascade"
   )]
   Game,
-  #[sea_orm(has_many = "super::instance::Entity")]
-  Instance,
   #[sea_orm(
     belongs_to = "super::institute::Entity",
     from = "Column::InstituteId",
@@ -174,12 +172,6 @@ impl Related<super::extra::Entity> for Entity {
 impl Related<super::game::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::Game.def()
-  }
-}
-
-impl Related<super::instance::Entity> for Entity {
-  fn to() -> RelationDef {
-    Relation::Instance.def()
   }
 }
 

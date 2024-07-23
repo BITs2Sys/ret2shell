@@ -1,7 +1,7 @@
 mod entities;
 
 pub use entities::{
-  article, audit, calendar, challenge, chat, comment, config, extra, game, hint, instance,
-  institute, ip, media, notification, oauth, policy, submission, team, user, user2_ip, user2_team,
+  article, audit, calendar, challenge, chat, comment, config, extra, game, hint, institute, ip,
+  media, notification, oauth, policy, submission, team, user, user2_ip, user2_team,
 };
 pub use sea_orm::DbErr;

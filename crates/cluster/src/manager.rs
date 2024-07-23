@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use axum::extract::ws::WebSocket;
 use chrono::{DateTime, Utc};
 use futures_io::AsyncBufRead;
@@ -15,7 +17,6 @@ use kube::{
   runtime::reflector::Lookup,
   Api, Client,
 };
-use nanoid::nanoid;
 use tokio_util::codec::Framed;
 
 use r2s_config::cluster::ChallengeEnv;
@@ -216,50 +217,22 @@ impl Cluster {
     Ok(pods)
   }
 
-  pub async fn list_pods_by_label(&self, label: &str) -> Result<ObjectList<Pod>, ClusterError> {
-    let client = check_enabled!(self.client)?;
-    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "list pods")?);
-    let pods = api
-      .list(&ListParams {
-        label_selector: Some(label.to_owned()),
-        ..Default::default()
-      })
-      .await?;
-    Ok(pods)
-  }
-
   pub async fn create_challenge_env(
-    &self, user_id: i64, team_id: Option<i64>, challenge_id: i64, challenge_name: &str,
+    &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
     env_config: ChallengeEnv,
   ) -> Result<(), ClusterError> {
-    let pod_name = format!(
-      "ret2shell-{challenge_id}-{user_id}-{}",
-      team_id.unwrap_or(0)
-    );
+    let challenge_id = labels
+      .get("challenge_id")
+      .ok_or(ClusterError::MissingField("challenge_id".to_string()))?;
+    let user_id = labels
+      .get("user_id")
+      .ok_or(ClusterError::MissingField("user_id".to_string()))?;
+    let pod_name = format!("ret2shell-{challenge_id}-{user_id}");
     let pod = Pod {
       metadata: ObjectMeta {
         name: Some(pod_name.clone()),
-        labels: Some(
-          [
-            ("ret.sh.cn/service", pod_name),
-            ("ret.sh.cn/challenge", challenge_id.to_string()),
-            ("ret.sh.cn/user", user_id.to_string()),
-            ("ret.sh.cn/team", team_id.unwrap_or(0).to_string()),
-            ("ret.sh.cn/wsrx", nanoid!()),
-            ("ret.sh.cn/internet", env_config.internet.to_string()),
-          ]
-          .iter()
-          .cloned()
-          .map(|(k, v)| (k.to_owned(), v.to_owned()))
-          .collect(),
-        ),
-        annotations: Some(
-          [("ret.sh.cn/challenge-name", challenge_name.to_owned())]
-            .iter()
-            .cloned()
-            .map(|(k, v)| (k.to_owned(), v.to_owned()))
-            .collect(),
-        ),
+        labels: Some(labels),
+        annotations: Some(annotations),
         ..Default::default()
       },
       spec: Some(PodSpec {
@@ -272,7 +245,6 @@ impl Cluster {
             ports: image.port.map(|port| {
               vec![ContainerPort {
                 container_port: port as i32,
-                name: Some(format!("ret2shell-traffic-{}", port)),
                 protocol: Some("TCP".to_owned()),
                 ..Default::default()
               }]
@@ -303,7 +275,7 @@ impl Cluster {
 
   pub async fn delete_challenge_env(&self, user_id: i64) -> Result<(), ClusterError> {
     let pod = self
-      .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
+      .get_pods_by_label(&format!("ret.sh.cn/user_id={user_id}"))
       .await?;
     for p in pod {
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
@@ -313,14 +285,14 @@ impl Cluster {
 
   pub async fn get_challenge_env(&self, user_id: i64) -> Result<Option<Pod>, ClusterError> {
     let pod = self
-      .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
+      .get_pods_by_label(&format!("ret.sh.cn/user_id={user_id}"))
       .await?;
     Ok(pod.first().cloned())
   }
 
   pub async fn get_challenge_env_by_team(&self, team_id: i64) -> Result<Vec<Pod>, ClusterError> {
     let pod = self
-      .get_pods_by_label(&format!("ret.sh.cn/team={team_id}"))
+      .get_pods_by_label(&format!("ret.sh.cn/team_id={team_id}"))
       .await?;
     Ok(pod)
   }

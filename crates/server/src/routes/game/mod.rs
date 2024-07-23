@@ -5,11 +5,13 @@ use axum::{
   routing::{get, patch, post},
   Extension, Json, Router,
 };
+use chrono::{serde::ts_seconds, DateTime, Utc};
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
+use r2s_cluster::{Cluster, Pod};
 use r2s_database::{
-  article, game,
+  article, game, team as team_db,
   user::{self, Permission},
 };
 use r2s_event::{
@@ -19,13 +21,13 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tracing::warn;
 
 use crate::{
   middleware::{
     auth::{self, Token},
-    data,
+    data::{self, extract_team},
   },
   traits::{GlobalState, ResponseError},
 };
@@ -44,6 +46,12 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .nest(
       "/:game",
       Router::new()
+        .route(
+          "/envs",
+          get(get_self_envs)
+            .patch(delay_self_env)
+            .delete(stop_self_env),
+        )
         .route("/introduction", patch(update_game_intro))
         .route("/", patch(update_game).delete(delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
@@ -300,4 +308,116 @@ async fn update_game_intro(
   txn.commit().await?;
 
   Ok(Json(result))
+}
+
+#[derive(Serialize, Clone, Deserialize)]
+struct ChallengeEnvInstance {
+  pub state: String,
+  pub name: String,
+  pub wsrx: String,
+  pub renew_count: i32,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub user_id: i64,
+  pub user_name: String,
+  pub team_id: i64,
+  pub team_name: String,
+  pub challenge_id: i64,
+  pub challenge_name: String,
+  pub game_id: i64,
+  pub game_name: String,
+}
+
+macro_rules! get_pod_field {
+  ($pod:ident, $domain:tt, $field:expr) => {{
+    $pod
+      .metadata
+      .$domain
+      .clone()
+      .ok_or(ResponseError::Gone("pod field not found".to_owned()))?
+      .get($field)
+      .map(|s| s.clone())
+      .ok_or(ResponseError::Gone("pod field not found".to_owned()))?
+  }};
+}
+
+impl TryFrom<Pod> for ChallengeEnvInstance {
+  type Error = ResponseError;
+  fn try_from(value: Pod) -> Result<Self, Self::Error> {
+    Ok(ChallengeEnvInstance {
+      state: value
+        .status
+        .map(|s| s.phase.unwrap_or("Unknown".to_string()))
+        .ok_or(ResponseError::Gone("pod status not found".to_owned()))?
+        .clone(),
+      name: value.metadata.name.clone().unwrap_or_default(),
+      wsrx: get_pod_field!(value, labels, "ret.sh.cn/wsrx"),
+      renew_count: get_pod_field!(value, annotations, "ret.sh.cn/renew")
+        .parse()
+        .map_err(|_| ResponseError::Gone("renew count not found".to_owned()))?,
+      created_at: value
+        .metadata
+        .creation_timestamp
+        .clone()
+        .map(|c| c.0)
+        .ok_or(ResponseError::Gone(
+          "pod creation time not found".to_owned(),
+        ))?,
+      user_id: get_pod_field!(value, labels, "ret.sh.cn/user")
+        .parse()
+        .map_err(|_| ResponseError::Gone("user id not found".to_owned()))?,
+      user_name: get_pod_field!(value, annotations, "ret.sh.cn/user").clone(),
+      team_id: get_pod_field!(value, labels, "ret.sh.cn/team")
+        .parse()
+        .map_err(|_| ResponseError::Gone("team id not found".to_owned()))?,
+      team_name: get_pod_field!(value, annotations, "ret.sh.cn/team").clone(),
+      challenge_id: get_pod_field!(value, labels, "ret.sh.cn/challenge")
+        .parse()
+        .map_err(|_| ResponseError::Gone("challenge id not found".to_owned()))?,
+      challenge_name: get_pod_field!(value, annotations, "ret.sh.cn/challenge").clone(),
+      game_id: get_pod_field!(value, labels, "ret.sh.cn/game")
+        .parse()
+        .map_err(|_| ResponseError::Gone("game id not found".to_owned()))?,
+      game_name: get_pod_field!(value, annotations, "ret.sh.cn/game"),
+    })
+  }
+}
+
+async fn get_self_envs(
+  State(cluster): State<Cluster>, Extension(game): Extension<game::Model>,
+  Extension(token): Extension<Token>, team_ext: Option<Extension<team_db::Model>>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let team = extract_team!(game, team_ext, token);
+  let self_env = cluster
+    .at("ret2shell-challenge")
+    .get_challenge_env(token.id)
+    .await?;
+  let team_envs = if let Some(team) = team {
+    cluster
+      .at("ret2shell-challenge")
+      .get_challenge_env_by_team(team.id)
+      .await?
+  } else {
+    vec![]
+  };
+  let mut envs: Vec<ChallengeEnvInstance> = vec![];
+  if let Some(self_env) = self_env {
+    envs.push(self_env.try_into()?);
+  }
+  envs.extend(
+    team_envs
+      .into_iter()
+      .map(|env| env.try_into())
+      .collect::<Result<Vec<_>, _>>()?,
+  );
+
+  Ok(Json(envs))
+}
+
+async fn delay_self_env() -> Result<impl IntoResponse, ResponseError> {
+  Ok("not implemented")
+}
+
+async fn stop_self_env() -> Result<impl IntoResponse, ResponseError> {
+  Ok("not implemented")
 }
