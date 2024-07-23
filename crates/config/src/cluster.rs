@@ -68,5 +68,6 @@ pub struct ChallengeImage {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChallengeEnv {
+  pub internet: bool,
   pub images: Vec<ChallengeImage>,
 }

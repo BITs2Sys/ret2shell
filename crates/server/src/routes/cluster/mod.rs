@@ -14,6 +14,10 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .route_layer(middleware::from_fn(auth::permission_required_all!(
       Permission::DevOps
     )))
+    .route_layer(middleware::from_fn(auth::permission_required_all!(
+      Permission::Basic,
+      Permission::Verified
+    )))
 }
 
 async fn get_cluster_config(

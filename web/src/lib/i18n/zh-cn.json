@@ -166,7 +166,8 @@
       "withdraw": "下线",
       "withdrawTips": "确定要下线此题？下线后可以修改题目内容并再次上线。",
       "publishTips": "确定要发布此题？发布后选手即可在开赛时解题，发布期间无法修改题目。",
-      "noHints": "出题人还没有发布提示哦，再想想吧"
+      "noHints": "出题人还没有发布提示哦，再想想吧",
+      "calmDownBeforeStartEnv": "正在重整货箱"
     },
     "scoreboard": {
       "title": "积分板",

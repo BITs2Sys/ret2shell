@@ -1,6 +1,11 @@
 use std::path::Path;
 
+use k8s_openapi::{
+  api::networking::v1::{NetworkPolicy, NetworkPolicySpec},
+  apimachinery::pkg::apis::meta::v1::LabelSelector,
+};
 use kube::{
+  api::ObjectMeta,
   config::{KubeConfigOptions, Kubeconfig},
   Client, Config,
 };
@@ -13,7 +18,7 @@ pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod};
 pub use kube::api::ObjectList;
 pub use manager::Cluster;
 use r2s_config::cluster;
-use tracing::info;
+use tracing::{error, info};
 pub use traits::ClusterError;
 
 pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, ClusterError> {
@@ -34,6 +39,12 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
     Client::try_from(kube_config)?
   };
   let client = Cluster::new(Some(client));
+  check_namespace(&client).await?;
+  check_network_policy(&client).await?;
+  Ok(client)
+}
+
+async fn check_namespace(client: &Cluster) -> Result<(), ClusterError> {
   let namespaces = client.namespaces().await?;
   let mut found = false;
   for namespace in namespaces.items {
@@ -49,5 +60,44 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
     info!("Namespace `ret2shell-challenge` already exists in cluster, skipping...");
   }
   info!("Note: `ret2shell-challenge` namespace is used for challenge deployment, the pod will be managed automatically by Ret2Shell, please don't operate on it manually.");
-  Ok(client)
+  Ok(())
+}
+
+async fn check_network_policy(client: &Cluster) -> Result<(), ClusterError> {
+  let api = client.at("ret2shell-challenge");
+  match api.get_network_policy("internet-disabled").await {
+    Ok(Some(_)) => {
+      info!("Network policy `internet-disabled` already exists in cluster, skipping...");
+    }
+    Ok(None) => {
+      info!("Creating network policy `internet-disabled` in cluster...");
+      let policy = NetworkPolicy {
+        metadata: ObjectMeta {
+          name: Some("internet-disabled".to_owned()),
+          namespace: Some("ret2shell-challenge".to_owned()),
+          ..Default::default()
+        },
+        spec: Some(NetworkPolicySpec {
+          pod_selector: LabelSelector {
+            match_labels: Some(
+              [("ret.sh.cn/internet".to_owned(), "false".to_owned())]
+                .iter()
+                .cloned()
+                .collect(),
+            ),
+            ..Default::default()
+          },
+          policy_types: Some(vec!["Egress".to_owned()]),
+          ..Default::default()
+        }),
+        ..Default::default()
+      };
+      api.create_network_policy(policy).await?;
+    }
+    Err(err) => {
+      error!("Failed to get network policy `internet-disabled` in cluster: {err:?}");
+      return Err(err);
+    }
+  }
+  Ok(())
 }

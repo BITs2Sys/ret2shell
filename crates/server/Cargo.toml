@@ -78,7 +78,6 @@ r2s-media = { version = "3", path = "../media" }
 r2s-migrator = { version = "3", path = "../migrator" }
 r2s-oauth = { version = "3", path = "../oauth" }
 r2s-queue = { version = "3", path = "../queue" }
-r2s-traffic = { version = "3", path = "../traffic" }
 
 [build-dependencies]
 rustc_version = "0.4"

@@ -1,21 +1,21 @@
+import { api_root } from "@api";
 import { getChallengeAttachments, getChallengeEnv } from "@api/game";
+import { wsrx } from "@lib/wsrx";
 import type { Challenge } from "@models/challenge";
+import type { EnvConfig } from "@models/instance";
+import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
+import Divider from "@widgets/divider";
+import Tag from "@widgets/tag";
+import TimeProgress from "@widgets/time-progress";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
-import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
-import Tag from "@widgets/tag";
-import type { EnvConfig } from "@models/instance";
-import TimeProgress from "@widgets/time-progress";
-import { wsrx } from "@lib/wsrx";
-import { accountStore } from "@storage/account";
-import Divider from "@widgets/divider";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import DownloadButton from "../download-button";
-import { api_root } from "@api";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],
@@ -173,6 +173,9 @@ export default function (props: { challenge?: Challenge; solved?: boolean; solve
                       <Button ghost size="sm">
                         <span class="icon-[fluent--play-20-regular] w-5 h-5 text-success" />
                         <span>{t("game.challenge.startEnv")}</span>
+                        {/* <span class="icon-[fluent--history-20-regular] w-5 h-5" />
+                        <span class="opacity-60">{t("game.challenge.calmDownBeforeStartEnv")}</span>
+                        <span>00:48</span> */}
                       </Button>
                     }
                   >

@@ -17,7 +17,9 @@ kube = { version = "0.93", features = [
   "rustls-tls",
   "runtime",
   "derive",
+  "ws",
 ] }
+axum = { version = "0.7", features = ["ws", "http2", "tower-log", "tracing"] }
 k8s-openapi = { version = "0.22", features = ["v1_28"] }
 tracing = "0.1"
 thiserror = "1.0"
@@ -28,6 +30,8 @@ num-traits = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
 futures-io = "0.3"
 nanoid = "0.4"
+tokio-util = { version = "0.7", features = ["codec"] }
+wsrx = { version = "0.2", features = ["server"] }
 
 r2s-config = { version = "3", path = "../config" }
 

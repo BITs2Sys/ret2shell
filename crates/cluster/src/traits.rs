@@ -14,4 +14,8 @@ pub enum ClusterError {
   ConfigNeeded,
   #[error("cluster is disabled")]
   ClusterDisabled,
+  #[error("pod not found: {0}")]
+  PodNotFound(String),
+  #[error("proxy error: {0}")]
+  ProxyError(#[from] wsrx::Error),
 }

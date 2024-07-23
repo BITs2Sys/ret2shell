@@ -1,15 +1,23 @@
+use axum::extract::ws::WebSocket;
 use chrono::{DateTime, Utc};
 use futures_io::AsyncBufRead;
 use k8s_openapi::{
-  api::core::v1::{
-    ConfigMap, Container, ContainerPort, Namespace, Node, Pod, PodSpec, ResourceRequirements,
+  api::{
+    core::v1::{
+      ConfigMap, Container, ContainerPort, Namespace, Node, Pod, PodSpec, ResourceRequirements,
+    },
+    networking::v1::NetworkPolicy,
   },
   apimachinery::pkg::{api::resource::Quantity, version::Info},
 };
 use kube::{
   api::{ListParams, LogParams, ObjectList, ObjectMeta},
+  runtime::reflector::Lookup,
   Api, Client,
 };
+use nanoid::nanoid;
+use tokio_util::codec::Framed;
+
 use r2s_config::cluster::ChallengeEnv;
 
 use super::traits::ClusterError;
@@ -123,6 +131,50 @@ impl Cluster {
     Ok(namespace)
   }
 
+  pub async fn get_network_policies(&self) -> Result<ObjectList<NetworkPolicy>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<NetworkPolicy> = Api::namespaced(
+      client,
+      &with_namespace!(&self.namespace, "get network policies")?,
+    );
+    let policies = api.list(&ListParams::default()).await?;
+    Ok(policies)
+  }
+
+  pub async fn get_network_policy(
+    &self, name: &str,
+  ) -> Result<Option<NetworkPolicy>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<NetworkPolicy> = Api::namespaced(
+      client,
+      &with_namespace!(&self.namespace, "get network policy")?,
+    );
+    let policy = api.get_opt(name).await?;
+    Ok(policy)
+  }
+
+  pub async fn create_network_policy(
+    &self, policy: NetworkPolicy,
+  ) -> Result<NetworkPolicy, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<NetworkPolicy> = Api::namespaced(
+      client,
+      &with_namespace!(&self.namespace, "create network policy")?,
+    );
+    let policy = api.create(&Default::default(), &policy).await?;
+    Ok(policy)
+  }
+
+  pub async fn delete_network_policy(&self, name: &str) -> Result<(), ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<NetworkPolicy> = Api::namespaced(
+      client,
+      &with_namespace!(&self.namespace, "delete network policy")?,
+    );
+    api.delete(name, &Default::default()).await?;
+    Ok(())
+  }
+
   pub async fn create_pod(&self, pod: Pod) -> Result<Pod, ClusterError> {
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "create pod")?);
@@ -137,11 +189,24 @@ impl Cluster {
     Ok(())
   }
 
-  pub async fn infer_pod(&self, name: &str) -> Result<Pod, ClusterError> {
+  pub async fn get_pod(&self, name: &str) -> Result<Pod, ClusterError> {
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "infer pod")?);
     let pod = api.get(name).await?;
     Ok(pod)
+  }
+
+  pub async fn get_pods_by_label(&self, label: &str) -> Result<Vec<Pod>, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "infer pod")?);
+    let pod = api
+      .list(&ListParams {
+        label_selector: Some(label.to_owned()),
+        field_selector: Some("status.phase!=Succeeded,status.phase!=Failed".to_owned()),
+        ..Default::default()
+      })
+      .await?;
+    Ok(pod.items)
   }
 
   pub async fn list_pods(&self) -> Result<ObjectList<Pod>, ClusterError> {
@@ -180,6 +245,8 @@ impl Cluster {
             ("ret.sh.cn/challenge", challenge_id.to_string()),
             ("ret.sh.cn/user", user_id.to_string()),
             ("ret.sh.cn/team", team_id.unwrap_or(0).to_string()),
+            ("ret.sh.cn/wsrx", nanoid!()),
+            ("ret.sh.cn/internet", env_config.internet.to_string()),
           ]
           .iter()
           .cloned()
@@ -231,6 +298,49 @@ impl Cluster {
       ..Default::default()
     };
     self.create_pod(pod).await?;
+    Ok(())
+  }
+
+  pub async fn delete_challenge_env(&self, user_id: i64) -> Result<(), ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
+      .await?;
+    for p in pod {
+      self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
+    }
+    Ok(())
+  }
+
+  pub async fn get_challenge_env(&self, user_id: i64) -> Result<Option<Pod>, ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
+      .await?;
+    Ok(pod.first().cloned())
+  }
+
+  pub async fn get_challenge_env_by_team(&self, team_id: i64) -> Result<Vec<Pod>, ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/team={team_id}"))
+      .await?;
+    Ok(pod)
+  }
+
+  pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/wsrx={token}"))
+      .await?;
+    let pod = pod
+      .first()
+      .ok_or(ClusterError::PodNotFound(token.to_owned()))?;
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "wsrx link")?);
+    let mut pf = api.portforward(&pod.name().unwrap(), &vec![port]).await?;
+    let pfw = pf.take_stream(port);
+    if let Some(pfw) = pfw {
+      let stream = Framed::new(pfw, wsrx::proxy::MessageCodec::new());
+      let ws: wsrx::WrappedWsStream = ws.into();
+      wsrx::proxy::proxy_stream(stream, ws).await?;
+    }
     Ok(())
   }
 }
