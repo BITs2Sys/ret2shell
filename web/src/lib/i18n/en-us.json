@@ -518,7 +518,12 @@
       "unknownTag": "Unknown",
       "unlockHintFailed": "Unlock Hint Failed",
       "welcome": "Welcome to participate",
-      "checker": "Evaluation"
+      "checker": "Evaluation",
+      "publishChallenge": "Publish",
+      "withdraw": "Offline",
+      "withdrawTips": "Are you sure you want to take this question offline? After taking it offline, you can modify the content of the question and put it online again.",
+      "publishTips": "Are you sure you want to publish this question? Once published, contestants can solve it at the start of the competition, and the question cannot be modified during the publishing period.",
+      "noHints": "The problem setter hasn't released any hints yet, let's think about it some more."
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",

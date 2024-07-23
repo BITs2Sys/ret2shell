@@ -415,7 +415,6 @@ export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
   const location = useLocation();
   const inDocs = () => location.pathname.startsWith("/docs");
-  checkCookiePolicy();
   setupTitleResolver();
   getPlatformInfo()
     .then((res) => {
@@ -446,6 +445,8 @@ export default function (props: { children?: JSX.Element }) {
     })
     .finally(() => {
       platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+
+      checkCookiePolicy();
       if (showAnimation) {
         setTimeout(() => {
           const typeTimer = setInterval(() => {
@@ -515,7 +516,7 @@ export default function (props: { children?: JSX.Element }) {
         setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
         if (err.response?.status === 503) {
           setPlatformStore({ under_maintenance: true, backend_online: false });
-          navigate("/");
+          if (!inDocs()) navigate("/");
         }
       });
   }

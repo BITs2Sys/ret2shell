@@ -145,7 +145,15 @@ export default function (props: { challenge?: Challenge }) {
   }
   return (
     <div class="flex flex-col p-3 lg:p-6">
-      <For each={hints()}>
+      <For
+        each={hints()}
+        fallback={
+          <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+            <span class="font-bold opacity-60">{t("game.challenge.noHints")}</span>
+          </div>
+        }
+      >
         {(hint) => (
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
             <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />

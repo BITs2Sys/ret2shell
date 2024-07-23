@@ -4,18 +4,20 @@ import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
+import Card from "@widgets/card";
 import Divider from "@widgets/divider";
+import Popover from "@widgets/popover";
 import Splitter from "@widgets/splitter";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show, createSignal } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
+import Checker from "./checker";
 import Files from "./files";
 import Hammer from "./hammer";
 import Hints from "./hints";
 import Instances from "./instances";
 import Intro from "./intro";
-import Checker from "./checker";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
@@ -95,6 +97,41 @@ function BottomPanel(props: {
               <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
               <span>{t("game.challenge.settings")}</span>
             </Button>
+            <Popover
+              onClick={() => {}}
+              ghost
+              btnContent={
+                <Show
+                  when={props.challenge?.hidden}
+                  fallback={
+                    <>
+                      <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 text-warning" />
+                      <span class="text-warning">{t("game.challenge.withdraw")}</span>
+                    </>
+                  }
+                >
+                  <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 text-success" />
+                  <span class="text-success">{t("game.challenge.publishChallenge")}</span>
+                </Show>
+              }
+            >
+              <Card contentClass="p-2 flex flex-row space-x-2 items-center">
+                <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
+                <Show
+                  when={props.challenge?.hidden}
+                  fallback={
+                    <>
+                      <span>{t("game.challenge.withdrawTips")}</span>
+                    </>
+                  }
+                >
+                  <span>{t("game.challenge.publishTips")}</span>
+                </Show>
+                <Button level="primary" size="sm">
+                  {t("platform.accept")}
+                </Button>
+              </Card>
+            </Popover>
           </Show>
         </div>
       </OverlayScrollbarsComponent>

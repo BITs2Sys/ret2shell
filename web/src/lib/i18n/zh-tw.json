@@ -518,7 +518,12 @@
       "unknownTag": "未知的",
       "unlockHintFailed": "解鎖提示失敗",
       "welcome": "歡迎參賽",
-      "checker": "評測"
+      "checker": "評測",
+      "noHints": "出題人還沒有發布提示哦，再想想吧",
+      "publishChallenge": "發佈",
+      "publishTips": "確定要發佈此題？發佈後選手即可在開賽時解題，發佈期間無法修改題目。",
+      "withdraw": "下線",
+      "withdrawTips": "確定要下線此題？下線後可以修改題目內容並再次上線。"
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",
