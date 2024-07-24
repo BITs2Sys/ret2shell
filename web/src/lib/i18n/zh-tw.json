@@ -56,7 +56,11 @@
       "usage": "使用方法：",
       "delayTips": "延長題目環境存在時間，題目環境啟動後預設服務時間為一小時，如果你認為時間不夠，可以使用此命令延長。",
       "noEnv": "此題不提供線上環境。",
-      "error": "獲取題目環境配置失敗"
+      "error": "獲取題目環境配置失敗",
+      "onlyOneInstancePersist": "同一時間只能啟動一個題目服務。",
+      "onlyOneInstancePersistChoice": "是否停止其他題目服務並啟動當前題目？",
+      "onlyOneInstancePersistTips": "目前正在運行的服務",
+      "noActionPerformed": "不會執行任何操作。"
     },
     "canNotSwitchDir": "遠端主機拒絕了目錄穿越。"
   },

@@ -425,13 +425,8 @@ async fn delay_self_env(
 }
 
 async fn stop_self_env(
-  State(cluster): State<Cluster>, State(ref cache): State<Cache>,
-  Extension(token): Extension<Token>,
+  State(cluster): State<Cluster>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  cache
-    .at("cluster")
-    .set_ex(token.id.to_string(), 1, 60)
-    .await?;
   cluster
     .at("ret2shell-challenge")
     .stop_challenge_env(token.id)

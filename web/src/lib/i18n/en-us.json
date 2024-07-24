@@ -10,7 +10,11 @@
       "usage": "Usage:",
       "delayTips": "Extend the duration of the problem environment. The default service time after the problem environment starts is one hour. If you feel that this time is insufficient, you can use this command to extend it.",
       "noEnv": "This question does not provide an online environment.",
-      "error": "Failed to obtain the problem environment configuration."
+      "error": "Failed to obtain the problem environment configuration.",
+      "onlyOneInstancePersist": "Only one topic service can be activated at the same time.",
+      "onlyOneInstancePersistChoice": "Do you want to stop other topic services and start the current topic? ",
+      "onlyOneInstancePersistTips": "Currently running services",
+      "noActionPerformed": "No action will be taken."
     },
     "cat": {
       "error": "Error reading file.",

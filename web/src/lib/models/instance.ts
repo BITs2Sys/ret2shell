@@ -13,26 +13,23 @@ export enum InstanceState {
 }
 
 export type Instance = {
-  id: number;
+  state: InstanceState;
   name: string;
-  inner_addr: string | null;
-  proxy_addr: string | null;
-  data: { [key: string]: string } | null;
+  wsrx: string | null;
   renew_count: number;
-  started_at: DateTime;
   created_at: DateTime;
-  stoped_at: DateTime | null;
   user_id: number;
   user_name?: string;
   team_id: number | null;
   team_name?: string | null;
   challenge_id: number;
   challenge_name?: string;
-  state: InstanceState;
+  game_id: number;
+  game_name?: string;
 };
 
 export type Traffic = {
-  instance_id: number;
+  wsrx: string;
   local_addr: string;
   delay: number;
 };

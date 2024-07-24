@@ -895,6 +895,10 @@ async fn start_challenge_env(
         env,
       )
       .await?;
+    cache
+      .at("cluster")
+      .set_ex(token.id.to_string(), 1, 60)
+      .await?;
     Ok(())
   } else {
     Err(ResponseError::PreconditionFailed(

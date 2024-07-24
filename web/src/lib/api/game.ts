@@ -138,11 +138,13 @@ export async function getChallengeAttachments(game_id: number, challenge_id: num
     .json<{ folder: "static" | "mapped"; file: string }[]>();
 }
 
+export type ChallengeEnv = {
+  internet: boolean;
+  images: { name: string; tag: string; cpu: number; mem: string; port: number; description: string }[];
+};
+
 export async function getChallengeEnv(game_id: number, challenge_id: number) {
-  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<{
-    port: number;
-    images: { tag: string; cpu: number; mem: string }[];
-  } | null>();
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<ChallengeEnv | null>();
 }
 
 export async function getTeamInfo(game_id: number, team_id: number) {
