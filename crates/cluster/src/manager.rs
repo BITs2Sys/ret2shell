@@ -19,14 +19,19 @@ use kube::{
 };
 use tokio_util::codec::Framed;
 
-use r2s_config::cluster::ChallengeEnv;
+use r2s_config::cluster::{ChallengeEnv, Config};
 use tracing::{debug, error};
 
+use crate::registry::Registry;
+
 use super::traits::ClusterError;
+
+pub const CHALLENGE_NS: &str = "ret2shell-challenge";
 
 #[derive(Clone)]
 pub struct Cluster {
   client: Option<Client>,
+  pub registry: Option<Registry>,
   namespace: Option<String>,
 }
 
@@ -49,9 +54,15 @@ macro_rules! check_enabled {
 }
 
 impl Cluster {
-  pub fn new(client: Option<Client>) -> Self {
+  pub fn new(client: Option<Client>, config: &Config) -> Self {
+    let registry = if let Some(registry) = &config.registry {
+      Some(Registry::new(registry.clone()))
+    } else {
+      None
+    };
     Self {
       client,
+      registry,
       namespace: Some(String::from("default")),
     }
   }
@@ -297,7 +308,7 @@ impl Cluster {
 
   pub async fn create_challenge_env(
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
-    env_config: ChallengeEnv,
+    env_config: ChallengeEnv, node_selector: Option<String>,
   ) -> Result<(), ClusterError> {
     let challenge_id = labels
       .get("challenge")
@@ -306,6 +317,13 @@ impl Cluster {
       .get("user")
       .ok_or(ClusterError::MissingField("user".to_string()))?;
     let pod_name = format!("ret2shell-{challenge_id}-{user_id}");
+    let node_selector = if let Some(node_selector) = node_selector {
+      let mut n = BTreeMap::new();
+      n.insert("ret.sh.cn/workload".to_owned(), node_selector);
+      Some(n)
+    } else {
+      None
+    };
     let pod = Pod {
       metadata: ObjectMeta {
         name: Some(pod_name.clone()),
@@ -343,6 +361,7 @@ impl Cluster {
             ..Default::default()
           })
           .collect(),
+        node_selector,
         ..Default::default()
       }),
       ..Default::default()

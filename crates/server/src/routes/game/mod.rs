@@ -9,7 +9,7 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
-use r2s_cluster::{Cluster, Pod};
+use r2s_cluster::{Cluster, Pod, CHALLENGE_NS};
 use r2s_database::{
   article, game, team as team_db,
   user::{self, Permission},
@@ -389,13 +389,10 @@ async fn get_self_envs(
   Extension(token): Extension<Token>, team_ext: Option<Extension<team_db::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
-  let self_env = cluster
-    .at("ret2shell-challenge")
-    .get_challenge_env(token.id)
-    .await?;
+  let self_env = cluster.at(CHALLENGE_NS).get_challenge_env(token.id).await?;
   let team_envs = if let Some(team) = team {
     cluster
-      .at("ret2shell-challenge")
+      .at(CHALLENGE_NS)
       .get_challenge_env_by_team(team.id)
       .await?
   } else {
@@ -419,7 +416,7 @@ async fn delay_self_env(
   State(cluster): State<Cluster>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
   cluster
-    .at("ret2shell-challenge")
+    .at(CHALLENGE_NS)
     .delay_challenge_env(token.id)
     .await?;
   Ok(())
@@ -429,7 +426,7 @@ async fn stop_self_env(
   State(cluster): State<Cluster>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
   cluster
-    .at("ret2shell-challenge")
+    .at(CHALLENGE_NS)
     .stop_challenge_env(token.id)
     .await?;
   Ok(())

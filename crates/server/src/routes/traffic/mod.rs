@@ -4,7 +4,7 @@ use axum::{
   routing::get,
   Router,
 };
-use r2s_cluster::Cluster;
+use r2s_cluster::{Cluster, CHALLENGE_NS};
 use serde::Deserialize;
 use tracing::error;
 
@@ -29,7 +29,7 @@ async fn link_challenge_env(
   let ws = ws.unwrap();
   Ok(ws.on_upgrade(move |socket| async move {
     let result = cluster
-      .at("ret2shell-challenge")
+      .at(CHALLENGE_NS)
       .wsrx_link(&token, port, socket)
       .await;
     if let Err(e) = result {

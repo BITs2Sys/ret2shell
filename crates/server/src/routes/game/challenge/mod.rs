@@ -13,8 +13,8 @@ use nanoid::nanoid;
 use r2s_bucket::{challenge::ChallengeBucket, Bucket};
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::Cluster;
-use r2s_config::cluster::ChallengeEnv;
+use r2s_cluster::{Cluster, CHALLENGE_NS};
+use r2s_config::{cluster::ChallengeEnv, GlobalConfig};
 use r2s_database::{
   challenge, extra, game, hint, submission, team,
   user::{self, Permission},
@@ -852,10 +852,18 @@ async fn get_challenge_env(
 }
 
 async fn start_challenge_env(
-  State(ref bucket): State<Bucket>, State(cluster): State<Cluster>, State(ref cache): State<Cache>,
+  State(config): State<GlobalConfig>, State(ref bucket): State<Bucket>,
+  State(cluster): State<Cluster>, State(ref cache): State<Cache>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(token): Extension<Token>, team_ext: Option<Extension<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let config = if let Some(config) = &config.cluster {
+    config
+  } else {
+    return Err(ResponseError::PreconditionFailed(
+      "cluster is disabled".to_owned(),
+    ));
+  };
   let calmdown = cache.at("cluster").exists(token.id.to_string()).await?;
   if calmdown {
     return Err(ResponseError::PreconditionFailed(
@@ -866,7 +874,7 @@ async fn start_challenge_env(
   let team = extract_team!(game, team_ext, token);
   if let Some(env) = challenge_bucket.env().await? {
     cluster
-      .at("ret2shell-challenge")
+      .at(CHALLENGE_NS)
       .create_challenge_env(
         [
           ("ret.sh.cn/challenge", challenge.id.to_string()),
@@ -898,6 +906,7 @@ async fn start_challenge_env(
         .map(|(k, v)| (k.to_owned(), v.to_owned()))
         .collect(),
         env,
+        config.challenge_node_selector.clone(),
       )
       .await?;
     cache

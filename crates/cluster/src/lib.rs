@@ -17,6 +17,7 @@ mod traits;
 pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod};
 pub use kube::api::ObjectList;
 pub use manager::Cluster;
+pub use manager::CHALLENGE_NS;
 use r2s_config::cluster;
 use tracing::{error, info};
 pub use traits::ClusterError;
@@ -24,7 +25,7 @@ pub use traits::ClusterError;
 pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, ClusterError> {
   let config = config.clone().ok_or(ClusterError::ConfigNeeded)?;
   if !config.enabled {
-    return Ok(Cluster::new(None));
+    return Ok(Cluster::new(None, &config));
   }
   let client = if config.try_default.is_some_and(|t| t) {
     Client::try_default().await?
@@ -38,7 +39,7 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
       Config::from_custom_kubeconfig(kube_config, &KubeConfigOptions::default()).await?;
     Client::try_from(kube_config)?
   };
-  let client = Cluster::new(Some(client));
+  let client = Cluster::new(Some(client), &config);
   check_namespace(&client).await?;
   check_network_policy(&client).await?;
   Ok(client)
@@ -48,14 +49,14 @@ async fn check_namespace(client: &Cluster) -> Result<(), ClusterError> {
   let namespaces = client.namespaces().await?;
   let mut found = false;
   for namespace in namespaces.items {
-    if namespace.metadata.name == Some("ret2shell-challenge".to_owned()) {
+    if namespace.metadata.name == Some(CHALLENGE_NS.to_owned()) {
       found = true;
       break;
     }
   }
   if !found {
     info!("Creating namespace `ret2shell-challenge` in cluster...");
-    client.create_namespace("ret2shell-challenge").await?;
+    client.create_namespace(CHALLENGE_NS).await?;
   } else {
     info!("Namespace `ret2shell-challenge` already exists in cluster, skipping...");
   }
@@ -64,7 +65,7 @@ async fn check_namespace(client: &Cluster) -> Result<(), ClusterError> {
 }
 
 async fn check_network_policy(client: &Cluster) -> Result<(), ClusterError> {
-  let api = client.at("ret2shell-challenge");
+  let api = client.at(CHALLENGE_NS);
   match api.get_network_policy("internet-disabled").await {
     Ok(Some(_)) => {
       info!("Network policy `internet-disabled` already exists in cluster, skipping...");
@@ -74,7 +75,7 @@ async fn check_network_policy(client: &Cluster) -> Result<(), ClusterError> {
       let policy = NetworkPolicy {
         metadata: ObjectMeta {
           name: Some("internet-disabled".to_owned()),
-          namespace: Some("ret2shell-challenge".to_owned()),
+          namespace: Some(CHALLENGE_NS.to_owned()),
           ..Default::default()
         },
         spec: Some(NetworkPolicySpec {

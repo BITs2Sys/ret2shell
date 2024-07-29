@@ -19,7 +19,7 @@ pub struct Config {
   /// necessary when `try_default` and `auto_infer` both are false.
   pub kube_config_path: Option<String>,
   /// `challenge_node_selector` is the node selector for challenge pods.
-  /// it will be used as `ret2shellType=<challenge_node_selector>`,
+  /// it will be used as `ret.sh.cn/workload=<challenge_node_selector>`,
   /// you should setup the node selector in your kubernetes cluster first.
   pub challenge_node_selector: Option<String>,
   /// `proxy_image` is the image for the proxy container.
@@ -30,8 +30,8 @@ pub struct Config {
   pub enable_capture: Option<bool>,
   /// `capture_directory` is the directory to store the capture files.
   pub capture_directory: Option<String>,
-  /// `cleanup_interval` is the interval in seconds to cleanup outdated pods.
-  pub cleanup_interval: Option<u64>,
+  /// `registry` is the private registry for challenge images.
+  pub registry: Option<String>,
 }
 
 impl Merge for Option<Config> {
@@ -48,7 +48,7 @@ impl Merge for Option<Config> {
         traffic: b.traffic.or(a.traffic),
         enable_capture: b.enable_capture.or(a.enable_capture),
         capture_directory: b.capture_directory.or(a.capture_directory),
-        cleanup_interval: b.cleanup_interval.or(a.cleanup_interval),
+        registry: b.registry.or(a.registry),
       }),
       (Some(a), None) => Some(a),
       (None, Some(b)) => Some(b),
