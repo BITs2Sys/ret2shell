@@ -1,5 +1,8 @@
 import { createInstitute, deleteInstitute, updateInstitute } from "@api/account";
 import { getAuthConfig } from "@api/platform";
+import jiangnan from "@assets/brands/jiangnan.svg";
+import xdu from "@assets/brands/xdu.svg";
+import xmu from "@assets/brands/xmu.svg";
 import type { AuthConfig } from "@models/config";
 import type { Institute } from "@models/institute";
 import { accountStore, refreshInstitutes } from "@storage/account";
@@ -110,7 +113,7 @@ export default function () {
             </Card>
           </div>
           <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-            <span class="text-error">XDU</span>
+            <img src={xdu} alt="XDU" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.xdu.title")}</span>
             </h4>
@@ -122,21 +125,21 @@ export default function () {
             </Show>
           </div>
           <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-            <span class="text-info">NWNU</span>
+            <span class="text-info icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.nwnu.title")}</span>
             </h4>
             <span class="text-warning">{t("admin.oauth.notSupport")}</span>
           </div>
           <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-            <span class="text-info">TARU</span>
+            <span class="text-info icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.taru.title")}</span>
             </h4>
             <span class="text-warning">{t("admin.oauth.notSupport")}</span>
           </div>
           <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-            <span class="text-info">XMU</span>
+            <img src={xmu} alt="XMU" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.xmu.title")}</span>
             </h4>
@@ -148,7 +151,7 @@ export default function () {
             </Show>
           </div>
           <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-            <span class="text-info">JNU</span>
+            <img src={jiangnan} alt="Jiangnan" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.jiangnan.title")}</span>
             </h4>

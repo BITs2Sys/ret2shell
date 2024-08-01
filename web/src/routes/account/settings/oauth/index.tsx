@@ -85,7 +85,7 @@ export default function () {
         </h3>
         <Show when={oauthServices().find((service) => service === "xdu")}>
           <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-            <img src={xdu} alt="XDU" class="w-6 h-6" />
+            <img src={xdu} alt="XDU" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.xdu.title")}</span>
             </h4>
@@ -120,7 +120,7 @@ export default function () {
         </Show>
         <Show when={oauthServices().find((service) => service === "xmu")}>
           <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-            <img src={xmu} alt="XMU" class="w-6 h-6" />
+            <img src={xmu} alt="XMU" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.xmu.title")}</span>
             </h4>
@@ -155,7 +155,7 @@ export default function () {
         </Show>
         <Show when={oauthServices().find((service) => service === "jiangnan")}>
           <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-            <img src={jiangnan} alt="Jiangnan" class="w-6 h-6" />
+            <img src={jiangnan} alt="Jiangnan" class="w-5 h-5" />
             <h4 class="font-bold text-start flex-1">
               <span>{t("account.oauth.jiangnan.title")}</span>
             </h4>
