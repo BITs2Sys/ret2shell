@@ -411,7 +411,10 @@
       "validatorRequired": "需要指定验证器"
     },
     "media": {
-      "title": "媒体存储设置"
+      "title": "媒体存储设置",
+      "path": "媒体存储路径",
+      "limit": "普通用户上传限制（每周）",
+      "antiTheft": "图床防盗链"
     },
     "sync": {
       "title": "分布式资源共享"
@@ -420,7 +423,12 @@
       "title": "用户列表"
     },
     "oauth": {
-      "title": "第三方认证"
+      "title": "第三方认证",
+      "warningChangeInConfig": "第三方认证的适配器需要在服务器启动时初始化，因此并不支持热重载。请手动更改配置文件后重启回归终端服务。",
+      "configured": "已配置",
+      "notConfigured": "未配置",
+      "notSupport": "不支持",
+      "configuredEmail": "已配置-邮箱"
     },
     "cluster": {
       "title": "集群管理",
@@ -469,7 +477,17 @@
       "updateFailed": "平台配置更新失败",
       "updateSuccess": "平台配置更新成功"
     },
-    "permissionDenied": "拒绝访问"
+    "permissionDenied": "拒绝访问",
+    "institute": {
+      "title": "学校/组织",
+      "withOAuth": "使用第三方认证",
+      "manual": "手动管理",
+      "warningDelete": "删除组织会导致关联用户回到无组织状态，重新创建组织需要所有用户手动认证，确认删除吗？",
+      "name": "组织名称",
+      "nameRequired": "请输入组织名称",
+      "provider": "第三方身份验证器",
+      "providerNeeded": "请选择第三方验证器，留空为手动..."
+    }
   },
   "theme": {
     "colorScheme": "明暗主题",
@@ -626,7 +644,19 @@
       "notBind": "未绑定",
       "bind": "绑定",
       "unbind": "解绑",
-      "failedToUnbind": "解绑失败"
+      "failedToUnbind": "解绑失败",
+      "nwnu": {
+        "title": "西北师范大学统一身份认证"
+      },
+      "t": {
+        "title": "塔里木大学统一身份认证"
+      },
+      "taru": {
+        "title": "塔里木大学统一身份认证"
+      },
+      "jiangnan": {
+        "title": "江南大学统一身份认证"
+      }
     },
     "institute": {
       "none": "无从属组织机构"
@@ -708,7 +738,9 @@
     "selectFile": "选择文件...",
     "uploading": "上传中...",
     "uploadFailed": "文件上传失败",
-    "download": "下载"
+    "download": "下载",
+    "confirm": "确认",
+    "deleteSuccess": "删除成功"
   },
   "docs": {
     "titleTips": "回归终端 - 开发者文档",

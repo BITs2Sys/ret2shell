@@ -120,14 +120,26 @@
         "title": "Xidian Unified Identity Authentication"
       },
       "xmu": {
-        "title": ""
+        "title": "Xiamen University Unified Identity Authentication"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "Login failed",
+      "failedToBind": "Binding failed",
+      "notBind": "Unbound",
+      "bind": "Bind",
+      "unbind": "Unbind",
+      "failedToUnbind": "Unbind failed",
+      "nwnu": {
+        "title": "Northwest Normal University Unified Identity Authentication"
+      },
+      "t": {
+        "title": "Tarim University Unified Identity Authentication"
+      },
+      "taru": {
+        "title": "Tarim University Unified Identity Authentication"
+      },
+      "jiangnan": {
+        "title": "Jiangnan University Unified Identity Authentication"
+      }
     },
     "register": {
       "accountMaxLength": "Username can be up to 32 characters.",
@@ -172,7 +184,7 @@
       },
       "oauth": {
         "title": "Third-party certification",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "Failed to obtain third-party account information"
       },
       "password": {
         "confirmPassword": "Re-enter the new password",
@@ -270,10 +282,18 @@
       "title": "Platform Log"
     },
     "media": {
-      "title": "Media Storage Settings"
+      "title": "Media Storage Settings",
+      "path": "Media storage path",
+      "limit": "Regular User Upload Limit (Weekly)",
+      "antiTheft": "Image Hosting Anti-Hotlinking"
     },
     "oauth": {
-      "title": "Third-party certification"
+      "title": "Third-party certification",
+      "warningChangeInConfig": "Third-party certified adapters need to be initialized when the server starts, so hot reloading is not supported. Please manually change the configuration file and restart the terminal service.",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "notSupport": "Not supported",
+      "configuredEmail": "Configured - Email"
     },
     "permissionDenied": "Access Denied",
     "platform": {
@@ -309,6 +329,16 @@
     "title": "Management",
     "users": {
       "title": "User List"
+    },
+    "institute": {
+      "title": "School/Organization",
+      "withOAuth": "Utilize third-party authentication",
+      "manual": "Manual Management",
+      "warningDelete": "Deleting the organization will cause associated users to revert to an unorganized state, and re-creating the organization requires manual authentication from all users. Are you sure you want to confirm deletion?",
+      "name": "Organization Name",
+      "nameRequired": "Please enter the organization name",
+      "provider": "Third-party authenticator",
+      "providerNeeded": "Please select a third-party validator, leaving it blank for manual..."
     }
   },
   "article": {
@@ -430,10 +460,12 @@
     "save": "Save",
     "saveFailed": "Save Failed",
     "saveSuccess": "Save Successful",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "Select File...",
+    "uploading": "Uploading...",
+    "uploadFailed": "File upload failed",
+    "download": "Download",
+    "confirm": "Confirm",
+    "deleteSuccess": "Deletion successful"
   },
   "game": {
     "accessPolicy": {
@@ -446,7 +478,7 @@
         "tips1": "Connect to the following WebSocket address to subscribe to the platform event API. You can find the method for integrating with the event API here:",
         "tips2": "Please note that the Event API is authorized only through Token, so be cautious to prevent this link from being leaked.",
         "title": "Event Push",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "Failed to retrieve device list"
       },
       "awardRate": "First Blood Reward Score Ratio",
       "briefPlaceholder": "Competition Overview",
@@ -544,12 +576,12 @@
       "publishTips": "Are you sure you want to publish this question? Once published, contestants can solve it at the start of the competition, and the question cannot be modified during the publishing period.",
       "noHints": "The problem setter hasn't released any hints yet, let's think about it some more.",
       "calmDownBeforeStartEnv": "Reorganizing cargo crates",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "Upload Static Attachments",
+      "uploadDynamicAttachment": "Upload Dynamic Attachment",
+      "deleteFileFailed": "Failed to delete attachment",
+      "fetchAssetsFailed": "Failed to get detailed information about the question",
+      "publishChallengeFailed": "Failed to Publish the Question",
+      "withdrawChallengeFailed": "Failed to generate offline questions"
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",

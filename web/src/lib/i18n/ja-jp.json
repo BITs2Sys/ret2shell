@@ -55,14 +55,26 @@
         "title": "西電統一認証"
       },
       "xmu": {
-        "title": ""
+        "title": "厦门大学統一ID認証"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "ログイン失敗",
+      "failedToBind": "バインド失敗",
+      "notBind": "未バインド",
+      "bind": "結合",
+      "unbind": "解約",
+      "failedToUnbind": "解約失敗",
+      "nwnu": {
+        "title": "西北師範大学統一認証"
+      },
+      "t": {
+        "title": "塔里木大学統一認証"
+      },
+      "taru": {
+        "title": "塔里木大学統一認証"
+      },
+      "jiangnan": {
+        "title": "江南大学統一認証"
+      }
     },
     "register": {
       "accountMaxLength": "ユーザー名は最大32文字まで",
@@ -107,7 +119,7 @@
       },
       "oauth": {
         "title": "第三者認証",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "サードパーティアカウント情報の取得に失敗しました"
       },
       "password": {
         "confirmPassword": "新しいパスワードを再入力",
@@ -205,10 +217,18 @@
       "title": "プラットフォームログ"
     },
     "media": {
-      "title": "メディアストレージ設定"
+      "title": "メディアストレージ設定",
+      "path": "メディアストレージパス",
+      "limit": "一般ユーザーのアップロード制限（毎週）",
+      "antiTheft": "画像ホストの盗用防止リンク"
     },
     "oauth": {
-      "title": "第三者認証"
+      "title": "第三者認証",
+      "warningChangeInConfig": "サードパーティ認証のアダプターは、サーバー起動時に初期化する必要があるため、ホットリロードをサポートしていません。手動で設定ファイルを変更した後、回帰端末サービスを再起動してください。",
+      "configured": "設定済み",
+      "notConfigured": "未設定",
+      "notSupport": "サポートされていません",
+      "configuredEmail": "設定済み - メールボックス"
     },
     "permissionDenied": "アクセス拒否",
     "platform": {
@@ -244,6 +264,16 @@
     "title": "管理",
     "users": {
       "title": "ユーザーリスト"
+    },
+    "institute": {
+      "title": "学校/組織",
+      "withOAuth": "サードパーティ認証を使用する",
+      "manual": "手動管理",
+      "warningDelete": "組織を削除すると、関連するユーザーは無組織状態に戻ります。再び組織を作成するには、すべてのユーザーが手動で認証を行う必要があります。削除を確認しますか？",
+      "name": "組織名",
+      "nameRequired": "組織名を入力してください",
+      "provider": "サードパーティ認証器",
+      "providerNeeded": "第三者検証機関を選択してください。空欄の場合は手動で行います..."
     }
   },
   "article": {
@@ -365,10 +395,12 @@
     "save": "保存",
     "saveFailed": "保存失敗",
     "saveSuccess": "保存成功",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "ファイルを選択...",
+    "uploading": "アップロード中...",
+    "uploadFailed": "ファイルアップロードに失敗しました",
+    "download": "ダウンロード",
+    "confirm": "確認",
+    "deleteSuccess": "削除成功"
   },
   "game": {
     "accessPolicy": {
@@ -381,7 +413,7 @@
         "tips1": "WebSocket アドレスに接続することで、プラットフォームイベント API の購読を行うことができます。イベント API の導入手順は以下で確認できます：",
         "tips2": "注意してください、イベント API はトークンを通じてのみ認証されます。このリンクが漏洩しないように注意してください。",
         "title": "イベントプッシュ",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "デバイスリストの取得に失敗しました"
       },
       "awardRate": "一血報酬ポイント比率",
       "briefPlaceholder": "試合概要",
@@ -479,12 +511,12 @@
       "withdraw": "オフライン",
       "withdrawTips": "この問題をオフラインにしてもよろしいですか？オフラインにすると、問題の内容を修正して再びオンラインにすることができます。",
       "calmDownBeforeStartEnv": "貨箱を再整理しています",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "静的添付ファイルをアップロード",
+      "uploadDynamicAttachment": "動的添付ファイルをアップロード",
+      "deleteFileFailed": "添付ファイルの削除に失敗しました",
+      "fetchAssetsFailed": "問題の詳細情報の取得に失敗しました",
+      "publishChallengeFailed": "题目の公開に失敗しました",
+      "withdrawChallengeFailed": "下線問題失敗"
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",

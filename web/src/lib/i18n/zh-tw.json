@@ -120,14 +120,26 @@
         "title": "西電統一身份認證"
       },
       "xmu": {
-        "title": ""
+        "title": "廈門大學統一身份認證"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "登入失敗",
+      "failedToBind": "綁定失敗",
+      "notBind": "未綁定",
+      "bind": "綁定",
+      "unbind": "解除綁定",
+      "failedToUnbind": "解綁失敗",
+      "nwnu": {
+        "title": "西北師範大學統一身份認證"
+      },
+      "t": {
+        "title": "塔里木大學統一身份認證"
+      },
+      "taru": {
+        "title": "塔里木大學統一身份認證"
+      },
+      "jiangnan": {
+        "title": "江南大學統一身份認證"
+      }
     },
     "register": {
       "accountMaxLength": "使用者名稱最多32個字元",
@@ -172,7 +184,7 @@
       },
       "oauth": {
         "title": "第三方驗證",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "獲取第三方帳戶資訊失敗"
       },
       "password": {
         "confirmPassword": "再次輸入新密碼",
@@ -270,10 +282,18 @@
       "title": "平台記錄"
     },
     "media": {
-      "title": "媒體儲存設定"
+      "title": "媒體儲存設定",
+      "path": "媒體儲存路徑",
+      "limit": "普通用戶上傳限制（每週）",
+      "antiTheft": "圖床防盜鏈"
     },
     "oauth": {
-      "title": "第三方驗證"
+      "title": "第三方驗證",
+      "warningChangeInConfig": "第三方認證的適配器需要在伺服器啟動時初始化，因此並不支援熱重載。請手動更改配置檔案後重新啟動回歸終端服務。",
+      "configured": "已設定",
+      "notConfigured": "未設定",
+      "notSupport": "不支援",
+      "configuredEmail": "已設置-郵箱"
     },
     "permissionDenied": "拒絕存取",
     "platform": {
@@ -309,6 +329,16 @@
     "title": "管理",
     "users": {
       "title": "使用者清單"
+    },
+    "institute": {
+      "title": "學校/組織",
+      "withOAuth": "使用第三方認證",
+      "manual": "手動管理",
+      "warningDelete": "刪除組織會導致關聯用戶回到無組織狀態，重新創建組織需要所有用戶手動認證，確認刪除嗎？",
+      "name": "組織名稱",
+      "nameRequired": "請輸入組織名稱",
+      "provider": "第三方身分驗證器",
+      "providerNeeded": "請選擇第三方驗證器，留空為手動..."
     }
   },
   "article": {
@@ -430,10 +460,12 @@
     "save": "儲存",
     "saveFailed": "儲存失敗",
     "saveSuccess": "儲存成功",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "選擇檔案...",
+    "uploading": "上傳中...",
+    "uploadFailed": "文件上傳失敗",
+    "download": "下載",
+    "confirm": "確認",
+    "deleteSuccess": "刪除成功"
   },
   "game": {
     "accessPolicy": {
@@ -446,7 +478,7 @@
         "tips1": "連接下述 WebSocket 地址即可接入平台事件 API 訂閱。你可以在這裡找到事件 API 的對接方法：",
         "tips2": "請注意，事件 API 只透過 Token 進行鑑權，謹防此連結洩漏。",
         "title": "事件推送",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "獲取設備列表失敗"
       },
       "awardRate": "一血獎勵分數比例",
       "briefPlaceholder": "比賽簡介",
@@ -544,12 +576,12 @@
       "withdraw": "下線",
       "withdrawTips": "確定要下線此題？下線後可以修改題目內容並再次上線。",
       "calmDownBeforeStartEnv": "正在重整貨箱",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "上傳靜態附件",
+      "uploadDynamicAttachment": "上傳動態附件",
+      "deleteFileFailed": "刪除附件失敗",
+      "fetchAssetsFailed": "獲取題目詳細資訊失敗",
+      "publishChallengeFailed": "發布題目失敗",
+      "withdrawChallengeFailed": "下線題目失敗"
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",

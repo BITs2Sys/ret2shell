@@ -55,14 +55,26 @@
         "title": "서전통일신원인증"
       },
       "xmu": {
-        "title": ""
+        "title": "샤먼 대학교 통합 신분 인증"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "로그인 실패",
+      "failedToBind": "바인딩 실패",
+      "notBind": "미바인드",
+      "bind": "바인딩",
+      "unbind": "해제",
+      "failedToUnbind": "해제 실패",
+      "nwnu": {
+        "title": "서북사범대학교 통합 신원 인증"
+      },
+      "t": {
+        "title": "타리뭉 대학교 통합 신분 인증"
+      },
+      "taru": {
+        "title": "타리뭉 대학교 통합 신분 인증"
+      },
+      "jiangnan": {
+        "title": "강남대학교 통합 신분 인증"
+      }
     },
     "register": {
       "accountMaxLength": "사용자 이름은 최대 32자까지 가능합니다.",
@@ -107,7 +119,7 @@
       },
       "oauth": {
         "title": "제3자 인증",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "서드 파티 계정 정보를 가져오지 못했습니다."
       },
       "password": {
         "confirmPassword": "새 비밀번호를 다시 입력하세요",
@@ -205,10 +217,18 @@
       "title": "플랫폼 로그"
     },
     "media": {
-      "title": "미디어 저장소 설정"
+      "title": "미디어 저장소 설정",
+      "path": "미디어 저장 경로",
+      "limit": "일반 사용자 업로드 제한 (주간)",
+      "antiTheft": "이미지 호스팅 방도련"
     },
     "oauth": {
-      "title": "제3자 인증"
+      "title": "제3자 인증",
+      "warningChangeInConfig": "서드파티 인증 어댑터는 서버 시작 시 초기화되어야 하므로, 핫 리로드를 지원하지 않습니다.  구성 파일을  수동으로  변경한  후에는  서버를  다시  시작하여야만합니다.",
+      "configured": "구성됨",
+      "notConfigured": "미구성",
+      "notSupport": "지원되지 않음",
+      "configuredEmail": "구성됨 - 이메일"
     },
     "permissionDenied": "접근 거부",
     "platform": {
@@ -244,6 +264,16 @@
     "title": "관리",
     "users": {
       "title": "사용자 목록"
+    },
+    "institute": {
+      "title": "학교/조직",
+      "withOAuth": "제3자 인증 사용",
+      "manual": "수동 관리",
+      "warningDelete": "조직을 삭제하면 연결된 사용자가 조직이 없는 상태로 돌아갑니다. 조직을 다시 만들려면 모든 사용자가 수동으로 인증해야합니다.",
+      "name": "조직 이름",
+      "nameRequired": "조직 이름을 입력하세요",
+      "provider": "제3자 인증기",
+      "providerNeeded": "서드 파티 검증기를 선택하세요. 빈칸으로 두면 수동으로..."
     }
   },
   "article": {
@@ -365,10 +395,12 @@
     "save": "저장",
     "saveFailed": "저장 실패",
     "saveSuccess": "저장 성공",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "파일 선택...",
+    "uploading": "업로드 중...",
+    "uploadFailed": "파일 업로드 실패",
+    "download": "다운로드",
+    "confirm": "확인",
+    "deleteSuccess": "삭제 성공"
   },
   "game": {
     "accessPolicy": {
@@ -384,7 +416,7 @@
         "tips1": "WebSocket 주소에 연결하면 플랫폼 이벤트 API 구독에 접속할 수 있습니다. 이벤트 API의 연동 방법은 여기서 찾을",
         "tips2": "주의하세요, 이벤트 API는 Token을 통해서만 인증되므로, 이 링크가 유출되지 않도록 조심하세요.",
         "title": "이벤트 푸시",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "장치 목록 가져오기 실패"
       },
       "awardRate": "첫 킬 보너스 점수 비율",
       "briefPlaceholder": "대회 소개",
@@ -479,12 +511,12 @@
       "welcome": "참가를 환영합니다",
       "withdraw": "오프라인",
       "withdrawTips": "이 문제를 오프라인으로 전환하시겠습니까? 오프라인으로 전환한 후에는 문제 내용을 수정하고 다시 온라인으로 전환할 수 있습니다.",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "정적 첨부 파일 업로드",
+      "uploadDynamicAttachment": "동적 첨부파일 업로드",
+      "deleteFileFailed": "첨부 파일 삭제 실패",
+      "fetchAssetsFailed": "문제 상세 정보를 가져오지 못했습니다.",
+      "publishChallengeFailed": "문제 발행 실패",
+      "withdrawChallengeFailed": "오프라인 문제 실패"
     },
     "cover": {
       "uploadFailed": "표지 업로드 실패",

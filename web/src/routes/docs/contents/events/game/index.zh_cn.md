@@ -7,13 +7,14 @@
 ```json
 {
   "game": {
-    "event_type": "freeze", // "freeze" | "unfreeze"，保证不会有其他值
+    "event_type": "freeze", // "freeze" | "unfreeze" | "new_notification"，保证不会有其他值
     "operator": {
       "id": 1,
       "account": "admin",
       "nickname": "管理员",
       ... // 其他数据库字段，不保证完整，也不保证今后的版本不变更，即使存在也不要使用这些字段
-    }
+    },
+    "message": "比赛已冻结", // 消息内容
   }
 }
 ```

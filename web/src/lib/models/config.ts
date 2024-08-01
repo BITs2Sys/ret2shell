@@ -62,6 +62,8 @@ export type LoggingConfig = {
 };
 export type MediaConfig = {
   path: string;
+  anti_theft: boolean;
+  limit: number;
 };
 export type QueueConfig = {
   host: string;

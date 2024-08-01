@@ -219,6 +219,10 @@ async fn update_game(
           nickname: token.nickname.clone(),
           ..Default::default()
         },
+        message: format!(
+          "{} the game",
+          if model.frozen { "Freeze" } else { "Unfreeze" }
+        ),
       }),
     };
     queue.publish("event", payload).await.ok();

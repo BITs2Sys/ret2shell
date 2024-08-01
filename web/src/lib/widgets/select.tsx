@@ -35,6 +35,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
   return (
     <Select.Root
       {...others}
+      class={`flex flex-col space-y-1 ${others.class}`}
       items={others.items}
       positioning={{
         sameWidth: true,

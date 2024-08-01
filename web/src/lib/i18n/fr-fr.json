@@ -55,14 +55,26 @@
         "title": "Authentification unique de l'université de Xidian"
       },
       "xmu": {
-        "title": ""
+        "title": "Authentification unique de l'Université de Xiamen"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "Échec de la connexion",
+      "failedToBind": "Échec de la liaison",
+      "notBind": "Non lié",
+      "bind": "Liaison",
+      "unbind": "Délier",
+      "failedToUnbind": "Échec du désenregistrement",
+      "nwnu": {
+        "title": "Authentification unique de l'Université Normale du Nord-Ouest"
+      },
+      "t": {
+        "title": "Authentification unique de l'Université Tarim"
+      },
+      "taru": {
+        "title": "Authentification unique de l'Université Tarim"
+      },
+      "jiangnan": {
+        "title": "Authentification unique de l'Université du Sud"
+      }
     },
     "register": {
       "accountMaxLength": "Le nom d'utilisateur peut comporter jusqu'à 32 caractères.",
@@ -107,7 +119,7 @@
       },
       "oauth": {
         "title": "certification par un tiers",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "Échec de l'obtention des informations du compte tiers"
       },
       "password": {
         "confirmPassword": "Ré-entrer le nouveau mot de passe",
@@ -205,10 +217,18 @@
       "title": "Journal de la plateforme"
     },
     "media": {
-      "title": "Paramètres de stockage multimédia"
+      "title": "Paramètres de stockage multimédia",
+      "path": "Chemin de stockage des médias",
+      "limit": "Limite de téléchargement pour les utilisateurs standard (par semaine)",
+      "antiTheft": "Anti-leech pour les images"
     },
     "oauth": {
-      "title": "certification par un tiers"
+      "title": "certification par un tiers",
+      "warningChangeInConfig": "Les adaptateurs certifiés par un tiers doivent être initialisés au démarrage du serveur et ne prennent donc pas en charge le rechargement à chaud. Veuillez modifier manuellement le fichier de configuration, puis redémarrer le service de terminal.",
+      "configured": "配置完毕",
+      "notConfigured": "Non configuré",
+      "notSupport": "Non pris en charge",
+      "configuredEmail": "配置-邮箱"
     },
     "permissionDenied": "Refuser l'accès",
     "platform": {
@@ -244,6 +264,16 @@
     "title": "gérer",
     "users": {
       "title": "Liste des utilisateurs"
+    },
+    "institute": {
+      "title": "école/organisation",
+      "withOAuth": "Utilisation de l'authentification tierce",
+      "manual": "Gestion manuelle",
+      "warningDelete": "La suppression de l'organisation entraînera le retour des utilisateurs associés à un état sans organisation, et la recréation de l'organisation nécessitera une certification manuelle de tous les utilisateurs. Êtes-vous sûr de vouloir confirmer la suppression ?",
+      "name": "Nom de l'organisation",
+      "nameRequired": "Veuillez entrer le nom de l'organisation",
+      "provider": "Authentificateur tiers",
+      "providerNeeded": "Sélectionnez un validateur tiers, laisser vide pour une vérification manuelle..."
     }
   },
   "article": {
@@ -365,10 +395,12 @@
     "save": "Sauvegarder",
     "saveFailed": "Échec de la sauvegarde",
     "saveSuccess": "Enregistrement réussi",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "Sélectionner le fichier...",
+    "uploading": "Téléchargement en cours...",
+    "uploadFailed": "Le téléchargement du fichier a échoué.",
+    "download": "Télécharger",
+    "confirm": "Confirmation",
+    "deleteSuccess": "Suppression réussie"
   },
   "game": {
     "accessPolicy": {
@@ -384,7 +416,7 @@
         "tips1": "Connectez-vous à l'adresse WebSocket suivante pour accéder à l'API d'abonnement aux événements de la plateforme. Vous pouvez trouver ici la méthode de connexion à l'API des événements :",
         "tips2": "Attention, l'API des événements n'est authentifiée que par Token, soyez vigilant à ne pas divulguer ce lien.",
         "title": "Push d'événements",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "Échec de la récupération de la liste des appareils"
       },
       "awardRate": "Ratio de points de récompense pour la première élimination",
       "briefPlaceholder": "Présentation de la compétition",
@@ -479,12 +511,12 @@
       "welcome": "Bienvenue à la compétition",
       "withdraw": "déconnecter",
       "withdrawTips": "Êtes-vous sûr de vouloir retirer cette question ? Après l'avoir retirée, vous pourrez modifier son contenu et la remettre en ligne.",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "Télécharger des pièces jointes statiques",
+      "uploadDynamicAttachment": "Télécharger une pièce jointe dynamique",
+      "deleteFileFailed": "Échec de la suppression des pièces jointes",
+      "fetchAssetsFailed": "Échec de l'obtention des informations détaillées sur le sujet",
+      "publishChallengeFailed": "Échec de la publication du sujet",
+      "withdrawChallengeFailed": "Échec de la mise hors ligne du sujet"
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",

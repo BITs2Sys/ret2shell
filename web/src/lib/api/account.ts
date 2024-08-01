@@ -1,9 +1,9 @@
 import type { Captcha } from "@models/captcha";
 import type { Institute } from "@models/institute";
+import type { OAuth } from "@models/oauth";
 import type { User } from "@models/user";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
-import type { OAuth } from "@models/oauth";
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();
@@ -107,4 +107,16 @@ export async function unbindWithOAuth(id: number) {
 
 export async function getOAuthStatus() {
   return await api.get(`${api_root}/account/bind`).json<OAuth[]>();
+}
+
+export async function updateInstitute(req: Institute) {
+  return await api.patch(`${api_root}/account/institute/${req.id}`, { json: req }).json<Institute>();
+}
+
+export async function createInstitute(req: Institute) {
+  return await api.post(`${api_root}/account/institute`, { json: req }).json<Institute>();
+}
+
+export async function deleteInstitute(id: number) {
+  return await api.delete(`${api_root}/account/institute/${id}`).json<void>();
 }

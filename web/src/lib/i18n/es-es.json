@@ -55,14 +55,26 @@
         "title": "Autenticación de Identidad Unificada de Xidian"
       },
       "xmu": {
-        "title": ""
+        "title": "Autenticación de Identidad Unificada de la Universidad de Xiamen"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "Inicio de sesión fallido",
+      "failedToBind": "Fallo en la vinculación",
+      "notBind": "Sin vincular",
+      "bind": "Vincular",
+      "unbind": "Desvincular",
+      "failedToUnbind": "Desvinculación fallida",
+      "nwnu": {
+        "title": "Autenticación de Identidad Unificada de la Universidad Normal del Noroeste"
+      },
+      "t": {
+        "title": "Autenticación de Identidad Unificada de la Universidad Tarim"
+      },
+      "taru": {
+        "title": "Autenticación de identidad unificada de la Universidad Tarim"
+      },
+      "jiangnan": {
+        "title": "Autenticación de Identidad Unificada de la Universidad de Jiangnan"
+      }
     },
     "register": {
       "accountMaxLength": "El nombre de usuario puede tener hasta 32 caracteres.",
@@ -107,7 +119,7 @@
       },
       "oauth": {
         "title": "certificación de terceros",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "Fallo al obtener la información de la cuenta de terceros"
       },
       "password": {
         "confirmPassword": "vuelve a ingresar la nueva contraseña",
@@ -205,10 +217,18 @@
       "title": "registro de la plataforma"
     },
     "media": {
-      "title": "Configuración de almacenamiento multimedia"
+      "title": "Configuración de almacenamiento multimedia",
+      "path": "Ruta de almacenamiento de medios",
+      "limit": "Límite de subida para usuarios normales (semanal)",
+      "antiTheft": "Protección contra hotlinking en servidores de imágenes"
     },
     "oauth": {
-      "title": "certificación de terceros"
+      "title": "certificación de terceros",
+      "warningChangeInConfig": "Los adaptadores certificados por terceros necesitan inicializarse al iniciar el servidor, por lo que no son compatibles con la recarga en caliente. Por favor, cambie manualmente el archivo de configuración y luego reinicie el servicio de terminal.",
+      "configured": "configurado",
+      "notConfigured": "Sin configurar",
+      "notSupport": "No soportado",
+      "configuredEmail": "configurado - correo electrónico"
     },
     "permissionDenied": "Acceso denegado",
     "platform": {
@@ -244,6 +264,16 @@
     "title": "administración",
     "users": {
       "title": "Lista de usuarios"
+    },
+    "institute": {
+      "title": "escuela/organización",
+      "withOAuth": "uso de autenticación de terceros",
+      "manual": "Gestión manual",
+      "warningDelete": "Eliminar la organización hará que los usuarios asociados vuelvan a un estado sin organización, y volver a crear la organización requerirá que todos los usuarios se autentiquen manualmente. ¿Confirmar eliminación?",
+      "name": "Nombre de la organización",
+      "nameRequired": "Por favor, ingrese el nombre de la organización",
+      "provider": "autenticador de terceros",
+      "providerNeeded": "Seleccione un validador de terceros, dejar en blanco para manual..."
     }
   },
   "article": {
@@ -365,10 +395,12 @@
     "save": "Guardar",
     "saveFailed": "Error al guardar",
     "saveSuccess": "Guardado con éxito",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "Seleccionar archivo...",
+    "uploading": "Cargando...",
+    "uploadFailed": "Error al subir el archivo",
+    "download": "Descargar",
+    "confirm": "Confirmar",
+    "deleteSuccess": "Eliminación exitosa"
   },
   "game": {
     "accessPolicy": {
@@ -384,7 +416,7 @@
         "tips1": "Conecta a la siguiente dirección WebSocket para suscribirte a la API de eventos de la plataforma. Puedes encontrar aquí el método de integración con la API de eventos:",
         "tips2": "Tenga en cuenta que la API de eventos solo se autoriza mediante Token, tenga cuidado de no divulgar este enlace.",
         "title": "Notificación de eventos",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "Error al obtener la lista de dispositivos"
       },
       "awardRate": "Proporción de puntos de recompensa por la primera sangre",
       "briefPlaceholder": "Introducción del concurso",
@@ -479,12 +511,12 @@
       "welcome": "Bienvenido al concurso",
       "withdraw": "Desconectar",
       "withdrawTips": "¿Estás seguro de que deseas desactivar esta pregunta? Después de desactivarla, puedes modificar su contenido y volver a activarla.",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "Subir archivos adjuntos estáticos",
+      "uploadDynamicAttachment": "Subir archivo adjunto dinámico",
+      "deleteFileFailed": "Error al eliminar el archivo adjunto",
+      "fetchAssetsFailed": "Fallo al obtener información detallada del tema",
+      "publishChallengeFailed": "Fallo al publicar el problema",
+      "withdrawChallengeFailed": "Fallo al desactivar el tema"
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",

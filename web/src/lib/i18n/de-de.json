@@ -55,14 +55,26 @@
         "title": "West-Elektro Einheitliche Identitätsauthentifizierung"
       },
       "xmu": {
-        "title": ""
+        "title": "Xiamen Universität Einheitliche Identitätsauthentifizierung"
       },
-      "failedToLogin": "",
-      "failedToBind": "",
-      "notBind": "",
-      "bind": "",
-      "unbind": "",
-      "failedToUnbind": ""
+      "failedToLogin": "Anmeldung fehlgeschlagen",
+      "failedToBind": "Bindung fehlgeschlagen",
+      "notBind": "Nicht gebunden",
+      "bind": "Binden",
+      "unbind": "Entbinden",
+      "failedToUnbind": "Entsperrung fehlgeschlagen",
+      "nwnu": {
+        "title": "Nordwest-Universität Einheitliche Identifizierung"
+      },
+      "t": {
+        "title": "Tariyam-Universität Einheitliche Identifizierung"
+      },
+      "taru": {
+        "title": "Tarijim-Universität Einheitliche Identifizierung"
+      },
+      "jiangnan": {
+        "title": "Jiangnan-Universität-Einheitliche Identifizierung"
+      }
     },
     "register": {
       "accountMaxLength": "Benutzername maximal 32 Zeichen",
@@ -107,7 +119,7 @@
       },
       "oauth": {
         "title": "Drittpartei-Zertifizierung",
-        "failedToGetOAuthStatus": ""
+        "failedToGetOAuthStatus": "Fehler beim Abrufen der Drittanbieter-Kontoinformationen"
       },
       "password": {
         "confirmPassword": "Erneut neues Passwort eingeben",
@@ -205,10 +217,18 @@
       "title": "Plattformprotokoll"
     },
     "media": {
-      "title": "Medienspeicher-Einstellungen"
+      "title": "Medienspeicher-Einstellungen",
+      "path": "Medien-Speicherpfad",
+      "limit": "Allgemeine Benutzer-Upload-Limit (wöchentlich)",
+      "antiTheft": "Bildhosting-Anti-Hotlinking"
     },
     "oauth": {
-      "title": "Drittanbieter-Zertifizierung"
+      "title": "Drittanbieter-Zertifizierung",
+      "warningChangeInConfig": "Drittanbieter-zertifizierte Adapter müssen beim Serverstart initialisiert werden, daher wird das Hot-Reload nicht unterstützt. Bitte ändern Sie die Konfigurationsdatei manuell und starten Sie den Terminaldienst neu.",
+      "configured": "Konfiguriert",
+      "notConfigured": "Nicht konfiguriert",
+      "notSupport": "Nicht unterstützt",
+      "configuredEmail": "Konfiguriert - E-Mail"
     },
     "permissionDenied": "Zugriff verweigert",
     "platform": {
@@ -244,6 +264,16 @@
     "title": "Verwaltung",
     "users": {
       "title": "Benutzerliste"
+    },
+    "institute": {
+      "title": "Schule/Organisation",
+      "withOAuth": "Verwendung der Drittanbieter-Authentifizierung",
+      "manual": "Manuelle Verwaltung",
+      "warningDelete": "Das Löschen der Organisation führt dazu, dass die zugehörigen Benutzer wieder in einen zustand ohne Organisation versetzt werden. Um die Organisation neu zu erstellen, müssen alle Benutzer eine manuelle Bestätigung durchführen. Sind Sie sicher, dass Sie löschen möchten?",
+      "name": "Organisationsname",
+      "nameRequired": "Bitte geben Sie den Namen der Organisation ein",
+      "provider": "Drittanbieter-Authentifizierung",
+      "providerNeeded": "Bitte wählen Sie einen Drittanbieter-Validator, leer lassen für manuell..."
     }
   },
   "article": {
@@ -365,10 +395,12 @@
     "save": "speichern",
     "saveFailed": "Speichern fehlgeschlagen",
     "saveSuccess": "Speichern erfolgreich",
-    "selectFile": "",
-    "uploading": "",
-    "uploadFailed": "",
-    "download": ""
+    "selectFile": "Datei auswählen...",
+    "uploading": "Hochladen...",
+    "uploadFailed": "Datei-Upload fehlgeschlagen",
+    "download": "Herunterladen",
+    "confirm": "Bestätigen",
+    "deleteSuccess": "Löschung erfolgreich"
   },
   "game": {
     "accessPolicy": {
@@ -384,7 +416,7 @@
         "tips1": "Verbinden Sie sich mit der folgenden WebSocket-Adresse, um das Plattformereignis-API-Abonnement aufzunehmen. Hier finden Sie die Anleitung zur Integration der Ereignis-API:",
         "tips2": "Bitte beachten Sie, dass die Event-API nur über Token authentifiziert wird. Gehen Sie sorgfältig vor, um das Leaken dieses Links zu verhindern.",
         "title": "Ereignis-Push",
-        "fetchDevicesFailed": ""
+        "fetchDevicesFailed": "Fehler beim Abrufen der Geräteliste"
       },
       "awardRate": "Erstblut-Bonuspunkte-Verhältnis",
       "briefPlaceholder": "Wettkampfübersicht",
@@ -479,12 +511,12 @@
       "welcome": "Willkommen beim Wettbewerb",
       "withdraw": "Ausfahrt",
       "withdrawTips": "Möchten Sie diese Frage wirklich offline schalten? Nach dem Offline-Schalten können Sie den Inhalt der Frage ändern und sie erneut online stellen.",
-      "uploadStaticAttachment": "",
-      "uploadDynamicAttachment": "",
-      "deleteFileFailed": "",
-      "fetchAssetsFailed": "",
-      "publishChallengeFailed": "",
-      "withdrawChallengeFailed": ""
+      "uploadStaticAttachment": "Statische Anhänge hochladen",
+      "uploadDynamicAttachment": "Dynamische Anhänge hochladen",
+      "deleteFileFailed": "Anhang-Löschung fehlgeschlagen",
+      "fetchAssetsFailed": "Fehler beim Abrufen der detaillierten Informationen zum Thema",
+      "publishChallengeFailed": "Veröffentlichung der Aufgabe fehlgeschlagen",
+      "withdrawChallengeFailed": "Die Aufgabe konnte nicht abgeschlossen werden."
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

@@ -41,12 +41,14 @@ pub struct SubmissionEvent {
 pub enum GameEventType {
   Freeze,
   Unfreeze,
+  NewNotification,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GameEvent {
   pub operator: user::Model,
   pub event_type: GameEventType,
+  pub message: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
