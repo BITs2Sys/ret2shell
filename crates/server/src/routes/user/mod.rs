@@ -66,8 +66,10 @@ async fn get_user_list(
 }
 
 async fn get_user(
-  Extension(user): Extension<user::Model>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let user = user::get_ex(&db.conn, token.id).await?;
+  let user = user.ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
   if token.permissions.0.contains(&Permission::User) {
     Ok(Json(user))
   } else {

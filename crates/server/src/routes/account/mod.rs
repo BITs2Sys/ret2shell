@@ -911,6 +911,24 @@ async fn unbind_oauth_account(
     ));
   };
   r2s_database::oauth::delete(&db.conn, oauth_item.id).await?;
+  if oauth_item.institute_id.is_some() {
+    let user = user::get(&db.conn, token.id).await?;
+    let user = match user {
+      Some(user) => user,
+      None => {
+        return Err(ResponseError::NotFound("user not found".to_owned()));
+      }
+    };
+    user::update(
+      &db.conn,
+      user::Model {
+        id: user.id,
+        institute_id: None,
+        ..user
+      },
+    )
+    .await?;
+  }
 
   Ok(StatusCode::OK)
 }

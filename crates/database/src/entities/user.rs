@@ -87,6 +87,16 @@ pub struct ExModel {
   pub banned: bool,
 }
 
+impl ExModel {
+  pub fn desensitize(self) -> Self {
+    Self {
+      password: None,
+      email: None,
+      ..self
+    }
+  }
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
   #[sea_orm(has_many = "super::article::Entity")]
