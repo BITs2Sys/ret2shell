@@ -15,7 +15,9 @@ pub struct OAuthProvider {
 
 #[async_trait::async_trait]
 impl OAuthProviderTrait for OAuthProvider {
-  async fn login(&self, query: HashMap<String, String>) -> Result<(String, Value), OAuthError> {
+  async fn login(
+    &self, _account: &str, _email: &str, query: HashMap<String, String>,
+  ) -> Result<(String, Value), OAuthError> {
     let ticket = query
       .get("ticket")
       .ok_or(OAuthError::MissingField("ticket".to_string()))?;

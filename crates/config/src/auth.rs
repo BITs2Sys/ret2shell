@@ -22,6 +22,9 @@ impl OAuthKey {
 pub struct OAuthKeys {
   pub xdu: Option<OAuthKey>,
   pub xmu: Option<OAuthKey>,
+  pub nwnu: Option<OAuthKey>,
+  pub taru: Option<OAuthKey>,
+  pub jiangnan: Option<OAuthKey>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
@@ -39,6 +42,9 @@ impl Config {
       oauth_keys: self.oauth_keys.map(|keys| OAuthKeys {
         xdu: keys.xdu.map(|key| key.desensitize()),
         xmu: keys.xmu.map(|key| key.desensitize()),
+        nwnu: keys.nwnu.map(|key| key.desensitize()),
+        taru: keys.taru.map(|key| key.desensitize()),
+        jiangnan: keys.jiangnan.map(|key| key.desensitize()),
       }),
       ..self
     }

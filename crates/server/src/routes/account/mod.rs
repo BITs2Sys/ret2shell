@@ -768,7 +768,7 @@ async fn login_with_oauth_account(
       return Err(ResponseError::BadRequest("service not found".to_owned()));
     }
   };
-  let (auth_id, _) = provider.login(params.clone()).await?;
+  let (auth_id, _) = provider.login("", "", params.clone()).await?;
   let oauth_item = r2s_database::oauth::get_by_auth_key(&db.conn, provider_str, &auth_id).await?;
   if let Some(item) = oauth_item {
     let user = user::get(&db.conn, item.user_id).await?;
@@ -815,6 +815,13 @@ async fn bind_oauth_account(
   State(db): State<Database>, State(oauth): State<OAuth>, Extension(token): Extension<Token>,
   Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let user = user::get(&db.conn, token.id).await?;
+  let user = match user {
+    Some(user) => user,
+    None => {
+      return Err(ResponseError::NotFound("user not found".to_owned()));
+    }
+  };
   let provider = params
     .get("service")
     .ok_or(ResponseError::BadRequest("service required".to_owned()))?;
@@ -825,7 +832,9 @@ async fn bind_oauth_account(
       return Err(ResponseError::BadRequest("service not found".to_owned()));
     }
   };
-  let (auth_key, data) = provider.login(params.clone()).await?;
+  let (auth_key, data) = provider
+    .login(&user.account, &user.email.unwrap(), params.clone())
+    .await?;
   let bind_institute = r2s_database::institute::get_by_provider(&db.conn, provider_str).await?;
   let oauth_item = r2s_database::oauth::Model {
     id: 0,
