@@ -142,6 +142,41 @@ export default function () {
             </Show>
           </div>
         </Show>
+        <Show when={oauthServices().find((service) => service === "jiangnan")}>
+          <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
+            <span class="text-info">JIANGNAN</span>
+            <h4 class="font-bold text-start flex-1">
+              <span>{t("account.oauth.jiangnan.title")}</span>
+            </h4>
+            <Show when={institutes().find((v) => v.provider === "jiangnan")}>
+              <Tag level="info">
+                <span>{institutes().find((v) => v.provider === "jiangnan")?.name}</span>
+              </Tag>
+            </Show>
+            <Show
+              when={selfOAuthItems().find((v) => v.provider === "jiangnan")}
+              fallback={
+                <>
+                  <span class="opacity-60">{t("account.oauth.notBind")}</span>
+                  <Link size="sm" href={`${window.location.origin}/account/bind?service=jiangnan`}>
+                    {t("account.oauth.bind")}
+                  </Link>
+                </>
+              }
+            >
+              <span class="opacity-60">
+                {selfOAuthItems().find((v) => v.provider === "jiangnan")?.data.name ?? "UNKNOWN"} (
+                {selfOAuthItems().find((v) => v.provider === "jiangnan")?.data.id ?? "UNKNOWN"})
+              </span>
+              <Button
+                size="sm"
+                onClick={() => handleUnbind(selfOAuthItems().find((v) => v.provider === "jiangnan")!.id)}
+              >
+                {t("account.oauth.unbind")}
+              </Button>
+            </Show>
+          </div>
+        </Show>
       </div>
     </div>
   );
