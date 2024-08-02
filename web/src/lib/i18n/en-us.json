@@ -365,7 +365,9 @@
       "permBasic": "Basic Permissions",
       "permVerified": "Verified",
       "ipAddresses": "IP Address",
-      "fetchIpAddressesFailed": "Failed to obtain IP address"
+      "fetchIpAddressesFailed": "Failed to obtain IP address",
+      "oauths": "Third-party certification entry",
+      "fetchOAuthsFailed": "Failed to obtain third-party certification information"
     },
     "institute": {
       "title": "School/Organization",

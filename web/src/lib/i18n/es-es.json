@@ -300,7 +300,9 @@
       "permBasic": "Permisos básicos",
       "permVerified": "Verificado",
       "ipAddresses": "Dirección IP",
-      "fetchIpAddressesFailed": "Error al obtener la dirección IP"
+      "fetchIpAddressesFailed": "Error al obtener la dirección IP",
+      "oauths": "Entrada de certificación de terceros",
+      "fetchOAuthsFailed": "Fallo al obtener información de certificación de terceros"
     },
     "institute": {
       "title": "escuela/organización",

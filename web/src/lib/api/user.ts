@@ -1,4 +1,5 @@
 import type { Ip } from "@models/ip";
+import type { OAuth } from "@models/oauth";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import type { SearchParamsOption } from "ky";
@@ -44,4 +45,8 @@ export async function deleteUser(id: number) {
 
 export async function getUserIpList(id: number) {
   return await api.get(`${api_root}/user/${id}/ip`).json<Ip[]>();
+}
+
+export async function getUserOAuthList(id: number) {
+  return await api.get(`${api_root}/user/${id}/oauth`).json<OAuth[]>();
 }

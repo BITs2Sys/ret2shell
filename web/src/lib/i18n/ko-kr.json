@@ -300,7 +300,9 @@
       "permBasic": "기본 권한",
       "permVerified": "검증됨",
       "ipAddresses": "IP 주소",
-      "fetchIpAddressesFailed": "IP 주소 가져오기 실패"
+      "fetchIpAddressesFailed": "IP 주소 가져오기 실패",
+      "oauths": "제3자 인증 항목",
+      "fetchOAuthsFailed": "서드 파티 인증 정보를 가져오지 못했습니다."
     },
     "institute": {
       "title": "학교/조직",

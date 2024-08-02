@@ -300,7 +300,9 @@
       "permBasic": "Grundlegende Berechtigungen",
       "permVerified": "Überprüft",
       "ipAddresses": "IP-Adresse",
-      "fetchIpAddressesFailed": "IP-Adresse konnte nicht abgerufen werden"
+      "fetchIpAddressesFailed": "IP-Adresse konnte nicht abgerufen werden",
+      "oauths": "Drittanbieter-Zertifizierungseintrag",
+      "fetchOAuthsFailed": "Fehler beim Abrufen der Drittanbieter-Zertifizierungsinformationen"
     },
     "institute": {
       "title": "Schule/Organisation",

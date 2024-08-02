@@ -436,7 +436,9 @@
       "permBasic": "基础权限",
       "permVerified": "已验证",
       "ipAddresses": "IP 地址",
-      "fetchIpAddressesFailed": "获取 IP 地址失败"
+      "fetchIpAddressesFailed": "获取 IP 地址失败",
+      "oauths": "第三方认证条目",
+      "fetchOAuthsFailed": "获取第三方认证信息失败"
     },
     "oauth": {
       "title": "第三方认证",

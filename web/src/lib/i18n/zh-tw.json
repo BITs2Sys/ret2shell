@@ -365,7 +365,9 @@
       "permBasic": "基礎權限",
       "permVerified": "已驗證",
       "ipAddresses": "IP 位址",
-      "fetchIpAddressesFailed": "取得 IP 位址失敗"
+      "fetchIpAddressesFailed": "取得 IP 位址失敗",
+      "oauths": "第三方認證條目",
+      "fetchOAuthsFailed": "取得第三方認證資訊失敗"
     },
     "institute": {
       "title": "學校/組織",

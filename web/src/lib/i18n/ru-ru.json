@@ -300,7 +300,9 @@
       "permBasic": "Базовые права",
       "permVerified": "Проверено",
       "ipAddresses": "IP-адрес",
-      "fetchIpAddressesFailed": "Ошибка получения IP-адреса"
+      "fetchIpAddressesFailed": "Ошибка получения IP-адреса",
+      "oauths": "Третья сторона подтверждает запись",
+      "fetchOAuthsFailed": "Ошибка при получении информации о третьей стороне"
     },
     "institute": {
       "title": "школа/организация",

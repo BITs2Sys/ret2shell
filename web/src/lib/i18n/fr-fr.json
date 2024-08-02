@@ -300,7 +300,9 @@
       "permBasic": "Autorisations de base",
       "permVerified": "Vérifié",
       "ipAddresses": "Adresse IP",
-      "fetchIpAddressesFailed": "Échec de l'obtention de l'adresse IP"
+      "fetchIpAddressesFailed": "Échec de l'obtention de l'adresse IP",
+      "oauths": "Élément de certification tiers",
+      "fetchOAuthsFailed": "Échec de l'obtention des informations d'authentification tierce"
     },
     "institute": {
       "title": "école/organisation",

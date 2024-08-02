@@ -300,7 +300,9 @@
       "permBasic": "基本権限",
       "permVerified": "検証済み",
       "ipAddresses": "IPアドレス",
-      "fetchIpAddressesFailed": "IP アドレスの取得に失敗しました"
+      "fetchIpAddressesFailed": "IP アドレスの取得に失敗しました",
+      "oauths": "第三者認証項目",
+      "fetchOAuthsFailed": "第三者認証情報の取得に失敗しました"
     },
     "institute": {
       "title": "学校/組織",

@@ -1,10 +1,11 @@
 import { uploadMedia } from "@api/media";
-import { getUserIpList } from "@api/user";
+import { getUserIpList, getUserOAuthList } from "@api/user";
 import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import { mediaPath } from "@lib/utils/media";
 import type { Ip } from "@models/ip";
+import type { OAuth } from "@models/oauth";
 import { Permission, type User, permissionToString } from "@models/user";
-import { createForm, email, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { t } from "@storage/theme";
@@ -86,6 +87,19 @@ export default function (compProps: {
               });
             });
           });
+        getUserOAuthList(compProps.editSource!.id)
+          .then((resp) => {
+            setOauthes(resp);
+          })
+          .catch((err: HTTPError) => {
+            void err.response.text().then((text) => {
+              addToast({
+                level: "error",
+                description: `${t("admin.users.fetchOAuthsFailed")}: ${text}`,
+                duration: 5000,
+              });
+            });
+          });
       });
     }
   });
@@ -93,6 +107,7 @@ export default function (compProps: {
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
   const [ips, setIps] = createSignal<Ip[]>([]);
+  const [oauths, setOauthes] = createSignal([] as OAuth[]);
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
     avatarInput.click();
@@ -260,8 +275,8 @@ export default function (compProps: {
             {(field, props) => (
               <Avatar
                 class="w-28 h-28 relative m-2"
-                src={(compProps.editSource?.avatar && mediaPath(compProps.editSource?.avatar)) || undefined}
-                fallback={compProps.editSource?.nickname}
+                src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar")!)) || undefined}
+                fallback={getValue(form, "nickname")}
               >
                 <Button
                   loading={avatarUploading()}
@@ -402,6 +417,20 @@ export default function (compProps: {
           {t("form.save")}
         </Button>
       </Form>
+      <div class="w-full flex flex-col">
+        <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+          <span class="flex-1 text-start">{t("admin.users.oauths")}</span>
+        </h3>
+        <For each={oauths()}>
+          {(oauth) => (
+            <div class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full px-2">
+              <span class="flex-1 text-start text-info">Adapter: {oauth.provider}</span>
+              <span>{JSON.stringify(oauth.data)}</span>
+            </div>
+          )}
+        </For>
+      </div>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
         <span class="flex-1 text-start">{t("admin.users.ipAddresses")}</span>
