@@ -420,7 +420,15 @@
       "title": "分布式资源共享"
     },
     "users": {
-      "title": "用户列表"
+      "title": "用户列表",
+      "fetchFailed": "获取用户列表失败",
+      "filterPlaceholder": "搜索用户名、昵称、邮箱、IP 地址...",
+      "selectInstitute": "选择组织...",
+      "sortBy": "排序...",
+      "id": "ID",
+      "account": "用户名",
+      "institute": "邮箱",
+      "registeredAt": "注册时间"
     },
     "oauth": {
       "title": "第三方认证",

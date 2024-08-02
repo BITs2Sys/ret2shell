@@ -54,6 +54,31 @@ export function permissionToString(permission: Permission): string {
   }
 }
 
+export function permissionToIcon(permission: Permission): string {
+  switch (permission) {
+    case Permission.Basic:
+      return "icon-[fluent--person-20-filled] w-5 h-5 text-primary";
+    case Permission.Verified:
+      return "icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-success";
+    case Permission.Calendar:
+      return "icon-[fluent--calendar-20-filled] w-5 h-5 text-info";
+    case Permission.Wiki:
+      return "icon-[fluent--book-number-20-filled] w-5 h-5 text-info";
+    case Permission.Bulletin:
+      return "icon-[fluent--megaphone-20-filled] w-5 h-5 text-info";
+    case Permission.Game:
+      return "icon-[fluent--flag-20-filled] w-5 h-5 text-info";
+    case Permission.Host:
+      return "icon-[fluent--desktop-20-filled] w-5 h-5 text-info";
+    case Permission.User:
+      return "icon-[fluent--people-20-filled] w-5 h-5 text-info";
+    case Permission.Statistics:
+      return "icon-[fluent--data-pie-20-filled] w-5 h-5 text-info";
+    case Permission.DevOps:
+      return "icon-[fluent--settings-20-filled] w-5 h-5 text-error";
+  }
+}
+
 export type Token = {
   id: number;
   account: string;

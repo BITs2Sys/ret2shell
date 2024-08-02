@@ -348,7 +348,15 @@
     },
     "title": "Management",
     "users": {
-      "title": "User List"
+      "title": "User List",
+      "fetchFailed": "Failed to retrieve user list",
+      "filterPlaceholder": "Search by username, nickname, email, IP address...",
+      "selectInstitute": "Select Organization...",
+      "sortBy": "Sorting...",
+      "id": "translate from zh-cn to en-us:\n\nID",
+      "account": "Username",
+      "institute": "Email",
+      "registeredAt": "Registration Time"
     },
     "institute": {
       "title": "School/Organization",

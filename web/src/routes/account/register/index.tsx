@@ -184,7 +184,7 @@ export default function () {
                     icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                     placeholder={t("account.register.passwordPlaceholder")}
                     title={t("account.register.passwordPlaceholder")}
-                    autocomplete="password"
+                    autocomplete="new-password"
                     type="password"
                     {...props}
                     value={field.value}

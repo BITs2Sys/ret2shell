@@ -2,7 +2,7 @@ import { getUser, getUserTeams } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
-import { useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -71,13 +71,16 @@ export default function () {
             <section class="flex flex-col">
               <For each={teams()}>
                 {(team) => (
-                  <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
+                  <A
+                    class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
+                    href={`/games/${team.game_id}/teams/${team.id}`}
+                  >
                     <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
                     <span class="flex-1 text-start truncate">
                       {t("user.gameJournal", { team: team.name, game: team.game_name! })}
                     </span>
                     <span class="opacity-60">{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
-                  </div>
+                  </A>
                 )}
               </For>
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">

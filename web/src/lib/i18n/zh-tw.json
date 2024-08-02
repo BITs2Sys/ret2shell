@@ -348,7 +348,15 @@
     },
     "title": "管理",
     "users": {
-      "title": "使用者清單"
+      "title": "使用者清單",
+      "fetchFailed": "獲取用戶列表失敗",
+      "filterPlaceholder": "搜尋使用者名稱、暱稱、郵箱、IP 地址...",
+      "selectInstitute": "選擇組織...",
+      "sortBy": "排序...",
+      "id": "翻譯自 zh-cn 到 zh-tw：\n\nID",
+      "account": "使用者名稱",
+      "institute": "郵箱",
+      "registeredAt": "註冊時間"
     },
     "institute": {
       "title": "學校/組織",

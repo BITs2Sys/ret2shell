@@ -283,7 +283,15 @@
     },
     "title": "gérer",
     "users": {
-      "title": "Liste des utilisateurs"
+      "title": "Liste des utilisateurs",
+      "fetchFailed": "Échec de la récupération de la liste des utilisateurs",
+      "filterPlaceholder": "Rechercher par nom d'utilisateur, pseudonyme, adresse e-mail, adresse IP...",
+      "selectInstitute": "Sélectionner une organisation...",
+      "sortBy": "Tri...",
+      "id": "ID",
+      "account": "Nom d'utilisateur",
+      "institute": "boîte aux lettres",
+      "registeredAt": "Date d'inscription"
     },
     "institute": {
       "title": "école/organisation",

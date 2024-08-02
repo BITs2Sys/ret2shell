@@ -2,6 +2,7 @@ import { resetPassword } from "@api/account";
 import Captcha from "@blocks/captcha";
 import { createForm, email, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { useNavigate, useSearchParams } from "@solidjs/router";
+import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -76,6 +77,14 @@ export default function () {
       >
         <Form onSubmit={handleSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
           <h2 class="font-bold text-center">{t("account.reset.title")}</h2>
+          <input
+            class="hidden"
+            type="text"
+            name="username"
+            value={accountStore.account!}
+            autocomplete="username"
+            disabled
+          />
           <Field
             name="email"
             validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
@@ -128,7 +137,7 @@ export default function () {
                 icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                 placeholder={t("account.register.passwordPlaceholder")}
                 title={t("account.register.passwordPlaceholder")}
-                autocomplete="password"
+                autocomplete="new-password"
                 type="password"
                 {...props}
                 value={field.value}

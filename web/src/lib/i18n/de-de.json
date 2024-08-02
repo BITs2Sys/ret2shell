@@ -283,7 +283,15 @@
     },
     "title": "Verwaltung",
     "users": {
-      "title": "Benutzerliste"
+      "title": "Benutzerliste",
+      "fetchFailed": "Das Abrufen der Benutzerliste ist fehlgeschlagen.",
+      "filterPlaceholder": "Benutzername, Spitzname, E-Mail, IP-Adresse suchen...",
+      "selectInstitute": "Organisation auswählen...",
+      "sortBy": "Sortieren...",
+      "id": "ID",
+      "account": "Benutzername",
+      "institute": "E-Mail",
+      "registeredAt": "Registrierungszeit"
     },
     "institute": {
       "title": "Schule/Organisation",

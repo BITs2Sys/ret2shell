@@ -78,7 +78,10 @@ async fn get_user(
 ) -> Result<impl IntoResponse, ResponseError> {
   let user = user::get_ex(&db.conn, token.id).await?;
   let user = user.ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
-  if token.permissions.0.contains(&Permission::User) {
+  if user.id != token.id && user.hidden {
+    return Err(ResponseError::NotFound("user".to_owned()));
+  }
+  if token.permissions.0.contains(&Permission::User) || user.id == token.id {
     Ok(Json(user))
   } else {
     Ok(Json(user.desensitize()))

@@ -1,7 +1,7 @@
 import { changePassword } from "@api/account";
 import { createForm, custom, getValue, minLength, pattern, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
-import { resetUser } from "@storage/account";
+import { accountStore, resetUser } from "@storage/account";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -57,6 +57,14 @@ export default function () {
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.settings.password.title")}</span>
           </h3>
+          <input
+            class="hidden"
+            type="text"
+            name="username"
+            value={accountStore.account!}
+            autocomplete="username"
+            disabled
+          />
           <Field name="old_password" validate={[required(t("account.settings.password.oldPasswordRequired")!)]}>
             {(field, props) => (
               <Input
@@ -68,6 +76,7 @@ export default function () {
                 error={field.error}
                 required
                 type="password"
+                autocomplete="current-password"
               />
             )}
           </Field>
@@ -92,6 +101,7 @@ export default function () {
                 value={field.value}
                 error={field.error}
                 required
+                autocomplete="new-password"
                 type="password"
               />
             )}
@@ -117,6 +127,7 @@ export default function () {
                 value={field.value}
                 error={field.error}
                 required
+                autocomplete="new-password"
                 type="password"
               />
             )}

@@ -283,7 +283,15 @@
     },
     "title": "administración",
     "users": {
-      "title": "Lista de usuarios"
+      "title": "Lista de usuarios",
+      "fetchFailed": "Error al obtener la lista de usuarios",
+      "filterPlaceholder": "Buscar nombre de usuario, apodo, correo electrónico, dirección IP...",
+      "selectInstitute": "Seleccionar organización...",
+      "sortBy": "Ordenar...",
+      "id": "Traducir del chino (simplificado) al español:\n\nID",
+      "account": "Nombre de usuario",
+      "institute": "correo electrónico",
+      "registeredAt": "Fecha de registro"
     },
     "institute": {
       "title": "escuela/organización",

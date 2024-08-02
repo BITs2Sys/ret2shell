@@ -279,11 +279,15 @@ fn filter_and_order(
     if let Ok(id) = filter.parse::<i64>() {
       cond = cond.add(Column::Id.eq(id));
     }
-    let filter = format!("%{}%", filter.to_ascii_lowercase());
-    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Nickname))).like(filter.clone()));
-    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Account))).like(filter.clone()));
-    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Email))).like(filter.clone()));
-    sql = sql.filter(cond);
+    let filter_like = format!("%{}%", filter.to_ascii_lowercase());
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Nickname))).like(&filter_like));
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Account))).like(&filter_like));
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Email))).like(&filter_like));
+    cond = cond.add(Expr::expr(Func::lower(Expr::col(super::ip::Column::Address))).eq(&filter));
+    sql = sql
+      .join(JoinType::InnerJoin, Relation::User2Ip.def())
+      .join(JoinType::InnerJoin, super::user2_ip::Relation::Ip.def())
+      .filter(cond);
   };
   if let Some(order) = order {
     let order = order.split(',').collect::<Vec<&str>>();

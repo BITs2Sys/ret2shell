@@ -283,7 +283,15 @@
     },
     "title": "관리",
     "users": {
-      "title": "사용자 목록"
+      "title": "사용자 목록",
+      "fetchFailed": "사용자 목록 가져오기 실패",
+      "filterPlaceholder": "사용자 이름, 닉네임, 이메일, IP 주소 검색...",
+      "selectInstitute": "조직 선택...",
+      "sortBy": "정렬 중...",
+      "id": "ID",
+      "account": "사용자 이름",
+      "institute": "이메일",
+      "registeredAt": "가입 시간"
     },
     "institute": {
       "title": "학교/조직",

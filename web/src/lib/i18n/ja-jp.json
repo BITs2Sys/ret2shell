@@ -283,7 +283,15 @@
     },
     "title": "管理",
     "users": {
-      "title": "ユーザーリスト"
+      "title": "ユーザーリスト",
+      "fetchFailed": "ユーザーリストの取得に失敗しました",
+      "filterPlaceholder": "ユーザー名、ニックネーム、メールアドレス、IP アドレスを検索...",
+      "selectInstitute": "組織を選択...",
+      "sortBy": "ソート中...",
+      "id": "IDを日本語に翻訳する:\n\nID",
+      "account": "ユーザー名",
+      "institute": "メールボックス",
+      "registeredAt": "登録時間"
     },
     "institute": {
       "title": "学校/組織",
