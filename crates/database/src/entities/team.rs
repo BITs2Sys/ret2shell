@@ -223,6 +223,17 @@ where
     .await
 }
 
+pub async fn get_by_token<C>(db: &C, game_id: i64, token: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait,
+{
+  Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .filter(Column::Token.eq(token))
+    .one(db)
+    .await
+}
+
 pub async fn get_by_user_id<C>(db: &C, game_id: i64, user_id: i64) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait,
@@ -266,6 +277,20 @@ where
     .join(JoinType::LeftJoin, Relation::Game.def())
     .column_as(institute::Column::Name, "institute_name")
     .column_as(game::Column::Name, "game_name")
+    .into_model()
+    .all(db)
+    .await
+}
+
+pub async fn get_members<C>(db: &C, id: i64) -> Result<Vec<user::Model>, DbErr>
+where
+  C: ConnectionTrait,
+{
+  user2_team::Entity::find()
+    .filter(user2_team::Column::TeamId.eq(id))
+    .select_only()
+    .columns(user::Column::iter())
+    .join(JoinType::InnerJoin, user2_team::Relation::User.def())
     .into_model()
     .all(db)
     .await

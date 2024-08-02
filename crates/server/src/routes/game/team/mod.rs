@@ -8,7 +8,11 @@ use axum::{
 use chrono::Utc;
 use nanoid::nanoid;
 use r2s_auditor::Auditor;
-use r2s_database::{extra, game, team, user::Permission, user2_team};
+use r2s_database::{
+  extra, game, team,
+  user::{self, Permission},
+  user2_team,
+};
 use r2s_migrator::Database;
 use serde::Deserialize;
 
@@ -27,7 +31,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       state.clone(),
       data::prepare_team_info,
     ))
-    .route("/", post(create_team))
+    .route("/", post(create_team).patch(join_team))
     .route_layer(middleware::from_fn(auth::permission_required_all!(
       Permission::Verified
     )))
@@ -99,7 +103,7 @@ async fn get_team_list(
   } else {
     query.min_state
   };
-  let results = team::get_page(
+  let (teams, total) = team::get_page(
     &db.conn,
     game.id,
     query.page.unwrap_or(1),
@@ -111,7 +115,13 @@ async fn get_team_list(
     query.asc.unwrap_or(true),
   )
   .await?;
-  Ok(Json(results))
+  let teams =
+    if token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id) {
+      teams
+    } else {
+      teams.into_iter().map(|t| t.desensitize()).collect()
+    };
+  Ok(Json((teams, total)))
 }
 
 async fn get_team_extra(
@@ -138,6 +148,19 @@ async fn create_team(
   if (game.start_at < Utc::now() && !game.can_register_after_started) || game.end_at < Utc::now() {
     return Err(ResponseError::PreconditionFailed(
       "too late to participate".to_owned(),
+    ));
+  }
+  let user = user::get(&db.conn, token.id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
+  if game.access_policy.restrict
+    && !game
+      .access_policy
+      .institutes
+      .contains(&user.institute_id.unwrap_or(0))
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "institute not allowed".to_owned(),
     ));
   }
   if team::get_by_user_id(&db.conn, game.id, token.id)
@@ -169,6 +192,65 @@ async fn create_team(
     },
   )
   .await?;
+  user2_team::user_join_team(&db.conn, token.id, team.id).await?;
+  Ok(Json(team))
+}
+
+#[derive(Deserialize)]
+struct JoinTeamRequest {
+  pub token: String,
+}
+
+async fn join_team(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(token): Extension<Token>, Json(req): Json<JoinTeamRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if game.register_at > Utc::now() {
+    return Err(ResponseError::PreconditionFailed(
+      "game has not start yet".to_owned(),
+    ));
+  }
+  if (game.start_at < Utc::now() && !game.can_register_after_started) || game.end_at < Utc::now() {
+    return Err(ResponseError::PreconditionFailed(
+      "too late to participate".to_owned(),
+    ));
+  }
+  let user = user::get(&db.conn, token.id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
+  if game.access_policy.restrict
+    && !game
+      .access_policy
+      .institutes
+      .contains(&user.institute_id.unwrap_or(0))
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "institute not allowed".to_owned(),
+    ));
+  }
+  if team::get_by_user_id(&db.conn, game.id, token.id)
+    .await?
+    .is_some()
+  {
+    return Err(ResponseError::Conflict(
+      "can not join multiple teams".to_owned(),
+    ));
+  }
+  let team = team::get_by_token(&db.conn, game.id, &req.token)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("team".to_owned()))?;
+  let members = team::get_members(&db.conn, team.id).await?;
+  if members.len() >= (game.team_size as usize) {
+    return Err(ResponseError::PreconditionFailed("team is full".to_owned()));
+  }
+  if team
+    .institute_id
+    .is_some_and(|v| user.institute_id.is_some_and(|w| v != w) || user.institute_id.is_none())
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "institute not match".to_owned(),
+    ));
+  }
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   Ok(Json(team))
 }
