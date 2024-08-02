@@ -75,8 +75,9 @@ async fn get_user_list(
 
 async fn get_user(
   State(ref db): State<Database>, Extension(token): Extension<Token>,
+  Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let user = user::get_ex(&db.conn, token.id).await?;
+  let user = user::get_ex(&db.conn, user.id).await?;
   let user = user.ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
   if user.id != token.id && user.hidden {
     return Err(ResponseError::NotFound("user".to_owned()));

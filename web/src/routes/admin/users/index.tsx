@@ -7,6 +7,7 @@ import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
+import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
@@ -146,6 +147,15 @@ export default function () {
                   </Tag>
                 </Show>
                 <span class="font-normal">{user.registered_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                <Dialog
+                  size="sm"
+                  ghost
+                  square
+                  btnContent={<span class="icon-[fluent--edit-20-regular] w-5 h-5 text-info" />}
+                  title={t("form.edit")}
+                >
+                  {null}
+                </Dialog>
               </div>
             )}
           </For>
