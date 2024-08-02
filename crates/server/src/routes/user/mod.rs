@@ -7,7 +7,7 @@ use axum::{
 };
 use r2s_cache::Cache;
 use r2s_database::{
-  team,
+  ip, team,
   user::{self, Permission},
 };
 use r2s_migrator::Database;
@@ -26,6 +26,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .nest(
       "/:user",
       Router::new()
+        .route("/ip", get(get_user_ip_list))
         .route("/", patch(update_user).delete(delete_user))
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::User
@@ -144,4 +145,11 @@ async fn delete_user(
   user::delete(&db.conn, user.id).await?;
   logout_user(cache, user.id).await?;
   Ok(Json(user))
+}
+
+async fn get_user_ip_list(
+  State(ref db): State<Database>, Extension(user): Extension<user::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let ips = ip::get_list(&db.conn, user.id).await?;
+  Ok(Json(ips))
 }

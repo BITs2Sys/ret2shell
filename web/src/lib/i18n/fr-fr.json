@@ -116,7 +116,8 @@
         "emailRequired": "veuillez remplir l'adresse e-mail",
         "nickname": "Surnom",
         "nicknameRequired": "Veuillez remplir le pseudonyme",
-        "title": "Informations de l'utilisateur"
+        "title": "Informations de l'utilisateur",
+        "accountRequired": ""
       },
       "institute": {
         "title": "organisation"
@@ -291,7 +292,15 @@
       "id": "ID",
       "account": "Nom d'utilisateur",
       "institute": "boîte aux lettres",
-      "registeredAt": "Date d'inscription"
+      "registeredAt": "Date d'inscription",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "école/organisation",
@@ -429,7 +438,8 @@
     "download": "Télécharger",
     "confirm": "Confirmation",
     "deleteSuccess": "Suppression réussie",
-    "goto": "Aller"
+    "goto": "Aller",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

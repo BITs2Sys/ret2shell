@@ -116,7 +116,8 @@
         "emailRequired": "请填写邮箱",
         "nickname": "никнейм",
         "nicknameRequired": "Пожалуйста, заполните никнейм",
-        "title": "пользовательская информация"
+        "title": "пользовательская информация",
+        "accountRequired": ""
       },
       "institute": {
         "title": "организации"
@@ -291,7 +292,15 @@
       "id": "Перевести с zh-cn на ru-ru:\n\nID",
       "account": "Имя пользователя",
       "institute": "почтовый ящик",
-      "registeredAt": "Дата регистрации"
+      "registeredAt": "Дата регистрации",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "школа/организация",
@@ -429,7 +438,8 @@
     "download": "Скачать",
     "confirm": "Подтвердить",
     "deleteSuccess": "Удаление прошло успешно",
-    "goto": "前往"
+    "goto": "前往",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

@@ -1,3 +1,4 @@
+import type { Ip } from "@models/ip";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import type { SearchParamsOption } from "ky";
@@ -31,4 +32,16 @@ export async function getUser(id: number) {
 
 export async function getUserTeams(id: number) {
   return await api.get(`${api_root}/user/${id}/team`).json<Team[]>();
+}
+
+export async function updateUser(user: User) {
+  return await api.patch(`${api_root}/user/${user.id}`, { json: user }).json<User>();
+}
+
+export async function deleteUser(id: number) {
+  return await api.delete(`${api_root}/user/${id}`).json();
+}
+
+export async function getUserIpList(id: number) {
+  return await api.get(`${api_root}/user/${id}/ip`).json<Ip[]>();
 }

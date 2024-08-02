@@ -18,8 +18,23 @@
   .fade-group-dive-left {
     @apply transition-all duration-300 ease-in-out;
   }
+.rainbow{
+	background-image: -webkit-linear-gradient(left, #0078D6, #f4e006 20%, #ff0000 40%, #00ff08 60%, #c800ff 80%, #0078D6);
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 100%;
+    animation:  rainbow 4s infinite linear;
+}
 }
 
+@keyframes rainbow {
+	0% {
+    background-position: 0 0;
+	}
+	100% {
+	    background-position: -100% 0;
+	}
+}
 .fade-group-right {
   &-enter,
   &-exit-to {

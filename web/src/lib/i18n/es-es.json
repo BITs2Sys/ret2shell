@@ -116,7 +116,8 @@
         "emailRequired": "Por favor, rellene el correo electrónico.",
         "nickname": "Apodo",
         "nicknameRequired": "Por favor, ingrese el apodo",
-        "title": "Información del usuario"
+        "title": "Información del usuario",
+        "accountRequired": ""
       },
       "institute": {
         "title": "organización"
@@ -291,7 +292,15 @@
       "id": "Traducir del chino (simplificado) al español:\n\nID",
       "account": "Nombre de usuario",
       "institute": "correo electrónico",
-      "registeredAt": "Fecha de registro"
+      "registeredAt": "Fecha de registro",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "escuela/organización",
@@ -429,7 +438,8 @@
     "download": "Descargar",
     "confirm": "Confirmar",
     "deleteSuccess": "Eliminación exitosa",
-    "goto": "前往"
+    "goto": "前往",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

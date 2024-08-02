@@ -116,7 +116,8 @@
         "emailRequired": "メールアドレスを入力してください",
         "nickname": "ニックネーム",
         "nicknameRequired": "ニックネームを入力してください",
-        "title": "ユーザー情報"
+        "title": "ユーザー情報",
+        "accountRequired": ""
       },
       "institute": {
         "title": "組織機構"
@@ -291,7 +292,15 @@
       "id": "IDを日本語に翻訳する:\n\nID",
       "account": "ユーザー名",
       "institute": "メールボックス",
-      "registeredAt": "登録時間"
+      "registeredAt": "登録時間",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "学校/組織",
@@ -429,7 +438,8 @@
     "download": "ダウンロード",
     "confirm": "確認",
     "deleteSuccess": "削除成功",
-    "goto": "行く"
+    "goto": "行く",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

@@ -181,7 +181,8 @@
         "emailRequired": "Please fill in your email",
         "nickname": "Nickname",
         "nicknameRequired": "Enter Nickname",
-        "title": "User Information"
+        "title": "User Information",
+        "accountRequired": ""
       },
       "institute": {
         "title": "Organization"
@@ -356,7 +357,15 @@
       "id": "translate from zh-cn to en-us:\n\nID",
       "account": "Username",
       "institute": "Email",
-      "registeredAt": "Registration Time"
+      "registeredAt": "Registration Time",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "School/Organization",
@@ -494,7 +503,8 @@
     "download": "Download",
     "confirm": "Confirm",
     "deleteSuccess": "Deletion successful",
-    "goto": "Go"
+    "goto": "Go",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

@@ -428,7 +428,15 @@
       "id": "ID",
       "account": "用户名",
       "institute": "邮箱",
-      "registeredAt": "注册时间"
+      "registeredAt": "注册时间",
+      "fetchUserFailed": "获取用户详细信息失败",
+      "warningDelete": "真的要删除此用户吗？这是真正的删除！",
+      "hidden": "隐藏",
+      "banned": "封禁",
+      "permBasic": "基础权限",
+      "permVerified": "已验证",
+      "ipAddresses": "IP 地址",
+      "fetchIpAddressesFailed": "获取 IP 地址失败"
     },
     "oauth": {
       "title": "第三方认证",
@@ -593,7 +601,8 @@
         "email": "邮箱",
         "avatarUploadFailed": "头像上传失败",
         "description": "主页内容",
-        "emailNotVerified": "你的邮箱尚未通过验证，部分功能受限制。"
+        "emailNotVerified": "你的邮箱尚未通过验证，部分功能受限制。",
+        "accountRequired": "请填写用户名"
       },
       "oauth": {
         "title": "第三方认证",
@@ -769,7 +778,8 @@
     "download": "下载",
     "confirm": "确认",
     "deleteSuccess": "删除成功",
-    "goto": "前往"
+    "goto": "前往",
+    "backToList": "返回列表"
   },
   "docs": {
     "titleTips": "回归终端 - 开发者文档",

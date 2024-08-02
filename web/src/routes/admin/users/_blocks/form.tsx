@@ -1,0 +1,389 @@
+import { uploadMedia } from "@api/media";
+import { getUserIpList } from "@api/user";
+import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+import { mediaPath } from "@lib/utils/media";
+import type { Ip } from "@models/ip";
+import { Permission, type User, permissionToString } from "@models/user";
+import { createForm, email, required, setValue, setValues } from "@modular-forms/solid";
+import { A } from "@solidjs/router";
+import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
+import Avatar from "@widgets/avatar";
+import Button from "@widgets/button";
+import Card from "@widgets/card";
+import Checkbox from "@widgets/checkbox";
+import Editor from "@widgets/editor";
+import Input from "@widgets/input";
+import Link from "@widgets/link";
+import Popover from "@widgets/popover";
+import Tag from "@widgets/tag";
+import type { HTTPError } from "ky";
+import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+
+export type UserForm = {
+  account: string;
+  nickname: string;
+  email: string;
+  avatar: string;
+  description: string;
+  hidden: boolean;
+  banned: boolean;
+  permBasic: boolean;
+  permVerified: boolean;
+  permCalendar: boolean;
+  permWiki: boolean;
+  permBulletin: boolean;
+  permGame: boolean;
+  permHost: boolean;
+  permUser: boolean;
+  permStat: boolean;
+  permDevOps: boolean;
+};
+
+export default function (compProps: {
+  onDone?: (result: User) => void;
+  editSource?: User;
+  loading: boolean;
+}) {
+  const [form, { Form, Field }] = createForm<UserForm>();
+  createEffect(() => {
+    if (compProps.editSource) {
+      untrack(() => {
+        setValues(form, {
+          account: compProps.editSource?.account || "",
+          nickname: compProps.editSource?.nickname || "",
+          email: compProps.editSource?.email || "",
+          avatar: compProps.editSource?.avatar || "",
+          description: compProps.editSource?.description || "",
+          hidden: compProps.editSource?.hidden || false,
+          banned: compProps.editSource?.banned || false,
+          permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
+          permVerified: compProps.editSource?.permissions.includes(Permission.Verified) || false,
+          permCalendar: compProps.editSource?.permissions.includes(Permission.Calendar) || false,
+          permWiki: compProps.editSource?.permissions.includes(Permission.Wiki) || false,
+          permBulletin: compProps.editSource?.permissions.includes(Permission.Bulletin) || false,
+          permGame: compProps.editSource?.permissions.includes(Permission.Game) || false,
+          permHost: compProps.editSource?.permissions.includes(Permission.Host) || false,
+          permUser: compProps.editSource?.permissions.includes(Permission.User) || false,
+          permStat: compProps.editSource?.permissions.includes(Permission.Statistics) || false,
+          permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
+        });
+        setAvatarSet(!!compProps.editSource?.avatar);
+        getUserIpList(compProps.editSource!.id)
+          .then((resp) => {
+            setIps(resp);
+          })
+          .catch((err: HTTPError) => {
+            void err.response.text().then((text) => {
+              addToast({
+                level: "error",
+                description: `${t("admin.users.fetchIpAddressesFailed")}: ${text}`,
+                duration: 5000,
+              });
+            });
+          });
+      });
+    }
+  });
+  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
+  const [avatarSet, setAvatarSet] = createSignal(false);
+  const [avatarUploading, setAvatarUploading] = createSignal(false);
+  const [ips, setIps] = createSignal<Ip[]>([]);
+  let avatarInput: HTMLInputElement;
+  function handleSelectAvatar() {
+    avatarInput.click();
+  }
+  function handleSelectedAvatar(event: Event) {
+    if (
+      event.target &&
+      (event.target as HTMLInputElement).files &&
+      (event.target as HTMLInputElement).files!.length > 0
+    ) {
+      setAvatarFile((event.target as HTMLInputElement).files![0]);
+      handleUploadAvatar();
+    }
+  }
+  function handleUploadAvatar() {
+    if (avatarFile()) {
+      setAvatarUploading(true);
+      uploadMedia(avatarFile()!, false)
+        .then((resp) => {
+          setValue(form, "avatar", resp.hash);
+          setAvatarSet(true);
+        })
+        .catch((err: HTTPError) => {
+          void err.response.text().then((text) => {
+            addToast({
+              level: "error",
+              description: `${t("account.settings.info.avatarUploadFailed")}: ${text}`,
+              duration: 5000,
+            });
+          });
+        })
+        .finally(() => {
+          setAvatarUploading(false);
+        });
+    }
+  }
+
+  function onSubmit(result: UserForm) {
+    const permissions: Permission[] = [];
+    if (result.permBasic) permissions.push(Permission.Basic);
+    if (result.permVerified) permissions.push(Permission.Verified);
+    if (result.permCalendar) permissions.push(Permission.Calendar);
+    if (result.permWiki) permissions.push(Permission.Wiki);
+    if (result.permBulletin) permissions.push(Permission.Bulletin);
+    if (result.permGame) permissions.push(Permission.Game);
+    if (result.permHost) permissions.push(Permission.Host);
+    if (result.permUser) permissions.push(Permission.User);
+    if (result.permStat) permissions.push(Permission.Statistics);
+    if (result.permDevOps) permissions.push(Permission.DevOps);
+
+    compProps.onDone?.({
+      ...compProps.editSource,
+      account: result.account,
+      nickname: result.nickname,
+      email: result.email,
+      avatar: result.avatar,
+      description: result.description,
+      hidden: result.hidden,
+      banned: result.banned,
+      permissions,
+    } as User);
+  }
+  return (
+    <div class="w-full p-3 lg:p-6 flex flex-col flex-1 space-y-2 items-center">
+      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
+        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="flex-1 text-start">{t("account.settings.info.title")}</span>
+        <Link href="/admin/users" size="sm">
+          {t("form.backToList")}
+        </Link>
+        <Popover size="sm" level="error" btnContent={<span>{t("form.delete")}</span>}>
+          <Card contentClass="p-2 flex flex-col space-y-2 items-center">
+            <div class="flex flex-row space-x-2 items-center">
+              <span class="icon-[fluent--warning-20-filled] text-warning w-5 h-5" />
+              <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
+            </div>
+            <Button level="warning" class="flex-col space-x-0 space-y-2 py-4 w-full">
+              <img src={xdsecMascotUnsee} class="w-20 h-20" alt=">.<" />
+              <span>{t("form.delete")}</span>
+            </Button>
+          </Card>
+        </Popover>
+      </h3>
+      <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+        <div class="flex flex-row space-x-4 items-center">
+          <div class="flex flex-col space-y-2 flex-1">
+            <div class="flex flex-row space-x-2">
+              <Field name="account" validate={[required(t("account.settings.info.accountRequired")!)]}>
+                {(field, props) => (
+                  <Input
+                    class="flex-1"
+                    icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                    title={t("account.settings.info.account")}
+                    placeholder={t("account.settings.info.account")}
+                    {...props}
+                    value={field.value}
+                    error={field.error}
+                    required
+                  />
+                )}
+              </Field>
+              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+                {(field, props) => (
+                  <Input
+                    class="flex-1"
+                    icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                    title={t("account.settings.info.nickname")}
+                    placeholder={t("account.settings.info.nickname")}
+                    {...props}
+                    value={field.value}
+                    error={field.error}
+                    required
+                  />
+                )}
+              </Field>
+            </div>
+            <Field
+              name="email"
+              validate={[
+                required(t("account.settings.info.emailRequired")!),
+                email(t("account.settings.info.emailInvalid")!),
+              ]}
+            >
+              {(field, props) => (
+                <Input
+                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                  title={t("account.settings.info.email")}
+                  placeholder={t("account.settings.info.email")}
+                  {...props}
+                  value={field.value}
+                  error={field.error}
+                  required
+                />
+              )}
+            </Field>
+          </div>
+          <Field name="avatar">
+            {(field, props) => (
+              <Avatar
+                class="w-28 h-28 relative m-2"
+                src={(compProps.editSource?.avatar && mediaPath(compProps.editSource?.avatar)) || undefined}
+                fallback={compProps.editSource?.nickname}
+              >
+                <Button
+                  loading={avatarUploading()}
+                  disabled={avatarUploading()}
+                  type="button"
+                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute !rounded-full top-0 left-0 w-full h-full"
+                  onClick={() => {
+                    if (avatarSet()) {
+                      setAvatarSet(false);
+                      setAvatarFile(null);
+                      setValue(form, "avatar", "");
+                    } else {
+                      handleSelectAvatar();
+                    }
+                  }}
+                >
+                  <input
+                    type="file"
+                    class="hidden"
+                    id={field.name}
+                    {...props}
+                    ref={avatarInput!}
+                    onChange={handleSelectedAvatar}
+                  />
+                  <Show
+                    when={compProps.editSource?.avatar}
+                    fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                  >
+                    <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                  </Show>
+                </Button>
+              </Avatar>
+            )}
+          </Field>
+        </div>
+        <Field name="description">
+          {(field) => (
+            <Editor
+              form={form}
+              lineNumbers
+              class="h-80"
+              lang="markdown"
+              placeholder="MARKDOWN"
+              title={t("account.settings.info.description")}
+              name="description"
+              value={field.value}
+              error={field.error}
+            />
+          )}
+        </Field>
+        <div class="flex flex-row flex-wrap items-start">
+          <Field name="hidden" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{t("admin.users.hidden")}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="banned" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{t("admin.users.banned")}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permBasic" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Basic)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permVerified" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Verified)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permCalendar" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Calendar)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permWiki" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Wiki)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permBulletin" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Bulletin)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permGame" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Game)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permHost" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Host)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permUser" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.User)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permStat" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.Statistics)}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="permDevOps" type="boolean">
+            {(field, props) => (
+              <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
+                <span class="flex-1 text-start truncate">{permissionToString(Permission.DevOps)}</span>
+              </Checkbox>
+            )}
+          </Field>
+        </div>
+        <Button type="submit" level="primary" class="!mt-4" loading={compProps.loading} disabled={compProps.loading}>
+          {t("form.save")}
+        </Button>
+      </Form>
+      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
+        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="flex-1 text-start">{t("admin.users.ipAddresses")}</span>
+      </h3>
+      <div class="flex flex-row flex-wrap">
+        <For each={ips()}>
+          {(ip) => (
+            <Tag level="info" class="m-1">
+              <A href={`/admin/users?filter=${ip.address}`}>{ip.address}</A>
+            </Tag>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+}

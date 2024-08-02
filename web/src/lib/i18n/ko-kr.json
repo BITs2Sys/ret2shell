@@ -116,7 +116,8 @@
         "emailRequired": "이메일을 입력하세요.",
         "nickname": "닉네임",
         "nicknameRequired": "닉네임을 입력하세요.",
-        "title": "사용자 정보"
+        "title": "사용자 정보",
+        "accountRequired": ""
       },
       "institute": {
         "title": "조직 기관"
@@ -291,7 +292,15 @@
       "id": "ID",
       "account": "사용자 이름",
       "institute": "이메일",
-      "registeredAt": "가입 시간"
+      "registeredAt": "가입 시간",
+      "fetchUserFailed": "",
+      "warningDelete": "",
+      "hidden": "",
+      "banned": "",
+      "permBasic": "",
+      "permVerified": "",
+      "ipAddresses": "",
+      "fetchIpAddressesFailed": ""
     },
     "institute": {
       "title": "학교/조직",
@@ -429,7 +438,8 @@
     "download": "다운로드",
     "confirm": "확인",
     "deleteSuccess": "삭제 성공",
-    "goto": "가기"
+    "goto": "가기",
+    "backToList": ""
   },
   "game": {
     "accessPolicy": {

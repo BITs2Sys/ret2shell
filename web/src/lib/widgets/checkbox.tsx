@@ -21,7 +21,7 @@ export default function (
     `btn ${checkboxProps.ghost ? "btn-ghost" : ""} data-[state=checked]:border-2 data-[state=checked]:border-primary ${rest.disabled ? "btn-disabled" : ""}`.trim();
   return (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
-      <Popover.Anchor class="flex flex-col space-y-1 flex-1">
+      <Popover.Anchor class={`flex flex-col space-y-1 flex-1 ${rest.class}`.trim()}>
         <label class="label">{props.title}</label>
         <Checkbox.Root {...rest} class={classes()}>
           <Checkbox.Label asChild={() => children} />
