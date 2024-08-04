@@ -20,7 +20,7 @@ export default function () {
           {t("bulletin.create")} - {t("bulletin.title")}
         </span>
       </h1>
-      <div class="flex-1 flex flex-col">
+      <div class="flex-1 flex flex-col p-3 lg:p-6 items-center">
         <CreateForm onDone={onDone} />
       </div>
     </>

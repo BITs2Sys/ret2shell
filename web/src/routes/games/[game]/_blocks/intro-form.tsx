@@ -52,7 +52,7 @@ export default function IntroForm(props: {
       .catch(() => setLoading(false));
   }
   return (
-    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
       <Field name="content" validate={[required(t("game.introRequired")!)]}>
         {(field) => (
           <Editor

@@ -100,8 +100,8 @@ export default function () {
   return (
     <>
       <Title title={`${t("admin.oauth.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <div class="flex-1 flex flex-col items-center">
-        <div class="w-full max-w-5xl p-3 lg:p-6 flex flex-col">
+      <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
+        <div class="w-full max-w-5xl flex flex-col">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("admin.oauth.title")}</span>

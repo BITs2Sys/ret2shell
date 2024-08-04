@@ -475,7 +475,7 @@ export default function () {
             </Switch>
           </div>
         </div>
-        <div class="flex-1 flex flex-col space-y-2">
+        <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
           <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">{t("game.introduction.title")}</h1>
           <Switch>
             <Match when={inEdit()}>

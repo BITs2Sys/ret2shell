@@ -80,7 +80,7 @@ export default function (props: {
       });
   }
   return (
-    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
       <Field name="title" validate={[required(t("wiki.titleRequired")!)]}>
         {(field, props) => (
           <Input

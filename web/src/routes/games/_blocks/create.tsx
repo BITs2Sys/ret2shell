@@ -75,7 +75,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       });
   }
   return (
-    <Form onSubmit={onSubmit} class="flex flex-col self-center w-full max-w-5xl space-y-2 py-3 lg:py-6">
+    <Form onSubmit={onSubmit} class="flex flex-col self-center w-full max-w-5xl space-y-2">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.admin.edit.title")}</span>

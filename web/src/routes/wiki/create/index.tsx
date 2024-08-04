@@ -16,7 +16,7 @@ export default function () {
   return (
     <>
       <Title title={`${t("form.create")} - ${platformStore.config.name || t("platform.name")}`} />
-      <div class="flex-1 flex flex-col">
+      <div class="flex-1 flex flex-col p-3 lg:p-6">
         <CreateForm onDone={onDone} />
       </div>
     </>

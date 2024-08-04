@@ -1,4 +1,3 @@
-import IconCheckbox from "@widgets/icon-checkbox";
 import { createBulletin, updateBulletin } from "@api/bulletin";
 import { type Article, ArticleAccessPolicy } from "@models/article";
 import { createForm, required, setValues } from "@modular-forms/solid";
@@ -7,6 +6,7 @@ import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
@@ -75,7 +75,7 @@ export default function (props: {
       });
   }
   return (
-    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+    <Form onSubmit={onSubmit} class="flex flex-col space-y-2 w-full max-w-5xl flex-1">
       <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
         {(field, props) => (
           <Input

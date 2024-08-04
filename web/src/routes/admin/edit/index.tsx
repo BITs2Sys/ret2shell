@@ -87,8 +87,8 @@ export default function () {
   return (
     <>
       <Title title={`${t("admin.edit.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <div class="flex-1 flex flex-col items-center">
-        <Form onSubmit={onSubmit} class="w-full max-w-5xl p-3 lg:p-6 flex flex-col space-y-2">
+      <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
+        <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <div class="p-6 flex items-center justify-center">
             <LogoAnimate width={128} height={128} />
           </div>

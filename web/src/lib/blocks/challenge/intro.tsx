@@ -54,8 +54,8 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
         class="relative w-full flex-1 print:h-auto print:overflow-auto"
         defer
       >
-        <div class="flex flex-col items-center">
-          <div class="flex flex-col w-full max-w-5xl p-3 lg:p-6">
+        <div class="flex flex-col items-center p-3 lg:p-6">
+          <div class="flex flex-col w-full max-w-5xl">
             <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-6 font-bold">
               <span class="flex flex-row space-x-2 items-center flex-1 overflow-hidden">
                 <span class="icon-[fluent--info-20-regular] w-5 h-5" />

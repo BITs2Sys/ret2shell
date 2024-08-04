@@ -77,8 +77,8 @@ export default function () {
   return (
     <>
       <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t("platform.name")}`} />
-      <div class="flex-1 flex flex-col items-center">
-        <h1 class="text-3xl flex flex-row space-x-4 items-center w-full px-3 lg:px-6 max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
+      <div class="flex-1 flex flex-col items-center px-3 lg:px-6">
+        <h1 class="text-3xl flex flex-row space-x-4 items-center w-full max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
           <Show
             when={wikiStore.current}
             fallback={
@@ -91,7 +91,7 @@ export default function () {
             <span>{wikiStore.current!.title}</span>
           </Show>
         </h1>
-        <div class="flex flex-row items-center w-full px-3 lg:px-6 max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
+        <div class="flex flex-row items-center w-full max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
           <A
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
             title={t("article.by", {

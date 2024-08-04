@@ -48,8 +48,8 @@ export default function () {
     <>
       <Title title={`${user()?.nickname} - ${platformStore.config.name || t("platform.name")!}`} />
       <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />}>
-        <div class="flex-1 flex flex-col items-center">
-          <div class="flex flex-col w-full max-w-5xl p-3 lg:p-6">
+        <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
+          <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="icon-[fluent--person-20-regular] w-5 h-5" />
               <span>{t("user.introductionTitle")}</span>

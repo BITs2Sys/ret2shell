@@ -3,16 +3,20 @@ import { useNavigate } from "@solidjs/router";
 import { gameStore, isGameAdmin, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import type { JSX } from "solid-js";
+import { type JSX, createEffect } from "solid-js";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
-  if (!isGameAdmin()) {
-    setGameStore({ current: null, preload: null });
-    navigate("/sigtrap/403");
-    return null;
-  }
+  createEffect(() => {
+    if (gameStore.current) {
+      if (!isGameAdmin()) {
+        setGameStore({ current: null, preload: null });
+        navigate("/sigtrap/403");
+        return null;
+      }
+    }
+  });
   return (
     <>
       <Title title={`${t("game.admin.title")} - ${gameStore.current?.name || "CTF"}`} />

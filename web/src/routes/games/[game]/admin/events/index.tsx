@@ -29,8 +29,8 @@ export default function () {
     }
   });
   return (
-    <div class="flex-1 flex flex-col items-center">
-      <div class="flex-1 flex flex-col w-full max-w-5xl p-3 lg:p-6">
+    <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
+      <div class="flex-1 flex flex-col w-full max-w-5xl">
         <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
           <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
           <span>{t("game.admin.automate.title")} API</span>

@@ -67,8 +67,8 @@ export default function () {
   return (
     <>
       <Title title={`${t("admin.captcha.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <div class="flex-1 flex flex-col items-center">
-        <Form onSubmit={onSubmit} class="w-full max-w-5xl p-3 lg:p-6 flex flex-col space-y-2">
+      <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
+        <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("admin.captcha.title")}</span>
