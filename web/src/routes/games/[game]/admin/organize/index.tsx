@@ -257,7 +257,17 @@ function AdministratorsManagement() {
               <Show when={searching()}>
                 <LoadingTips />
               </Show>
-              <For each={searchedUsers()}>
+              <For
+                each={searchedUsers()}
+                fallback={
+                  <Show when={!searching() && adminSearch()}>
+                    <div class="h-12 flex items-center font-bold space-x-4 px-2">
+                      <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                      <span class="font-bold opacity-60">{t("game.admin.administrators.noAdmins")}</span>
+                    </div>
+                  </Show>
+                }
+              >
                 {(user) => (
                   <Dialog
                     disabled={

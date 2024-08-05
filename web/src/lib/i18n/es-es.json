@@ -502,7 +502,8 @@
         "confirm": "¿Está seguro de agregar a este usuario como administrador del concurso?",
         "addFailed": "Fallo al agregar",
         "deleteFailed": "Eliminación fallida",
-        "warningDelete": "¿Confirmar la eliminación del administrador?"
+        "warningDelete": "¿Confirmar la eliminación del administrador?",
+        "noAdmins": "No se encontraron usuarios que coincidan con los criterios de búsqueda."
       }
     },
     "adminCanNotTakePartIn": "El administrador no puede participar en la competición.",

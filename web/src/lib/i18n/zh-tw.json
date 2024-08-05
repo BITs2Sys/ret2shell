@@ -567,7 +567,8 @@
         "confirm": "是否確認添加該用戶為比賽管理員？",
         "addFailed": "添加失敗",
         "deleteFailed": "刪除失敗",
-        "warningDelete": "確認刪除管理員？"
+        "warningDelete": "確認刪除管理員？",
+        "noAdmins": "找不到符合搜尋條件的用戶"
       }
     },
     "adminCanNotTakePartIn": "管理員不能參賽",

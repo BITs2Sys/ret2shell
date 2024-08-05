@@ -502,7 +502,8 @@
         "confirm": "このユーザーを試合管理者として追加してもよろしいですか？",
         "addFailed": "追加失敗",
         "deleteFailed": "削除失敗",
-        "warningDelete": "管理者を削除してもよろしいですか？"
+        "warningDelete": "管理者を削除してもよろしいですか？",
+        "noAdmins": "検索条件に一致するユーザーが見つかりませんでした"
       }
     },
     "adminCanNotTakePartIn": "管理者は参加できません。",

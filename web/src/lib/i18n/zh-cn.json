@@ -238,7 +238,8 @@
         "confirm": "是否确认添加该用户为比赛管理员？",
         "addFailed": "添加失败",
         "deleteFailed": "删除失败",
-        "warningDelete": "确认删除管理员？"
+        "warningDelete": "确认删除管理员？",
+        "noAdmins": "没有找到符合搜索条件的的用户"
       }
     },
     "exit": "退出",

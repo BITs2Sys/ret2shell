@@ -567,7 +567,8 @@
         "confirm": "Are you sure you want to add this user as a competition administrator?",
         "addFailed": "Addition failed",
         "deleteFailed": "Deletion failed",
-        "warningDelete": "Confirm deletion of the administrator?"
+        "warningDelete": "Confirm deletion of the administrator?",
+        "noAdmins": "No users found matching the search criteria"
       }
     },
     "adminCanNotTakePartIn": "Administrators are not allowed to participate.",

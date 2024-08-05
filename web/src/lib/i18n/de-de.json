@@ -502,7 +502,8 @@
         "confirm": "Möchten Sie diesen Benutzer als Turnieradministrator hinzufügen?",
         "addFailed": "Hinzufügen fehlgeschlagen",
         "deleteFailed": "Löschung fehlgeschlagen",
-        "warningDelete": "Bestätigen Sie das Löschen des Administrators?"
+        "warningDelete": "Bestätigen Sie das Löschen des Administrators?",
+        "noAdmins": "Keine Benutzer gefunden, die den Suchkriterien entsprechen"
       }
     },
     "adminCanNotTakePartIn": "Administrator kann nicht teilnehmen.",

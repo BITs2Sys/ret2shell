@@ -502,7 +502,8 @@
         "confirm": "Êtes-vous sûr de vouloir ajouter cet utilisateur en tant qu'administrateur de la compétition ?",
         "addFailed": "Échec de l'ajout",
         "deleteFailed": "Échec de la suppression",
-        "warningDelete": "Confirmer la suppression de l'administrateur ?"
+        "warningDelete": "Confirmer la suppression de l'administrateur ?",
+        "noAdmins": "Aucun utilisateur ne correspond aux critères de recherche"
       }
     },
     "adminCanNotTakePartIn": "L'administrateur ne peut pas participer.",
