@@ -20,4 +20,12 @@ pub enum ClusterError {
   ProxyError(#[from] wsrx::Error),
   #[error("missing field: {0}")]
   MissingField(String),
+  #[error("network error: {0}")]
+  NetworkError(#[from] reqwest::Error),
+  #[error("json error: {0}")]
+  JsonError(#[from] serde_json::Error),
+  #[error("io error: {0}")]
+  IoError(#[from] std::io::Error),
+  #[error("upload failed: {0}")]
+  UploadFailed(String),
 }

@@ -12,3 +12,18 @@ export type Challenge = {
   score: number;
   bucket: string | null;
 };
+
+export type ChallengeImage = {
+  name: string;
+  tag: string;
+  cpu: number;
+  mem: string;
+  port: number | null;
+  service_type: "http" | "tcp" | null;
+  description: string | null;
+};
+
+export type ChallengeEnv = {
+  internet: boolean;
+  images: ChallengeImage[];
+};

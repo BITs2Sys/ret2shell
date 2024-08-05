@@ -1,3 +1,4 @@
+import type { RegistryConfig } from "@models/config";
 import api, { api_root } from ".";
 
 export type ClusterConfig = {
@@ -92,5 +93,17 @@ export type ClusterNodes = {
 };
 
 export async function getClusterNodes() {
-  return await api.get(`${api_root}/cluster/nodes`).json<ClusterNodes>();
+  return await api.get(`${api_root}/cluster/node`).json<ClusterNodes>();
+}
+
+export async function getRegistryRepositories() {
+  return await api.get(`${api_root}/cluster/repo`).json<string[]>();
+}
+
+export async function getRegistryImages(repo: string) {
+  return await api.get(`${api_root}/cluster/repo/${repo}`).json<string[]>();
+}
+
+export async function getRegistryConfig() {
+  return await api.get(`${api_root}/cluster/repo/config`).json<RegistryConfig>();
 }

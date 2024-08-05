@@ -1,5 +1,5 @@
 import type { Article } from "@models/article";
-import type { Challenge } from "@models/challenge";
+import type { Challenge, ChallengeEnv } from "@models/challenge";
 import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
 import type { User } from "@models/user";
@@ -176,21 +176,20 @@ export async function deleteChallengeAttachment(
     .json<void>();
 }
 
-export type ChallengeEnv = {
-  internet: boolean;
-  images: {
-    name: string;
-    tag: string;
-    cpu: number;
-    mem: string;
-    port: number;
-    service_type: "http" | "tcp";
-    description: string;
-  }[];
-};
-
 export async function getChallengeEnv(game_id: number, challenge_id: number) {
   return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<ChallengeEnv | null>();
+}
+
+export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
+      json: env,
+    })
+    .json<void>();
+}
+
+export async function deleteChallengeEnv(game_id: number, challenge_id: number) {
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>();
 }
 
 export async function getTeamInfo(game_id: number, team_id: number) {

@@ -1,5 +1,5 @@
-import { type ChallengeEnv, getChallengeAttachments, getChallengeEnv, getChallengeList } from "@api/game";
-import type { Challenge } from "@models/challenge";
+import { getChallengeAttachments, getChallengeEnv, getChallengeList } from "@api/game";
+import type { Challenge, ChallengeEnv } from "@models/challenge";
 import { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
 import { gameStore } from "./game";

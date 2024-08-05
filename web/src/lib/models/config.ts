@@ -28,13 +28,25 @@ export type CaptchaConfig = {
   difficulty: number | null;
   validator: "none" | "image" | "pow" | "recaptcha_v3" | "h_captcha";
 };
+
+export type RegistryConfig = {
+  username: string;
+  password: string;
+  server: string;
+  insecure: boolean;
+};
 export type ClusterConfig = {
   try_default: boolean;
   auto_infer: boolean;
   kube_config_path: string | null;
   challenge_node_selector: string | null;
   proxy_image: string | null;
+  traffic: string | null;
+  enable_capture: boolean | null;
+  capture_directory: string | null;
+  registry: RegistryConfig | null;
 };
+
 export type DatabaseConfig = {
   db: string;
   host: string;

@@ -38,6 +38,12 @@ enable_capture = true
 capture_directory = "./data/captures"
 cleanup_interval = 3600                        # in seconds
 
+[cluster.registry]
+server = "ctf.xidian.edu.cn"
+insecure = false
+#username =
+#password =
+
 [database]
 db = 'ret2shell'
 host = '127.0.0.1'

@@ -4,6 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::Merge;
 
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+pub struct RegistryConfig {
+  pub username: Option<String>,
+  pub password: Option<String>,
+  pub server: String,
+  pub insecure: bool,
+}
+
 /// `ClusterConfig` is a configuration struct for managing service settings.
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -31,7 +39,7 @@ pub struct Config {
   /// `capture_directory` is the directory to store the capture files.
   pub capture_directory: Option<String>,
   /// `registry` is the private registry for challenge images.
-  pub registry: Option<String>,
+  pub registry: Option<RegistryConfig>,
 }
 
 impl Merge for Option<Config> {
