@@ -554,20 +554,20 @@
       },
       "organize": {
         "title": "Organization Management",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "Restrict this competition",
+        "instituteEnabled": "Organizational Sub-Rankings"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "Event Manager",
+        "fetchFailed": "Failed to obtain event administrator",
+        "add": "Add Administrator",
+        "addPlaceholder": "Enter username to add administrator...",
+        "noPermission": "No event administrator main permissions",
+        "alreadyAdded": "Added",
+        "confirm": "Are you sure you want to add this user as a competition administrator?",
+        "addFailed": "Addition failed",
+        "deleteFailed": "Deletion failed",
+        "warningDelete": "Confirm deletion of the administrator?"
       }
     },
     "adminCanNotTakePartIn": "Administrators are not allowed to participate.",

@@ -489,20 +489,20 @@
       "title": "관리",
       "organize": {
         "title": "조직 관리",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "이 대회를 제한합니다",
+        "instituteEnabled": "조직 부문 순위"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "대회 관리자",
+        "fetchFailed": "대회 관리자 가져오기 실패",
+        "add": "관리자 추가",
+        "addPlaceholder": "사용자 이름을 입력하여 관리자를 추가하세요...",
+        "noPermission": "대회 관리자 주요 권한 없음",
+        "alreadyAdded": "추가됨",
+        "confirm": "해당 사용자를 대회 관리자로 추가하시겠습니까?",
+        "addFailed": "추가 실패",
+        "deleteFailed": "삭제 실패",
+        "warningDelete": "관리자를 삭제하시겠습니까?"
       }
     },
     "adminCanNotTakePartIn": "관리자는 참가할 수 없습니다.",

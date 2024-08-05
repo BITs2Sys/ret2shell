@@ -489,20 +489,20 @@
       "title": "управление",
       "organize": {
         "title": "организационное управление",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "Ограничить это соревнование",
+        "instituteEnabled": "организационные рейтинги"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "Спортивный администратор",
+        "fetchFailed": "Получение администратора соревнований не удалось",
+        "add": "添加管理员",
+        "addPlaceholder": "Введите имя пользователя для добавления администратора...",
+        "noPermission": "Без главных прав администратора соревнований",
+        "alreadyAdded": "Добавлено",
+        "confirm": "Вы уверены, что хотите добавить этого пользователя в качестве администратора соревнования?",
+        "addFailed": "Добавление не удалось",
+        "deleteFailed": "Удаление не удалось",
+        "warningDelete": "Подтвердить удаление администратора?"
       }
     },
     "adminCanNotTakePartIn": "Администраторы не могут участвовать в соревнованиях.",

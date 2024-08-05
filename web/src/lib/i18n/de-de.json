@@ -489,20 +489,20 @@
       "title": "Verwaltung",
       "organize": {
         "title": "Organisationsmanagement",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "Beschränken Sie dieses Turnier",
+        "instituteEnabled": "Organisations-Unterkategorie"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "Wettkampfverwalter",
+        "fetchFailed": "Fehler beim Abrufen des Turnieradministrators",
+        "add": "Administrator hinzufügen",
+        "addPlaceholder": "Geben Sie den Benutzernamen ein, um einen Administrator hinzuzufügen...",
+        "noPermission": "kein Hauptberechtigter für Wettkampfverwaltung",
+        "alreadyAdded": "Hinzugefügt",
+        "confirm": "Möchten Sie diesen Benutzer als Turnieradministrator hinzufügen?",
+        "addFailed": "Hinzufügen fehlgeschlagen",
+        "deleteFailed": "Löschung fehlgeschlagen",
+        "warningDelete": "Bestätigen Sie das Löschen des Administrators?"
       }
     },
     "adminCanNotTakePartIn": "Administrator kann nicht teilnehmen.",

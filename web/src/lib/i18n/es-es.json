@@ -489,20 +489,20 @@
       "title": "administración",
       "organize": {
         "title": "Gestión de organización",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "Limitar esta competición",
+        "instituteEnabled": "Clasificación por categorías"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "Administrador de eventos",
+        "fetchFailed": "Fallo al obtener el administrador de eventos",
+        "add": "agregar administrador",
+        "addPlaceholder": "Ingrese el nombre de usuario para agregar administrador...",
+        "noPermission": "Sin permisos principales de administrador de eventos",
+        "alreadyAdded": "agregado",
+        "confirm": "¿Está seguro de agregar a este usuario como administrador del concurso?",
+        "addFailed": "Fallo al agregar",
+        "deleteFailed": "Eliminación fallida",
+        "warningDelete": "¿Confirmar la eliminación del administrador?"
       }
     },
     "adminCanNotTakePartIn": "El administrador no puede participar en la competición.",

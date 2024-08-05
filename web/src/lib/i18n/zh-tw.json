@@ -554,20 +554,20 @@
       },
       "organize": {
         "title": "組織管理",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "限定此賽事",
+        "instituteEnabled": "組織分榜"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "賽事管理員",
+        "fetchFailed": "獲取賽事管理員失敗",
+        "add": "添加管理員",
+        "addPlaceholder": "輸入用戶名添加管理員...",
+        "noPermission": "無賽事管理員主權限",
+        "alreadyAdded": "已新增",
+        "confirm": "是否確認添加該用戶為比賽管理員？",
+        "addFailed": "添加失敗",
+        "deleteFailed": "刪除失敗",
+        "warningDelete": "確認刪除管理員？"
       }
     },
     "adminCanNotTakePartIn": "管理員不能參賽",

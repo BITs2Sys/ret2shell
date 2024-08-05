@@ -489,20 +489,20 @@
       "title": "gérer",
       "organize": {
         "title": "Gestion des organisations",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "Limiter cette compétition",
+        "instituteEnabled": "Classement par catégories"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "Administrateur de compétition",
+        "fetchFailed": "Échec de l'obtention de l'administrateur des compétitions",
+        "add": "Ajouter un administrateur",
+        "addPlaceholder": "Entrez le nom d'utilisateur pour ajouter un administrateur...",
+        "noPermission": "sans autorité principale d'administrateur de compétition",
+        "alreadyAdded": "Ajouté",
+        "confirm": "Êtes-vous sûr de vouloir ajouter cet utilisateur en tant qu'administrateur de la compétition ?",
+        "addFailed": "Échec de l'ajout",
+        "deleteFailed": "Échec de la suppression",
+        "warningDelete": "Confirmer la suppression de l'administrateur ?"
       }
     },
     "adminCanNotTakePartIn": "L'administrateur ne peut pas participer.",

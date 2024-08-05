@@ -489,20 +489,20 @@
       },
       "organize": {
         "title": "組織管理",
-        "restrict": "",
-        "instituteEnabled": ""
+        "restrict": "この大会を限定する",
+        "instituteEnabled": "組織別ランキング"
       },
       "administrators": {
-        "title": "",
-        "fetchFailed": "",
-        "add": "",
-        "addPlaceholder": "",
-        "noPermission": "",
-        "alreadyAdded": "",
-        "confirm": "",
-        "addFailed": "",
-        "deleteFailed": "",
-        "warningDelete": ""
+        "title": "大会管理者",
+        "fetchFailed": "賽事管理員の取得に失敗しました",
+        "add": "管理者を追加",
+        "addPlaceholder": "ユーザー名を入力して管理者を追加...",
+        "noPermission": "コンテスト管理者の主権限なし",
+        "alreadyAdded": "追加済み",
+        "confirm": "このユーザーを試合管理者として追加してもよろしいですか？",
+        "addFailed": "追加失敗",
+        "deleteFailed": "削除失敗",
+        "warningDelete": "管理者を削除してもよろしいですか？"
       }
     },
     "adminCanNotTakePartIn": "管理者は参加できません。",
