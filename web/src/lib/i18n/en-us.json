@@ -553,7 +553,21 @@
         "notAccessableWhenInGame": "Solutions cannot be released before the end of the game."
       },
       "organize": {
-        "title": "Organization Management"
+        "title": "Organization Management",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "Administrators are not allowed to participate.",

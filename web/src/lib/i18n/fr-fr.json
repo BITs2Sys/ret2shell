@@ -488,7 +488,21 @@
       },
       "title": "gérer",
       "organize": {
-        "title": "Gestion des organisations"
+        "title": "Gestion des organisations",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "L'administrateur ne peut pas participer.",

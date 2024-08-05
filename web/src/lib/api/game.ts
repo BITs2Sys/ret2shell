@@ -2,6 +2,7 @@ import type { Article } from "@models/article";
 import type { Challenge } from "@models/challenge";
 import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
+import type { User } from "@models/user";
 import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
@@ -215,4 +216,12 @@ export type EventDeviceInfo = {
 
 export async function getGameDevices(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/device`).json<EventDeviceInfo[]>();
+}
+
+export async function getGameAdmins(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/administrator`).json<User[]>();
+}
+
+export async function updateGameAdmins(game_id: number, admins: number[]) {
+  return await api.patch(`${api_root}/game/${game_id}/administrator`, { json: admins }).json<Game>();
 }

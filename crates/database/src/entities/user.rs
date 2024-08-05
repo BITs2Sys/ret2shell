@@ -234,6 +234,19 @@ where
     .await
 }
 
+pub async fn get_multiple<C>(db: &C, user_ids: &Vec<i64>) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait,
+{
+  Entity::find()
+    .filter(
+      Condition::any()
+        .add(Expr::col(Column::Id).in_tuples(user_ids.iter().map(|id| *id).collect::<Vec<i64>>())),
+    )
+    .all(db)
+    .await
+}
+
 pub async fn get_by_account_or_email<C>(db: &C, n: &str) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait,

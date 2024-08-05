@@ -488,7 +488,21 @@
       },
       "title": "Verwaltung",
       "organize": {
-        "title": "Organisationsmanagement"
+        "title": "Organisationsmanagement",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "Administrator kann nicht teilnehmen.",

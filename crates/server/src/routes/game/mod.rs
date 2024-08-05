@@ -47,15 +47,19 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       "/:game",
       Router::new()
         .route(
-          "/env",
-          get(get_self_envs)
-            .patch(delay_self_env)
-            .delete(stop_self_env),
+          "/administrator",
+          get(get_game_administrator).patch(update_game_administrator),
         )
         .route("/device", get(get_connected_devices))
         .route("/introduction", patch(update_game_intro))
         .route("/", patch(update_game).delete(delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
+        .route(
+          "/env",
+          get(get_self_envs)
+            .patch(delay_self_env)
+            .delete(stop_self_env),
+        )
         .nest("/challenge", challenge::router(state))
         .nest("/team", team::router(state))
         .nest("/notification", notification::router(state))
@@ -458,4 +462,28 @@ async fn get_connected_devices(
     })
     .collect::<Vec<_>>();
   Ok(Json(clients))
+}
+
+async fn get_game_administrator(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let admins = user::get_multiple(&db.conn, &game.admins.0).await?;
+  Ok(Json(admins))
+}
+
+async fn update_game_administrator(
+  State(ref db): State<Database>, State(ref cache): State<Cache>,
+  Extension(game): Extension<game::Model>, Json(admins): Json<Vec<i64>>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let model = game::update(
+    &db.conn,
+    game::Model {
+      id: game.id,
+      admins: game::Admins(admins),
+      ..game.clone()
+    },
+  )
+  .await?;
+  cache.at("game").del(game.id).await?;
+  Ok(Json(model))
 }

@@ -553,7 +553,21 @@
         "notAccessableWhenInGame": "比賽結束前無法發布題解"
       },
       "organize": {
-        "title": "組織管理"
+        "title": "組織管理",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "管理員不能參賽",

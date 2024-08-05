@@ -488,7 +488,21 @@
       },
       "title": "관리",
       "organize": {
-        "title": "조직 관리"
+        "title": "조직 관리",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "관리자는 참가할 수 없습니다.",

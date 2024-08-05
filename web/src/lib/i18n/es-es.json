@@ -488,7 +488,21 @@
       },
       "title": "administración",
       "organize": {
-        "title": "Gestión de organización"
+        "title": "Gestión de organización",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "El administrador no puede participar en la competición.",

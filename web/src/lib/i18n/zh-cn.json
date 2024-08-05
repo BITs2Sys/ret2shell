@@ -224,7 +224,21 @@
         "notAccessableWhenInGame": "比赛结束前无法发布题解"
       },
       "organize": {
-        "title": "组织管理"
+        "title": "组织管理",
+        "restrict": "限定此赛事",
+        "instituteEnabled": "组织分榜"
+      },
+      "administrators": {
+        "title": "赛事管理员",
+        "fetchFailed": "获取赛事管理员失败",
+        "add": "添加管理员",
+        "addPlaceholder": "输入用户名添加管理员...",
+        "noPermission": "无赛事管理员主权限",
+        "alreadyAdded": "已添加",
+        "confirm": "是否确认添加该用户为比赛管理员？",
+        "addFailed": "添加失败",
+        "deleteFailed": "删除失败",
+        "warningDelete": "确认删除管理员？"
       }
     },
     "exit": "退出",

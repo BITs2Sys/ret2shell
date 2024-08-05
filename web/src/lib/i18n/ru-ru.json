@@ -488,7 +488,21 @@
       },
       "title": "управление",
       "organize": {
-        "title": "организационное управление"
+        "title": "организационное управление",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "Администраторы не могут участвовать в соревнованиях.",

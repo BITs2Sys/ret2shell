@@ -488,7 +488,21 @@
         "notAccessableWhenInGame": "試合終了前に問題解説を公開できません"
       },
       "organize": {
-        "title": "組織管理"
+        "title": "組織管理",
+        "restrict": "",
+        "instituteEnabled": ""
+      },
+      "administrators": {
+        "title": "",
+        "fetchFailed": "",
+        "add": "",
+        "addPlaceholder": "",
+        "noPermission": "",
+        "alreadyAdded": "",
+        "confirm": "",
+        "addFailed": "",
+        "deleteFailed": "",
+        "warningDelete": ""
       }
     },
     "adminCanNotTakePartIn": "管理者は参加できません。",
