@@ -6,6 +6,7 @@ use r2s_database::{challenge, submission, team, user};
 use rune::{
   alloc,
   runtime::{Object, RuntimeContext},
+  termcolor::Buffer,
   Context, Diagnostics, Source, Sources, Unit, Value, Vm,
 };
 use serde::{Deserialize, Serialize};
@@ -32,7 +33,7 @@ macro_rules! to_rune_object {
         {
             let mut object = Object::new();
             $(
-                object.insert(alloc::String::try_from(stringify!($column))?, rune::to_value($model.$column)?)?;
+                object.insert(alloc::String::try_from(stringify!($column))?, rune::to_value($model.$column.clone())?)?;
             )*
             object
         }
@@ -86,7 +87,12 @@ impl Checker {
       .with_diagnostics(&mut diagnostics)
       .build();
     if !diagnostics.is_empty() {
-      return Err(CheckerError::CompileError(format!("{diagnostics:?}")));
+      let mut out = Buffer::ansi();
+      diagnostics.emit(&mut out, &sources)?;
+      return Err(CheckerError::CompileError(format!(
+        "{}",
+        String::from_utf8(out.into_inner())?
+      )));
     }
     let unit = rune::prepare(&mut sources).with_context(&context).build()?;
     let runtime = context.runtime()?;
@@ -99,7 +105,7 @@ impl Checker {
   }
 
   pub async fn preload(
-    &mut self, challenge: challenge::Model, bucket: &ChallengeBucket,
+    &mut self, challenge: &challenge::Model, bucket: &ChallengeBucket,
   ) -> Result<(), CheckerError> {
     let contexts = self.contexts.write().await;
     if contexts.contains_key(&bucket.hash()) && challenge.updated_at < contexts[&bucket.hash()].2 {
@@ -125,8 +131,8 @@ impl Checker {
   /// (correct: bool, msg: String, Option<(peer_team: Option<i64>, reason:
   /// String)>)
   pub async fn check(
-    &self, bucket: ChallengeBucket, user: user::Model, team: Option<team::Model>,
-    submission: submission::Model,
+    &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
+    submission: &submission::Model,
   ) -> Result<(bool, String, Option<AuditMessage>), CheckerError> {
     let contexts = self.contexts.read().await;
     let (unit, runtime, _) = contexts
@@ -140,13 +146,11 @@ impl Checker {
       Some(team) => to_rune_object!(team, id, name, institute_id),
       None => Object::new(),
     };
-    let bucket_path = alloc::String::try_from(bucket.path().to_path_buf().display().to_string())?;
-    let output = vm
-      .async_call(
-        ["check"],
-        (bucket_path, user_object, team_object, submission_object),
-      )
-      .await?;
+    let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
+    let output = vm.call(
+      ["check"],
+      (bucket, user_object, team_object, submission_object),
+    )?;
     let output: Result<(bool, String, Option<Object>), Value> = rune::from_value(output)?;
     if let Ok((result, message, audit)) = output {
       let audit = if let Some(audit) = audit {
@@ -180,7 +184,7 @@ impl Checker {
   }
 
   pub async fn environ(
-    &self, bucket: ChallengeBucket, user: user::Model, team: Option<team::Model>,
+    &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
   ) -> Result<HashMap<String, String>, CheckerError> {
     let contexts = self.contexts.read().await;
     let (unit, runtime, _) = contexts
@@ -192,10 +196,8 @@ impl Checker {
       Some(team) => to_rune_object!(team, id, name, institute_id),
       None => Object::new(),
     };
-    let bucket_path = alloc::String::try_from(bucket.path().to_path_buf().display().to_string())?;
-    let output = vm
-      .async_call(["environ"], (bucket_path, user_object, team_object))
-      .await?;
+    let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
+    let output = vm.call(["environ"], (bucket, user_object, team_object))?;
     let object: Result<Object, Value> = rune::from_value(output)?;
     if let Ok(object) = object {
       let mut environ = HashMap::new();

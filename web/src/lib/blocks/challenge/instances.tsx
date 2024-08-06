@@ -1,6 +1,6 @@
 import { api_root } from "@api";
-import { getRegistryConfig, getRegistryImages, getRegistryRepositories } from "@api/cluster";
-import { deleteChallengeEnv, updateChallengeEnv } from "@api/game";
+import { getRegistryConfig, getRegistryImageTags, getRegistryRepositories } from "@api/cluster";
+import { deleteChallengeEnv, getChallengeInstance, updateChallengeEnv } from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
 import type { ChallengeImage } from "@models/challenge";
@@ -18,11 +18,13 @@ import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
+import type { Pod } from "kubernetes-types/core/v1";
 import type { HTTPError } from "ky";
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal, untrack } from "solid-js";
 
 function CreateForm(fnProps: {
   repos: string[];
+  onDone?: () => void;
 }) {
   const [loading, setLoading] = createSignal(false);
   const [registryConfig, setRegistryConfig] = createSignal<RegistryConfig | null>(null);
@@ -45,7 +47,7 @@ function CreateForm(fnProps: {
   const [selected, setSelected] = createSignal(false);
   function fetchTags(repo: string) {
     setLoading(true);
-    getRegistryImages(repo)
+    getRegistryImageTags(repo)
       .then((tags) => {
         setTags(tags);
       })
@@ -97,6 +99,7 @@ function CreateForm(fnProps: {
       })
       .finally(() => {
         setAdding(false);
+        fnProps.onDone?.();
       });
   }
   return (
@@ -281,6 +284,49 @@ function CreateForm(fnProps: {
   );
 }
 
+function InstanceList() {
+  const [pods, setPods] = createSignal<Pod[]>([]);
+  createEffect(() => {
+    if (challengeStore.current) {
+      untrack(() => {
+        getChallengeInstance(challengeStore!.current!.game_id, challengeStore!.current!.id)
+          .then(setPods)
+          .catch((err: HTTPError) => {
+            err.response.text().then((text) => {
+              addToast({
+                level: "error",
+                description: `${t("game.challenge.fetchEnvInstancesFailed")}: ${text}`,
+                duration: 5000,
+              });
+            });
+          });
+      });
+    }
+  });
+  return (
+    <ul class="flex flex-col">
+      <For
+        each={pods()}
+        fallback={
+          <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
+            <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
+            <span>{t("game.challenge.noEnvInstances")}</span>
+          </div>
+        }
+      >
+        {(pod) => (
+          <li class="h-12 flex flex-row space-x-2 items-center border-b border-b-layer-content/10">
+            <span class="icon-[fluent--cube-20-regular] w-5 h-5" />
+            <span>{pod.metadata?.name}</span>
+            <span class="flex-1" />
+            <span class="opacity-60">{pod.status?.phase}</span>
+          </li>
+        )}
+      </For>
+    </ul>
+  );
+}
+
 export default function () {
   const [repos, setRepos] = createSignal<string[]>([]);
   function fetchRepos() {
@@ -298,7 +344,11 @@ export default function () {
         });
       });
   }
-  fetchRepos();
+  createEffect(() => {
+    if (challengeStore.current) {
+      untrack(fetchRepos);
+    }
+  });
   function onToggleInternet() {
     updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
       internet: !challengeStore.env?.internet,
@@ -342,8 +392,6 @@ export default function () {
             description: `${t("game.challenge.deleteEnvImageFailed")}: ${text}`,
             duration: 5000,
           });
-
-          refreshChallengeAssets();
         });
       });
   }
@@ -367,6 +415,7 @@ export default function () {
         });
       });
   }
+  const [formOpen, setFormOpen] = createSignal(false);
   return (
     <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
       <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
@@ -382,10 +431,27 @@ export default function () {
               description: t("game.challenge.uploadImageToRegistrySuccess")!,
               duration: 5000,
             });
+            fetchRepos();
           }}
         />
-        <Dialog size="sm" btnContent={<span>{t("game.challenge.addEnvImage")}</span>} stretched>
-          <CreateForm repos={repos()} />
+        <Dialog
+          size="sm"
+          btnContent={<span>{t("game.challenge.addEnvImage")}</span>}
+          stretched
+          open={formOpen()}
+          onOpenChange={(details) => {
+            setFormOpen(details.open);
+          }}
+          onClick={() => {
+            setFormOpen(true);
+          }}
+        >
+          <CreateForm
+            repos={repos()}
+            onDone={() => {
+              setFormOpen(false);
+            }}
+          />
         </Dialog>
         <Show when={challengeStore.env}>
           <Popover level="error" size="sm" btnContent={<span>{t("game.challenge.deleteEnv")}</span>}>
@@ -413,7 +479,7 @@ export default function () {
       <For
         each={challengeStore.env?.images || []}
         fallback={
-          <div class="h-12 flex flex-row px-2 space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
+          <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
             <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
             <span>{t("game.challenge.noEnvImages")}</span>
           </div>
@@ -423,8 +489,10 @@ export default function () {
           <div class="py-2 flex flex-col space-y-1 border-b border-b-layer-content/10">
             <div class="flex flex-row space-x-2 items-center">
               <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
-              <span class="flex-1">{image.name}</span>
-              <span class="opacity-60">{image.tag}</span>
+              <span>{image.name}</span>
+              <span class="opacity-60 flex-1 text-end truncate" title={image.tag}>
+                {image.tag}
+              </span>
               <Popover
                 level="error"
                 ghost
@@ -444,20 +512,27 @@ export default function () {
               </Popover>
             </div>
             <div class="flex flex-row space-x-2 items-center opacity-80">
-              <span class="icon-[fluent--engine-20-regular] w-5 h-5" />
-              <span class="text-error">{image.cpu}</span>
-              <span class="icon-[fluent--box-20-regular] w-5 h-5" />
-              <span class="text-error">{image.mem}</span>
-              <span class="flex-1" />
               <span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />
-              <span class="text-info">
+              <span class="text-warning font-bold">
                 {image.service_type}:{image.port}
               </span>
               <span>({image.description})</span>
+              <span class="flex-1" />
+              <span class="icon-[fluent--engine-20-regular] w-5 h-5" />
+              <span class="font-bold opacity-60">CPU: {image.cpu}</span>
+              <span class="icon-[fluent--box-20-regular] w-5 h-5" />
+              <span class="font-bold opacity-60">Memory: {image.mem}</span>
             </div>
           </div>
         )}
       </For>
+      <Show when={challengeStore.env}>
+        <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5 flex-shrink-0" />
+          <span class="flex-1 text-start">{t("game.challenge.envInstances")}</span>
+        </header>
+        <InstanceList />
+      </Show>
     </div>
   );
 }

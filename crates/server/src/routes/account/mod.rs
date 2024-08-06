@@ -52,7 +52,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       "/profile",
       get(get_profile).patch(change_profile).delete(delete_self),
     )
-    .route("/verify", post(verify_email).patch(resend_verify_email))
+    .route("/verify", patch(resend_verify_email))
     .route_layer(middleware::from_fn_with_state(
       state.clone(),
       data::prepare_user_info,
@@ -63,6 +63,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       Permission::Basic
     )))
     .route("/oauth", post(login_with_oauth_account))
+    .route("/verify", post(verify_email))
     .route("/reset", post(reset_password))
     .route("/forgot", post(forgot_password))
     .route("/login", post(login))
@@ -121,6 +122,18 @@ macro_rules! check_email_validation {
     }
     checked_email
   }};
+}
+
+async fn logout_user(cache: &Cache, user_id: i64) -> Result<(), ResponseError> {
+  while let Some(token) = cache
+    .at("token")
+    .pop::<String>(format!("user-{user_id}"))
+    .await?
+  {
+    cache.at("token").del(&token).await.ok();
+  }
+  cache.del(format!("user-{user_id}")).await.ok();
+  Ok(())
 }
 
 #[derive(Serialize, Deserialize)]
@@ -473,6 +486,7 @@ async fn verify_email(
     user.nickname,
     user.email.unwrap_or_default()
   );
+  logout_user(&cache, user.id).await?;
   // renew token
   *(token_tracker.token.lock().await) = Token {
     id: user.id,
@@ -712,6 +726,7 @@ async fn change_profile(
     )
     .await?;
 
+    logout_user(&cache, user.id).await?;
     // renew token
     *(token_tracker.token.lock().await) = Token {
       id: user.id,

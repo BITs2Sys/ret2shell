@@ -144,7 +144,7 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
                       <For each={challengeStore.env?.images}>
                         {(image) => (
                           <Show when={image.port}>
-                            <Button ghost size="sm" title={image.description}>
+                            <Button ghost size="sm" title={image.description!}>
                               <Switch>
                                 <Match when={image.service_type === "http"}>
                                   <span class="text-info">HTTP</span>

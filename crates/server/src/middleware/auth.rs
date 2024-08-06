@@ -121,7 +121,7 @@ pub async fn extract_user_info(
     .load(std::sync::atomic::Ordering::Relaxed)
   {
     let original_token_str = token_tracker.original.as_ref().unwrap();
-    cache.at("token").del(original_token_str).await?;
+    cache.at("token").del(original_token_str).await.ok();
     let token_stored = token_tracker.token.lock().await.clone();
     cache
       .at("token")

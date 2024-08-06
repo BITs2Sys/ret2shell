@@ -20,6 +20,7 @@ declare module "*.jpeg" {
   export default src;
 }
 declare module "*.md";
+declare module "*.rx";
 declare module "*.module.css" {
   const styles: Record<string, string>;
   export default styles;

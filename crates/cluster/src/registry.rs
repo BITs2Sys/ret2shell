@@ -83,11 +83,20 @@ impl Registry {
     tokio::io::copy(&mut stdin, &mut file).await?;
     // get tag name without file extension
     let repo = name.split('.').next().unwrap();
+    let mut args = vec![
+      "copy".to_string(),
+      format!("docker-archive:{}", name),
+      format!("docker://{}/{}:latest", self.base()?, repo),
+    ];
+    if self.credentials.clone().is_some_and(|c| c.insecure) {
+      args.push("--dest-tls-verify=false".to_string());
+    }
     let output = Command::new("skopeo")
       .current_dir(&tmp_dir)
-      .arg("copy")
-      .arg(format!("docker-archive:{}", name))
-      .arg(format!("docker://{}/{}:latest", self.base()?, repo))
+      // .arg("copy")
+      // .arg(format!("docker-archive:{}", name))
+      // .arg(format!("docker://{}/{}:latest", self.base()?, repo))
+      .args(&args)
       .output()
       .await?;
     if output.status.success() {

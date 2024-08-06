@@ -507,7 +507,8 @@
     "deleteSuccess": "刪除成功",
     "goto": "前往",
     "backToList": "返回清單",
-    "add": "添加"
+    "add": "添加",
+    "saveAndCompile": "儲存&編譯"
   },
   "game": {
     "accessPolicy": {
@@ -682,7 +683,16 @@
       "deleteEnvTips": "確定要移除整個題目環境配置？此題目將變回靜態題目。",
       "noEnvImages": "沒有配置",
       "deleteEnvImageTips": "確定要刪除這個題目環境鏡像嗎？",
-      "addEnvImage": "添加環境鏡像"
+      "addEnvImage": "添加環境鏡像",
+      "fetchEnvInstancesFailed": "獲取運行中容器失敗",
+      "envInstances": "運行中實例",
+      "noEnvInstances": "沒有運行中的環境",
+      "checkerScript": "評測腳本",
+      "presetScripts": "預設腳本",
+      "selectPresetScripts": "選擇預設腳本...",
+      "simpleCheckerScriptPreset": "靜態評測",
+      "dynamicCheckerScriptPreset": "動態環境評測",
+      "mappedCheckerScriptPreset": "動態附件評測"
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",

@@ -442,7 +442,8 @@
     "deleteSuccess": "Eliminación exitosa",
     "goto": "前往",
     "backToList": "volver a la lista",
-    "add": "añadir"
+    "add": "añadir",
+    "saveAndCompile": "Guardar&Compilar"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "¿Estás seguro de que deseas eliminar toda la configuración del entorno del problema? Este problema volverá a ser un problema estático.",
       "noEnvImages": "sin configurar",
       "deleteEnvImageTips": "¿Estás seguro de que deseas eliminar esta imagen del entorno del problema?",
-      "addEnvImage": "Agregar imagen del entorno"
+      "addEnvImage": "Agregar imagen del entorno",
+      "fetchEnvInstancesFailed": "Fallo al obtener el contenedor en ejecución",
+      "envInstances": "instancia en ejecución",
+      "noEnvInstances": "No hay un entorno en ejecución",
+      "checkerScript": "Script de evaluación",
+      "presetScripts": "Script predefinido",
+      "selectPresetScripts": "Seleccionar script preestablecido...",
+      "simpleCheckerScriptPreset": "Evaluación estática",
+      "dynamicCheckerScriptPreset": "Evaluación del entorno dinámico",
+      "mappedCheckerScriptPreset": "Evaluación de accesorios dinámicos"
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",

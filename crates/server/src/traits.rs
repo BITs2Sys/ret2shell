@@ -79,6 +79,8 @@ pub enum ResponseError {
   ClusterError(#[from] r2s_cluster::ClusterError),
   #[error("OAuth error: {0}")]
   OAuthError(#[from] r2s_oauth::OAuthError),
+  #[error("Checker error: {0}")]
+  CheckerError(#[from] r2s_checker::traits::CheckerError),
 }
 
 macro_rules! log_with_resp {
@@ -266,6 +268,29 @@ impl IntoResponse for ResponseError {
           "failed to login with 3rd account".to_owned(),
           e.to_string()
         ),
+      },
+      ResponseError::CheckerError(e) => match e {
+        r2s_checker::traits::CheckerError::MissingCheckerScript(_) => {
+          log_with_resp!(
+            StatusCode::PRECONDITION_FAILED,
+            "missing checker script for challenge".to_owned(),
+            e.to_string()
+          )
+        }
+        r2s_checker::traits::CheckerError::MissingFunction(e) => {
+          log_with_resp!(
+            StatusCode::PRECONDITION_FAILED,
+            format!("missing `{e}` function for challenge"),
+            e.to_string()
+          )
+        }
+        _ => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "checker internal error".to_owned(),
+            e.to_string()
+          )
+        }
       },
     };
     Response::builder()

@@ -24,4 +24,8 @@ pub enum CheckerError {
   CompileError(String),
   #[error("Missing function: {0}")]
   MissingFunction(String),
+  #[error("Failed to emit diagnostics: {0}")]
+  DiagnosticsError(#[from] rune::diagnostics::EmitError),
+  #[error("String UTF-8 decode error: {0}")]
+  FromUtf8Error(#[from] std::string::FromUtf8Error),
 }

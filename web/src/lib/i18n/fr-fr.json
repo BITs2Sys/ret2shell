@@ -442,7 +442,8 @@
     "deleteSuccess": "Suppression réussie",
     "goto": "Aller",
     "backToList": "retourner à la liste",
-    "add": "ajouter"
+    "add": "ajouter",
+    "saveAndCompile": "Sauvegarder & Compiler"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "Êtes-vous sûr de vouloir supprimer l'ensemble de la configuration de l'environnement du sujet ? Ce sujet redeviendra un sujet statique.",
       "noEnvImages": "pas de configuration",
       "deleteEnvImageTips": "Êtes-vous sûr de vouloir supprimer cet environnement d'image de sujet ?",
-      "addEnvImage": "Ajouter une image d'environnement"
+      "addEnvImage": "Ajouter une image d'environnement",
+      "fetchEnvInstancesFailed": "Échec de l'obtention du conteneur en cours d'exécution",
+      "envInstances": "Instance en cours d'exécution",
+      "noEnvInstances": "Aucun environnement en cours d'exécution",
+      "checkerScript": "Script d'évaluation",
+      "presetScripts": "Script prédéfini",
+      "selectPresetScripts": "Sélectionner un script prédéfini...",
+      "simpleCheckerScriptPreset": "Évaluation statique",
+      "dynamicCheckerScriptPreset": "Évaluation de l'environnement dynamique",
+      "mappedCheckerScriptPreset": "Évaluation des pièces jointes dynamiques"
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",

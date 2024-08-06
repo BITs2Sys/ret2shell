@@ -1,4 +1,4 @@
-import { type ClusterNode, getClusterConfig, getClusterNodes } from "@api/cluster";
+import { getClusterConfig, getClusterNodes } from "@api/cluster";
 import Spin from "@assets/animates/spin";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
@@ -7,6 +7,7 @@ import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
+import type { Node } from "kubernetes-types/core/v1";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createSignal } from "solid-js";
@@ -17,7 +18,7 @@ export default function () {
   const [since, setSince] = createSignal("");
   const [clusterDNS, setClusterDNS] = createSignal("");
   const [clusterDomain, setClusterDomain] = createSignal("");
-  const [clusterNodes, setClusterNodes] = createSignal([] as ClusterNode[]);
+  const [clusterNodes, setClusterNodes] = createSignal([] as Node[]);
   getClusterConfig()
     .then((resp) => {
       setAvailable(true);
@@ -53,7 +54,7 @@ export default function () {
       });
     });
 
-  const [shownNode, setShownNode] = createSignal(null as ClusterNode | null);
+  const [shownNode, setShownNode] = createSignal(null as Node | null);
   return (
     <>
       <Title title={`${t("admin.cluster.title")} - ${platformStore.config.name || t("platform.name")}`} />
@@ -112,21 +113,21 @@ export default function () {
               {(node) => (
                 <Button
                   class="m-1 min-w-fit !h-auto py-2"
-                  level={shownNode()?.metadata.name === node.metadata.name ? "primary" : undefined}
+                  level={shownNode()?.metadata?.name === node.metadata?.name ? "primary" : undefined}
                   onClick={() => setShownNode(node)}
                 >
                   <span
                     class={`${
-                      node.metadata.labels["node-role.kubernetes.io/master"] === "true"
+                      node.metadata?.labels?.["node-role.kubernetes.io/master"] === "true"
                         ? "icon-[fluent--brain-circuit-20-regular]"
                         : "icon-[fluent--production-20-regular]"
                     } w-8 h-8 ${
-                      shownNode()?.metadata.name === node.metadata.name ? "text-primary-content" : "text-success"
+                      shownNode()?.metadata?.name === node.metadata?.name ? "text-primary-content" : "text-success"
                     }`}
                   />
                   <div class="flex flex-col justify-center items-start min-w-fit">
-                    <span class="font-bold">{node.metadata.name}</span>
-                    <span class="opacity-60">{node.metadata.creationTimestamp}</span>
+                    <span class="font-bold">{node.metadata?.name}</span>
+                    <span class="opacity-60">{node.metadata?.creationTimestamp}</span>
                   </div>
                 </Button>
               )}
@@ -144,10 +145,12 @@ export default function () {
           >
             <div class="h-12 flex flex-row items-center space-x-2 px-3">
               <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
-              <span class="font-bold flex-1 text-start">{shownNode()?.metadata.name}</span>
+              <span class="font-bold flex-1 text-start">{shownNode()?.metadata?.name}</span>
               <span class="opacity-60 hidden lg:inline">
                 <span>Online at: </span>
-                <span>{DateTime.fromISO(shownNode()!.metadata.creationTimestamp).toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                <span>
+                  {DateTime.fromISO(shownNode()!.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}
+                </span>
               </span>
               <Button size="sm" square title={t("admin.cluster.refreshNode")}>
                 <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
@@ -164,7 +167,7 @@ export default function () {
               <h3 class="text-center font-bold">{t("admin.cluster.nodeInfo")}</h3>
               <table>
                 <tbody>
-                  <For each={Object.entries(shownNode()!.status.nodeInfo)}>
+                  <For each={Object.entries(shownNode()!.status!.nodeInfo!)}>
                     {([key, value]) => (
                       <tr class="border-b border-b-layer-content/10">
                         <td class="font-bold opacity-60 p-2">{`${
@@ -177,19 +180,19 @@ export default function () {
                   </For>
                   <tr class="border-b border-b-layer-content/10">
                     <td class="font-bold opacity-60 p-2">Provider ID</td>
-                    <td class="p-2">{shownNode()?.spec.providerID}</td>
+                    <td class="p-2">{shownNode()?.spec?.providerID}</td>
                   </tr>
                   <tr class="border-b border-b-layer-content/10">
                     <td class="font-bold opacity-60 p-2">Addresses</td>
                     <td class="p-2">
                       {shownNode()
-                        ?.status.addresses.map((a) => a.address)
+                        ?.status!.addresses!.map((a) => a.address)
                         .join(", ")}
                     </td>
                   </tr>
                   <tr class="border-b border-b-layer-content/10">
                     <td class="font-bold opacity-60 p-2">Pod CIDRs</td>
-                    <td class="p-2">{shownNode()?.spec.podCIDRs.join(", ")}</td>
+                    <td class="p-2">{shownNode()?.spec?.podCIDRs?.join(", ")}</td>
                   </tr>
                 </tbody>
               </table>
@@ -199,7 +202,7 @@ export default function () {
               <div class="flex flex-col xl:flex-row p-3 lg:p-6">
                 <table class="flex-1">
                   <tbody>
-                    <For each={Object.entries(shownNode()!.status.capacity)}>
+                    <For each={Object.entries(shownNode()!.status!.capacity!)}>
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
                           <td class="font-bold opacity-60 p-2">Capacity {key}</td>
@@ -211,7 +214,7 @@ export default function () {
                 </table>
                 <table class="flex-1">
                   <tbody>
-                    <For each={Object.entries(shownNode()!.status.allocatable)}>
+                    <For each={Object.entries(shownNode()!.status!.allocatable!)}>
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
                           <td class="font-bold opacity-60 p-2">Allocatable {key}</td>

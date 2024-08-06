@@ -442,7 +442,8 @@
     "deleteSuccess": "Удаление прошло успешно",
     "goto": "前往",
     "backToList": "вернуться к списку",
-    "add": "Добавить"
+    "add": "Добавить",
+    "saveAndCompile": "Сохранить и скомпилировать"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "Вы уверены, что хотите удалить всю конфигурацию окружения задачи? Эта задача вернется к статической задаче.",
       "noEnvImages": "нет конфигурации",
       "deleteEnvImageTips": "Вы уверены, что хотите удалить этот образ окружения задачи?",
-      "addEnvImage": "Добавить образ окружения"
+      "addEnvImage": "Добавить образ окружения",
+      "fetchEnvInstancesFailed": "Получение запущенного контейнера не удалось",
+      "envInstances": "Запущенный экземпляр",
+      "noEnvInstances": "нет запущенной среды",
+      "checkerScript": "Оценочный скрипт",
+      "presetScripts": "Предустановленный скрипт",
+      "selectPresetScripts": "Выберите предустановленный скрипт...",
+      "simpleCheckerScriptPreset": "Статическая оценка",
+      "dynamicCheckerScriptPreset": "Динамическая оценка окружающей среды",
+      "mappedCheckerScriptPreset": "Динамическая оценка вложений"
     },
     "cover": {
       "uploadFailed": "Обложка не загружена",

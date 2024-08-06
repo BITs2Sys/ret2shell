@@ -80,6 +80,7 @@ export default function () {
       });
     }
   });
+  const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
       <Title title={`${t("game.team.create.title")} - ${gameStore.current?.name || "CTF"}`} />
@@ -162,7 +163,10 @@ export default function () {
                   <Dialog
                     justify="start"
                     ghost
+                    open={dialogOpen()}
                     stretched
+                    onOpenChange={(details) => setDialogOpen(details.open)}
+                    onClick={() => setDialogOpen(true)}
                     level={field.error ? "error" : null}
                     btnContent={
                       <>
@@ -184,7 +188,10 @@ export default function () {
                       <Button
                         class="flex-1"
                         level="success"
-                        onClick={() => setValue(form, "accepted", true)}
+                        onClick={() => {
+                          setValue(form, "accepted", true);
+                          setDialogOpen(false);
+                        }}
                         disabled={field.value}
                       >
                         <span>

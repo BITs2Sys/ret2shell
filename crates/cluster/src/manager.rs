@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use axum::extract::ws::WebSocket;
 use chrono::{DateTime, Utc};
@@ -6,7 +6,8 @@ use futures_io::AsyncBufRead;
 use k8s_openapi::{
   api::{
     core::v1::{
-      ConfigMap, Container, ContainerPort, Namespace, Node, Pod, PodSpec, ResourceRequirements,
+      ConfigMap, Container, ContainerPort, EnvVar, Namespace, Node, Pod, PodSpec,
+      ResourceRequirements,
     },
     networking::v1::NetworkPolicy,
   },
@@ -307,7 +308,7 @@ impl Cluster {
 
   pub async fn create_challenge_env(
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
-    env_config: ChallengeEnv, node_selector: Option<String>,
+    envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
   ) -> Result<(), ClusterError> {
     let challenge_id = labels
       .get("challenge")
@@ -338,6 +339,17 @@ impl Cluster {
             name: image.name.clone(),
             image: Some(image.tag.clone()),
             image_pull_policy: Some(String::from("Always")),
+            env: Some(
+              envs
+                .clone()
+                .into_iter()
+                .map(|v| EnvVar {
+                  name: v.0,
+                  value: Some(v.1),
+                  value_from: None,
+                })
+                .collect(),
+            ),
             ports: image.port.map(|port| {
               vec![ContainerPort {
                 container_port: port as i32,
@@ -380,7 +392,14 @@ impl Cluster {
     Ok(())
   }
 
-  pub async fn get_challenge_env(&self, user_id: i64) -> Result<Option<Pod>, ClusterError> {
+  pub async fn get_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/challenge={challenge_id}"))
+      .await?;
+    Ok(pod)
+  }
+
+  pub async fn get_challenge_env_by_user(&self, user_id: i64) -> Result<Option<Pod>, ClusterError> {
     let pod = self
       .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
       .await?;

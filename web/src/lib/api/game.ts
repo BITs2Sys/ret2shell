@@ -3,6 +3,7 @@ import type { Challenge, ChallengeEnv } from "@models/challenge";
 import type { Game, HostType } from "@models/game";
 import { type Team, TeamState } from "@models/team";
 import type { User } from "@models/user";
+import type { Pod } from "kubernetes-types/core/v1";
 import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
@@ -180,6 +181,10 @@ export async function getChallengeEnv(game_id: number, challenge_id: number) {
   return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<ChallengeEnv | null>();
 }
 
+export async function getChallengeInstance(game_id: number, challenge_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<Pod[]>();
+}
+
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
   return await api
     .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
@@ -190,6 +195,31 @@ export async function updateChallengeEnv(game_id: number, challenge_id: number, 
 
 export async function deleteChallengeEnv(game_id: number, challenge_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>();
+}
+
+export async function getChallengeCheckerScript(game_id: number, challenge_id: number, lint?: boolean) {
+  return await api
+    .get(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          lint,
+        })
+      ),
+    })
+    .json<{
+      script: string;
+      lint?: string;
+    }>();
+}
+
+export async function updateChallengeCheckerScript(game_id: number, challenge_id: number, content: string) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
+      json: {
+        content,
+      },
+    })
+    .json<void>();
 }
 
 export async function getTeamInfo(game_id: number, team_id: number) {

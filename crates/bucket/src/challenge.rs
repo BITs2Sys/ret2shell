@@ -305,10 +305,11 @@ impl ChallengeBucket {
   }
 
   pub async fn get_mapped_file(&self, requested_id: i64) -> Result<Option<String>, BucketError> {
-    let files = self.get_mapped_files().await?;
+    let mut files = self.get_mapped_files().await?;
     if files.is_empty() {
       return Ok(None);
     }
+    files.sort();
     let file_index = requested_id as usize % files.len();
     Ok(Some(files[file_index].clone()))
   }

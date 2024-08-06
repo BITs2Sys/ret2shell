@@ -113,7 +113,7 @@ export default function () {
       <Title title={`${t("game.challenge.title")} - ${gameStore.current?.name || "CTF"}`} />
       <SidebarLayout
         leftBar={() => (
-          <>
+          <div class="h-full flex flex-col">
             <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
               <Link class="w-full" ghost justify="start" href={`/games/${gameStore.current?.id}/challenges`}>
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
@@ -121,7 +121,7 @@ export default function () {
               </Link>
             </div>
             <ChallengeList showScore inGame />
-          </>
+          </div>
         )}
         rightBar={() => (
           <div class="flex flex-col">

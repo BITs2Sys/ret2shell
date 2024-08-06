@@ -80,14 +80,13 @@ async fn get_user(
   Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let user = user::get_ex(&db.conn, user.id).await?;
-  let user = user.ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
-  if user.id != token.id && user.hidden {
-    return Err(ResponseError::NotFound("user".to_owned()));
-  }
+  let user = user.ok_or_else(|| ResponseError::NotFound("user not found".to_owned()))?;
   if token.permissions.0.contains(&Permission::User) || user.id == token.id {
     Ok(Json(user))
-  } else {
+  } else if !user.hidden {
     Ok(Json(user.desensitize()))
+  } else {
+    Err(ResponseError::NotFound("user not found".to_owned()))
   }
 }
 

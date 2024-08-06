@@ -442,7 +442,8 @@
     "deleteSuccess": "삭제 성공",
     "goto": "가기",
     "backToList": "반환 목록",
-    "add": "추가"
+    "add": "추가",
+    "saveAndCompile": "저장 및 컴파일"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "전체 문제 환경 설정을 제거하시겠습니까? 이 문제는 다시 정적 문제로 돌아갑니다.",
       "noEnvImages": "구성되지 않음",
       "deleteEnvImageTips": "이 문제 환경 이미지를 삭제하시겠습니까?",
-      "addEnvImage": "환경 이미지 추가"
+      "addEnvImage": "환경 이미지 추가",
+      "fetchEnvInstancesFailed": "실행 중인 컨테이너를 가져오지 못했습니다.",
+      "envInstances": "실행 중인 인스턴스",
+      "noEnvInstances": "실행 중인 환경이 없습니다",
+      "checkerScript": "평가 스크립트",
+      "presetScripts": "사전 설정 스크립트",
+      "selectPresetScripts": "사전 설정 스크립트 선택...",
+      "simpleCheckerScriptPreset": "정적 평가",
+      "dynamicCheckerScriptPreset": "동적 환경 평가",
+      "mappedCheckerScriptPreset": "동적 첨부파일 평가"
     },
     "cover": {
       "uploadFailed": "표지 업로드 실패",

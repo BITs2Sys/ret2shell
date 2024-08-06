@@ -442,7 +442,8 @@
     "deleteSuccess": "Löschung erfolgreich",
     "goto": "Gehen",
     "backToList": "Rückgabeliste",
-    "add": "hinzufügen"
+    "add": "hinzufügen",
+    "saveAndCompile": "Speichern & Kompilieren"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "Möchten Sie die gesamte Umgebungskonfiguration des Themas wirklich entfernen? Dieses Thema wird zu einem statischen Thema zurückkehren.",
       "noEnvImages": "Keine Konfiguration",
       "deleteEnvImageTips": "Möchten Sie dieses Aufgabenumgebungs-Image wirklich löschen?",
-      "addEnvImage": "Umgebungsimage hinzufügen"
+      "addEnvImage": "Umgebungsimage hinzufügen",
+      "fetchEnvInstancesFailed": "Fehler beim Abrufen des laufenden Containers",
+      "envInstances": "laufende Instanz",
+      "noEnvInstances": "Keine laufende Umgebung",
+      "checkerScript": "Bewertungsskript",
+      "presetScripts": "Voreingestelltes Skript",
+      "selectPresetScripts": "Vorlagen-Skript auswählen...",
+      "simpleCheckerScriptPreset": "Statische Bewertung",
+      "dynamicCheckerScriptPreset": "Dynamische Umweltbewertung",
+      "mappedCheckerScriptPreset": "Dynamische Anhänge Bewertung"
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

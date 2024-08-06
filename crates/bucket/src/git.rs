@@ -105,6 +105,17 @@ impl Git {
   ) -> Result<(), BucketError> {
     let output = Command::new("git")
       .current_dir(&self.path)
+      .arg("status")
+      .arg("-u")
+      .arg("--porcelain")
+      .output()
+      .await?;
+    let git_status = String::from_utf8(output.stdout)?;
+    if git_status.trim().is_empty() {
+      return Ok(());
+    }
+    let output = Command::new("git")
+      .current_dir(&self.path)
       .arg("commit")
       .arg("--no-gpg-sign")
       .arg("--author")
@@ -119,7 +130,7 @@ impl Git {
     } else {
       warn!("failed to commit to git repository: {:?}", output);
       Err(BucketError::GitCommandFailed(String::from_utf8(
-        output.stderr,
+        output.stdout,
       )?))
     }
   }
@@ -297,7 +308,8 @@ impl Git {
   ) -> Result<impl AsyncRead, BucketError>
   where
     T: IntoIterator<Item = S>,
-    S: AsRef<OsStr>, {
+    S: AsRef<OsStr>,
+  {
     let mut cmd = Command::new("git");
     cmd
       .stdin(Stdio::piped())

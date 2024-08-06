@@ -442,7 +442,8 @@
     "deleteSuccess": "削除成功",
     "goto": "行く",
     "backToList": "リストに戻る",
-    "add": "追加"
+    "add": "追加",
+    "saveAndCompile": "保存＆コンパイル"
   },
   "game": {
     "accessPolicy": {
@@ -617,7 +618,16 @@
       "deleteEnvTips": "この問題環境全体を削除してもよろしいですか？この問題は静的な問題に戻ります。",
       "noEnvImages": "設定なし",
       "deleteEnvImageTips": "この問題環境のイメージを削除してもよろしいですか？",
-      "addEnvImage": "環境イメージを追加"
+      "addEnvImage": "環境イメージを追加",
+      "fetchEnvInstancesFailed": "実行中のコンテナを取得できませんでした",
+      "envInstances": "実行中のインスタンス",
+      "noEnvInstances": "実行中の環境はありません",
+      "checkerScript": "評価スクリプト",
+      "presetScripts": "プリセットスクリプト",
+      "selectPresetScripts": "プリセットスクリプトを選択...",
+      "simpleCheckerScriptPreset": "静的評価",
+      "dynamicCheckerScriptPreset": "動的環境評価",
+      "mappedCheckerScriptPreset": "動的添付評価"
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",

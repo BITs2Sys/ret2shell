@@ -395,7 +395,10 @@ async fn get_self_envs(
   Extension(token): Extension<Token>, team_ext: Option<Extension<team_db::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
-  let self_env = cluster.at(CHALLENGE_NS).get_challenge_env(token.id).await?;
+  let self_env = cluster
+    .at(CHALLENGE_NS)
+    .get_challenge_env_by_user(token.id)
+    .await?;
   let team_envs = if let Some(team) = team {
     cluster
       .at(CHALLENGE_NS)

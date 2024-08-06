@@ -12,7 +12,7 @@ use futures::TryStreamExt;
 use nanoid::nanoid;
 use r2s_bucket::{challenge::ChallengeBucket, Bucket};
 use r2s_cache::Cache;
-use r2s_checker::Checker;
+use r2s_checker::{traits::CheckerError, Checker};
 use r2s_cluster::{Cluster, CHALLENGE_NS};
 use r2s_config::{cluster::ChallengeEnv, GlobalConfig};
 use r2s_database::{
@@ -62,12 +62,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/env",
           patch(update_challenge_env).delete(delete_challenge_env),
         )
+        .route("/instance", get(get_all_running_instances_for_challenge))
         .route(
           "/checker",
-          get(get_challenge_checker)
-            .post(upload_checker_file)
-            .patch(update_checker_script)
-            .delete(delete_checker_file),
+          get(get_checker_script).patch(update_checker_script),
         )
         .route(
           "/hint",
@@ -863,9 +861,10 @@ async fn get_challenge_env(
 }
 
 #[allow(clippy::too_many_arguments)]
+#[axum::debug_handler(state = GlobalState)]
 async fn start_challenge_env(
-  State(config): State<GlobalConfig>, State(ref bucket): State<Bucket>,
-  State(cluster): State<Cluster>, State(ref cache): State<Cache>,
+  State(config): State<GlobalConfig>, State(bucket): State<Bucket>, State(cluster): State<Cluster>,
+  State(cache): State<Cache>, State(mut checker): State<Checker>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(token): Extension<Token>, team_ext: Option<Extension<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -882,9 +881,22 @@ async fn start_challenge_env(
       "please wait for rebuilding cargo crates".to_owned(),
     ));
   }
-  let challenge_bucket = get_challenge_bucket!(bucket, game.clone(), challenge);
+  let challenge_bucket = get_challenge_bucket!(bucket, game.clone(), challenge.clone());
   let team = extract_team!(game, team_ext, token);
-  if let Some(env) = challenge_bucket.env().await? {
+  if let Some(env_config) = challenge_bucket.env().await? {
+    checker.preload(&challenge, &challenge_bucket).await?;
+    let env_map = checker
+      .environ(
+        &challenge_bucket,
+        &user::Model {
+          id: token.id.clone(),
+          nickname: token.nickname.clone(),
+          account: token.account.clone(),
+          ..Default::default()
+        },
+        &team,
+      )
+      .await?;
     cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
@@ -898,7 +910,7 @@ async fn start_challenge_env(
           ("ret.sh.cn/user", token.id.to_string()),
           ("ret.sh.cn/wsrx", nanoid!()),
           ("ret.sh.cn/renew", 0.to_string()),
-          ("ret.sh.cn/internet", env.internet.to_string()),
+          ("ret.sh.cn/internet", env_config.internet.to_string()),
         ]
         .iter()
         .cloned()
@@ -917,7 +929,8 @@ async fn start_challenge_env(
         .cloned()
         .map(|(k, v)| (k.to_owned(), v.to_owned()))
         .collect(),
-        env,
+        env_map.into(),
+        env_config,
         config.challenge_node_selector.clone(),
       )
       .await?;
@@ -972,7 +985,6 @@ async fn delete_challenge_env(
 #[derive(Serialize)]
 struct CheckerResponse {
   pub script: String,
-  pub files: Vec<String>,
   pub lint: Option<String>,
 }
 
@@ -981,7 +993,7 @@ struct CheckerRequest {
   pub lint: Option<bool>,
 }
 
-async fn get_challenge_checker(
+async fn get_checker_script(
   State(ref bucket): State<Bucket>, State(checker): State<Checker>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<CheckerRequest>,
@@ -989,10 +1001,14 @@ async fn get_challenge_checker(
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
   let lint = if let Some(true) = query.lint {
     let lint = checker.lint(&challenge_bucket).await;
-    if lint.is_err() {
-      let err = format!("{:?}", lint.err().unwrap());
-      warn!("lint checker script failed: {:?}", err);
-      Some(err)
+    if let Err(lint) = lint {
+      match lint {
+        CheckerError::CompileError(diagnostics) => Some(diagnostics),
+        err => {
+          warn!("failed to lint script: {:?}", err);
+          Some(err.to_string())
+        }
+      }
     } else {
       None
     }
@@ -1003,46 +1019,7 @@ async fn get_challenge_checker(
   Ok(Json(CheckerResponse {
     script: challenge_bucket.checker().await?,
     lint,
-    files: challenge_bucket.get_checker_files().await?,
   }))
-}
-
-async fn upload_checker_file(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  mut multipart: Multipart,
-) -> Result<impl IntoResponse, ResponseError> {
-  let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
-  if let Some(field) = multipart
-    .next_field()
-    .await
-    .map_err(|err| ResponseError::BadRequest(err.to_string()))?
-  {
-    let file_name = field
-      .file_name()
-      .ok_or(ResponseError::BadRequest(
-        "file name is required".to_owned(),
-      ))?
-      .to_owned();
-    let reader =
-      StreamReader::new(field.map_err(|multipart_error| {
-        std::io::Error::new(std::io::ErrorKind::Other, multipart_error)
-      }));
-    challenge_bucket.upload_checker(&file_name, reader).await?;
-    game_bucket
-      .commit(
-        format!(
-          "upload checker file {} for challenge {}",
-          file_name, challenge.name
-        ),
-        &token.account,
-        format!("{}@private.ret.sh.cn", token.account),
-      )
-      .await?;
-    Ok(())
-  } else {
-    Err(ResponseError::BadRequest("file is required".to_owned()))
-  }
 }
 
 #[derive(Deserialize)]
@@ -1067,27 +1044,12 @@ async fn update_checker_script(
   Ok(())
 }
 
-#[derive(Deserialize)]
-struct DeleteCheckerFileRequest {
-  pub file: String,
-}
-
-async fn delete_checker_file(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Query(query): Query<DeleteCheckerFileRequest>,
+async fn get_all_running_instances_for_challenge(
+  State(ref cluster): State<Cluster>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
-  challenge_bucket.delete_checker(&query.file).await?;
-  game_bucket
-    .commit(
-      format!(
-        "delete checker file {} for challenge {}",
-        query.file, challenge.name
-      ),
-      &token.account,
-      format!("{}@private.ret.sh.cn", token.account),
-    )
+  let instances = cluster
+    .at(CHALLENGE_NS)
+    .get_challenge_env(challenge.id)
     .await?;
-  Ok(())
+  Ok(Json(instances))
 }

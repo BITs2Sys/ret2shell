@@ -151,7 +151,7 @@ async fn create_team(
   }
   let user = user::get(&db.conn, token.id)
     .await?
-    .ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
+    .ok_or_else(|| ResponseError::NotFound("user not found".to_owned()))?;
   if game.access_policy.restrict
     && !game
       .access_policy
@@ -216,7 +216,7 @@ async fn join_team(
   }
   let user = user::get(&db.conn, token.id)
     .await?
-    .ok_or_else(|| ResponseError::NotFound("user".to_owned()))?;
+    .ok_or_else(|| ResponseError::NotFound("user not found".to_owned()))?;
   if game.access_policy.restrict
     && !game
       .access_policy

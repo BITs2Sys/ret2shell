@@ -16,6 +16,15 @@ export default defineConfig({
         }
       },
     },
+    {
+      name: "rune-loader",
+      transform(code, id) {
+        if (id.slice(-3) === ".rx") {
+          // For .md files, get the raw content
+          return `export default ${JSON.stringify(code)};`;
+        }
+      },
+    },
   ],
   server: {
     port: 5173,

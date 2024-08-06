@@ -214,7 +214,16 @@
       "deleteEnvTips": "确定要移除整个题目环境配置？此题目将变回静态题目。",
       "noEnvImages": "没有配置",
       "deleteEnvImageTips": "确定要删除这个题目环境镜像吗？",
-      "addEnvImage": "添加环境镜像"
+      "addEnvImage": "添加环境镜像",
+      "fetchEnvInstancesFailed": "获取运行中容器失败",
+      "envInstances": "运行中实例",
+      "noEnvInstances": "没有运行中的环境",
+      "checkerScript": "评测脚本",
+      "presetScripts": "预设脚本",
+      "selectPresetScripts": "选择预设脚本...",
+      "simpleCheckerScriptPreset": "静态评测",
+      "dynamicCheckerScriptPreset": "动态环境评测",
+      "mappedCheckerScriptPreset": "动态附件评测"
     },
     "scoreboard": {
       "title": "积分板",
@@ -841,7 +850,8 @@
     "deleteSuccess": "删除成功",
     "goto": "前往",
     "backToList": "返回列表",
-    "add": "添加"
+    "add": "添加",
+    "saveAndCompile": "保存&编译"
   },
   "docs": {
     "titleTips": "回归终端 - 开发者文档",
