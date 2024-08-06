@@ -66,6 +66,6 @@ pub async fn environ(bucket, user, team) {
   };
   let content = audit::encode(TEMPLATE, ENCRYPT_KEY, enc_id);
   Ok(#{
-    FLAG: utils::Flag::new().with_prefix("flag").with_content(content).to_string(),
+    FLAG: utils::Flag::new().with_prefix(PREFIX).with_content(content).to_string(),
   })
 }

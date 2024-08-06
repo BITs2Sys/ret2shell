@@ -31,7 +31,7 @@ export function FormBare(props: {
     if (props.editSource) {
       untrack(() => {
         setValue(form, "name", props.editSource!.name);
-        setValue(form, "tag", props.editSource!.tag.map((t) => t.name).join(";"));
+        setValue(form, "tag", props.editSource!.tag.map((t) => t.name).join("/"));
         setValue(form, "content", props.editSource!.content || "");
         setValue(form, "initial", props.editSource!.score_rule.initial);
         setValue(form, "minimum", props.editSource!.score_rule.minimum);

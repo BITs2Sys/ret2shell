@@ -2,7 +2,7 @@ use ret2api::utils;
 use ret2api::regex;
 
 /// check the flag in regex format, only apply to content without prefix
-const ENABLE_REGEX = true;
+const ENABLE_REGEX = false;
 /// case sensitive
 const CASE_SENSITIVE = true;
 /// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
