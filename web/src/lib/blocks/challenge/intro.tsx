@@ -1,13 +1,14 @@
 import { api_root } from "@api";
 import { getCalmdownStatus } from "@api/cluster";
 import { delayGameSelfEnv, startChallengeEnv, stopGameSelfEnv } from "@api/game";
-import { wsrx } from "@lib/wsrx";
+import { getWsrxLink, wsrx } from "@lib/wsrx";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
+import ClipboardBtn from "@widgets/clipboard-btn";
 import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
 import TimeProgress from "@widgets/time-progress";
@@ -45,7 +46,9 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
   createEffect(() => {
     if (challengeStore.current && challengeStore.env) {
       refreshCalmdown();
-      wsrx.refreshInstances();
+      wsrx.refreshInstances().then(() => {
+        wsrx.openAllTraffic();
+      });
     }
   });
   const userExplicitInstance = createMemo(() => {
@@ -61,7 +64,9 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
     startChallengeEnv(challengeStore.current!.game_id, challengeStore.current!.id)
       .then(() => {
         setTimeout(() => {
-          wsrx.refreshInstances();
+          wsrx.refreshInstances().then(() => {
+            wsrx.openAllTraffic();
+          });
         }, 500);
       })
       .catch((err: HTTPError) => {
@@ -85,7 +90,9 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
       delayGameSelfEnv(challengeStore.current!.game_id)
         .then(() => {
           setTimeout(() => {
-            wsrx.refreshInstances();
+            wsrx.refreshInstances().then(() => {
+              wsrx.deleteOutdatedTraffic();
+            });
           }, 500);
         })
         .catch((err: HTTPError) => {
@@ -114,7 +121,9 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
             duration: 5000,
           });
           setTimeout(() => {
-            wsrx.refreshInstances();
+            wsrx.refreshInstances().then(() => {
+              wsrx.deleteOutdatedTraffic();
+            });
             refreshCalmdown();
           }, 500);
         })
@@ -311,13 +320,47 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
                       </Button>
                     </Match>
                     <Match when={userExplicitInstance()}>
-                      <Button ghost size="sm" square>
-                        <span class="icon-[fluent--record-stop-20-regular]" />
+                      <Button
+                        ghost
+                        size="sm"
+                        square
+                        title={t("game.challenge.stopEnv")}
+                        onClick={handleStopSelfEnv}
+                        loading={stopping()}
+                        disabled={stopping()}
+                      >
+                        <span class="icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
                       </Button>
                     </Match>
                   </Switch>
                 </div>
               </section>
+              <Show when={instance()}>
+                <For each={challengeStore.env?.images}>
+                  {(image) => (
+                    <Show when={image.port}>
+                      <section class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 relative">
+                        <span class="icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
+                        <span class="flex-1 text-start">{image.name}.service</span>
+                        <ClipboardBtn
+                          size="sm"
+                          title={image.description!}
+                          value={getWsrxLink(instance()!.wsrx, image.port!)}
+                          label="WSRX"
+                        />
+                        <Show when={wsrx.getTrafficLocal(instance()!, image.port!)}>
+                          <ClipboardBtn
+                            size="sm"
+                            title={image.description!}
+                            value={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
+                            label={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
+                          />
+                        </Show>
+                      </section>
+                    </Show>
+                  )}
+                </For>
+              </Show>
             </Show>
             <Show when={challengeStore.current}>
               <div class="flex flex-row-reverse flex-wrap py-2">

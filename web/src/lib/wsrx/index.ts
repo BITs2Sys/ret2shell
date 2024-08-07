@@ -189,6 +189,19 @@ export class Wsrx {
       this.refreshTraffic();
     }
   }
+
+  public async openAllTraffic() {
+    if (this.connected() === WsrxState.Connected) {
+      await this.refreshTraffic();
+      for (const instance of this.instances()) {
+        await this.openInstanceTraffic(instance);
+      }
+    }
+  }
+
+  public getTrafficLocal(instance: Instance, port: number) {
+    return this.traffic().find((t) => t.remote === getWsrxLink(instance.wsrx, port));
+  }
 }
 
 export const wsrx = new Wsrx();

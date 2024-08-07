@@ -58,7 +58,11 @@ export function InstanceBoxContent() {
   const heartbeatTimer = setInterval(() => {
     // Pending or Connected
     if (wsrx.connected()) {
-      void wsrx.checkConnection();
+      void wsrx.checkConnection().then((state) => {
+        if (state === WsrxState.Connected) {
+          wsrx.refreshTraffic();
+        }
+      });
     }
   }, 5 * 1000);
   onCleanup(() => {

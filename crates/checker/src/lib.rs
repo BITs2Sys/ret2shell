@@ -105,6 +105,10 @@ impl Checker {
     Ok(())
   }
 
+  pub async fn expire(&mut self, bucket: &ChallengeBucket) {
+    self.contexts.write().await.remove(&bucket.hash());
+  }
+
   pub async fn preload(
     &mut self, challenge: &challenge::Model, bucket: &ChallengeBucket,
   ) -> Result<(), CheckerError> {

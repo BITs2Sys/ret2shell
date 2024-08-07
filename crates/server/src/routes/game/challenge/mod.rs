@@ -1084,13 +1084,14 @@ struct UpdateCheckerScriptRequest {
 }
 
 async fn update_checker_script(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Json(req): Json<UpdateCheckerScriptRequest>,
+  State(bucket): State<Bucket>, State(mut checker): State<Checker>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UpdateCheckerScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   check_challenge_publishing!(challenge);
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket.set_checker(req.content).await?;
+  checker.expire(&challenge_bucket).await;
   game_bucket
     .commit(
       format!("update checker script for challenge {}", challenge.name),
