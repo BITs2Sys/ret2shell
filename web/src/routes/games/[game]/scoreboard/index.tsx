@@ -4,7 +4,7 @@ import { type Size, createElementSize } from "@solid-primitives/resize-observer"
 import { useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
-import { canAccessChallenges, gameStore } from "@storage/game";
+import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -141,6 +141,12 @@ export default function () {
       }
       untrack(getTopTeams);
       untrack(getTeams);
+    }
+  });
+
+  createEffect(() => {
+    if (showChallengeDetail()) {
+      untrack(refreshChallenges);
     }
   });
 
@@ -289,6 +295,7 @@ export default function () {
                   size={showChallengeDetail() ? "sm" : "md"}
                   onClick={() => setShowChallengeDetail(!showChallengeDetail())}
                   class="hidden xl:flex"
+                  disabled={!canAccessChallenges()[0] && !inArchived()}
                 >
                   <Show when={showChallengeDetail()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
                     <span class="icon-[fluent--flag-20-filled] w-5 h-5" />
@@ -353,7 +360,7 @@ export default function () {
               </>
             }
           >
-            <TeamSolves teams={teams()} challenges={[]} />
+            <TeamSolves teams={teams()} challenges={challengeStore.challenges} />
           </Show>
         </div>
       </div>
