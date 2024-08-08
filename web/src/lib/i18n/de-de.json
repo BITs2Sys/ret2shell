@@ -663,7 +663,8 @@
       "chatPlayerRole": "Spieler",
       "hammerInputAlreadySend": "Das Problem wurde gesendet, bitte warten Sie auf Rückmeldung...",
       "fetchChatSessionError": "Das Abrufen der Feedback-Liste ist fehlgeschlagen",
-      "adminHammerTips": "Hier sind die von den Teilnehmern bereitgestellten Informationen zu den Aufgaben und Teams:"
+      "adminHammerTips": "Hier sind die von den Teilnehmern bereitgestellten Informationen zu den Aufgaben und Teams:",
+      "envContainerNameFormat": "Der Containername darf nur aus Kleinbuchstaben und Bindestrichen bestehen."
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

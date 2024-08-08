@@ -663,7 +663,8 @@
       "chatPlayerRole": "Joueur",
       "hammerInputAlreadySend": "Le problème a été envoyé, veuillez attendre la réponse...",
       "fetchChatSessionError": "Échec de la récupération de la liste des commentaires",
-      "adminHammerTips": "Voici les informations sur le sujet et l'équipe fournies par les participants :"
+      "adminHammerTips": "Voici les informations sur le sujet et l'équipe fournies par les participants :",
+      "envContainerNameFormat": "Le nom du conteneur ne peut être composé que de lettres minuscules et de traits d'union."
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",

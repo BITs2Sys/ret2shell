@@ -190,7 +190,7 @@ export default function () {
 
   const [updatingUser, setUpdatingUser] = createSignal(false);
   function handleUpdateUser(user: User) {
-    console.log(user);
+    // console.log(user);
     setUpdatingUser(true);
     updateUser(user)
       .then((resp) => {

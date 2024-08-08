@@ -60,19 +60,22 @@ export default function (props: { inGame?: boolean }) {
   });
   let instanceStateIter = 0;
   function maintainInstances() {
-    if (instance()?.state === "Pending" || instanceStateIter === 0) {
-      wsrx.refreshInstances().then(() => {
-        wsrx.deleteOutdatedTraffic();
-        wsrx.openAllTraffic().then(() => {
-          wsrx.refreshTraffic();
-        });
+    wsrx.refreshInstances().then(() => {
+      wsrx.deleteOutdatedTraffic();
+      wsrx.openAllTraffic().then(() => {
+        wsrx.refreshTraffic();
       });
+    });
+  }
+  function maintainInstancesWorker() {
+    if (instance()?.state === "Pending" || instanceStateIter === 0) {
+      maintainInstances();
     }
     instanceStateIter++;
     instanceStateIter = instanceStateIter % 20;
-    return maintainInstances;
+    return maintainInstancesWorker;
   }
-  const timer = setInterval(maintainInstances(), 1000);
+  const timer = setInterval(maintainInstancesWorker(), 1000);
   onCleanup(() => {
     clearInterval(timer);
   });

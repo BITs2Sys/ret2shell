@@ -663,7 +663,8 @@
       "chatPlayerRole": "選手",
       "hammerInputAlreadySend": "問題は送信されました、フィードバックをお待ちください...",
       "fetchChatSessionError": "フィードバックリストの取得に失敗しました",
-      "adminHammerTips": "これは選手からのフィードバックの課題とチーム情報です："
+      "adminHammerTips": "これは選手からのフィードバックの課題とチーム情報です：",
+      "envContainerNameFormat": "コンテナ名は小文字とハイフンのみで構成される必要があります"
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",

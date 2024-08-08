@@ -242,7 +242,8 @@
       "chatPlayerRole": "选手",
       "hammerInputAlreadySend": "问题已经发送，请等待反馈...",
       "fetchChatSessionError": "获取反馈列表失败",
-      "adminHammerTips": "这是选手反馈的题目和队伍信息："
+      "adminHammerTips": "这是选手反馈的题目和队伍信息：",
+      "envContainerNameFormat": "容器名称只能由小写字母与短横杠组成"
     },
     "scoreboard": {
       "title": "积分板",

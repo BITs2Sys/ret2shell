@@ -18,7 +18,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
   const selectedChallenge = createMemo(() => challengeStore.challenges.find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];
-    console.log(search().toLowerCase());
+    // console.log(search().toLowerCase());
     for (const challenge of challengeStore.challenges.filter(
       (c) =>
         c.name.toLowerCase().includes(search().toLowerCase()) ||

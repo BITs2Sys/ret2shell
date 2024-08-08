@@ -10,6 +10,7 @@ import Intro from "../_blocks/intro";
 import { createChallenge, getChallenge, updateGame } from "@api/game";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
+import AdministratorsManagement from "@blocks/game/administrators";
 import GameEdit, { type GameForm } from "@blocks/game/form";
 import GameStatistics from "@blocks/game/statistics";
 import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
@@ -109,10 +110,10 @@ export default function () {
     updateGame(gameStore.current!.id, {
       ...gameStore.current!,
       ...result,
-      start_at: DateTime.fromSeconds(result.start_at),
-      end_at: DateTime.fromSeconds(result.end_at),
-      archive_at: DateTime.fromSeconds(result.archive_at),
-      register_at: DateTime.fromSeconds(result.register_at),
+      start_at: DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
+      end_at: DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
+      archive_at: DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
+      register_at: DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
     })
       .then((game) => {
         setGameStore({ current: game });
@@ -155,6 +156,10 @@ export default function () {
               >
                 <div class="w-full flex flex-col p-3 lg:p-6 items-center">
                   <GameEdit onDone={onEditGame} loading={editing()} editSource={gameStore.current || undefined} />
+                  <div class="h-16" />
+                  <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
+                    <AdministratorsManagement />
+                  </div>
                 </div>
               </OverlayScrollbarsComponent>
             </div>

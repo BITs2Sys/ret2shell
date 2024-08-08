@@ -742,7 +742,8 @@
       "fetchChatError": "Failed to retrieve message",
       "fetchChatSessionError": "Failed to retrieve feedback list",
       "hammerInputAlreadySend": "The issue has been sent, please wait for feedback...",
-      "sendChatError": "Send failed"
+      "sendChatError": "Send failed",
+      "envContainerNameFormat": "Container names can only consist of lowercase letters and hyphens."
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",

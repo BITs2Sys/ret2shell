@@ -14,10 +14,10 @@ export default function () {
     updateGame(gameStore.current!.id, {
       ...gameStore.current!,
       ...result,
-      start_at: DateTime.fromSeconds(result.start_at),
-      end_at: DateTime.fromSeconds(result.end_at),
-      archive_at: DateTime.fromSeconds(result.archive_at),
-      register_at: DateTime.fromSeconds(result.register_at),
+      start_at: DateTime.fromSeconds(result.start_at!),
+      end_at: DateTime.fromSeconds(result.end_at!),
+      archive_at: DateTime.fromSeconds(result.archive_at!),
+      register_at: DateTime.fromSeconds(result.register_at!),
     })
       .then((game) => {
         setGameStore({ current: game });
@@ -42,7 +42,7 @@ export default function () {
   }
   return (
     <div class="flex flex-col p-3 lg:p-6 w-full items-center">
-      <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} />
+      <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} inGame />
     </div>
   );
 }

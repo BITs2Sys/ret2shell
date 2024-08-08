@@ -663,7 +663,8 @@
       "chatPlayerRole": "participante",
       "hammerInputAlreadySend": "El problema ha sido enviado, por favor espere la respuesta...",
       "fetchChatSessionError": "Fallo al obtener la lista de comentarios",
-      "adminHammerTips": "Este es el tema de retroalimentación del participante y la información del equipo:"
+      "adminHammerTips": "Este es el tema de retroalimentación del participante y la información del equipo:",
+      "envContainerNameFormat": "Los nombres de los contenedores solo pueden estar formados por letras minúsculas y guiones."
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",
