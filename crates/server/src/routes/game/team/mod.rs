@@ -24,6 +24,8 @@ use crate::{
   traits::{GlobalState, ResponseError},
 };
 
+use super::worker;
+
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   Router::new()
     .route(
@@ -377,7 +379,7 @@ async fn delete_team(
 }
 
 async fn create_team_extra(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  State(db): State<Database>, Extension(team): Extension<team::Model>,
   Json(req): Json<extra::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let result = extra::create(
@@ -389,6 +391,9 @@ async fn create_team_extra(
     },
   )
   .await?;
+  tokio::spawn(async move {
+    worker::update_team_state(&db, team).await;
+  });
   Ok(Json(result))
 }
 
@@ -398,7 +403,7 @@ struct DeleteTeamExtraQuery {
 }
 
 async fn delete_team_extra(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  State(db): State<Database>, Extension(team): Extension<team::Model>,
   Query(req): Query<DeleteTeamExtraQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let extra = extra::get(&db.conn, req.id).await?;
@@ -406,5 +411,8 @@ async fn delete_team_extra(
     return Err(ResponseError::NotFound("extra not found".to_owned()));
   }
   extra::delete(&db.conn, req.id).await?;
+  tokio::spawn(async move {
+    worker::update_team_state(&db, team).await;
+  });
   Ok(())
 }

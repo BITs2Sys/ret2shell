@@ -14,7 +14,7 @@ use r2s_event::{
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 use crate::traits::{GlobalState, ResponseError};
 
@@ -358,4 +358,35 @@ async fn submission_worker_exec(
     queue.publish("event", event).await.ok();
   }
   Ok(submission)
+}
+
+pub async fn update_team_state(db: &Database, team: team::Model) {
+  let score = team::calc_score(&db.conn, team.id).await;
+  if score.is_err() {
+    warn!("calc team score failed: {:?}", score.err());
+    return;
+  }
+  let score = score.unwrap();
+  if score != team.score {
+    let mut team_history = team.history.clone().0;
+    team_history.push(team::TeamScoreHistory {
+      score,
+      challenge_id: None,
+      changed_at: Utc::now(),
+      blood_state: None,
+    });
+    let result = team::update(
+      &db.conn,
+      team::Model {
+        id: team.id,
+        score,
+        history: team::TeamScoreHistoryList(team_history),
+        ..team
+      },
+    )
+    .await;
+    if let Err(e) = result {
+      warn!("update team score failed: {:?}", e);
+    }
+  }
 }

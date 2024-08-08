@@ -43,6 +43,8 @@ use crate::{
   traits::{GlobalState, ResponseError},
 };
 
+use super::worker;
+
 const LABEL_ALPHABET: [char; 62] = [
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
   'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B',
@@ -186,37 +188,6 @@ macro_rules! check_challenge_publishing {
 //     )*
 //   }};
 // }
-
-async fn update_team_state(db: &Database, team: team::Model) {
-  let score = team::calc_score(&db.conn, team.id).await;
-  if score.is_err() {
-    warn!("calc team score failed: {:?}", score.err());
-    return;
-  }
-  let score = score.unwrap();
-  if score != team.score {
-    let mut team_history = team.history.clone().0;
-    team_history.push(team::TeamScoreHistory {
-      score,
-      challenge_id: None,
-      changed_at: Utc::now(),
-      blood_state: None,
-    });
-    let result = team::update(
-      &db.conn,
-      team::Model {
-        id: team.id,
-        score,
-        history: team::TeamScoreHistoryList(team_history),
-        ..team
-      },
-    )
-    .await;
-    if let Err(e) = result {
-      warn!("update team score failed: {:?}", e);
-    }
-  }
-}
 
 #[derive(Deserialize)]
 struct ChallengeQuery {
@@ -863,7 +834,7 @@ async fn unlock_hint(
     .await?;
     txn.commit().await?;
     tokio::spawn(async move {
-      update_team_state(&db, team).await;
+      worker::update_team_state(&db, team).await;
     });
     Ok(Json(extra))
   } else {

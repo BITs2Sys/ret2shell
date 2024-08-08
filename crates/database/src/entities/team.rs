@@ -330,6 +330,42 @@ where
   Ok((teams, total))
 }
 
+#[allow(clippy::too_many_arguments)]
+pub async fn get_page_ex<C>(
+  db: &C, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
+  institute_id: Option<i64>, filter: Option<String>, order_by: Option<String>, asc: bool,
+) -> Result<(Vec<ExModel>, u64), DbErr>
+where
+  C: ConnectionTrait,
+{
+  let state = min_state.unwrap_or(State::Passed);
+  let mut sql = Entity::find()
+    .join(JoinType::LeftJoin, Relation::Institute.def())
+    .join(JoinType::LeftJoin, Relation::Game.def())
+    .column_as(institute::Column::Name, "institute_name")
+    .column_as(game::Column::Name, "game_name")
+    .filter(Column::GameId.eq(game_id))
+    .filter(Column::State.gte(state));
+  sql = filter_sql(sql, filter)?;
+  if let Some(institute_id) = institute_id {
+    sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  if let Some(order_by) = order_by {
+    let order_by = Column::from_str(order_by.as_str())
+      .map_err(|e| DbErr::Custom(format!("invalid order_by: {}", e)))?;
+    sql = if asc {
+      sql.order_by(order_by, Order::Asc)
+    } else {
+      sql.order_by(order_by, Order::Desc)
+    };
+  }
+  sql = sql.order_by(Column::LastActiveAt, Order::Asc);
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let teams = paginator.fetch_page(page - 1).await?;
+  Ok((teams, total))
+}
+
 fn filter_sql(mut sql: Select<Entity>, filter: Option<String>) -> Result<Select<Entity>, DbErr> {
   if let Some(filter) = filter {
     let mut cond = Condition::any();

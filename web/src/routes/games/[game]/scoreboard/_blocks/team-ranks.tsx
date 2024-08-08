@@ -2,9 +2,11 @@ import Spin from "@assets/animates/spin";
 import { randomTips } from "@lib/utils/loading-tips";
 import type { Team } from "@models/team";
 import { A } from "@solidjs/router";
+import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
+import Tag from "@widgets/tag";
 import { For, Match, Show, Switch } from "solid-js";
 
 // icon-[fluent-emoji-flat--1st-place-medal]
@@ -66,6 +68,11 @@ export default function TeamRanks(props: {
               >
                 {team.name}
               </A>
+              <Show when={props.showTime && team.institute_id}>
+                <Tag level="info">
+                  <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
+                </Tag>
+              </Show>
               <span class="w-20 text-end">
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>

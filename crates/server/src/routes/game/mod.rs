@@ -36,7 +36,7 @@ mod challenge;
 mod chat;
 mod notification;
 mod team;
-mod worker;
+pub mod worker;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   tokio::spawn(worker::spawn_game_workers(state.clone()));
