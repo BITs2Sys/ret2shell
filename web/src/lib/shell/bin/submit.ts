@@ -1,6 +1,12 @@
 import { checkSubmissionStatus, submitFlag } from "@api/game";
-import { challengeStore, refreshSolves, refreshStatus } from "@storage/challenge";
-import { gameStore } from "@storage/game";
+import {
+  challengeStore,
+  refreshChallenges,
+  refreshCurrentChallenge,
+  refreshSolves,
+  refreshStatus,
+} from "@storage/challenge";
+import { gameStore, inProgress, isGameAdmin, refreshSelfTeam } from "@storage/game";
 import { t } from "@storage/theme";
 import ansiColors from "ansi-colors";
 import { HTTPError } from "ky";
@@ -27,6 +33,11 @@ export class Submit implements Command {
             io.success(`${t("shell.submit.correct")}: ${s.result}`);
             refreshStatus();
             refreshSolves();
+            if (inProgress() && !isGameAdmin()) {
+              refreshSelfTeam();
+              refreshChallenges();
+              refreshCurrentChallenge();
+            }
           } else {
             io.error(`${t("shell.submit.incorrect")}: ${s.result}`);
           }

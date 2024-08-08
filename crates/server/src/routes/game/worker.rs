@@ -1,6 +1,7 @@
 use chrono::Utc;
 use futures::StreamExt;
 use r2s_bucket::Bucket;
+use r2s_cache::Cache;
 use r2s_checker::Checker;
 use r2s_database::{
   audit, challenge, extra, game, submission,
@@ -22,9 +23,11 @@ pub async fn spawn_game_workers(state: GlobalState) {
   let database = state.db.clone();
   let checker = state.checker.clone();
   let bucket = state.bucket.clone();
+  let cache = state.cache.clone();
   tokio::spawn(submission_worker(
     queue.clone(),
     database.clone(),
+    cache,
     checker,
     bucket,
   ));
@@ -113,7 +116,9 @@ async fn score_maintainance_worker_exec(
   Ok(())
 }
 
-async fn submission_worker(queue: Queue, database: Database, checker: Checker, bucket: Bucket) {
+async fn submission_worker(
+  queue: Queue, db: Database, cache: Cache, checker: Checker, bucket: Bucket,
+) {
   let messages = queue
     .subscribe("check")
     .await
@@ -148,7 +153,8 @@ async fn submission_worker(queue: Queue, database: Database, checker: Checker, b
       }
       let result = submission_worker_exec(
         queue.clone(),
-        database.clone(),
+        db.clone(),
+        cache.clone(),
         checker.clone(),
         bucket.clone(),
         submission.clone().unwrap(),
@@ -158,7 +164,7 @@ async fn submission_worker(queue: Queue, database: Database, checker: Checker, b
       .ok();
       if result.is_none() {
         submission::update(
-          &database.conn,
+          &db.conn,
           submission::Model {
             id: submission.clone().unwrap().id,
             solved: Some(false),
@@ -179,7 +185,8 @@ async fn submission_worker(queue: Queue, database: Database, checker: Checker, b
 }
 
 async fn submission_worker_exec(
-  queue: Queue, db: Database, mut checker: Checker, bucket: Bucket, submission: submission::Model,
+  queue: Queue, db: Database, cache: Cache, mut checker: Checker, bucket: Bucket,
+  submission: submission::Model,
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
   let challenge = challenge::get(&db.conn, submission.challenge_id).await?;
@@ -257,6 +264,7 @@ async fn submission_worker_exec(
     // publish scoreboard update event if nessary
     if changed {
       queue.publish("scoreboard", challenge.clone()).await.ok();
+      cache.at("challenge").del(challenge.id).await.ok();
     }
     // detect blood state and create extra if necessary
     let blood_state = if decay <= 3 { Some(decay as i32) } else { None };

@@ -1,3 +1,4 @@
+import { getSelfTeam } from "@api/game";
 import type { Game } from "@models/game";
 import type { Team } from "@models/team";
 import { Permission, type User } from "@models/user";
@@ -24,6 +25,18 @@ export function appendGames(games: Game[]) {
   setGameStore({
     games: [...gameStore.games.filter((g) => !ids.has(g.id)), ...games],
   });
+}
+
+export function refreshSelfTeam() {
+  if (gameStore.current) {
+    getSelfTeam(gameStore.current?.id)
+      .then((team) => {
+        setGameStore({ team });
+      })
+      .catch(() => {
+        setGameStore({ team: null });
+      });
+  }
 }
 
 export function inProgress() {

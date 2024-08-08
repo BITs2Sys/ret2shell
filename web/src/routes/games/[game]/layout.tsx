@@ -1,12 +1,12 @@
-import { getGame, getSelfTeam } from "@api/game";
+import { getGame } from "@api/game";
 import { HostType } from "@models/game";
 import { useNavigate, useParams } from "@solidjs/router";
-import { gameStore, setGameStore } from "@storage/game";
+import { setChallengeStore } from "@storage/challenge";
+import { gameStore, refreshSelfTeam, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import type { HTTPError } from "ky";
 import { type JSX, onCleanup } from "solid-js";
 import TeamCover from "./_blocks/team-cover";
-import { setChallengeStore } from "@storage/challenge";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
@@ -24,16 +24,12 @@ export default function (props: { children?: JSX.Element }) {
           return null;
         }
         setGameStore({ current: resp });
+        setTimeout(() => {
+          refreshSelfTeam();
+        });
       })
       .catch((err: HTTPError) => {
         navigate(`/sigtrap/${err.response.status}`, { replace: true });
-      });
-    getSelfTeam(game_id)
-      .then((team) => {
-        setGameStore({ team });
-      })
-      .catch(() => {
-        setGameStore({ team: null });
       });
   }
   return (

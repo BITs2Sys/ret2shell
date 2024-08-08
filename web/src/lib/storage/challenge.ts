@@ -1,4 +1,5 @@
 import {
+  getChallenge,
   getChallengeAttachments,
   getChallengeEnv,
   getChallengeList,
@@ -97,4 +98,23 @@ export function refreshStatus() {
         });
       });
     });
+}
+
+export function refreshCurrentChallenge() {
+  if (challengeStore.current) {
+    getChallenge(gameStore.current!.id, challengeStore.current.id)
+      .then((resp) => {
+        setChallengeStore({ current: resp });
+        refreshChallengeAssets();
+      })
+      .catch((e: HTTPError) => {
+        e.response.text().then((text) => {
+          addToast({
+            level: "error",
+            description: `${t("game.challenge.fetchChallengeFailed")}: ${text}`,
+            duration: 5000,
+          });
+        });
+      });
+  }
 }
