@@ -182,7 +182,22 @@ where
       .select_only()
       .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
   }
-  sql.into_model().all(db).await
+
+  let result = sql.into_model().all(db).await?;
+  if !with_content {
+    Ok(
+      result
+        .into_iter()
+        .map(|r| ExModel {
+          content: None,
+          result: None,
+          ..r
+        })
+        .collect(),
+    )
+  } else {
+    Ok(result)
+  }
 }
 
 pub async fn get_list_ex<C>(
@@ -219,12 +234,22 @@ where
     sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
   }
   sql = sql.column_as(challenge::Column::Score, "score");
+
+  let result = sql.into_model().all(db).await?;
   if !with_content {
-    sql = sql
-      .select_only()
-      .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
+    Ok(
+      result
+        .into_iter()
+        .map(|r| ExModel {
+          content: None,
+          result: None,
+          ..r
+        })
+        .collect(),
+    )
+  } else {
+    Ok(result)
   }
-  sql.into_model().all(db).await
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -255,14 +280,21 @@ where
     sql = sql.filter(Column::Solved.eq(true));
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  if !with_content {
-    sql = sql
-      .select_only()
-      .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
-  }
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
+  let submissions = if !with_content {
+    submissions
+      .into_iter()
+      .map(|r| ExModel {
+        content: None,
+        result: None,
+        ..r
+      })
+      .collect()
+  } else {
+    submissions
+  };
   Ok((submissions, total))
 }
 

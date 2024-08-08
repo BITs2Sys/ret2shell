@@ -58,11 +58,13 @@ export class Wsrx {
         );
       } catch (err) {
         if (err instanceof HTTPError) {
-          addToast({
-            level: "error",
-            description: `${t("instance.fetchFailed")}: ${await err.response.text()}`,
-            duration: 5000,
-          });
+          if (err.response.status !== 404) {
+            addToast({
+              level: "error",
+              description: `${t("instance.fetchFailed")}: ${await err.response.text()}`,
+              duration: 5000,
+            });
+          }
         }
       }
     }
