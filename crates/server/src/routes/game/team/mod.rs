@@ -166,7 +166,7 @@ async fn get_team_solves(
   State(ref db): State<Database>, Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   Ok(Json(
-    submission::get_list(&db.conn, true, false, None, Some(team.id), None, true).await?,
+    submission::get_list_ex(&db.conn, true, false, None, Some(team.id), None, true).await?,
   ))
 }
 

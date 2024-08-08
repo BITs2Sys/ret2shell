@@ -40,9 +40,9 @@ pub struct ExModel {
   #[serde(with = "ts_seconds")]
   pub created_at: DateTime<Utc>,
   pub user_id: i64,
-  pub user_name: String,
+  pub user_name: Option<String>,
   pub challenge_id: i64,
-  pub challenge_name: String,
+  pub challenge_name: Option<String>,
   pub team_id: Option<i64>,
   pub team_name: Option<String>,
   pub content: Option<String>,
@@ -155,6 +155,50 @@ where
   C: ConnectionTrait,
 {
   let mut sql = Entity::find();
+  if let Some(challenge_id) = challenge_id {
+    sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+  }
+  if let Some(team_id) = team_id {
+    sql = sql.filter(Column::TeamId.eq(team_id));
+  }
+  if let Some(user_id) = user_id {
+    sql = sql.filter(Column::UserId.eq(user_id));
+  }
+  if only_solved {
+    sql = sql.filter(Column::Solved.eq(true));
+  }
+  if in_game && only_solved {
+    sql = sql
+      .filter(Column::TeamId.is_not_null())
+      .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
+  } else if only_solved {
+    sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+  }
+  sql = sql
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .column_as(challenge::Column::Score, "score");
+  if !with_content {
+    sql = sql
+      .select_only()
+      .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Result)));
+  }
+  sql.into_model().all(db).await
+}
+
+pub async fn get_list_ex<C>(
+  db: &C, only_solved: bool, with_content: bool, challenge_id: Option<i64>, team_id: Option<i64>,
+  user_id: Option<i64>, in_game: bool,
+) -> Result<Vec<ExModel>, DbErr>
+where
+  C: ConnectionTrait,
+{
+  let mut sql = Entity::find()
+    .join(JoinType::LeftJoin, Relation::Team.def())
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::InnerJoin, Relation::User.def())
+    .column_as(user::Column::Nickname, "user_name")
+    .column_as(team::Column::Name, "team_name")
+    .column_as(challenge::Column::Name, "challenge_name");
   if let Some(challenge_id) = challenge_id {
     sql = sql.filter(Column::ChallengeId.eq(challenge_id));
   }

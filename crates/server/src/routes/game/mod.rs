@@ -410,11 +410,11 @@ async fn get_self_solves(
 ) -> Result<impl IntoResponse, ResponseError> {
   if is_game_admin!(token, game) {
     let solves =
-      submission::get_list(&db.conn, true, false, None, None, Some(token.id), false).await?;
+      submission::get_list_ex(&db.conn, true, false, None, None, Some(token.id), false).await?;
     return Ok(Json(solves));
   }
   let team = extract_team!(game, team_ext, token);
-  let solves = submission::get_list(
+  let solves = submission::get_list_ex(
     &db.conn,
     true,
     false,
