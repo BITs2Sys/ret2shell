@@ -218,9 +218,7 @@ where
   } else if only_solved {
     sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
   }
-  sql = sql
-    .join(JoinType::InnerJoin, Relation::Challenge.def())
-    .column_as(challenge::Column::Score, "score");
+  sql = sql.column_as(challenge::Column::Score, "score");
   if !with_content {
     sql = sql
       .select_only()
