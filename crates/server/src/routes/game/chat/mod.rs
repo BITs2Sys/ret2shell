@@ -105,7 +105,7 @@ async fn player_send_chat(
   .await?;
   let event = EventContainer {
     game_id: game.id,
-    event: Event::Chat(ChatEvent {
+    event: Event::Chat(Box::new(ChatEvent {
       operator: user::Model {
         id: token.id,
         account: token.account.clone(),
@@ -116,7 +116,7 @@ async fn player_send_chat(
       challenge,
       event_type: ChatEventType::Message,
       content: chat.content,
-    }),
+    })),
   };
   queue.publish("event", event).await.ok();
 

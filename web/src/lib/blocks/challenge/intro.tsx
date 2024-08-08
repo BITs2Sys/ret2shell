@@ -38,10 +38,14 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
     return null;
   });
   const [calmdownStart, setCalmdownStart] = createSignal<DateTime | null>(null);
-  function refreshCalmdown() {
-    getCalmdownStatus()
-      .then(setCalmdownStart)
-      .catch(() => setCalmdownStart(null));
+  async function refreshCalmdown() {
+    try {
+      const result = await getCalmdownStatus();
+      setCalmdownStart(result);
+    } catch {
+      setCalmdownStart(null);
+      return;
+    }
   }
   createEffect(() => {
     if (challengeStore.current && challengeStore.env) {

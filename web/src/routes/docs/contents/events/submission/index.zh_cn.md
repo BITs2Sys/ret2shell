@@ -7,7 +7,7 @@
 ```json
 {
   "submission": {
-    "event_type": "correct", // "correct" | "too_many_submits" | "cheated" | "too_quick"，保证不会有其他值
+    "event_type": "correct", // "correct" | "cheated" | "too_quick"，保证不会有其他值
     "operator": {
       "id": 1,
       "account": "player",

@@ -420,7 +420,7 @@
   },
   "form": {
     "changeAvatar": "Deckblatt",
-    "copy": "translate from zh-cn to de-de:\n\nKopieren",
+    "copy": "Kopieren",
     "cover": "Deckblatt",
     "create": "Erstellen",
     "createFailed": "Erstellung fehlgeschlagen",
@@ -820,7 +820,7 @@
     "wiki": "Wissensdatenbankmanagement"
   },
   "platform": {
-    "accept": "translate from zh-cn to de-de:\n\n好的",
+    "accept": "OK",
     "clearNotifications": "Nachrichten löschen",
     "cookiePolicy": "Wir verwenden keine Cookies, um Sie zu verfolgen.",
     "diyBox": "Sprache und Hell-/Dunkel-Thema",
@@ -830,12 +830,12 @@
       "footerInfoPlaceholder": "Plattform-Fußzeilen-Copyright-Information",
       "footerInfoTitle": "Plattform-Fußzeile Copyright-Informationen",
       "footerUrlPlaceholder": "Urheberrecht-Informationen-Link",
-      "footerUrlTitle": "版权信息链接",
+      "footerUrlTitle": "Urheberrecht-Informationen-Link",
       "hideMaker": "Entwicklerinformationen ausblenden",
       "hideMakerDisabled": "Deine Lizenz erlaubt nicht, die Entwicklerinformationen zu verbergen.",
       "nameTitle": "Plattformname",
       "recordPlaceholder": "Chinesische MIIT-Registrierungsnummer (Nicht für den Service in der VR China erforderlich)",
-      "recordTitle": "中国工信部备案号",
+      "recordTitle": "Registrierungsnummer des chinesischen MIIT",
       "subjectInfoTitle": "Startseite Untertitel",
       "subjectUrlTitle": "Untertitel-Link"
     },
@@ -849,7 +849,7 @@
     "notImplementedTips3": "Du hast recht, aber RX ist ein ein ein ein...",
     "notificationBox": "Hinweis",
     "offline": "Der Backend-Server scheint offline zu sein. Bitte aktualisieren Sie die Seite. Wenn dieser Fehler wiederholt auftritt, wenden Sie sich bitte an den Support.",
-    "ok": "translate from zh-cn to de-de:\n\n好的",
+    "ok": "OK",
     "reject": "Nicht geht.",
     "return": "Rückkehr",
     "subject": "Für alle Schönheiten der Welt kämpfen",
@@ -875,7 +875,7 @@
     "commandInvalid": "Befehl enthält Syntaxfehler",
     "commandNotFound": "Unbekannter Befehl: {{command}}",
     "echo": {
-      "man": "原始输出你的任何输入。"
+      "man": "Rohausgabe für jede von Ihnen eingegebene Eingabe."
     },
     "help": {
       "man": "Hilfeinformationen ausgeben."
@@ -912,7 +912,9 @@
       "usage": "Verwendungsweise:",
       "stopEnvError": "Umgebungstopp fehlgeschlagen",
       "startEnvError": "Umgebung starten fehlgeschlagen",
-      "delayError": "Erweiterung der Servicefrist fehlgeschlagen"
+      "delayError": "Erweiterung der Servicefrist fehlgeschlagen",
+      "stopping": "Stoppe {{service}}...",
+      "starting": "Starte {{service}}..."
     },
     "welcome": "Willkommen bei {{shell}}!",
     "wget": {
@@ -929,7 +931,7 @@
   },
   "theme": {
     "colorScheme": "Hell-Dunkel-Thema",
-    "language": "语言 / Sprache"
+    "language": "Sprache / Language"
   },
   "training": {
     "briefPlaceholder": "Übungsplatz-Einführung",

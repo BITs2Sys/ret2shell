@@ -961,7 +961,9 @@
       "noActionPerformed": "不会执行任何操作。",
       "stopEnvError": "停止环境失败",
       "startEnvError": "启动环境失败",
-      "delayError": "延长服务时限失败"
+      "delayError": "延长服务时限失败",
+      "stopping": "正在停止 {{service}}...",
+      "starting": "正在启动 {{service}}..."
     },
     "canNotSwitchDir": "远程主机拒绝了目录穿越。"
   },

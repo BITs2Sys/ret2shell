@@ -63,7 +63,9 @@
       "noActionPerformed": "不會執行任何操作。",
       "stopEnvError": "停止環境失敗",
       "startEnvError": "啟動環境失敗",
-      "delayError": "延長服務時限失敗"
+      "delayError": "延長服務時限失敗",
+      "stopping": "正在停止 {{service}}...",
+      "starting": "正在啟動 {{service}}..."
     },
     "canNotSwitchDir": "遠端主機拒絕了目錄穿越。"
   },
@@ -357,7 +359,7 @@
       "filterPlaceholder": "搜尋使用者名稱、暱稱、郵箱、IP 地址...",
       "selectInstitute": "選擇組織...",
       "sortBy": "排序...",
-      "id": "翻譯自 zh-cn 到 zh-tw：\n\nID",
+      "id": "ID",
       "account": "使用者名稱",
       "institute": "組織",
       "registeredAt": "註冊時間",

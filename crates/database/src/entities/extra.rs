@@ -84,6 +84,13 @@ impl Related<super::team::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait,
+{
+  Entity::find_by_id(id).one(db).await
+}
+
 pub async fn get_list<C>(db: &C, team_id: i64) -> Result<Vec<Model>, DbErr>
 where
   C: ConnectionTrait,

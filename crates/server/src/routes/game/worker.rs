@@ -3,7 +3,7 @@ use futures::StreamExt;
 use r2s_bucket::Bucket;
 use r2s_checker::Checker;
 use r2s_database::{
-  audit, challenge, game, submission,
+  audit, challenge, extra, game, submission,
   team::{self, TeamScoreHistory, TeamScoreHistoryList},
   user,
 };
@@ -241,33 +241,52 @@ async fn submission_worker_exec(
   .await?;
   if submission.solved.unwrap_or(false) && game.in_progress() && team.is_some() {
     let decay = maintain_challenge_score(db.clone(), queue.clone(), challenge.clone()).await?;
+    let blood_state = if decay < 3 {
+      Some((decay + 1) as i32)
+    } else {
+      None
+    };
     let changed_at = submission.created_at;
     let mut team = team.clone().unwrap();
+    if let Some(blood_state) = blood_state {
+      extra::create(
+        &db.conn,
+        extra::Model {
+          id: 0,
+          created_at: changed_at,
+          team_id: team.id,
+          challenge_id: Some(challenge.id),
+          score: challenge.score_rule.initial * game.award_rate / 100,
+          reason: format!(
+            "No.{blood_state} solution for challenge {}#{}",
+            challenge.id, challenge.name
+          ),
+          hint_id: None,
+        },
+      )
+      .await?;
+    }
     let score = team::calc_score(&db.conn, team.id).await?;
-    team.score = score.clone();
+    team.score = score;
     team.history.0.push(TeamScoreHistory {
       changed_at,
-      blood_state: if decay < 3 {
-        Some((decay + 1) as i32)
-      } else {
-        None
-      },
+      blood_state,
       challenge_id: Some(challenge.id),
       score,
     });
     team::update(&db.conn, team.clone()).await?;
     let event = EventContainer {
       game_id: challenge.game_id,
-      event: Event::Submission(SubmissionEvent {
+      event: Event::Submission(Box::new(SubmissionEvent {
         event_type: SubmissionEventType::Correct,
         submission: submission.clone(),
-        blood_state: if decay < 3 { Some(decay + 1) } else { None },
+        blood_state,
         challenge: challenge.clone(),
         operator: user.clone(),
-        team: team.clone(),
+        team: Some(team.clone()),
         peer_team: None,
         reason: None,
-      }),
+      })),
     };
     queue.publish("event", event).await.ok();
   }
@@ -296,16 +315,16 @@ async fn submission_worker_exec(
       let audit = audit::create(&db.conn, audit).await?;
       let event = EventContainer {
         game_id: challenge.game_id,
-        event: Event::Submission(SubmissionEvent {
+        event: Event::Submission(Box::new(SubmissionEvent {
           event_type: SubmissionEventType::Cheated,
           submission: submission.clone(),
           blood_state: None,
           challenge: challenge.clone(),
           operator: user.clone(),
-          team: team.unwrap(),
+          team,
           peer_team,
           reason: Some(audit.reason),
-        }),
+        })),
       };
       queue.publish("event", event).await.ok();
     }

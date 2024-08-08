@@ -61,7 +61,7 @@ impl Registry {
     let body = res.text().await?;
     let data: serde_json::Value = serde_json::from_str(&body)?;
     let repositories = data["repositories"].clone();
-    Ok(serde_json::from_value(repositories.clone()).map_err(|e| ClusterError::JsonError(e))?)
+    serde_json::from_value(repositories.clone()).map_err(ClusterError::JsonError)
   }
 
   pub async fn images(&self, repository: &str) -> Result<Vec<String>, ClusterError> {
@@ -70,7 +70,7 @@ impl Registry {
     let body = res.text().await?;
     let data: serde_json::Value = serde_json::from_str(&body)?;
     let tags = data["tags"].clone();
-    Ok(serde_json::from_value(tags.clone()).map_err(|e| ClusterError::JsonError(e))?)
+    serde_json::from_value(tags.clone()).map_err(ClusterError::JsonError)
   }
 
   pub async fn upload_image(

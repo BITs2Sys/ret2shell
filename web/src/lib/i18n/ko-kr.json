@@ -912,7 +912,9 @@
       "usage": "사용 방법:",
       "stopEnvError": "환경 중지 실패",
       "startEnvError": "환경 시작 실패",
-      "delayError": "서비스 기간 연장 실패"
+      "delayError": "서비스 기간 연장 실패",
+      "stopping": "{{service}}을(를) 중지하는 중...",
+      "starting": "{{service}}을(를) 시작하는 중..."
     },
     "welcome": "{{shell}}을 사용해 주셔서 감사합니다!",
     "wget": {

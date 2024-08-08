@@ -2,7 +2,7 @@ use axum::{
   extract::{Query, State},
   middleware,
   response::IntoResponse,
-  routing::{get, post},
+  routing::{get, patch, post},
   Extension, Json, Router,
 };
 use chrono::Utc;
@@ -44,6 +44,12 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .nest(
       "/:team",
       Router::new()
+        .route("/extra", post(create_team_extra).delete(delete_team_extra))
+        .route("/", patch(update_team_info).delete(delete_team))
+        .route_layer(middleware::from_fn_with_state(
+          state.clone(),
+          auth::game_admin_required,
+        ))
         .route("/", get(get_team_info))
         .route("/member", get(get_team_members))
         .route("/solve", get(get_team_solves))
@@ -345,4 +351,60 @@ async fn join_team(
   }
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   Ok(Json(team))
+}
+
+async fn update_team_info(
+  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  Json(req): Json<team::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let result = team::update(
+    &db.conn,
+    team::Model {
+      id: team.id,
+      game_id: team.game_id,
+      ..req
+    },
+  )
+  .await?;
+  Ok(Json(result))
+}
+
+async fn delete_team(
+  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  team::delete(&db.conn, team.id).await?;
+  Ok(())
+}
+
+async fn create_team_extra(
+  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  Json(req): Json<extra::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let result = extra::create(
+    &db.conn,
+    extra::Model {
+      id: 0,
+      team_id: team.id,
+      ..req
+    },
+  )
+  .await?;
+  Ok(Json(result))
+}
+
+#[derive(Deserialize)]
+struct DeleteTeamExtraQuery {
+  pub id: i64,
+}
+
+async fn delete_team_extra(
+  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  Query(req): Query<DeleteTeamExtraQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let extra = extra::get(&db.conn, req.id).await?;
+  if extra.is_none() || extra.is_some_and(|e| e.team_id != team.id) {
+    return Err(ResponseError::NotFound("extra not found".to_owned()));
+  }
+  extra::delete(&db.conn, req.id).await?;
+  Ok(())
 }

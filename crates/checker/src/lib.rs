@@ -90,10 +90,7 @@ impl Checker {
     if !diagnostics.is_empty() {
       let mut out = Buffer::ansi();
       diagnostics.emit(&mut out, &sources)?;
-      return Err(CheckerError::CompileError(format!(
-        "{}",
-        String::from_utf8(out.into_inner())?
-      )));
+      return Err(CheckerError::CompileError((String::from_utf8(out.into_inner())?).to_string()));
     }
     let unit = rune::prepare(&mut sources).with_context(&context).build()?;
     let runtime = context.runtime()?;

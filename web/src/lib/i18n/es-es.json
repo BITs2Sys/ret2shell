@@ -820,7 +820,7 @@
     "wiki": "Gestión de la base de conocimientos"
   },
   "platform": {
-    "accept": "translate from zh-cn to es-es:\n\nBueno",
+    "accept": "Bueno",
     "clearNotifications": "Vaciar mensajes",
     "cookiePolicy": "No utilizamos ninguna cookie para rastrearle.",
     "diyBox": "idioma y tema claro/oscuro",
@@ -849,7 +849,7 @@
     "notImplementedTips3": "Tienes razón, pero RX es una una una una...",
     "notificationBox": "Mensaje de aviso",
     "offline": "El backend parece estar fuera de línea, por favor, actualiza la página. Si este error persiste, contacte con el personal de mantenimiento.",
-    "ok": "translate from zh-cn to es-es:\n\nBueno",
+    "ok": "Bueno",
     "reject": "No se puede",
     "return": "regresar",
     "subject": "Luchar por todas las maravillas del mundo",
@@ -912,7 +912,9 @@
       "usage": "Modo de uso:",
       "stopEnvError": "Detener el fracaso ambiental",
       "startEnvError": "Fallo al iniciar el entorno",
-      "delayError": "Fallo al extender el plazo de servicio"
+      "delayError": "Fallo al extender el plazo de servicio",
+      "stopping": "Deteniendo {{service}}...",
+      "starting": "Iniciando {{service}}..."
     },
     "welcome": "¡Bienvenido a usar {{shell}}!",
     "wget": {

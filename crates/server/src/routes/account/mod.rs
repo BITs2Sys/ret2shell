@@ -726,7 +726,7 @@ async fn change_profile(
     )
     .await?;
 
-    logout_user(&cache, user.id).await?;
+    logout_user(cache, user.id).await?;
     // renew token
     *(token_tracker.token.lock().await) = Token {
       id: user.id,

@@ -88,6 +88,8 @@ export class Service implements Command {
         return 1;
       }
     }
+    const d_service_name = await deunicode(challengeStore.current!.name);
+    io.info(t("shell.service.starting", { service: ansiColors.blueBright(d_service_name) })!);
     await new Promise((r) => setTimeout(r, 500));
     try {
       await startChallengeEnv(challengeStore.current!.game_id, challengeStore.current!.id);
@@ -106,6 +108,8 @@ export class Service implements Command {
       io.error(t("shell.service.noEnv")!);
       return 1;
     }
+    const d_service_name = await deunicode(challengeStore.current!.name);
+    io.info(t("shell.service.stopping", { service: ansiColors.blueBright(d_service_name) })!);
     try {
       await stopGameSelfEnv(challengeStore.current!.game_id);
     } catch (e) {
@@ -183,7 +187,7 @@ export class Service implements Command {
         io.error(`${t("shell.service.delayError")!}: ${text}`);
       }
     }
-    this.status(io);
+    await this.status(io);
     return 0;
   }
 }

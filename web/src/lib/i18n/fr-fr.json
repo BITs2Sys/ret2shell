@@ -912,7 +912,9 @@
       "usage": "Mode d'emploi :",
       "stopEnvError": "Échec de l'arrêt de l'environnement",
       "startEnvError": "Échec du démarrage de l'environnement",
-      "delayError": "Échec de l'extension de la durée du service"
+      "delayError": "Échec de l'extension de la durée du service",
+      "stopping": "Arrêt de {{service}} en cours...",
+      "starting": "Démarrage de {{service}}..."
     },
     "welcome": "Bienvenue sur {{shell}}!",
     "wget": {

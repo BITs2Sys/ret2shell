@@ -4,6 +4,7 @@ import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import ky, { HTTPError } from "ky";
+import { DateTime } from "luxon";
 import { type Accessor, createSignal } from "solid-js";
 
 export enum WsrxState {
@@ -52,7 +53,9 @@ export class Wsrx {
     if (gameStore.current) {
       try {
         const result = await getGameSelfEnvs(gameStore.current.id);
-        this.setInstances(result);
+        this.setInstances(
+          result.filter((instance) => instance.created_at.plus({ hours: instance.renew_count + 1 }) > DateTime.now())
+        );
       } catch (err) {
         if (err instanceof HTTPError) {
           addToast({

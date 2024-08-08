@@ -1,7 +1,7 @@
 import type { Challenge } from "@models/challenge";
 import type { Team } from "@models/team";
 
-export default function TeamSolves(props: {
+export default function TeamSolves(_props: {
   teams: Team[];
   challenges: Challenge[];
 }) {

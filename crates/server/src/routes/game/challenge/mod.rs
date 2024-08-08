@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use axum::{
   body::Body,
-  extract::{DefaultBodyLimit, Multipart, Path, Query, State},
+  extract::{DefaultBodyLimit, Multipart, Query, State},
   http::{HeaderMap, StatusCode},
   middleware,
   response::{IntoResponse, Response},
@@ -25,7 +23,9 @@ use r2s_database::{
   user::{self, Permission},
 };
 use r2s_event::{
-  events::{ChallengeEvent, ChallengeEventType, EventContainer},
+  events::{
+    ChallengeEvent, ChallengeEventType, EventContainer, SubmissionEvent, SubmissionEventType,
+  },
   Event,
 };
 use r2s_migrator::Database;
@@ -354,6 +354,7 @@ async fn update_challenge(
   Ok(Json(challenge))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn up_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   State(ref queue): State<Queue>, State(checker): State<Checker>,
@@ -484,10 +485,13 @@ async fn get_challenge_solves_status(
 ) -> Result<impl IntoResponse, ResponseError> {
   if let Some(id) = query.id {
     let submission = submission::get(&db.conn, id).await?;
-    if submission.clone().is_some_and(|s| s.user_id != token.id) || submission.is_none() {
-      return Err(ResponseError::NotFound("submission".to_string()));
+    if let Some(submission) = submission.clone() {
+      if submission.user_id != token.id {
+        return Err(ResponseError::NotFound("submission not found".to_owned()));
+      }
+      return Ok(Json(submission).into_response());
     } else {
-      return Ok(Json(submission.unwrap()).into_response());
+      return Err(ResponseError::NotFound("submission not found".to_owned()));
     }
   }
   let team = extract_team!(game, team_ext, token);
@@ -543,7 +547,7 @@ struct SubmitRequest {
 
 #[allow(clippy::too_many_arguments)]
 async fn submit_flag(
-  State(ref db): State<Database>, State(ref queue): State<Queue>,
+  State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   team_ext: Option<Extension<team::Model>>, Extension(challenge): Extension<challenge::Model>,
   Json(req): Json<SubmitRequest>,
@@ -555,10 +559,10 @@ async fn submit_flag(
     id: 0,
     created_at: Utc::now(),
     challenge_id: challenge.id,
-    content: Some(req.content),
+    content: Some(req.content.clone()),
     solved: None,
     result: None,
-    team_id: if let Some(team) = team {
+    team_id: if let Some(team) = team.clone() {
       if game.in_progress() {
         Some(team.id)
       } else {
@@ -569,6 +573,41 @@ async fn submit_flag(
     },
     user_id: token.id,
   };
+  // check submission frequency, skip admin
+  if !is_game_admin!(token, game) {
+    let limit: Option<i32> = cache.at("submission").get(token.id).await?;
+    if limit.is_some_and(|v| v > 10) {
+      let event = EventContainer {
+        game_id: game.id,
+        event: Event::Submission(Box::new(SubmissionEvent {
+          event_type: SubmissionEventType::TooQuick,
+          submission: submission.clone(),
+          operator: user::Model {
+            id: token.id,
+            nickname: token.nickname.clone(),
+            account: token.account.clone(),
+            ..Default::default()
+          },
+          team: team.clone(),
+          peer_team: None,
+          blood_state: None,
+          reason: None,
+          challenge: challenge.clone(),
+        })),
+      };
+      queue.publish("event", event).await.ok();
+      return Err(ResponseError::TooManyRequests(
+        "too many submissions, please calmdown and try again 5 miniutes later".to_owned(),
+        format!(
+          "user {}:'{}' ({}) submission frequency limit exceeded",
+          token.id, token.account, token.nickname
+        ),
+      ));
+    } else {
+      cache.at("submission").incr(token.id).await?;
+      cache.at("submission").expire(token.id, 5 * 60).await?;
+    }
+  }
   let submission = submission::create(&db.conn, submission).await?;
   queue.publish("check", submission.clone()).await?;
   Ok(Json(submission))
@@ -832,9 +871,9 @@ async fn unlock_hint(
 }
 
 async fn create_challenge_hint(
-  State(bucket): State<Bucket>, State(ref db): State<Database>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Json(hint): Json<hint::Model>,
+  State(bucket): State<Bucket>, State(ref db): State<Database>, State(ref queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Json(hint): Json<hint::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // if challenge.ref_id.is_some() {
   //   return Err(ResponseError::PreconditionFailed(
@@ -852,6 +891,20 @@ async fn create_challenge_hint(
     },
   )
   .await?;
+  let event = EventContainer {
+    game_id: game.id,
+    event: Event::Challenge(ChallengeEvent {
+      event_type: ChallengeEventType::NewHint,
+      challenge: challenge.clone(),
+      operator: user::Model {
+        id: token.id,
+        nickname: token.nickname.clone(),
+        account: token.account.clone(),
+        ..Default::default()
+      },
+    }),
+  };
+  queue.publish("event", event).await.ok();
   sync_challenge_hint_with_bucket(&challenge_bucket, &txn, &challenge).await?;
   txn.commit().await?;
   game_bucket
@@ -982,7 +1035,7 @@ async fn start_challenge_env(
       .environ(
         &challenge_bucket,
         &user::Model {
-          id: token.id.clone(),
+          id: token.id,
           nickname: token.nickname.clone(),
           account: token.account.clone(),
           ..Default::default()
@@ -1029,7 +1082,7 @@ async fn start_challenge_env(
         .cloned()
         .map(|(k, v)| (k.to_owned(), v.to_owned()))
         .collect(),
-        env_map.into(),
+        env_map,
         env_config,
         config.challenge_node_selector.clone(),
       )

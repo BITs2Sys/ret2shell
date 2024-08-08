@@ -6,8 +6,13 @@ use axum::{
   Extension, Json, Router,
 };
 use chrono::Utc;
-use r2s_database::{game, notification};
+use r2s_database::{game, notification, user};
+use r2s_event::{
+  events::{EventContainer, GameEvent, GameEventType},
+  Event,
+};
 use r2s_migrator::Database;
+use r2s_queue::Queue;
 
 use crate::{
   middleware::{
@@ -48,8 +53,9 @@ async fn get_notifications(
 }
 
 async fn create_notification(
-  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
-  Extension(token): Extension<Token>, Json(notification): Json<notification::Model>,
+  State(ref db): State<Database>, State(ref queue): State<Queue>,
+  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+  Json(notification): Json<notification::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let notification = notification::create(
     &db.conn,
@@ -62,6 +68,20 @@ async fn create_notification(
     },
   )
   .await?;
+  let event = EventContainer {
+    game_id: game.id,
+    event: Event::Game(GameEvent {
+      event_type: GameEventType::NewNotification,
+      operator: user::Model {
+        id: token.id,
+        nickname: token.nickname.clone(),
+        account: token.account.clone(),
+        ..Default::default()
+      },
+      message: notification.title.clone(),
+    }),
+  };
+  queue.publish("event", event).await?;
   Ok(Json(notification))
 }
 

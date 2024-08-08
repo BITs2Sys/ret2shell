@@ -19,6 +19,9 @@ export default function TimeProgress(
     const result =
       (progressProps.startAt.diff(now()).milliseconds / progressProps.startAt.diff(progressProps.endAt).milliseconds) *
       100;
+    if (result > 100) {
+      return 100;
+    }
     return result;
   };
   const cleanup = () => clearInterval(interval);
