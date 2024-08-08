@@ -1,5 +1,4 @@
 import type { Game } from "@models/game";
-import type { Submission } from "@models/submission";
 import type { Team } from "@models/team";
 import { Permission, type User } from "@models/user";
 import { DateTime } from "luxon";
@@ -15,7 +14,6 @@ export const [gameStore, setGameStore] = createStore({
   rank: null as number | null,
   score: null as number | null,
   members: [] as User[],
-  solves: [] as Submission[],
   showTeamCover: false,
 });
 

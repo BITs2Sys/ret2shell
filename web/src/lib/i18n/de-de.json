@@ -634,7 +634,11 @@
       "startEnvFailed": "Umgebung konnte nicht gestartet werden",
       "stopEnvSuccess": "Stopp-Befehl wurde gesendet",
       "delayEnv": "Umweltverlängerung um 1 Stunde",
-      "stopEnv": "Umweltstopp"
+      "stopEnv": "Umweltstopp",
+      "envIsPending": "Die Umgebung für die Aufgabe wird gestartet...",
+      "envHasError": "Fehler aufgetreten, bitte versuchen Sie die Umgebung nach 1 Minute neu zu starten oder wenden Sie sich an den Administrator...",
+      "fetchSolvesFailed": "Fehler beim Abrufen der Lösungsaufzeichnungen",
+      "fetchSolveStatusFailed": "Die Abfrage des Lösungsstatus ist fehlgeschlagen."
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",
@@ -927,6 +931,15 @@
     },
     "whoami": {
       "man": "Zeigt den Benutzernamen an, der mit der aktuellen effektiven User-ID verknüpft ist."
+    },
+    "submit": {
+      "man": "Flag für die Plattform einreichen.",
+      "submitting": "Wird übermittelt",
+      "waitingForChecking": "Übermittelt, warten auf die Bewertung...",
+      "correct": "richtig",
+      "incorrect": "Fehler",
+      "failed": "Übermittlung fehlgeschlagen",
+      "timeout": "Die Warteschlange für die Bewertung ist derzeit zu lang. Bitte aktualisieren Sie in etwa fünf Minuten, um das Bewertungsergebnis zu sehen, und wiederholen Sie nicht ständig die Einreichung."
     }
   },
   "theme": {

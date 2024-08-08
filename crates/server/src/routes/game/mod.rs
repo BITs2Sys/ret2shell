@@ -11,7 +11,7 @@ use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_cluster::{Cluster, Pod, CHALLENGE_NS};
 use r2s_database::{
-  article, game, team as team_db,
+  article, game, submission, team as team_db,
   user::{self, Permission},
 };
 use r2s_event::{
@@ -56,6 +56,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/introduction", patch(update_game_intro))
         .route("/", patch(update_game).delete(delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
+        .route("/solve", get(get_self_solves))
         .route(
           "/env",
           get(get_self_envs)
@@ -401,6 +402,29 @@ impl TryFrom<Pod> for Instance {
       game_name: get_pod_field!(value, annotations, "ret.sh.cn/game"),
     })
   }
+}
+
+async fn get_self_solves(
+  State(ref db): State<Database>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, team_ext: Option<Extension<team_db::Model>>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if is_game_admin!(token, game) {
+    let solves =
+      submission::get_list(&db.conn, true, false, None, None, Some(token.id), false).await?;
+    return Ok(Json(solves));
+  }
+  let team = extract_team!(game, team_ext, token);
+  let solves = submission::get_list(
+    &db.conn,
+    true,
+    false,
+    None,
+    team.clone().map(|t| t.id),
+    if team.is_none() { Some(token.id) } else { None },
+    false,
+  )
+  .await?;
+  Ok(Json(solves))
 }
 
 async fn get_self_envs(

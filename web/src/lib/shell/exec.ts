@@ -17,6 +17,11 @@ export class Exec {
   }
 
   public async exec(io: Stdio, args: ParseEntry[], origin: string) {
+    const flag_regex = /\w+\{.+\}/gm;
+    if (flag_regex.test(origin)) {
+      this.commands.get("submit")!.func(io, args, origin);
+    }
+
     let cmd = args[0];
     if (typeof cmd !== "string") {
       io.error(t("shell.commandInvalid")!);

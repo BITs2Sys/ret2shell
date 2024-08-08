@@ -634,7 +634,11 @@
       "startEnvFailed": "Fallo al iniciar el entorno",
       "stopEnvSuccess": "Instrucción de detención enviada",
       "delayEnv": "Entorno prolongado 1 hora",
-      "stopEnv": "detener el medio ambiente"
+      "stopEnv": "detener el medio ambiente",
+      "envIsPending": "El entorno del tema se está activando...",
+      "envHasError": "Ocurrió un error, por favor intente reiniciar el entorno después de 1 minuto o contacte al administrador...",
+      "fetchSolvesFailed": "Fallo al obtener el registro de resolución del problema",
+      "fetchSolveStatusFailed": "Fallo al obtener el estado de la resolución del problema"
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",
@@ -927,6 +931,15 @@
     },
     "whoami": {
       "man": "Mostrar el nombre de usuario asociado con el ID de usuario efectivo actual."
+    },
+    "submit": {
+      "man": "Envía la bandera de este problema al plataforma.",
+      "submitting": "Enviando",
+      "waitingForChecking": "Se ha enviado y se está esperando la evaluación...",
+      "correct": "correcto",
+      "incorrect": "error",
+      "failed": "Envío fallido",
+      "timeout": "La cola de evaluación actual es demasiado larga, por favor, refresque para ver los resultados de la evaluación aproximadamente cinco minutos después y no envíe repetidamente."
     }
   },
   "theme": {

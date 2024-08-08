@@ -67,7 +67,16 @@
     "whoami": {
       "man": "Display the username associated with the current effective user ID."
     },
-    "canNotSwitchDir": "The remote host denied directory traversal."
+    "canNotSwitchDir": "The remote host denied directory traversal.",
+    "submit": {
+      "man": "Submit the flag for this challenge to the platform.",
+      "submitting": "Submitting",
+      "waitingForChecking": "Submitted, awaiting evaluation...",
+      "correct": "accurate",
+      "incorrect": "Error",
+      "failed": "Submission failed",
+      "timeout": "The evaluation queue is currently too long. Please refresh and check the evaluation results in about five minutes, and do not submit repeatedly."
+    }
   },
   "about": {
     "contactTips": "Platform software supports email.",
@@ -704,7 +713,11 @@
       "startEnvFailed": "Failed to start the environment",
       "stopEnvSuccess": "Stop command has been sent",
       "delayEnv": "Environment extended by 1 hour",
-      "stopEnv": "Stop Environment"
+      "stopEnv": "Stop Environment",
+      "envIsPending": "The topic environment is being activated...",
+      "envHasError": "An error occurred. Please try restarting the environment after 1 minute or contact the administrator...",
+      "fetchSolvesFailed": "Failed to retrieve problem-solving records",
+      "fetchSolveStatusFailed": "Failed to retrieve problem-solving status"
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",

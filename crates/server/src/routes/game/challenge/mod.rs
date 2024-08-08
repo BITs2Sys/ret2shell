@@ -303,10 +303,12 @@ async fn create_challenge(
   Ok(Json(challenge))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn update_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(prev_challenge): Extension<challenge::Model>, Json(challenge): Json<challenge::Model>,
+  State(ref queue): State<Queue>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
+  Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // refuse to change some columns when challenge is cloned from another challenge.
   // if prev_challenge.ref_id.is_some() {
@@ -323,6 +325,7 @@ async fn update_challenge(
   // }
   check_challenge_publishing!(prev_challenge);
   let txn = db.conn.begin().await?;
+  let score_changed = prev_challenge.score_rule != challenge.score_rule;
   let challenge = challenge::update(
     &txn,
     challenge::Model {
@@ -331,6 +334,15 @@ async fn update_challenge(
     },
   )
   .await?;
+  let challenge = if score_changed {
+    let (changed, _, challenge) = challenge::maintain_score(&db.conn, challenge.clone()).await?;
+    if changed {
+      queue.publish("scoreboard", challenge.clone()).await.ok();
+    }
+    challenge
+  } else {
+    challenge
+  };
   // if challenge.ref_id.is_none() {
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket

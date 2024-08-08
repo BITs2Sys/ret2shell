@@ -46,7 +46,7 @@ pub struct ExModel {
   pub team_id: Option<i64>,
   pub team_name: Option<String>,
   pub content: Option<String>,
-  pub solved: bool,
+  pub solved: Option<bool>,
   pub score: i32,
   pub result: Option<String>,
 }

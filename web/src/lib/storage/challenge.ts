@@ -1,5 +1,12 @@
-import { getChallengeAttachments, getChallengeEnv, getChallengeList } from "@api/game";
+import {
+  getChallengeAttachments,
+  getChallengeEnv,
+  getChallengeList,
+  getChallengeSolveStatus,
+  getSelfSolves,
+} from "@api/game";
 import type { Challenge, ChallengeEnv } from "@models/challenge";
+import type { Submission } from "@models/submission";
 import { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
 import { gameStore } from "./game";
@@ -11,10 +18,16 @@ type Attachment = { file: string; folder: FileType };
 
 export const [challengeStore, setChallengeStore] = createStore({
   current: null as Challenge | null,
+  status: null as {
+    solved: boolean;
+    solves: number;
+    top: Submission[];
+  } | null,
   challenges: [] as Challenge[],
   files: [] as Attachment[],
   adminFiles: [] as Attachment[],
   env: null as ChallengeEnv | null,
+  solves: [] as Submission[],
 });
 
 export type ChallengeStoreType = typeof challengeStore;
@@ -54,4 +67,35 @@ export async function refreshChallengeAssets() {
       throw e;
     }
   }
+}
+
+export function refreshSolves() {
+  getSelfSolves(gameStore.current!.id)
+    .then((result) => {
+      setChallengeStore({ solves: result });
+    })
+    .catch((e: HTTPError) => {
+      addToast({
+        level: "error",
+        description: `${t("game.challenge.fetchSolvesFailed")}: ${e.response.statusText}`,
+        duration: 5000,
+      });
+    });
+}
+
+export function refreshStatus() {
+  getChallengeSolveStatus(challengeStore.current!.game_id, challengeStore.current!.id)
+    .then((result) => {
+      setChallengeStore({ status: result });
+    })
+    .catch((e: HTTPError) => {
+      setChallengeStore({ status: null });
+      e.response.text().then((text) => {
+        addToast({
+          level: "error",
+          description: `${t("game.challenge.fetchSolveStatusFailed")}: ${text}`,
+          duration: 5000,
+        });
+      });
+    });
 }

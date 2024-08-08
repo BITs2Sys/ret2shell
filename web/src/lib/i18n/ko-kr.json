@@ -634,7 +634,11 @@
       "startEnvFailed": "환경 시작 실패",
       "stopEnvSuccess": "정지 명령이 전송되었습니다.",
       "delayEnv": "환경 연장 1시간",
-      "stopEnv": "환경 중지"
+      "stopEnv": "환경 중지",
+      "envIsPending": "문제 환경 시작 중...",
+      "envHasError": "오류가 발생했습니다. 1분 후에 환경을 다시 시작하거나 관리자에게 문의하십시오...",
+      "fetchSolvesFailed": "문제 해결 기록을 가져오지 못했습니다.",
+      "fetchSolveStatusFailed": "문제 해결 상황 가져오기 실패"
     },
     "cover": {
       "uploadFailed": "표지 업로드 실패",
@@ -927,6 +931,15 @@
     },
     "whoami": {
       "man": "현재 유효한 사용자 ID와 연결된 사용자 이름을 표시합니다."
+    },
+    "submit": {
+      "man": "플랫폼에 이 문제의 flag를 제출하세요.",
+      "submitting": "제출 중",
+      "waitingForChecking": "제출되었으며, 평가를 기다리는 중입니다...",
+      "correct": "정확",
+      "incorrect": "오류",
+      "failed": "제출 실패",
+      "timeout": "현재 평가 대기열이 너무 길어서, 약 5분 후에 새로고침하여 평가 결과를 확인하십시오."
     }
   },
   "theme": {

@@ -1,9 +1,10 @@
 import { api_root } from "@api";
 import { getCalmdownStatus } from "@api/cluster";
 import { delayGameSelfEnv, startChallengeEnv, stopGameSelfEnv } from "@api/game";
+import Spin from "@assets/animates/spin";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
 import { accountStore } from "@storage/account";
-import { challengeStore } from "@storage/challenge";
+import { challengeStore, refreshStatus } from "@storage/challenge";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
@@ -17,7 +18,7 @@ import type { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import DownloadButton from "../download-button";
 
 passiveSupport({
@@ -30,7 +31,7 @@ passiveSupport({
   ],
 });
 
-export default function (props: { solved?: boolean; solves?: number; inGame?: boolean }) {
+export default function (props: { inGame?: boolean }) {
   const instance = createMemo(() => {
     if (challengeStore.current && challengeStore.env) {
       return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
@@ -49,14 +50,26 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
   }
   createEffect(() => {
     if (challengeStore.current && challengeStore.env) {
-      refreshCalmdown();
-      wsrx.refreshInstances().then(() => {
-        wsrx.deleteOutdatedTraffic();
-        wsrx.openAllTraffic().then(() => {
-          wsrx.refreshTraffic();
-        });
-      });
+      untrack(refreshCalmdown);
     }
+  });
+  createEffect(() => {
+    if (challengeStore.current) {
+      untrack(refreshStatus);
+    }
+  });
+  function maintainInstances() {
+    wsrx.refreshInstances().then(() => {
+      wsrx.deleteOutdatedTraffic();
+      wsrx.openAllTraffic().then(() => {
+        wsrx.refreshTraffic();
+      });
+    });
+    return maintainInstances;
+  }
+  const timer = setInterval(maintainInstances(), 3000);
+  onCleanup(() => {
+    clearInterval(timer);
   });
   const userExplicitInstance = createMemo(() => {
     if (challengeStore.current && challengeStore.env) {
@@ -169,11 +182,11 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
               </span>
               <Show when={props.inGame}>
                 <span
-                  class={`font-bold flex flex-row space-x-2 items-center ${props.solved ? "text-success" : "text-warning"}`.trim()}
+                  class={`font-bold flex flex-row space-x-2 items-center ${challengeStore.status?.solved ? "text-success" : "text-warning"}`.trim()}
                 >
                   <span
                     class={
-                      props.solved
+                      challengeStore.status?.solved
                         ? "icon-[fluent--checkmark-circle-20-regular] w-5 h-5"
                         : "icon-[fluent--flag-20-regular] w-5 h-5"
                     }
@@ -184,7 +197,8 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
               <span class="font-bold flex flex-row space-x-2 items-center">
                 <span class="icon-[fluent--data-bar-vertical-24-regular] w-5 h-5" />
                 <span>
-                  {props.solves ?? 0} solve{props.solves && props.solves > 1 ? "s" : ""}
+                  {challengeStore.status?.solves ?? 0} solve
+                  {challengeStore.status?.solves && challengeStore.status.solves > 1 ? "s" : ""}
                 </span>
               </span>
             </header>
@@ -222,10 +236,18 @@ export default function (props: { solved?: boolean; solves?: number; inGame?: bo
                 <h3 class="font-bold flex space-x-2 items-center flex-1">
                   <span class={`icon-[fluent--play-20-regular] w-5 h-5 ${instance() ? "text-success" : ""}`.trim()} />
                   <Switch fallback={<span class="opacity-80 flex-1 truncate">{t("game.challenge.envNotStart")}</span>}>
-                    <Match when={instance()}>
+                    <Match when={instance()?.state === "Running"}>
                       <span class="flex-1 truncate">
                         {t("game.challenge.envIsRunning")}: {instance()?.wsrx}
                       </span>
+                    </Match>
+                    <Match when={instance()?.state === "Pending"}>
+                      <Spin width={20} height={20} />
+                      <span class="flex-1 truncate">{t("game.challenge.envIsPending")}</span>
+                    </Match>
+                    <Match when={instance()}>
+                      <Spin width={20} height={20} />
+                      <span class="flex-1 truncate text-error">{t("game.challenge.envHasError")}</span>
                     </Match>
                     <Match when={userExplicitInstance()}>
                       <span class="text-warning flex-1 truncate">

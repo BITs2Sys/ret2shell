@@ -1,6 +1,7 @@
 import { delayGameSelfEnv, getChallengeEnv, startChallengeEnv, stopGameSelfEnv } from "@api/game";
 import { deunicode } from "@api/rpc";
-import { wsrx } from "@lib/wsrx";
+import { getWsrxLink, wsrx } from "@lib/wsrx";
+import type { Instance } from "@models/instance";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { t } from "@storage/theme";
@@ -143,28 +144,33 @@ export class Service implements Command {
     const inst = wsrx.instances().find((instance) => instance.challenge_id === challengeStore.current?.id);
     const d_service_name = await deunicode(challengeStore.current!.name);
     io.println(`${inst ? ansiColors.greenBright("●") : ansiColors.dim("○")} ${d_service_name}.service`);
+    function getInstState(inst?: Instance, with_time = true) {
+      if (inst?.state === "Running")
+        return `${ansiColors.greenBright("active (running)")}${with_time ? ` since ${inst.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}` : ""}`;
+      if (inst?.state === "Pending")
+        return `${ansiColors.blueBright("active (pending)")}${with_time ? ` since ${inst.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}` : ""}`;
+      return ansiColors.redBright("inactive (dead)");
+    }
     io.println(
       `     Loaded: loaded (~/${challengeStore.current?.name}/checkers/${d_service_name}.service; ${ansiColors.yellow("disabled")}; preset: ${ansiColors.green("enabled")})`
     );
-    io.println(
-      `     Active: ${inst ? `${ansiColors.greenBright.bold("active (running)")} since ${inst.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}` : ansiColors.red.bold("inactive (dead)")}`
-    );
+    io.println(`     Active: ${getInstState(inst)}`);
     if (inst) {
       await wsrx.openAllTraffic();
       await wsrx.refreshTraffic();
       for (const image of challengeStore.env.images) {
         io.println(
-          `       ${ansiColors.dim("└─")} ${image.name}.service: ${ansiColors.greenBright.bold("active (running)")} - ${image.description}`
+          `       ${ansiColors.dim("└─")} ${image.name}.service - ${image.description}: ${getInstState(inst, false)}`
         );
         if (image.port) {
           const local = wsrx.getTrafficLocal(inst, image.port!);
           if (local) {
             io.println(
-              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} proxing by WSRX`
+              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx_local.service`
             );
           } else {
             io.println(
-              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`wsrx://open?url=${inst.wsrx}&port=${image.port}`, `wsrx://open?url=${inst.wsrx}&port=${image.port}`))}`
+              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(getWsrxLink(inst.wsrx, image.port!))}`
             );
           }
         }

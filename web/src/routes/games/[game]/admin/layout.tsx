@@ -1,6 +1,6 @@
 import SidebarLayout from "@blocks/sidebar-layout";
 import { useNavigate } from "@solidjs/router";
-import { gameStore, isGameAdmin, setGameStore } from "@storage/game";
+import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { type JSX, createEffect } from "solid-js";
@@ -11,7 +11,6 @@ export default function (props: { children?: JSX.Element }) {
   createEffect(() => {
     if (gameStore.current) {
       if (!isGameAdmin()) {
-        setGameStore({ current: null, preload: null });
         navigate("/sigtrap/403");
         return null;
       }

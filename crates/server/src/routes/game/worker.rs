@@ -181,6 +181,7 @@ async fn submission_worker(queue: Queue, database: Database, checker: Checker, b
 async fn submission_worker_exec(
   queue: Queue, db: Database, mut checker: Checker, bucket: Bucket, submission: submission::Model,
 ) -> Result<submission::Model, ResponseError> {
+  // stage 1: get all necessary data
   let challenge = challenge::get(&db.conn, submission.challenge_id).await?;
   let challenge = if let Some(challenge) = challenge {
     challenge
@@ -225,6 +226,8 @@ async fn submission_worker_exec(
         )))?,
     )
     .await?;
+
+  // stage 2: invoke checker to check the submission
   checker.preload(&challenge, &challenge_bucket).await?;
   let (solved, result, audit) = checker
     .check(&challenge_bucket, &user, &team, &submission)
@@ -239,15 +242,30 @@ async fn submission_worker_exec(
     },
   )
   .await?;
-  if submission.solved.unwrap_or(false) && game.in_progress() && team.is_some() {
-    let decay = maintain_challenge_score(db.clone(), queue.clone(), challenge.clone()).await?;
+
+  if team.is_none() {
+    return Ok(submission);
+  }
+
+  let team = team.unwrap();
+
+  // stage 3: update team score and create extra or audit if necessary
+  if submission.solved.unwrap_or(false) {
+    // stage 3.1: update challenge score
+    let (changed, decay, challenge) =
+      challenge::maintain_score(&db.conn, challenge.clone()).await?;
+    // publish scoreboard update event if nessary
+    if changed {
+      queue.publish("scoreboard", challenge.clone()).await.ok();
+    }
+    // detect blood state and create extra if necessary
     let blood_state = if decay < 3 {
       Some((decay + 1) as i32)
     } else {
       None
     };
     let changed_at = submission.created_at;
-    let mut team = team.clone().unwrap();
+    let mut team = team.clone();
     if let Some(blood_state) = blood_state {
       extra::create(
         &db.conn,
@@ -266,6 +284,7 @@ async fn submission_worker_exec(
       )
       .await?;
     }
+    // stage 3.2: update team score
     let score = team::calc_score(&db.conn, team.id).await?;
     team.score = score;
     team.history.0.push(TeamScoreHistory {
@@ -275,6 +294,8 @@ async fn submission_worker_exec(
       score,
     });
     team::update(&db.conn, team.clone()).await?;
+
+    // stage 3.3: create team correct event
     let event = EventContainer {
       game_id: challenge.game_id,
       event: Event::Submission(Box::new(SubmissionEvent {
@@ -290,74 +311,44 @@ async fn submission_worker_exec(
     };
     queue.publish("event", event).await.ok();
   }
-  if team.is_some() {
-    if let Some(audit) = audit {
-      let peer_team = if let Some(peer_team_id) = audit.peer_team {
-        let peer_team = team::get(&db.conn, peer_team_id).await?;
-        // could not find peer team, this audit is a mistake, ignore it
-        if peer_team.is_none() {
-          return Ok(submission);
-        }
-        peer_team
-      } else {
-        None
-      };
-      let audit = audit::Model {
-        id: 0,
-        created_at: Utc::now(),
-        reason: audit.reason,
-        challenge_id: challenge.id,
-        user_id: user.id,
-        team_id: team.clone().unwrap().id,
-        game_id: game.id,
-        state: audit::State::Pending,
-      };
-      let audit = audit::create(&db.conn, audit).await?;
-      let event = EventContainer {
-        game_id: challenge.game_id,
-        event: Event::Submission(Box::new(SubmissionEvent {
-          event_type: SubmissionEventType::Cheated,
-          submission: submission.clone(),
-          blood_state: None,
-          challenge: challenge.clone(),
-          operator: user.clone(),
-          team,
-          peer_team,
-          reason: Some(audit.reason),
-        })),
-      };
-      queue.publish("event", event).await.ok();
-    }
+
+  // stage 4: create audit if necessary
+  if let Some(audit) = audit {
+    let peer_team = if let Some(peer_team_id) = audit.peer_team {
+      let peer_team = team::get(&db.conn, peer_team_id).await?;
+      // could not find peer team, this audit is a mistake, ignore it
+      if peer_team.is_none() {
+        return Ok(submission);
+      }
+      peer_team
+    } else {
+      None
+    };
+    let audit = audit::Model {
+      id: 0,
+      created_at: Utc::now(),
+      reason: audit.reason,
+      challenge_id: challenge.id,
+      user_id: user.id,
+      team_id: team.id,
+      game_id: game.id,
+      state: audit::State::Pending,
+    };
+    let audit = audit::create(&db.conn, audit).await?;
+    let event = EventContainer {
+      game_id: challenge.game_id,
+      event: Event::Submission(Box::new(SubmissionEvent {
+        event_type: SubmissionEventType::Cheated,
+        submission: submission.clone(),
+        blood_state: None,
+        challenge: challenge.clone(),
+        operator: user.clone(),
+        team: Some(team.clone()),
+        peer_team,
+        reason: Some(audit.reason),
+      })),
+    };
+    queue.publish("event", event).await.ok();
   }
   Ok(submission)
-}
-
-pub async fn maintain_challenge_score(
-  db: Database, queue: Queue, challenge: challenge::Model,
-) -> Result<u64, ResponseError> {
-  let decay = submission::count(&db.conn, true, Some(challenge.id), None, None, true).await?;
-  let score = if decay < 1 {
-    challenge.score_rule.initial
-  } else if decay >= challenge.score_rule.decay as u64 {
-    challenge.score_rule.minimum
-  } else {
-    (challenge.score_rule.initial
-      + ((challenge.score_rule.minimum - challenge.score_rule.initial)
-        * (decay * decay - 1) as i32
-        / (challenge.score_rule.decay * challenge.score_rule.decay))) as i32
-  };
-  let challenge_score_changed = challenge.score != score;
-  if challenge_score_changed {
-    let challenge = challenge::update_score(
-      &db.conn,
-      challenge::Model {
-        id: challenge.id,
-        score,
-        ..challenge.clone()
-      },
-    )
-    .await?;
-    queue.publish("scoreboard", challenge).await.ok();
-  }
-  Ok(decay)
 }

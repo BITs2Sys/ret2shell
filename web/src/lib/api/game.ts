@@ -314,3 +314,35 @@ export async function stopGameSelfEnv(game_id: number) {
 export async function startChallengeEnv(game_id: number, challenge_id: number) {
   return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>();
 }
+
+export async function submitFlag(game_id: number, challenge_id: number, flag: string) {
+  return await api
+    .post(`${api_root}/game/${game_id}/challenge/${challenge_id}/submit`, {
+      json: {
+        content: flag,
+      },
+    })
+    .json<Submission>();
+}
+
+export async function checkSubmissionStatus(game_id: number, challenge_id: number, submission_id: number) {
+  return await api
+    .get(`${api_root}/game/${game_id}/challenge/${challenge_id}/submit`, {
+      searchParams: {
+        id: submission_id,
+      },
+    })
+    .json<Submission>();
+}
+
+export async function getSelfSolves(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/solve`).json<Submission[]>();
+}
+
+export async function getChallengeSolveStatus(game_id: number, challenge_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/submit`).json<{
+    solved: boolean;
+    solves: number;
+    top: Submission[];
+  }>();
+}

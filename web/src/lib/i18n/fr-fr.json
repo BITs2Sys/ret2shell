@@ -634,7 +634,11 @@
       "startEnvFailed": "Échec du démarrage de l'environnement",
       "stopEnvSuccess": "Instruction d'arrêt envoyée",
       "delayEnv": "Environnement prolongé de 1 heure",
-      "stopEnv": "Arrêt de l'environnement"
+      "stopEnv": "Arrêt de l'environnement",
+      "envIsPending": "L'environnement du sujet s'active...",
+      "envHasError": "Une erreur s'est produite, veuillez essayer de redémarrer l'environnement dans 1 minute ou contacter l'administrateur...",
+      "fetchSolvesFailed": "Échec de l'obtention des enregistrements de résolution de problèmes",
+      "fetchSolveStatusFailed": "Échec de l'obtention des informations sur la résolution du problème"
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",
@@ -927,6 +931,15 @@
     },
     "whoami": {
       "man": "Afficher le nom d'utilisateur associé à l'ID utilisateur actuellement valide."
+    },
+    "submit": {
+      "man": "Soumettre le flag de ce problème à la plateforme.",
+      "submitting": "Soumission en cours",
+      "waitingForChecking": "Soumis, en attente d'évaluation...",
+      "correct": "correct",
+      "incorrect": "Erreur",
+      "failed": "Échec de la soumission",
+      "timeout": "La file d'attente des évaluations est actuellement trop longue. Veuillez actualiser et vérifier les résultats de l'évaluation dans environ cinq minutes, et ne soumettez pas à plusieurs reprises."
     }
   },
   "theme": {

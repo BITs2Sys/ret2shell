@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::game;
 
+use super::submission;
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ScoreRule {
   pub initial: i32,
@@ -224,6 +226,37 @@ where
     ..challenge.into_active_model()
   };
   challenge.update(db).await
+}
+
+pub async fn maintain_score<C>(db: &C, challenge: Model) -> Result<(bool, u64, Model), DbErr>
+where
+  C: ConnectionTrait,
+{
+  let decay = submission::count(db, true, Some(challenge.id), None, None, true).await?;
+  let score = if decay < 1 {
+    challenge.score_rule.initial
+  } else if decay >= challenge.score_rule.decay as u64 {
+    challenge.score_rule.minimum
+  } else {
+    (challenge.score_rule.initial
+      + ((challenge.score_rule.minimum - challenge.score_rule.initial)
+        * (decay * decay - 1) as i32
+        / (challenge.score_rule.decay * challenge.score_rule.decay))) as i32
+  };
+  let challenge_score_changed = challenge.score != score;
+  if challenge_score_changed {
+    let challenge = update_score(
+      db,
+      Model {
+        id: challenge.id,
+        score,
+        ..challenge.clone()
+      },
+    )
+    .await?;
+    return Ok((challenge_score_changed, decay, challenge));
+  }
+  Ok((challenge_score_changed, decay, challenge))
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>

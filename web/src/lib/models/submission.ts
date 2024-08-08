@@ -11,5 +11,6 @@ export type Submission = {
   challenge_name?: string;
   content: string | null;
   score?: number;
-  solved: boolean;
+  solved: boolean | null;
+  result: string | null;
 };

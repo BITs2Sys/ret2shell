@@ -67,7 +67,16 @@
       "stopping": "正在停止 {{service}}...",
       "starting": "正在啟動 {{service}}..."
     },
-    "canNotSwitchDir": "遠端主機拒絕了目錄穿越。"
+    "canNotSwitchDir": "遠端主機拒絕了目錄穿越。",
+    "submit": {
+      "man": "向平台提交本題 flag。",
+      "submitting": "正在提交",
+      "waitingForChecking": "已提交，正在等待評測...",
+      "correct": "正確",
+      "incorrect": "錯誤",
+      "failed": "提交失敗",
+      "timeout": "目前評測隊列過長，請約五分鐘後重新整理查看評測結果，不要反覆提交。"
+    }
   },
   "about": {
     "contactTips": "平台軟體支援信箱",
@@ -704,7 +713,11 @@
       "startEnvFailed": "啟動環境失敗",
       "stopEnvSuccess": "已發送停止指令",
       "delayEnv": "環境延長 1 小時",
-      "stopEnv": "停止環境"
+      "stopEnv": "停止環境",
+      "envIsPending": "題目環境開啟中...",
+      "envHasError": "發生錯誤，請嘗試 1 分鐘後重新啟動環境或聯繫管理員...",
+      "fetchSolvesFailed": "獲取解題記錄失敗",
+      "fetchSolveStatusFailed": "獲取解題情況失敗"
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",

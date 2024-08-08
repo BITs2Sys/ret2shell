@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { challengeStore, refreshChallenges } from "@storage/challenge";
+import { challengeStore, refreshChallenges, refreshSolves } from "@storage/challenge";
 import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import LoadingTips from "@widgets/loading-tips";
@@ -17,7 +17,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
   const challengesEx = createMemo(() => {
     const result = [];
     for (const challenge of challengeStore.challenges) {
-      const submission = gameStore.solves.find((s) => s.challenge_id === challenge.id);
+      const submission = challengeStore.solves.find((s) => s.challenge_id === challenge.id);
       result.push({ challenge, solved: !!submission });
     }
     const tree = [] as TreeNode[];
@@ -66,6 +66,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         // fetch challenges and set them.
         setLoading(true);
         refreshChallenges().finally(() => {
+          refreshSolves();
           setLoading(false);
         });
       });

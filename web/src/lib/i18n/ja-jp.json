@@ -634,7 +634,11 @@
       "startEnvFailed": "環境の起動に失敗しました",
       "stopEnvSuccess": "停止指令を送信しました",
       "delayEnv": "環境延長 1 時間",
-      "stopEnv": "環境停止"
+      "stopEnv": "環境停止",
+      "envIsPending": "問題環境の起動中...",
+      "envHasError": "エラーが発生しました。1 分後に環境を再起動するか、管理者に連絡してください...",
+      "fetchSolvesFailed": "解題記録の取得に失敗しました",
+      "fetchSolveStatusFailed": "解題状況の取得に失敗しました"
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",
@@ -927,7 +931,16 @@
       "stopping": "{{service}} を停止しています...",
       "starting": "{{service}} を起動しています..."
     },
-    "canNotSwitchDir": "リモートホストがディレクトリトラバーサルを拒否しました。"
+    "canNotSwitchDir": "リモートホストがディレクトリトラバーサルを拒否しました。",
+    "submit": {
+      "man": "プラットフォームにこの問題のフラグを提出します。",
+      "submitting": "提出中",
+      "waitingForChecking": "提出され、評価待ちです...",
+      "correct": "正しい",
+      "incorrect": "エラー",
+      "failed": "提出失敗",
+      "timeout": "現在の評価待ち行列が長すぎます。約5分後に更新して評価結果を確認してください。繰り返し提出しないでください。"
+    }
   },
   "theme": {
     "colorScheme": "明暗テーマ",

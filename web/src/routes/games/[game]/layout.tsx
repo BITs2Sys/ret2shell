@@ -6,11 +6,13 @@ import { Title } from "@storage/header";
 import type { HTTPError } from "ky";
 import { type JSX, onCleanup } from "solid-js";
 import TeamCover from "./_blocks/team-cover";
+import { setChallengeStore } from "@storage/challenge";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
   onCleanup(() => {
-    setGameStore({ current: null, team: null, showTeamCover: false });
+    setGameStore({ current: null, preload: null, team: null, showTeamCover: false });
+    setChallengeStore({ current: null, challenges: [], solves: [] });
   });
   const params = useParams();
   const game_id = Number.parseInt(params.game);

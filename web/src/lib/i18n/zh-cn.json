@@ -230,7 +230,11 @@
       "startEnvFailed": "启动环境失败",
       "stopEnvSuccess": "已发送停止指令",
       "delayEnv": "环境延长 1 小时",
-      "stopEnv": "停止环境"
+      "stopEnv": "停止环境",
+      "envIsPending": "题目环境开启中...",
+      "envHasError": "发生错误，请尝试 1 分钟后重启环境或者联系管理员...",
+      "fetchSolvesFailed": "获取解题记录失败",
+      "fetchSolveStatusFailed": "获取解题情况失败"
     },
     "scoreboard": {
       "title": "积分板",
@@ -965,7 +969,16 @@
       "stopping": "正在停止 {{service}}...",
       "starting": "正在启动 {{service}}..."
     },
-    "canNotSwitchDir": "远程主机拒绝了目录穿越。"
+    "canNotSwitchDir": "远程主机拒绝了目录穿越。",
+    "submit": {
+      "man": "向平台提交本题 flag。",
+      "submitting": "正在提交",
+      "waitingForChecking": "已提交，正在等待评测...",
+      "correct": "正确",
+      "incorrect": "错误",
+      "failed": "提交失败",
+      "timeout": "当前评测队列过长，请约五分钟后刷新查看评测结果，不要反复提交。"
+    }
   },
   "permission": {
     "basic": "用户",
