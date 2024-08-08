@@ -19,7 +19,7 @@ export class Exec {
   public async exec(io: Stdio, args: ParseEntry[], origin: string) {
     const flag_regex = /\w+\{.+\}/gm;
     if (flag_regex.test(origin)) {
-      this.commands.get("submit")!.func(io, args, origin);
+      return { cmd: "submit", code: await this.commands.get("submit")!.func(io, args.slice(1), origin) };
     }
 
     let cmd = args[0];

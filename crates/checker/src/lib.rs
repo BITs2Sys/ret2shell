@@ -90,7 +90,9 @@ impl Checker {
     if !diagnostics.is_empty() {
       let mut out = Buffer::ansi();
       diagnostics.emit(&mut out, &sources)?;
-      return Err(CheckerError::CompileError((String::from_utf8(out.into_inner())?).to_string()));
+      return Err(CheckerError::CompileError(
+        (String::from_utf8(out.into_inner())?).to_string(),
+      ));
     }
     let unit = rune::prepare(&mut sources).with_context(&context).build()?;
     let runtime = context.runtime()?;
@@ -136,14 +138,21 @@ impl Checker {
     &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
     submission: &submission::Model,
   ) -> Result<(bool, String, Option<AuditMessage>), CheckerError> {
+    debug!("checking submission: {:?}", submission);
     let contexts = self.contexts.read().await;
     let (unit, runtime, _) = contexts
       .get(&bucket.hash())
       .ok_or(CheckerError::MissingCheckerScript(bucket.name.clone()))?;
     let mut vm = Vm::new(runtime.clone(), unit.clone());
+    debug!("load user: {:?}", user);
     let user_object = to_rune_object!(user, id, account, institute_id);
-    let submission_object =
-      to_rune_object!(submission, id, user_id, team_id, challenge_id, content);
+    debug!("load submission: {:?}", submission);
+    let mut submission_object = to_rune_object!(submission, id, user_id, team_id, challenge_id);
+    submission_object.insert(
+      alloc::String::try_from("content")?,
+      rune::to_value(submission.content.clone().unwrap())?,
+    )?;
+    debug!("load team: {:?}", team);
     let team_object = match team {
       Some(team) => to_rune_object!(team, id, name, institute_id),
       None => Object::new(),
