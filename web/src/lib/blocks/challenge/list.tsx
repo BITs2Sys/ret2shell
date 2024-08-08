@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { challengeStore, refreshChallenges, refreshSolves } from "@storage/challenge";
 import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
+import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import TreeView, { type TreeNode } from "@widgets/treeview";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -13,10 +14,18 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
     return Number.parseInt(searchParams.challenge || "") ?? null;
   });
   const [loading, setLoading] = createSignal(false);
+  const [search, setSearch] = createSignal("");
   const selectedChallenge = createMemo(() => challengeStore.challenges.find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];
-    for (const challenge of challengeStore.challenges) {
+    for (const challenge of challengeStore.challenges.filter(
+      (c) =>
+        c.name.toLowerCase().includes(search().toLowerCase()) ||
+        c.tag
+          .find((t) => t.primary)
+          ?.name.toLowerCase()
+          .includes(search().toLowerCase())
+    )) {
       const submission = challengeStore.solves.find((s) => s.challenge_id === challenge.id);
       result.push({ challenge, solved: !!submission });
     }
@@ -28,9 +37,6 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
       const taggedChallenges = result
         .filter((c) => c.challenge.tag.find((t) => t.primary)?.name === tag)
         .sort((a, b) => {
-          if (a.solved !== b.solved) {
-            return a.solved ? 1 : -1;
-          }
           if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
           return a.challenge.updated_at < b.challenge.updated_at ? -1 : 1;
         });
@@ -86,6 +92,12 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
           defer
         >
           <div class="flex flex-col space-y-2 p-3 lg:p-6">
+            <Input
+              class="sticky top-3 lg:top-6"
+              icon={<span class="icon-[fluent--filter-20-regular] 2-5 h-5" />}
+              placeholder={t("game.challenge.filterNameOrLabel")}
+              onInput={(e) => setSearch(e.currentTarget.value)}
+            />
             <Switch
               fallback={
                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">

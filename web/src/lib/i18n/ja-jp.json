@@ -638,7 +638,8 @@
       "envIsPending": "問題環境の起動中...",
       "envHasError": "エラーが発生しました。1 分後に環境を再起動するか、管理者に連絡してください...",
       "fetchSolvesFailed": "解題記録の取得に失敗しました",
-      "fetchSolveStatusFailed": "解題状況の取得に失敗しました"
+      "fetchSolveStatusFailed": "解題状況の取得に失敗しました",
+      "filterNameOrLabel": "フィルター名またはタグ..."
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",

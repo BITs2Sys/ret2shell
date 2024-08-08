@@ -638,7 +638,8 @@
       "envIsPending": "L'environnement du sujet s'active...",
       "envHasError": "Une erreur s'est produite, veuillez essayer de redémarrer l'environnement dans 1 minute ou contacter l'administrateur...",
       "fetchSolvesFailed": "Échec de l'obtention des enregistrements de résolution de problèmes",
-      "fetchSolveStatusFailed": "Échec de l'obtention des informations sur la résolution du problème"
+      "fetchSolveStatusFailed": "Échec de l'obtention des informations sur la résolution du problème",
+      "filterNameOrLabel": "Filtrer par nom ou par étiquette..."
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",

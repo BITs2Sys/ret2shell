@@ -638,7 +638,8 @@
       "envIsPending": "문제 환경 시작 중...",
       "envHasError": "오류가 발생했습니다. 1분 후에 환경을 다시 시작하거나 관리자에게 문의하십시오...",
       "fetchSolvesFailed": "문제 해결 기록을 가져오지 못했습니다.",
-      "fetchSolveStatusFailed": "문제 해결 상황 가져오기 실패"
+      "fetchSolveStatusFailed": "문제 해결 상황 가져오기 실패",
+      "filterNameOrLabel": "필터 이름 또는 태그..."
     },
     "cover": {
       "uploadFailed": "표지 업로드 실패",

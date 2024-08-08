@@ -717,7 +717,8 @@
       "envIsPending": "The topic environment is being activated...",
       "envHasError": "An error occurred. Please try restarting the environment after 1 minute or contact the administrator...",
       "fetchSolvesFailed": "Failed to retrieve problem-solving records",
-      "fetchSolveStatusFailed": "Failed to retrieve problem-solving status"
+      "fetchSolveStatusFailed": "Failed to retrieve problem-solving status",
+      "filterNameOrLabel": "Filter by name or tag..."
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",

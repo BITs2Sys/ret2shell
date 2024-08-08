@@ -717,7 +717,8 @@
       "envIsPending": "題目環境開啟中...",
       "envHasError": "發生錯誤，請嘗試 1 分鐘後重新啟動環境或聯繫管理員...",
       "fetchSolvesFailed": "獲取解題記錄失敗",
-      "fetchSolveStatusFailed": "獲取解題情況失敗"
+      "fetchSolveStatusFailed": "獲取解題情況失敗",
+      "filterNameOrLabel": "過濾名稱或標籤..."
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",

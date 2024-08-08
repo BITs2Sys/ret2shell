@@ -638,7 +638,8 @@
       "envIsPending": "Die Umgebung für die Aufgabe wird gestartet...",
       "envHasError": "Fehler aufgetreten, bitte versuchen Sie die Umgebung nach 1 Minute neu zu starten oder wenden Sie sich an den Administrator...",
       "fetchSolvesFailed": "Fehler beim Abrufen der Lösungsaufzeichnungen",
-      "fetchSolveStatusFailed": "Die Abfrage des Lösungsstatus ist fehlgeschlagen."
+      "fetchSolveStatusFailed": "Die Abfrage des Lösungsstatus ist fehlgeschlagen.",
+      "filterNameOrLabel": "Filtername oder Tag..."
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

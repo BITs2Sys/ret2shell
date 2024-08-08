@@ -638,7 +638,8 @@
       "envIsPending": "El entorno del tema se está activando...",
       "envHasError": "Ocurrió un error, por favor intente reiniciar el entorno después de 1 minuto o contacte al administrador...",
       "fetchSolvesFailed": "Fallo al obtener el registro de resolución del problema",
-      "fetchSolveStatusFailed": "Fallo al obtener el estado de la resolución del problema"
+      "fetchSolveStatusFailed": "Fallo al obtener el estado de la resolución del problema",
+      "filterNameOrLabel": "Filtrar por nombre o etiqueta..."
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",

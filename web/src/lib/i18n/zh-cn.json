@@ -234,7 +234,8 @@
       "envIsPending": "题目环境开启中...",
       "envHasError": "发生错误，请尝试 1 分钟后重启环境或者联系管理员...",
       "fetchSolvesFailed": "获取解题记录失败",
-      "fetchSolveStatusFailed": "获取解题情况失败"
+      "fetchSolveStatusFailed": "获取解题情况失败",
+      "filterNameOrLabel": "过滤名称或标签..."
     },
     "scoreboard": {
       "title": "积分板",
