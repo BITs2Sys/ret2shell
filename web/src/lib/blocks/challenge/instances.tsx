@@ -5,7 +5,7 @@ import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
 import type { Challenge, ChallengeImage } from "@models/challenge";
 import type { RegistryConfig } from "@models/config";
-import { createForm, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, pattern, required, setValue, setValues } from "@modular-forms/solid";
 import { challengeStore, refreshChallengeAssets } from "@storage/challenge";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -105,7 +105,13 @@ function CreateForm(fnProps: {
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
       <div class="flex flex-row space-x-2">
-        <Field name="name" validate={[required(t("game.challenge.envContainerNameRequired")!)]}>
+        <Field
+          name="name"
+          validate={[
+            required(t("game.challenge.envContainerNameRequired")!),
+            pattern(/^[a-z\-]{3,40}$/, t("game.challenge.envContainerNameFormat")!),
+          ]}
+        >
           {(field, props) => (
             <Input
               class="flex-1"
