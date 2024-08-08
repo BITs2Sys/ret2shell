@@ -259,30 +259,29 @@ async fn submission_worker_exec(
       queue.publish("scoreboard", challenge.clone()).await.ok();
     }
     // detect blood state and create extra if necessary
-    let blood_state = if decay < 3 {
-      Some((decay + 1) as i32)
-    } else {
-      None
-    };
+    let blood_state = if decay <= 3 { Some(decay as i32) } else { None };
     let changed_at = submission.created_at;
     let mut team = team.clone();
     if let Some(blood_state) = blood_state {
-      extra::create(
-        &db.conn,
-        extra::Model {
-          id: 0,
-          created_at: changed_at,
-          team_id: team.id,
-          challenge_id: Some(challenge.id),
-          score: challenge.score_rule.initial * game.award_rate / 100,
-          reason: format!(
-            "No.{blood_state} solution for challenge {}#{}",
-            challenge.id, challenge.name
-          ),
-          hint_id: None,
-        },
-      )
-      .await?;
+      let score = challenge.score_rule.initial * game.award_rate / 100;
+      if score > 0 {
+        extra::create(
+          &db.conn,
+          extra::Model {
+            id: 0,
+            created_at: changed_at,
+            team_id: team.id,
+            challenge_id: Some(challenge.id),
+            score: challenge.score_rule.initial * game.award_rate / 100,
+            reason: format!(
+              "No.{blood_state} solution for challenge {}#{}",
+              challenge.id, challenge.name
+            ),
+            hint_id: None,
+          },
+        )
+        .await?;
+      }
     }
     // stage 3.2: update team score
     let score = team::calc_score(&db.conn, team.id).await?;

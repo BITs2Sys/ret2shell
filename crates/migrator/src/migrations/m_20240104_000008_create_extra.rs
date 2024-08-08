@@ -74,16 +74,6 @@ impl MigrationTrait for Migration {
           )
           .to_owned(),
       )
-      .await?;
-    manager
-      .create_index(
-        Index::create()
-          .table(Extra::Table)
-          .col(Extra::TeamId)
-          .col(Extra::ChallengeId)
-          .unique()
-          .to_owned(),
-      )
       .await
   }
 

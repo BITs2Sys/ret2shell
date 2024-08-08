@@ -67,7 +67,7 @@ export default function (props: { inGame?: boolean }) {
     });
     return maintainInstances;
   }
-  const timer = setInterval(maintainInstances(), 3000);
+  const timer = setInterval(maintainInstances(), 30 * 1000);
   onCleanup(() => {
     clearInterval(timer);
   });
@@ -84,9 +84,7 @@ export default function (props: { inGame?: boolean }) {
     startChallengeEnv(challengeStore.current!.game_id, challengeStore.current!.id)
       .then(() => {
         setTimeout(() => {
-          wsrx.refreshInstances().then(() => {
-            wsrx.openAllTraffic();
-          });
+          maintainInstances();
         }, 500);
       })
       .catch((err: HTTPError) => {
@@ -110,9 +108,7 @@ export default function (props: { inGame?: boolean }) {
       delayGameSelfEnv(challengeStore.current!.game_id)
         .then(() => {
           setTimeout(() => {
-            wsrx.refreshInstances().then(() => {
-              wsrx.deleteOutdatedTraffic();
-            });
+            maintainInstances();
           }, 500);
         })
         .catch((err: HTTPError) => {
@@ -141,9 +137,7 @@ export default function (props: { inGame?: boolean }) {
             duration: 5000,
           });
           setTimeout(() => {
-            wsrx.refreshInstances().then(() => {
-              wsrx.deleteOutdatedTraffic();
-            });
+            maintainInstances();
             refreshCalmdown();
           }, 500);
         })
@@ -315,7 +309,7 @@ export default function (props: { inGame?: boolean }) {
                         end={instance()!.created_at.plus({ hours: instance()!.renew_count + 1 })}
                         onTimeout={() => {
                           setTimeout(() => {
-                            wsrx.refreshInstances();
+                            maintainInstances();
                           }, 500);
                         }}
                         hasHours
