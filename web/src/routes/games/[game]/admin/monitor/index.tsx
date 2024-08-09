@@ -35,7 +35,7 @@ function AuditList() {
       });
   }
   createEffect(() => {
-    if (gameStore.current) {
+    if (gameStore.current && page()) {
       untrack(refreshAudits);
     }
   });
@@ -194,7 +194,7 @@ function SubmissionList() {
       });
   }
   createEffect(() => {
-    if (gameStore.current) {
+    if (gameStore.current && page()) {
       untrack(refreshSubmissions);
     }
   });
