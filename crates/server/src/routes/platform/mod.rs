@@ -23,7 +23,7 @@ use r2s_license::{License, LicenseLevel};
 use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
-use tokio::{fs, io::AsyncBufReadExt};
+use tokio::{fs, io::AsyncBufReadExt, time::timeout};
 use tracing::{debug, error};
 
 use crate::{
@@ -228,13 +228,27 @@ async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<
       .await
       .map(tokio::io::BufReader::new)
       .map(tokio::io::BufReader::lines)?;
+    let interval = tokio::time::Duration::from_secs(5);
     loop {
-      while let Some(log) = lines.next_line().await? {
+      while let Ok(log) = timeout(interval, lines.next_line()).await {
+        let log = match log {
+          Ok(Some(log)) => log,
+          Ok(None) => break,
+          Err(e) => {
+            error!("failed to read log: {:?}", e);
+            break;
+          }
+        };
         let result = ws.send(Message::Text(log)).await;
         if result.is_err() {
           return Ok(());
         }
       }
+      let result = ws.send(Message::Ping(vec![])).await;
+      if result.is_err() {
+        return Ok(());
+      }
+      let _ = ws.recv().await;
       timer.tick().await;
     }
   } else {

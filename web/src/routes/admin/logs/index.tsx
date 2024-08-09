@@ -1,6 +1,6 @@
 import { api_root } from "@api";
-import DownloadButton from "@blocks/download-button";
 import { getPlatformLogs } from "@api/platform";
+import DownloadButton from "@blocks/download-button";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
