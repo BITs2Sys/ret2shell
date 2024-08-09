@@ -328,7 +328,7 @@ pub async fn challenge_access_required(
   if is_game_admin!(token, game) {
     return Ok(next.run(req).await);
   }
-  if game.hidden || challenge.hidden {
+  if game.hidden || challenge.hidden || game.frozen {
     return Err(ResponseError::Forbidden(
       "permission denied".to_owned(),
       format!(
