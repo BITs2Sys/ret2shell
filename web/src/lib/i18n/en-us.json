@@ -72,8 +72,8 @@
       "man": "Submit the flag for this challenge to the platform.",
       "submitting": "Submitting",
       "waitingForChecking": "Submitted, awaiting evaluation...",
-      "correct": "accurate",
-      "incorrect": "Error",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
       "failed": "Submission failed",
       "timeout": "The evaluation queue is currently too long. Please refresh and check the evaluation results in about five minutes, and do not submit repeatedly."
     }
@@ -625,13 +625,13 @@
         "unread": "Unread"
       },
       "monitor": {
-        "fetchFailed": "Acquisition failed",
-        "pending": "In the queue",
-        "solved": "accurate",
-        "notSolved": "Error",
-        "needReview": "Awaiting review",
-        "misjudged": "Misjudgment",
-        "confirmed": "True"
+        "fetchFailed": "Fetch failed",
+        "pending": "In-queue",
+        "solved": "Correct",
+        "notSolved": "Incorrect",
+        "needReview": "Need-review",
+        "misjudged": "Misjudged",
+        "confirmed": "Confirmed"
       }
     },
     "adminCanNotTakePartIn": "Administrators are not allowed to participate.",
