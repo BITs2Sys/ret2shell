@@ -111,7 +111,6 @@ async fn score_maintainance_worker_exec(
         id: team.id,
         score,
         history: TeamScoreHistoryList(history),
-        last_active_at: changed_at,
         ..team
       },
     )
@@ -324,6 +323,7 @@ async fn submission_worker_exec(
       challenge_id: Some(challenge.id),
       score,
     });
+    team.last_active_at = changed_at;
     team::update(&db.conn, team.clone()).await?;
 
     // stage 3.3: create team correct event
