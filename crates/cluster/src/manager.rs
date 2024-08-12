@@ -242,7 +242,7 @@ impl Cluster {
   async fn check_outdated_pod(&self, pod: &Pod) -> Result<bool, ClusterError> {
     let renew = pod
       .metadata
-      .labels
+      .annotations
       .clone()
       .unwrap_or_default()
       .get("ret.sh.cn/renew")
