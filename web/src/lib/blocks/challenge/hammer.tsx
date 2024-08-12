@@ -56,7 +56,7 @@ export default function (_props: {
       getSolveStatus().then(() => {
         getGamePlayerChatMessages(gameStore.current!.id, challengeStore.current!.id)
           .then((result) => {
-            if (result.length > chats().length) {
+            if (result.length > chats().filter((u) => u.id !== 0).length) {
               setChats(result);
               setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
             }

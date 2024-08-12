@@ -19,13 +19,16 @@ import hdu from "@assets/brands/hdu.svg";
 import jiangnan from "@assets/brands/jiangnan.svg";
 import xdu from "@assets/brands/xdu.svg";
 import xmu from "@assets/brands/xmu.svg";
+import cumt from "@assets/brands/cumt.svg";
 import logo from "@assets/logo-gray.svg";
 const logos = {
   xdu: xdu,
   xmu: xmu,
   jiangnan: jiangnan,
   hdu: hdu,
+  cumt: cumt,
 };
+
 export default function () {
   const [authConfig, setAuthConfig] = createSignal({
     signing_key: "",

@@ -99,6 +99,9 @@
       },
       "xdu_cas": {
         "title": "Autenticación de Identidad Unificada de la Universidad de Ciencia y Tecnología de Xi'an"
+      },
+      "cumt_email": {
+        "title": "Autenticación de identidad de correo electrónico de la Universidad de Minería y Tecnología de China"
       }
     },
     "register": {

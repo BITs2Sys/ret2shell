@@ -178,6 +178,9 @@
       },
       "xdu_cas": {
         "title": "Xi'an University of Electronic Science and Technology Unified Identity Authentication"
+      },
+      "cumt_email": {
+        "title": "China University of Mining and Technology Email Identity Authentication"
       }
     },
     "register": {

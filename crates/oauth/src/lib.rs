@@ -10,6 +10,7 @@ pub struct OAuth {
   pub xmu_cas: Option<adapters::xmu_cas::OAuthProvider>,
   pub jiangnan_email: Option<adapters::jiangnan_email::OAuthProvider>,
   pub hdu_email: Option<adapters::hdu_email::OAuthProvider>,
+  pub cumt_email: Option<adapters::cumt_email::OAuthProvider>,
 }
 
 impl OAuth {
@@ -35,6 +36,11 @@ impl OAuth {
           key: key.to_owned().clone(),
         }
       }),
+      cumt_email: config.oauth_keys.get("cumt_email").as_ref().map(|key| {
+        adapters::cumt_email::OAuthProvider {
+          key: key.to_owned().clone(),
+        }
+      }),
     }
   }
 
@@ -56,6 +62,10 @@ impl OAuth {
         .hdu_email
         .as_ref()
         .map(|hdu| hdu as &dyn traits::OAuthProvider),
+      "cumt_email" => self
+        .cumt_email
+        .as_ref()
+        .map(|cumt| cumt as &dyn traits::OAuthProvider),
       _ => None,
     }
   }
@@ -70,6 +80,7 @@ pub async fn initialize(config: &Option<Config>) -> OAuth {
       xmu_cas: None,
       jiangnan_email: None,
       hdu_email: None,
+      cumt_email: None,
     }
   }
 }

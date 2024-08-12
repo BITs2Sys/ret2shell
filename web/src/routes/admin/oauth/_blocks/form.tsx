@@ -6,11 +6,9 @@ import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { createEffect, untrack } from "solid-js";
 
-type Providers = "xdu" | "xmu" | "jiangnan" | "nwnu" | "taru";
-
 type FormType = {
   name: string;
-  provider?: Providers;
+  provider?: string;
 };
 
 export default function InstituteForm(props: {
@@ -25,7 +23,7 @@ export default function InstituteForm(props: {
       untrack(() => {
         setValues(form, {
           name: props.editSource!.name,
-          provider: (props.editSource?.provider as Providers) || undefined,
+          provider: props.editSource?.provider || undefined,
         });
       });
     }
@@ -73,7 +71,7 @@ export default function InstituteForm(props: {
             value={field.value ? [field.value as string] : undefined}
             inputProps={fieldProps}
             onValueChange={(e) => {
-              setValue(form, "provider", e.value.at(0) as Providers);
+              setValue(form, "provider", e.value.at(0));
             }}
           >
             {/* TODO: integrate with modular-forms */}

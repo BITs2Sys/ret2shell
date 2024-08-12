@@ -99,6 +99,9 @@
       },
       "xdu_cas": {
         "title": "西安電子科技大学統一認証"
+      },
+      "cumt_email": {
+        "title": "中国鉱業大学の電子メール ID 認証"
       }
     },
     "register": {

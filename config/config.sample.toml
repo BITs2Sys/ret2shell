@@ -10,6 +10,7 @@ expires_time = 86400
 xdu_cas = { id = "https://ctf.xidian.edu.cn/account/oauth", key = "NOTNEEDED" }
 xmu_cas = { id = "https://ctf.xmu.edu.cn/account/oauth", key = "NOTNEEDED" }
 jiangnan_email = { id = "jiangnan.edu.cn", key = "NOTNEEDED" }
+cumt_email = { id = "cumt.edu.cn", key = "NOTNEEDED" }
 hdu_email = { id = "hdu.edu.cn", key = "NOTNEEDED" }
 
 [automate]

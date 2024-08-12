@@ -93,9 +93,11 @@ export default function () {
       getSolveStatus().then(() => {
         getGameAdminChatMessages(gameStore.current!.id, challengeId()!, teamId()!)
           .then((result) => {
-            console.log(result, chats());
-            if (cachedTeamId !== teamId() || cachedChallengeId !== challengeId() || result.length > chats().length) {
-              console.log("refreshing chats");
+            if (
+              cachedTeamId !== teamId() ||
+              cachedChallengeId !== challengeId() ||
+              result.length > chats().filter((u) => u.id !== 0).length
+            ) {
               setChats(result);
               cachedTeamId = teamId();
               cachedChallengeId = challengeId();
