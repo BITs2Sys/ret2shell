@@ -208,9 +208,6 @@ function TitleBar() {
                 <Card contentClass="p-2 flex flex-col space-y-2">
                   <ul class="flex flex-col space-y-2">
                     <Switch>
-                      <Match when={platformStore.isOnline}>
-                        <GlobalNav size="sm" />
-                      </Match>
                       <Match
                         when={
                           platformStore.isOnline &&
@@ -219,6 +216,9 @@ function TitleBar() {
                         }
                       >
                         <GameNav size="sm" />
+                      </Match>
+                      <Match when={platformStore.isOnline}>
+                        <GlobalNav size="sm" />
                       </Match>
                     </Switch>
                     <Divider direction="horizontal" />

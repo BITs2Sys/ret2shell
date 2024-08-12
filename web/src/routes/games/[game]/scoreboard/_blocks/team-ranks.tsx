@@ -63,18 +63,18 @@ export default function TeamRanks(props: {
                 </Switch>
               </span>
               <A
-                class="font-bold hover:underline flex-1 truncate"
+                class="font-bold hover:underline flex-1 w-0 truncate"
                 href={`/games/${gameStore.current?.id}/teams/${team.id}`}
               >
                 {team.name}
               </A>
               <Show when={team.state === TeamState.Hidden}>
-                <Tag level="warning">
+                <Tag class="truncate" level="warning">
                   <span>{t("game.team.state.hidden")}</span>
                 </Tag>
               </Show>
               <Show when={props.showTime && team.institute_id}>
-                <Tag level="info">
+                <Tag class="truncate" level="info">
                   <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
                 </Tag>
               </Show>

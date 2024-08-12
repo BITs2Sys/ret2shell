@@ -48,7 +48,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
         <Select.Trigger
           class={`btn flex flex-row ${
             selectProps.size === "sm" ? "px-0" : "px-2"
-          } gap-0 items-center w-full btn-${selectProps.size} ${selectProps.ghost ? "btn-ghost" : ""} ${
+          } gap-0 items-center w-full ${selectProps.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"} ${selectProps.ghost ? "btn-ghost" : ""} ${
             selectProps.error ? "border-error" : ""
           }`.trim()}
         >

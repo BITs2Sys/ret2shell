@@ -15,13 +15,16 @@ import { createChallenge, getChallenge } from "@api/game";
 import { addToast } from "@storage/toast";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { Match, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
 
 import Tabs from "@blocks/challenge/tabs";
+import { createBreakpoints } from "@solid-primitives/media";
 import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
+import Button from "@widgets/button";
+import { Transition } from "solid-transition-group";
 
 export default function () {
   const navigate = useNavigate();
@@ -107,11 +110,18 @@ export default function () {
         setCreating(false);
       });
   }
-  // TODO: fetchSelfTeam and redirect
+  const breakpoints = {
+    lg: "1024px",
+    xl: "1440px",
+  };
+  const matches = createBreakpoints(breakpoints);
+  const [showLeftSidebar, setShowLeftSidebar] = createSignal(false);
+  const [showRightSidebar, setShowRightSidebar] = createSignal(false);
   return (
     <>
       <Title title={`${t("game.challenge.title")} - ${gameStore.current?.name || "CTF"}`} />
       <SidebarLayout
+        showLeftBar={showLeftSidebar()}
         leftBar={() => (
           <div class="h-full flex flex-col">
             <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
@@ -123,6 +133,7 @@ export default function () {
             <ChallengeList showScore inGame />
           </div>
         )}
+        showRightBar={showRightSidebar()}
         rightBar={() => (
           <div class="h-full flex flex-col">
             <Team />
@@ -147,6 +158,46 @@ export default function () {
           </Switch>
         </div>
       </SidebarLayout>
+      <Transition name="slide-fade-right">
+        <Show when={!matches.lg}>
+          <Button
+            class="fixed bottom-3 right-3"
+            square
+            onClick={() => {
+              setShowRightSidebar(false);
+              setShowLeftSidebar(!showLeftSidebar());
+            }}
+            type="button"
+          >
+            {/* icon-[fluent--code-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
+            <span
+              class={`transition-transform rotate-${showLeftSidebar() ? "90" : "0"} icon-[fluent--${
+                showLeftSidebar() ? "dismiss" : "code"
+              }-20-regular] w-5 h-5`}
+            />
+          </Button>
+        </Show>
+      </Transition>
+      <Transition name="slide-fade-left">
+        <Show when={!matches.xl}>
+          <Button
+            class="fixed bottom-3 left-3"
+            square
+            onClick={() => {
+              setShowLeftSidebar(false);
+              setShowRightSidebar(!showRightSidebar());
+            }}
+            type="button"
+          >
+            {/* icon-[fluent--alert-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
+            <span
+              class={`transition-transform rotate-${showRightSidebar() ? "90" : "0"} icon-[fluent--${
+                showRightSidebar() ? "dismiss" : "alert"
+              }-20-regular] w-5 h-5`}
+            />
+          </Button>
+        </Show>
+      </Transition>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { getGameScoreboard } from "@api/game";
 import type { Team } from "@models/team";
+import { createBreakpoints } from "@solid-primitives/media";
 import { type Size, createElementSize } from "@solid-primitives/resize-observer";
 import { useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
@@ -41,15 +42,25 @@ function ChartOperations(props: {
   return (
     <div class="flex flex-row space-x-2 justify-between overflow-hidden">
       <div class="flex flex-row space-x-2">
-        <Button square size={props.size} ghost={props.ghost} onClick={() => props.onRefresh?.()}>
+        <Button
+          square
+          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
+          ghost={props.ghost}
+          onClick={() => props.onRefresh?.()}
+        >
           <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
         </Button>
-        <Button square size={props.size} ghost={props.ghost} onClick={() => props.onExport?.()}>
+        <Button
+          square
+          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
+          ghost={props.ghost}
+          onClick={() => props.onExport?.()}
+        >
           <span class="icon-[fluent--open-20-regular] w-5 h-5" />
         </Button>
         <Button
           square
-          size={props.size}
+          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
           ghost={props.ghost}
           onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
         >
@@ -59,7 +70,7 @@ function ChartOperations(props: {
         </Button>
       </div>
       <Select
-        class="flex-1 max-w-64 min-w-0"
+        class="flex-1 max-w-64 min-w-0 w-0"
         size={props.size}
         ghost={props.ghost}
         placeholder={t("game.scoreboard.selectInstitute")}
@@ -89,7 +100,11 @@ export default function () {
   const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
   void refreshInstitutes().then(() => setLoadingInstitute(false));
-
+  const breakpoints = {
+    xl: "1440px",
+    lg: "1024px",
+  };
+  const matches = createBreakpoints(breakpoints);
   function getTopTeams() {
     setLoading(true);
     getGameScoreboard(gameStore.current?.id || 0, 1, 10, showHiddenTeams(), selectedInstituteId() || undefined)
@@ -212,10 +227,10 @@ export default function () {
               <Chart
                 option={{
                   grid: {
-                    left: showChallengeDetail() ? "0" : "72px",
-                    right: showChallengeDetail() ? "4px" : "24px",
-                    bottom: showChallengeDetail() ? "56px" : "80px",
-                    top: showChallengeDetail() ? "4px" : "48px",
+                    left: showChallengeDetail() || !matches.lg ? "0" : "72px",
+                    right: showChallengeDetail() || !matches.lg ? "4px" : "24px",
+                    bottom: showChallengeDetail() || !matches.lg ? "56px" : "80px",
+                    top: showChallengeDetail() || !matches.lg ? "4px" : "48px",
                   },
                   tooltip: {
                     trigger: "axis",
