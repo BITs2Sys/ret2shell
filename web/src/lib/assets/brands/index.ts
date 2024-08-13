@@ -1,6 +1,8 @@
 import cumt from "@assets/brands/cumt.svg";
+import fudan from "@assets/brands/fudan.svg";
 import hdu from "@assets/brands/hdu.svg";
 import jiangnan from "@assets/brands/jiangnan.svg";
+import jlu from "@assets/brands/jlu.svg";
 import seu from "@assets/brands/seu.svg";
 import uestc from "@assets/brands/uestc.svg";
 import xdu from "@assets/brands/xdu.svg";
@@ -15,6 +17,8 @@ const eduLogos = {
   cumt: cumt,
   uestc: uestc,
   seu: seu,
+  fudan: fudan,
+  jlu: jlu,
 };
 
 export function getLogo(provider: string) {
