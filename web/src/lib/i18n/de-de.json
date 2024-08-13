@@ -105,6 +105,9 @@
       },
       "uestc_email": {
         "title": "E-Mail-Identitätsauthentifizierung der Universität für elektronische Wissenschaft und Technologie Chinas"
+      },
+      "seu_email": {
+        "title": "E-Mail-Identitätsauthentifizierung der Southeast University"
       }
     },
     "register": {

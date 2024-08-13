@@ -1,5 +1,6 @@
 import { getInstitutes, getOAuthStatus, unbindWithOAuth } from "@api/account";
 import { getAuthConfig } from "@api/platform";
+import { getLogo } from "@assets/brands";
 import type { AuthConfig } from "@models/config";
 import type { Institute } from "@models/institute";
 import type { OAuth } from "@models/oauth";
@@ -11,22 +12,6 @@ import Link from "@widgets/link";
 import Tag from "@widgets/tag";
 import type { HTTPError } from "ky";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
-
-import hdu from "@assets/brands/hdu.svg";
-import jiangnan from "@assets/brands/jiangnan.svg";
-import xdu from "@assets/brands/xdu.svg";
-import xmu from "@assets/brands/xmu.svg";
-import cumt from "@assets/brands/cumt.svg";
-import uestc from "@assets/brands/uestc.svg";
-import logo from "@assets/logo-gray.svg";
-const logos = {
-  xdu: xdu,
-  xmu: xmu,
-  jiangnan: jiangnan,
-  hdu: hdu,
-  cumt: cumt,
-  uestc: uestc,
-};
 
 function getOAuthLink(service: string) {
   if (service.endsWith("_email")) {
@@ -68,13 +53,6 @@ export default function () {
           });
         });
       });
-  }
-  function getLogo(provider: string) {
-    const logoKeys = Object.keys(logos);
-    for (const key of logoKeys) {
-      if (provider.startsWith(key)) return logos[key as keyof typeof logos];
-    }
-    return logo;
   }
   createEffect(() => {
     if (accountStore.token) {

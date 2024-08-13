@@ -184,6 +184,9 @@
       },
       "uestc_email": {
         "title": "電子科技大學郵件身分認證"
+      },
+      "seu_email": {
+        "title": "東南大學郵件認證"
       }
     },
     "register": {

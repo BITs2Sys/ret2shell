@@ -105,6 +105,9 @@
       },
       "uestc_email": {
         "title": "中国電子科学技術大学の電子メール ID 認証"
+      },
+      "seu_email": {
+        "title": "東南大学の電子メール ID 認証"
       }
     },
     "register": {

@@ -22,7 +22,7 @@ import Card from "@widgets/card";
 import Editor from "@widgets/editor";
 import Link from "@widgets/link";
 import { HTTPError } from "ky";
-import type { DateTime } from "luxon";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 
@@ -97,7 +97,18 @@ export default function () {
               cachedChallengeId !== challengeId() ||
               result.length > chats().filter((u) => u.id !== 0).length
             ) {
-              setChats(result);
+              const last_msg = chats()
+                .filter((u) => u.user_id !== 0 && u.challenge_id === challengeId() && u.team_id === teamId())
+                .reduce((a, b) => (a.created_at > b.created_at ? a : b), {
+                  created_at: DateTime.fromMillis(0),
+                });
+              setChats([
+                ...chats().filter((u) => u.challenge_id === challengeId() && u.team_id === teamId()),
+                ...result.filter(
+                  (u) =>
+                    u.created_at > last_msg.created_at && u.challenge_id === challengeId() && u.team_id === teamId()
+                ),
+              ]);
               cachedTeamId = teamId();
               cachedChallengeId = challengeId();
               setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
@@ -124,13 +135,13 @@ export default function () {
   });
   const mixedChats = createMemo(() => {
     const c = chats();
-    if (solvedAt()) {
+    if (solvedAt() && !c.find((x) => x.id === 0)) {
       c.push({
         id: 0,
         user_id: 0,
         user_name: "Ciallo～(∠・ω< )⌒☆",
         avatar: undefined,
-        content: t("game.challenge.chatSolvedMessage")!,
+        content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
         created_at: solvedAt()!,
         is_admin: true,
         challenge_id: challengeId()!,

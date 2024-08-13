@@ -866,6 +866,9 @@
       },
       "uestc_email": {
         "title": "电子科技大学邮件身份认证"
+      },
+      "seu_email": {
+        "title": "东南大学邮件身份认证"
       }
     },
     "institute": {

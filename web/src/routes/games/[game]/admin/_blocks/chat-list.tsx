@@ -10,6 +10,7 @@ import Link from "@widgets/link";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { TransitionGroup } from "solid-transition-group";
 
 export default function ChatList() {
   const [sessions, setSessions] = createSignal([] as ChatSession[]);
@@ -20,11 +21,26 @@ export default function ChatList() {
     if (gameStore.current) {
       getGameAdminChatSessions(gameStore.current!.id)
         .then((resp) => {
-          setSessions(
-            resp.sort((a, b) => {
-              return b.last_active_at.toMillis() - a.last_active_at.toMillis();
-            })
+          // only append new sessions
+          const oldSessions = sessions().filter(
+            (session) =>
+              !resp.find(
+                (s) =>
+                  s.team_id === session.team_id &&
+                  s.challenge_id === session.challenge_id &&
+                  (s.last_active_at.toMillis() > session.last_active_at.toMillis() ||
+                    s.checked !== session.checked ||
+                    s.is_admin !== session.is_admin)
+              )
           );
+          const newSessions = [
+            ...oldSessions,
+            ...resp.filter(
+              (session) =>
+                !oldSessions.find((s) => s.team_id === session.team_id && s.challenge_id === session.challenge_id)
+            ),
+          ].sort((a, b) => b.last_active_at.toMillis() - a.last_active_at.toMillis());
+          setSessions(newSessions);
         })
         .catch((err: HTTPError) => {
           err.response.text().then((text) => {
@@ -79,13 +95,13 @@ export default function ChatList() {
           }
         >
           <div class="w-full min-h-full overflow-hidden flex flex-col space-y-2 p-2">
-            <For each={sessions()}>
-              {(session) => (
-                <>
+            <TransitionGroup name="fade-group-right">
+              <For each={sessions()}>
+                {(session) => (
                   <Link
                     href={`/games/${gameStore.current?.id}/admin/hammers?challenge=${session.challenge_id}&team=${session.team_id}`}
                     ghost={!(teamId() === session.team_id && challengeId() === session.challenge_id)}
-                    class="flex-row space-x-2 items-center h-auto py-2 !px-3"
+                    class="flex-row space-x-2 items-center h-auto py-2 !px-3 fade-group-right"
                   >
                     <Avatar class="w-10 aspect-square flex-shrink-0" src={undefined} fallback={session.team_name} />
                     <div class="flex-col flex-1">
@@ -111,9 +127,9 @@ export default function ChatList() {
                       </div>
                     </div>
                   </Link>
-                </>
-              )}
-            </For>
+                )}
+              </For>
+            </TransitionGroup>
           </div>
         </Show>
       </OverlayScrollbarsComponent>

@@ -14,22 +14,7 @@ import Popover from "@widgets/popover";
 import type { HTTPError } from "ky";
 import { For, Show, createMemo, createSignal } from "solid-js";
 import InstituteForm from "./_blocks/form";
-
-import hdu from "@assets/brands/hdu.svg";
-import jiangnan from "@assets/brands/jiangnan.svg";
-import xdu from "@assets/brands/xdu.svg";
-import xmu from "@assets/brands/xmu.svg";
-import cumt from "@assets/brands/cumt.svg";
-import uestc from "@assets/brands/uestc.svg";
-import logo from "@assets/logo-gray.svg";
-const logos = {
-  xdu: xdu,
-  xmu: xmu,
-  jiangnan: jiangnan,
-  hdu: hdu,
-  cumt: cumt,
-  uestc: uestc,
-};
+import { getLogo } from "@assets/brands";
 
 export default function () {
   const [authConfig, setAuthConfig] = createSignal({
@@ -41,13 +26,6 @@ export default function () {
   getAuthConfig()
     .then((config) => setAuthConfig(config))
     .catch(() => {});
-  function getLogo(provider: string) {
-    const logoKeys = Object.keys(logos);
-    for (const key of logoKeys) {
-      if (provider.startsWith(key)) return logos[key as keyof typeof logos];
-    }
-    return logo;
-  }
   const oauthServices = createMemo(() => Object.keys(authConfig().oauth_keys || {}));
   const [loading, setLoading] = createSignal(true);
   refreshInstitutes().then(() => setLoading(false));

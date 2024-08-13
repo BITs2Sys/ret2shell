@@ -1,6 +1,8 @@
 import { loginWithOAuth } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
+import { getLogo } from "@assets/brands";
 import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+import logo from "@assets/logo-gray.svg";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -8,29 +10,6 @@ import LoadingTips from "@widgets/loading-tips";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
 
-import hdu from "@assets/brands/hdu.svg";
-import jiangnan from "@assets/brands/jiangnan.svg";
-import xdu from "@assets/brands/xdu.svg";
-import xmu from "@assets/brands/xmu.svg";
-import cumt from "@assets/brands/cumt.svg";
-import uestc from "@assets/brands/uestc.svg";
-import logo from "@assets/logo-gray.svg";
-const logos = {
-  xdu: xdu,
-  xmu: xmu,
-  jiangnan: jiangnan,
-  hdu: hdu,
-  cumt: cumt,
-  uestc: uestc,
-};
-
-function getLogo(provider: string) {
-  const logoKeys = Object.keys(logos);
-  for (const key of logoKeys) {
-    if (provider.startsWith(key)) return logos[key as keyof typeof logos];
-  }
-  return logo;
-}
 export default function () {
   const [animate, setAnimate] = createSignal(false);
   const location = useLocation();

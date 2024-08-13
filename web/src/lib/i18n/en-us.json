@@ -184,6 +184,9 @@
       },
       "uestc_email": {
         "title": "University of Electronic Science and Technology of China Email Identity Authentication"
+      },
+      "seu_email": {
+        "title": "Southeast University email identity authentication"
       }
     },
     "register": {

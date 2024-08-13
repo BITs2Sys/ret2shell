@@ -105,6 +105,9 @@
       },
       "uestc_email": {
         "title": "Authentification de l'identité de courrier électronique de l'Université des sciences et technologies électroniques de Chine"
+      },
+      "seu_email": {
+        "title": "Authentification de l'identité de courrier électronique de l'Université du Sud-Est"
       }
     },
     "register": {
