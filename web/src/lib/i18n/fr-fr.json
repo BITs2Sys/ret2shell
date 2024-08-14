@@ -114,6 +114,12 @@
       },
       "jlu_email": {
         "title": "Authentification de l'identité de courrier électronique de l'Université de Jilin"
+      },
+      "bit_email": {
+        "title": "Authentification de l'identité de courrier électronique de l'Institut de technologie de Pékin"
+      },
+      "tzc_email": {
+        "title": "Authentification de l'identité de courrier électronique de l'Université de Taizhou"
       }
     },
     "register": {

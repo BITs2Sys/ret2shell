@@ -879,6 +879,9 @@
       },
       "bit_email": {
         "title": "北京理工大学邮件身份认证"
+      },
+      "tzc_email": {
+        "title": "台州学院邮件身份认证"
       }
     },
     "institute": {

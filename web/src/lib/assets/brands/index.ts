@@ -8,6 +8,7 @@ import seu from "@assets/brands/seu.svg";
 import uestc from "@assets/brands/uestc.svg";
 import xdu from "@assets/brands/xdu.svg";
 import xmu from "@assets/brands/xmu.svg";
+import tzc from "@assets/brands/tzc.svg";
 import logo from "@assets/logo-gray.svg";
 
 const eduLogos = {
@@ -21,6 +22,7 @@ const eduLogos = {
   fudan: fudan,
   jlu: jlu,
   bit: bit,
+  tzc: tzc,
 };
 
 export function getLogo(provider: string) {

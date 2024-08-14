@@ -193,6 +193,12 @@
       },
       "jlu_email": {
         "title": "Jilin University email identity authentication"
+      },
+      "bit_email": {
+        "title": "Beijing Institute of Technology Email Identity Authentication"
+      },
+      "tzc_email": {
+        "title": "Taizhou University Email Identity Authentication"
       }
     },
     "register": {

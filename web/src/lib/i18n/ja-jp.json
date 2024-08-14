@@ -114,6 +114,12 @@
       },
       "jlu_email": {
         "title": "吉林大学の電子メール ID 認証"
+      },
+      "bit_email": {
+        "title": "北京理工大学の電子メール ID 認証"
+      },
+      "tzc_email": {
+        "title": "台州大学の電子メール ID 認証"
       }
     },
     "register": {

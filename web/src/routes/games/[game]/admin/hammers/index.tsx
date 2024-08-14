@@ -26,6 +26,17 @@ import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 
+function mergeChats(a: Chat[], b: Chat[]): Chat[] {
+  // merge b into a, append all new chats and update checked chats
+  const last_msg = a.reduce((a, b) => (a.created_at > b.created_at ? a : b), {
+    created_at: DateTime.fromMillis(0),
+  });
+  const new_chats = b.filter((x) => x.created_at > last_msg.created_at);
+  const checked_chats = b.filter((x) => x.checked);
+  const checked_ids = checked_chats.map((x) => x.id);
+  return a.map((x) => (checked_ids.includes(x.id) ? { ...x, checked: true } : x)).concat(new_chats);
+}
+
 export default function () {
   const [searchParams, _] = useSearchParams();
   const teamId = createMemo(() => Number.parseInt(searchParams.team ?? "") || null);
@@ -97,18 +108,7 @@ export default function () {
               cachedChallengeId !== challengeId() ||
               result.length > chats().filter((u) => u.id !== 0).length
             ) {
-              const last_msg = chats()
-                .filter((u) => u.user_id !== 0 && u.challenge_id === challengeId() && u.team_id === teamId())
-                .reduce((a, b) => (a.created_at > b.created_at ? a : b), {
-                  created_at: DateTime.fromMillis(0),
-                });
-              setChats([
-                ...chats().filter((u) => u.challenge_id === challengeId() && u.team_id === teamId()),
-                ...result.filter(
-                  (u) =>
-                    u.created_at > last_msg.created_at && u.challenge_id === challengeId() && u.team_id === teamId()
-                ),
-              ]);
+              setChats(mergeChats(chats(), result));
               cachedTeamId = teamId();
               cachedChallengeId = challengeId();
               setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);

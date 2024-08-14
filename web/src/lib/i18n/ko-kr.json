@@ -114,6 +114,12 @@
       },
       "jlu_email": {
         "title": "길림대학교 이메일 본인인증"
+      },
+      "bit_email": {
+        "title": "베이징이공대학교 이메일 신원 인증"
+      },
+      "tzc_email": {
+        "title": "Taizhou University 이메일 신원 인증"
       }
     },
     "register": {

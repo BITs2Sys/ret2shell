@@ -193,6 +193,12 @@
       },
       "jlu_email": {
         "title": "吉林大學郵件身份認證"
+      },
+      "bit_email": {
+        "title": "北京理工大學郵件認證"
+      },
+      "tzc_email": {
+        "title": "台州學院郵件身份認證"
       }
     },
     "register": {
