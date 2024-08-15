@@ -6,9 +6,10 @@ import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
+import LoadingTips from "@widgets/loading-tips";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 function StatisticsPanel() {
   return <></>;
@@ -19,9 +20,11 @@ function HintsPanel() {
 
 function HistoryPanel() {
   const [history, setHistory] = createSignal([] as CommitHistory[]);
+  const [loading, setLoading] = createSignal(false);
   createEffect(() => {
     if (challengeStore.current) {
       untrack(() => {
+        setLoading(true);
         getChallengeCommitHistory(gameStore.current!.id, challengeStore.current!.id)
           .then(setHistory)
           .catch((err: HTTPError) => {
@@ -32,12 +35,20 @@ function HistoryPanel() {
                 duration: 5000,
               });
             });
+          })
+          .finally(() => {
+            setLoading(false);
           });
       });
     }
   });
   return (
     <>
+      <Show when={loading()}>
+        <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+          <LoadingTips />
+        </div>
+      </Show>
       <For each={history()}>
         {(item) => (
           <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">

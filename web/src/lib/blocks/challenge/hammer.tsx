@@ -1,6 +1,7 @@
 import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
 import Spin from "@assets/animates/spin";
 import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
+import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
@@ -8,15 +9,18 @@ import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
-import { t } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
+import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
+import Popover from "@widgets/popover";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { For, Show, createMemo, createSignal, onCleanup } from "solid-js";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { For, Show, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 
 export default function (_props: {
   onStateChange?: (challenge?: Challenge) => void;
@@ -139,6 +143,10 @@ export default function (_props: {
   }
   const alreadySend = createMemo(() => chats().at(-1)?.user_id === accountStore.id);
 
+  onMount(() => {
+    setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
+  });
+
   return (
     <div class="flex flex-col min-h-full relative">
       <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-1">
@@ -163,7 +171,30 @@ export default function (_props: {
           <div class="flex flex-col space-y-1 items-start">
             <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
             <Card contentClass="p-2">
-              <p class="text-wrap">{t("game.challenge.hammerTips2")}</p>
+              <p class="text-wrap">
+                {t("game.challenge.hammerTips2")}
+                {t("game.challenge.hammerTips3")}
+              </p>
+              <div class="flex flex-row space-x-2 flex-wrap">
+                <a
+                  class="flex flex-row items-center space-x-1 text-primary hover:underline"
+                  href="https://paste.mozilla.org/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span class="icon-[fluent--earth-20-regular]" />
+                  <span>Mozilla Public Pastebin</span>
+                </a>
+                <a
+                  class="flex flex-row items-center space-x-1 text-primary hover:underline"
+                  href="https://0x0.st"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span class="icon-[fluent--earth-20-regular]" />
+                  <span>0x0.st</span>
+                </a>
+              </div>
             </Card>
             <div class="h-3" />
           </div>
@@ -225,6 +256,52 @@ export default function (_props: {
         </For>
       </div>
       <div class="sticky bottom-0 p-3 lg:p-6">
+        <div class="h-full w-full relative">
+          <Popover
+            class="absolute -top-10 left-2"
+            size="sm"
+            square
+            ghost
+            btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+          >
+            <Card contentClass="p-2 aspect-square">
+              <OverlayScrollbarsComponent
+                options={{
+                  scrollbars: {
+                    theme: `os-theme-${fullTheme()}`,
+                    autoHide: "scroll",
+                  },
+                }}
+                class="relative w-full h-full print:h-auto print:overflow-auto"
+                defer
+              >
+                <div class="grid grid-cols-4 gap-2">
+                  <For each={stickerSet}>
+                    {(sticker) => (
+                      <Button
+                        ghost
+                        class="p-0 aspect-square overflow-hidden"
+                        onClick={() => {
+                          setChat(`![${sticker.alt}](${sticker.src})`);
+                          setTimeout(() => {
+                            handleSendChat();
+                          });
+                        }}
+                      >
+                        <img
+                          class="w-24 h-24 transition-transform duration-300 hover:scale-[1.1]"
+                          src={sticker.src}
+                          alt={sticker.alt}
+                          title={sticker.alt}
+                        />
+                      </Button>
+                    )}
+                  </For>
+                </div>
+              </OverlayScrollbarsComponent>
+            </Card>
+          </Popover>
+        </div>
         <Editor
           class="h-24 bg-layer"
           value={chat()}

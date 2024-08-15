@@ -614,7 +614,7 @@
       "hammer": "Marteau",
       "hammerInput": "Veuillez saisir la question à laquelle vous souhaitez répondre, Entrée pour envoyer, Maj Entrée pour changer de ligne, prend en charge la syntaxe Markdown",
       "hammerTips": "Le message que vous envoyez ici sera transmis avec l'état du sujet au concepteur de l'exercice, qui pourra répondre ici ou vous contacter par d'autres moyens.",
-      "hammerTips2": "Veuillez noter que vous ne pouvez envoyer qu'un seul message avant la réponse de l'auteur de la question, donc envoyez votre question en une seule fois, pas de chat en temps réel ici.",
+      "hammerTips2": "Veuillez noter que vous ne pouvez envoyer qu'un seul message avant que la personne qui vous pose la question ne réponde. Veuillez donc envoyer vos questions une par une.",
       "hint": "Indication",
       "hintRequired": "Veuillez remplir le contenu de la suggestion",
       "info": "Informations de base",
@@ -734,7 +734,8 @@
       "chatQuickReply1": "Veuillez réfléchir et résoudre les problèmes de manière indépendante.",
       "chatQuickReply2": "Veuillez lire attentivement les instructions d'entrée et le manuel.",
       "chatQuickReply3": "Détrompez-vous, allez !",
-      "chatQuickReply4": "Ne vous inquiétez pas, réfléchissez-y à nouveau, si vous n'avez pas d'idées, vous pouvez d'abord vous détendre."
+      "chatQuickReply4": "Ne vous inquiétez pas, réfléchissez-y à nouveau, si vous n'avez pas d'idées, vous pouvez d'abord vous détendre.",
+      "hammerTips3": "Il est recommandé d'utiliser le presse-papiers du réseau pour envoyer des messages longs tels que des journaux et des codes, par exemple :"
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",

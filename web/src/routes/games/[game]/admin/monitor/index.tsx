@@ -6,10 +6,11 @@ import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
+import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import type { HTTPError } from "ky";
-import { For, Match, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 
 function AuditList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,7 +18,9 @@ function AuditList() {
   const pageSize = 15;
   const [total, setTotal] = createSignal(0);
   const [audits, setAudits] = createSignal([] as Audit[]);
+  const [loading, setLoading] = createSignal(false);
   function refreshAudits() {
+    setLoading(true);
     getGameAuditLogs(gameStore.current!.id, page(), pageSize)
       .then((resp) => {
         setAudits(resp[0]);
@@ -32,6 +35,9 @@ function AuditList() {
             duration: 5000,
           });
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
   createEffect(() => {
@@ -100,8 +106,17 @@ function AuditList() {
           each={audits()}
           fallback={
             <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-              <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-              <span>{t("game.team.noExtras")}</span>
+              <Show
+                when={loading()}
+                fallback={
+                  <>
+                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span>{t("game.team.noExtras")}</span>
+                  </>
+                }
+              >
+                <LoadingTips />
+              </Show>
             </div>
           }
         >
@@ -183,7 +198,9 @@ function SubmissionList() {
   const pageSize = 15;
   const [total, setTotal] = createSignal(0);
   const [submissions, setSubmissions] = createSignal([] as Submission[]);
+  const [loading, setLoading] = createSignal(false);
   function refreshSubmissions() {
+    setLoading(true);
     getGameSubmissions(gameStore.current!.id, page(), pageSize)
       .then((resp) => {
         setSubmissions(resp[0]);
@@ -198,6 +215,9 @@ function SubmissionList() {
             duration: 5000,
           });
         });
+      })
+      .then(() => {
+        setLoading(false);
       });
   }
   createEffect(() => {
@@ -219,8 +239,17 @@ function SubmissionList() {
           each={submissions()}
           fallback={
             <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-              <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-              <span>{t("game.team.noExtras")}</span>
+              <Show
+                when={loading()}
+                fallback={
+                  <>
+                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span>{t("game.team.noExtras")}</span>
+                  </>
+                }
+              >
+                <LoadingTips />
+              </Show>
             </div>
           }
         >

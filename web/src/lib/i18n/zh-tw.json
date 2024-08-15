@@ -691,7 +691,7 @@
       "hammer": "錘子",
       "hammerInput": "請輸入你要回饋的問題，Enter 發送，Shift Enter 換行，支援 Markdown 語法",
       "hammerTips": "你在這裡發送的訊息將會與題目狀態一起轉發給出題人，出題人可能會在這裡回覆或者透過其他管道聯繫你。",
-      "hammerTips2": "請注意，在出題人回覆之前，你只能發送一條消息，所以請一次發送你的問題，不要在這裡即時聊天。",
+      "hammerTips2": "請注意，在出題人回覆之前，你只能發送一封訊息，所以請一次發送你的問題。",
       "hint": "提示",
       "hintRequired": "請填寫提示內容",
       "info": "基礎資訊",
@@ -813,7 +813,8 @@
       "chatQuickReply1": "請獨立思考並解題。",
       "chatQuickReply2": "請仔細閱讀參賽須知和手冊。",
       "chatQuickReply3": "再想一想，加油！",
-      "chatQuickReply4": "別急，再想想，沒有思緒的話可以先放鬆一下。"
+      "chatQuickReply4": "別急，再想想，沒有思緒的話可以先放鬆一下。",
+      "hammerTips3": "日誌、代碼等過長的訊息建議使用網路剪貼簿發送，例如："
     },
     "cover": {
       "uploadFailed": "封面傳輸失敗",

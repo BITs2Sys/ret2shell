@@ -614,7 +614,7 @@
       "hammer": "Hammer",
       "hammerInput": "Bitte geben Sie die Frage ein, zu der Sie Feedback geben möchten. Geben Sie die Eingabetaste ein, um sie zu senden. Drücken Sie die Umschalt-Eingabetaste, um die Zeile zu ändern. Unterstützt die Markdown-Syntax",
       "hammerTips": "Die hier gesendeten Nachrichten werden zusammen mit dem Status der Aufgabe an den Aufgabenersteller weitergeleitet. Der Aufgabenersteller kann hier antworten oder dich über andere Kanäle kontaktieren.",
-      "hammerTips2": "Bitte beachten Sie, dass Sie nur eine Nachricht senden können, bevor der Aufgabenersteller antwortet. Senden Sie daher Ihre Frage in einem einzigen Schritt und führen Sie hier keinen Live-Chat durch.",
+      "hammerTips2": "Bitte beachten Sie, dass Sie nur eine Nachricht senden können, bevor der Fragesteller antwortet. Senden Sie Ihre Fragen daher bitte einzeln.",
       "hint": "Hinweis",
       "hintRequired": "Bitte füllen Sie den Hinweisinhalt aus.",
       "info": "Grundinformationen",
@@ -734,7 +734,8 @@
       "chatQuickReply1": "Bitte denken und lösen Sie Probleme selbstständig.",
       "chatQuickReply2": "Bitte lesen Sie die Eingabeanleitung und das Handbuch sorgfältig durch.",
       "chatQuickReply3": "Denken Sie noch einmal darüber nach, komm schon!",
-      "chatQuickReply4": "Machen Sie sich keine Sorgen, denken Sie noch einmal darüber nach. Wenn Sie keine Ideen haben, können Sie sich zunächst entspannen."
+      "chatQuickReply4": "Machen Sie sich keine Sorgen, denken Sie noch einmal darüber nach. Wenn Sie keine Ideen haben, können Sie sich zunächst entspannen.",
+      "hammerTips3": "Es wird empfohlen, die Netzwerk-Zwischenablage zu verwenden, um lange Nachrichten wie Protokolle und Codes zu senden, zum Beispiel:"
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

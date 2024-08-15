@@ -691,7 +691,7 @@
       "hammer": "Hammer",
       "hammerInput": "Please enter the question you want to feedback, Enter to send, Shift Enter to change line, supports Markdown syntax",
       "hammerTips": "The message you send here will be forwarded to the challenge setter along with the status of the challenge. The challenge setter may reply here or contact you through other channels.",
-      "hammerTips2": "Please note that you can only send one message before the challenge setter replies, so please send your challenge all at once and do not engage in real-time chat here.",
+      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time.",
       "hint": "Hint",
       "hintRequired": "Please fill in the prompt content.",
       "info": "Basic Information",
@@ -813,7 +813,8 @@
       "chatQuickReply1": "Please think and solve problems independently.",
       "chatQuickReply2": "Please read the entry instructions and manual carefully.",
       "chatQuickReply3": "Think again, come on!",
-      "chatQuickReply4": "Don't be anxious, think about it again, if you have no ideas, you can relax first."
+      "chatQuickReply4": "Don't be anxious, think about it again, if you have no ideas, you can relax first.",
+      "hammerTips3": "It is recommended to use the network clipboard to send long messages such as logs and codes, for example:"
     },
     "cover": {
       "uploadFailed": "Cover Upload Failed",
