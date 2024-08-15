@@ -245,7 +245,7 @@ async fn bind_account_by_code(
     cache.at("account-code").del(user_id).await.ok();
     if let Some(user) = user::get_ex(&db.conn, user_id).await? {
       if user.institute_id.is_some_and(|v| v == institute.id) {
-        return Ok((StatusCode::NOT_MODIFIED, Json(user)));
+        return Ok((StatusCode::OK, Json(user)));
       } else if user.institute_id.is_some() {
         return Err(ResponseError::Conflict("account already bound".to_owned()));
       }
@@ -255,7 +255,7 @@ async fn bind_account_by_code(
       };
       let mut user: user::ExModel = user::update(&db.conn, user).await?.into();
       user.institute_name = Some(institute.name);
-      Ok((StatusCode::OK, Json(user)))
+      Ok((StatusCode::CREATED, Json(user)))
     } else {
       Err(ResponseError::NotFound("user not found".to_owned()))
     }
