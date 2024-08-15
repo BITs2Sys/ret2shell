@@ -54,6 +54,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           auth::game_admin_required,
         ))
         .route("/", get(get_team_info))
+        .route("/rank", get(get_team_rank))
         .route("/member", get(get_team_members))
         .route("/solve", get(get_team_solves))
         .route("/extra", get(get_team_extra))
@@ -173,10 +174,36 @@ async fn get_team_solves(
   ))
 }
 
-async fn get_team_members(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+async fn get_team_rank(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(team::get_members(&db.conn, team.id).await?))
+  if team.state < team::State::Hidden {
+    return Err(ResponseError::PreconditionFailed(
+      "team is not valid".to_owned(),
+    ));
+  }
+  let result = team::count_rank(
+    &db.conn,
+    game.id,
+    team.score,
+    team.last_active_at,
+    team.state == team::State::Hidden,
+  )
+  .await?;
+  Ok(Json(result))
+}
+
+async fn get_team_members(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>, Extension(token): Extension<Token>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let result = team::get_members(&db.conn, team.id).await?;
+  if is_game_admin!(token, game) {
+    Ok(Json(result))
+  } else {
+    Ok(Json(result.into_iter().map(|m| m.desensitize()).collect()))
+  }
 }
 
 #[derive(Deserialize)]

@@ -452,10 +452,6 @@ async fn get_self_envs(
   Extension(token): Extension<Token>, team_ext: Option<Extension<team_db::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
-  let self_env = cluster
-    .at(CHALLENGE_NS)
-    .get_challenge_env_by_user(token.id)
-    .await?;
   let team_envs = if let Some(team) = team {
     cluster
       .at(CHALLENGE_NS)
@@ -464,18 +460,13 @@ async fn get_self_envs(
   } else {
     vec![]
   };
-  let mut envs: Vec<Instance> = vec![];
-  if let Some(self_env) = self_env {
-    envs.push(self_env.try_into()?);
-  }
-  envs.extend(
+
+  Ok(Json(
     team_envs
       .into_iter()
       .map(|env| env.try_into())
-      .collect::<Result<Vec<_>, _>>()?,
-  );
-
-  Ok(Json(envs))
+      .collect::<Result<Vec<Instance>, _>>()?,
+  ))
 }
 
 async fn delay_self_env(

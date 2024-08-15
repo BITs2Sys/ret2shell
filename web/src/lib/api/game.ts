@@ -238,6 +238,10 @@ export async function getTeamInfo(game_id: number, team_id: number, ex?: boolean
     .json<Team>();
 }
 
+export async function getTeamRank(game_id: number, team_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/team/${team_id}/rank`).json<number>();
+}
+
 export async function updateTeamInfo(game_id: number, team_id: number, team: Team) {
   return await api
     .patch(`${api_root}/game/${game_id}/team/${team_id}`, {

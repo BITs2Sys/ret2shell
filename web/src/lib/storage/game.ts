@@ -1,4 +1,4 @@
-import { getSelfTeam } from "@api/game";
+import { getSelfTeam, getTeamRank } from "@api/game";
 import type { Game } from "@models/game";
 import { type Team, TeamState } from "@models/team";
 import { Permission, type User } from "@models/user";
@@ -33,6 +33,13 @@ export function refreshSelfTeam() {
     getSelfTeam(gameStore.current?.id)
       .then((team) => {
         setGameStore({ team });
+        getTeamRank(gameStore.current!.id, team.id)
+          .then((rank) => {
+            setGameStore({ rank });
+          })
+          .catch(() => {
+            setGameStore({ rank: null });
+          });
         if (team.state === TeamState.Pending) {
           addToast({
             level: "warning",

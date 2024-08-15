@@ -424,3 +424,23 @@ where
   let total = score + extra_score;
   Ok(total)
 }
+
+pub async fn count_rank<C>(
+  db: &C, game_id: i64, score: i32, last_active_at: DateTime<Utc>, with_hidden: bool,
+) -> Result<i64, DbErr>
+where
+  C: ConnectionTrait,
+{
+  let count = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .filter(Column::State.gte(if with_hidden {
+      State::Hidden
+    } else {
+      State::Passed
+    }))
+    .filter(Column::Score.gte(score))
+    .filter(Column::LastActiveAt.lt(last_active_at))
+    .count(db)
+    .await?;
+  Ok(count as i64 + 1)
+}

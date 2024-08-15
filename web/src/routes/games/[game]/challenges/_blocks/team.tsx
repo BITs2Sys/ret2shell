@@ -4,7 +4,6 @@ import Button from "@widgets/button";
 import { Match, Switch } from "solid-js";
 
 export default function () {
-  // TODO: refreshSelfTeam()
   return (
     <>
       <div class="border-b border-b-layer-content/10 px-2 h-16 flex-shrink-0 flex items-center justify-center">
@@ -20,6 +19,7 @@ export default function () {
               <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
               <span class="flex-1 text-start truncate">{gameStore.team?.name}</span>
               <span class="text-success">{gameStore.team?.score} pts</span>
+              <span class="text-warning">#{gameStore.rank}</span>
             </Button>
           </Match>
         </Switch>
