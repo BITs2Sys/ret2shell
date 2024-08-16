@@ -230,7 +230,6 @@ function SubmissionList() {
   }, 5000);
   onCleanup(() => {
     clearInterval(timer);
-    setSearchParams({ page: null });
   });
   return (
     <>

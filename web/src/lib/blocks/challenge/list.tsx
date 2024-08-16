@@ -44,7 +44,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         id: tag,
         name: tag,
         type: "category",
-        icon: "icon-[fluent--tag-20-regular] w-5 h-5",
+        icon: "icon-[fluent--tag-20-filled] w-5 h-5",
         children: taggedChallenges.map((c) => ({
           id: c.challenge.id,
           name: c.challenge.name,
@@ -93,7 +93,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         >
           <div class="flex flex-col space-y-2 p-3 lg:p-6">
             <Input
-              class="sticky top-3 lg:top-6 z-20"
+              class="sticky top-3 lg:top-6 z-20 bg-layer rounded-lg"
               icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
               placeholder={t("game.challenge.filterNameOrLabel")}
               onInput={(e) => setSearch(e.currentTarget.value)}

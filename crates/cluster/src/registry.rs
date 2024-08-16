@@ -57,7 +57,7 @@ impl Registry {
 
   pub async fn repositories(&self) -> Result<Vec<String>, ClusterError> {
     let api_base = self.api_base()?;
-    let res = reqwest::get(&format!("{}/_catalog", api_base)).await?;
+    let res = reqwest::get(&format!("{}/_catalog?n=65535", api_base)).await?;
     let body = res.text().await?;
     let data: serde_json::Value = serde_json::from_str(&body)?;
     let repositories = data["repositories"].clone();

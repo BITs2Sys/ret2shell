@@ -116,8 +116,12 @@ async fn get_cluster_nodes(
 }
 
 async fn get_cluster_registry_repo(
-  State(cluster): State<Cluster>,
+  State(cluster): State<Cluster>, State(cache): State<Cache>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let repos: Option<Vec<String>> = cache.at("registry").get("repos").await?;
+  if let Some(repos) = repos {
+    return Ok(Json(repos));
+  }
   let registry = if let Some(registry) = cluster.registry {
     registry
   } else {
@@ -141,7 +145,7 @@ async fn get_cluster_registry_image(
 }
 
 async fn upload_image(
-  State(cluster): State<Cluster>, mut multipart: Multipart,
+  State(cluster): State<Cluster>, State(cache): State<Cache>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
   let registry = if let Some(registry) = cluster.registry {
     registry
@@ -164,6 +168,7 @@ async fn upload_image(
         std::io::Error::new(std::io::ErrorKind::Other, multipart_error)
       }));
     registry.upload_image(&file_name, reader).await?;
+    cache.at("registry").del("repos").await?;
     Ok(())
   } else {
     Err(ResponseError::BadRequest("no file".to_string()))

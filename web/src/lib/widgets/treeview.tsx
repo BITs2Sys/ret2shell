@@ -53,7 +53,7 @@ export default function TreeView(props: TreeViewProps) {
               justify="start"
               ghost
               title={node.name}
-              class={`w-full overflow-hidden ${node.extraClasses}`.trim()}
+              class={`font-normal w-full overflow-hidden ${node.extraClasses}`.trim()}
               href={node.type === "item" && node.link ? node.link : "#"}
               activeMatch={props.activeMatch}
               active={
@@ -73,7 +73,7 @@ export default function TreeView(props: TreeViewProps) {
             title={node.name}
             size={props.size}
             justify="start"
-            class={`w-full overflow-hidden ${node.extraClasses}`.trim()}
+            class={`font-normal w-full overflow-hidden ${node.extraClasses}`.trim()}
             onClick={() => {
               setShowChildren(!showChildren());
             }}

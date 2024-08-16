@@ -372,7 +372,7 @@ export default function () {
                               }}
                             >
                               <img
-                                class="w-24 h-24 transition-transform duration-300 hover:scale-[1.1]"
+                                class="w-16 h-16 transition-transform duration-300 hover:scale-[1.1]"
                                 src={sticker.src}
                                 alt={sticker.alt}
                                 title={sticker.alt}
