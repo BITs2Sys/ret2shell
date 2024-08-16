@@ -120,6 +120,9 @@
       },
       "tzc_email": {
         "title": "Authentification de l'identité de courrier électronique de l'Université de Taizhou"
+      },
+      "cppu_email": {
+        "title": "Authentification de l'identité par courrier électronique de l'Université de la police populaire de Chine"
       }
     },
     "register": {

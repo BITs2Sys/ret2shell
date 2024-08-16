@@ -120,6 +120,9 @@
       },
       "tzc_email": {
         "title": "台州大学の電子メール ID 認証"
+      },
+      "cppu_email": {
+        "title": "中国人民警察大学の電子メール ID 認証"
       }
     },
     "register": {

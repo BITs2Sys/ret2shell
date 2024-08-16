@@ -890,6 +890,9 @@
       },
       "tzc_email": {
         "title": "台州学院邮件身份认证"
+      },
+      "cppu_email": {
+        "title": "中国人民警察大学邮件身份认证"
       }
     },
     "institute": {

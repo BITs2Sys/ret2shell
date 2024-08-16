@@ -199,6 +199,9 @@
       },
       "tzc_email": {
         "title": "台州學院郵件身份認證"
+      },
+      "cppu_email": {
+        "title": "中國人民警察大學郵件身份認證"
       }
     },
     "register": {

@@ -120,6 +120,9 @@
       },
       "tzc_email": {
         "title": "Taizhou University 이메일 신원 인증"
+      },
+      "cppu_email": {
+        "title": "중국 인민경찰대학교 이메일 신원 인증"
       }
     },
     "register": {

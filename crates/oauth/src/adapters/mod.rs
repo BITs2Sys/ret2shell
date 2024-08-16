@@ -1,4 +1,5 @@
 pub mod bit_email;
+pub mod cppu_email;
 pub mod cumt_email;
 pub mod fudan_email;
 pub mod hdu_email;

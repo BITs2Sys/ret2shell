@@ -1,14 +1,15 @@
 import bit from "@assets/brands/bit.svg";
+import cppu from "@assets/brands/cppu.webp";
 import cumt from "@assets/brands/cumt.svg";
 import fudan from "@assets/brands/fudan.svg";
 import hdu from "@assets/brands/hdu.svg";
 import jiangnan from "@assets/brands/jiangnan.svg";
 import jlu from "@assets/brands/jlu.svg";
 import seu from "@assets/brands/seu.svg";
+import tzc from "@assets/brands/tzc.svg";
 import uestc from "@assets/brands/uestc.svg";
 import xdu from "@assets/brands/xdu.svg";
 import xmu from "@assets/brands/xmu.svg";
-import tzc from "@assets/brands/tzc.svg";
 import logo from "@assets/logo-gray.svg";
 
 const eduLogos = {
@@ -23,6 +24,7 @@ const eduLogos = {
   jlu: jlu,
   bit: bit,
   tzc: tzc,
+  cppu: cppu,
 };
 
 export function getLogo(provider: string) {

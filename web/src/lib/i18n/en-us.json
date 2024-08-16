@@ -199,6 +199,9 @@
       },
       "tzc_email": {
         "title": "Taizhou University Email Identity Authentication"
+      },
+      "cppu_email": {
+        "title": "China People's Police University Email Identity Authentication"
       }
     },
     "register": {
