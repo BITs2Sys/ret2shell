@@ -8,8 +8,24 @@ import { Show } from "solid-js";
 export function DiyBoxContent() {
   return (
     <div class="flex flex-col space-y-2 max-w-64">
-      <Card contentClass="flex">
+      <Card contentClass="flex flex-col p-0 hover:p-2 hover:space-y-2 transition-all duration-300 group">
         <DarkmodeButton />
+        <Button
+          ghost
+          size="sm"
+          class="!min-h-0 !h-0 group-hover:!min-h-8 group-hover:!h-8 overflow-hidden border-none"
+          onClick={() => {
+            setThemeStore({ colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem });
+          }}
+        >
+          <span class="flex-1 text-start">{t("platform.followSystem")}</span>
+          <Show
+            when={themeStore.colorSchemeFollowsSystem}
+            fallback={<span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
+          >
+            <span class="icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
+          </Show>
+        </Button>
       </Card>
       <Card contentClass="p-2 flex flex-col space-y-2">
         <ul class="flex flex-row space-x-2">
@@ -41,16 +57,10 @@ export function DiyBoxContent() {
               square
               justify="center"
               onClick={() => {
-                setThemeStore({ colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem });
+                location.reload();
               }}
-              title={t("platform.followSystem")}
             >
-              <Show
-                when={themeStore.colorSchemeFollowsSystem}
-                fallback={<span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
-              >
-                <span class="icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
-              </Show>
+              <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
             </Button>
           </li>
         </ul>

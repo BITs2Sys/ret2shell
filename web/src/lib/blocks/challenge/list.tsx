@@ -44,7 +44,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         id: tag,
         name: tag,
         type: "category",
-        icon: "icon-[fluent--tag-20-filled] w-5 h-5",
+        icon: "icon-[fluent--tag-20-regular] w-5 h-5",
         children: taggedChallenges.map((c) => ({
           id: c.challenge.id,
           name: c.challenge.name,

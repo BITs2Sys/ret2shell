@@ -11,6 +11,16 @@ pub struct Registry {
   credentials: Option<RegistryConfig>,
 }
 
+#[derive(Deserialize)]
+struct Repository {
+  repositories: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct Tags {
+  tags: Vec<String>,
+}
+
 impl Registry {
   pub fn new(c: RegistryConfig) -> Self {
     Self {
@@ -57,20 +67,29 @@ impl Registry {
 
   pub async fn repositories(&self) -> Result<Vec<String>, ClusterError> {
     let api_base = self.api_base()?;
-    let res = reqwest::get(&format!("{}/_catalog?n=65535", api_base)).await?;
-    let body = res.text().await?;
-    let data: serde_json::Value = serde_json::from_str(&body)?;
-    let repositories = data["repositories"].clone();
-    serde_json::from_value(repositories.clone()).map_err(ClusterError::JsonError)
+    let mut result: Vec<String> = Vec::new();
+    let mut last = String::new();
+    loop {
+      let res = match last {
+        ref s if s.is_empty() => reqwest::get(&format!("{}/_catalog?n=1000", api_base)).await?,
+        ref s => reqwest::get(&format!("{}/_catalog?n=1000&last={}", api_base, s)).await?,
+      };
+      let body: Repository = res.json().await?;
+      let repositories = body.repositories;
+      if repositories.is_empty() {
+        break;
+      }
+      last = repositories.last().unwrap().clone();
+      result.extend(repositories);
+    }
+    Ok(result)
   }
 
   pub async fn images(&self, repository: &str) -> Result<Vec<String>, ClusterError> {
     let api_base = self.api_base()?;
     let res = reqwest::get(&format!("{api_base}/{repository}/tags/list")).await?;
-    let body = res.text().await?;
-    let data: serde_json::Value = serde_json::from_str(&body)?;
-    let tags = data["tags"].clone();
-    serde_json::from_value(tags.clone()).map_err(ClusterError::JsonError)
+    let body: Tags = res.json().await?;
+    Ok(body.tags)
   }
 
   pub async fn upload_image(
