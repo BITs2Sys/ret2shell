@@ -2,6 +2,7 @@ import { deleteChallenge, publishChallenge, withdrawChallenge } from "@api/game"
 import type { Challenge } from "@models/challenge";
 import { useSearchParams } from "@solidjs/router";
 import { challengeStore, setChallengeStore } from "@storage/challenge";
+import { isGameAdmin } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -23,10 +24,11 @@ import Intro from "./intro";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
-import { isGameAdmin } from "@storage/game";
 
 function BottomPanel(props: {
   onStateChange?: (challenge?: Challenge) => void;
+  expanded: boolean;
+  onExpand?: () => void;
   inGame: boolean;
 }) {
   const [_, setSearchParams] = useSearchParams();
@@ -213,6 +215,15 @@ function BottomPanel(props: {
               </Card>
             </Popover>
           </Show>
+          <div class="flex-1" />
+          <div class="flex flex-row items-center space-x-2 sticky right-2 bg-layer">
+            <Divider direction="vertical" class="h-8" />
+            <Button onClick={props.onExpand} ghost square>
+              <span
+                class={`${props.expanded ? "icon-[fluent--chevron-double-down-20-regular]" : "icon-[fluent--chevron-double-up-20-regular]"} w-5 h-5`}
+              />
+            </Button>
+          </div>
         </div>
       </OverlayScrollbarsComponent>
       <OverlayScrollbarsComponent
@@ -238,16 +249,36 @@ export default function (props: {
   onCleanup(() => {
     setChallengeStore({ current: null, env: null, files: [], adminFiles: [] });
   });
+  const [expanded, setExpanded] = createSignal(false);
+  const size = () => {
+    if (expanded()) {
+      return [
+        { id: "a", size: 24, minSize: 24 },
+        { id: "b", size: 76, minSize: 20 },
+      ];
+    }
+    return [
+      { id: "a", size: 64, minSize: 24 },
+      { id: "b", size: 36, minSize: 20 },
+    ];
+  };
+
   return (
     <div class="flex-1">
       <Splitter
         startPanel={() => <Intro inGame={props.inGame} />}
-        endPanel={() => <BottomPanel inGame={props.inGame ?? false} onStateChange={props.onStateChange} />}
+        endPanel={() => (
+          <BottomPanel
+            inGame={props.inGame ?? false}
+            onStateChange={props.onStateChange}
+            expanded={expanded()}
+            onExpand={() => {
+              setExpanded(!expanded());
+            }}
+          />
+        )}
         orientation="vertical"
-        size={[
-          { id: "a", size: 64, minSize: 24 },
-          { id: "b", size: 36, minSize: 20 },
-        ]}
+        size={size()}
       />
     </div>
   );
