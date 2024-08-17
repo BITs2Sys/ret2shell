@@ -164,8 +164,7 @@ export function InstanceBoxContent() {
           <Card contentClass="p-2">
             <Link size="sm" ghost class="relative w-full" href={challengeLink(instance)}>
               <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success" />
-              <span>{instance.challenge_name}</span>
-              <span class="flex-1" />
+              <span class="flex-1 truncate text-start">{instance.challenge_name}</span>
               <Timer
                 class="opacity-60"
                 hasHours
