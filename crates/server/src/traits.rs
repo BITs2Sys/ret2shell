@@ -300,6 +300,10 @@ impl IntoResponse for ResponseError {
             "please check the script syntax"
           )
         }
+        r2s_checker::traits::CheckerError::ScriptError(_) => (
+          StatusCode::PRECONDITION_FAILED,
+          "checker fails on your input, incorrect.".to_owned(),
+        ),
         _ => {
           log_with_resp!(
             StatusCode::INTERNAL_SERVER_ERROR,
