@@ -160,7 +160,7 @@ export default function () {
   });
 
   createEffect(() => {
-    if (showChallengeDetail()) {
+    if (canAccessChallenges()[0] && challengeStore.challenges.length === 0) {
       untrack(refreshChallenges);
     }
   });

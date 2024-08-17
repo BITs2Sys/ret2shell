@@ -3,7 +3,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { type ITerminalOptions, Terminal } from "@xterm/xterm";
 import { type ComponentProps, createEffect, onCleanup, onMount, untrack } from "solid-js";
-import { colorPalette } from "../storage/theme";
+import { colorPalette, themeStore } from "../storage/theme";
 import { Shell } from "./shell";
 import "@xterm/xterm/css/xterm.css";
 import { challengeStore } from "@storage/challenge";
@@ -79,6 +79,21 @@ export default function (props: ComponentProps<"div">) {
   createEffect(() => {
     if (challengeStore.current) {
       untrack(() => shell?.setChallenge(challengeStore.current || null));
+    }
+  });
+
+  createEffect(() => {
+    if (themeStore.colorScheme) {
+      term.options.theme = {
+        foreground: colorPalette.fg(),
+        background: "#00000000",
+        cursor: colorPalette.primary,
+        selectionBackground: "#88888840",
+        blue: colorPalette.info,
+        yellow: colorPalette.warning,
+        green: colorPalette.success,
+        red: colorPalette.error,
+      };
     }
   });
 
