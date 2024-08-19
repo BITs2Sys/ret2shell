@@ -1,5 +1,4 @@
 import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
-import Spin from "@assets/animates/spin";
 import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
@@ -16,20 +15,71 @@ import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
+import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import { HTTPError } from "ky";
-import { DateTime } from "luxon";
+import type { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createMemo, createSignal, onCleanup, onMount } from "solid-js";
+import { TransitionGroup } from "solid-transition-group";
 
-export default function (_props: {
+function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], solvedAt: DateTime | null): Chat[] {
+  if (solvedAt) {
+    b.push({
+      id: 0,
+      user_id: 0,
+      user_name: "Ciallo～(∠・ω< )⌒☆",
+      avatar: undefined,
+      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
+      created_at: solvedAt,
+      is_admin: true,
+      challenge_id: challengeId,
+      team_id: teamId,
+      checked: true,
+      game_id: gameStore.current!.id,
+    });
+  }
+  const bb = b.sort((x, y) => x.id - y.id);
+  const aa = a.sort((x, y) => x.id - y.id);
+  if (aa.length === 0) return bb;
+
+  let i = 0;
+  const iLen = aa.length;
+  let j = 0;
+  const jLen = bb.length;
+  while (i < iLen && j < jLen) {
+    const aChat = aa[i];
+    const bChat = bb[j];
+    if (aChat.id === bChat.id && aChat.checked === bChat.checked) {
+      i++;
+      j++;
+    } else if (aChat.id === bChat.id) {
+      aa[i] = bChat;
+      i++;
+      j++;
+    } else if (aChat.id > bChat.id) {
+      aa.push(bChat);
+      j++;
+    } else {
+      i++;
+    }
+  }
+  while (j < jLen) {
+    aa.push(bb[j]);
+    j++;
+  }
+  return aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis());
+}
+
+export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
+  onExpand?: () => void;
+  expanded?: boolean;
   inGame?: boolean;
 }) {
   const [chats, setChats] = createSignal([] as Chat[]);
   const [chat, setChat] = createSignal("");
   const [sending, setSending] = createSignal(false);
-  const [solvedAt, setSolvedAt] = createSignal(null as DateTime | null);
 
   function handleSendChat() {
     if (chat().trim() === "") return;
@@ -53,33 +103,17 @@ export default function (_props: {
     }
   }
 
+  const [_loading, setLoading] = createSignal(false);
+
   function refreshChats() {
     if (gameStore.current && challengeStore.current && !isGameAdmin()) {
-      getSolveStatus().then(() => {
+      getSolveStatus().then((s) => {
+        setLoading(true);
         getGamePlayerChatMessages(gameStore.current!.id, challengeStore.current!.id)
           .then((result) => {
-            if (result.length > chats().filter((u) => u.id !== 0).length) {
-              const last_msg = chats()
-                .filter(
-                  (u) =>
-                    u.user_id !== 0 && u.challenge_id === challengeStore.current?.id && u.team_id === gameStore.team?.id
-                )
-                .reduce((a, b) => (a.created_at > b.created_at ? a : b), {
-                  created_at: DateTime.fromMillis(0),
-                });
-              setChats([
-                ...chats().filter(
-                  (u) => u.challenge_id === challengeStore.current?.id && u.team_id === gameStore.team?.id
-                ),
-                ...result.filter(
-                  (u) =>
-                    u.created_at > last_msg.created_at &&
-                    u.challenge_id === challengeStore.current?.id &&
-                    u.team_id === gameStore.team?.id
-                ),
-              ]);
-              setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
-            }
+            const r = mergeChats(challengeStore.current!.id, gameStore.team?.id ?? 0, chats(), result, s);
+            setChats([...r]);
+            setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }));
           })
           .catch((err: HTTPError) => {
             err.response.text().then((text) => {
@@ -89,7 +123,8 @@ export default function (_props: {
                 duration: 5000,
               });
             });
-          });
+          })
+          .finally(() => setLoading(false));
       });
     }
     return refreshChats;
@@ -98,37 +133,13 @@ export default function (_props: {
   const interval = setInterval(refreshChats(), 5000);
   onCleanup(() => clearInterval(interval));
   let chatBottomEl: HTMLDivElement;
-  const mixedChats = createMemo(() => {
-    const c = chats();
-    if (solvedAt() && !c.find((x) => x.id === 0)) {
-      c.push({
-        id: 0,
-        user_id: 0,
-        user_name: "Ciallo～(∠・ω< )⌒☆",
-        avatar: undefined,
-        content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
-        created_at: solvedAt()!,
-        is_admin: true,
-        challenge_id: challengeStore.current?.id!,
-        team_id: gameStore.team!.id,
-        checked: true,
-        game_id: gameStore.current!.id,
-      });
-    }
-    c.sort((a, b) => a.created_at.toMillis() - b.created_at.toMillis());
-    return c;
-  });
 
   async function getSolveStatus() {
     if (gameStore.current?.id && gameStore.team?.id && !isGameAdmin()) {
       const resp = await getTeamSolves(gameStore.current.id, gameStore.team.id);
       try {
         const s = resp.find((x) => x.challenge_id === challengeStore.current?.id);
-        if (s) {
-          setSolvedAt(s.created_at);
-        } else {
-          setSolvedAt(null);
-        }
+        return s?.created_at ?? null;
       } catch (err) {
         if (err instanceof HTTPError) {
           const text = await err.response.text();
@@ -139,9 +150,20 @@ export default function (_props: {
           });
         }
       }
+      return null;
     }
+    return null;
   }
-  const alreadySend = createMemo(() => chats().at(-1)?.user_id === accountStore.id);
+  const availableMsg = createMemo(() => {
+    // every player could send up to 3 messages before admin reply
+    let count = 0;
+    for (let i = chats().length - 1; i >= 0; i--) {
+      if (chats().at(i)?.user_id === accountStore.id) count++;
+      if (chats().at(i)?.is_admin) break;
+    }
+    return 3 - count;
+  });
+  const [editorExpanded, setEditorExpanded] = createSignal(false);
 
   onMount(() => {
     setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
@@ -149,7 +171,7 @@ export default function (_props: {
 
   return (
     <div class="flex flex-col min-h-full relative">
-      <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-1">
+      <div class="flex flex-col flex-1 px-3 lg:px-6 pt-3 space-y-1">
         <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
           <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
             <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
@@ -199,73 +221,80 @@ export default function (_props: {
             <div class="h-3" />
           </div>
         </div>
-        <For each={mixedChats()}>
-          {(chat, index) => (
-            <div
-              class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
-            >
-              <Show
-                when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}
-                fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
-              >
-                <Show
-                  when={chat.id !== 0}
-                  fallback={
-                    <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-                      <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
-                    </A>
-                  }
-                >
-                  <A class="w-10 h-10 flex-shrink-0 self-start" href={`/users/${chat.user_id}`}>
-                    <Avatar
-                      class="w-full h-full"
-                      src={chat.avatar ? mediaPath(chat.avatar) : undefined}
-                      fallback={chat.user_name}
-                    />
-                  </A>
-                </Show>
-              </Show>
-              <div class="w-4 flex-shrink-0" />
+        <TransitionGroup name="fade-group-up">
+          <For each={chats()}>
+            {(chat, index) => (
               <div
-                class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                class={`fade-group-up ${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
               >
-                <Show when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}>
-                  <label class="label space-x-2">
-                    <Show when={chat.user_id !== 0}>
-                      <Show
-                        when={chat.is_admin}
-                        fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
-                      >
-                        <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
-                      </Show>
-                    </Show>
-                    <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
-                  </label>
-                </Show>
-                <Card class="peer max-w-full" contentClass="p-2">
-                  <Article content={chat.content} noExtraPaddings compact extra />
-                </Card>
                 <Show
-                  when={index() === mixedChats().length - 1 || mixedChats().at(index() + 1)?.user_id !== chat.user_id}
+                  when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
+                  fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
                 >
-                  <label class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
-                    {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                  </label>
+                  <Show
+                    when={chat.id !== 0}
+                    fallback={
+                      <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+                        <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+                      </A>
+                    }
+                  >
+                    <A class="w-10 h-10 flex-shrink-0 self-start" href={`/users/${chat.user_id}`}>
+                      <Avatar
+                        class="w-full h-full"
+                        src={chat.avatar ? mediaPath(chat.avatar) : undefined}
+                        fallback={chat.user_name}
+                      />
+                    </A>
+                  </Show>
                 </Show>
+                <div class="w-4 flex-shrink-0" />
+                <div
+                  class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                >
+                  <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
+                    <label class="label space-x-2">
+                      <Show when={chat.user_id !== 0}>
+                        <Show
+                          when={chat.is_admin}
+                          fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
+                        >
+                          <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
+                        </Show>
+                      </Show>
+                      <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
+                    </label>
+                  </Show>
+                  <div
+                    class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                  >
+                    <Card contentClass="p-2">
+                      <Article content={chat.content} noExtraPaddings compact extra />
+                    </Card>
+                    <div class="px-2 self-end flex items-end">
+                      <span
+                        class={
+                          chat.checked
+                            ? "icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-success"
+                            : "icon-[fluent--circle-20-regular] w-5 h-5 opacity-40"
+                        }
+                      />
+                    </div>
+                  </div>
+                  <Show when={index() === chats().length - 1 || chats().at(index() + 1)?.user_id !== chat.user_id}>
+                    <label class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
+                      {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
+                    </label>
+                  </Show>
+                </div>
               </div>
-            </div>
-          )}
-        </For>
+            )}
+          </For>
+        </TransitionGroup>
       </div>
-      <div class="sticky bottom-0 p-3 lg:p-6">
-        <div class="h-full w-full relative">
-          <Popover
-            class="absolute -top-10 left-2"
-            size="sm"
-            square
-            ghost
-            btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-          >
+      <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
+        <div class="flex flex-row items-center h-8 space-x-2">
+          <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}>
             <Card contentClass="p-2 aspect-square">
               <OverlayScrollbarsComponent
                 options={{
@@ -303,25 +332,59 @@ export default function (_props: {
               </OverlayScrollbarsComponent>
             </Card>
           </Popover>
+          <span class="flex items-center space-x-2">
+            <span class={`w-2 h-2 rounded-full ${availableMsg() <= 0 ? "bg-error" : "bg-success"}`} />
+            <span class="opacity-60">
+              {availableMsg() <= 0
+                ? t("game.challenge.hammerInputAlreadySend")
+                : t("game.challenge.hammerLastMessage", {
+                    last: availableMsg(),
+                  })}
+            </span>
+          </span>
+          <div class="flex-1" />
+          <Link
+            href="https://101.lug.ustc.edu.cn/Appendix/markdown/"
+            ghost
+            size="sm"
+            class="opacity-60"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
+            <span>{t("game.challenge.hammerHowto")}</span>
+          </Link>
+          <Button
+            size="sm"
+            square
+            onClick={() => {
+              if (props.onExpand && !props.expanded) props.onExpand();
+              setEditorExpanded(!editorExpanded());
+            }}
+          >
+            <Show when={editorExpanded()} fallback={<span class="icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}>
+              <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
+            </Show>
+          </Button>
+          <Button
+            level="primary"
+            size="sm"
+            onClick={handleSendChat}
+            disabled={sending() || availableMsg() <= 0}
+            loading={sending()}
+          >
+            <span class="icon-[fluent--send-20-regular] w-5 h-5" />
+            <span>{t("game.challenge.hammerSend")}</span>
+          </Button>
         </div>
         <Editor
-          class="h-24 bg-layer"
+          class={`bg-layer rounded-lg ${editorExpanded() ? "h-64" : "h-16"}`}
           value={chat()}
-          placeholder={alreadySend() ? t("game.challenge.hammerInputAlreadySend") : t("game.challenge.hammerInput")}
-          onKeyPress={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              handleSendChat();
-            }
-          }}
+          placeholder={t("game.challenge.hammerInput")}
           lang="markdown"
           onValueChanged={(v) => setChat(v)}
         />
       </div>
-      <Show when={sending()}>
-        <div class="absolute right-6 bottom-6 lg:right-9 lg:bottom-9">
-          <Spin width={20} height={20} />
-        </div>
-      </Show>
       <div ref={chatBottomEl!} />
       <Show when={isGameAdmin()}>
         <div class="absolute top-0 left-0 w-full h-full bg-layer/60 backdrop-blur flex items-center justify-center">

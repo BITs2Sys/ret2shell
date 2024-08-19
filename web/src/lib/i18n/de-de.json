@@ -618,7 +618,7 @@
       "fetchHintFailed": "Die Abfrage der Hinweise für die Aufgabe ist fehlgeschlagen.",
       "files": "Datei",
       "hammer": "Hammer",
-      "hammerInput": "Bitte geben Sie die Frage ein, zu der Sie Feedback geben möchten. Geben Sie die Eingabetaste ein, um sie zu senden. Drücken Sie die Umschalt-Eingabetaste, um die Zeile zu ändern. Unterstützt die Markdown-Syntax",
+      "hammerInput": "Bitte geben Sie die Frage ein, zu der Sie Feedback geben möchten. Die Markdown-Syntax wird unterstützt.",
       "hammerTips": "Die hier gesendeten Nachrichten werden zusammen mit dem Status der Aufgabe an den Aufgabenersteller weitergeleitet. Der Aufgabenersteller kann hier antworten oder dich über andere Kanäle kontaktieren.",
       "hammerTips2": "Bitte beachten Sie, dass Sie nur eine Nachricht senden können, bevor der Fragesteller antwortet. Senden Sie Ihre Fragen daher bitte einzeln.",
       "hint": "Hinweis",
@@ -740,8 +740,11 @@
       "chatQuickReply1": "Bitte denken und lösen Sie Probleme selbstständig.",
       "chatQuickReply2": "Bitte lesen Sie die Eingabeanleitung und das Handbuch sorgfältig durch.",
       "chatQuickReply3": "Denken Sie noch einmal darüber nach, komm schon!",
-      "chatQuickReply4": "Machen Sie sich keine Sorgen, denken Sie noch einmal darüber nach. Wenn Sie keine Ideen haben, können Sie sich zunächst entspannen.",
-      "hammerTips3": "Es wird empfohlen, die Netzwerk-Zwischenablage zu verwenden, um lange Nachrichten wie Protokolle und Codes zu senden, zum Beispiel:"
+      "chatQuickReply4": "Machen Sie sich keine Sorgen, denken Sie noch einmal darüber nach.",
+      "hammerTips3": "Es wird empfohlen, die Netzwerk-Zwischenablage zu verwenden, um lange Nachrichten wie Protokolle und Codes zu senden, zum Beispiel:",
+      "hammerHowto": "Wie verwende ich Markdown?",
+      "hammerSend": "schicken",
+      "hammerLastMessage": "Senden Sie auch {{last}} Nachrichten"
     },
     "cover": {
       "uploadFailed": "Cover-Upload fehlgeschlagen",

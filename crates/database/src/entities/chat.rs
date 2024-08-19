@@ -180,7 +180,7 @@ where
     .column_as(super::user::Column::Avatar, "avatar")
     .filter(Column::TeamId.eq(team_id))
     .filter(Column::ChallengeId.eq(challenge_id))
-    .order_by(Column::CreatedAt, Order::Asc);
+    .order_by(Column::CreatedAt, Order::Desc);
   let chats = sql.into_model().all(conn).await?;
   Ok(chats)
 }

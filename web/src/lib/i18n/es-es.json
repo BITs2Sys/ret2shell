@@ -618,7 +618,7 @@
       "fetchHintFailed": "Fallo al obtener información de las pistas del tema",
       "files": "archivo",
       "hammer": "Martillo",
-      "hammerInput": "Ingrese la pregunta que desea enviar, Ingrese para enviar, Mayús Ingrese para cambiar la línea, admite la sintaxis de Markdown",
+      "hammerInput": "Ingrese la pregunta que desea enviar. La sintaxis de Markdown es compatible.",
       "hammerTips": "El mensaje que envíes aquí será reenviado junto con el estado del problema al creador del problema, quien podría responderte aquí o contactarte a través de otros canales.",
       "hammerTips2": "Tenga en cuenta que solo puede enviar un mensaje antes de que la persona que pregunta responda, así que envíe sus preguntas una a la vez.",
       "hint": "sugerencia",
@@ -740,8 +740,11 @@
       "chatQuickReply1": "Piense y resuelva los problemas de forma independiente.",
       "chatQuickReply2": "Lea atentamente las instrucciones de entrada y el manual.",
       "chatQuickReply3": "Piénsalo de nuevo, ¡vamos!",
-      "chatQuickReply4": "No te preocupes, piénsalo de nuevo, si no tienes ideas, primero puedes relajarte.",
-      "hammerTips3": "Se recomienda utilizar el portapapeles de la red para enviar mensajes largos como registros y códigos, por ejemplo:"
+      "chatQuickReply4": "No te preocupes, piénsalo de nuevo.",
+      "hammerTips3": "Se recomienda utilizar el portapapeles de la red para enviar mensajes largos como registros y códigos, por ejemplo:",
+      "hammerHowto": "¿Cómo utilizar Markdown?",
+      "hammerSend": "enviar",
+      "hammerLastMessage": "Enviar también {{last}} mensajes"
     },
     "cover": {
       "uploadFailed": "Error al subir la portada",

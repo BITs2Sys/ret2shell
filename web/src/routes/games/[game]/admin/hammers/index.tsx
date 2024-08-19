@@ -5,7 +5,6 @@ import {
   getTeamSolves,
   sendGameAdminChatMessage,
 } from "@api/game";
-import Spin from "@assets/animates/spin";
 import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
@@ -25,9 +24,10 @@ import Editor from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import { HTTPError } from "ky";
-import { DateTime } from "luxon";
+import type { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { TransitionGroup } from "solid-transition-group";
 
 const quickReplies = [
   t("game.challenge.chatQuickReply1"),
@@ -36,17 +36,52 @@ const quickReplies = [
   t("game.challenge.chatQuickReply4"),
 ];
 
-function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[]): Chat[] {
-  const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId && x.user_id !== 0);
-  if (aa.length === 0) return b;
-  // merge b into a, append all new chats and update checked chats
-  const last_msg = aa.reduce((i, j) => (i.created_at > j.created_at ? i : j), {
-    created_at: DateTime.fromMillis(0),
-  });
-  const new_chats = b.filter((x) => x.created_at > last_msg.created_at);
-  const checked_chats = b.filter((x) => x.checked);
-  const checked_ids = checked_chats.map((x) => x.id);
-  return aa.map((x) => (checked_ids.includes(x.id) ? { ...x, checked: true } : x)).concat(new_chats);
+function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], solvedAt: DateTime | null): Chat[] {
+  if (solvedAt) {
+    b.push({
+      id: 0,
+      user_id: 0,
+      user_name: "Ciallo～(∠・ω< )⌒☆",
+      avatar: undefined,
+      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
+      created_at: solvedAt,
+      is_admin: true,
+      challenge_id: challengeId,
+      team_id: teamId,
+      checked: true,
+      game_id: gameStore.current!.id,
+    });
+  }
+  const bb = b.sort((x, y) => x.id - y.id);
+  const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId).sort((x, y) => x.id - y.id);
+  if (aa.length === 0) return bb;
+
+  let i = 0;
+  const iLen = aa.length;
+  let j = 0;
+  const jLen = bb.length;
+  while (i < iLen && j < jLen) {
+    const aChat = aa[i];
+    const bChat = bb[j];
+    if (aChat.id === bChat.id && aChat.checked === bChat.checked) {
+      i++;
+      j++;
+    } else if (aChat.id === bChat.id) {
+      aa[i] = bChat;
+      i++;
+      j++;
+    } else if (aChat.id > bChat.id) {
+      aa.push(bChat);
+      j++;
+    } else {
+      i++;
+    }
+  }
+  while (j < jLen) {
+    aa.push(bb[j]);
+    j++;
+  }
+  return aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis());
 }
 
 export default function () {
@@ -86,7 +121,6 @@ export default function () {
   const [chats, setChats] = createSignal([] as Chat[]);
   const [chat, setChat] = createSignal("");
   const [sending, setSending] = createSignal(false);
-  const [solvedAt, setSolvedAt] = createSignal(null as DateTime | null);
   function handleSendChat() {
     if (chat().trim() === "") return;
     setSending(true);
@@ -107,25 +141,18 @@ export default function () {
       .finally(() => setSending(false));
   }
   let chatBottomEl: HTMLDivElement;
-  let cachedTeamId: number | null = null;
-  let cachedChallengeId: number | null = null;
+
+  const [_loading, setLoading] = createSignal(false);
 
   function refreshChats() {
     if (gameStore.current && challengeId() && teamId()) {
-      getSolveStatus().then(() => {
+      getSolveStatus().then((s) => {
+        setLoading(true);
         getGameAdminChatMessages(gameStore.current!.id, challengeId()!, teamId()!)
           .then((result) => {
-            if (
-              cachedTeamId !== teamId() ||
-              cachedChallengeId !== challengeId() ||
-              result.length > chats().filter((u) => u.id !== 0).length
-            ) {
-              const r = mergeChats(challengeId() ?? 0, teamId() ?? 0, chats(), result);
-              setChats([...r]);
-              cachedTeamId = teamId();
-              cachedChallengeId = challengeId();
-              setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
-            }
+            const r = mergeChats(challengeId() ?? 0, teamId() ?? 0, chats(), result, s);
+            setChats([...r]);
+            setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }));
           })
           .catch((err: HTTPError) => {
             err.response.text().then((text) => {
@@ -135,7 +162,8 @@ export default function () {
                 duration: 5000,
               });
             });
-          });
+          })
+          .finally(() => setLoading(false));
       });
     }
     return refreshChats;
@@ -146,37 +174,14 @@ export default function () {
       untrack(refreshChats);
     }
   });
-  const mixedChats = createMemo(() => {
-    const c = chats();
-    if (solvedAt() && !c.find((x) => x.id === 0)) {
-      c.push({
-        id: 0,
-        user_id: 0,
-        user_name: "Ciallo～(∠・ω< )⌒☆",
-        avatar: undefined,
-        content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
-        created_at: solvedAt()!,
-        is_admin: true,
-        challenge_id: challengeId()!,
-        team_id: teamId()!,
-        checked: true,
-        game_id: gameStore.current!.id,
-      });
-    }
-    c.sort((a, b) => a.created_at.toMillis() - b.created_at.toMillis());
-    return c;
-  });
+  const [editorExpanded, setEditorExpanded] = createSignal(false);
 
   async function getSolveStatus() {
     if (gameStore.current?.id && teamId()) {
       const resp = await getTeamSolves(gameStore.current.id, teamId()!);
       try {
         const s = resp.find((x) => x.challenge_id === challengeId());
-        if (s) {
-          setSolvedAt(s.created_at);
-        } else {
-          setSolvedAt(null);
-        }
+        return s?.created_at ?? null;
       } catch (err) {
         if (err instanceof HTTPError) {
           const text = await err.response.text();
@@ -187,7 +192,9 @@ export default function () {
           });
         }
       }
+      return null;
     }
+    return null;
   }
 
   const interval = setInterval(refreshChats(), 5000);
@@ -223,8 +230,8 @@ export default function () {
         <Show
           when={teamId() && challengeId()}
           fallback={
-            <div class="min-h-full w-full flex items-center justify-center space-x-2">
-              <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
+            <div class="min-h-full w-full flex flex-col opacity-60 items-center justify-center space-y-8">
+              <span class="icon-[fluent--chat-20-regular] w-24 h-24" />
               <span class="font-bold">{t("game.admin.chat.selectToShow")}</span>
             </div>
           }
@@ -272,88 +279,82 @@ export default function () {
                   <div class="h-3" />
                 </div>
               </div>
-              <For each={mixedChats()}>
-                {(chat, index) => (
-                  <div
-                    class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
-                  >
-                    <Show
-                      when={chat.id !== 0}
-                      fallback={
-                        <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-                          <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
-                        </A>
-                      }
-                    >
-                      <Show
-                        when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}
-                        fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
-                      >
-                        <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
-                          <Avatar
-                            class="w-full h-full"
-                            src={chat.avatar ? mediaPath(chat.avatar) : undefined}
-                            fallback={chat.user_name}
-                          />
-                        </A>
-                      </Show>
-                    </Show>
-                    <div class="w-4 flex-shrink-0" />
+              <TransitionGroup name="fade-group-up">
+                <For each={chats()}>
+                  {(chat, index) => (
                     <div
-                      class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                      class={`fade-group-up ${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
                     >
-                      <Show when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}>
-                        <label class="label space-x-2">
-                          <Show when={chat.user_id !== 0}>
-                            <Show
-                              when={chat.is_admin}
-                              fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
-                            >
-                              <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
-                            </Show>
-                          </Show>
-                          <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
-                        </label>
-                      </Show>
-                      <div
-                        class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
-                      >
-                        <Card contentClass="p-2">
-                          <Article content={chat.content} noExtraPaddings compact extra />
-                        </Card>
-                        <div class="px-2 self-end flex items-end">
-                          <span
-                            class={
-                              chat.checked
-                                ? "icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-success"
-                                : "icon-[fluent--circle-20-regular] w-5 h-5 opacity-40"
-                            }
-                          />
-                        </div>
-                      </div>
                       <Show
-                        when={
-                          index() === mixedChats().length - 1 || mixedChats().at(index() + 1)?.user_id !== chat.user_id
+                        when={chat.id !== 0}
+                        fallback={
+                          <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+                            <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+                          </A>
                         }
                       >
-                        <label class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
-                          {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                        </label>
+                        <Show
+                          when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
+                          fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
+                        >
+                          <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
+                            <Avatar
+                              class="w-full h-full"
+                              src={chat.avatar ? mediaPath(chat.avatar) : undefined}
+                              fallback={chat.user_name}
+                            />
+                          </A>
+                        </Show>
                       </Show>
+                      <div class="w-4 flex-shrink-0" />
+                      <div
+                        class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                      >
+                        <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
+                          <label class="label space-x-2">
+                            <Show when={chat.user_id !== 0}>
+                              <Show
+                                when={chat.is_admin}
+                                fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
+                              >
+                                <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
+                              </Show>
+                            </Show>
+                            <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
+                          </label>
+                        </Show>
+                        <div
+                          class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                        >
+                          <Card contentClass="p-2">
+                            <Article content={chat.content} noExtraPaddings compact extra />
+                          </Card>
+                          <div class="px-2 self-end flex items-end">
+                            <span
+                              class={
+                                chat.checked
+                                  ? "icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-success"
+                                  : "icon-[fluent--circle-20-regular] w-5 h-5 opacity-40"
+                              }
+                            />
+                          </div>
+                        </div>
+                        <Show
+                          when={index() === chats().length - 1 || chats().at(index() + 1)?.user_id !== chat.user_id}
+                        >
+                          <label class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
+                            {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
+                          </label>
+                        </Show>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </For>
+                  )}
+                </For>
+              </TransitionGroup>
             </div>
-            <div class="sticky bottom-0 p-3 lg:p-6">
-              <div class="h-full w-full relative">
-                <Popover
-                  class="absolute -top-10 left-2"
-                  size="sm"
-                  square
-                  ghost
-                  btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-                >
+            <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 bg-layer">
+              <div class="flex flex-row items-center h-8 space-x-2">
+                <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}>
                   <Card contentClass="p-2 aspect-square">
                     <OverlayScrollbarsComponent
                       options={{
@@ -391,13 +392,7 @@ export default function () {
                     </OverlayScrollbarsComponent>
                   </Card>
                 </Popover>
-                <Popover
-                  class="absolute -top-10 left-12"
-                  size="sm"
-                  square
-                  ghost
-                  btnContent={<span class="icon-[fluent--flash-20-regular] w-5 h-5" />}
-                >
+                <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--flash-20-regular] w-5 h-5" />}>
                   <Card contentClass="p-2">
                     <OverlayScrollbarsComponent
                       options={{
@@ -432,25 +427,45 @@ export default function () {
                     </OverlayScrollbarsComponent>
                   </Card>
                 </Popover>
-                <Editor
-                  class="h-24 bg-layer"
-                  value={chat()}
-                  placeholder={t("game.admin.chat.sendPlaceholder")}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      handleSendChat();
-                    }
+                <div class="flex-1" />
+                <Link
+                  href="https://101.lug.ustc.edu.cn/Appendix/markdown/"
+                  ghost
+                  size="sm"
+                  class="opacity-60"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
+                  <span>{t("game.challenge.hammerHowto")}</span>
+                </Link>
+                <Button
+                  size="sm"
+                  square
+                  onClick={() => {
+                    setEditorExpanded(!editorExpanded());
                   }}
-                  lang="markdown"
-                  onValueChanged={(v) => setChat(v)}
-                />
+                >
+                  <Show
+                    when={editorExpanded()}
+                    fallback={<span class="icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
+                  >
+                    <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
+                  </Show>
+                </Button>
+                <Button level="primary" size="sm" onClick={handleSendChat} disabled={sending()} loading={sending()}>
+                  <span class="icon-[fluent--send-20-regular] w-5 h-5" />
+                  <span>{t("game.challenge.hammerSend")}</span>
+                </Button>
               </div>
+              <Editor
+                class={`bg-layer rounded-lg ${editorExpanded() ? "h-64" : "h-16"}`}
+                value={chat()}
+                placeholder="MARKDOWN"
+                lang="markdown"
+                onValueChanged={(v) => setChat(v)}
+              />
             </div>
-            <Show when={sending()}>
-              <div class="absolute right-6 bottom-6 lg:right-9 lg:bottom-9">
-                <Spin width={20} height={20} />
-              </div>
-            </Show>
             <div ref={chatBottomEl!} />
           </div>
         </Show>

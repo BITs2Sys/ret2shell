@@ -618,7 +618,7 @@
       "fetchHintFailed": "Échec de la récupération des informations d'indication du sujet",
       "files": "document",
       "hammer": "Marteau",
-      "hammerInput": "Veuillez saisir la question à laquelle vous souhaitez répondre, Entrée pour envoyer, Maj Entrée pour changer de ligne, prend en charge la syntaxe Markdown",
+      "hammerInput": "Veuillez saisir la question à laquelle vous souhaitez répondre. La syntaxe Markdown est prise en charge.",
       "hammerTips": "Le message que vous envoyez ici sera transmis avec l'état du sujet au concepteur de l'exercice, qui pourra répondre ici ou vous contacter par d'autres moyens.",
       "hammerTips2": "Veuillez noter que vous ne pouvez envoyer qu'un seul message avant que la personne qui vous pose la question ne réponde. Veuillez donc envoyer vos questions une par une.",
       "hint": "Indication",
@@ -740,8 +740,11 @@
       "chatQuickReply1": "Veuillez réfléchir et résoudre les problèmes de manière indépendante.",
       "chatQuickReply2": "Veuillez lire attentivement les instructions d'entrée et le manuel.",
       "chatQuickReply3": "Détrompez-vous, allez !",
-      "chatQuickReply4": "Ne vous inquiétez pas, réfléchissez-y à nouveau, si vous n'avez pas d'idées, vous pouvez d'abord vous détendre.",
-      "hammerTips3": "Il est recommandé d'utiliser le presse-papiers du réseau pour envoyer des messages longs tels que des journaux et des codes, par exemple :"
+      "chatQuickReply4": "Ne vous inquiétez pas, détrompez-vous.",
+      "hammerTips3": "Il est recommandé d'utiliser le presse-papiers du réseau pour envoyer des messages longs tels que des journaux et des codes, par exemple :",
+      "hammerHowto": "Comment utiliser le Markdown ?",
+      "hammerSend": "envoyer",
+      "hammerLastMessage": "Envoyez également {{last}} messages"
     },
     "cover": {
       "uploadFailed": "Échec du téléchargement de la couverture",
