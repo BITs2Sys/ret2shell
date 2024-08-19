@@ -123,6 +123,9 @@
       },
       "cppu_email": {
         "title": "Autenticación de identidad de correo electrónico de la Universidad de la Policía Popular de China"
+      },
+      "ncu_email": {
+        "title": "Autenticación de identidad de correo electrónico de la Universidad de Nanchang"
       }
     },
     "register": {

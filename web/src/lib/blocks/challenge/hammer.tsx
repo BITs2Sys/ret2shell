@@ -202,7 +202,7 @@ export default function (_props: {
         <For each={mixedChats()}>
           {(chat, index) => (
             <div
-              class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} max-w-[calc(100%-4rem)] flex items-center`}
+              class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
             >
               <Show
                 when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}
@@ -226,7 +226,9 @@ export default function (_props: {
                 </Show>
               </Show>
               <div class="w-4 flex-shrink-0" />
-              <div class={`flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}>
+              <div
+                class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+              >
                 <Show when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}>
                   <label class="label space-x-2">
                     <Show when={chat.user_id !== 0}>
@@ -240,7 +242,7 @@ export default function (_props: {
                     <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
                   </label>
                 </Show>
-                <Card class="peer" contentClass="p-2">
+                <Card class="peer max-w-full" contentClass="p-2">
                   <Article content={chat.content} noExtraPaddings compact extra />
                 </Card>
                 <Show

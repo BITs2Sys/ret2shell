@@ -202,6 +202,9 @@
       },
       "cppu_email": {
         "title": "中國人民警察大學郵件身份認證"
+      },
+      "ncu_email": {
+        "title": "南昌大學郵件身分認證"
       }
     },
     "register": {

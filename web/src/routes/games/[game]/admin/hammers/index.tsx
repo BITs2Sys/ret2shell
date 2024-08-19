@@ -231,33 +231,38 @@ export default function () {
         >
           <div class="flex flex-col min-h-full relative">
             <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-1">
-              <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
+              <div class="self-start flex-row w-[calc(100%-4rem)] flex items-center">
                 <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
                   <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
                 </A>
                 <div class="w-4 flex-shrink-0" />
-                <div class="flex flex-col space-y-1">
+                <div class="flex-1 w-0 flex flex-col space-y-1 items-start">
                   <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
-                  <Card contentClass="flex flex-col space-y-2 p-2">
+                  <Card contentClass="flex flex-col space-y-2 p-2 max-w-full">
                     <span>{t("game.challenge.adminHammerTips")}</span>
-                    <div class="flex flex-row space-x-2">
+                    <div class="flex flex-col space-y-2 lg:space-y-0 lg:flex-row lg:space-x-2 max-w-full">
                       <Link
                         class="!h-auto p-2"
+                        justify="start"
                         href={`/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}`}
                       >
                         <div class="flex flex-row space-x-2 items-center pr-4">
                           <span class="icon-[fluent--code-20-filled] w-8 h-8 m-2" />
                           <div class="flex flex-col items-start">
-                            <h3 class="font-bold">{challenge()?.name}</h3>
+                            <h3 class="font-bold truncate">{challenge()?.name}</h3>
                             <p class="opacity-60">{challenge()?.score} pts</p>
                           </div>
                         </div>
                       </Link>
-                      <Link class="!h-auto p-2" href={`/games/${gameStore.current?.id}/teams/${teamId()}`}>
+                      <Link
+                        class="!h-auto p-2"
+                        justify="start"
+                        href={`/games/${gameStore.current?.id}/teams/${teamId()}`}
+                      >
                         <div class="flex flex-row space-x-2 items-center pr-4">
                           <span class="icon-[fluent--flag-20-filled] w-8 h-8 m-2" />
                           <div class="flex flex-col items-start">
-                            <h3 class="font-bold">{team()?.name}</h3>
+                            <h3 class="font-bold truncate">{team()?.name}</h3>
                             <p class="opacity-60">{team()?.score} pts</p>
                           </div>
                         </div>
@@ -270,7 +275,7 @@ export default function () {
               <For each={mixedChats()}>
                 {(chat, index) => (
                   <div
-                    class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} max-w-[calc(100%-4rem)] flex items-center`}
+                    class={`${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
                   >
                     <Show
                       when={chat.id !== 0}
@@ -295,7 +300,7 @@ export default function () {
                     </Show>
                     <div class="w-4 flex-shrink-0" />
                     <div
-                      class={`flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                      class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
                     >
                       <Show when={index() === 0 || mixedChats().at(index() - 1)?.user_id !== chat.user_id}>
                         <label class="label space-x-2">
@@ -310,7 +315,9 @@ export default function () {
                           <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
                         </label>
                       </Show>
-                      <div class={`peer flex ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}>
+                      <div
+                        class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                      >
                         <Card contentClass="p-2">
                           <Article content={chat.content} noExtraPaddings compact extra />
                         </Card>

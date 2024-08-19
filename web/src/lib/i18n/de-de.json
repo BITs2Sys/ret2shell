@@ -123,6 +123,9 @@
       },
       "cppu_email": {
         "title": "E-Mail-Identitätsauthentifizierung der Chinesischen Volkspolizeiuniversität"
+      },
+      "ncu_email": {
+        "title": "E-Mail-Identitätsauthentifizierung der Nanchang University"
       }
     },
     "register": {

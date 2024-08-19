@@ -123,6 +123,9 @@
       },
       "cppu_email": {
         "title": "中国人民警察大学の電子メール ID 認証"
+      },
+      "ncu_email": {
+        "title": "南昌大学の電子メール ID 認証"
       }
     },
     "register": {

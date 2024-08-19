@@ -179,7 +179,7 @@ export default function () {
       name: t.name,
       type: "line",
       step: "end",
-      data: t.history.map((h) => [h.changed_at.toMillis(), h.score]),
+      data: t.history.map((h) => [h.changed_at.toMillis(), h.score]).concat([[Date.now(), t.score]]),
     }));
   };
 
