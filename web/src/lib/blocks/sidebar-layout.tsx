@@ -32,14 +32,14 @@ export default function SidebarLayout(props: SidebarLayoutProps) {
       </Show>
       <Transition name="slide-fade-left">
         <Show when={props.leftBar && !matches.lg && props.showLeftBar}>
-          <div class="fixed top-16 left-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-layer/60 border-r border-r-layer-content/10 print:hidden">
+          <div class="fixed top-16 left-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-layer/60 border-r border-r-layer-content/10 print:hidden z-20">
             <div class="w-full h-full bg-layer-content/5 overflow-hidden">{props.leftBar?.()}</div>
           </div>
         </Show>
       </Transition>
       <Transition name="slide-fade-right">
         <Show when={props.rightBar && !((!props.leftBar && matches.lg) || matches.xl) && props.showRightBar}>
-          <div class="fixed top-16 right-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-layer/60 border-l border-l-layer-content/10 print:hidden">
+          <div class="fixed top-16 right-0 w-full max-w-[24rem] h-[calc(100vh_-_4rem)] overflow-hidden backdrop-blur bg-layer/60 border-l border-l-layer-content/10 print:hidden z-20">
             <div class="w-full h-full bg-layer-content/5 overflow-hidden">{props.rightBar?.()}</div>
           </div>
         </Show>

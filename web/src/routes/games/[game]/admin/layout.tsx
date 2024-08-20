@@ -32,7 +32,12 @@ export default function (props: { children?: JSX.Element }) {
       </SidebarLayout>
       <Transition name="slide-fade-right">
         <Show when={!matches.lg}>
-          <Button class="fixed bottom-3 right-3" square onClick={() => setShowSidebar(!showSidebar())} type="button">
+          <Button
+            class="fixed bottom-3 right-3 z-30"
+            square
+            onClick={() => setShowSidebar(!showSidebar())}
+            type="button"
+          >
             {/* icon-[fluent--navigation-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
             <span
               class={`transition-transform rotate-${showSidebar() ? "90" : "0"} icon-[fluent--${

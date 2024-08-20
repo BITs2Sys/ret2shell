@@ -18,7 +18,6 @@ export type ArticleProps = {
 };
 
 export default function (props: ComponentProps<"article"> & ArticleProps) {
-  let cachedContent = "";
   const [articleProps, nativeProps] = splitProps(props, [
     "content",
     "extra",
@@ -57,8 +56,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     }, 100);
   }
   createEffect(() => {
-    if (articleProps.content && articleProps.content !== cachedContent) {
-      cachedContent = articleProps.content;
+    if (articleProps.content) {
       setReady(false);
       untrack(() => {
         render(articleProps.content)

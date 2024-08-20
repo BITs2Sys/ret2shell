@@ -161,7 +161,7 @@ export default function () {
       <Transition name="slide-fade-right">
         <Show when={!matches.lg}>
           <Button
-            class="fixed bottom-3 right-3"
+            class="fixed bottom-3 right-3 z-30"
             square
             onClick={() => {
               setShowRightSidebar(false);
@@ -181,7 +181,7 @@ export default function () {
       <Transition name="slide-fade-left">
         <Show when={!matches.xl}>
           <Button
-            class="fixed bottom-3 left-3"
+            class="fixed bottom-3 left-3 z-30"
             square
             onClick={() => {
               setShowLeftSidebar(false);

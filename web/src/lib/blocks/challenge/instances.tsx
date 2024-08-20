@@ -6,7 +6,9 @@ import UploadButton from "@blocks/upload-button";
 import type { Challenge, ChallengeImage } from "@models/challenge";
 import type { RegistryConfig } from "@models/config";
 import { createForm, pattern, required, setValue, setValues } from "@modular-forms/solid";
+import { A } from "@solidjs/router";
 import { challengeStore, refreshChallengeAssets } from "@storage/challenge";
+import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -21,8 +23,9 @@ import Select from "@widgets/select";
 import Slider from "@widgets/slider";
 import type { Pod } from "kubernetes-types/core/v1";
 import type { HTTPError } from "ky";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 function CreateForm(fnProps: {
   repos: string[];
@@ -356,8 +359,51 @@ function InstanceList() {
           <li class="h-12 flex flex-row space-x-2 items-center border-b border-b-layer-content/10">
             <span class="icon-[fluent--cube-20-regular] w-5 h-5" />
             <span>{pod.metadata?.name}</span>
+            <A
+              class="hover:underline flex items-center space-x-2"
+              href={`/users/${pod.metadata?.labels?.["ret.sh.cn/user"]}`}
+            >
+              <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+              <span>{pod.metadata?.annotations?.["ret.sh.cn/user"]}</span>
+            </A>
+            <A
+              class="hover:underline flex items-center space-x-2"
+              href={`/games/${gameStore.current?.id}/teams/${pod.metadata?.labels?.["ret.sh.cn/team"]}`}
+            >
+              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span>{pod.metadata?.annotations?.["ret.sh.cn/team"]}</span>
+            </A>
             <span class="flex-1" />
             <span class="opacity-60">{pod.status?.phase}</span>
+            <Popover btnContent={<span class="icon-[fluent--production-20-regular] w-5 h-5" />} ghost square size="sm">
+              <Card contentClass="py-2 px-4 flex flex-col max-w-xl">
+                <Show when={pod.metadata}>
+                  <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
+                    <span class="icon-[fluent--clock-20-regular] w-5 h-5" />
+                    <span>{DateTime.fromISO(pod.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                  </div>
+                </Show>
+                <For each={pod.status?.containerStatuses || []}>
+                  {(container) => (
+                    <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
+                      <span class="icon-[fluent--cube-20-regular] w-5 h-5" />
+                      <span class="flex-1 truncate">{container.name}</span>
+                      <div class="w-16" />
+                      <Switch>
+                        <Match when={container.state?.running}>
+                          <span class="text-success">Running {container.state?.running?.startedAt}</span>
+                        </Match>
+                        <Match when={container.state?.waiting}>
+                          <span class="text-error" title={container.state?.waiting?.message}>
+                            Waiting {container.state?.waiting?.reason}
+                          </span>
+                        </Match>
+                      </Switch>
+                    </div>
+                  )}
+                </For>
+              </Card>
+            </Popover>
           </li>
         )}
       </For>
@@ -553,7 +599,6 @@ export default function (_props: {
           }}
         />
       </div>
-
       <For
         each={challengeStore.env?.images || []}
         fallback={
