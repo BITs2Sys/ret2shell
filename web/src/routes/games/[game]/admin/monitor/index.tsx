@@ -51,7 +51,6 @@ function AuditList() {
   }, 5000);
   onCleanup(() => {
     clearInterval(timer);
-    setSearchParams({ page: null });
   });
   function handleMisjudged(audit: Audit) {
     updateGameAuditLog(gameStore.current!.id, audit.id, {

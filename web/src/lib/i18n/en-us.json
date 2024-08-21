@@ -697,7 +697,7 @@
       "hammer": "Hammer",
       "hammerInput": "Please enter the question you want to feedback. Markdown syntax is supported.",
       "hammerTips": "The message you send here will be forwarded to the challenge setter along with the status of the challenge. The challenge setter may reply here or contact you through other channels.",
-      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time.",
+      "hammerTips2": "Please note that you can only send three messages before the questioner responds, so please try to combine your questions.",
       "hint": "Hint",
       "hintRequired": "Please fill in the prompt content.",
       "info": "Basic Information",

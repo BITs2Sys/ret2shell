@@ -620,7 +620,7 @@
       "hammer": "Martillo",
       "hammerInput": "Ingrese la pregunta que desea enviar. La sintaxis de Markdown es compatible.",
       "hammerTips": "El mensaje que envíes aquí será reenviado junto con el estado del problema al creador del problema, quien podría responderte aquí o contactarte a través de otros canales.",
-      "hammerTips2": "Tenga en cuenta que solo puede enviar un mensaje antes de que la persona que pregunta responda, así que envíe sus preguntas una a la vez.",
+      "hammerTips2": "Tenga en cuenta que solo puede enviar tres mensajes antes de que el interlocutor responda, así que intente combinar sus preguntas.",
       "hint": "sugerencia",
       "hintRequired": "Por favor, complete el contenido de la indicación.",
       "info": "Información básica",

@@ -620,7 +620,7 @@
       "hammer": "Marteau",
       "hammerInput": "Veuillez saisir la question à laquelle vous souhaitez répondre. La syntaxe Markdown est prise en charge.",
       "hammerTips": "Le message que vous envoyez ici sera transmis avec l'état du sujet au concepteur de l'exercice, qui pourra répondre ici ou vous contacter par d'autres moyens.",
-      "hammerTips2": "Veuillez noter que vous ne pouvez envoyer qu'un seul message avant que la personne qui vous pose la question ne réponde. Veuillez donc envoyer vos questions une par une.",
+      "hammerTips2": "Veuillez noter que vous ne pouvez envoyer que trois messages avant que la personne qui pose la question ne réponde. Essayez donc de combiner vos questions.",
       "hint": "Indication",
       "hintRequired": "Veuillez remplir le contenu de la suggestion",
       "info": "Informations de base",

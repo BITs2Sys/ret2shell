@@ -620,7 +620,7 @@
       "hammer": "Hammer",
       "hammerInput": "Bitte geben Sie die Frage ein, zu der Sie Feedback geben möchten. Die Markdown-Syntax wird unterstützt.",
       "hammerTips": "Die hier gesendeten Nachrichten werden zusammen mit dem Status der Aufgabe an den Aufgabenersteller weitergeleitet. Der Aufgabenersteller kann hier antworten oder dich über andere Kanäle kontaktieren.",
-      "hammerTips2": "Bitte beachten Sie, dass Sie nur eine Nachricht senden können, bevor der Fragesteller antwortet. Senden Sie Ihre Fragen daher bitte einzeln.",
+      "hammerTips2": "Bitte beachten Sie, dass Sie nur drei Nachrichten senden können, bevor der Fragesteller antwortet. Versuchen Sie daher, Ihre Fragen zu kombinieren.",
       "hint": "Hinweis",
       "hintRequired": "Bitte füllen Sie den Hinweisinhalt aus.",
       "info": "Grundinformationen",
