@@ -192,30 +192,29 @@ export default function (props: {
           <div class="flex flex-col space-y-1 items-start">
             <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
             <Card contentClass="p-2">
-              <p class="text-wrap">
-                {t("game.challenge.hammerTips2")}
-                {t("game.challenge.hammerTips3")}
-              </p>
-              <div class="flex flex-row space-x-2 flex-wrap">
+              <p class="text-wrap inline">
+                <span>{t("game.challenge.hammerTips2")}</span>
+                <span>{t("game.challenge.hammerTips3")}</span>
                 <a
-                  class="flex flex-row items-center space-x-1 text-primary hover:underline"
+                  class="align-middle space-x-1 text-primary hover:underline"
                   href="https://paste.mozilla.org/"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span class="icon-[fluent--earth-20-regular]" />
                   <span>Mozilla Public Pastebin</span>
+                  <span class="icon-[fluent--open-20-regular]" />
                 </a>
+                <span>&nbsp;</span>
                 <a
-                  class="flex flex-row items-center space-x-1 text-primary hover:underline"
+                  class="align-middle space-x-1 text-primary hover:underline"
                   href="https://0x0.st"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span class="icon-[fluent--earth-20-regular]" />
                   <span>0x0.st</span>
+                  <span class="icon-[fluent--open-20-regular]" />
                 </a>
-              </div>
+              </p>
             </Card>
             <div class="h-3" />
           </div>
