@@ -40,7 +40,7 @@ futures-io = "0.3"
 nanoid = "0.4"
 tokio-util = { version = "0.7", features = ["codec"] }
 wsrx = { version = "0.2", features = ["server"] }
-tokio = { version = "1.39", features = ["full"] }
+tokio = { version = "1.40", features = ["full"] }
 
 r2s-config = { version = "3", path = "../config" }
 
