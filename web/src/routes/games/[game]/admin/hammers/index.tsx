@@ -36,7 +36,7 @@ const quickReplies = [
   t("game.challenge.chatQuickReply4"),
 ];
 
-function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], solvedAt: DateTime | null): Chat[] {
+function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], solvedAt: DateTime | null): [boolean, Chat[]] {
   if (solvedAt) {
     b.push({
       id: 0,
@@ -59,6 +59,9 @@ function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], s
   const iLen = aa.length;
   let j = 0;
   const jLen = bb.length;
+
+  let changed = false;
+
   while (i < iLen && j < jLen) {
     const aChat = aa[i];
     const bChat = bb[j];
@@ -67,10 +70,12 @@ function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], s
       j++;
     } else if (aChat.id === bChat.id) {
       aa[i] = bChat;
+      changed = true;
       i++;
       j++;
     } else if (aChat.id > bChat.id) {
       aa.push(bChat);
+      changed = true;
       j++;
     } else {
       i++;
@@ -78,12 +83,13 @@ function mergeChats(challengeId: number, teamId: number, a: Chat[], b: Chat[], s
   }
   while (j < jLen) {
     aa.push(bb[j]);
+    changed = true;
     j++;
   }
-  return aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis());
+  return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function () {
+export default function() {
   const [searchParams, _] = useSearchParams();
   const teamId = createMemo(() => Number.parseInt(searchParams.team ?? "") || null);
   const challengeId = createMemo(() => Number.parseInt(searchParams.challenge ?? "") || null);
@@ -149,9 +155,10 @@ export default function () {
         setLoading(true);
         getGameAdminChatMessages(gameStore.current!.id, challengeId()!, teamId()!)
           .then((result) => {
-            const r = mergeChats(challengeId() ?? 0, teamId() ?? 0, chats(), result, s);
+            const [changed, r] = mergeChats(challengeId() ?? 0, teamId() ?? 0, chats(), result, s);
             setChats([...r]);
-            setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }));
+            if (changed)
+              setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 700);
           })
           .catch((err: HTTPError) => {
             err.response.text().then((text) => {

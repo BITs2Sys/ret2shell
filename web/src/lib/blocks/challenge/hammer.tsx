@@ -40,7 +40,7 @@ function mergeChats(
   a: Chat[],
   b: Chat[],
   solvedAt: DateTime | null,
-): Chat[] {
+): [boolean, Chat[]] {
   if (solvedAt) {
     b.push({
       id: 0,
@@ -63,6 +63,9 @@ function mergeChats(
   const iLen = aa.length;
   let j = 0;
   const jLen = bb.length;
+
+  let changed = false;
+
   while (i < iLen && j < jLen) {
     const aChat = aa[i];
     const bChat = bb[j];
@@ -71,10 +74,12 @@ function mergeChats(
       j++;
     } else if (aChat.id === bChat.id) {
       aa[i] = bChat;
+      changed = true;
       i++;
       j++;
     } else if (aChat.id > bChat.id) {
       aa.push(bChat);
+      changed = true;
       j++;
     } else {
       i++;
@@ -82,12 +87,13 @@ function mergeChats(
   }
   while (j < jLen) {
     aa.push(bb[j]);
+    changed = true;
     j++;
   }
-  return aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis());
+  return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function (props: {
+export default function(props: {
   onStateChange?: (challenge?: Challenge) => void;
   onExpand?: () => void;
   expanded?: boolean;
@@ -134,7 +140,7 @@ export default function (props: {
           challengeStore.current!.id,
         )
           .then((result) => {
-            const r = mergeChats(
+            const [changed, r] = mergeChats(
               challengeStore.current!.id,
               gameStore.team?.id ?? 0,
               chats(),
@@ -142,9 +148,11 @@ export default function (props: {
               s,
             );
             setChats([...r]);
-            setTimeout(() =>
-              chatBottomEl?.scrollIntoView({ behavior: "smooth" }),
-            );
+            if (changed) {
+              setTimeout(() =>
+                chatBottomEl?.scrollIntoView({ behavior: "smooth" }),
+                700);
+            }
           })
           .catch((err: HTTPError) => {
             err.response.text().then((text) => {
@@ -453,8 +461,8 @@ export default function (props: {
               {availableMsg() <= 0
                 ? t("game.challenge.hammerInputAlreadySend")
                 : t("game.challenge.hammerLastMessage", {
-                    last: availableMsg(),
-                  })}
+                  last: availableMsg(),
+                })}
             </span>
           </span>
           <div class="flex-1" />
