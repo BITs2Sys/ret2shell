@@ -11,7 +11,7 @@ import Popover from "@widgets/popover";
 import { Show, onMount } from "solid-js";
 import Calendar from "./calendar";
 
-export default function () {
+export default function() {
   const [searchParams] = useSearchParams();
   let calendarSection: HTMLElement;
   onMount(() => {
@@ -99,26 +99,28 @@ export default function () {
                   btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
                 >
                   <div class="w-max flex flex-col space-y-2">
-                    <Card contentClass="flex flex-row items-center space-x-6 p-4 px-8">
-                      <LogoAnimate width={64} height={64} />
-                      <div class="flex flex-col space-y-1">
-                        <h2 class="text-2xl font-bold flex flex-row">
-                          <span class="text-primary">R</span>
-                          <span class="opacity-80">et</span>
-                          <span class="opacity-60">&nbsp;2&nbsp;</span>
-                          <span class="text-error">S</span>
-                          <span class="opacity-80">hell</span>
-                        </h2>
-                        <p class="text-base font-bold opacity-60 space-x-2">
-                          <Show
-                            when={(platformStore.version || "UNKNOWN").includes("*")}
-                            fallback={<span class="text-primary">REL</span>}
-                          >
-                            <span class="text-warning">DEV</span>
-                          </Show>
-                          <span>{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
-                        </p>
-                      </div>
+                    <Card contentClass="p-2">
+                      <Link ghost href="https://ctf.xidian.edu.cn/magic/about" class="flex flex-row items-center !h-auto space-x-6 p-4 px-8">
+                        <LogoAnimate width={64} height={64} />
+                        <div class="flex flex-col space-y-1">
+                          <h2 class="text-2xl font-bold flex flex-row">
+                            <span class="text-primary">R</span>
+                            <span class="opacity-80">et</span>
+                            <span class="opacity-60">&nbsp;2&nbsp;</span>
+                            <span class="text-error">S</span>
+                            <span class="opacity-80">hell</span>
+                          </h2>
+                          <p class="text-base font-bold opacity-60 space-x-2">
+                            <Show
+                              when={(platformStore.version || "UNKNOWN").includes("*")}
+                              fallback={<span class="text-primary">REL</span>}
+                            >
+                              <span class="text-warning">DEV</span>
+                            </Show>
+                            <span>{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
+                          </p>
+                        </div>
+                      </Link>
                     </Card>
                     <Card contentClass="flex flex-row p-2 space-x-2">
                       <a
