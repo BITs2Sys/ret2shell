@@ -11,7 +11,7 @@ import Popover from "@widgets/popover";
 import { Show, onMount } from "solid-js";
 import Calendar from "./calendar";
 
-export default function() {
+export default function () {
   const [searchParams] = useSearchParams();
   let calendarSection: HTMLElement;
   onMount(() => {
@@ -100,7 +100,11 @@ export default function() {
                 >
                   <div class="w-max flex flex-col space-y-2">
                     <Card contentClass="p-2">
-                      <Link ghost href="https://ctf.xidian.edu.cn/magic/about" class="flex flex-row items-center !h-auto space-x-6 p-4 px-8">
+                      <Link
+                        ghost
+                        href="https://ctf.xidian.edu.cn/magic/about"
+                        class="flex flex-row items-center !h-auto space-x-6 p-4 px-8"
+                      >
                         <LogoAnimate width={64} height={64} />
                         <div class="flex flex-col space-y-1">
                           <h2 class="text-2xl font-bold flex flex-row">

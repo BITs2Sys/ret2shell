@@ -8,7 +8,7 @@ export type CheckboxProps = {
   inputProps?: JSX.IntrinsicElements["input"];
 };
 
-export default function (
+export default function(
   props: CheckboxProps &
     CheckboxRootProps & {
       children?: JSX.Element;
@@ -23,7 +23,9 @@ export default function (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
       <Popover.Anchor class={`flex flex-col space-y-1 flex-1 ${rest.class}`.trim()}>
         <Show when={props.title}>
-          <label class="label">{props.title}</label>
+          <label class="label" for={checkboxProps.inputProps?.id ?? "input_NOTPOSSIBLE"}>
+            {props.title}
+          </label>
         </Show>
         <Checkbox.Root {...rest} class={classes()}>
           <Checkbox.Label asChild={() => children} />

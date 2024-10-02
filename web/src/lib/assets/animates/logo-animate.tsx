@@ -1,6 +1,6 @@
 import { type ComponentProps, onMount } from "solid-js";
 
-export default function(props: ComponentProps<"svg">) {
+export default function (props: ComponentProps<"svg">) {
   let svgPath1: SVGPathElement;
   let svgPath2: SVGPathElement;
   let svgPath3: SVGPathElement;

@@ -26,7 +26,9 @@ export default function ScorePicker(props: {
   }
   return (
     <div class={`flex flex-col space-y-1 ${props.class ?? ""}`.trim()}>
-      <label class="label">{t("game.challenge.scoreRange")}</label>
+      <label class="label" for="scorePicker_NOTPOSSIBLE">
+        {t("game.challenge.scoreRange")}
+      </label>
       <div class="flex h-56">
         <div class="flex flex-col items-end space-y-2">
           <RangeSlider

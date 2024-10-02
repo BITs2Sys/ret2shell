@@ -1,6 +1,6 @@
 import type { ComponentProps } from "solid-js";
 
-export default function(props: ComponentProps<"svg">) {
+export default function (props: ComponentProps<"svg">) {
   const { width, height } = { width: 256, height: 256, ...props };
   return (
     <svg

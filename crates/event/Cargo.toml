@@ -20,8 +20,8 @@ tokio = { version = "1.40", features = ["full"] }
 tracing = "0.1"
 axum = { version = "0.7", features = ["ws"] }
 thiserror = "1.0"
-once_cell = "1.19"
-async-nats = "0.36"
+once_cell = "1.20"
+async-nats = "0.37"
 futures = "0.3"
 chrono = "0.4"
 

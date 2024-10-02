@@ -175,11 +175,7 @@ function BottomPanel(props: {
                   <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary align-middle" />
                   <Show
                     when={challengeStore.current?.hidden === true}
-                    fallback={
-                      <>
-                        <span>{t("game.challenge.withdrawTips")}</span>
-                      </>
-                    }
+                    fallback={<span>{t("game.challenge.withdrawTips")}</span>}
                   >
                     <span>{t("game.challenge.publishTips")}</span>
                   </Show>

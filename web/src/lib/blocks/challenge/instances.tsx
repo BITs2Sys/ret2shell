@@ -218,7 +218,7 @@ function CreateForm(fnProps: {
                 <Field name="restricted" type="boolean">
                   {(field, props) => (
                     <div class="flex flex-col space-y-1">
-                      <label class="label">CAP</label>
+                      <header class="label">CAP</header>
                       <IconCheckbox
                         inputProps={props}
                         title={t("game.challenge.dropCap")}
@@ -411,7 +411,7 @@ function InstanceList() {
   );
 }
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {

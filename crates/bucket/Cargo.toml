@@ -22,7 +22,7 @@ toml = "0.8"
 deunicode = "1.6"
 ring = "0.17"
 heck = "0.5"
-regex = "1.10"
+regex = "1.11"
 r2s-config = { version = "3", path = "../config" }
 
 [lib]

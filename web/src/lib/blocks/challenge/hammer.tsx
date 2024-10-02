@@ -36,7 +36,7 @@ function mergeChats(
       user_id: 0,
       user_name: "Ciallo～(∠・ω< )⌒☆",
       avatar: undefined,
-      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•̀ω•́๑)۶`,
+      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•ω•๑)۶`,
       created_at: solvedAt,
       is_admin: true,
       challenge_id: challengeId,
@@ -194,7 +194,7 @@ export default function (props: {
               </A>
               <div class="w-4 flex-shrink-0" />
               <div class="flex flex-col space-y-1">
-                <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
+                <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
                 <Card contentClass="p-2">
                   <p class="text-wrap">{t("game.admin.hammer.shouldGoto")}</p>
                 </Card>
@@ -209,7 +209,7 @@ export default function (props: {
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1">
-              <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
+              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
                 <p class="text-wrap">{t("game.challenge.hammerTips")}</p>
               </Card>
@@ -222,7 +222,7 @@ export default function (props: {
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1 items-start">
-              <label class="label">Ciallo～(∠・ω&lt; )⌒☆</label>
+              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
                 <p class="text-wrap inline">
                   <span>{t("game.challenge.hammerTips2")}</span>
@@ -284,7 +284,7 @@ export default function (props: {
                   class={`flex-1 w-0 flex flex-col space-y-1 ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
                 >
                   <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
-                    <label class="label space-x-2">
+                    <header class="label space-x-2">
                       <Show when={chat.user_id !== 0}>
                         <Show
                           when={chat.is_admin}
@@ -294,7 +294,7 @@ export default function (props: {
                         </Show>
                       </Show>
                       <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
-                    </label>
+                    </header>
                   </Show>
                   <div
                     class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
@@ -313,9 +313,9 @@ export default function (props: {
                     </div>
                   </div>
                   <Show when={index() === chats().length - 1 || chats().at(index() + 1)?.user_id !== chat.user_id}>
-                    <label class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
+                    <header class="opacity-0 peer-hover:opacity-60 text-sm transition-all duration-300">
                       {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                    </label>
+                    </header>
                   </Show>
                 </div>
               </div>

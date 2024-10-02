@@ -116,7 +116,7 @@ export default function GameStatistics(props: {
                         focus: "ancestor",
                       },
                       data: Object.entries(stats()!.institute_players).map(([key, value]) => ({
-                        name: accountStore.institutes.find((v) => v.id === parseInt(key))?.name || key,
+                        name: accountStore.institutes.find((v) => v.id === Number.parseInt(key))?.name || key,
                         value,
                       })),
                       label: {
@@ -163,7 +163,7 @@ export default function GameStatistics(props: {
                   xAxis: {
                     type: "category",
                     data: Object.entries(stats()!.institute_players)
-                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === parseInt(i))?.name)
+                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i))?.name)
                       .concat(t("game.statistics.others")!),
                   },
                   yAxis: {
@@ -214,7 +214,7 @@ export default function GameStatistics(props: {
                         show: false,
                       },
                       data: Object.entries(stats()!.institute_teams).map(([key, value]) => ({
-                        name: accountStore.institutes.find((v) => v.id === parseInt(key))?.name || key,
+                        name: accountStore.institutes.find((v) => v.id === Number.parseInt(key))?.name || key,
                         value,
                       })),
                       levels: [
@@ -227,7 +227,6 @@ export default function GameStatistics(props: {
                     },
                   }}
                 />
-
               </Show>
             </div>
             <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
@@ -259,7 +258,7 @@ export default function GameStatistics(props: {
                   xAxis: {
                     type: "category",
                     data: Object.entries(stats()!.institute_teams)
-                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === parseInt(i))?.name)
+                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i))?.name)
                       .concat(t("game.statistics.others")!),
                   },
                   yAxis: {
@@ -310,7 +309,7 @@ export default function GameStatistics(props: {
                             color: "#17a750",
                           },
                           name: "Solves",
-                          value: (stats()?.total_solves ?? 0),
+                          value: stats()?.total_solves ?? 0,
                         },
                         {
                           name: "Fails",
@@ -333,7 +332,6 @@ export default function GameStatistics(props: {
                     },
                   }}
                 />
-
               </Show>
             </div>
             <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>

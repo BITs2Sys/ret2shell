@@ -44,7 +44,7 @@ export type UserForm = {
   permDevOps: boolean;
 };
 
-export default function (compProps: {
+export default function(compProps: {
   onDone?: (result: User) => void;
   editSource?: User;
   loading: boolean;
@@ -198,7 +198,7 @@ export default function (compProps: {
               <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
             </div>
             <Button level="warning" class="flex-col space-x-0 space-y-2 py-4 w-full">
-              <img src={xdsecMascotUnsee} class="w-20 h-20" alt=">.<" />
+              <img src={xdsecMascotUnsee} class="w-20 h-20" alt="ΦωΦ" />
               <span>{t("form.delete")}</span>
             </Button>
           </Card>
