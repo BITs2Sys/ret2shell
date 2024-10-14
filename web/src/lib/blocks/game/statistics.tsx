@@ -147,6 +147,12 @@ export default function GameStatistics(props: {
           XLSX.utils.sheet_add_aoa(statisticsSheet, statisticsArr, { origin: "A2" });
           XLSX.utils.book_append_sheet(workbook, statisticsSheet, "Statistics");
 
+          const challengeStatsHeader = ["Challenge", "Submissions", "Solves"];
+          const challengeStatsSheet = XLSX.utils.aoa_to_sheet([challengeStatsHeader]);
+          const challengeStatsArr = challengeStats().map((v) => [v.name, v.submissions, v.solves]);
+          XLSX.utils.sheet_add_aoa(challengeStatsSheet, challengeStatsArr, { origin: "A2" });
+          XLSX.utils.book_append_sheet(workbook, challengeStatsSheet, "Challenge Stats");
+
           const scoreboardHeader = [
             "Rank",
             "ID",
