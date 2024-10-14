@@ -86,12 +86,14 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/hint",
           post(create_challenge_hint).delete(delete_challenge_hint),
         )
+        .route("/answer", patch(update_answer))
         .route("/", patch(update_challenge).delete(delete_challenge))
         .route("/publish", post(up_challenge).delete(down_challenge))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
           auth::game_admin_required,
         ))
+        .route("/answer", get(get_answer))
         .route("/file", get(get_player_attachment))
         .route("/env", get(get_challenge_env).post(start_challenge_env))
         .route("/hint", get(get_challenge_hints))
@@ -1263,4 +1265,39 @@ async fn get_challenge_solves(
   )
   .await?;
   Ok(Json(solves))
+}
+
+async fn get_answer(
+  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if !game.archived() && !is_game_admin!(token, game) {
+    return Err(ResponseError::Forbidden(
+      "you can only get the answer after the game is archived".to_owned(),
+      format!(
+        "user {}:'{}' ({}) want to get the answer for challenge {}:'{}'",
+        token.id, token.account, token.nickname, challenge.id, challenge.name
+      ),
+    ));
+  }
+  let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
+
+  Ok(Json(challenge_bucket.answer().await?))
+}
+
+async fn update_answer(
+  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Json(answer): Json<String>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
+  challenge_bucket.set_answer(answer.clone()).await?;
+  game_bucket
+    .commit(
+      format!("update answer for challenge {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  Ok(Json(answer))
 }

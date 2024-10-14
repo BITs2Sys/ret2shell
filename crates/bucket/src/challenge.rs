@@ -188,6 +188,22 @@ impl ChallengeBucket {
     Ok(read_to_string(&path).await?)
   }
 
+  pub async fn set_answer(&self, answer: String) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    write(&self.path.join("answer.md"), answer.as_bytes()).await?;
+    Ok(())
+  }
+
+  pub async fn answer(&self) -> Result<String, BucketError> {
+    let path = self.path.join("answer.md");
+    if !path.exists() {
+      return Ok("".to_owned());
+    }
+    Ok(read_to_string(&path).await?)
+  }
+
   pub async fn set_checker(&self, checker: String) -> Result<(), BucketError> {
     if !self.locked {
       return Err(BucketError::NeedLocking);

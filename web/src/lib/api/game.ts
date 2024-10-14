@@ -549,3 +549,15 @@ export async function getGameStatisticsExport(game_id: number, in_game?: boolean
     })
     .json<GameStatisticsExport>();
 }
+
+export async function getChallengeAnswer(game_id: number, challenge_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/answer`).json<string>();
+}
+
+export async function updateChallengeAnswer(game_id: number, challenge_id: number, answer: string) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/answer`, {
+      json: answer,
+    })
+    .json<string>();
+}
