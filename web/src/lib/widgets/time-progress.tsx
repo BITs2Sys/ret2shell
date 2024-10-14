@@ -22,6 +22,9 @@ export default function TimeProgress(
     if (result > 100) {
       return 100;
     }
+    if (result < 0) {
+      return 0;
+    }
     return result;
   };
   const cleanup = () => clearInterval(interval);
