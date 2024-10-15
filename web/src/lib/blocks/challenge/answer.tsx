@@ -100,7 +100,7 @@ export default function(_props: {
             </p>
           </article>
         }>
-          <Article content={answer()} />
+          <Article content={answer()} extra />
         </Show>
       </Show>
     </div>

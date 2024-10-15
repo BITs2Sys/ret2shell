@@ -1,6 +1,6 @@
 import Challenge from "@blocks/challenge";
 import type { Challenge as ChallengeModel } from "@models/challenge";
-import { useSearchParams } from "@solidjs/router";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { gameStore, setGameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import LoadingTips from "@widgets/loading-tips";
@@ -18,8 +18,25 @@ import { addToast } from "@storage/toast";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { accountStore } from "@storage/account";
+import { Permission } from "@models/user";
 
-export default function () {
+export default function() {
+  const navigate = useNavigate();
+  const params = useParams();
+  if (!accountStore.token) {
+    navigate(`/account/login?redirect=/training/${params.game}`);
+    return;
+  }
+  if (!accountStore.permissions.includes(Permission.Verified)) {
+    addToast({
+      level: "warning",
+      description: t("account.emailNotVerified")!,
+      duration: 5000,
+    });
+    navigate("/account/settings/info");
+    return;
+  }
   const [searchParams, setSearchParams] = useSearchParams();
   const inCreate = createMemo(() => searchParams.create === "true");
   const [loadingChallenge, setLoadingChallenge] = createSignal(false);
