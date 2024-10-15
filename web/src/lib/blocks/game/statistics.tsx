@@ -158,17 +158,31 @@ export default function GameStatistics(props: {
             "ID",
             "Team",
             "Institute",
+            "State",
             ...Array.from({ length: gameStore.current?.team_size ?? 0 }, (_, i) => `PLAYER ${i}`),
             ...Array.from({ length: challenges().length }, (_, i) => challenges()[i].name),
           ];
           const scoreboardSheet = XLSX.utils.aoa_to_sheet([scoreboardHeader]);
           const scoreboardArr = [];
+          function convertTeamState(state: number) {
+            switch (state) {
+              case 0:
+                return "Banned";
+              case 1:
+                return "Pending";
+              case 2:
+                return "Hidden";
+              case 3:
+                return "OK";
+            }
+          }
           for (const [index, [team, members]] of data.scoreboard.entries()) {
             const row = [
               index + 1,
               team.id,
               team.name,
               accountStore.institutes.find((i) => i.id === team.institute_id)?.name ?? "",
+              convertTeamState(team.state),
               ...members.map((m) => `${m.id}:${m.account} (${m.nickname}) <${m.email}>`),
               ...challenges().map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")),
             ];
@@ -499,7 +513,7 @@ export default function GameStatistics(props: {
                           .map(([_, v]) => v)
                           .concat(
                             stats()!.total_players -
-                            Object.values(stats()!.institute_players).reduce((a, b) => a + b, 0)
+                              Object.values(stats()!.institute_players).reduce((a, b) => a + b, 0)
                           ),
                         barMaxWidth: 64,
                       },
