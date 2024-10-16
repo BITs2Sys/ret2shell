@@ -50,6 +50,7 @@ export default function UserBox() {
         title={t("account.box")}
         btnContent={
           <Avatar
+            alt={accountStore.info?.account ?? "USER"}
             class="w-8 h-8"
             src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
             fallback={accountStore.info?.account || undefined}

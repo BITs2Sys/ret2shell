@@ -89,10 +89,11 @@ export default function () {
                 </Button>
               </Show>
               <Show when={!platformStore.config.hide_maker}>
-                <Link square href="/magic/sakana" ghost>
+                <Link square href="/magic/sakana" ghost name="gift">
                   <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
                 </Link>
                 <Popover
+                  aria-label="about"
                   ghost
                   popContentClass="pb-2"
                   square
