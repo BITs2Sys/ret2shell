@@ -5,7 +5,12 @@ import Card from "./card";
 import ace from "ace-builds";
 import "ace-builds/esm-resolver";
 import { type FormStore, setValue } from "@modular-forms/solid";
-import { themeStore } from "@storage/theme";
+import { t, themeStore } from "@storage/theme";
+import { uploadMedia } from "@api/media";
+import type { HTTPError } from "ky";
+import { addToast } from "@storage/toast";
+import { mediaPath } from "@lib/utils/media";
+import Spin from "@assets/animates/spin";
 
 export type EditorProps = {
   value?: string;
@@ -38,6 +43,30 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     "error",
     "onFocusIn",
   ]);
+  const [imageFile, setImageFile] = createSignal<File | null>(null);
+  const [uploading, setUploading] = createSignal(false);
+  const [draging, setDraging] = createSignal(false);
+  function handleUploadImage() {
+    if (imageFile()) {
+      setUploading(true);
+      uploadMedia(imageFile()!, false)
+        .then((resp) => {
+          editor?.insert(`![${imageFile()!.name}](${mediaPath(resp.hash)})`);
+        })
+        .catch((err: HTTPError) => {
+          void err.response.text().then((resp) => {
+            addToast({
+              level: "error",
+              description: `${t("form.uploadFailed")}: ${resp}`,
+              duration: 5000,
+            });
+          });
+        })
+        .finally(() => {
+          setUploading(false);
+        });
+    }
+  }
   let editorElement: HTMLPreElement;
   let editor: ace.Ace.Editor | null = null;
   function initEditor() {
@@ -79,8 +108,41 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     editor.on("focus", () => {
       editorProps.onFocusIn?.();
     });
-  }
+    editor.container.addEventListener("paste", (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.kind === "file") {
+          const file = item.getAsFile();
+          if (file) {
+            setImageFile(file);
+            handleUploadImage();
+          }
+        }
+      }
+    });
 
+    editor.container.addEventListener("dragenter", () => {
+      setDraging(true);
+    });
+    editor.container.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    editor.container.addEventListener("dragleave", () => {
+      setDraging(false);
+    });
+    editor.container.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDraging(false);
+      const file = e.dataTransfer?.files[0];
+      if (file) {
+        setImageFile(file);
+        handleUploadImage();
+      }
+    });
+  }
   createEffect(() => {
     if (editorProps.value !== editor?.getValue()) {
       editor?.setValue(editorProps.value || "");
@@ -101,6 +163,17 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       <Show when={editorProps.error}>
         <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
           <p>{editorProps.error}</p>
+        </Card>
+      </Show>
+      <Show when={uploading()}>
+        <Card class="absolute bottom-2 left-2 right-2" level="info" contentClass="z-50 px-4 p-2 flex items-center">
+          <Spin width={20} height={20} />
+          <p>{t("form.uploading")}</p>
+        </Card>
+      </Show>
+      <Show when={draging()}>
+        <Card class="absolute bottom-2 left-2 right-2 top-2" contentClass="z-50 flex items-center justify-center">
+          <span class="icon-[fluent--image-20-regular] w-12 h-12" />
         </Card>
       </Show>
     </div>
