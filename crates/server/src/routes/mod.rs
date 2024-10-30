@@ -3,7 +3,7 @@ use std::{net::IpAddr, time::Duration};
 use axum::{
   body::Body,
   http::{HeaderValue, Request},
-  middleware::from_fn_with_state,
+  middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
   routing::get,
   Router,
@@ -19,6 +19,7 @@ use crate::{
   middleware::{
     self,
     auth::extract_user_info,
+    codec,
     forwarded::{ip_record, ip_record_worker},
   },
   traits::GlobalState,
@@ -53,6 +54,7 @@ pub async fn initialize(
       state.clone(),
       middleware::data::prepare_config,
     ))
+    .layer(from_fn(codec::encrypt_stream_codec))
     .layer(
       CorsLayer::new()
         .allow_headers(Any)

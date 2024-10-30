@@ -958,6 +958,7 @@
     "diyBox": "言語と明暗テーマ",
     "error": "プラットフォームエラー",
     "followSystem": "同期システムテーマ",
+    "ret2codec": "暗号化を有効にする",
     "form": {
       "footerInfoPlaceholder": "プラットフォーム下部の著作権情報",
       "footerInfoTitle": "プラットフォーム下部の著作権情報",

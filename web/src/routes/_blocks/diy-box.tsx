@@ -1,4 +1,5 @@
 import DarkmodeButton from "@blocks/darkmode-button";
+import { platformStore, setPlatformStore } from "@storage/platform";
 import { setLocale, setThemeStore, t, themeStore, toggleBackgroundImg } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -95,6 +96,23 @@ export function DiyBoxContent() {
       {/*     </li> */}
       {/*   </ul> */}
       {/* </Card> */}
+      <Card contentClass="p-2 flex flex-col space-y-2">
+        <Button
+          size="sm"
+          ghost
+          onClick={() => {
+            setPlatformStore({ enable_ret2codec: !platformStore.enable_ret2codec });
+          }}
+        >
+          <span class="flex-1 text-start font-normal">{t("platform.ret2codec")}</span>
+          <Show
+            when={platformStore.enable_ret2codec}
+            fallback={<span class="icon-[fluent--lock-open-20-regular] w-5 h-5" />}
+          >
+            <span class="icon-[fluent--lock-shield-20-regular] w-5 h-5 text-success" />
+          </Show>
+        </Button>
+      </Card>
     </div>
   );
 }

@@ -26,6 +26,7 @@
     "return": "Return",
     "versionMismatch": "failed to match service versions ({{frontend}} != {{backend}}), the server may not be working properly, please contact the operation and maintenance team to check.",
     "tooNarrow": "Too narrow, please use a wider device to browse",
+    "ret2codec": "Enable Obfus Codec",
     "form": {
       "footerInfoPlaceholder": "Platform Copyright Information",
       "footerInfoTitle": "Platform Copyright Information",

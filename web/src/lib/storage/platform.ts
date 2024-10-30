@@ -27,6 +27,7 @@ export const [platformStore, setPlatformStore] = makePersisted(
     under_maintenance: false,
     backend_online: false,
     license: null as null | PlatformLicense,
+    enable_ret2codec: null as null | boolean,
     get isOnline() {
       return this.backend_online && !this.under_maintenance;
     },

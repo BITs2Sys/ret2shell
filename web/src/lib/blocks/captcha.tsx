@@ -5,7 +5,7 @@ import { type FormStore, type Maybe, setValue } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input, { type TextInputProps } from "@widgets/input";
-import { encode } from "js-base64";
+import { base64 } from "@scure/base";
 import { type ComponentProps, createEffect, createSignal, splitProps, untrack } from "solid-js";
 
 export default function (
@@ -66,7 +66,7 @@ export default function (
           return (
             <img
               class="w-20 object-fill"
-              src={`data:image/svg+xml;base64,${encode(captchaObj.challenge)}`}
+              src={`data:image/svg+xml;base64,${base64.encode(new TextEncoder().encode(captchaObj.challenge))}`}
               alt={t("captcha.reload")}
             />
           );

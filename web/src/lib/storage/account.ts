@@ -2,7 +2,7 @@ import { getInstitutes, getProfile } from "@api/account";
 import type { Institute } from "@models/institute";
 import type { Permission, Token, User } from "@models/user";
 import { makePersisted } from "@solid-primitives/storage";
-import { fromBase64 } from "js-base64";
+import { base64urlnopad } from "@scure/base";
 import { createStore } from "solid-js/store";
 
 export const [accountStore, setAccountStore] = makePersisted(
@@ -21,7 +21,7 @@ export const [accountStore, setAccountStore] = makePersisted(
 
 export const storeToken = (token: string) => {
   setAccountStore({ token });
-  const tokenRaw = fromBase64(token.split(".")[1]);
+  const tokenRaw = new TextDecoder().decode(base64urlnopad.decode(token.split(".")[1]));
   const tokenJson = JSON.parse(tokenRaw) as Token;
   setAccountStore({
     id: tokenJson.id,
