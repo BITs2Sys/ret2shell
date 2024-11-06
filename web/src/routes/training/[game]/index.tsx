@@ -128,10 +128,10 @@ export default function () {
     updateGame(gameStore.current!.id, {
       ...gameStore.current!,
       ...result,
-      start_at: DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
-      end_at: DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
-      archive_at: DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
-      register_at: DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
+      start_at: gameStore.current?.start_at ?? DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
+      end_at: gameStore.current?.end_at ?? DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
+      archive_at: gameStore.current?.archive_at ?? DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
+      register_at: gameStore.current?.register_at ?? DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
     })
       .then((game) => {
         setGameStore({ current: game });

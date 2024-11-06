@@ -371,6 +371,7 @@
       "organize": {
         "title": "Organization Management",
         "restrict": "Restrict this Game",
+        "restrictWarning": "Are you sure to restrict users from organizations other than the following from participating? (Effective immediately after clicking!)",
         "instituteEnabled": "Organization Ranking"
       },
       "administrators": {

@@ -34,7 +34,7 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const showCreate = () => searchParams.create === "true";
   const selectedGameId = createMemo(() => {
-    const result = searchParams.selected ? Number.parseInt(searchParams.selected) : Number.NaN;
+    const result = searchParams.selected ? Number.parseInt(searchParams.selected as string) : Number.NaN;
     if (Number.isNaN(result)) {
       return gameStore.games.at(0)?.id || null;
     }

@@ -553,6 +553,7 @@
       "organize": {
         "title": "組織管理",
         "restrict": "この大会を限定する",
+        "restrictWarning": "以下の組織以外のユーザーの参加を制限しますか？（クリックすると即時に有効になります！）",
         "instituteEnabled": "組織別ランキング"
       },
       "administrators": {
@@ -791,7 +792,7 @@
       "titleRequired": "タイトルを入力してください"
     },
     "offline": "オフライン大会",
-    "otherGames": "非重要競技",
+    "otherGames": "其他競技",
     "pending": "未開始",
     "register": "オープン登録",
     "registerArchiveTime": "登録と保管時間",

@@ -326,6 +326,7 @@
       "organize": {
         "title": "組織管理",
         "restrict": "限定此賽事",
+        "restrictWarning": "是否阻止以下組織之外的用戶參賽？（點擊後立即生效！）",
         "instituteEnabled": "組織分榜"
       },
       "administrators": {
@@ -363,7 +364,7 @@
     },
     "exit": "退出",
     "noGameHosted": "沒有舉辦過賽事",
-    "otherGames": "非重點賽事",
+    "otherGames": "其他賽事",
     "pending": "未開始",
     "ended": "已結束",
     "started": "進行中",

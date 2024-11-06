@@ -23,7 +23,7 @@ export default function (props: ImageProps & ComponentProps<"div">) {
     }
   });
   return (
-    <div {...rest} class={`overflow-hidden relative ${rest.class}`.trim()}>
+    <div {...rest} class={`overflow-hidden relative bg-layer ${rest.class}`.trim()}>
       <img
         class="w-full h-full object-cover"
         width={imageProps.width}

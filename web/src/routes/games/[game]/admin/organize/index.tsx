@@ -90,13 +90,16 @@ function InstituteManagement() {
           <LoadingTips />
         </div>
       </Show>
-      <Checkbox
-        checked={gameStore.current?.access_policy.restrict}
-        title={t("game.admin.organize.restrict")}
-        onChange={() => handleChangePolicy(!gameStore.current?.access_policy.restrict)}
-      >
-        <span class="flex-1 text-start">{t("game.admin.organize.restrict")}</span>
-      </Checkbox>
+      <div class="flex flex-wrap items-center">
+        <span class="flex-1">{t("game.admin.organize.restrictWarning")}</span>
+        <Checkbox
+          checked={gameStore.current?.access_policy.restrict}
+          title={t("game.admin.organize.restrict")}
+          onChange={() => handleChangePolicy(!gameStore.current?.access_policy.restrict)}
+        >
+          <span class="flex-1 text-start">{t("game.admin.organize.restrict")}</span>
+        </Checkbox>
+      </div>
       <div class="flex flex-col space-y-1">
         <header class="label">{t("game.admin.organize.instituteEnabled")}</header>
         <div class="flex flex-row flex-wrap">

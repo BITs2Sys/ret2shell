@@ -25,7 +25,7 @@ export default function TeamCover(props: ComponentProps<"div">) {
         expanded() ? "h-full" : "h-0"
       } ${props.class}`.trim()}
     >
-      <div class="w-screen h-screen relative">
+      <div class="w-screen h-screen relative bg-layer">
         <img
           class={`w-screen h-screen transition-all ease-out duration-[2000ms] object-cover ${
             expanded() ? "scale-125 blur-md" : ""
