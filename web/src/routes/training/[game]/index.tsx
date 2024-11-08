@@ -21,7 +21,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { accountStore } from "@storage/account";
 import { Permission } from "@models/user";
 
-export default function() {
+export default function () {
   const navigate = useNavigate();
   const params = useParams();
   if (!accountStore.token) {

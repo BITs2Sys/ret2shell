@@ -100,6 +100,10 @@ code.language-css .token.selector > .token.pseudo-element {
 }
 
 .line-number::before {
-  @apply inline-block w-5 text-right mr-4 -ml-2 text-gray-500;
+  @apply absolute left-2 w-7 h-full align-top pr-1 border-r border-r-gray-500/60 text-end text-gray-500;
   content: attr(line);
+}
+
+.line-number {
+  @apply relative pl-12 inline-block;
 }

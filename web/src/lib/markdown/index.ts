@@ -1,6 +1,5 @@
 import rehypeToc from "@jsdevtools/rehype-toc";
 import { toHtml } from "hast-util-to-html";
-import type { Nodes } from "hast-util-to-html/lib";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -91,7 +90,8 @@ export class Markdown {
       this.processor?.use(rehypeToc, {
         headings: ["h2", "h3"],
         customizeTOC: (toc) => {
-          this.setToc(toHtml(toc as unknown as Nodes));
+          // @ts-expect-error toc's type is not exported
+          this.setToc(toHtml(toc));
           return false;
         },
       });

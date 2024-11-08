@@ -6,32 +6,26 @@ import { addToast } from "@storage/toast";
 import Card from "@widgets/card";
 import Picture from "@widgets/picture";
 import type { HTTPError } from "ky";
-import { createEffect, createMemo, createSignal, For, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { mediaPath } from "@lib/utils/media";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
 import Pagination from "@widgets/pagination";
+import Spin from "@assets/animates/spin";
 
-export default function () {
+export default function() {
   const [page, setPage] = createSignal(1);
   const pageSize = 20;
   const [total, setTotal] = createSignal(0);
   const [_loading, setLoading] = createSignal(true);
-  const [selectedGameId, setSelectedGameId] = createSignal(null as number | null);
+  const [loadingGame, setLoadingGame] = createSignal(null as number | null);
 
   const otherGames = createMemo(() => {
     return gameStore.games
       .filter((game) => game.weight < 3 && game.host_type === HostType.CTFGame)
       .sort((a, b) => b.start_at.toSeconds() - a.start_at.toSeconds())
       .slice((page() - 1) * pageSize, page() * pageSize);
-  });
-
-  const selectedGame = createMemo(() => {
-    return otherGames().find((game) => game.id === selectedGameId());
-  });
-  createEffect(() => {
-    if (selectedGameId()) setGameStore({ preload: selectedGame() });
   });
 
   function fetchGames() {
@@ -97,13 +91,20 @@ export default function () {
                 type="button"
                 class="flex flex-col p-3 lg:p-6 w-full flex-1"
                 onClick={() => {
-                  if (selectedGameId() === game.id) setGameStore({ current: selectedGame() || null });
-                  else setSelectedGameId(game.id);
+                  setGameStore({ preload: game });
+                  setLoadingGame(game.id);
+                  setTimeout(() => {
+                    setGameStore({ current: game });
+                    setLoadingGame(null);
+                  }, 300);
                 }}
               >
                 <h2 class="text-start align-middle font-bold text-xl">{game.name}</h2>
-                <p class={`transition-all ${selectedGameId() === game.id ? "font-bold" : "opacity-60"}`}>
-                  {game.brief}
+                <p class="opacity-60 flex text-wrap space-x-2">
+                  <Show when={loadingGame() === game.id}>
+                    <Spin width={16} height={16} />
+                  </Show>
+                  <span>{game.brief}</span>
                 </p>
               </button>
             </Card>
@@ -115,7 +116,7 @@ export default function () {
         count={total()}
         pageSize={pageSize}
         page={page()}
-        onPageChange={(page) => setPage(page.page)}
+        onPageChange={(p) => setPage(p.page)}
       />
     </section>
   );

@@ -67,13 +67,17 @@ nav.toc a {
   @apply text-layer-content/80 no-underline hover:underline;
 }
 
-article > pre,
-article > pre * {
+article pre,
+article pre * {
   @apply text-base break-words;
 }
 
-article > pre {
+article pre {
   @apply bg-layer-content/5 backdrop-blur rounded-md mx-1 min-w-0 text-wrap #{!important};
+}
+
+article pre > code {
+  @apply flex flex-col;
 }
 
 code:not(pre code) {
