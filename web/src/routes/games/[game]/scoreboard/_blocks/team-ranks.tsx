@@ -28,7 +28,7 @@ export default function TeamRanks(props: {
   }
   return (
     <>
-      <ul class="flex-1 flex flex-col space-y-2 w-full max-w-5xl self-center">
+      <ul class="flex-1 flex flex-col w-full max-w-5xl self-center">
         <Switch>
           <Match when={props.loading}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">

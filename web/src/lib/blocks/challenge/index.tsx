@@ -115,6 +115,12 @@ function BottomPanel(props: {
         defer
       >
         <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
+          <Button onClick={props.onExpand} ghost square>
+            <span
+              class={`${props.expanded ? "icon-[fluent--chevron-double-down-20-regular]" : "icon-[fluent--chevron-double-up-20-regular]"} w-5 h-5`}
+            />
+          </Button>
+          <Divider direction="vertical" class="h-8" />
           <Button onClick={() => setPage(0)} ghost={page() !== 0}>
             <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("game.challenge.terminal")}</span>
@@ -211,15 +217,6 @@ function BottomPanel(props: {
               </Card>
             </Popover>
           </Show>
-          <div class="flex-1" />
-          <div class="flex flex-row items-center space-x-2 sticky right-2 bg-layer">
-            <Divider direction="vertical" class="h-8" />
-            <Button onClick={props.onExpand} ghost square>
-              <span
-                class={`${props.expanded ? "icon-[fluent--chevron-double-down-20-regular]" : "icon-[fluent--chevron-double-up-20-regular]"} w-5 h-5`}
-              />
-            </Button>
-          </div>
         </div>
       </OverlayScrollbarsComponent>
       <OverlayScrollbarsComponent

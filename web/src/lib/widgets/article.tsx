@@ -35,8 +35,8 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
       await markdownInst.init({
         type: "html",
         options: {
-          prism: articleProps.extra,
-          katex: articleProps.extra,
+          code: articleProps.extra,
+          math: articleProps.extra,
           headingAnchors: articleProps.headingAnchors,
           toc: articleProps.toc,
         },

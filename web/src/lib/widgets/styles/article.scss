@@ -77,12 +77,60 @@ article pre {
 }
 
 article pre > code {
-  @apply flex flex-col;
+  @apply flex flex-col break-all;
 }
 
 code:not(pre code) {
-  @apply text-[1em] break-words bg-layer-content/10 rounded-sm mx-1 px-1 #{!important};
+  @apply text-[1em] break-words bg-layer-content/10 rounded-sm mx-1 px-1 font-normal #{!important};
   @apply before:content-[''] after:content-[''] #{!important};
+}
+
+pre code {
+  counter-reset: line;
+}
+ 
+pre code > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+ 
+  @apply absolute top-0 left-0 inline-block w-10 text-layer-content/60 pr-1 text-right mr-4 h-full border-r-2 border-layer-content/10;
+}
+
+pre code > [data-highlighted-line] {
+  @apply bg-layer-content/10 rounded-md;
+}
+
+pre code > [data-line] {
+  @apply relative pl-12;
+}
+
+pre button.rehype-pretty-copy {
+  @apply absolute top-2 right-2 #{!important};
+  @apply w-8 h-8 flex items-center justify-center #{!important};
+  @apply text-success;
+
+  span.ready {
+    @apply icon-[fluent--copy-20-regular] w-5 h-5;
+  }
+
+  span.success {
+    @apply hidden icon-[fluent--checkmark-20-regular] w-5 h-5;
+  }
+
+}
+
+html[data-style='dark'] {
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+  }
+}
+
+html[data-style='light'] {
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
+    color: var(--shiki-light);
+  }
 }
 
 article.prose img {
@@ -100,11 +148,6 @@ article > h4 > a,
 article > h5 > a,
 article > h6 > a {
   @apply no-underline #{!important};
-}
-
-article > ol > li,
-article > ul > li {
-  @apply list-inside #{!important};
 }
 
 article > h1 > a,
@@ -130,9 +173,21 @@ article > h6 > a:hover::after {
 article blockquote {
   @apply border-l-primary bg-primary/10 rounded-md p-0 m-1 backdrop-blur #{!important};
 
-  & > p {
-    @apply px-4 py-2 #{!important};
+  & > *:first-child {
+    @apply pt-2 #{!important};
     @apply before:content-[''] after:content-[''] #{!important};
+  }
+
+  & > * {
+    @apply mx-2 #{!important};
+  }
+
+  & > *:last-child {
+    @apply pb-2 #{!important};
+  }
+
+  & pre code {
+    @apply not-italic;
   }
 }
 

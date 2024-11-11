@@ -14,7 +14,7 @@ import Pagination from "@widgets/pagination";
 import type { HTTPError } from "ky";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
-export default function () {
+export default function() {
   const [articles, setArticles] = createSignal<Article[]>([]);
   const [total, setTotal] = createSignal(0);
   const [page, setPage] = createSignal(1);
@@ -44,7 +44,7 @@ export default function () {
     <>
       <Title title={`${t("bulletin.title")} - ${platformStore.config.name || t("platform.name")}`} />
       <div class="flex flex-col items-center p-3 lg:p-6 flex-1">
-        <div class="flex flex-col space-y-2 flex-1 w-full max-w-5xl">
+        <div class="flex flex-col flex-1 w-full max-w-5xl">
           <div class="h-12 relative flex flex-row items-center px-4">
             <h1 class="space-x-2 flex flex-row items-center flex-1">
               <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
@@ -64,9 +64,8 @@ export default function () {
                 <Link ghost justify="start" href={`/bulletin/${article.id}`} class="overflow-hidden relative">
                   {/* icon-[fluent--megaphone-20-regular] icon-[fluent--megaphone-20-filled] */}
                   <span
-                    class={`icon-[fluent--megaphone-20-${
-                      article.weight >= 1 ? "filled" : "regular"
-                    }] w-5 h-5 text-${article.weight >= 1 ? "primary" : "layer-content"}`}
+                    class={`icon-[fluent--megaphone-20-${article.weight >= 1 ? "filled" : "regular"
+                      }] w-5 h-5 text-${article.weight >= 1 ? "primary" : "layer-content"}`}
                   />
                   <span class="flex-1 text-start truncate font-normal">{article.title}</span>
                   <span class="opacity-60">{article.created_at.toFormat("yyyy-MM-dd")}</span>

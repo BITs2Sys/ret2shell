@@ -53,7 +53,7 @@ export class Markdown {
   }
 
   private async initHtml(options?: MarkToHtmlOptions) {
-    if (options?.katex) {
+    if (options?.math) {
       const remarkMath = await import("remark-math");
       this.processor?.use(remarkMath.default);
     }
@@ -73,16 +73,32 @@ export class Markdown {
       ],
       rel: ["nofollow", "noopener", "noreferrer"],
     });
-    if (options?.katex) {
+    if (options?.math) {
       const rehypeKatex = await import("rehype-katex");
       await import("katex/dist/katex.css");
       await import("./katex.scss");
       this.processor?.use(rehypeKatex.default);
     }
-    if (options?.prism) {
-      const rehypePrismPlus = await import("rehype-prism-plus/common");
-      await import("./prism.scss");
-      this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true, showLineNumbers: true });
+    if (options?.code) {
+      const rehypePrettyCode = await import("rehype-pretty-code");
+      const rehypePrettyCodeTransformers = await import("@rehype-pretty/transformers");
+      this.processor?.use(rehypePrettyCode.default, {
+        grid: true,
+        theme: {
+          dark: "github-dark",
+          light: "github-light",
+        },
+        keepBackground: false,
+        bypassInlineCode: false,
+        transformers: [
+          rehypePrettyCodeTransformers.transformerCopyButton({
+            visibility: "hover",
+            feedbackDuration: 3_000,
+            copyIcon: "",
+            successIcon: "",
+          }),
+        ],
+      });
     }
     if (options?.headingAnchors) {
       this.processor?.use(rehypeSlug);

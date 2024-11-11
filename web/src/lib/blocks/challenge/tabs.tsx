@@ -57,7 +57,7 @@ export default function Tabs(props: {
     >
       <div class="h-full flex pr-2 py-0 items-center space-x-2 min-w-max w-max">
         <TransitionGroup name="fade-group-dive-left">
-          <div class="fade-group-dive-left flex space-x-2 items-center sticky left-0 pl-2 bg-layer z-20">
+          <div class="fade-group-dive-left flex space-x-2 items-center">
             <Link
               href={props.baseUrl}
               onClick={() => setSearchParams({ challenge: null })}

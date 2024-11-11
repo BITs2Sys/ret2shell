@@ -14,7 +14,7 @@ import { DateTime } from "luxon";
 import Pagination from "@widgets/pagination";
 import Spin from "@assets/animates/spin";
 
-export default function() {
+export default function () {
   const [page, setPage] = createSignal(1);
   const pageSize = 20;
   const [total, setTotal] = createSignal(0);

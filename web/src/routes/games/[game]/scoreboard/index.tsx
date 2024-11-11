@@ -84,7 +84,7 @@ function ChartOperations(props: {
   );
 }
 
-export default function () {
+export default function() {
   const [showLargePanel, setShowLargePanel] = createSignal(false);
   const [showChallengeDetail, setShowChallengeDetail] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -95,7 +95,7 @@ export default function () {
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(10);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
-  const selectedInstituteId = createMemo(() => Number.parseInt(searchParams.institute || "NaN") || null);
+  const selectedInstituteId = createMemo(() => Number.parseInt((searchParams.institute as string) || "NaN") || null);
   const [loadingInstitute, setLoadingInstitute] = createSignal(true);
   const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
@@ -191,7 +191,7 @@ export default function () {
 
   createEffect(() => {
     if (pageHeight?.height) {
-      const p = Math.floor(pageHeight.height / 56);
+      const p = Math.floor(pageHeight.height / 48);
       untrack(() => {
         setTimeout(() => {
           setPageSize(p);
@@ -217,13 +217,12 @@ export default function () {
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={!loadingInstitute() && topTeams().length > 0}>
           <div
-            class={`xl:sticky w-full top-0 left-0 ${
-              showChallengeDetail()
+            class={`xl:sticky w-full top-0 left-0 ${showChallengeDetail()
                 ? "xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "xl:w-[75vw] justify-center"
                   : "xl:w-[40vw]"
-            } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
+              } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
           >
             <Card class="relative" contentClass={`p-2 ${showChallengeDetail() ? "h-48" : "aspect-video"}`}>
               <Chart
@@ -359,7 +358,7 @@ export default function () {
             </Switch>
           </div>
         </Show>
-        <div class="flex-1 min-w-fit p-3 lg:p-6 space-y-2 flex flex-col">
+        <div class="flex-1 min-w-fit p-3 lg:p-6 flex flex-col">
           <Show
             when={showChallengeDetail()}
             fallback={
