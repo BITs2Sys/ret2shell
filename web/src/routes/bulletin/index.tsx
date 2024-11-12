@@ -14,7 +14,7 @@ import Pagination from "@widgets/pagination";
 import type { HTTPError } from "ky";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
-export default function() {
+export default function () {
   const [articles, setArticles] = createSignal<Article[]>([]);
   const [total, setTotal] = createSignal(0);
   const [page, setPage] = createSignal(1);
@@ -64,8 +64,9 @@ export default function() {
                 <Link ghost justify="start" href={`/bulletin/${article.id}`} class="overflow-hidden relative">
                   {/* icon-[fluent--megaphone-20-regular] icon-[fluent--megaphone-20-filled] */}
                   <span
-                    class={`icon-[fluent--megaphone-20-${article.weight >= 1 ? "filled" : "regular"
-                      }] w-5 h-5 text-${article.weight >= 1 ? "primary" : "layer-content"}`}
+                    class={`icon-[fluent--megaphone-20-${
+                      article.weight >= 1 ? "filled" : "regular"
+                    }] w-5 h-5 text-${article.weight >= 1 ? "primary" : "layer-content"}`}
                   />
                   <span class="flex-1 text-start truncate font-normal">{article.title}</span>
                   <span class="opacity-60">{article.created_at.toFormat("yyyy-MM-dd")}</span>

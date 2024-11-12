@@ -1,5 +1,4 @@
 //! Add encryption/decryption tower_http layer for all the api requests.
-//!
 
 use axum::{
   body::Body,

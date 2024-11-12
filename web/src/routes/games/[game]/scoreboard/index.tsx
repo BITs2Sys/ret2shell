@@ -84,7 +84,7 @@ function ChartOperations(props: {
   );
 }
 
-export default function() {
+export default function () {
   const [showLargePanel, setShowLargePanel] = createSignal(false);
   const [showChallengeDetail, setShowChallengeDetail] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -217,12 +217,13 @@ export default function() {
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={!loadingInstitute() && topTeams().length > 0}>
           <div
-            class={`xl:sticky w-full top-0 left-0 ${showChallengeDetail()
+            class={`xl:sticky w-full top-0 left-0 ${
+              showChallengeDetail()
                 ? "xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "xl:w-[75vw] justify-center"
                   : "xl:w-[40vw]"
-              } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
+            } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
           >
             <Card class="relative" contentClass={`p-2 ${showChallengeDetail() ? "h-48" : "aspect-video"}`}>
               <Chart

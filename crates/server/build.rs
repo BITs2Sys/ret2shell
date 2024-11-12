@@ -21,7 +21,7 @@ fn main() {
   );
   fs::write(
         dest_path,
-        format!("pub const R2S_VERSION: &'static str = \"{version}\";\npub const R2S_FULL_VERSION: &'static str = \"{full_version}\";\n"),
+        format!("pub const R2S_VERSION: &str = \"{version}\";\npub const R2S_FULL_VERSION: &'static str = \"{full_version}\";\n"),
     )
 
     .unwrap();
