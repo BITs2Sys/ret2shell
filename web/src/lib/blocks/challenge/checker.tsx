@@ -11,13 +11,14 @@ import { AnsiUp } from "ansi_up";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
-import dynamicChecker from "./scripts/dynamic.rx";
+import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
+import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
 import simpleChecker from "./scripts/simple.rx";
 
-type PresetChecker = "simple" | "mapped" | "dynamic";
+type PresetChecker = "simple" | "mapped" | "dynamic-leet" | "dynamic-uuid";
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -28,8 +29,10 @@ export default function (_props: {
         return simpleChecker;
       case "mapped":
         return mappedChecker;
-      case "dynamic":
-        return dynamicChecker;
+      case "dynamic-leet":
+        return dynamicLeetChecker;
+      case "dynamic-uuid":
+        return dynamicUuidChecker;
       default:
         return null;
     }
@@ -103,8 +106,13 @@ export default function (_props: {
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {
-              label: t("game.challenge.dynamicCheckerScriptPreset")!,
-              value: "dynamic",
+              label: t("game.challenge.dynamicLeetCheckerScriptPreset")!,
+              value: "dynamic-leet",
+              icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
+            },
+            {
+              label: t("game.challenge.dynamicUuidCheckerScriptPreset")!,
+              value: "dynamic-uuid",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {

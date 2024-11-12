@@ -225,6 +225,8 @@
       "selectPresetScripts": "选择预设脚本...",
       "simpleCheckerScriptPreset": "静态评测",
       "dynamicCheckerScriptPreset": "动态环境评测",
+      "dynamicLeetCheckerScriptPreset": "动态环境评测（Leet）",
+      "dynamicUuidCheckerScriptPreset": "动态环境评测（UUID）",
       "mappedCheckerScriptPreset": "动态附件评测",
       "deleteTips": "是否确认删除此题目？相关提交记录与分数将一并删除。",
       "delayEnvFailed": "环境延时失败",

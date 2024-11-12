@@ -270,6 +270,8 @@
       "selectPresetScripts": "Select Preset Scripts...",
       "simpleCheckerScriptPreset": "Static Checker",
       "dynamicCheckerScriptPreset": "Dynamic Environment Checker",
+      "dynamicLeetCheckerScriptPreset": "Dynamic Environment Checker (Leet)",
+      "dynamicUuidCheckerScriptPreset": "Dynamic Environment Checker (UUID)",
       "mappedCheckerScriptPreset": "Dynamic Attachment Checker",
       "deleteTips": "Are you sure to delete this challenge? Related submission records and scores will be deleted together.",
       "delayEnvFailed": "failed to delay environment",

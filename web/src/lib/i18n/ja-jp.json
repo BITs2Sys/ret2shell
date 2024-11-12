@@ -708,6 +708,8 @@
       "selectPresetScripts": "プリセットスクリプトを選択...",
       "simpleCheckerScriptPreset": "静的評価",
       "dynamicCheckerScriptPreset": "動的環境評価",
+      "dynamicLeetCheckerScriptPreset": "動的環境評価 (Leet)",
+      "dynamicUuidCheckerScriptPreset": "動的環境評価 (UUID)",
       "mappedCheckerScriptPreset": "動的添付評価",
       "deleteTips": "この問題を削除してもよろしいですか？関連する提出記録とスコアも一緒に削除されます。",
       "delayEnvFailed": "環境遅延失敗",
