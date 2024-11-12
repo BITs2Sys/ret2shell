@@ -82,7 +82,7 @@ export default function () {
                     </a>
                   </Tag>
                   <Tag level="info" class="m-1">
-                    <a href="https://cnily.me/" target="_blank" rel="noreferrer">
+                    <a href="https://github.com/Cnily03" target="_blank" rel="noreferrer">
                       Cnily03
                     </a>
                   </Tag>
