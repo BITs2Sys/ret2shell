@@ -37,7 +37,7 @@ export default function () {
   const [logFiles, setLogFiles] = createSignal([] as string[]);
   getPlatformLogs()
     .then((resp) => {
-      setLogFiles(resp as string[]);
+      setLogFiles((resp as string[]).sort());
     })
     .catch((err: HTTPError) => {
       void err.response.text().then((text) => {
