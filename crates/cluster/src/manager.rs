@@ -313,9 +313,9 @@ impl Cluster {
       }
     }
 
-    let overloaded = running + pending > 240;
-
-    Ok((overloaded, running, pending))
+    // if pending > 32, means that the cluster have too many pending pods
+    // push a warning event to the queue
+    Ok((pending > 32, running, pending))
   }
 
   pub async fn get_pod(&self, name: &str) -> Result<Pod, ClusterError> {

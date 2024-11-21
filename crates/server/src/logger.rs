@@ -27,11 +27,13 @@ pub async fn initialize(
     level: "info".to_string(),
     directory: "./log".to_string(),
     files_kept: None,
+    compress: Some(false),
   });
   let logging::Config {
     level,
     directory,
     files_kept,
+    compress: _,
   } = config;
   tokio::fs::create_dir_all(&directory).await?;
   let mut file_appender = rolling::RollingFileAppender::builder()

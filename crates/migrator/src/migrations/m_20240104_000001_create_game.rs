@@ -39,6 +39,8 @@ pub enum Game {
   Bucket,
   Token,
   TimelinePresets,
+  Traffic,
+  NodeSelector,
 }
 
 #[async_trait::async_trait]

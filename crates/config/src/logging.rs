@@ -14,6 +14,8 @@ pub struct Config {
   pub level: String,
   /// `files_kept` is the last n files that will be kept.
   pub files_kept: Option<usize>,
+  /// compress files after they are rotated
+  pub compress: Option<bool>,
 }
 
 impl Merge for Option<Config> {

@@ -8,22 +8,6 @@ expires_time = 86400
 
 [auth.oauth_keys]
 xdu_cas = { id = "https://ctf.xidian.edu.cn/account/oauth", key = "NOTNEEDED" }
-xmu_cas = { id = "https://ctf.xmu.edu.cn/account/oauth", key = "NOTNEEDED" }
-jiangnan_email = { id = "jiangnan.edu.cn", key = "NOTNEEDED" }
-cumt_email = { id = "cumt.edu.cn", key = "NOTNEEDED" }
-hdu_email = { id = "hdu.edu.cn", key = "NOTNEEDED" }
-uestc_email = { id = "uestc.edu.cn", key = "NOTNEEDED" }
-seu_email = { id = "seu.edu.cn", key = "NOTNEEDED" }
-fudan_email = { id = "fudan.edu.cn", key = "NOTNEEDED" }
-jlu_email = { id = "jlu.edu.cn", key = "NOTNEEDED" }
-bit_email = { id = "bit.edu.cn", key = "NOTNEEDED" }
-tzc_email = { id = "tzc.edu.cn", key = "NOTNEEDED" }
-cppu_email = { id = "cppu.edu.cn", key = "NOTNEEDED" }
-ncu_email = { id = "ncu.edu.cn", key = "NOTNEEDED" }
-
-[automate]
-enabled = false
-token = 'T0k3nInD3v3l0pm3nt'
 
 [bucket]
 path = './data/bucket'
@@ -46,12 +30,12 @@ enabled = true
 try_default = false
 auto_infer = true
 kube_config_path = "~/.kube/config"
-challenge_node_selector = "challenge"
+challenge_node_selector = "challenge"          # default node selector for challenges, could be specified in each game.
 proxy_image = "ret2shell/container-proxy:main"
-traffic = "wsrx"
+traffic = "wsrx"                               # wsrx | plain, default traffic, could be specified in each game.
 enable_capture = true
 capture_directory = "./data/captures"
-cleanup_interval = 3600                        # in seconds
+cleanup_interval = 60                          # in seconds
 
 [cluster.registry]
 external = "ctf.xidian.edu.cn"
@@ -81,6 +65,7 @@ tls = 'starttls'                   #  'none' | 'tls' | 'starttls'
 directory = './data/log'
 level = 'info,tower_http=info,sqlx=warn'
 files_kept = 3
+compress = true
 
 [media]
 path = './data/media'

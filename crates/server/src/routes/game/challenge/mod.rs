@@ -1047,6 +1047,11 @@ async fn start_challenge_env(
       )
       .await?;
     debug!("env_map: {:?}", env_map);
+    let node_selector = if game.in_progress() {
+      game.node_selector.clone()
+    } else {
+      config.challenge_node_selector.clone()
+    };
     cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
@@ -1087,7 +1092,7 @@ async fn start_challenge_env(
         .collect(),
         env_map,
         env_config,
-        config.challenge_node_selector.clone(),
+        node_selector,
       )
       .await?;
     cache

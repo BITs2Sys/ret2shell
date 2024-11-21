@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::Merge;
 
-#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct RegistryConfig {
   pub username: Option<String>,
   pub password: Option<String>,
@@ -14,7 +14,7 @@ pub struct RegistryConfig {
 }
 
 /// `ClusterConfig` is a configuration struct for managing service settings.
-#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
   pub enabled: bool,
   /// `try_default` is a flag to try to use the default service account.
@@ -33,12 +33,16 @@ pub struct Config {
   pub challenge_node_selector: Option<String>,
   /// `proxy_image` is the image for the proxy container.
   pub proxy_image: Option<String>,
-  /// `traffic` is the traffic backend, default to `wsrx`.
+  /// `traffic` is the traffic backend, default to `wsrx`. Available options are:
+  /// - `wsrx`: websocket reverse proxy
+  /// - `plain`: plain tcp outbound
   pub traffic: Option<String>,
   /// `enable_capture` is a flag to enable the stream capture feature.
   pub enable_capture: Option<bool>,
   /// `capture_directory` is the directory to store the capture files.
   pub capture_directory: Option<String>,
+  /// `cleanup_interval` is the interval to cleanup the challenge pods.
+  pub cleanup_interval: Option<u64>,
   /// `registry` is the private registry for challenge images.
   pub registry: Option<RegistryConfig>,
 }
@@ -57,6 +61,7 @@ impl Merge for Option<Config> {
         traffic: b.traffic.or(a.traffic),
         enable_capture: b.enable_capture.or(a.enable_capture),
         capture_directory: b.capture_directory.or(a.capture_directory),
+        cleanup_interval: b.cleanup_interval.or(a.cleanup_interval),
         registry: b.registry.or(a.registry),
       }),
       (Some(a), None) => Some(a),
