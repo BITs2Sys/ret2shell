@@ -84,7 +84,12 @@ export default function TeamSolves(props: {
               {(tag) => (
                 <For each={challengeMap().get(tag)!}>
                   {(challenge) => (
-                    <div class="h-12 w-24 flex items-center justify-center">
+                    <div
+                      class="h-12 w-24 flex items-center justify-center"
+                      title={team.history
+                        .find((h) => h.challenge_id === challenge.id)
+                        ?.changed_at.toFormat("yyyy-MM-dd HH:mm:ss")}
+                    >
                       <Switch>
                         <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 1}>
                           <span class="icon-[fluent--hexagon-20-filled] w-5 h-5 text-yellow-500 -z-10" />
