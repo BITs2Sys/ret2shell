@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import {
   createChallengeHint,
   deleteChallengeHint,
@@ -17,7 +18,6 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
-import type { HTTPError } from "ky";
 import { LoremIpsum } from "lorem-ipsum";
 import { DateTime } from "luxon";
 import { For, Show, createEffect, createSignal, untrack } from "solid-js";
@@ -42,7 +42,7 @@ export default function (_props: {
   const [form, { Form, Field }] = createForm<CreateHintForm>();
   setValue(form, "cost", 0);
   const [loading, setLoading] = createSignal(false);
-  function onSubmit(result: CreateHintForm) {
+  async function onSubmit(result: CreateHintForm) {
     const hint = {
       id: 0,
       created_at: DateTime.now(),
@@ -50,62 +50,43 @@ export default function (_props: {
       content: result.content,
       cost: result.cost || 0,
     } as Hint;
-    createChallengeHint(challengeStore.current!.game_id, challengeStore.current!.id, hint)
-      .then(() => {
-        addToast({
-          level: "success",
-          description: t("form.createSuccess")!,
-          duration: 5000,
-        });
-        refreshHint();
-        setValues(form, {
-          content: undefined,
-          cost: undefined,
-        });
-      })
-      .catch((e: HTTPError) => {
-        e.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.createFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
+    try {
+      await createChallengeHint(challengeStore.current!.game_id, challengeStore.current!.id, hint);
+      addToast({
+        level: "success",
+        description: t("form.createSuccess")!,
+        duration: 5000,
       });
-  }
-  function refreshHint() {
-    setLoading(true);
-    getChallengeHint(challengeStore.current!.game_id, challengeStore.current!.id)
-      .then((resp) => {
-        setHints(resp);
-      })
-      .catch((e: HTTPError) => {
-        e.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("game.challenge.fetchHintFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+      refreshHint();
+      setValues(form, {
+        content: undefined,
+        cost: undefined,
       });
-    if (!isGameAdmin()) {
-      getTeamExtras(gameStore.current!.id, gameStore.team!.id)
-        .then((resp) => {
-          setExtras(resp);
-        })
-        .catch((e: HTTPError) => {
-          e.response.text().then((text) => {
-            addToast({
-              level: "error",
-              description: `${t("game.challenge.fetchHintFailed")}: ${text}`,
-              duration: 5000,
-            });
-          });
-        });
+    } catch (err) {
+      handleHttpError(err as Error, t("form.createFailed")!);
     }
+  }
+  async function refreshHint() {
+    setLoading(true);
+    try {
+      async function getExtrasOpt() {
+        if (!isGameAdmin() && gameStore.team) {
+          return await getTeamExtras(gameStore.current!.id, gameStore.team.id);
+        }
+        return [];
+      }
+      const [hints, extras] = await Promise.all([
+        getChallengeHint(gameStore.current!.id, challengeStore.current!.id),
+        getExtrasOpt(),
+      ]);
+      setHints(hints);
+      if (extras.length) {
+        setExtras(extras);
+      }
+    } catch (err) {
+      handleHttpError(err as Error, t("game.challenge.fetchHintFailed")!);
+    }
+    setLoading(false);
   }
   createEffect(() => {
     if (challengeStore.current) {
@@ -115,35 +96,22 @@ export default function (_props: {
     }
   });
 
-  function handleDeleteHint(id: number) {
-    deleteChallengeHint(gameStore.current!.id, challengeStore.current!.id, id)
-      .then(() => {
-        refreshHint();
-      })
-      .catch((e: HTTPError) => {
-        e.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.deleteFailed")}: ${text}`,
-          });
-        });
-      });
+  async function handleDeleteHint(id: number) {
+    try {
+      await deleteChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
+      refreshHint();
+    } catch (err) {
+      handleHttpError(err as Error, t("form.deleteFailed")!);
+    }
   }
 
-  function handleUnlockHint(id: number) {
-    unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id)
-      .then(() => {
-        refreshHint();
-      })
-      .catch((e: HTTPError) => {
-        e.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("game.challenge.unlockHintFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      });
+  async function handleUnlockHint(id: number) {
+    try {
+      await unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
+      refreshHint();
+    } catch (err) {
+      handleHttpError(err as Error, t("game.challenge.unlockHintFailed")!);
+    }
   }
   return (
     <div class="flex flex-col p-3 lg:p-6">

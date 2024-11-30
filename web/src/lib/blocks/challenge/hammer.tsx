@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
 import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import { stickerSet } from "@assets/stickers";
@@ -9,7 +10,6 @@ import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -17,7 +17,6 @@ import Card from "@widgets/card";
 import Editor from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createMemo, createSignal, onCleanup, onMount } from "solid-js";
@@ -92,54 +91,44 @@ export default function (props: {
   const [chat, setChat] = createSignal("");
   const [sending, setSending] = createSignal(false);
 
-  function handleSendChat() {
+  async function handleSendChat() {
     if (chat().trim() === "") return;
     if (gameStore.current && challengeStore.current) {
       setSending(true);
-      sendGamePlayerChatMessage(gameStore.current.id, challengeStore.current.id, chat())
-        .then(() => {
-          setChat("");
-          refreshChats();
-        })
-        .catch((err: HTTPError) => {
-          err.response.text().then((text) => {
-            addToast({
-              level: "error",
-              description: `${t("game.challenge.sendChatError")}: ${text}`,
-              duration: 5000,
-            });
-          });
-        })
-        .finally(() => setSending(false));
+      try {
+        await sendGamePlayerChatMessage(gameStore.current.id, challengeStore.current.id, chat());
+        setChat("");
+        refreshChats();
+      } catch (err) {
+        handleHttpError(err as Error, t("game.challenge.sendChatError")!);
+      } finally {
+        setSending(false);
+      }
     }
   }
 
   const [_loading, setLoading] = createSignal(false);
 
-  function refreshChats() {
+  async function _refreshChats() {
     if (gameStore.current && challengeStore.current && !isGameAdmin()) {
-      getSolveStatus().then((s) => {
+      try {
         setLoading(true);
-        getGamePlayerChatMessages(gameStore.current!.id, challengeStore.current!.id)
-          .then((result) => {
-            const [changed, r] = mergeChats(challengeStore.current!.id, gameStore.team?.id ?? 0, chats(), result, s);
-            setChats([...r]);
-            if (changed) {
-              setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 700);
-            }
-          })
-          .catch((err: HTTPError) => {
-            err.response.text().then((text) => {
-              addToast({
-                level: "error",
-                description: `${t("game.challenge.fetchChatError")}: ${text}`,
-                duration: 5000,
-              });
-            });
-          })
-          .finally(() => setLoading(false));
-      });
+        const s = await getSolveStatus();
+        const result = await getGamePlayerChatMessages(gameStore.current.id, challengeStore.current.id);
+        const [changed, r] = mergeChats(challengeStore.current.id, gameStore.team?.id ?? 0, chats(), result, s);
+        setChats([...r]);
+        if (changed) {
+          setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 700);
+        }
+      } catch (err) {
+        handleHttpError(err as Error, t("game.challenge.fetchSolveError")!);
+      }
+      setLoading(false);
     }
+  }
+
+  function refreshChats() {
+    _refreshChats();
     return refreshChats;
   }
 
@@ -154,14 +143,7 @@ export default function (props: {
         const s = resp.find((x) => x.challenge_id === challengeStore.current?.id);
         return s?.created_at ?? null;
       } catch (err) {
-        if (err instanceof HTTPError) {
-          const text = await err.response.text();
-          addToast({
-            level: "error",
-            description: `${t("game.challenge.fetchSolveError")}: ${text}`,
-            duration: 5000,
-          });
-        }
+        handleHttpError(err as Error, t("game.challenge.fetchSolveError")!);
       }
       return null;
     }
