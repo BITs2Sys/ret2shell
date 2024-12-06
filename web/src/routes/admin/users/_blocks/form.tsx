@@ -29,7 +29,7 @@ export type UserForm = {
   email: string;
   avatar: string;
   description: string;
-  institute_id?: number;
+  institute_id?: string;
   hidden: boolean;
   banned: boolean;
   permBasic: boolean;
@@ -59,7 +59,7 @@ export default function (compProps: {
           email: compProps.editSource?.email || "",
           avatar: compProps.editSource?.avatar || "",
           description: compProps.editSource?.description || "",
-          institute_id: compProps.editSource?.institute_id || undefined,
+          institute_id: compProps.editSource?.institute_id?.toString() || undefined,
           hidden: compProps.editSource?.hidden || false,
           banned: compProps.editSource?.banned || false,
           permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
@@ -174,7 +174,7 @@ export default function (compProps: {
       email: result.email,
       avatar: result.avatar,
       description: result.description,
-      institute_id: result.institute_id || null,
+      institute_id: Number.parseInt(result.institute_id || "NONE") || null,
       hidden: result.hidden,
       banned: result.banned,
       permissions,
@@ -258,16 +258,19 @@ export default function (compProps: {
                   />
                 )}
               </Field>
-              <Field name="institute_id" type="number">
-                {(field) => (
+              <Field name="institute_id">
+                {(field, props) => (
                   <Select
                     class="flex-1 min-w-0"
                     label={t("admin.users.institute")}
                     placeholder={t("admin.users.selectInstitute")}
                     items={institutesSelect()}
-                    onValueChange={(v) => {
-                      setValue(form, "institute_id", (v.value.at(0) && Number.parseInt(v.value.at(0)!)) || undefined);
-                    }}
+                    name={field.name}
+                    error={field.error}
+                    inputProps={props}
+                    // onValueChange={(v) => {
+                    //   setValue(form, "institute_id", v.value.at(0) ? Number.parseInt(v.value.at(0)!) : undefined);
+                    // }}
                     value={field.value ? [field.value.toString()] : undefined}
                   />
                 )}

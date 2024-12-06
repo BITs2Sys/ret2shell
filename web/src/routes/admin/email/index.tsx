@@ -1,6 +1,6 @@
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import type { Config, EmailConfig } from "@models/config";
-import { createForm, custom, getValue, setValue, setValues } from "@modular-forms/solid";
+import { createForm, custom, getValue, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -117,9 +117,6 @@ export default function () {
                   ]}
                   value={field.value ? [field.value as string] : undefined}
                   inputProps={props}
-                  onValueChange={(e) => {
-                    setValue(form, "tls", e.value.at(0) as "none" | "tls" | "starttls");
-                  }}
                 >
                   {/* TODO: integrate with modular-forms */}
                 </Select>

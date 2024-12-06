@@ -22,13 +22,15 @@ type OrderType = "id" | "account" | "institute_id" | "registered_at";
 function UserList() {
   const [users, setUsers] = createSignal([] as User[]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page)) || 1);
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
   const pageSize = 15;
   const [loading, setLoading] = createSignal(true);
   const [total, setTotal] = createSignal(0);
-  const filter = createMemo(() => searchParams.filter || null);
-  const order = createMemo(() => searchParams.order || "id");
-  const instituteId = createMemo(() => (searchParams.institute && Number.parseInt(searchParams.institute)) || null);
+  const filter = createMemo(() => (searchParams.filter as string) || null);
+  const order = createMemo(() => (searchParams.order as string) || "id");
+  const instituteId = createMemo(
+    () => (searchParams.institute && Number.parseInt(searchParams.institute as string)) || null
+  );
   function refreshUsers() {
     setLoading(true);
     getUserList(page(), pageSize, order() || "id", filter() ?? undefined, instituteId() ?? undefined)
@@ -168,7 +170,7 @@ function UserList() {
 
 export default function () {
   const [searchParams] = useSearchParams();
-  const inEdit = createMemo(() => (searchParams.user && Number.parseInt(searchParams.user)) || null);
+  const inEdit = createMemo(() => (searchParams.user && Number.parseInt(searchParams.user as string)) || null);
   const [user, setUser] = createSignal(null as User | null);
   createEffect(() => {
     if (inEdit()) {

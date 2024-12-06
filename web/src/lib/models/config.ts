@@ -28,7 +28,6 @@ export type CaptchaConfig = {
   difficulty: number | null;
   validator: "none" | "image" | "pow" | "recaptcha_v3" | "h_captcha";
 };
-
 export type RegistryConfig = {
   external: string;
   username: string;
@@ -47,7 +46,6 @@ export type ClusterConfig = {
   capture_directory: string | null;
   registry: RegistryConfig | null;
 };
-
 export type DatabaseConfig = {
   db: string;
   host: string;
@@ -102,7 +100,6 @@ export type ServerConfig = {
   record: string | null;
   hide_maker: boolean | null;
 };
-
 export type Config = {
   auditor: AuditorConfig;
   auth: AuthConfig;

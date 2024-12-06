@@ -32,7 +32,7 @@ import Sidebar from "./_blocks/sidebar";
 type TeamAdminUpdateForm = {
   name: string;
   state: string;
-  institute_id: number;
+  institute_id: string;
 };
 
 function AdminManagement(props: {
@@ -45,7 +45,7 @@ function AdminManagement(props: {
       untrack(() => {
         setValues(form, {
           name: props.team!.name,
-          institute_id: props.team?.institute_id || 0,
+          institute_id: props.team?.institute_id?.toString() || "0",
           state: props.team?.state.toString() || "0",
         });
       });
@@ -75,7 +75,7 @@ function AdminManagement(props: {
       ...props.team!,
       name: result.name,
       state: Number.parseInt(result.state),
-      institute_id: result.institute_id || null,
+      institute_id: Number.parseInt(result.institute_id) || null,
     })
       .then((team) => {
         props.onDone?.(team);
@@ -131,22 +131,22 @@ function AdminManagement(props: {
                 />
               )}
             </Field>
-            <Field name="institute_id" type="number">
-              {(field) => (
+            <Field name="institute_id">
+              {(field, props) => (
                 <Select
                   class="flex-1 min-w-0"
                   label={t("admin.users.institute")}
                   placeholder={t("admin.users.selectInstitute")}
                   items={institutesSelect()}
-                  onValueChange={(v) => {
-                    setValue(form, "institute_id", (v.value.at(0) && Number.parseInt(v.value.at(0)!)) || 0);
-                  }}
+                  name={field.name}
+                  error={field.error}
+                  inputProps={props}
                   value={field.value ? [field.value.toString()] : undefined}
                 />
               )}
             </Field>
             <Field name="state">
-              {(field) => (
+              {(field, props) => (
                 <Select
                   class="flex-1 min-w-0"
                   label={t("game.team.state.title")!}
@@ -172,9 +172,12 @@ function AdminManagement(props: {
                       icon: "icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success",
                     },
                   ]}
-                  onValueChange={(v) => {
-                    setValue(form, "state", v.value.at(0) || "0");
-                  }}
+                  name={field.name}
+                  error={field.error}
+                  inputProps={props}
+                  // onValueChange={(v) => {
+                  //   setValue(form, "state", v.value.at(0) || "0");
+                  // }}
                   value={field.value ? [field.value.toString()] : undefined}
                 />
               )}
@@ -192,7 +195,7 @@ function AdminManagement(props: {
 
 type TeamSelfUpdateForm = {
   name: string;
-  institute_id: number;
+  institute_id: string;
 };
 
 function SelfManagement(props: {
@@ -204,7 +207,7 @@ function SelfManagement(props: {
       untrack(() => {
         setValues(form, {
           name: gameStore.team!.name,
-          institute_id: gameStore.team?.institute_id || 0,
+          institute_id: gameStore.team?.institute_id?.toString() || "0",
         });
       });
     }
@@ -236,7 +239,7 @@ function SelfManagement(props: {
     setUpdating(true);
     updateSelfteam(gameStore.current!.id, {
       name: result.name,
-      institute_id: result.institute_id || null,
+      institute_id: Number.parseInt(result.institute_id) || null,
     })
       .then((team) => {
         setGameStore({ team });
@@ -293,13 +296,16 @@ function SelfManagement(props: {
                 />
               )}
             </Field>
-            <Field name="institute_id" type="number">
-              {(field) => (
+            <Field name="institute_id">
+              {(field, props) => (
                 <Select
                   class="flex-1 min-w-0"
                   label={t("admin.users.institute")}
                   placeholder={t("admin.users.selectInstitute")}
                   items={institutesSelect()}
+                  name={field.name}
+                  error={field.error}
+                  inputProps={props}
                   onValueChange={(v) => {
                     setValue(form, "institute_id", (v.value.at(0) && Number.parseInt(v.value.at(0)!)) || 0);
                   }}

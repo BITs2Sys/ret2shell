@@ -54,7 +54,15 @@ export default function (
       <Show when={selectProps.label}>
         <Select.Label class="label">{selectProps.label}</Select.Label>
       </Show>
-      <Select.HiddenSelect {...selectProps.inputProps} />
+      <Select.HiddenSelect
+        {...selectProps.inputProps}
+        onChange={(e) => {
+          if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
+            e.target.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+          if (selectProps.inputProps?.onChange && typeof selectProps.inputProps.onChange === "function")
+            selectProps.inputProps.onChange(e);
+        }}
+      />
       <Select.Control class="w-full">
         <Select.Trigger
           class={`btn flex flex-row gap-0 items-center w-full ${selectProps.size === "sm" ? "btn-sm" : "btn-md"} ${selectProps.ghost ? "btn-ghost" : ""} ${

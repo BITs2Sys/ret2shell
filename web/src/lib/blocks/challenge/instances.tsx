@@ -186,7 +186,7 @@ function CreateForm(fnProps: {
                       icon: "icon-[fluent--tag-20-regular]",
                     })) || []
                   }
-                  inputProps={props}
+                  // inputProps={props}
                   onValueChange={(e) => {
                     setValue(form, "tag", `${registryConfig()?.external}/${searchedRepo()}:${e.value.at(0)}`);
                   }}
@@ -238,9 +238,6 @@ function CreateForm(fnProps: {
                 ]}
                 value={field.value ? [field.value as string] : undefined}
                 inputProps={props}
-                onValueChange={(e) => {
-                  setValue(form, "service_type", (e.value[0] || null) as "http" | "tcp" | null);
-                }}
               />
             )}
           </Field>

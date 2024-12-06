@@ -19,13 +19,15 @@ type OrderType = "id" | "name" | "institute_id" | "state";
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
   const [teams, setTeams] = createSignal([] as Team[]);
-  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page)) || 1);
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
   const pageSize = 15;
   const [loading, setLoading] = createSignal(false);
   const [total, setTotal] = createSignal(0);
-  const filter = createMemo(() => searchParams.filter || null);
-  const order = createMemo(() => searchParams.order || "id");
-  const instituteId = createMemo(() => (searchParams.institute && Number.parseInt(searchParams.institute)) || null);
+  const filter = createMemo(() => (searchParams.filter as string) || null);
+  const order = createMemo(() => (searchParams.order as string) || "id");
+  const instituteId = createMemo(
+    () => (searchParams.institute && Number.parseInt(searchParams.institute as string)) || null
+  );
 
   const institutesSelect = createMemo(() => {
     return accountStore.institutes.map((i) => ({

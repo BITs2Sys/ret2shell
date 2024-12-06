@@ -5,7 +5,7 @@ import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, getValue, required, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -107,12 +107,7 @@ export default function () {
                   ]}
                   value={field.value ? [field.value as string] : undefined}
                   inputProps={props}
-                  onValueChange={(e) => {
-                    setValue(form, "validator", e.value.at(0) as "image" | "pow");
-                  }}
-                >
-                  {/* TODO: integrate with modular-forms */}
-                </Select>
+                />
               )}
             </Field>
           </div>

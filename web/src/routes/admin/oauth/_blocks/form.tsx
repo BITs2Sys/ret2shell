@@ -1,5 +1,5 @@
 import type { Institute } from "@models/institute";
-import { createForm, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, required, setValues } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
@@ -73,12 +73,7 @@ export default function InstituteForm(props: {
             })}
             value={field.value ? [field.value as string] : undefined}
             inputProps={fieldProps}
-            onValueChange={(e) => {
-              setValue(form, "provider", e.value.at(0));
-            }}
-          >
-            {/* TODO: integrate with modular-forms */}
-          </Select>
+          />
         )}
       </Field>
       <Field name="token">
