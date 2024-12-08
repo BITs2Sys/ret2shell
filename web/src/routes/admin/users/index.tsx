@@ -13,9 +13,9 @@ import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import type { HTTPError } from "ky";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import Form from "./_blocks/form";
+import { handleHttpError } from "@api";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";
 
@@ -31,23 +31,22 @@ function UserList() {
   const instituteId = createMemo(
     () => (searchParams.institute && Number.parseInt(searchParams.institute as string)) || null
   );
-  function refreshUsers() {
+  async function refreshUsers() {
     setLoading(true);
-    getUserList(page(), pageSize, order() || "id", filter() ?? undefined, instituteId() ?? undefined)
-      .then((resp) => {
-        setUsers(resp[0]);
-        setTotal(resp[1]);
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("admin.users.fetchFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      const resp = await getUserList(
+        page(),
+        pageSize,
+        order() || "id",
+        filter() ?? undefined,
+        instituteId() ?? undefined
+      );
+      setUsers(resp[0]);
+      setTotal(resp[1]);
+    } catch (err) {
+      handleHttpError(err as Error, t("admin.users.fetchFailed")!);
+    }
+    setLoading(false);
   }
 
   const institutesSelect = createMemo(() => {
@@ -174,45 +173,34 @@ export default function () {
   const [user, setUser] = createSignal(null as User | null);
   createEffect(() => {
     if (inEdit()) {
-      getUser(inEdit()!)
-        .then((u) => setUser(u))
-        .catch((e: HTTPError) => {
-          e.response.text().then((text) => {
-            addToast({
-              level: "error",
-              description: `${t("admin.users.fetchUserFailed")}: ${text}`,
-              duration: 5000,
-            });
-          });
-        });
+      untrack(async () => {
+        try {
+          const resp = await getUser(inEdit()!);
+          setUser(resp);
+        } catch (err) {
+          handleHttpError(err as Error, t("admin.users.fetchUserFailed")!);
+        }
+      });
     } else {
       setUser(null);
     }
   });
 
   const [updatingUser, setUpdatingUser] = createSignal(false);
-  function handleUpdateUser(user: User) {
-    // console.log(user);
+  async function handleUpdateUser(user: User) {
     setUpdatingUser(true);
-    updateUser(user)
-      .then((resp) => {
-        addToast({
-          level: "success",
-          description: t("form.saveSuccess")!,
-          duration: 5000,
-        });
-        setUser(resp);
-      })
-      .catch((e: HTTPError) => {
-        e.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.saveFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setUpdatingUser(false));
+    try {
+      await updateUser(user);
+      addToast({
+        level: "success",
+        description: t("form.saveSuccess")!,
+        duration: 5000,
+      });
+      setUser(user);
+    } catch (err) {
+      handleHttpError(err as Error, t("form.saveFailed")!);
+    }
+    setUpdatingUser(false);
   }
   return (
     <div class="flex-1 flex flex-col items-center">

@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { type PlatformStatistics, getPlatformStatistics } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
@@ -5,31 +6,24 @@ import { HostType } from "@models/game";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
-import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { Show, createSignal } from "solid-js";
+import { Show, createSignal, onMount } from "solid-js";
 
 export default function () {
-  const [loading, setLoading] = createSignal(false);
+  const [loading, setLoading] = createSignal(true);
   const [statistics, setStatistics] = createSignal(null as null | PlatformStatistics);
-  setLoading(true);
-  getPlatformStatistics()
-    .then((resp) => {
+  onMount(async () => {
+    try {
+      const resp = await getPlatformStatistics();
       setStatistics(resp);
-    })
-    .catch((err: HTTPError) => {
-      void err.response.text().then((text) => {
-        addToast({
-          level: "error",
-          description: `${t("admin.statistics.fetchFailed")}: ${text}`,
-          duration: 5000,
-        });
-      });
-    })
-    .finally(() => setLoading(false));
+    } catch (err) {
+      handleHttpError(err as Error, t("admin.statistics.fetchFailed")!);
+    }
+    setLoading(false);
+  });
+
   return (
     <>
       <Title title={`${t("admin.statistics.title")} - ${platformStore.config.name || t("platform.name")}`} />

@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getBulletinList } from "@api/bulletin";
 import Spin from "@assets/animates/spin";
 import { randomTips } from "@lib/utils/loading-tips";
@@ -7,11 +8,9 @@ import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import Pagination from "@widgets/pagination";
-import type { HTTPError } from "ky";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {
@@ -19,23 +18,16 @@ export default function () {
   const [total, setTotal] = createSignal(0);
   const [page, setPage] = createSignal(1);
   const [loading, setLoading] = createSignal(false);
-  function fetchArticles() {
+  async function fetchArticles() {
     setLoading(true);
-    getBulletinList(page(), 10)
-      .then(([a, t]) => {
-        setArticles(a);
-        setTotal(t);
-      })
-      .catch((err: HTTPError) => {
-        void err.response.text().then((reason) => {
-          addToast({
-            level: "error",
-            description: `${t("bulletin.fetchFailed")}: ${reason}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      const resp = await getBulletinList(page(), 10);
+      setArticles(resp[0]);
+      setTotal(resp[1]);
+    } catch (err) {
+      handleHttpError(err as Error, t("bulletin.fetchFailed")!);
+    }
+    setLoading(false);
   }
   createEffect(() => {
     if (page()) untrack(fetchArticles);

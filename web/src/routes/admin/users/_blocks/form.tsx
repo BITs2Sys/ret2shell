@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
 import { getUserIpList, getUserOAuthList } from "@api/user";
 import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
@@ -9,7 +10,6 @@ import { createForm, email, getValue, required, setValue, setValues } from "@mod
 import { A } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -20,7 +20,6 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import type { HTTPError } from "ky";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export type UserForm = {
@@ -52,7 +51,7 @@ export default function (compProps: {
   const [form, { Form, Field }] = createForm<UserForm>();
   createEffect(() => {
     if (compProps.editSource) {
-      untrack(() => {
+      untrack(async () => {
         setValues(form, {
           account: compProps.editSource?.account || "",
           nickname: compProps.editSource?.nickname || "",
@@ -74,32 +73,18 @@ export default function (compProps: {
           permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
         });
         setAvatarSet(!!compProps.editSource?.avatar);
-        getUserIpList(compProps.editSource!.id)
-          .then((resp) => {
-            setIps(resp);
-          })
-          .catch((err: HTTPError) => {
-            void err.response.text().then((text) => {
-              addToast({
-                level: "error",
-                description: `${t("admin.users.fetchIpAddressesFailed")}: ${text}`,
-                duration: 5000,
-              });
-            });
-          });
-        getUserOAuthList(compProps.editSource!.id)
-          .then((resp) => {
-            setOauthes(resp);
-          })
-          .catch((err: HTTPError) => {
-            void err.response.text().then((text) => {
-              addToast({
-                level: "error",
-                description: `${t("admin.users.fetchOAuthsFailed")}: ${text}`,
-                duration: 5000,
-              });
-            });
-          });
+        try {
+          const resp = await getUserIpList(compProps.editSource!.id);
+          setIps(resp);
+        } catch (err) {
+          handleHttpError(err as Error, t("admin.users.fetchIpAddressesFailed")!);
+        }
+        try {
+          const resp = await getUserOAuthList(compProps.editSource!.id);
+          setOauthes(resp);
+        } catch (err) {
+          handleHttpError(err as Error, t("admin.users.fetchOAuthsFailed")!);
+        }
       });
     }
   });
@@ -122,26 +107,17 @@ export default function (compProps: {
       handleUploadAvatar();
     }
   }
-  function handleUploadAvatar() {
+  async function handleUploadAvatar() {
     if (avatarFile()) {
       setAvatarUploading(true);
-      uploadMedia(avatarFile()!, false)
-        .then((resp) => {
-          setValue(form, "avatar", resp.hash);
-          setAvatarSet(true);
-        })
-        .catch((err: HTTPError) => {
-          void err.response.text().then((text) => {
-            addToast({
-              level: "error",
-              description: `${t("account.settings.info.avatarUploadFailed")}: ${text}`,
-              duration: 5000,
-            });
-          });
-        })
-        .finally(() => {
-          setAvatarUploading(false);
-        });
+      try {
+        const resp = await uploadMedia(avatarFile()!, false);
+        setValue(form, "avatar", resp.hash);
+        setAvatarSet(true);
+      } catch (err) {
+        handleHttpError(err as Error, t("account.settings.info.avatarUploadFailed")!);
+      }
+      setAvatarUploading(false);
     }
   }
 

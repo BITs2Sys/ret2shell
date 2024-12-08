@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import type { Config, EmailConfig } from "@models/config";
 import { createForm, custom, getValue, setValues } from "@modular-forms/solid";
@@ -18,43 +19,37 @@ export default function () {
   const [form, { Form, Field }] = createForm<EmailConfig>();
   const [loading, setLoading] = createSignal(false);
   const [config, setConfig] = createSignal(null as null | Config);
-  onMount(() => {
-    getPlatformConfig().then((resp) => {
+  onMount(async () => {
+    try {
+      const resp = await getPlatformConfig();
       setConfig(resp);
       setValues(form, {
         ...resp.email,
       });
-    });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("errors.500")!);
+    }
   });
 
-  function onSubmit(result: EmailConfig) {
+  async function onSubmit(result: EmailConfig) {
     setLoading(true);
-    updatePlatformConfig({
-      ...config()!,
-      email: {
-        ...config()?.email,
-        ...result,
-      },
-    })
-      .then(() => {
-        addToast({
-          level: "success",
-          description: t("form.saveSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.saveFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      await updatePlatformConfig({
+        ...config()!,
+        email: {
+          ...config()?.email,
+          ...result,
+        },
       });
+      addToast({
+        level: "success",
+        description: t("form.saveSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+    }
+    setLoading(false);
   }
 
   return (
@@ -117,9 +112,7 @@ export default function () {
                   ]}
                   value={field.value ? [field.value as string] : undefined}
                   inputProps={props}
-                >
-                  {/* TODO: integrate with modular-forms */}
-                </Select>
+                />
               )}
             </Field>
             <Field

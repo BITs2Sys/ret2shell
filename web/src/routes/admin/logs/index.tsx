@@ -1,4 +1,4 @@
-import { api_root } from "@api";
+import { api_root, handleHttpError } from "@api";
 import { getPlatformLogs } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
 import { accountStore } from "@storage/account";
@@ -9,9 +9,8 @@ import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
-import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { For, Show, createSignal, onCleanup } from "solid-js";
+import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 
 type Log = {
   timestamp: string;
@@ -35,19 +34,14 @@ export default function () {
   let ws: WebSocket;
 
   const [logFiles, setLogFiles] = createSignal([] as string[]);
-  getPlatformLogs()
-    .then((resp) => {
+  onMount(async () => {
+    try {
+      const resp = await getPlatformLogs();
       setLogFiles((resp as string[]).sort());
-    })
-    .catch((err: HTTPError) => {
-      void err.response.text().then((text) => {
-        addToast({
-          level: "error",
-          description: `${t("admin.logs.failedToFetchLogsList")}: ${text}`,
-          duration: 5000,
-        });
-      });
-    });
+    } catch (err) {
+      handleHttpError(err as Error, t("admin.logs.failedToFetchLogsList")!);
+    }
+  });
 
   function disable() {
     if (ws) {

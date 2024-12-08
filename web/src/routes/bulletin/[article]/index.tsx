@@ -7,9 +7,10 @@ import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
-import type { HTTPError } from "ky";
-import { Show, createSignal } from "solid-js";
+import { Show, createSignal, onMount } from "solid-js";
 import EditForm from "../_blocks/form";
+import { handleHttpError } from "@api";
+import { HTTPError } from "ky";
 
 export default function () {
   const params = useParams();
@@ -20,45 +21,39 @@ export default function () {
   const navigate = useNavigate();
 
   if (Number.isNaN(article_id)) navigate("/sigtrap/404", { replace: true });
-  getBulletin(article_id)
-    .then((resp) => {
-      setArticle(resp);
-    })
-    .catch((err: HTTPError) => {
-      void err.response.text().then((reason) => {
-        addToast({ level: "error", description: reason, duration: 5000 });
-        navigate(`/sigtrap/${err.response.status}`, { replace: true });
-      });
-    });
 
-  function onDelete() {
-    deleteBulletin(article_id)
-      .then(() => {
-        addToast({
-          level: "success",
-          description: t("bulletin.deleteSuccess")!,
-          duration: 5000,
-        });
-        navigate("/bulletin", { replace: true });
-      })
-      .catch((err: HTTPError) => {
-        void err.response.text().then((reason) => {
-          addToast({ level: "error", description: reason, duration: 5000 });
-        });
+  onMount(async () => {
+    try {
+      const resp = await getBulletin(article_id);
+      setArticle(resp);
+    } catch (err) {
+      handleHttpError(err as Error, t("errors.unknown")!);
+      if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
+      else navigate("/sigtrap/unknown", { replace: true });
+    }
+  });
+
+  async function onDelete() {
+    try {
+      await deleteBulletin(article_id);
+      addToast({
+        level: "success",
+        description: t("bulletin.deleteSuccess")!,
+        duration: 5000,
       });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("form.deleteFailed")!);
+    }
   }
 
-  function onDone(article: ArticleModel) {
-    getBulletin(article.id)
-      .then((resp) => {
-        setArticle(resp);
-      })
-      .catch((err: HTTPError) => {
-        void err.response.text().then((reason) => {
-          addToast({ level: "error", description: reason, duration: 5000 });
-          navigate(`/sigtrap/${err.response.status}`, { replace: true });
-        });
-      });
+  async function onDone(article: ArticleModel) {
+    try {
+      setArticle(await getBulletin(article.id));
+    } catch (err) {
+      handleHttpError(err as Error, t("errors.unknown")!);
+      if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
+      else navigate("/sigtrap/unknown", { replace: true });
+    }
     setSearchParams({ edit: undefined });
   }
   return (

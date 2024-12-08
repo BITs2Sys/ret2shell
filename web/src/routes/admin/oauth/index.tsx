@@ -12,9 +12,10 @@ import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Popover from "@widgets/popover";
 import type { HTTPError } from "ky";
-import { For, Show, createMemo, createSignal } from "solid-js";
+import { For, Show, createMemo, createSignal, onMount } from "solid-js";
 import InstituteForm from "./_blocks/form";
 import { getLogo } from "@assets/brands";
+import { handleHttpError } from "@api";
 
 export default function () {
   const [authConfig, setAuthConfig] = createSignal({
@@ -23,77 +24,61 @@ export default function () {
     expires_time: 0,
     oauth_keys: {},
   } as AuthConfig);
-  getAuthConfig()
-    .then((config) => setAuthConfig(config))
-    .catch(() => {});
   const oauthServices = createMemo(() => Object.keys(authConfig().oauth_keys || {}));
   const [loading, setLoading] = createSignal(true);
-  refreshInstitutes().then(() => setLoading(false));
-  function handleUpdateInstitute(result: Institute) {
+  onMount(async () => {
+    try {
+      setAuthConfig(await getAuthConfig());
+    } catch (err) {
+      handleHttpError(err as Error, t("errors.500")!);
+    }
+    await refreshInstitutes();
+    setLoading(false);
+  });
+  async function handleUpdateInstitute(result: Institute) {
     setLoading(true);
-    updateInstitute(result)
-      .then(() => {
-        refreshInstitutes();
-        addToast({
-          level: "success",
-          description: t("form.saveSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.saveFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      await updateInstitute(result);
+      refreshInstitutes();
+      addToast({
+        level: "success",
+        description: t("form.saveSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+    }
+    setLoading(false);
   }
-  function handleCreateInstitute(result: Institute) {
+  async function handleCreateInstitute(result: Institute) {
     setLoading(true);
-    createInstitute(result)
-      .then(() => {
-        refreshInstitutes();
-        addToast({
-          level: "success",
-          description: t("form.createSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.createFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      await createInstitute(result);
+      refreshInstitutes();
+      addToast({
+        level: "success",
+        description: t("form.createSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("form.createFailed")!);
+    }
+    setLoading(false);
   }
-  function handleDeleteInstitute(result: Institute) {
+  async function handleDeleteInstitute(result: Institute) {
     setLoading(true);
-    deleteInstitute(result.id)
-      .then(() => {
-        refreshInstitutes();
-        addToast({
-          level: "success",
-          description: t("form.deleteSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("form.deleteFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      await deleteInstitute(result.id);
+      refreshInstitutes();
+      addToast({
+        level: "success",
+        description: t("form.deleteSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("form.deleteFailed")!);
+    }
+    setLoading(false);
   }
   return (
     <>

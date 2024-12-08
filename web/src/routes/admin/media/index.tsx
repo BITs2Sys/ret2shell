@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import type { Config, MediaConfig } from "@models/config";
 import { createForm, setValues } from "@modular-forms/solid";
@@ -16,17 +17,20 @@ export default function () {
   const [form, { Form, Field }] = createForm<MediaConfig>();
   const [loading, setLoading] = createSignal(false);
   const [config, setConfig] = createSignal(null as null | Config);
-  onMount(() => {
-    getPlatformConfig().then((resp) => {
+  onMount(async () => {
+    try {
+      const resp = await getPlatformConfig();
       setConfig(resp);
       setValues(form, {
         path: resp.media.path,
         limit: resp.media.limit,
         anti_theft: resp.media.anti_theft,
       });
-    });
+    } catch (err) {
+      handleHttpError(err as Error, t("errors.500")!);
+    }
   });
-  function onSubmit(result: MediaConfig) {
+  async function onSubmit(result: MediaConfig) {
     setLoading(true);
     if (!config()) {
       addToast({
@@ -40,25 +44,18 @@ export default function () {
       ...config(),
       media: result,
     } as Config;
-    updatePlatformConfig(mergedConfig)
-      .then(() => {
-        setConfig(mergedConfig);
-        addToast({
-          level: "success",
-          description: t("admin.platform.updateSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("admin.platform.updateFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      await updatePlatformConfig(mergedConfig);
+      setConfig(mergedConfig);
+      addToast({
+        level: "success",
+        description: t("admin.platform.updateSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("admin.platform.updateFailed")!);
+    }
+    setLoading(false);
   }
   return (
     <>

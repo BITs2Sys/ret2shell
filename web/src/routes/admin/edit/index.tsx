@@ -11,6 +11,7 @@ import Button from "@widgets/button";
 import Input from "@widgets/input";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
+import { handleHttpError } from "@api";
 
 type PlatformConfigForm = {
   name?: string;
@@ -26,7 +27,7 @@ export default function () {
   const [form, { Form, Field }] = createForm<PlatformConfigForm>();
   const [loading, setLoading] = createSignal(false);
   const [config, setConfig] = createSignal(null as null | Config);
-  function onSubmit(result: PlatformConfigForm) {
+  async function onSubmit(result: PlatformConfigForm) {
     setLoading(true);
     if (!config()) {
       addToast({
@@ -49,29 +50,23 @@ export default function () {
         hide_maker: result.hide_maker,
       },
     } as Config;
-    updatePlatformConfig(mergedConfig)
-      .then(() => {
-        setConfig(mergedConfig);
-        setPlatformStore({ config: mergedConfig.server });
-        addToast({
-          level: "success",
-          description: t("admin.platform.updateSuccess")!,
-          duration: 5000,
-        });
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then((text) => {
-          addToast({
-            level: "error",
-            description: `${t("admin.platform.updateFailed")}: ${text}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      await updatePlatformConfig(mergedConfig);
+      setConfig(mergedConfig);
+      setPlatformStore({ config: mergedConfig.server });
+      addToast({
+        level: "success",
+        description: t("admin.platform.updateSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as Error, t("admin.platform.updateFailed")!);
+    }
+    setLoading(false);
   }
-  onMount(() => {
-    getPlatformConfig().then((resp) => {
+  onMount(async () => {
+    try {
+      const resp = await getPlatformConfig();
       setConfig(resp);
       setValues(form, {
         name: resp.server.name || undefined,
@@ -82,7 +77,9 @@ export default function () {
         record: resp.server.record || undefined,
         hide_maker: resp.server.hide_maker || false,
       });
-    });
+    } catch (err) {
+      handleHttpError(err as HTTPError, t("errors.500")!);
+    }
   });
   return (
     <>

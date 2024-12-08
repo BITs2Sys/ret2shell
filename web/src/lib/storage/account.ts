@@ -52,7 +52,7 @@ export async function refreshUser() {
   }
 }
 
-export const refreshInstitutes = async () => {
+export async function refreshInstitutes() {
   try {
     const institutes = await getInstitutes();
     setAccountStore({ institutes });
@@ -60,4 +60,4 @@ export const refreshInstitutes = async () => {
     // make eslint happy
     setAccountStore({ institutes: [] });
   }
-};
+}

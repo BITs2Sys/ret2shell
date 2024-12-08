@@ -1,16 +1,15 @@
+import { handleHttpError } from "@api";
 import { getClusterConfig, getClusterNodes } from "@api/cluster";
 import Spin from "@assets/animates/spin";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
 import type { Node } from "kubernetes-types/core/v1";
-import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { For, Match, Show, Switch, createSignal } from "solid-js";
+import { For, Match, Show, Switch, createSignal, onMount } from "solid-js";
 
 export default function () {
   const [available, setAvailable] = createSignal(false);
@@ -19,8 +18,10 @@ export default function () {
   const [clusterDNS, setClusterDNS] = createSignal("");
   const [clusterDomain, setClusterDomain] = createSignal("");
   const [clusterNodes, setClusterNodes] = createSignal([] as Node[]);
-  getClusterConfig()
-    .then((resp) => {
+
+  onMount(async () => {
+    try {
+      const resp = await getClusterConfig();
       setAvailable(true);
       for (const c of resp.items) {
         if (c.data?.since) {
@@ -33,26 +34,18 @@ export default function () {
           setClusterDomain(c.data.clusterDomain);
         }
       }
-    })
-    .catch(() => {
+    } catch {
       setAvailable(false);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-  getClusterNodes()
-    .then((resp) => {
+    }
+    setLoading(false);
+
+    try {
+      const resp = await getClusterNodes();
       setClusterNodes(resp.items);
-    })
-    .catch((err: HTTPError) => {
-      void err.response.text().then((text) => {
-        addToast({
-          level: "error",
-          description: `${t("admin.cluster.failedToFetchNodes")}: ${text}`,
-          duration: 5000,
-        });
-      });
-    });
+    } catch (err) {
+      handleHttpError(err as Error, t("admin.cluster.failedToFetchNodes")!);
+    }
+  });
 
   const [shownNode, setShownNode] = createSignal(null as Node | null);
   return (

@@ -1,9 +1,9 @@
+import { handleHttpError } from "@api";
 import { createBulletin, updateBulletin } from "@api/bulletin";
 import { type Article, ArticleAccessPolicy } from "@models/article";
 import { createForm, required, setValues } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
 import IconCheckbox from "@widgets/icon-checkbox";
@@ -46,33 +46,26 @@ export default function (props: {
       });
     }
   });
-  function onSubmit(result: BulletinForm) {
+  async function onSubmit(result: BulletinForm) {
     setLoading(true);
-    (props.editSource ? updateBulletin : createBulletin)({
-      ...result,
-      weight: result.weight ? 1 : 0,
-      id: props.editSource?.id || 0,
-      created_at: props.editSource?.created_at || DateTime.now(),
-      updated_at: props.editSource?.updated_at || DateTime.now(),
-      publisher_id: accountStore.id || 0,
-      access_policy: ArticleAccessPolicy.Bulletin,
-      draft: false,
-      published: true,
-      path: [],
-    })
-      .then((resp) => props.onDone(resp))
-      .catch((err: HTTPError) => {
-        void err.response.text().then((resp) => {
-          addToast({
-            level: "error",
-            description: `${props.editSource ? t("form.saveFailed") : t("form.createFailed")}: ${resp}`,
-            duration: 5000,
-          });
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const resp = await (props.editSource ? updateBulletin : createBulletin)({
+        ...result,
+        weight: result.weight ? 1 : 0,
+        id: props.editSource?.id || 0,
+        created_at: props.editSource?.created_at || DateTime.now(),
+        updated_at: props.editSource?.updated_at || DateTime.now(),
+        publisher_id: accountStore.id || 0,
+        access_policy: ArticleAccessPolicy.Bulletin,
+        draft: false,
+        published: true,
+        path: [],
       });
+      props.onDone(resp);
+    } catch (err) {
+      handleHttpError(err as HTTPError, props.editSource ? t("form.saveFailed")! : t("form.createFailed")!);
+    }
+    setLoading(false);
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 w-full max-w-5xl flex-1">
