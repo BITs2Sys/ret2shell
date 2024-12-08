@@ -426,10 +426,12 @@ impl Cluster {
                   .map(|(k, v)| (k.to_owned(), Quantity(v)))
                   .collect(),
               ),
+              // TODO: limit ephemeral storage
               limits: Some(
                 [
                   ("cpu", image.cpu.to_string()),
                   ("memory", image.mem.clone()),
+                  ("ephemeral-storage", "3Gi".to_owned()),
                 ]
                 .iter()
                 .cloned()
