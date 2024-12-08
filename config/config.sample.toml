@@ -2,12 +2,12 @@
 sensitive_word_list = './config/sensitive_word_list.txt'
 
 [auth]
-signing_key = '857f1cda-01f7-473c-b957-6d4744230a47'
+signing_key = 'K3yInD3v3l0pm3nt'
 buffer_time = 21600
 expires_time = 86400
 
 [auth.oauth_keys]
-xdu_cas = { id = "https://ctf.xidian.edu.cn/account/oauth", key = "NOTNEEDED" }
+#xdu_cas = { id = "https://ctf.xidian.edu.cn/account/oauth", key = "NOTNEEDED" }
 
 [bucket]
 path = './data/bucket'
@@ -57,7 +57,7 @@ enabled = false
 host = 'smtp.example.com'
 port = 587
 sender = 'Ret2Shell'
-username = 'ret2shell@woooo.tech'
+username = 'dev@ret.sh.cn'
 password = 'P@ssw0rdInD3v3l0pm3nt'
 tls = 'starttls'                   #  'none' | 'tls' | 'starttls'
 
@@ -86,11 +86,11 @@ port = 4222
 [server]
 host = '127.0.0.1'
 port = 8080
-external_domain = 'ctf.woooo.tech'
+external_domain = 'dev.ret.sh.cn'
 external_https = true
 api_base_path = '/api'
 cors_origins = '*'
-api_rate_limit = 10                # in 5 seconds
+api_rate_limit = 10               # in 5 seconds
 
 ### the Following settings could be changed at web admin panel.
 ### configuration in database will overwrite the following settings.
@@ -98,6 +98,6 @@ api_rate_limit = 10                # in 5 seconds
 # footer_info = 'Ret 2 Shell'
 # footer_url = 'https://github.com/ret2shell/ret2shell'
 # subject_info = 'Fight for all the beauty in the world.'
-# subject_url = 'https://www.woooo.tech'
+# subject_url = 'https://ret.sh.cn/'
 # record = '豫ICP备xxxxxxxx号-1'   # China ICP record
 # hide_maker = false
