@@ -2,13 +2,15 @@ use std::{net::IpAddr, time::Duration};
 
 use axum::{
   body::Body,
-  http::{HeaderValue, Request},
+  error_handling::HandleErrorLayer,
+  http::{HeaderValue, Request, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
   routing::get,
   Router,
 };
 use r2s_config::server;
+use tower::{buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
 use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
@@ -37,6 +39,8 @@ mod rpc;
 mod traffic;
 mod user;
 mod wiki;
+
+mod proxy;
 
 pub async fn initialize(
   config: Option<server::Config>, state: GlobalState,
@@ -102,6 +106,27 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .route("/ping", get(ping))
     .route_layer(from_fn_with_state(state.clone(), ip_record))
     .route_layer(from_fn_with_state(state.clone(), extract_user_info))
+    .layer(
+      ServiceBuilder::new()
+        .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
+          (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("unhandled error: {}", err),
+          )
+        }))
+        .layer(BufferLayer::new(1024))
+        .layer(RateLimitLayer::new(
+          state
+            .clone()
+            .config
+            .server
+            .unwrap_or_default()
+            .api_rate_limit
+            .unwrap_or(48) as u64,
+          Duration::from_secs(5),
+        )),
+    )
+    .nest("/", proxy::router(state))
 }
 
 async fn ping() -> impl IntoResponse {
