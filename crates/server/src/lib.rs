@@ -1,6 +1,7 @@
 use std::{io::Write, net::SocketAddr, process};
 
 use colored::Colorize;
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use r2s_config::GlobalConfig;
 use rustls::crypto;
 use tokio::signal;
@@ -88,6 +89,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
 
   let state = GlobalState {
     config: config.clone(),
+    requestor: hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
+      .build(HttpConnector::new()),
     db,
     cache,
     auditor,

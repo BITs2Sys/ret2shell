@@ -69,6 +69,7 @@ pub async fn initialize(
             .expect("invalid CORS origins"),
         ),
     )
+    .nest("/", proxy::router(&state))
     .layer(
       TraceLayer::new_for_http()
         .make_span_with(|request: &Request<Body>| {
@@ -126,7 +127,6 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
           Duration::from_secs(5),
         )),
     )
-    .nest("/", proxy::router(state))
 }
 
 async fn ping() -> impl IntoResponse {

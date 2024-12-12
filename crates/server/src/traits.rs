@@ -4,6 +4,7 @@ use axum::{
   http::StatusCode,
   response::{IntoResponse, Response},
 };
+use hyper_util::client::legacy::connect::HttpConnector;
 use r2s_auditor::Auditor;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
@@ -20,9 +21,12 @@ use r2s_queue::Queue;
 use thiserror::Error;
 use tracing::{error, warn};
 
+type HTTPClient = hyper_util::client::legacy::Client<HttpConnector, Body>;
+
 #[derive(Clone, FromRef)]
 pub struct GlobalState {
   pub config: GlobalConfig,
+  pub requestor: HTTPClient,
   pub db: Database,
   pub cache: Cache,
   pub auditor: Auditor,

@@ -101,3 +101,7 @@ api_rate_limit = 10               # in 5 seconds
 # subject_url = 'https://ret.sh.cn/'
 # record = '豫ICP备xxxxxxxx号-1'   # China ICP record
 # hide_maker = false
+
+[server.frontend]
+serve_type = 'static'    # static | proxy
+path = './frontend/dist'

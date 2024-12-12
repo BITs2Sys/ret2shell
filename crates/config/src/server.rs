@@ -4,6 +4,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::Merge;
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, FromJsonQueryResult, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum FrontendServeType {
+  #[default]
+  Static,
+  Proxy,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
+pub struct FrontendConfig {
+  pub serve_type: FrontendServeType,
+  pub path: String,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq, Default)]
 pub struct Config {
   /// The host address of the server.
@@ -20,6 +34,8 @@ pub struct Config {
   pub cors_origins: String,
   /// request rate per 5 seconds
   pub api_rate_limit: Option<i32>,
+  /// Frontend configuration
+  pub frontend: Option<FrontendConfig>,
 
   pub name: Option<String>,
   pub footer_info: Option<String>,
@@ -63,6 +79,7 @@ impl Config {
       external_https: self.external_https,
       api_base_path: self.api_base_path.clone(),
       cors_origins: "".to_string(),
+      frontend: None,
       name: self.name.clone(),
       footer_info: self.footer_info.clone(),
       footer_url: self.footer_url.clone(),
@@ -86,6 +103,7 @@ impl Merge for Option<Config> {
         external_https: b.external_https,
         api_base_path: b.api_base_path,
         cors_origins: b.cors_origins,
+        frontend: b.frontend,
         name: b.name.or(a.name),
         footer_info: b.footer_info.or(a.footer_info),
         footer_url: b.footer_url.or(a.footer_url),
