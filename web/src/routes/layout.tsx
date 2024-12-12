@@ -447,7 +447,8 @@ export default function (props: { children?: JSX.Element }) {
     }
     platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
 
-    checkCookiePolicy();
+    setTimeout(checkCookiePolicy, 1000);
+
     if (showAnimation) {
       setTimeout(() => {
         const typeTimer = setInterval(() => {
