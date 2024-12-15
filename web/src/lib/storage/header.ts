@@ -13,6 +13,7 @@ class RouteHeader {
     this.subRoutes = [];
   }
 
+  /// returns: [parentRoute, exactRoute]
   findRoute(subPath: string[]): [RouteHeader, RouteHeader | null] {
     if (subPath.length === 0) {
       return [this, this];
@@ -56,10 +57,14 @@ export function Title(props: { title: string }) {
 }
 
 export function setupTitleResolver() {
+  const watchedLocation = useLocation();
   createEffect(() => {
-    const path = useLocation().pathname;
-    const pathArr = path.split("/");
-    const [parentRoute, exactRoute] = untrack(() => headerStore.findRoute(pathArr));
-    document.title = exactRoute?.title || parentRoute.title || platformStore.config.name || t("platform.name")!;
+    let path = watchedLocation.pathname;
+    untrack(() => {
+      if (path.endsWith('/')) path = path.slice(0, path.length - 1);
+      const pathArr = path.split("/");
+      const [parentRoute, exactRoute] = headerStore.findRoute(pathArr);
+      document.title = exactRoute?.title || parentRoute.title || platformStore.config.name || t("platform.name")!;
+    })
   });
 }

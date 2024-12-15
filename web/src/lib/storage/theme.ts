@@ -70,7 +70,7 @@ export function initTheme() {
   window.onafterprint = onAfterPrint;
 }
 
-const [dict] = createResource(themeStore.locale || "zh_cn", fetchDictionary);
+const [dict] = createResource(themeStore.locale || systemPrefersLocale, fetchDictionary);
 export const t = translator(dict, resolveTemplate);
 export const colorPalette = {
   fg: () => (themeStore.colorScheme === "dark" ? "#eee" : "#121212"),
