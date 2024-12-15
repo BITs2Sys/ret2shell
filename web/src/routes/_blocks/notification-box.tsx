@@ -1,32 +1,44 @@
-import { t } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import { clearToasts, toastStore } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Popover from "@widgets/popover";
 import Toast from "@widgets/toast";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
 export function NotificationBoxContent() {
   return (
-    <div class="flex flex-col space-y-2 max-w-96 w-[calc(100vw-1rem)]">
-      <Card contentClass="p-2 h-12 flex flex-row items-center space-x-2">
-        <h2 class="px-2 flex-1 flex items-center space-x-2 font-bold">
-          <span class="icon-[fluent--alert-20-regular] w-5 h-5" />
-          <Show
-            when={toastStore.toasts.length > 0}
-            fallback={<span class="opacity-60">{t("platform.noNotifications")}</span>}
-          >
-            <span>{t("platform.notificationBox")}</span>
+    <OverlayScrollbarsComponent
+      options={{
+        scrollbars: {
+          theme: `os-theme-${fullTheme()}`,
+          autoHide: "scroll",
+        },
+      }}
+      class="max-h-[80vh] max-w-96 w-[calc(100vw-1rem)]"
+      defer
+    >
+      <div class="flex flex-col space-y-2 max-w-96 w-[calc(100vw-1rem)]">
+        <Card contentClass="p-2 h-12 flex flex-row items-center space-x-2">
+          <h2 class="px-2 flex-1 flex items-center space-x-2 font-bold">
+            <span class="icon-[fluent--alert-20-regular] w-5 h-5" />
+            <Show
+              when={toastStore.toasts.length > 0}
+              fallback={<span class="opacity-60">{t("platform.noNotifications")}</span>}
+            >
+              <span>{t("platform.notificationBox")}</span>
+            </Show>
+          </h2>
+          <Show when={toastStore.toasts.length > 0}>
+            <Button size="sm" ghost level="info" onClick={() => clearToasts()}>
+              {t("platform.clearNotifications")}
+            </Button>
           </Show>
-        </h2>
-        <Show when={toastStore.toasts.length > 0}>
-          <Button size="sm" ghost level="info" onClick={() => clearToasts()}>
-            {t("platform.clearNotifications")}
-          </Button>
-        </Show>
-      </Card>
-      <For each={toastStore.toasts}>{(toast) => <Toast toast={toast} />}</For>
-    </div>
+        </Card>
+        <For each={toastStore.toasts}>{(toast) => <Toast toast={toast} />}</For>
+      </div>
+    </OverlayScrollbarsComponent>
   );
 }
 
