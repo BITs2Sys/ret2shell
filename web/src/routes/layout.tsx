@@ -529,7 +529,7 @@ export default function (props: { children?: JSX.Element }) {
       {props.children}
       <Toasts />
       <Transition
-        onExit={async (el, done) => {
+        onExit={async (el: HTMLElement, done: () => void) => {
           const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 300,
           });
