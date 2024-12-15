@@ -5,7 +5,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore } from "@storage/game";
+import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
@@ -40,7 +40,7 @@ export default function () {
 
   createEffect(() => {
     if (selectedChallengeId() && gameStore.current) {
-      if (gameStore.current && gameStore.current.start_at > DateTime.now()) {
+      if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
         addToast({
           level: "warning",
           description: t("game.challenge.notStarted")!,
