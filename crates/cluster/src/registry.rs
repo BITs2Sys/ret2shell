@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
+use deunicode::deunicode_with_tofu;
 use r2s_config::cluster::RegistryConfig;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use tempdir::TempDir;
 use tokio::{io::AsyncRead, process::Command};
@@ -117,11 +119,16 @@ impl Registry {
     }
     let tmp_dir = TempDir::new("ret2shell")?;
     let file_path = tmp_dir.path().join(name);
+    if file_path.canonicalize()?.starts_with(tmp_dir.path()) {
+      return Err(ClusterError::InvalidImageFileType(
+        "invalid file path".to_string(),
+      ));
+    }
     let mut file = tokio::fs::File::create(&file_path).await?;
     debug!("uploading file to path: {:?}", file_path);
     tokio::io::copy(&mut stdin, &mut file).await?;
     // get tag name without file extension
-    let repo = name.split('.').next().unwrap();
+    let repo = to_image_name(name.split('.').next().unwrap());
     let mut args = vec![
       "copy".to_string(),
       format!("docker-archive:{}", name),
@@ -144,4 +151,15 @@ impl Registry {
       Err(ClusterError::UploadFailed(error))
     }
   }
+}
+
+fn to_image_name(file: &str) -> String {
+  let file = deunicode_with_tofu(file, "_").trim().to_owned();
+  let escape_filesystem = Regex::new(r#"[\\\/:\*\?\"<>\|\ ]"#).unwrap();
+  let escape_printable = Regex::new(r#"[^[:print:]]"#).unwrap();
+  let file = escape_filesystem.replace_all(&file, "_").to_string();
+  escape_printable
+    .replace_all(&file, "")
+    .to_string()
+    .to_lowercase()
 }
