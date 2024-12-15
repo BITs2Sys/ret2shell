@@ -39,6 +39,17 @@ export default function () {
   const [creating, setCreating] = createSignal(false);
 
   createEffect(() => {
+    if (gameStore.current && gameStore.current.archive_at < DateTime.now()) {
+      addToast({
+        level: "warning",
+        description: t("game.archivedGotoTraining")!,
+        duration: 5000,
+      });
+      navigate(`/games/${gameStore.current.id}`);
+    }
+  });
+
+  createEffect(() => {
     if (selectedChallengeId() && gameStore.current) {
       if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
         addToast({
@@ -135,12 +146,6 @@ export default function () {
         <div class="flex-1 flex flex-col w-0">
           <Tabs baseUrl={`/games/${gameStore.current?.id}/challenges`} loading={loadingChallenge()} inGame />
           <Switch fallback={<Welcome />}>
-            <Match when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
-              <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent-emoji-flat--party-popper] w-24 h-24" />
-                <span>{t("game.archivedGotoTraining")}</span>
-              </div>
-            </Match>
             <Match when={loadingChallenge()}>
               <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
                 <LoadingTips />

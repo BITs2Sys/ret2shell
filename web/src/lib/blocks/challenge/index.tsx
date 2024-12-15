@@ -12,7 +12,7 @@ import Popover from "@widgets/popover";
 import Splitter from "@widgets/splitter";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createSignal, onCleanup } from "solid-js";
+import { Show, createMemo, createSignal, onCleanup } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
 import Checker from "./checker";
@@ -32,9 +32,31 @@ function BottomPanel(props: {
   onExpand?: () => void;
   inGame: boolean;
 }) {
-  const [_, setSearchParams] = useSearchParams();
-  const [page, setPage] = createSignal(0);
-  const pages = [Terminal, Hints, Files, Hammer, Answer, Statistics, Instances, Checker, Settings];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pages = {
+    terminal: Terminal,
+    hints: Hints,
+    files: Files,
+    hammer: Hammer,
+    answer: Answer,
+    statistics: Statistics,
+    instances: Instances,
+    checker: Checker,
+    settings: Settings,
+  };
+  const page = createMemo(() => {
+    const key = (searchParams.tab as string) || "terminal";
+    return Object.keys(pages).includes(key) ? key : "terminal";
+  });
+  const pageComponent = () => {
+    if (!isGameAdmin() && ["statistics", "instances", "checker", "settings"].includes(page())) {
+      return pages.terminal;
+    }
+    if (!props.inGame && page() === "hammer") {
+      return pages.terminal;
+    }
+    return pages[page() as keyof typeof pages];
+  };
   const [deleting, setDeleting] = createSignal(false);
   async function handleDeleteChallenge() {
     if (challengeStore.current) {
@@ -95,41 +117,49 @@ function BottomPanel(props: {
             />
           </Button>
           <Divider direction="vertical" class="h-8" />
-          <Button onClick={() => setPage(0)} ghost={page() !== 0}>
+          <Button onClick={() => setSearchParams({ tab: "terminal" })} ghost={page() !== "terminal"}>
             <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("game.challenge.terminal")}</span>
           </Button>
-          <Button onClick={() => setPage(1)} ghost={page() !== 1}>
+          <Button onClick={() => setSearchParams({ tab: "hints" })} ghost={page() !== "hints"}>
             <span class="icon-[fluent--info-20-regular] w-5 h-5" />
             <span>{t("game.challenge.hint")}</span>
           </Button>
-          <Button onClick={() => setPage(3)} ghost={page() !== 3} disabled={!props.inGame}>
+          <Button
+            onClick={() => setSearchParams({ tab: "hammer" })}
+            ghost={page() !== "hammer"}
+            disabled={!props.inGame}
+          >
             <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
             <span>{t("game.challenge.hammer")}</span>
           </Button>
-          <Button onClick={() => setPage(4)} ghost={page() !== 4} disabled={props.inGame && !isGameAdmin()}>
+          <Button
+            onClick={() => setSearchParams({ tab: "answer" })}
+            ghost={page() !== "answer"}
+            disabled={props.inGame && !isGameAdmin()}
+          >
             <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("game.challenge.answer")}</span>
           </Button>
           <Show when={isGameAdmin()}>
             <Divider direction="vertical" class="h-8" />
-            <Button onClick={() => setPage(5)} ghost={page() !== 5}>
+            <Button onClick={() => setSearchParams({ tab: "statistics" })} ghost={page() !== "statistics"}>
               <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
               <span>{t("game.challenge.statistics")}</span>
             </Button>
-            <Button onClick={() => setPage(2)} ghost={page() !== 2}>
+            <Button onClick={() => setSearchParams({ tab: "files" })} ghost={page() !== "files"}>
               <span class="icon-[fluent--save-20-regular] w-5 h-5" />
               <span>{t("game.challenge.files")}</span>
             </Button>
-            <Button onClick={() => setPage(6)} ghost={page() !== 6}>
+            <Button onClick={() => setSearchParams({ tab: "instances" })} ghost={page() !== "instances"}>
               <span class="icon-[fluent--production-20-regular] w-5 h-5" />
               <span>{t("game.challenge.instances")}</span>
             </Button>
-            <Button onClick={() => setPage(7)} ghost={page() !== 7}>
+            <Button onClick={() => setSearchParams({ tab: "checker" })} ghost={page() !== "checker"}>
               <span class="icon-[fluent--flash-play-20-regular] w-5 h-5" />
               <span>{t("game.challenge.checker")}</span>
             </Button>
-            <Button onClick={() => setPage(8)} ghost={page() !== 8}>
+            <Button onClick={() => setSearchParams({ tab: "settings" })} ghost={page() !== "settings"}>
               <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
               <span>{t("game.challenge.settings")}</span>
             </Button>
@@ -203,7 +233,7 @@ function BottomPanel(props: {
         class="relative w-full flex-1 print:h-auto print:overflow-auto"
         defer
       >
-        <Dynamic component={pages[page()]} {...props} />
+        <Dynamic component={pageComponent()} {...props} />
       </OverlayScrollbarsComponent>
     </div>
   );
