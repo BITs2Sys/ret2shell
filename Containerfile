@@ -22,5 +22,8 @@ RUN apk add --update --no-cache curl git skopeo && \
 
 COPY --from=builder /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /bin/r2s-server
 
-ENTRYPOINT ["/bin/r2s-server"]
+# if you changes the server port in deployment, maybe you should request for a new distribution
+HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=1 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/ping || exit 1
 
+ENTRYPOINT ["/bin/r2s-server"]
