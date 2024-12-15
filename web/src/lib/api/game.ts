@@ -13,6 +13,7 @@ import type { DateTime } from "luxon";
 import api, { api_root } from ".";
 import type { Extra } from "../models/extra";
 import type { Hint } from "../models/hint";
+import type { RegistryConfig } from "@models/config";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -560,4 +561,16 @@ export async function updateChallengeAnswer(game_id: number, challenge_id: numbe
       json: answer,
     })
     .json<string>();
+}
+
+export async function getRegistryConfig(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/registry/config`).json<RegistryConfig>();
+}
+
+export async function getRegistryRepositories(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/registry`).json<string[]>();
+}
+
+export async function getRegistryImageTags(game_id: number, repo: string) {
+  return await api.get(`${api_root}/game/${game_id}/registry/${repo}`).json<string[]>();
 }

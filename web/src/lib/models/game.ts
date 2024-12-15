@@ -35,4 +35,11 @@ export type Game = {
   admins: number[];
   weight: number;
   token: string | null;
+  bucket: string | null;
+  timeline_presets: {
+    start_at: DateTime;
+    end_at: DateTime;
+  }[];
+  node_selector: string | null;
+  traffic: string | null;
 };

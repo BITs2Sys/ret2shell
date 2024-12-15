@@ -1,6 +1,12 @@
 import { api_root, handleHttpError } from "@api";
-import { getRegistryConfig, getRegistryImageTags, getRegistryRepositories } from "@api/cluster";
-import { deleteChallengeEnv, getChallengeInstance, updateChallengeEnv } from "@api/game";
+import {
+  deleteChallengeEnv,
+  getChallengeInstance,
+  getRegistryConfig,
+  getRegistryImageTags,
+  getRegistryRepositories,
+  updateChallengeEnv,
+} from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
 import type { Challenge, ChallengeImage } from "@models/challenge";
@@ -34,7 +40,7 @@ function CreateForm(fnProps: {
   const [registryConfig, setRegistryConfig] = createSignal<RegistryConfig | null>(null);
   onMount(async () => {
     try {
-      setRegistryConfig(await getRegistryConfig());
+      setRegistryConfig(await getRegistryConfig(gameStore.current!.id));
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.fetchEnvRegistryConfigFailed")!);
     }
@@ -48,7 +54,7 @@ function CreateForm(fnProps: {
   async function fetchTags(repo: string) {
     setLoading(true);
     try {
-      setTags(await getRegistryImageTags(repo));
+      setTags(await getRegistryImageTags(gameStore.current!.id, repo));
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.fetchEnvImagesFailed")!);
     }
@@ -188,7 +194,11 @@ function CreateForm(fnProps: {
                   }
                   // inputProps={props}
                   onValueChange={(e) => {
-                    setValue(form, "tag", `${registryConfig()?.external}/${searchedRepo()}:${e.value.at(0)}`);
+                    setValue(
+                      form,
+                      "tag",
+                      `${registryConfig()?.external}/${gameStore.current!.bucket}/${searchedRepo()}:${e.value.at(0)}`
+                    );
                   }}
                 />
                 <Field name="restricted" type="boolean">
@@ -385,7 +395,7 @@ export default function (_props: {
   const [repos, setRepos] = createSignal<string[]>([]);
   async function fetchRepos() {
     try {
-      setRepos(await getRegistryRepositories());
+      setRepos(await getRegistryRepositories(gameStore.current!.id));
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.fetchEnvImagesFailed")!);
     }
