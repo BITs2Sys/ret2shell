@@ -77,9 +77,9 @@ export function DiyBoxContent() {
           <span class="flex-1 text-start font-normal">{t("platform.ret2codec")}</span>
           <Show
             when={platformStore.enable_ret2codec}
-            fallback={<span class="icon-[fluent--lock-open-20-regular] w-5 h-5" />}
+            fallback={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
           >
-            <span class="icon-[fluent--lock-shield-20-regular] w-5 h-5 text-success" />
+            <span class="icon-[fluent--emoji-meme-20-regular] w-5 h-5 text-success" />
           </Show>
         </Button>
       </Card>
