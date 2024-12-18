@@ -76,7 +76,7 @@ export default function () {
   onCleanup(() => clearInterval(updateTimer));
 
   const [introduction, setIntroduction] = createSignal(null as ArticleModel | null);
-  const [loading, setLoading] = createSignal(true);
+  const [loading, setLoading] = createSignal(false);
 
   createEffect(() => {
     setIntroduction(null);

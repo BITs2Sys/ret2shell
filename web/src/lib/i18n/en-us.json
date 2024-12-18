@@ -39,7 +39,8 @@
       "recordTitle": "China MIIT Record Number",
       "hideMaker": "Hide Developer Information",
       "hideMakerDisabled": "Your permission does not allow hiding developer information"
-    }
+    },
+    "thanks": "Thanks for using my software."
   },
   "wiki": {
     "title": "Wiki",

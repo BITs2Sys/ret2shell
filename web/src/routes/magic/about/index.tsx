@@ -1,11 +1,12 @@
 import LogoAnimate from "@assets/animates/logo-animate";
 import { Reverier } from "@assets/animates/Reverier";
 import { platformStore } from "@storage/platform";
-import { fullTheme } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show } from "solid-js";
+import thanksForUsingMySoftware from "@assets/imgs/thanks-for-using-my-software.svg";
 
 export default function () {
   return (
@@ -163,19 +164,27 @@ export default function () {
           </OverlayScrollbarsComponent>
         </section>
         <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative space-y-8 p-3">
-          <Reverier width={256} height={256} class="" />
-          <h2 class="flex flex-col space-y-2 w-full max-w-3xl">
-            <span class="text-3xl font-bold">
-              <span class="text-error">&gt;&nbsp;</span>
-              Powered by Reverier
-            </span>
-            <Divider />
-            <span class="text-primary self-end">with caffine, a cat named 'dog', and love.</span>
-          </h2>
+          <div class="flex flex-row items-center space-x-6">
+            <Reverier width={128} height={128} class="" />
+            <h2 class="flex flex-col space-y-2 justify-center">
+              <span class="text-3xl font-bold">Powered by Reverier</span>
+              <span class="opacity-60 self-end">with caffine, a cat named 'dog', and love.</span>
+            </h2>
+          </div>
           <p class="font-bold opacity-60 max-w-3xl">
-            Idealism is that you will never receive something back, but nonetheless still decide to give.
+            Idealism is that you will never receive something back,
+            <br />
+            but nonetheless still decide to give.
             <span class="text-primary animate-ping">_</span>
           </p>
+        </section>
+        <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative p-3">
+          <img
+            src={thanksForUsingMySoftware}
+            alt="Thanks for using my software"
+            class="w-full max-w-3xl object-contain"
+          />
+          <p class="opacity-60">{t("platform.thanks")}</p>
         </section>
       </div>
     </div>

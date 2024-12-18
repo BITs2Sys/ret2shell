@@ -39,7 +39,8 @@
     },
     "return": "返回",
     "versionMismatch": "服務版本不匹配（{{frontend}} != {{backend}}），服務器可能工作不正常，請聯繫運維排查。",
-    "tooNarrow": "太窄了，請換寬一點的設備瀏覽"
+    "tooNarrow": "太窄了，請換寬一點的設備瀏覽",
+    "thanks": ""
   },
   "wiki": {
     "title": "知識",
