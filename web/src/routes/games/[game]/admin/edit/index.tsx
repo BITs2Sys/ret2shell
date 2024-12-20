@@ -19,6 +19,11 @@ export default function () {
         end_at: DateTime.fromSeconds(result.end_at!),
         archive_at: DateTime.fromSeconds(result.archive_at!),
         register_at: DateTime.fromSeconds(result.register_at!),
+        award_rates: [
+          result.award_rate_1 ?? result.award_rate ?? 0,
+          result.award_rate_2 ?? ((result.award_rate ?? 0) * 2) / 3,
+          result.award_rate_3 ?? (result.award_rate ?? 0) / 3,
+        ],
       });
       setGameStore({ current: game });
       addToast({
