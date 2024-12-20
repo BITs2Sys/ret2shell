@@ -861,7 +861,7 @@ async fn unlock_hint(
     .await?;
     txn.commit().await?;
     tokio::spawn(async move {
-      worker::update_team_state(&db, team).await;
+      worker::update_team_state(&db, team).await.ok();
     });
     Ok(Json(extra))
   } else {

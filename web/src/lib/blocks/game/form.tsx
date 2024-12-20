@@ -23,6 +23,9 @@ export type GameForm = {
   enable_audit?: boolean;
   can_register_after_started?: boolean;
   award_rate?: number;
+  award_rate_1?: number;
+  award_rate_2?: number;
+  award_rate_3?: number;
 };
 
 export default function GameEdit(props: {
@@ -41,6 +44,9 @@ export default function GameEdit(props: {
           end_at: props.editSource!.end_at.toSeconds(),
           register_at: props.editSource!.register_at.toSeconds(),
           archive_at: props.editSource!.archive_at.toSeconds(),
+          award_rate_1: props.editSource!.award_rates?.[0] || props.editSource!.award_rate,
+          award_rate_2: Math.floor(props.editSource!.award_rates?.[1] || (props.editSource!.award_rate * 2) / 3),
+          award_rate_3: Math.floor(props.editSource!.award_rates?.[2] || props.editSource!.award_rate / 3),
         });
       });
     }
@@ -227,9 +233,61 @@ export default function GameEdit(props: {
               inputProps={props}
               name={field.name}
               value={[field.value || 0]}
+              onValueChange={(value) => {
+                const v = value.value[0] as number;
+                setValues(form, {
+                  award_rate_1: v,
+                  award_rate_2: Math.floor((v * 2) / 3),
+                  award_rate_3: Math.floor(v / 3),
+                });
+              }}
             />
           )}
         </Field>
+        <div class="flex flex-row items-center space-x-2">
+          <Field name="award_rate_1" type="number">
+            {(field, props) => (
+              <Slider
+                label={t("game.admin.awardRate1")}
+                max={100}
+                min={0}
+                step={1}
+                inputProps={props}
+                name={field.name}
+                value={[field.value || 0]}
+                class="flex-1"
+              />
+            )}
+          </Field>
+          <Field name="award_rate_2" type="number">
+            {(field, props) => (
+              <Slider
+                label={t("game.admin.awardRate2")}
+                max={100}
+                min={0}
+                step={1}
+                inputProps={props}
+                name={field.name}
+                value={[field.value || 0]}
+                class="flex-1"
+              />
+            )}
+          </Field>
+          <Field name="award_rate_3" type="number">
+            {(field, props) => (
+              <Slider
+                label={t("game.admin.awardRate3")}
+                max={100}
+                min={0}
+                step={1}
+                inputProps={props}
+                name={field.name}
+                value={[field.value || 0]}
+                class="flex-1"
+              />
+            )}
+          </Field>
+        </div>
       </Show>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
         {t("form.save")}

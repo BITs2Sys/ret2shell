@@ -334,6 +334,9 @@
       "frozen": "Frozen",
       "offline": "Enable Offline Game Feature",
       "description": "Game Management Panel",
+      "awardRate1": "Award for No.1",
+      "awardRate2": "Award for No.2",
+      "awardRate3": "Award for No.3",
       "statistics": {
         "title": "Statistics"
       },
