@@ -34,6 +34,7 @@ pub enum Game {
   EnableAudit,
   CanRegisterAfterStarted,
   AwardRate,
+  AwardRates,
   Admins,
   Weight,
   Bucket,

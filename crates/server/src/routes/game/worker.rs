@@ -312,7 +312,7 @@ async fn submission_worker_exec(
             created_at: changed_at,
             team_id: team.id,
             challenge_id: Some(challenge.id),
-            score: challenge.score_rule.initial * game.award_rate / 100,
+            score,
             reason: format!(
               "No.{blood_state} solution for challenge {}#{}",
               challenge.id, challenge.name

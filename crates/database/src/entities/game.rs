@@ -91,6 +91,8 @@ pub struct Model {
   pub can_register_after_started: bool,
   pub award_rate: i32,
   #[sea_orm(column_type = "JsonBinary")]
+  pub award_rates: Option<Vec<i32>>,
+  #[sea_orm(column_type = "JsonBinary")]
   pub admins: Admins,
   pub weight: i32,
   pub bucket: Option<String>,
