@@ -286,10 +286,13 @@
       "teamSizePlaceholder": "队伍最大人数",
       "enableAudit": "启用队伍审核",
       "canRegisterAfterStarted": "开赛后可参赛",
-      "awardRate": "一血奖励分数比例",
+      "awardRate": "额外奖励分数比例",
       "hidden": "隐藏",
       "frozen": "冻结",
       "offline": "启用线下赛事特性",
+      "awardRate1": "一血奖励分数比例",
+      "awardRate2": "二血奖励分数比例",
+      "awardRate3": "三血奖励分数比例",
       "statistics": {
         "title": "统计数据"
       },

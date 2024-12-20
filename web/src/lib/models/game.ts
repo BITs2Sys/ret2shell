@@ -32,6 +32,7 @@ export type Game = {
   enable_audit: boolean;
   can_register_after_started: boolean;
   award_rate: number;
+  award_rates: number[];
   admins: number[];
   weight: number;
   token: string | null;
