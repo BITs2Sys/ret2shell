@@ -111,8 +111,9 @@ export default function () {
                     </a>
                   </Tag>
                 </div>
-                <p>
+                <p class="opacity-60">
                   <span>Prototype of 墨雨鸢 created by</span>
+                  &nbsp;
                   <a href="https://github.com/arttnba3">arttnba3 (SumiKiriko)</a>
                 </p>
                 <h3 class="font-bold">Opensource projects & 3rd libraries</h3>
