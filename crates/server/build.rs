@@ -27,6 +27,5 @@ fn main() {
         dest_path,
         format!("pub const R2S_VERSION: &str = \"{version}\";\npub const R2S_FULL_VERSION: &str = \"{full_version}\";\n"),
     )
-
     .unwrap();
 }

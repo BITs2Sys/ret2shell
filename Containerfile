@@ -11,7 +11,8 @@ COPY ./Cargo.toml /var/lib/ret2shell/Cargo.toml
 COPY ./crates /var/lib/ret2shell/crates
 WORKDIR /var/lib/ret2shell
 
-RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN --mount=type=cache,target=/var/lib/ret2shell/target cargo build --release --target x86_64-unknown-linux-musl && \
+    cp /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /usr/local/bin/r2s-server
 
 # --------------------------------------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ RUN apk add --update --no-cache curl git skopeo && \
     git config --global user.email platform@ret.sh.cn && \
     git config --global user.name Ret2Shell
 
-COPY --from=builder /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /bin/r2s-server
+COPY --from=builder /usr/local/bin/r2s-server /bin/r2s-server
 
 # if you changes the server port in deployment, maybe you should request for a new distribution
 HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=1 \
