@@ -31,9 +31,9 @@ export default function (props: { status: number | null }) {
 
   return (
     <div class="flex-1 flex flex-col items-center justify-center space-y-8">
-      <Switch fallback={<img src={platformAvatar} width={256} height={256} alt="TωT" />}>
+      <Switch fallback={<img class="rounded-xl" src={platformAvatar} width={256} height={256} alt="TωT" />}>
         <Match when={props.status === 418}>
-          <img src={teapot} width={256} height={256} alt="TωT" />
+          <img class="rounded-xl" src={teapot} width={256} height={256} alt="TωT" />
         </Match>
         {/* <Match when={props.status && props.status >= 500}> */}
         {/*   <img src={xdsecMascotCrying} width={256} height={256} alt="TωT" /> */}

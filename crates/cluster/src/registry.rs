@@ -119,9 +119,14 @@ impl Registry {
     }
     let tmp_dir = TempDir::new("ret2shell")?;
     let file_path = tmp_dir.path().join(name);
-    if file_path.canonicalize()?.starts_with(tmp_dir.path()) {
-      return Err(ClusterError::InvalidImageFileType(
-        "invalid file path".to_string(),
+    let file_parent_dir = file_path
+      .parent()
+      .ok_or(ClusterError::PathTraversalDetected(
+        file_path.to_string_lossy().to_string(),
+      ))?;
+    if !file_parent_dir.canonicalize()?.starts_with(tmp_dir.path()) {
+      return Err(ClusterError::PathTraversalDetected(
+        file_path.to_string_lossy().to_string(),
       ));
     }
     let mut file = tokio::fs::File::create(&file_path).await?;

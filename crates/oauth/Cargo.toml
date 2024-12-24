@@ -12,13 +12,14 @@ resolver = "2"
 
 [dependencies]
 serde = { workspace = true }
-extism = { workspace = true }
 tracing = { workspace = true }
 reqwest = { workspace = true }
 roxmltree = { workspace = true }
 thiserror = { workspace = true }
 serde_json = { workspace = true }
 async-trait = { workspace = true }
+rune = { workspace = true }
+rune-modules = { workspace = true }
 
 r2s-config = { workspace = true }
 

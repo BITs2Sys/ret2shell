@@ -32,4 +32,6 @@ pub enum ClusterError {
   PodRenewExceedLimit(String),
   #[error("invalid image file type: {0}")]
   InvalidImageFileType(String),
+  #[error("path traversal detected: {0}")]
+  PathTraversalDetected(String),
 }
