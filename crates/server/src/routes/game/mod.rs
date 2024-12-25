@@ -578,7 +578,10 @@ async fn get_self_envs(
       .preload(&traffic_key, &traffic_script)
       .await?;
     let exposed_ports = traffic_mapper.expose(&traffic_key, env, service).await?;
-    cache.at("traffic").set(&traffic_id, &exposed_ports).await?;
+    cache
+      .at("traffic")
+      .set_ex(&traffic_id, &exposed_ports, 3600)
+      .await?;
     i.exposed_ports = Some(exposed_ports);
     result.push(i);
   }
