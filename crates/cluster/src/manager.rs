@@ -7,7 +7,8 @@ use k8s_openapi::{
   api::{
     core::v1::{
       Capabilities, ConfigMap, Container, ContainerPort, EnvVar, Namespace, Node, Pod,
-      PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext, Sysctl,
+      PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext, Service,
+      Sysctl,
     },
     networking::v1::NetworkPolicy,
   },
@@ -186,6 +187,22 @@ impl Cluster {
     Ok(())
   }
 
+  pub async fn create_service(&self, service: Service) -> Result<Service, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Service> =
+      Api::namespaced(client, &with_namespace!(&self.namespace, "create service")?);
+    let service = api.create(&Default::default(), &service).await?;
+    Ok(service)
+  }
+
+  pub async fn delete_service(&self, name: &str) -> Result<(), ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Service> =
+      Api::namespaced(client, &with_namespace!(&self.namespace, "delete service")?);
+    api.delete(name, &Default::default()).await?;
+    Ok(())
+  }
+
   pub async fn create_pod(&self, pod: Pod) -> Result<Pod, ClusterError> {
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "create pod")?);
@@ -303,6 +320,15 @@ impl Cluster {
               },
             )
             .await?;
+          match self.delete_service(&pod.name().unwrap()).await {
+            Ok(_) => {}
+            Err(err) => {
+              warn!(
+                "Failed to delete service for pod '{}': {err:?}",
+                pod.name().unwrap()
+              );
+            }
+          };
         }
         Ok(false) => {
           debug!("Pod is alive: {}", pod.name().unwrap());
@@ -350,6 +376,7 @@ impl Cluster {
   pub async fn create_challenge_env(
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
     envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
+    need_service: bool,
   ) -> Result<(), ClusterError> {
     let challenge_id = labels
       .get("ret.sh.cn/challenge")
@@ -384,7 +411,7 @@ impl Cluster {
     let pod = Pod {
       metadata: ObjectMeta {
         name: Some(pod_name.clone()),
-        labels: Some(labels),
+        labels: Some(labels.clone()),
         annotations: Some(annotations),
         ..Default::default()
       },
@@ -455,15 +482,38 @@ impl Cluster {
       ..Default::default()
     };
     self.create_pod(pod).await?;
-    Ok(())
-  }
 
-  pub async fn delete_challenge_env(&self, user_id: i64) -> Result<(), ClusterError> {
-    let pod = self
-      .get_pods_by_label(&format!("ret.sh.cn/user={user_id}"))
-      .await?;
-    for p in pod {
-      self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
+    if need_service {
+      let service = Service {
+        metadata: ObjectMeta {
+          name: Some(pod_name.clone()),
+          labels: Some(labels.clone()),
+          ..Default::default()
+        },
+        spec: Some(k8s_openapi::api::core::v1::ServiceSpec {
+          selector: Some(labels),
+          ports: Some(
+            env_config
+              .images
+              .iter()
+              .filter_map(|image| {
+                image
+                  .port
+                  .map(|port| k8s_openapi::api::core::v1::ServicePort {
+                    port: port as i32,
+                    target_port: Some(
+                      k8s_openapi::apimachinery::pkg::util::intstr::IntOrString::Int(port as i32),
+                    ),
+                    ..Default::default()
+                  })
+              })
+              .collect(),
+          ),
+          ..Default::default()
+        }),
+        ..Default::default()
+      };
+      self.create_service(service).await?;
     }
     Ok(())
   }
@@ -505,6 +555,15 @@ impl Cluster {
       .await?;
     for p in pod {
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
+      match self.delete_service(p.metadata.name.as_ref().unwrap()).await {
+        Ok(_) => {}
+        Err(err) => {
+          warn!(
+            "Failed to delete service for pod '{}': {err:?}",
+            p.metadata.name.unwrap()
+          );
+        }
+      };
     }
     Ok(())
   }

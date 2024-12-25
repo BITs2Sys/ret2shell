@@ -31,12 +31,7 @@ pub struct Config {
   /// it will be used as `ret.sh.cn/workload=<challenge_node_selector>`,
   /// you should setup the node selector in your kubernetes cluster first.
   pub challenge_node_selector: Option<String>,
-  /// `proxy_image` is the image for the proxy container.
-  pub proxy_image: Option<String>,
-  /// `traffic` is the traffic backend, default to `wsrx`. Available options
-  /// are:
-  /// - `wsrx`: websocket reverse proxy
-  /// - `plain`: plain tcp outbound
+  /// the `traffic` script for challenge routes.
   pub traffic: Option<String>,
   /// `enable_capture` is a flag to enable the stream capture feature.
   pub enable_capture: Option<bool>,
@@ -53,17 +48,16 @@ impl Merge for Option<Config> {
     // prefers fields in `other`
     match (self, other) {
       (Some(a), Some(b)) => Some(Config {
-        enabled: b.enabled,
-        try_default: b.try_default.or(a.try_default),
-        auto_infer: b.auto_infer.or(a.auto_infer),
-        kube_config_path: b.kube_config_path.or(a.kube_config_path),
-        challenge_node_selector: b.challenge_node_selector.or(a.challenge_node_selector),
-        proxy_image: b.proxy_image.or(a.proxy_image),
+        enabled: a.enabled,
+        try_default: a.try_default,
+        auto_infer: a.auto_infer,
+        kube_config_path: a.kube_config_path,
+        challenge_node_selector: a.challenge_node_selector,
         traffic: b.traffic.or(a.traffic),
         enable_capture: b.enable_capture.or(a.enable_capture),
         capture_directory: b.capture_directory.or(a.capture_directory),
         cleanup_interval: b.cleanup_interval.or(a.cleanup_interval),
-        registry: b.registry.or(a.registry),
+        registry: a.registry,
       }),
       (Some(a), None) => Some(a),
       (None, Some(b)) => Some(b),

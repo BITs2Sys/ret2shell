@@ -36,16 +36,7 @@ impl Merge for Option<Config> {
   fn merge(self, other: Self) -> Self {
     // prefers fields in `other`
     match (self, other) {
-      (Some(a), Some(b)) => Some(Config {
-        host: b.host,
-        port: b.port.or(a.port),
-        token: b.token.or(a.token),
-        user: b.user.or(a.user),
-        password: b.password.or(a.password),
-        ping_interval: b.ping_interval.or(a.ping_interval),
-        tls: b.tls.or(a.tls),
-      }),
-      (Some(a), None) => Some(a),
+      (Some(a), _) => Some(a),
       (None, Some(b)) => Some(b),
       (None, None) => None,
     }

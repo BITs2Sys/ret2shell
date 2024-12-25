@@ -46,13 +46,7 @@ impl Merge for Option<Config> {
   fn merge(self, other: Self) -> Self {
     // prefers fields in `other`
     match (self, other) {
-      (Some(a), Some(b)) => Some(Config {
-        signing_key: b.signing_key,
-        buffer_time: b.buffer_time,
-        expires_time: b.expires_time,
-        oauth_keys: a.oauth_keys,
-      }),
-      (Some(a), None) => Some(a),
+      (Some(a), _) => Some(a),
       (None, Some(b)) => Some(b),
       (None, None) => None,
     }

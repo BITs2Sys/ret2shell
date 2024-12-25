@@ -97,13 +97,13 @@ impl Merge for Option<Config> {
     // prefers fields in `other`
     match (self, other) {
       (Some(a), Some(b)) => Some(Config {
-        host: b.host,
-        port: b.port,
-        external_domain: b.external_domain,
-        external_https: b.external_https,
-        api_base_path: b.api_base_path,
-        cors_origins: b.cors_origins,
-        frontend: b.frontend,
+        host: a.host,
+        port: a.port,
+        external_domain: a.external_domain,
+        external_https: a.external_https,
+        api_base_path: a.api_base_path,
+        cors_origins: a.cors_origins,
+        frontend: a.frontend,
         name: b.name.or(a.name),
         footer_info: b.footer_info.or(a.footer_info),
         footer_url: b.footer_url.or(a.footer_url),

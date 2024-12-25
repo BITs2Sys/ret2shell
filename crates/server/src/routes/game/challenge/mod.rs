@@ -17,9 +17,9 @@ use r2s_bucket::{
 use r2s_cache::Cache;
 use r2s_checker::{traits::CheckerError, Checker};
 use r2s_cluster::{Cluster, CHALLENGE_NS};
-use r2s_config::{cluster::ChallengeEnv, GlobalConfig};
+use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
-  challenge, extra, game, hint, submission, team,
+  challenge, config, extra, game, hint, submission, team,
   user::{self, Permission},
 };
 use r2s_event::{
@@ -983,8 +983,8 @@ async fn get_challenge_env(
 
 #[allow(clippy::too_many_arguments)]
 async fn start_challenge_env(
-  State(config): State<GlobalConfig>, State(bucket): State<Bucket>, State(cluster): State<Cluster>,
-  State(cache): State<Cache>, State(mut checker): State<Checker>,
+  State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
+  State(mut checker): State<Checker>, Extension(config): Extension<config::Model>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(token): Extension<Token>, team_ext: Option<Extension<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -1052,6 +1052,7 @@ async fn start_challenge_env(
     } else {
       config.challenge_node_selector.clone()
     };
+    let need_service = game.traffic.is_some() || config.traffic.is_some();
     cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
@@ -1093,6 +1094,7 @@ async fn start_challenge_env(
         env_map,
         env_config,
         node_selector,
+        need_service,
       )
       .await?;
     cache
