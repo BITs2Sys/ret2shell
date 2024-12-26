@@ -155,18 +155,13 @@ impl TrafficMapper {
       alloc::String::try_from("ports")?,
       rune::to_value(ports_info)?,
     )?;
+    let pod_name = pod
+      .spec
+      .ok_or(ClusterError::MissingField("pod spec".to_owned()))?
+      .node_name
+      .ok_or(ClusterError::MissingField("node_name".to_owned()))?;
 
-    let output = vm.call(
-      ["expose"],
-      (
-        pod
-          .spec
-          .ok_or(ClusterError::MissingField("pod spec".to_owned()))?
-          .node_name
-          .ok_or(ClusterError::MissingField("node_name".to_owned()))?,
-        service_info,
-      ),
-    )?;
+    let output = vm.call(["expose"], (rune::to_value(pod_name)?, service_info))?;
 
     let output: Result<Vec<MappedPort>, Value> = rune::from_value(output)?;
 

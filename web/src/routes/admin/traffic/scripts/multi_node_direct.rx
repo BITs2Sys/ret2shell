@@ -35,7 +35,7 @@ pub async fn expose(node, service) {
     let node_base = NODE_MAP.get(node)?;
     let result = Vec::new();
     for port in service.ports {
-        result.push({
+        result.push(#{
             name: port.name,
             address: format!("{}:{}", node_base, port.node_port),
         });
