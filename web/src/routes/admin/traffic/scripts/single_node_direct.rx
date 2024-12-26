@@ -13,9 +13,9 @@
 //
 // Returns:
 //
-// * Vec<#{name:string, address:string}>
-//   * name: the service name on this port
-//   * address: the actual address for this service
+// * #{name:address}
+//   * name:string : the service name on this port
+//   * address:string : the actual address for this service
 //
 // NOTE: This function will be called when user first requesting the challenge environment.
 // 
@@ -27,12 +27,9 @@
 // also, Ret 2 Shell does not provide API for traffic-cleanup, you should use `create_at` /
 // `lifetime` to calculate and manage the traffic in your external controller.
 pub async fn expose(node, service) {
-    let result = Vec::new();
+    let result = #{};
     for port in service.ports {
-        result.push(#{
-            name: port.name,
-            address: format!("{}:{}", "<Outer IP>", port.node_port),
-        });
+        result[port.name] = `ctf.xidian.edu.cn:${port.node_port}`;
     }
-    result
+    Ok(result)
 }

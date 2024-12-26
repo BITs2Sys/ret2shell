@@ -7,7 +7,7 @@ use rune::{
   alloc,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Context, Diagnostics, FromValue, Source, Sources, Unit, Value, Vm,
+  Context, Diagnostics, Source, Sources, Unit, Value, Vm,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
@@ -22,7 +22,7 @@ pub struct TrafficMapper {
   contexts: Arc<RwLock<HashMap<String, TrafficMapperContext>>>,
 }
 
-#[derive(FromValue, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MappedPort {
   pub name: String,
   pub address: String,
@@ -146,7 +146,7 @@ impl TrafficMapper {
       )?;
       port_object.insert(
         alloc::String::try_from("node_port")?,
-        rune::to_value(port.node_port)?,
+        rune::to_value(port.node_port.unwrap_or(0))?,
       )?;
       ports_info.push(port_object);
     }
@@ -163,9 +163,21 @@ impl TrafficMapper {
 
     let output = vm.call(["expose"], (rune::to_value(pod_name)?, service_info))?;
 
-    let output: Result<Vec<MappedPort>, Value> = rune::from_value(output)?;
-
-    output.map_err(|_| ClusterError::ScriptError("expose error".to_owned()))
+    let output: Result<Object, Value> = rune::from_value(output)?;
+    let mut result = Vec::new();
+    if let Ok(object) = output {
+      for (key, value) in object.iter() {
+        result.push(MappedPort {
+          name: key.to_string(),
+          address: rune::from_value(value.clone())?,
+        });
+      }
+      Ok(result)
+    } else {
+      Err(ClusterError::ScriptError(
+        "Early returns from script".to_owned(),
+      ))
+    }
   }
 
   pub async fn cleanup(&mut self) {
