@@ -97,13 +97,13 @@ export default function () {
               <Popover
                 aria-label="about"
                 ghost
-                popContentClass="pb-2"
+                popContentClass="p-2"
                 square
                 btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
               >
                 <div class="w-max flex flex-col space-y-2">
                   <Card contentClass="p-2">
-                    <Link ghost href="/magic/about" class="flex flex-row items-center !h-auto space-x-2 px-3 py-1">
+                    <Link ghost href="/magic/about" class="flex flex-row items-center !h-auto space-x-2 pl-2 pr-3 py-1">
                       <LogoAnimate width={56} height={56} />
                       <div class="flex flex-col">
                         <h2 class="text-xl font-bold flex flex-row">
@@ -112,16 +112,16 @@ export default function () {
                           <span class="opacity-60">&nbsp;2&nbsp;</span>
                           <span class="text-error">S</span>
                           <span class="opacity-80">hell</span>
-                          <span>&nbsp;v{platformStore.version?.[0] || "3"}</span>
+                          <span class="opacity-60">&nbsp;v{platformStore.version?.[0] || "3"}</span>
                         </h2>
-                        <p class="opacity-60 space-x-2">
+                        <p class="opacity-60 space-x-2 flex">
                           <Show
                             when={(platformStore.version || "UNKNOWN").includes("*")}
                             fallback={<span class="text-primary">REL</span>}
                           >
                             <span class="text-warning">DEV</span>
                           </Show>
-                          <span>{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
+                          <span class="flex-1 truncate">{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
                         </p>
                       </div>
                     </Link>
