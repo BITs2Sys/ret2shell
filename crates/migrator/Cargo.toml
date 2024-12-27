@@ -1,14 +1,14 @@
 [package]
-authors      = ["Reverier-Xu <reverier.xu@woooo.tech>"]
-description  = "Database migrator for Ret2Shell - A feature-riches CTF challenge platform."
-edition      = "2021"
-homepage     = "https://ret.sh.cn/"
-keywords     = ["ctf", "challenge", "platform", "security", "education"]
-name         = "r2s-migrator"
-publish      = false
-resolver     = "2"
-rust-version = "1.80.0"
-version      = "3.4.3"
+description = "Database migrator for Ret2Shell - A feature-riches CTF challenge platform."
+name        = "r2s-migrator"
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+publish      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
 
 [dependencies]
 sea-orm = { workspace = true, features = [
