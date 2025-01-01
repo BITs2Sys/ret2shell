@@ -61,10 +61,10 @@ export function setupTitleResolver() {
   createEffect(() => {
     let path = watchedLocation.pathname;
     untrack(() => {
-      if (path.endsWith('/')) path = path.slice(0, path.length - 1);
+      if (path.endsWith("/")) path = path.slice(0, path.length - 1);
       const pathArr = path.split("/");
       const [parentRoute, exactRoute] = headerStore.findRoute(pathArr);
       document.title = exactRoute?.title || parentRoute.title || platformStore.config.name || t("platform.name")!;
-    })
+    });
   });
 }
