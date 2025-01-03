@@ -69,7 +69,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.4.2",
-    "@types/node": "^22.10.3",
+    "@types/node": "^22.10.4",
     "@types/postcss-import": "^14.0.3",
     "@types/shell-quote": "^1.7.5",
     "autoprefixer": "^10.4.20",
@@ -80,7 +80,7 @@
     "sass-migrator": "^2.3.0",
     "tailwindcss": "^3.4.17",
     "tslib": "^2.8.1",
-    "vite": "^6.0.6",
+    "vite": "^6.0.7",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^2.1.8"
