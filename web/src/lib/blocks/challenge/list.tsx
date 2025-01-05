@@ -6,6 +6,7 @@ import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import TreeView, { type TreeNode } from "@widgets/treeview";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
@@ -17,6 +18,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
   const [loading, setLoading] = createSignal(false);
   const [search, setSearch] = createSignal("");
   const [hideSolved, setHideSolved] = createSignal(false);
+  const [hideArchived, setHideArchived] = createSignal(true);
   const selectedChallenge = createMemo(() => challengeStore.challenges.find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];
@@ -26,7 +28,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         !!c.tag.find((t) => t.name.toLowerCase().includes(search().toLowerCase()))
     )) {
       const submission = challengeStore.solves.find((s) => s.challenge_id === challenge.id);
-      result.push({ challenge, solved: !!submission });
+      result.push({ challenge, solved: (props.inGame && submission?.team_id) || !!submission });
     }
     const tree = [] as TreeNode[];
     const tags = new Set(
@@ -37,9 +39,10 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
       const taggedChallenges = result
         .filter((c) => c.challenge.tag.find((t) => t.primary)?.name === tag)
         .filter((c) => !c.solved || !hideSolved())
+        .filter((c) => !c.challenge.archive_at || !hideArchived() || c.challenge.archive_at > DateTime.now())
         .sort((a, b) => {
           if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
-          return a.challenge.updated_at < b.challenge.updated_at ? -1 : 1;
+          return a.challenge.name < b.challenge.name ? -1 : 1;
         });
       if (taggedChallenges.length === 0) continue;
       tree.push({
@@ -61,7 +64,13 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
             : c.solved
               ? "icon-[fluent--checkmark-circle-20-regular] text-success"
               : "icon-[fluent--flag-20-regular]",
-          extraPart: props.showScore ? <span class="opacity-60">{c.challenge.score} pts</span> : null,
+          extraPart: props.showScore ? (
+            <span
+              class={`opacity-60 ${c.challenge.archive_at && c.challenge.archive_at < DateTime.now() ? "line-through" : ""}`}
+            >
+              {c.challenge.score} pts
+            </span>
+          ) : null,
           children: [],
         })),
       });
@@ -94,24 +103,51 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
           defer
         >
           <div class="flex flex-col space-y-2 p-3 lg:p-6">
-            <Input
-              class="sticky top-3 lg:top-6 z-20 bg-layer rounded-lg"
-              icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
-              placeholder={t("game.challenge.filterNameOrLabel")}
-              onInput={(e) => setSearch(e.currentTarget.value)}
-              extraBtn={
-                <Button
-                  class="!rounded-l-none"
-                  title={t("game.challenge.hideSolved")!}
-                  square
-                  onClick={() => setHideSolved(!hideSolved())}
-                >
-                  <Show when={hideSolved()} fallback={<span class="icon-[fluent--eye-off-20-regular] w-5 h-5" />}>
-                    <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
-                  </Show>
-                </Button>
-              }
-            />
+            <div class="sticky top-3 lg:top-6 z-20 flex flex-col">
+              <Input
+                class="bg-layer"
+                size="sm"
+                icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
+                placeholder={t("game.challenge.filterNameOrLabel")}
+                onInput={(e) => setSearch(e.currentTarget.value)}
+              />
+              <Show when={props.inGame}>
+                <div class="flex flex-row space-x-1">
+                  <Button
+                    class="my-1"
+                    size="sm"
+                    title={t("game.challenge.hideSolved")}
+                    onClick={() => {
+                      setHideSolved(!hideSolved());
+                    }}
+                  >
+                    <Show
+                      when={hideSolved()}
+                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                    >
+                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                    </Show>
+                    <span>{t("game.challenge.solved")}</span>
+                  </Button>
+                  <Button
+                    class="my-1"
+                    size="sm"
+                    title={t("game.challenge.hideArchived")}
+                    onClick={() => {
+                      setHideArchived(!hideArchived());
+                    }}
+                  >
+                    <Show
+                      when={hideArchived()}
+                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                    >
+                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                    </Show>
+                    <span>{t("game.challenge.archived")}</span>
+                  </Button>
+                </div>
+              </Show>
+            </div>
             <Switch
               fallback={
                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
