@@ -29,7 +29,7 @@ pub async fn check(bucket, user, team, submission) {
     return Ok((false, `Wrong format! flag should be ${PREFIX}{...}`, None))
   }
 
-  let enc_id = if let Some(id) = team.get("id") {
+  let enc_id = if let Some(id) = team.id {
     id
   } else {
     user.id
@@ -50,7 +50,7 @@ pub async fn check(bucket, user, team, submission) {
   };
 
   // the flag is wrong, let's see whether the team has cheated
-  if let Some(id) = team.get("id") {
+  if let Some(id) = team.id {
     if dec_id != id {
       return Ok((false, "Incorrect!", Some(#{
         peer_team: dec_id,
@@ -70,7 +70,7 @@ pub async fn check(bucket, user, team, submission) {
 ///
 /// Returns: Result<#{ [key: string]: string }, any>
 pub async fn environ(bucket, user, team) {
-  let enc_id = if let Some(id) = team.get("id") {
+  let enc_id = if let Some(id) = team.id {
     id
   } else {
     user.id

@@ -20,7 +20,7 @@ pub async fn check(bucket, user, team, submission) {
   if let (flag_json_str, _flag_len) = bucket.open(FLAG_JSON_FILE)?.get_str()? {
     let flag_json = json::from_string(flag_json_str)?;
 
-    let mapped_id = if let Some(id) = team.get("id") {
+    let mapped_id = if let Some(id) = team.id {
       id
     } else {
       user.id
