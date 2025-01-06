@@ -38,6 +38,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
           code: articleProps.extra,
           math: articleProps.extra,
           headingAnchors: articleProps.headingAnchors,
+          alertBlockquote: articleProps.extra,
           toc: articleProps.toc,
         },
       });

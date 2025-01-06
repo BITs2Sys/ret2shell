@@ -2,7 +2,7 @@ import rehypeToc from "@jsdevtools/rehype-toc";
 import { toHtml } from "hast-util-to-html";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -53,12 +53,41 @@ export class Markdown {
   }
 
   private async initHtml(options?: MarkToHtmlOptions) {
+    // schema
+    const schema = Object.assign({}, defaultSchema);
+    schema.attributes = Object.assign({}, schema.attributes, {
+      blockquote: ["dataAlertTitle", ["className", /^markdown-alert(-.+)?$/]],
+    });
+
+    // remark
+    if (options?.alertBlockquote) {
+      const alertQuote = await import("./plugins/alert-quote");
+      this.processor?.use(alertQuote.remarkAlertQuote, {
+        classMap: {
+          INFO: ["markdown-alert", "markdown-alert-blue"],
+          SUCCESS: ["markdown-alert", "markdown-alert-green"],
+          DEBUG: ["markdown-alert", "markdown-alert-magenta"],
+          WARN: ["markdown-alert", "markdown-alert-yellow"],
+          ERROR: ["markdown-alert", "markdown-alert-error"],
+          DANGER: ["markdown-alert", "markdown-alert-red"],
+          // github
+          NOTE: ["markdown-alert", "markdown-alert-blue"],
+          TIP: ["markdown-alert", "markdown-alert-green"],
+          IMPORTANT: ["markdown-alert", "markdown-alert-magenta"],
+          WARNING: ["markdown-alert", "markdown-alert-yellow"],
+          CAUTION: ["markdown-alert", "markdown-alert-red"],
+        },
+      });
+    }
     if (options?.math) {
       const remarkMath = await import("remark-math");
       this.processor?.use(remarkMath.default);
     }
+
     this.processor?.use(remarkRehype);
-    this.processor?.use(rehypeSanitize);
+
+    // rehype
+    this.processor?.use(rehypeSanitize, schema);
     this.processor?.use(rehypeExternalLinks, {
       target: "_blank",
       content: [
@@ -115,3 +144,16 @@ export class Markdown {
     this.processor?.use(rehypeStringify);
   }
 }
+
+(async () => {
+  const test = new Markdown();
+  await test.init({
+    type: "html",
+    options: { math: true, code: true, headingAnchors: true, alertBlockquote: true, toc: true },
+  });
+  test.renderContent(`
+$1$
+> ![NOTE]
+> 456
+`);
+})();

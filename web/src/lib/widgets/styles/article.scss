@@ -67,13 +67,17 @@ nav.toc a {
   @apply text-layer-content/80 no-underline hover:underline;
 }
 
+article p {
+  @apply my-4 #{!important};
+}
+
 article pre,
 article pre * {
   @apply text-base break-words;
 }
 
 article pre {
-  @apply bg-layer-content/5 text-layer-content backdrop-blur rounded-md mx-1 min-w-0 text-wrap #{!important};
+  @apply bg-layer-content/5 text-layer-content backdrop-blur rounded-md mx-0 min-w-0 text-wrap #{!important};
 }
 
 article pre > code {
@@ -88,12 +92,24 @@ code:not(pre code) {
 pre code {
   counter-reset: line;
 }
- 
+
 pre code > [data-line]::before {
   counter-increment: line;
   content: counter(line);
- 
-  @apply absolute top-0 left-0 inline-block w-10 text-layer-content/60 pr-1 text-right mr-4 h-full border-r-2 border-layer-content/10;
+
+  @apply w-[1.65em] float-start inline-block text-layer-content/60 pr-2 text-right whitespace-nowrap mr-4 h-full border-r-2 border-layer-content/10;
+}
+
+/* pre code:has(:nth-child(10)) > [data-line]::before {
+  @apply w-[1.65em];
+} */
+
+pre code:has(:nth-child(100)) > [data-line]::before {
+  @apply w-[2.25em];
+}
+
+pre code:has(:nth-child(1000)) > [data-line]::before {
+  @apply w-[2.85em];
 }
 
 pre code > [data-highlighted-line] {
@@ -101,7 +117,7 @@ pre code > [data-highlighted-line] {
 }
 
 pre code > [data-line] {
-  @apply relative pl-12;
+  @apply relative;
 }
 
 pre button.rehype-pretty-copy {
@@ -171,10 +187,56 @@ article > h6 > a:hover::after {
 }
 
 article blockquote {
-  @apply border-l-primary bg-primary/10 rounded-md p-0 m-1 backdrop-blur #{!important};
+  --quote-color: rgb(156 163 175);
+  --quote-bg: rgb(156 163 175 / 0.1);
+  &.markdown-alert {
+    &.markdown-alert-blue {
+      --quote-color: oklch(var(--info));
+      --quote-bg: oklch(var(--info) / 0.1);
+    }
+    &.markdown-alert-green {
+      --quote-color: oklch(var(--success));
+      --quote-bg: oklch(var(--success) / 0.1);
+    }
+
+    &.markdown-alert-yellow {
+      --quote-color: oklch(var(--warning));
+      --quote-bg: oklch(var(--warning) / 0.1);
+    }
+
+    &.markdown-alert-magenta {
+      --quote-color: oklch(var(--secondary));
+      --quote-bg: oklch(var(--secondary) / 0.1);
+    }
+
+    &.markdown-alert-red {
+      --quote-color: oklch(var(--error));
+      --quote-bg: oklch(var(--error) / 0.1);
+    }
+  }
+}
+
+article blockquote {
+  border-left-color: var(--quote-color) !important;
+  background-color: var(--quote-bg) !important;
+  @apply not-italic text-layer-content/80 border-l-[5px] rounded-[4px] px-4 py-3 mx-0 my-6 backdrop-blur-sm #{!important};
+
+  & figure,
+  & pre {
+    @apply m-0 #{!important};
+  }
+
+  & p {
+    @apply mx-0 my-2 #{!important};
+  }
+
+  &.markdown-alert[data-alert-title] > p:first-child {
+    color: var(--quote-color);
+    font-weight: 600;
+  }
 
   & > *:first-child {
-    @apply pt-2 #{!important};
+    @apply mt-0 #{!important};
     @apply before:content-[''] after:content-[''] #{!important};
   }
 
@@ -183,12 +245,12 @@ article blockquote {
   }
 
   & > *:last-child {
-    @apply pb-2 #{!important};
+    @apply mb-0 #{!important};
   }
 
-  & pre code {
+  /* & pre code {
     @apply not-italic;
-  }
+  } */
 }
 
 article a:not(h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a) {
