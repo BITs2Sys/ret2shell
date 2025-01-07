@@ -1,4 +1,5 @@
 import type { Institute } from "@models/institute";
+import type { OAuthProvider } from "@models/oauth-provider";
 import { createForm, required, setValues } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -13,7 +14,7 @@ type FormType = {
 };
 
 export default function InstituteForm(props: {
-  oauthServices: string[];
+  oauthServices: OAuthProvider[];
   onDone?: (result: Institute) => void;
   editSource?: Institute;
   loading?: boolean;
@@ -65,9 +66,8 @@ export default function InstituteForm(props: {
             placeholder={t("admin.institute.providerNeeded")}
             items={props.oauthServices.map((service) => {
               return {
-                value: service,
-                /* @ts-expect-error key is dynamic */
-                label: t(`account.oauth.${service}.title`) as string,
+                value: service.provider,
+                label: service.name,
                 icon: "icon-[fluent--hat-graduation-20-regular]",
               };
             })}

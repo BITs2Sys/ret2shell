@@ -232,11 +232,7 @@ export default function () {
               onOpenChange={(detail) => setInstituteFormOpen(detail.open)}
               open={instituteFormOpen()}
             >
-              <InstituteForm
-                onDone={handleCreateInstitute}
-                loading={loading()}
-                oauthServices={oauthServices().map((v) => v.provider)}
-              />
+              <InstituteForm onDone={handleCreateInstitute} loading={loading()} oauthServices={oauthServices()} />
             </Dialog>
           </h3>
           <For each={accountStore.institutes}>
@@ -263,7 +259,7 @@ export default function () {
                     editSource={institute}
                     onDone={handleUpdateInstitute}
                     loading={loading()}
-                    oauthServices={oauthServices().map((v) => v.provider)}
+                    oauthServices={oauthServices()}
                   />
                 </Dialog>
                 <Popover
