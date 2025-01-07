@@ -95,29 +95,29 @@ pre code {
 
 pre code > [data-line]::before {
   counter-increment: line;
-  content: counter(line);
+  content: counter(line) !important;
 
-  @apply w-[1.65em] float-start inline-block text-layer-content/60 pr-2 text-right whitespace-nowrap mr-4 h-full border-r-2 border-layer-content/10;
+  @apply absolute left-0 top-0 float-start inline-block text-layer-content/60 pr-2 text-right whitespace-nowrap mr-4 h-full border-r-2 border-layer-content/10;
 }
 
-/* pre code:has(:nth-child(10)) > [data-line]::before {
-  @apply w-[1.65em];
+pre code > [data-line] {
+  @apply before:w-[1.65em] pl-[2.65em] relative;
+}
+
+/* pre code:has(:nth-child(10)) > [data-line] {
+  @apply before:w-[1.65em] pl-[2.65em];
 } */
 
-pre code:has(:nth-child(100)) > [data-line]::before {
-  @apply w-[2.25em];
+pre code:has(:nth-child(100)) > [data-line] {
+  @apply before:w-[2.25em] pl-[3.25em];
 }
 
-pre code:has(:nth-child(1000)) > [data-line]::before {
-  @apply w-[2.85em];
+pre code:has(:nth-child(1000)) > [data-line] {
+  @apply before:w-[2.85em] pl-[3.85em];
 }
 
 pre code > [data-highlighted-line] {
   @apply bg-layer-content/10 rounded-md;
-}
-
-pre code > [data-line] {
-  @apply relative;
 }
 
 pre button.rehype-pretty-copy {
