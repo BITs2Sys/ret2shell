@@ -19,7 +19,9 @@ use r2s_checker::{traits::CheckerError, Checker};
 use r2s_cluster::{Cluster, CHALLENGE_NS};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
-  challenge, config, extra, game, hint, submission, team,
+  challenge, config, extra,
+  game::{self, HostType},
+  hint, submission, team,
   user::{self, Permission},
 };
 use r2s_event::{
@@ -1302,7 +1304,7 @@ async fn get_answer(
   State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if !game.archived() && !is_game_admin!(token, game) {
+  if game.host_type == HostType::Game && !game.archived() && !is_game_admin!(token, game) {
     return Err(ResponseError::Forbidden(
       "you can only get the answer after the game is archived".to_owned(),
       format!(
