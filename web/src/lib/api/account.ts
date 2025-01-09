@@ -124,7 +124,10 @@ export async function createOAuthProvider(req: OAuthProvider) {
 export async function loginWithOAuth(query: string) {
   return await api.post(`${api_root}/account/oauth/login${query}`).json<{
     token: string | null;
-    data: Map<string, string> | null;
+    data: {
+      auth_key: string;
+      [key: string]: string;
+    } | null;
   }>();
 }
 
