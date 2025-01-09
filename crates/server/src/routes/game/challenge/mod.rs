@@ -1065,7 +1065,7 @@ async fn start_challenge_env(
     debug!("env_map: {:?}", env_map);
     debug!("game: {:?}", game);
     let node_selector = if game.archive_at > Utc::now() {
-      game.node_selector.clone()
+      game.node_selector.clone().or(config.node_selector.clone())
     } else {
       config.node_selector.clone()
     }
