@@ -19,8 +19,9 @@ import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
+import Popover from "@widgets/popover";
 import { DateTime } from "luxon";
-import { For, createSignal, onMount } from "solid-js";
+import { For, Match, Switch, createSignal, onMount } from "solid-js";
 
 type LoginForm = {
   account: string;
@@ -222,14 +223,41 @@ export default function () {
             <Link class="w-full" href="/account/register">
               {t("account.register.tips")}
             </Link>
-            <For each={oauthServices().filter((s) => s.portal)}>
-              {(service) => (
-                <Link class="w-full" href={service.portal} title={service.name}>
-                  <img src={mediaPath(service.avatar ?? "")} alt={service.name} width={24} height={24} />
-                  <span>{service.name}</span>
+            <Switch>
+              <Match when={oauthServices().length === 1}>
+                <Link class="w-full !mt-4" href={oauthServices()[0].portal} title={oauthServices()[0].name}>
+                  <img
+                    src={mediaPath(oauthServices()[0].avatar ?? "")}
+                    alt={oauthServices()[0].name}
+                    width={24}
+                    height={24}
+                  />
+                  <span>{oauthServices()[0].name}</span>
                 </Link>
-              )}
-            </For>
+              </Match>
+              <Match when={oauthServices().length > 1}>
+                <Popover
+                  class="w-full !mt-4"
+                  btnContent={
+                    <>
+                      <span class="icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                      <span>{t("account.oauth.select")}</span>
+                    </>
+                  }
+                >
+                  <Card contentClass="p-2 flex flex-col space-y-2">
+                    <For each={oauthServices().filter((s) => s.portal)}>
+                      {(service) => (
+                        <Link class="w-full" justify="start" href={service.portal} title={service.name} ghost>
+                          <img src={mediaPath(service.avatar ?? "")} alt={service.name} width={24} height={24} />
+                          <span>{service.name}</span>
+                        </Link>
+                      )}
+                    </For>
+                  </Card>
+                </Popover>
+              </Match>
+            </Switch>
           </div>
         </Card>
       </div>
