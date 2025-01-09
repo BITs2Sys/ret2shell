@@ -20,6 +20,7 @@ use r2s_email::{EmailCtx, EmailRequest};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use rand::Rng;
+use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info, warn};
 
@@ -463,6 +464,7 @@ async fn register(
   Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   debug!("register request: {:?}", body);
+  let txn = db.conn.begin().await?;
   if config
     .captcha
     .clone()
@@ -474,10 +476,10 @@ async fn register(
   // if user::get_user_by_account(db, &body.email).await.is_ok() {
   //     return Err((StatusCode::CONFLICT, "account already exists"));
   // }
-  if user::get_by_account_or_email(&db.conn, &body.email)
+  if user::get_by_account_or_email(&txn, &body.email)
     .await?
     .is_some()
-    || user::get_by_account_or_email(&db.conn, &body.account)
+    || user::get_by_account_or_email(&txn, &body.account)
       .await?
       .is_some()
   {
@@ -486,7 +488,7 @@ async fn register(
 
   let password = hash_password(&body.password)?;
 
-  let mut permissions = match user::count(&db.conn, true, None, None).await? {
+  let mut permissions = match user::count(&txn, true, None, None).await? {
     0 => Permissions(vec![
       Permission::Basic,
       Permission::Verified,
@@ -517,7 +519,9 @@ async fn register(
     ..Default::default()
   };
 
-  let user = user::create(&db.conn, new_user).await?;
+  let user = user::create(&txn, new_user).await?;
+
+  txn.commit().await?;
 
   send_email(
     &cache,
@@ -839,12 +843,21 @@ struct DeleteSelfRequest {
 }
 
 async fn delete_self(
-  State(db): State<Database>, State(cache): State<Cache>, Extension(user): Extension<user::Model>,
+  State(db): State<Database>, State(cache): State<Cache>,
+  Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
   Json(req): Json<DeleteSelfRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  captcha_protected!(cache, &req.captcha_id, &req.captcha_answer);
-  let user_count = user::count(&db.conn, false, None, None).await?;
+  if config
+    .captcha
+    .clone()
+    .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+  {
+    captcha_protected!(cache, &req.captcha_id, &req.captcha_answer);
+  }
+  let txn = db.conn.begin().await?;
 
+  // Check if user is the only user
+  let user_count = user::count(&txn, false, None, None).await?;
   if user_count == 1 {
     return Err(ResponseError::Forbidden(
       "you are the only user, can't delete yourself".to_owned(),
@@ -854,9 +867,11 @@ async fn delete_self(
       ),
     ));
   }
-  let games = game::get_list(&db.conn, Some(Utc::now()), None, None, Some(Utc::now())).await?;
+
+  // Check if user has participated in any in-progress game
+  let games = game::get_list(&txn, Some(Utc::now()), None, None, Some(Utc::now())).await?;
   for game in games {
-    if team::get_by_user_id(&db.conn, game.id, user.id)
+    if team::get_by_user_id(&txn, game.id, user.id)
       .await?
       .is_some()
     {
@@ -893,6 +908,9 @@ async fn delete_self(
     cache.at("token").del(&prev_token.unwrap()).await.ok();
   }
   cache.at("token").del(format!("user-{}", user.id)).await?;
-  user::update(&db.conn, user).await?;
+  r2s_database::oauth::delete_by_user_id(&txn, user.id).await?;
+  user::update(&txn, user.clone()).await?;
+
+  txn.commit().await?;
   Ok(StatusCode::OK)
 }

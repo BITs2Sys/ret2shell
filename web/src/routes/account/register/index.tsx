@@ -1,10 +1,10 @@
 import { handleHttpError } from "@api";
-import { register } from "@api/account";
+import { register, registerWithOAuth } from "@api/account";
 import { deunicode, leet } from "@api/rpc";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import Captcha from "@blocks/captcha";
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from "@modular-forms/solid";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -13,7 +13,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 type RegisterForm = {
   account: string;
@@ -34,12 +34,17 @@ export default function () {
   const [loading, setLoading] = createSignal(false);
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
   let accountInputRef: HTMLInputElement;
+  const [searchParams, _] = useSearchParams();
 
   function onSubmit(result: RegisterForm) {
     setLoading(true);
     setTimeout(async () => {
       try {
-        await register(result);
+        if (searchParams.token && searchParams.auth_key) {
+          await registerWithOAuth(searchParams.token as string, result);
+        } else {
+          await register(result);
+        }
         addToast({
           level: "success",
           description: t("account.register.success")!,
@@ -65,6 +70,11 @@ export default function () {
         >
           <Form onSubmit={onSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("account.register.title")}</h2>
+            <Show when={searchParams.token && searchParams.auth_key}>
+              <Card level="info" class="w-full" contentClass="p-2">
+                <p>{t("account.register.oauthRegisterTips", { key: searchParams.auth_key as string })}</p>
+              </Card>
+            </Show>
             <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <Field
                 name="nickname"
@@ -78,7 +88,7 @@ export default function () {
                   <Input
                     icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
                     placeholder={t("account.register.nicknamePlaceholder")}
-                    title={t("account.register.nicknamePlaceholder")}
+                    title={t("account.register.nickname")}
                     autocomplete="nickname"
                     {...props}
                     value={field.value}

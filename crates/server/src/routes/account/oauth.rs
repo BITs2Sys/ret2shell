@@ -10,19 +10,26 @@ use axum::{
 };
 use chrono::Utc;
 use r2s_cache::Cache;
-use r2s_database::user::Permission;
+use r2s_config::captcha::ValidatorType;
+use r2s_database::{
+  config,
+  user::{self, Permission, Permissions},
+};
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
+use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
 use crate::{
   middleware::{
-    auth::{permission_required_all, Token, TokenTracker},
+    auth::{captcha_protected, permission_required_all, Token, TokenTracker},
     data,
   },
+  routes::account::{send_email, EmailType},
   traits::{GlobalState, ResponseError},
+  utility::password::hash_password,
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -51,6 +58,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       data::prepare_user_info,
     ))
     .route("/login", post(login_with_oauth_account))
+    .route("/register", post(register_with_oauth_account))
     .route("/provider", get(get_oauth_providers))
 }
 
@@ -136,8 +144,19 @@ async fn delete_oauth_provider(
   Ok(StatusCode::OK)
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OAuthCachedToken {
+  pub provider: String,
+  pub auth_key: String,
+  pub data: HashMap<String, String>,
+}
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OAuthLoginResponse {
+  pub token: Option<String>,
+  pub data: Option<HashMap<String, String>>,
+}
 async fn login_with_oauth_account(
-  State(db): State<Database>, State(oauth): State<OAuth>,
+  State(db): State<Database>, State(oauth): State<OAuth>, State(cache): State<Cache>,
   Extension(token_tracker): Extension<TokenTracker>, Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let provider = params.get("service").ok_or(ResponseError::BadRequest(
@@ -163,7 +182,24 @@ async fn login_with_oauth_account(
     match r2s_database::oauth::get_by_auth_key(&db.conn, provider_str, auth_key).await? {
       Some(item) => item,
       None => {
-        return Err(ResponseError::NotFound("oauth user account".to_owned()));
+        let temp_token = nanoid::nanoid!(32);
+        let cached_token = OAuthCachedToken {
+          provider: provider_str.to_owned(),
+          auth_key: auth_key.clone().to_owned(),
+          data: oauth_item.clone(),
+        };
+        cache
+          .at("oauth")
+          .set_ex(&temp_token, cached_token, 30 * 60)
+          .await?;
+        info!("OAuth user {auth_key} not found, temp token {temp_token} generated for register");
+        return Ok((
+          StatusCode::CREATED,
+          Json(OAuthLoginResponse {
+            token: Some(temp_token),
+            data: Some(oauth_item),
+          }),
+        ));
       }
     };
   let user = r2s_database::user::get(&db.conn, oauth_item.user_id).await?;
@@ -191,7 +227,134 @@ async fn login_with_oauth_account(
     .renew_requested
     .store(true, std::sync::atomic::Ordering::Relaxed);
 
-  Ok(StatusCode::OK)
+  Ok((StatusCode::OK, Json(OAuthLoginResponse::default())))
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct OAuthRegisterRequest {
+  pub token: String,
+  pub account: String,
+  pub nickname: String,
+  pub email: String,
+  pub password: String,
+  pub captcha_id: String,
+  pub captcha_answer: String,
+}
+
+async fn register_with_oauth_account(
+  State(db): State<Database>, State(cache): State<Cache>, State(queue): State<Queue>,
+  Extension(config): Extension<config::Model>, Extension(token_tracker): Extension<TokenTracker>,
+  Json(req): Json<OAuthRegisterRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if config
+    .captcha
+    .clone()
+    .is_some_and(|c| c.enabled && c.validator != ValidatorType::None)
+  {
+    captcha_protected!(cache, &req.captcha_id, &req.captcha_answer);
+  }
+  let cached_token = cache
+    .at("oauth")
+    .get::<OAuthCachedToken>(&req.token)
+    .await?;
+  let cached_token = match cached_token {
+    Some(token) => token,
+    None => {
+      return Err(ResponseError::NotFound("oauth token".to_owned()));
+    }
+  };
+  let txn = db.conn.begin().await?;
+
+  // if user::get_user_by_account(db, &body.email).await.is_ok() {
+  //     return Err((StatusCode::CONFLICT, "account already exists"));
+  // }
+  if user::get_by_account_or_email(&txn, &req.email)
+    .await?
+    .is_some()
+    || user::get_by_account_or_email(&txn, &req.account)
+      .await?
+      .is_some()
+  {
+    return Err(ResponseError::Conflict("account already exists".to_owned()));
+  }
+
+  let password = hash_password(&req.password)?;
+
+  let mut permissions = match user::count(&txn, true, None, None).await? {
+    0 => Permissions(vec![
+      Permission::Basic,
+      Permission::Verified,
+      Permission::Calendar,
+      Permission::Wiki,
+      Permission::Bulletin,
+      Permission::Game,
+      Permission::Host,
+      Permission::User,
+      Permission::Statistics,
+      Permission::DevOps,
+    ]),
+    _ => Permissions(vec![Permission::Basic]),
+  };
+  if !config.email.as_ref().is_some_and(|c| c.enabled) && permissions.0.len() == 1 {
+    permissions.0.push(Permission::Verified);
+  }
+  let email = req.email.clone();
+  let institute = r2s_database::institute::get_by_provider(&txn, &cached_token.provider).await?;
+  let new_user = user::Model {
+    account: req.account.clone(),
+    nickname: req.nickname.clone(),
+    password: Some(password),
+    email: Some(req.email),
+    registered_at: Utc::now(),
+    permissions,
+    hidden: false,
+    banned: false,
+    institute_id: institute.clone().map(|i| i.id),
+    ..Default::default()
+  };
+  let user = user::create(&txn, new_user).await?;
+
+  let new_oauth = r2s_database::oauth::Model {
+    user_id: user.id,
+    provider: cached_token.provider.clone(),
+    auth_key: cached_token.auth_key.clone(),
+    data: Some(serde_json::to_value(cached_token.data)?),
+    created_at: Utc::now(),
+    updated_at: Utc::now(),
+    ..Default::default()
+  };
+  r2s_database::oauth::create(&txn, new_oauth).await?;
+
+  txn.commit().await?;
+
+  send_email(
+    &cache,
+    &queue,
+    &config,
+    &user.account,
+    &email,
+    EmailType::Verify,
+  )
+  .await
+  .ok();
+  info!(
+    "User registered: {} ({}) <{}>",
+    user.nickname,
+    user.account,
+    user.email.unwrap_or_default()
+  );
+  *(token_tracker.token.lock().await) = Token {
+    id: user.id,
+    account: user.account.clone(),
+    nickname: user.nickname.clone(),
+    permissions: user.permissions,
+    ..Default::default()
+  };
+  token_tracker
+    .renew_requested
+    .store(true, std::sync::atomic::Ordering::Relaxed);
+
+  Ok(())
 }
 
 async fn get_oauth_status(

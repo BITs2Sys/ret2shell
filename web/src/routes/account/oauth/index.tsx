@@ -50,7 +50,13 @@ export default function () {
 
   async function handleLoginWithOAuth() {
     try {
-      await loginWithOAuth(location.search);
+      const resp = await loginWithOAuth(location.search);
+      if (resp.token && resp.data) {
+        navigate(`/account/register?token=${resp.token}&auth_key=${resp.data.get("auth_key")}`, {
+          replace: true,
+        });
+        return;
+      }
       navigate("/", { replace: true });
       addToast({
         level: "success",

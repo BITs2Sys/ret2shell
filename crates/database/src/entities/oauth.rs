@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{institute, user};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "oauth")]
 pub struct Model {
   #[sea_orm(primary_key)]
@@ -142,4 +142,14 @@ pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}
+
+pub async fn delete_by_user_id<C>(db: &C, user_id: i64) -> Result<(), DbErr>
+where
+  C: ConnectionTrait, {
+  let active_model = ActiveModel {
+    user_id: ActiveValue::Set(user_id),
+    ..Default::default()
+  };
+  Entity::delete(active_model).exec(db).await.map(|_| ())
 }

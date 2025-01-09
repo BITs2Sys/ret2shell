@@ -122,7 +122,31 @@ export async function createOAuthProvider(req: OAuthProvider) {
 }
 
 export async function loginWithOAuth(query: string) {
-  return await api.post(`${api_root}/account/oauth/login${query}`).json();
+  return await api.post(`${api_root}/account/oauth/login${query}`).json<{
+    token: string | null;
+    data: Map<string, string> | null;
+  }>();
+}
+
+export async function registerWithOAuth(
+  token: string,
+  req: {
+    account: string;
+    nickname: string;
+    email: string;
+    password: string;
+    captcha_id: string;
+    captcha_answer: string;
+  }
+) {
+  return await api
+    .post(`${api_root}/account/oauth/register`, {
+      json: {
+        token,
+        ...req,
+      },
+    })
+    .json();
 }
 
 export async function bindWithOAuth(query: string) {

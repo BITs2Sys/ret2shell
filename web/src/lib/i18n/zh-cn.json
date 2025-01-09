@@ -893,7 +893,8 @@
       "nicknameRequired": "请填写昵称",
       "nicknameMinLength": "昵称最短2个字符",
       "nicknameMaxLength": "昵称最长32个字符",
-      "nicknamePlaceholder": "昵称",
+      "nickname": "昵称",
+      "nicknamePlaceholder": "昵称（不建议填真名哦）",
       "emailRequired": "请填写邮箱",
       "emailInvalid": "邮箱格式不正确",
       "passwordRequired": "请填写密码",
@@ -901,6 +902,7 @@
       "passwordTooWeak": "密码在8-40字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
       "emailPlaceholder": "邮箱",
       "passwordPlaceholder": "密码",
+      "oauthRegisterTips": "看起来你在此之前没有注册用户…… 没关系！现在注册将直接绑定到你的第三方认证账户 {{key}} 中，下次你就可以直接使用第三方统一身份认证登录了。",
       "success": "注册成功，欢迎来到 CTF 的世界！"
     },
     "oauth": {
