@@ -201,8 +201,8 @@ export default function () {
                   class="relative w-full h-full print:h-auto print:overflow-auto"
                   defer
                 >
-                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                    <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+                  <div class="w-full flex flex-col p-3 lg:p-6">
+                    <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
                       <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                       <span class="flex-1 text-start">{t("game.admin.monitor.title")}</span>
                       <Tag level="success">
