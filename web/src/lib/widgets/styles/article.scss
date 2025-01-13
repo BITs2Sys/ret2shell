@@ -47,7 +47,7 @@ article.prose * {
   }
 
   p {
-    @apply m-0 py-1;
+    @apply m-0 py-1 #{!important};
   }
 }
 
