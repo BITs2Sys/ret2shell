@@ -372,28 +372,40 @@ export default function (props: { inGame?: boolean }) {
                         <Tag level="info">
                           <span>{image.service_type}</span>
                         </Tag>
-                        <ClipboardBtn
-                          size="sm"
-                          title={image.description!}
-                          value={getWsrxLink(instance()!.traffic, image.port!)}
-                          label="WSRX"
-                        />
-                        <Show when={wsrx.getTrafficLocal(instance()!, image.port!)}>
-                          <ClipboardBtn
-                            size="sm"
-                            title={image.description!}
-                            value={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
-                            label={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
-                          />
-                        </Show>
-                        <Show when={instance()?.exposed_ports?.find((v) => v.name === image.name)}>
-                          <ClipboardBtn
-                            size="sm"
-                            title={image.description!}
-                            value={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
-                            label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
-                          />
-                        </Show>
+
+                        <Switch
+                          fallback={
+                            <ClipboardBtn
+                              size="sm"
+                              title={image.description!}
+                              value={getWsrxLink(instance()!.traffic, image.port!)}
+                              label="WebSocket"
+                            />
+                          }
+                        >
+                          <Match when={instance()?.exposed_ports?.find((v) => v.name === image.name)}>
+                            <ClipboardBtn
+                              size="sm"
+                              title={image.description!}
+                              value={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                              label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                            />
+                          </Match>
+                          <Match when={wsrx.getTrafficLocal(instance()!, image.port!)}>
+                            <ClipboardBtn
+                              size="sm"
+                              title={image.description!}
+                              value={getWsrxLink(instance()!.traffic, image.port!)}
+                              label="WebSocket"
+                            />
+                            <ClipboardBtn
+                              size="sm"
+                              title={image.description!}
+                              value={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
+                              label={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
+                            />
+                          </Match>
+                        </Switch>
                       </section>
                     </Show>
                   )}
