@@ -3,6 +3,30 @@ article.prose * {
   @apply scroll-m-20 break-words;
 }
 
+/* default */
+article.prose {
+  p {
+    @apply my-4;
+  }
+  figure,
+  blockquote {
+    @apply my-6;
+  }
+}
+
+/* compact */
+article.article-compact {
+  p {
+    @apply my-2;
+  }
+  figure,
+  blockquote {
+    @apply my-3;
+  }
+}
+
+/* --- */
+
 .article-compact.prose * {
   @apply scroll-m-0;
 }
@@ -11,11 +35,11 @@ article.prose * {
   @apply p-0;
 
   &> *:first-child {
-    @apply mt-0 pt-0 #{!important};
+    @apply mt-0 pt-0;
   }
 
   &> *:last-child {
-    @apply mb-0 pb-0 #{!important};
+    @apply mb-0 pb-0;
   }
 
   :where(pre) {
@@ -45,10 +69,6 @@ article.prose * {
   :where(pre) {
     @apply my-0;
   }
-
-  p {
-    @apply m-0 py-1 #{!important};
-  }
 }
 
 nav.toc {
@@ -65,10 +85,6 @@ nav.toc li {
 
 nav.toc a {
   @apply text-layer-content/80 no-underline hover:underline;
-}
-
-article p {
-  @apply my-4 #{!important};
 }
 
 article pre,
@@ -219,7 +235,7 @@ article blockquote {
 article blockquote {
   border-left-color: var(--quote-color) !important;
   background-color: var(--quote-bg) !important;
-  @apply not-italic text-layer-content/80 border-l-[5px] rounded-[4px] px-4 py-3 mx-0 my-6 backdrop-blur-sm #{!important};
+  @apply not-italic text-layer-content/80 border-l-[5px] rounded-[4px] px-4 py-3 mx-0 backdrop-blur-sm #{!important};
 
   & figure,
   & pre {
