@@ -372,11 +372,12 @@ export default function () {
             <Switch>
               <Match when={gameStore.team}>
                 <Link
-                  href={`/games/${gameStore.current?.id}/challenges`}
+                  href={
+                    inArchived() ? `/training/${gameStore.current?.id}` : `/games/${gameStore.current?.id}/challenges`
+                  }
                   class="flex-1"
                   level="success"
                   disabled={
-                    inArchived() ||
                     (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) ||
                     gameStore.team?.state === TeamState.Pending ||
                     gameStore.team?.state === TeamState.Banned
