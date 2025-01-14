@@ -1,13 +1,34 @@
-const EMAIL_DOMAIN_SUFFIX = "user.ret.sh.cn";
+//! * email.rx
+//! * Verify the user organization with email suffix(es)
 
+/// The list of valid email suffixes.
+const DOMAIN_LIST = [
+    "user.ret.sh.cn"
+];
+
+/// Email login
+///
+/// [endpoint] ${API}/account/oauth/login
+/// * params: the request parameters
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
 pub async fn login(params) {
     Err("DISABLED")
 }
 
+/// Bind the organization account with the user
+///
+/// [endpoint] ${API}/account/oauth/bind
+///
+/// * params: the request parameters
+/// * user: user data of who requested this bind
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
 pub async fn bind(params, user) {
     let email = user.get("email")?;
+    let suffix = email.split("@").collect::<Vec>().pop().unwrap_or(email);
 
-    if email.ends_with(EMAIL_DOMAIN_SUFFIX) {
+    if DOMAIN_LIST.iter().any(|domain| domain == suffix) {
         Ok(#{
             auth_key: email.clone(),
             email: email

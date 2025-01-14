@@ -69,8 +69,8 @@ pub async fn check(bucket, user, team, submission) {
 
 /// Provides the environment variables when user starts the challenge container.
 ///
-/// *Note*: the flag content generation has random data injected every time you
-/// call audit::encode_uuid. The examiners only validate the stegano data in the
+/// NOTE: the flag content generation has random data injected every time you
+/// call `audit::encode_uuid`. The examiners only validate the stegano data in the
 /// flag content.
 ///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
