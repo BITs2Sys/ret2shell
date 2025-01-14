@@ -94,10 +94,17 @@ export default function () {
                   }
                 >
                   <Popover size="sm" square btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}>
-                    <Card contentClass="max-w-lg p-2 text-wrap">
-                      <p class="text-wrap break-all max-w-lg">
-                        {JSON.stringify(selfOAuthItems().find((v) => v.provider === service.provider)?.data)}
-                      </p>
+                    <Card contentClass="max-w-lg p-2">
+                      <table>
+                        <For each={Object.entries(selfOAuthItems().find((v) => v.provider === service.provider)!.data)}>
+                          {([key, value]) => (
+                            <tr class="h-12 align-middle text-start border-b border-b-layer-content/15">
+                              <td class="h-12 align-middle text-start font-bold px-2">{key}</td>
+                              <td class="align-middle text-start truncate px-2">{value}</td>
+                            </tr>
+                          )}
+                        </For>
+                      </table>
                     </Card>
                   </Popover>
 
