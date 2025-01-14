@@ -372,7 +372,6 @@ export default function (props: { inGame?: boolean }) {
                         <Tag level="info">
                           <span>{image.service_type}</span>
                         </Tag>
-
                         <Switch
                           fallback={
                             <ClipboardBtn

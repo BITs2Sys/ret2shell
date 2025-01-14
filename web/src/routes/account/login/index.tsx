@@ -224,7 +224,7 @@ export default function () {
               {t("account.register.tips")}
             </Link>
             <Switch>
-              <Match when={oauthServices().length === 1}>
+              <Match when={oauthServices().filter((s) => s.portal).length === 1}>
                 <Link class="w-full !mt-4" href={oauthServices()[0].portal} title={oauthServices()[0].name}>
                   <img
                     src={mediaPath(oauthServices()[0].avatar ?? "")}
@@ -235,7 +235,7 @@ export default function () {
                   <span>{oauthServices()[0].name}</span>
                 </Link>
               </Match>
-              <Match when={oauthServices().length > 1}>
+              <Match when={oauthServices().filter((s) => s.portal).length > 1}>
                 <Popover
                   class="w-full !mt-4"
                   btnContent={
