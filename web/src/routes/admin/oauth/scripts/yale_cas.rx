@@ -1,8 +1,20 @@
+//! * yale_cas.rx
+//! * Most universities take this as its CAS
+
 use ret2shell::oauth::cas;
 
+/// CAS login URL
 const AUTH_SERVER_URL = "https://ids.example.edu/authserver/serviceValidate";
+/// CAS callback URL, please replace the origin with your own
 const ORIGINAL_SERVER_URL = "https://ctf.ret.sh.cn/account/oauth/";
 
+/// Login with CAS ticket
+///
+/// [endpoint] ${API}/account/oauth/login
+///
+/// * params: the request parameters
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
 pub async fn login(params) {
     let ticket = params.get("ticket")?;
     let url = `${AUTH_SERVER_URL}?service=${ORIGINAL_SERVER_URL}&ticket=${ticket}`;
@@ -16,6 +28,14 @@ pub async fn login(params) {
     })
 }
 
+/// Bind the organization account with the user
+///
+/// [endpoint] ${API}/account/oauth/bind
+///
+/// * params: the request parameters
+/// * user: user data of who requested this bind
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
 pub async fn bind(params, user) {
     Ok(login(params).await?)
 }

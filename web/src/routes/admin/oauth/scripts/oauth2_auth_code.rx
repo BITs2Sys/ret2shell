@@ -1,8 +1,23 @@
+//! * oauth2_auth_code.rx
+//! * Verify the user organization with OAuth2 authorization code
+//  * reference: https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow#how-authorization-code-flow-works
+
+/// OAuth2 server URL to get access token
 const AUTH_SERVER_URL = "https://example.com/login/oauth/access_token";
+/// URL to get user data with access token
 const DATA_SERVER_URL = "https://api.example.com/user";
+/// OAuth2 client ID and secret
 const CLIENT_ID = "";
 const CLIENT_SECRET = "";
 
+/// Login with OAuth2 authorization code
+///
+/// [endpoint] ${API}/account/oauth/login
+///
+/// * params: the request parameters
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
+///  * auth_key: the unique key for this user
 pub async fn login(params) {
     let code = params.get("code")?;
     let client = http::Client::new();
@@ -28,6 +43,14 @@ pub async fn login(params) {
     })
 }
 
+/// Bind the organization account with the user
+///
+/// [endpoint] ${API}/account/oauth/bind
+///
+/// * params: the request parameters
+/// * user: user data of who requested this bind
+///
+/// Returns: Result<#{ auth_key: string, [key: string]: string }, any>
 pub async fn bind(params, user) {
     Ok(login(params).await?)
 }

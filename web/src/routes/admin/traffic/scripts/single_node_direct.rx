@@ -1,9 +1,11 @@
+//! * single_node_direct.rx
+
 const PUBLIC_ENTRY = "www.example.com";
 
 // Traffic exposing API
 //
 // Args:
-// 
+//
 // * node:string : k8s node name
 // * service: { traffic:string, created_at:u64, lifetime:u64, ports:Vec<#{name:string, node_port:u16}> }
 //   * traffic:string : the traffic id
@@ -20,7 +22,7 @@ const PUBLIC_ENTRY = "www.example.com";
 //   * address:string : the actual address for this service
 //
 // NOTE: This function will be called when user first requesting the challenge environment.
-// 
+//
 // Ret 2 Shell will automatically cache the result of this function, but it is still possible
 // to call this function twice on the same traffic.
 //
