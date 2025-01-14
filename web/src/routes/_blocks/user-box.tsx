@@ -1,9 +1,7 @@
 import { logout } from "@api/account";
 import { mediaPath } from "@lib/utils/media";
-import { HostType } from "@models/game";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, refreshUser, resetUser } from "@storage/account";
-import { canParticipate, gameParticipateState, gameStore, isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
 import { clearToasts } from "@storage/toast";
 import Avatar from "@widgets/avatar";
@@ -11,8 +9,9 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { Show, createEffect, createSignal, untrack } from "solid-js";
 import UserCodeDialog from "./user-code-dialog";
+import Divider from "@widgets/divider";
 
 export default function UserBox() {
   createEffect(() => {
@@ -81,11 +80,8 @@ export default function UserBox() {
                 </span>
               </div>
             </Link>
-          </Card>
-          <Card contentClass="p-2 flex flex-col space-y-2">
+            <Divider />
             <UserCodeDialog />
-          </Card>
-          <Card contentClass="p-2 flex flex-col space-y-2">
             <div class="flex flex-row space-x-2">
               <Link href="/account/settings" ghost size="sm" justify="start" class="flex-1">
                 <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
@@ -98,60 +94,6 @@ export default function UserBox() {
               </Button>
             </div>
           </Card>
-          <Show when={gameStore.current && gameStore.current.host_type === HostType.Game}>
-            <Card contentClass="p-2 flex flex-row space-x-2">
-              <Switch>
-                <Match when={isGameAdmin()}>
-                  <Button
-                    size="sm"
-                    justify="start"
-                    class="flex-1 overflow-hidden"
-                    title={t("game.adminCanNotTakePartIn")}
-                    disabled
-                  >
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
-                    <span class="flex-1 truncate text-start">{t("game.adminCanNotTakePartIn")}</span>
-                  </Button>
-                </Match>
-                <Match when={gameStore.team}>
-                  <Link
-                    href={`/games/${gameStore.current?.id}/teams/${gameStore.team?.id}`}
-                    ghost
-                    size="sm"
-                    justify="start"
-                    class="flex-1"
-                  >
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
-                    <span class="flex-1 truncate text-start">{gameStore.team?.name}</span>
-                  </Link>
-                </Match>
-                <Match when={gameStore.team}>
-                  <div />
-                </Match>
-                <Match when={canParticipate() && gameStore.team === null}>
-                  <Link
-                    href={`/games/${gameStore.current?.id}/teams/create`}
-                    ghost
-                    size="sm"
-                    justify="start"
-                    class="flex-1"
-                    disabled={!gameParticipateState()[0]}
-                  >
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
-                    <span class="flex-1 truncate text-start">
-                      {gameParticipateState()[0] ? t("game.team.joinGame") : gameParticipateState()[1]}
-                    </span>
-                  </Link>
-                </Match>
-                <Match when={!canParticipate()}>
-                  <Link href="#" ghost size="sm" justify="start" class="flex-1" disabled>
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
-                    <span class="flex-1 truncate text-start">{t("game.team.canNotJoin")}</span>
-                  </Link>
-                </Match>
-              </Switch>
-            </Card>
-          </Show>
         </div>
       </Popover>
     </Show>
