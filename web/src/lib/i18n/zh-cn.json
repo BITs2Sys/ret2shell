@@ -267,7 +267,7 @@
       "dropCap": "无特权运行（无特权端口权限）",
       "hintHistory": "提示情况",
       "hintHistoryTips": "谁买了我的题？",
-      "chatQuickReply": [
+      "chatQuickReplies": [
         "请独立思考并解题。",
         "请仔细阅读参赛须知和手册。",
         "再想一想，加油！",

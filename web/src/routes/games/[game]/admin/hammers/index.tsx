@@ -30,7 +30,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-const quickReplies = t("game.challenge.chatQuickReply") ?? [];
+const quickReplies = t("game.challenge.chatQuickReplies") ?? [];
 
 function mergeChats(
   challengeId: number,

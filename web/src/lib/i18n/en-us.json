@@ -303,7 +303,7 @@
       "dropCap": "No privileged run (no privileged port permissions)",
       "hintHistory": "Hint Status",
       "hintHistoryTips": "Who bought my question?",
-      "chatQuickReply": [
+      "chatQuickReplies": [
         "Please think independently and solve the challenge.",
         "Please read the competition rules and handbook carefully.",
         "Think again, and keep going!",
