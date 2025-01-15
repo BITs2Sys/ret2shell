@@ -8,7 +8,7 @@ import {
 } from "@api/game";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/misaka.webp";
-// import { stickerSet } from "@assets/stickers";
+import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
@@ -30,12 +30,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-const quickReplies = [
-  t("game.challenge.chatQuickReply1"),
-  t("game.challenge.chatQuickReply2"),
-  t("game.challenge.chatQuickReply3"),
-  t("game.challenge.chatQuickReply4"),
-];
+const quickReplies = t("game.challenge.chatQuickReply") ?? [];
 
 function mergeChats(
   challengeId: number,
@@ -345,6 +340,44 @@ export default function () {
               </div>
               <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 bg-layer">
                 <div class="flex flex-row items-center h-8 space-x-2">
+                  <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}>
+                    <Card contentClass="p-2 aspect-square">
+                      <OverlayScrollbarsComponent
+                        options={{
+                          scrollbars: {
+                            theme: `os-theme-${fullTheme()}`,
+                            autoHide: "scroll",
+                          },
+                        }}
+                        class="relative w-full h-full print:h-auto print:overflow-auto"
+                        defer
+                      >
+                        <div class="grid grid-cols-4 gap-2">
+                          <For each={stickerSet}>
+                            {(sticker) => (
+                              <Button
+                                ghost
+                                class="p-0 aspect-square overflow-hidden"
+                                onClick={() => {
+                                  setChat(`![${sticker.alt}](${sticker.src})`);
+                                  setTimeout(() => {
+                                    handleSendChat();
+                                  });
+                                }}
+                              >
+                                <img
+                                  class="w-16 h-16 transition-transform duration-300 hover:scale-[1.1]"
+                                  src={sticker.src}
+                                  alt={sticker.alt}
+                                  title={sticker.alt}
+                                />
+                              </Button>
+                            )}
+                          </For>
+                        </div>
+                      </OverlayScrollbarsComponent>
+                    </Card>
+                  </Popover>
                   <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--flash-20-regular] w-5 h-5" />}>
                     <Card contentClass="p-2">
                       <OverlayScrollbarsComponent

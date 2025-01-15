@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { register, registerWithOAuth } from "@api/account";
 import { deunicode, leet } from "@api/rpc";
-// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+import pangbaiMascotHappy from "@assets/imgs/pangbai-mascot-happy.png";
 import Captcha from "@blocks/captcha";
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { useNavigate, useSearchParams } from "@solidjs/router";
@@ -13,7 +13,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createSignal, Show } from "solid-js";
+import { Show, createSignal } from "solid-js";
 
 type RegisterForm = {
   account: string;
@@ -49,7 +49,7 @@ export default function () {
           level: "success",
           description: t("account.register.success")!,
           duration: 5000,
-          // img: xdsecMascotHappy,
+          img: pangbaiMascotHappy,
         });
         navigate("/", { replace: true });
       } catch (err) {

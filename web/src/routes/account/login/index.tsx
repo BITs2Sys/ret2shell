@@ -1,10 +1,10 @@
 import { handleHttpError } from "@api";
 import { getOAuthProviders, login } from "@api/account";
 import VnLogoAnimate from "@assets/animates/vn-logo-animate";
-// import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
-// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
-// import xdsecMascotNormal from "@assets/imgs/xdsec-mascot-normal.webp";
-// import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+import pangbaiMascotCrying from "@assets/imgs/pangbai-mascot-crying.png";
+import pangbaiMascotHappy from "@assets/imgs/pangbai-mascot-happy.png";
+import pangbaiMascotNormal from "@assets/imgs/pangbai-mascot-normal.png";
+import pangbaiMascotUnsee from "@assets/imgs/pangbai-mascot-unsee.png";
 import Captcha from "@blocks/captcha";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
@@ -48,7 +48,7 @@ export default function () {
     }
   });
 
-  const [_, setMascot] = createSignal(null as string | null);
+  const [mascot, setMascot] = createSignal(null as string | null);
   const [loading, setLoading] = createSignal(false);
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
   function handleLogin(result: LoginForm) {
@@ -60,7 +60,7 @@ export default function () {
           level: "success",
           description: t("account.login.success")!,
           duration: 5000,
-          // img: xdsecMascotHappy,
+          img: pangbaiMascotHappy,
         });
         const redirectUrl = location.query.redirect;
         if (redirectUrl) {
@@ -72,9 +72,9 @@ export default function () {
         handleHttpError(err as Error, t("account.login.failMascotTip")!);
         setTimestamp(DateTime.now().toMillis());
         setValue(form, "password", "");
-        // setTimeout(() => {
-        //   setMascot(xdsecMascotCrying);
-        // }, 500);
+        setTimeout(() => {
+          setMascot(pangbaiMascotCrying);
+        }, 500);
       }
       setLoading(false);
     }, 500);
@@ -107,7 +107,7 @@ export default function () {
                   error={field.error}
                   required
                   onFocusIn={() => {
-                    // setMascot(xdsecMascotNormal);
+                    setMascot(pangbaiMascotNormal);
                   }}
                   onFocusOut={() => {
                     setMascot(null);
@@ -144,7 +144,7 @@ export default function () {
                   value={field.value}
                   error={field.error}
                   onFocusIn={() => {
-                    // setMascot(xdsecMascotUnsee);
+                    setMascot(pangbaiMascotUnsee);
                   }}
                   onFocusOut={() => {
                     setMascot(null);
@@ -180,45 +180,45 @@ export default function () {
           <Divider class="hidden md:inline-block" direction="vertical" />
           <div class="md:w-0 flex-1 flex-shrink-0 flex flex-col items-center space-y-2">
             <div class="flex-1 flex flex-col items-center justify-center">
-              <VnLogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
-              {/* <Switch fallback={<LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}> */}
-              {/*   <Match when={mascot() === xdsecMascotNormal}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotNormal} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.accountMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotUnsee}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotUnsee} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.passwordMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotHappy}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotHappy} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.successMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotCrying}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotCrying} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.failMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/* </Switch> */}
+              {/* <VnLogoAnimate class="w-36 h-36 hidden md:inline-block my-6" /> */}
+              <Switch fallback={<VnLogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}>
+                <Match when={mascot() === pangbaiMascotNormal}>
+                  <img
+                    src={pangbaiMascotNormal}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <header>{t("account.login.accountMascotTip")}</header>
+                </Match>
+                <Match when={mascot() === pangbaiMascotUnsee}>
+                  <img
+                    src={pangbaiMascotUnsee}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <header>{t("account.login.passwordMascotTip")}</header>
+                </Match>
+                <Match when={mascot() === pangbaiMascotHappy}>
+                  <img
+                    src={pangbaiMascotHappy}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <header>{t("account.login.successMascotTip")}</header>
+                </Match>
+                <Match when={mascot() === pangbaiMascotCrying}>
+                  <img
+                    src={pangbaiMascotCrying}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <header>{t("account.login.failMascotTip")}</header>
+                </Match>
+              </Switch>
             </div>
             <Link class="w-full" href="/account/register">
               {t("account.register.tips")}

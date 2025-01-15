@@ -1,6 +1,6 @@
 import teapot from "@assets/imgs/teapot.svg";
-// import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
-// import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+import pangbaiMascotCrying from "@assets/imgs/pangbai-mascot-crying.png";
+import pangbaiMascotUnsee from "@assets/imgs/pangbai-mascot-unsee.png";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { t } from "@storage/theme";
 import { Match, Show, Switch } from "solid-js";
@@ -35,12 +35,12 @@ export default function (props: { status: number | null }) {
         <Match when={props.status === 418}>
           <img class="rounded-xl" src={teapot} width={256} height={256} alt="TωT" />
         </Match>
-        {/* <Match when={props.status && props.status >= 500}> */}
-        {/*   <img src={xdsecMascotCrying} width={256} height={256} alt="TωT" /> */}
-        {/* </Match> */}
-        {/* <Match when={props.status && props.status < 500}> */}
-        {/*   <img src={xdsecMascotUnsee} width={256} height={256} alt="TωT" /> */}
-        {/* </Match> */}
+        <Match when={props.status && props.status >= 500}>
+          <img src={pangbaiMascotCrying} width={256} height={256} alt="TωT" />
+        </Match>
+        <Match when={props.status && props.status < 500}>
+          <img src={pangbaiMascotUnsee} width={256} height={256} alt="TωT" />
+        </Match>
       </Switch>
       <h1 class="font-bold text-3xl space-x-4">
         <span class="opacity-60">{props.status}</span>
