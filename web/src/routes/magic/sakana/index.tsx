@@ -48,7 +48,7 @@ export default function () {
         <div class="relative">
           <div id="newstar-box" />
           <Link
-          // background contain
+            // background contain
             class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
             href="https://openctf.net"
             target="_blank"
