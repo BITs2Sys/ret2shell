@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
-import platformAvatar from "@assets/imgs/rx.webp";
+import platformAvatar from "@assets/imgs/misaka.webp";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
@@ -34,7 +34,7 @@ function mergeChats(
     b.push({
       id: 0,
       user_id: 0,
-      user_name: "Ciallo～(∠・ω< )⌒☆",
+      user_name: "御坂御坂",
       avatar: undefined,
       content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•ω•๑)۶`,
       created_at: solvedAt,

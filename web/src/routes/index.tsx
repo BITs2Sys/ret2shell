@@ -51,7 +51,7 @@ export default function () {
             <div class="h-24" />
             <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
               <Button ghost class="inline-flex flex-row space-x-1 flex-wrap h-auto max-w-full">
-                <span>(C) 2022 - {new Date().getFullYear()}</span>
+                <span>(C) {new Date().getFullYear()}</span>
                 <a
                   class="hover:underline"
                   href={platformStore.config.footer_url || "#"}

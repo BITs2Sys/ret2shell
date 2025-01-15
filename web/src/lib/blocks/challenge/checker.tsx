@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getChallengeCheckerScript, updateChallengeCheckerScript } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { challengeStore } from "@storage/challenge";
@@ -14,7 +15,6 @@ import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
 import simpleChecker from "./scripts/simple.rx";
-import { handleHttpError } from "@api";
 
 type PresetChecker = "simple" | "mapped" | "dynamic-leet" | "dynamic-uuid";
 
@@ -25,6 +25,17 @@ const checkerMap = {
   "dynamic-uuid": dynamicUuidChecker,
 };
 
+function genRandomAlphaNumic(n) {
+  let text = "";
+  const possible = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < n; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+  return text;
+}
+
+function replaceWithRandom(s: string) {
+  return s.replace(/%RANDOM:(\d+)%/g, (_, n) => genRandomAlphaNumic(Number.parseInt(n)));
+}
+
 export default function (_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
@@ -32,7 +43,7 @@ export default function (_props: {
   const [preset, setPreset] = createSignal(null as PresetChecker | null);
   const presetChecker = createMemo(() => {
     if (!preset()) return null;
-    return checkerMap[preset()!];
+    return replaceWithRandom(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
   const [lint, setLint] = createSignal(null as string | null);

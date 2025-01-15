@@ -1,0 +1,47 @@
+[data-vn-animate-logo] {
+    scale: 1.25;
+}
+
+.vn-animate-box {
+    transition: fill 0.3s;
+    transform: translateX(10%) translateY(10%) scale(0.8);
+}
+
+@keyframes fade-in-a {
+    to {
+        opacity: 1;
+        transform: translate(0) scale(1);
+    }
+}
+
+@keyframes fade-in-b {
+    to {
+        opacity: 1;
+        transform: translate(0) scale(1);
+    }
+}
+
+@keyframes fade-in-c {
+    to {
+        opacity: 1;
+        transform: translate(0) scale(1);
+    }
+}
+
+[data-fade="a"] {
+    opacity: 0;
+    transform: translate(-14.0625%, -28.125%) scale(1.5625);
+    animation: fade-in-a 0.5s ease-in 0.5s forwards;
+}
+
+[data-fade="b"] {
+    opacity: 0;
+    transform: translate(-28.125%, -28.125%) scale(1.5625);
+    animation: fade-in-b 0.5s ease-in 1.15s forwards;
+}
+
+[data-fade="c"] {
+    opacity: 0;
+    transform: translate(-42.1875%,-28.125%) scale(156.25%);
+    animation: fade-in-c 0.5s ease-in 1.8s forwards;
+}

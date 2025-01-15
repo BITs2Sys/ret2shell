@@ -32,8 +32,8 @@
       "nameTitle": "平台名称",
       "subjectInfoTitle": "首页副标题",
       "subjectUrlTitle": "副标题链接",
-      "recordPlaceholder": "中国工信部备案号（不对中国大陆服务则不需要填写）",
-      "recordTitle": "中国工信部备案号",
+      "recordPlaceholder": "工信部 ICP 备案号（仅限中国大陆）",
+      "recordTitle": "工信部 ICP 备案号",
       "hideMaker": "隐藏开发者信息",
       "hideMakerDisabled": "你的许可证不允许隐藏开发者信息"
     },
@@ -194,7 +194,7 @@
       "fetchEnvImagesFailed": "获取镜像仓库失败",
       "envContainerName": "容器名称",
       "envContainerNameRequired": "请填写容器名称",
-      "envContainerTag": "容器镜像",
+      "envContainerTag": "容器镜像地址",
       "envContainerTagRequired": "请选择容器镜像",
       "envContainerTagVersion": "镜像版本",
       "selectEnvContainerTagVersion": "选择镜像版本...",
@@ -205,10 +205,10 @@
       "envContainerCpuRequired": "请填写 CPU 限制",
       "envContainerMemRequired": "请填写内存限制",
       "envContainerStorageRequired": "请填写存储限制",
-      "envContainerDescription": "服务端口描述（不对外服务可留空）",
+      "envContainerDescription": "端口描述（不对外服务可留空）",
       "envContainerServiceType": "选择服务类型",
       "selectEnvContainerServiceType": "请选择服务类型",
-      "envContainerPort": "服务端口（可留空）",
+      "envContainerPort": "容器内端口（可留空）",
       "uploadImageToRegistry": "上传 docker-archive",
       "uploadImageToRegistrySuccess": "镜像上传完成",
       "envHasInternet": "题目环境可访问互联网",
@@ -280,9 +280,9 @@
       "releasePeriodPlaceholder": "发布前题目不可见，归档后题目不计分，留空则全时段有效..."
     },
     "scoreboard": {
-      "title": "积分板",
+      "title": "解题榜",
       "selectInstitute": "选择组织...",
-      "fetchError": "获取积分板失败",
+      "fetchError": "获取解题榜失败",
       "currentPeriod": "本周目"
     },
     "writeup": {
@@ -404,7 +404,7 @@
     },
     "exit": "退出",
     "noGameHosted": "没有举办过赛事",
-    "otherGames": "其他赛事",
+    "otherGames": "其它赛事",
     "pending": "未开始",
     "ended": "已结束",
     "started": "进行中",
@@ -1097,7 +1097,7 @@
     "goto": "前往",
     "backToList": "返回列表",
     "add": "添加",
-    "saveAndCompile": "保存&编译"
+    "saveAndCompile": "保存并编译"
   },
   "docs": {
     "titleTips": "回归终端 - 开发者文档",

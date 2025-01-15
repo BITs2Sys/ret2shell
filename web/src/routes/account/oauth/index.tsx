@@ -1,6 +1,6 @@
 import { handleHttpError } from "@api";
 import { bindWithOAuth, getOAuthProviders, loginWithOAuth } from "@api/account";
-import LogoAnimate from "@assets/animates/logo-animate";
+import VnLogoAnimate from "@assets/animates/vn-logo-animate";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import logo from "@assets/logo-gray.svg";
 import { mediaPath } from "@lib/utils/media";
@@ -89,7 +89,7 @@ export default function () {
       <Title page={t("account.oauth.title")} route="/account/oauth" />
       <div class="flex-1 w-full flex flex-col space-y-8 items-center justify-center">
         <div class="flex flex-row space-x-8 items-center">
-          <LogoAnimate
+          <VnLogoAnimate
             width={128}
             height={128}
             class={`transition-all duration-700 ${animate() ? "" : "translate-x-16 opacity-0"} `}

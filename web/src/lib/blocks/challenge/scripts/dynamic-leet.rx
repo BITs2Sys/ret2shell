@@ -1,14 +1,14 @@
 //! * dynamic-leet.rx
-//! Dynamic flag check with template and steganographic data.
+//! 可读的动态 FLAG（含隐写防作弊）
 
 use ret2api::audit;
 use ret2api::utils;
 
-/// the flag encryption key
-const ENCRYPT_KEY = "kamisato_ayaka";
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
-const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content
+/// FLAG 前缀
+const PREFIX = "VNCTF";
+/// 隐写密钥
+const ENCRYPT_KEY = "%RANDOM:16%";
+/// 可读的字符串，使用隐写密钥将特定字符变为形状相近的字符
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// Check flag submitted by user.

@@ -1,28 +1,34 @@
 import "sakana-widget/lib/index.css";
-import LTeam from "@assets/brands/L-team";
-import cnssTeam from "@assets/brands/cnss.svg";
-import vidarTeam from "@assets/brands/vidar.svg";
-import cnssMascot from "@assets/imgs/cnss-mascot.webp";
-import vidarMascot from "@assets/imgs/vidar-mascot.webp";
+import NewStarBrand from "@assets/brands/NewStar";
+import XDSECBrand from "@assets/brands/Ret2Shell";
+import newstarMascot from "@assets/imgs/newstar-mascot.webp";
 import xdsecMascot from "@assets/imgs/xdsec-mascot.webp";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import SakanaWidget from "sakana-widget";
 import { onMount } from "solid-js";
-import { Title } from "@storage/header";
 
 export default function () {
+  const newstar = SakanaWidget.getCharacter("takina");
   const xdsec = SakanaWidget.getCharacter("takina");
-  const vidar = SakanaWidget.getCharacter("chisato");
-  const cnss = SakanaWidget.getCharacter("takina");
+  if (newstar) newstar.image = newstarMascot;
   if (xdsec) xdsec.image = xdsecMascot;
-  if (vidar) vidar.image = vidarMascot;
-  if (cnss) cnss.image = cnssMascot;
+  SakanaWidget.registerCharacter("newstar", newstar!);
   SakanaWidget.registerCharacter("xdsec", xdsec!);
-  SakanaWidget.registerCharacter("vidar", vidar!);
-  SakanaWidget.registerCharacter("cnss", cnss!);
 
   onMount(() => {
+    new SakanaWidget({
+      character: "newstar",
+      controls: false,
+      size: 350,
+      stroke: {
+        color: "#80808060",
+        width: 4,
+      },
+    })
+      .setState({ i: 0.05, d: 0.99 })
+      .mount("#newstar-box");
     new SakanaWidget({
       character: "xdsec",
       controls: false,
@@ -34,64 +40,32 @@ export default function () {
     })
       .setState({ i: 0.05, d: 0.99 })
       .mount("#xdsec-box");
-    new SakanaWidget({
-      character: "vidar",
-      controls: false,
-      size: 350,
-      stroke: {
-        color: "#80808060",
-        width: 4,
-      },
-    })
-      .setState({ i: 0.05, d: 0.99 })
-      .mount("#vidar-box");
-    new SakanaWidget({
-      character: "cnss",
-      controls: false,
-      size: 350,
-      stroke: {
-        color: "#80808060",
-        width: 4,
-      },
-    })
-      .setState({ i: 0.05, d: 0.99 })
-      .mount("#cnss-box");
   });
   return (
     <>
       <Title page={t("magic.sakana.title")} route="/magic/sakana" />
       <div class="flex-1 flex flex-row items-center justify-center">
         <div class="relative">
-          <div id="xdsec-box" />
+          <div id="newstar-box" />
           <Link
+          // background contain
             class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
-            href="https://l.xdsec.org"
+            href="https://openctf.net"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <LTeam width={64} height={64} />
-          </Link>
-        </div>
-        <div class="relative hidden sm:block">
-          <div id="vidar-box" />
-          <Link
-            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
-            href="https://vidar.club"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={vidarTeam} class="w-16 h-16" width={64} height={64} alt="Vidar" />
+            <NewStarBrand width={64} height={64} />
           </Link>
         </div>
         <div class="relative hidden lg:block">
-          <div id="cnss-box" />
+          <div id="xdsec-box" />
           <Link
             class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
-            href="https://cnss.io"
+            href="https://ctf.xidian.edu.cn"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={cnssTeam} class="w-16 h-16" width={64} height={64} alt="CNSS" />
+            <XDSECBrand width={64} height={64} />
           </Link>
         </div>
       </div>

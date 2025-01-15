@@ -970,8 +970,8 @@
       "hideMaker": "開発者情報を隠す",
       "hideMakerDisabled": "あなたのライセンスでは、開発者情報を非表示にすることは許可されていません。",
       "nameTitle": "プラットフォーム名",
-      "recordPlaceholder": "中国工信部備案番号（中国本土以外のサービスには不要）",
-      "recordTitle": "中国工信部備案番号",
+      "recordPlaceholder": "工信部 ICP 備案番号（中国本土のみ）",
+      "recordTitle": "工信部 ICP 備案番号",
       "subjectInfoTitle": "ホームページのサブタイトル",
       "subjectUrlTitle": "サブタイトルリンク"
     },

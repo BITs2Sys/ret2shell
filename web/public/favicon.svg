@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1033)"><rect width="1000" height="1000" fill="#7e0f1e"></rect><g transform="matrix(2.4888003982080638,0,0,2.4888003982080638,150,256.84420109507215)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="281.26" height="195.4"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 281.26 195.4" fill="#e3cf8b"><g><g><polygon points="0 0 96.09 192.92 96.09 132.46 0 0"></polygon><polygon points="102.64 132.56 102.64 192.92 199.32 0 102.64 132.56"></polygon><polygon points="188.76 35.12 206.06 0 281.26 195.4 188.76 35.12"></polygon></g></g></svg></svg></g></g><defs><clipPath id="SvgjsClipPath1033"><rect width="1000" height="1000" x="0" y="0" rx="350" ry="350"></rect></clipPath></defs></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1034)"><rect width="1000" height="1000" fill="#7e0f1e"></rect><g transform="matrix(2.4888003982080638,0,0,2.4888003982080638,150,256.84420109507215)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="281.26" height="195.4"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 281.26 195.4" fill="#e3cf8b"><g><g><polygon points="0 0 96.09 192.92 96.09 132.46 0 0"></polygon><polygon points="102.64 132.56 102.64 192.92 199.32 0 102.64 132.56"></polygon><polygon points="188.76 35.12 206.06 0 281.26 195.4 188.76 35.12"></polygon></g></g></svg></svg></g></g><defs><clipPath id="SvgjsClipPath1034"><rect width="1000" height="1000" x="0" y="0" rx="350" ry="350"></rect></clipPath></defs></svg></g></svg>

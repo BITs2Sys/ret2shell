@@ -1,4 +1,4 @@
-import LogoAnimate from "@assets/animates/logo-animate";
+import VnLogoAnimate from "@assets/animates/vn-logo-animate";
 import { mediaPath } from "@lib/utils/media";
 import { wsrx } from "@lib/wsrx";
 import { HostType } from "@models/game";
@@ -19,16 +19,16 @@ import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import { DateTime } from "luxon";
 import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
-import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
+import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import UserBox from "./user-box";
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
   return (
     <Link ghost href={inDocs() ? "/docs" : "/"}>
-      <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+      <VnLogoAnimate class="hidden xl:inline-block" width={24} height={24} />
       <span />
       <span>
         {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
@@ -40,7 +40,7 @@ function GlobalTitleLink() {
 function GameTitleLink() {
   return (
     <Link ghost href={`/games/${gameStore.current?.id}/`}>
-      <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
+      <Show when={gameStore.current?.logo} fallback={<VnLogoAnimate width={24} height={24} />}>
         <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
       </Show>
       <span />

@@ -1,18 +1,17 @@
 //! * simple.rx
-//! Static flag check.
+//! 静态 FLAG（可正则表达式）
 
 use ret2api::utils;
 use ret2api::regex;
 
-/// check the flag in regex format, only apply to content without prefix
+/// FLAG 前缀
+const PREFIX = "VNCTF";
+/// 开启正则
 const ENABLE_REGEX = false;
-/// case sensitive
+/// 大小写敏感
 const CASE_SENSITIVE = true;
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
-const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content, and
-/// if regex enabled, the template is like `^you_.+_impact$`
-const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
+/// 静态 FLAG，如果开启了正则，此处应为正则表达式，例如 `^Genshin_.+_Impact`
+const TEMPLATE = "Genshin_Impact_%RANDOM:32%";
 
 /// Check flag submitted by user.
 ///

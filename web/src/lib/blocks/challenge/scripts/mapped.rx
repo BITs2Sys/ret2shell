@@ -1,5 +1,5 @@
 //! * mapped.rx
-//! Flag check for mapped attachments.
+//! 动态附件模板
 
 /// the flag json file, should be `{"file_name.ext": "flag{...}", ...}`
 const FLAG_JSON_FILE = "checker/flag.json";
