@@ -21,18 +21,18 @@ export default function () {
           await verifyEmail({ email: email()!, token: token()! });
           addToast({
             level: "success",
-            description: t("account.verify.verifySuccess")!,
+            description: t("account.settings.verify.verifySuccess")!,
             duration: 5000,
           });
           navigate("/account/settings", { replace: true });
         } catch (err) {
-          handleHttpError(err as HTTPError, t("account.verify.verifyFailed")!);
+          handleHttpError(err as HTTPError, t("account.settings.verify.verifyFailed")!);
           navigate("/sigtrap/412", { replace: true });
         }
       } else {
         addToast({
           level: "error",
-          description: t("account.verify.verifyBroken")!,
+          description: t("account.settings.verify.verifyBroken")!,
           duration: 5000,
         });
         navigate("/sigtrap/418", { replace: true });
@@ -41,11 +41,11 @@ export default function () {
   });
   return (
     <>
-      <Title page={t("account.verify.title")} route="/account/verify" />
+      <Title page={t("account.settings.verify.title")} route="/account/verify" />
       <img src={pangbaiMascotHappy} alt="Broken" class="w-48 h-48 animate-bounce" />
       <div class="flex-1 flex flex-row space-x-4 items-center justify-center">
         <Spin />
-        <span class="font-bold text-xl">{t("account.verify.verifying")}...</span>
+        <span class="font-bold text-xl">{t("account.settings.verify.verifying")}...</span>
       </div>
     </>
   );

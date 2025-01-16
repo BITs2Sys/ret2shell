@@ -1,7 +1,6 @@
 import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
-import { getUserIpList, getUserOAuthList } from "@api/user";
-import pangbaiMascotNormal from "@assets/imgs/pangbai-mascot-normal.png";
+import { deleteUser, getUserIpList, getUserOAuthList } from "@api/user";
 import pangbaiMascotUnsee from "@assets/imgs/pangbai-mascot-unsee.png";
 import { mediaPath } from "@lib/utils/media";
 import type { Ip } from "@models/ip";
@@ -122,6 +121,19 @@ export default function (compProps: {
       setAvatarUploading(false);
     }
   }
+  async function handleDeleteUser() {
+    try {
+      await deleteUser(compProps.editSource!.id);
+      // compProps.onDone?.(compProps.editSource!);
+      addToast({
+        level: "success",
+        description: t("form.deleteSuccess")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as Error, t("form.deleteFailed")!);
+    }
+  }
 
   const institutesSelect = createMemo(() => {
     return accountStore.institutes.map((i) => ({
@@ -174,18 +186,7 @@ export default function (compProps: {
               <span class="icon-[fluent--warning-20-filled] text-warning w-5 h-5" />
               <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
             </div>
-            <Button
-              level="warning"
-              class="flex-col space-x-0 space-y-2 py-4 w-full"
-              onClick={() => {
-                addToast({
-                  level: "warning",
-                  description: t("platform.notImplemented")!,
-                  duration: 5000,
-                  img: pangbaiMascotNormal,
-                });
-              }}
-            >
+            <Button level="warning" class="flex-col space-x-0 space-y-2 py-4 w-full" onClick={handleDeleteUser}>
               <img src={pangbaiMascotUnsee} class="w-20 h-20" alt="ΦωΦ" />
               <span>{t("form.delete")}</span>
             </Button>

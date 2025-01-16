@@ -168,6 +168,20 @@ export default function SideBar() {
             <Show when={expanded()}>{t("game.admin.git.title")}</Show>
           </Link>
         </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/delete`}
+            justify={expanded() ? "start" : "center"}
+            title={t("game.admin.delete.title")}
+          >
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.delete.title")}</Show>
+          </Link>
+        </li>
       </ul>
       <Show when={!expanded()}>
         <Divider direction="vertical" />
