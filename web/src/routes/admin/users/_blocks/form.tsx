@@ -1,7 +1,8 @@
 import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
 import { getUserIpList, getUserOAuthList } from "@api/user";
-import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+import pangbaiMascotNormal from "@assets/imgs/pangbai-mascot-normal.png";
+import pangbaiMascotUnsee from "@assets/imgs/pangbai-mascot-unsee.png";
 import { mediaPath } from "@lib/utils/media";
 import type { Ip } from "@models/ip";
 import type { OAuth } from "@models/oauth";
@@ -10,6 +11,7 @@ import { createForm, email, getValue, required, setValue, setValues } from "@mod
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -172,8 +174,19 @@ export default function (compProps: {
               <span class="icon-[fluent--warning-20-filled] text-warning w-5 h-5" />
               <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
             </div>
-            <Button level="warning" class="flex-col space-x-0 space-y-2 py-4 w-full">
-              <img src={xdsecMascotUnsee} class="w-20 h-20" alt="ΦωΦ" />
+            <Button
+              level="warning"
+              class="flex-col space-x-0 space-y-2 py-4 w-full"
+              onClick={() => {
+                addToast({
+                  level: "warning",
+                  description: t("platform.notImplemented")!,
+                  duration: 5000,
+                  img: pangbaiMascotNormal,
+                });
+              }}
+            >
+              <img src={pangbaiMascotUnsee} class="w-20 h-20" alt="ΦωΦ" />
               <span>{t("form.delete")}</span>
             </Button>
           </Card>

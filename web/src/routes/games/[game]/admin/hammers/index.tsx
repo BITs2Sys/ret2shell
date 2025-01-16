@@ -234,7 +234,7 @@ export default function () {
                   </A>
                   <div class="w-4 flex-shrink-0" />
                   <div class="flex-1 w-0 flex flex-col space-y-1 items-start">
-                    <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
+                    <header class="label">御坂御坂</header>
                     <Card class="max-w-full" contentClass="flex flex-col space-y-2 p-2 max-w-full">
                       <span>{t("game.challenge.adminHammerTips")}</span>
                       <div class="flex flex-col space-y-2 max-w-full">

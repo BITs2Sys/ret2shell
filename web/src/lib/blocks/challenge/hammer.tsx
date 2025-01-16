@@ -177,7 +177,7 @@ export default function (props: {
               </A>
               <div class="w-4 flex-shrink-0" />
               <div class="flex flex-col space-y-1">
-                <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
+                <header class="label">御坂御坂</header>
                 <Card contentClass="p-2">
                   <p class="text-wrap">{t("game.admin.hammer.shouldGoto")}</p>
                 </Card>
@@ -192,7 +192,7 @@ export default function (props: {
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1">
-              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
+              <header class="label">御坂御坂</header>
               <Card contentClass="p-2">
                 <p class="text-wrap">{t("game.challenge.hammerTips")}</p>
               </Card>
@@ -205,7 +205,7 @@ export default function (props: {
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1 items-start">
-              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
+              <header class="label">御坂御坂</header>
               <Card contentClass="p-2">
                 <p class="text-wrap inline">
                   <span>{t("game.challenge.hammerTips2")}</span>
