@@ -12,7 +12,8 @@ COPY ./Cargo.toml /var/lib/ret2shell/Cargo.toml
 COPY ./crates /var/lib/ret2shell/crates
 WORKDIR /var/lib/ret2shell
 
-RUN --mount=type=cache,target=/var/lib/ret2shell/target cargo build --release --bin r2s-server --target x86_64-unknown-linux-musl && \
+RUN --mount=type=cache,target=/var/lib/ret2shell/target cargo update && \
+    cargo build --release --bin r2s-server --target x86_64-unknown-linux-musl && \
     cp /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /usr/local/bin/r2s-server
 
 # --------------------------------------------------------------------------------------------------------
