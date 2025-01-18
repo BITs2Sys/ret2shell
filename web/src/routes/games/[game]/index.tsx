@@ -26,6 +26,7 @@ import Link from "@widgets/link";
 import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
+import EditFlag from "@assets/icons/edit-flag";
 
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { useSearchParams } from "@solidjs/router";
@@ -255,7 +256,7 @@ export default function () {
                     disabled={coverSet()}
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
-                    <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
+                    <Show when={logoSet()} fallback={<EditFlag class="w-5 h-5" />}>
                       <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
