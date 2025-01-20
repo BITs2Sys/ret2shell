@@ -55,7 +55,7 @@
     "remark-rehype": "^11.1.1",
     "sakana-widget": "^2.7.0",
     "shell-quote": "^1.8.2",
-    "shiki": "^1.27.2",
+    "shiki": "^1.29.1",
     "solid-js": "^1.9.4",
     "solid-transition-group": "^0.2.3",
     "strip-ansi": "^7.1.0",
@@ -82,7 +82,7 @@
     "sass-migrator": "^2.3.0",
     "tailwindcss": "^3.4.17",
     "tslib": "^2.8.1",
-    "vite": "^6.0.7",
+    "vite": "^6.0.9",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^3.0.2"
