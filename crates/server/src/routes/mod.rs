@@ -94,15 +94,23 @@ pub async fn initialize(
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
   let governor_conf = Arc::new(
     GovernorConfigBuilder::default()
-      .per_second(5)
+      .per_millisecond(
+        state
+          .config
+          .server
+          .clone()
+          .unwrap_or_default()
+          .api_burst_restore_rate
+          .unwrap_or(500),
+      )
       .burst_size(
         state
           .config
           .server
           .clone()
           .unwrap_or_default()
-          .api_rate_limit
-          .unwrap_or(48) as u32,
+          .api_burst_limit
+          .unwrap_or(32),
       )
       .key_extractor(ProxiedIpExtractor)
       .use_headers()
