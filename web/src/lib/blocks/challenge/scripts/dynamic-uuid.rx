@@ -1,19 +1,19 @@
 //! * dynamic-uuid.rx
-//! UUID 动态 FLAG（含隐写防作弊）
+//! Dynamic flag check with uuid and steganographic data.
 
 use ret2api::audit;
 use ret2api::utils;
 
-/// FLAG 前缀
-const PREFIX = "VNCTF";
-/// UUID 是否含有短横 `-`
+/// whether the flag uuid contains hyphen (`-`)
 const WITH_HYPHEN = true;
-/// 大小写敏感
+/// whether the flag uuid is case sensitive
 const CASE_SENSITIVE  = true;
-/// 其哈希用作初始化生成器密钥
-const ENCRYPT_KEY = "Ave_mujica_%RANDOM:8%";
-/// 其哈希用于隐写密钥
-const HASH_KEY = "%RANDOM:16%! BanG Dream! It's MyGO!!!!!";
+/// the key to initialize the flag encryptor
+const ENCRYPT_KEY = "Ave_mujica";
+/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
+const PREFIX = "flag";
+/// the flag hash key, used to generate the uuid content
+const HASH_KEY = "Yes you are right but you should watch BanG Dream! It's MyGO!!!!!";
 
 /// Check flag submitted by user.
 ///

@@ -1,7 +1,6 @@
 import { handleHttpError } from "@api";
 import { verifyEmail } from "@api/account";
 import Spin from "@assets/animates/spin";
-import pangbaiMascotHappy from "@assets/imgs/pangbai-mascot-happy.png";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -42,7 +41,6 @@ export default function () {
   return (
     <>
       <Title page={t("account.settings.verify.title")} route="/account/verify" />
-      <img src={pangbaiMascotHappy} alt="Broken" class="w-48 h-48 animate-bounce" />
       <div class="flex-1 flex flex-row space-x-4 items-center justify-center">
         <Spin />
         <span class="font-bold text-xl">{t("account.settings.verify.verifying")}...</span>

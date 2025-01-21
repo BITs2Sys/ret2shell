@@ -33,7 +33,7 @@ export type TreeViewProps = {
 export default function TreeView(props: TreeViewProps) {
   const [searchParams, _] = useSearchParams();
   const renderNode = (node: TreeNode, level = 0) => {
-    const [showChildren, setShowChildren] = createSignal(true);
+    const [showChildren, setShowChildren] = createSignal(false);
     createEffect(() => {
       if (props.highlightPaths) {
         untrack(() => {

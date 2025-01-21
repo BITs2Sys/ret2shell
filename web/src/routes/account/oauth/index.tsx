@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { bindWithOAuth, getOAuthProviders, loginWithOAuth } from "@api/account";
-import VnLogoAnimate from "@assets/animates/vn-logo-animate";
-import pangbaiMascotHappy from "@assets/imgs/pangbai-mascot-happy.png";
+import LogoAnimate from "@assets/animates/logo-animate";
+// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import logo from "@assets/logo-gray.svg";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
@@ -62,7 +62,7 @@ export default function () {
         level: "success",
         description: t("account.login.success")!,
         duration: 5000,
-        img: pangbaiMascotHappy,
+        // img: xdsecMascotHappy,
       });
     } catch (err) {
       handleHttpError(err as Error, t("account.oauth.failedToLogin")!);
@@ -89,20 +89,20 @@ export default function () {
       <Title page={t("account.oauth.title")} route="/account/oauth" />
       <div class="flex-1 w-full flex flex-col space-y-8 items-center justify-center">
         <div class="flex flex-row space-x-8 items-center">
-          <VnLogoAnimate
+          <LogoAnimate
             width={128}
             height={128}
             class={`transition-all duration-700 ${animate() ? "" : "translate-x-16 opacity-0"} `}
           />
-          <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "translate-x-8 opacity-0"}`}>-*-</span>
-          <img
-            src={pangbaiMascotHappy}
-            alt="Broken"
-            class={`w-24 h-24 animate-bounce transition-all duration-700 ${animate() ? "" : "translate-y-6 opacity-0"}`}
-          />
-          <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "-translate-x-8 opacity-0"}`}>
-            -*-
-          </span>
+          {/* <span class={`transition-all duration-700 ${ animate() ? "opacity-60" : "translate-x-8 opacity-0" } `}>-*-</span> */}
+          {/* <img */}
+          {/*   src={xdsecMascotHappy} */}
+          {/*   alt="Broken" */}
+          {/*   class={`w-24 h-24 animate-bounce transition-all duration-700 ${ animate() ? "" : "translate-y-6 opacity-0" } `} */}
+          {/* /> */}
+          {/* <span class={`transition-all duration-700 ${ animate() ? "opacity-60" : "-translate-x-8 opacity-0" } `}> */}
+          {/*   -*- */}
+          {/* </span> */}
           <span class={`text-2xl font-bold transition-all duration-700 ${animate() ? "opacity-100" : "opacity-0"} `}>
             +
           </span>

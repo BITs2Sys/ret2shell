@@ -1,7 +1,6 @@
 import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
 import { deleteUser, getUserIpList, getUserOAuthList } from "@api/user";
-import pangbaiMascotUnsee from "@assets/imgs/pangbai-mascot-unsee.png";
 import { mediaPath } from "@lib/utils/media";
 import type { Ip } from "@models/ip";
 import type { OAuth } from "@models/oauth";
@@ -186,8 +185,7 @@ export default function (compProps: {
               <span class="icon-[fluent--warning-20-filled] text-warning w-5 h-5" />
               <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
             </div>
-            <Button level="warning" class="flex-col space-x-0 space-y-2 py-4 w-full" onClick={handleDeleteUser}>
-              <img src={pangbaiMascotUnsee} class="w-20 h-20" alt="ΦωΦ" />
+            <Button level="warning" class="w-full" onClick={handleDeleteUser}>
               <span>{t("form.delete")}</span>
             </Button>
           </Card>

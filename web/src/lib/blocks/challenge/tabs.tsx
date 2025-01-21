@@ -45,16 +45,6 @@ export default function Tabs(props: {
       });
     }
   });
-  function closeChallengeTab(_: MouseEvent, challengeId: number) {
-    if (challengeId === selectedChallengeId()) setSearchParams({ challenge: null });
-    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challengeId)]);
-  }
-  function onMouseUpChallengeTab(e: MouseEvent, challengeId: number) {
-    e.preventDefault();
-    if (e.button === 1) {
-      closeChallengeTab(e, challengeId);
-    }
-  }
   return (
     <OverlayScrollbarsComponent
       class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
@@ -150,22 +140,26 @@ export default function Tabs(props: {
           </div>
           <For each={challengeHistory()}>
             {(challenge) => (
-              <div class="fade-group-dive-left flex flex-row" onMouseUp={(e) => onMouseUpChallengeTab(e, challenge.id)}>
-                <Button
-                  // href={`${props.baseUrl}?challenge=${challenge.id}`}
+              <div class="fade-group-dive-left flex flex-row">
+                <Link
+                  href={`${props.baseUrl}?challenge=${challenge.id}`}
                   onClick={() => setSearchParams({ challenge: challenge.id })}
                   id={`challenge-${challenge.id}`}
+                  active={challenge.id === selectedChallengeId() && inCreate() === false}
                   ghost
-                  class={`max-w-48 rounded-r-none ${challenge.id === selectedChallengeId() && inCreate() === false ? "btn-active" : ""}`}
+                  class="max-w-48 rounded-r-none"
                 >
                   <span class="icon-[fluent--code-20-regular] w-5 h-5" />
                   <span class="truncate flex-1 text-left">{challenge.name}</span>
-                </Button>
+                </Link>
                 <Button
                   class={`!rounded-l-none ${challenge.id === selectedChallengeId() && inCreate() === false ? "btn-active" : ""}`}
                   square
                   ghost
-                  onClick={(e: MouseEvent) => closeChallengeTab(e, challenge.id)}
+                  onClick={() => {
+                    if (challenge.id === selectedChallengeId()) setSearchParams({ challenge: null });
+                    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challenge.id)]);
+                  }}
                 >
                   <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
                 </Button>

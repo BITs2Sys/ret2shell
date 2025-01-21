@@ -1,6 +1,6 @@
-import { handleHttpError } from "@api";
+import Checkbox from "@widgets/checkbox";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
-import VnLogoAnimate from "@assets/animates/vn-logo-animate";
+import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
 import { createForm, custom, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
@@ -8,10 +8,10 @@ import { platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
-import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
+import { handleHttpError } from "@api";
 
 type PlatformConfigForm = {
   name?: string;
@@ -87,7 +87,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <div class="p-6 flex items-center justify-center">
-            <VnLogoAnimate width={128} height={128} />
+            <LogoAnimate width={128} height={128} />
           </div>
           <Field name="name">
             {(field, props) => (
