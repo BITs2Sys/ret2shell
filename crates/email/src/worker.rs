@@ -46,7 +46,9 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
   }?
   .port(config.port)
   .credentials(smtp_credentials)
+  .timeout(Some(std::time::Duration::from_secs(10)))
   .build();
+
   debug!("mailer: {:?}", mailer);
   let email = construct_email(email, &config.sender, &config.username)?;
   debug!("email: {:?}", email);

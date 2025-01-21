@@ -488,7 +488,7 @@ async fn register(
 
   let password = hash_password(&body.password)?;
 
-  let mut permissions = match user::count(&txn, true, None, None).await? {
+  let mut permissions = match user::count(&txn, true, None, None, false).await? {
     0 => Permissions(vec![
       Permission::Basic,
       Permission::Verified,
@@ -857,7 +857,7 @@ async fn delete_self(
   let txn = db.conn.begin().await?;
 
   // Check if user is the only user
-  let user_count = user::count(&txn, false, None, None).await?;
+  let user_count = user::count(&txn, false, None, None, false).await?;
   if user_count == 1 {
     return Err(ResponseError::Forbidden(
       "you are the only user, can't delete yourself".to_owned(),

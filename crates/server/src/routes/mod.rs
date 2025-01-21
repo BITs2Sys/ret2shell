@@ -1,4 +1,4 @@
-use std::{net::IpAddr, time::Duration};
+use std::{net::IpAddr, sync::Arc, time::Duration};
 
 use axum::{
   body::Body,
@@ -10,7 +10,8 @@ use axum::{
   Router,
 };
 use r2s_config::server;
-use tower::{buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
+use tower::{buffer::BufferLayer, ServiceBuilder};
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
@@ -22,7 +23,7 @@ use crate::{
     self,
     auth::extract_user_info,
     codec,
-    forwarded::{ip_record, ip_record_worker},
+    forwarded::{ip_record, ip_record_worker, ProxiedIpExtractor},
   },
   traits::GlobalState,
 };
@@ -91,6 +92,35 @@ pub async fn initialize(
 }
 
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
+  let governor_conf = Arc::new(
+    GovernorConfigBuilder::default()
+      .per_second(5)
+      .burst_size(
+        state
+          .config
+          .server
+          .clone()
+          .unwrap_or_default()
+          .api_rate_limit
+          .unwrap_or(48) as u32,
+      )
+      .key_extractor(ProxiedIpExtractor)
+      .use_headers()
+      .finish()
+      .unwrap(),
+  );
+
+  let governor_limiter = governor_conf.limiter().clone();
+  let interval = Duration::from_secs(60);
+  // a separate background task to clean up
+  tokio::spawn(async move {
+    loop {
+      tokio::time::sleep(interval).await;
+      debug!("rate limiting storage size: {}", governor_limiter.len());
+      governor_limiter.retain_recent();
+    }
+  });
+
   Router::new()
     .nest("/account", account::router(state))
     .nest("/bulletin", bulletin::router(state))
@@ -107,6 +137,9 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .route("/ping", get(ping))
     .route_layer(from_fn_with_state(state.clone(), ip_record))
     .route_layer(from_fn_with_state(state.clone(), extract_user_info))
+    .layer(GovernorLayer {
+      config: governor_conf,
+    })
     .layer(
       ServiceBuilder::new()
         .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
@@ -115,17 +148,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
             format!("unhandled error: {}", err),
           )
         }))
-        .layer(BufferLayer::new(1024))
-        .layer(RateLimitLayer::new(
-          state
-            .clone()
-            .config
-            .server
-            .unwrap_or_default()
-            .api_rate_limit
-            .unwrap_or(48) as u64,
-          Duration::from_secs(5),
-        )),
+        .layer(BufferLayer::new(1024)),
     )
 }
 
