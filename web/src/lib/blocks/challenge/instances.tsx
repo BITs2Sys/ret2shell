@@ -613,9 +613,11 @@ export default function (_props: {
           <span class="flex-1 text-start">{t("game.challenge.dropCap")}</span>
         </Checkbox>
         <Input
+          class="flex-1"
           icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
           placeholder={t("game.challenge.pullSecret")}
           ref={pullSecretInput!}
+          value={challengeStore.env?.pull_secret || ""}
           extraBtn={
             <Button
               class="!rounded-l-none"
