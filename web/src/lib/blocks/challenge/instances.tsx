@@ -116,16 +116,34 @@ function CreateForm(fnProps: {
             <Show
               when={fnProps.registryConfig?.enabled}
               fallback={
-                <Input
-                  class="flex-1"
-                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                  title={t("game.challenge.envContainerTag")}
-                  placeholder={t("game.challenge.envContainerTag")}
-                  error={field.error}
-                  required
-                  {...props}
-                  value={field.value}
-                />
+                <div class="flex-1 flex flex-row space-x-2">
+                  <Input
+                    class="flex-1"
+                    icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                    title={t("game.challenge.envContainerTag")}
+                    placeholder={t("game.challenge.envContainerTag")}
+                    error={field.error}
+                    required
+                    {...props}
+                    value={field.value}
+                  />
+                  <Field name="restricted" type="boolean">
+                    {(field, props) => (
+                      <div class="flex flex-col space-y-1">
+                        <header class="label">CAP</header>
+                        <IconCheckbox
+                          inputProps={props}
+                          title={t("game.challenge.dropCap")}
+                          checked={field.value ?? false}
+                          uncheckedIcon="icon-[fluent--live-20-regular]"
+                          checkedIcon="icon-[fluent--live-off-20-filled]"
+                          error={field.error}
+                          name="restricted"
+                        />
+                      </div>
+                    )}
+                  </Field>
+                </div>
               }
             >
               <>
