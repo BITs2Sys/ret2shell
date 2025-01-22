@@ -32,8 +32,12 @@ pub struct Config {
   pub api_base_path: String,
   /// CORS rules enabled
   pub cors_origins: String,
-  /// request rate per 5 seconds
-  pub api_rate_limit: Option<i32>,
+  // /// request rate per 5 seconds
+  // pub api_rate_limit: Option<i32>,
+  /// Rate limit use Generic cell rate algorithm
+  /// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+  pub api_burst_limit: Option<u32>,
+  pub api_burst_restore_rate: Option<u64>, // in milliseconds
   /// Frontend configuration
   pub frontend: Option<FrontendConfig>,
 
@@ -87,7 +91,9 @@ impl Config {
       subject_url: self.subject_url.clone(),
       record: self.record.clone(),
       hide_maker: self.hide_maker,
-      api_rate_limit: self.api_rate_limit,
+      // api_rate_limit: self.api_rate_limit,
+      api_burst_limit: self.api_burst_limit,
+      api_burst_restore_rate: self.api_burst_restore_rate,
     }
   }
 }
@@ -111,7 +117,9 @@ impl Merge for Option<Config> {
         subject_url: b.subject_url.or(a.subject_url),
         record: b.record.or(a.record),
         hide_maker: b.hide_maker.or(a.hide_maker),
-        api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
+        // api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
+        api_burst_limit: a.api_burst_limit,
+        api_burst_restore_rate: a.api_burst_restore_rate,
       }),
       (Some(a), None) => Some(a),
       (None, Some(b)) => Some(b),

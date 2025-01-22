@@ -93,13 +93,16 @@ port = 4222
 #tls = false
 
 [server]
-api_base_path   = '/api'
-api_rate_limit  = 10              # in 5 seconds
-cors_origins    = '*'
-external_domain = 'dev.ret.sh.cn'
-external_https  = true
-host            = '127.0.0.1'
-port            = 8080
+api_base_path = '/api'
+# Rate limit use Generic cell rate algorithm
+# https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+api_burst_limit        = 32
+api_burst_restore_rate = 500             # in miliseconds
+cors_origins           = '*'
+external_domain        = 'dev.ret.sh.cn'
+external_https         = true
+host                   = '127.0.0.1'
+port                   = 8080
 
 ### the Following settings could be changed at web admin panel.
 ### configuration in database will overwrite the following settings.
