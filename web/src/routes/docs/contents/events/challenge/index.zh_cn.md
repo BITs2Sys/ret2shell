@@ -29,6 +29,16 @@
 
 ## 触发规则
 
+> [!TIP] TIPS
+> challenge 事件仅在管理员手动操作时触发，并且不会在 challenge 有效时段之外触发。
+>
+> 考虑到同一时段内会有多个 challenge 同时发布，为了防止事件过多，challenge 的定时发布功能请考虑使用 HTTP API 获取 game 的相关信息，
+> 并从 `game.timeline_presets` 列中读取时段设置的相关信息，然后自行实现定时汇报功能。
+>
+> ```
+> GET /api/game/{game_id}
+> ```
+
 管理员更新题目的 `hidden` 状态或者新建提示时，会立即触发该事件。
 
 其中，`hidden = true` 会触发 `down` 事件，`hidden = false` 会触发 `up` 事件，新建提示会触发 `new_hint` 事件。
