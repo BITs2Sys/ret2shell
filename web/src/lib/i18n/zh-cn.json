@@ -215,6 +215,7 @@
       "currentEnv": "当前配置",
       "addEnvSuccess": "添加题目环境配置成功",
       "addEnvFailed": "添加题目环境配置失败",
+      "pullSecret": "镜像仓库密钥名称（请预先配置k8s）",
       "toggleEnvInternetSuccess": "调整网络配置成功",
       "toggleEnvInternetFailed": "调整网络配置失败",
       "deleteEnvImageSuccess": "移除题目环境配置成功",

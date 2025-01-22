@@ -233,6 +233,7 @@
       "fetchEnvImagesFailed": "failed to fetch image repository",
       "envContainerName": "Container Name",
       "envContainerNameRequired": "Please fill in the container name",
+      "pullSecret": "Pull Secret",
       "envContainerTag": "Container Image",
       "envContainerTagRequired": "Please select the container image",
       "envContainerTagVersion": "Image Version",

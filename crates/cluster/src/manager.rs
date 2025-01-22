@@ -6,9 +6,9 @@ use futures_io::AsyncBufRead;
 use k8s_openapi::{
   api::{
     core::v1::{
-      Capabilities, ConfigMap, Container, ContainerPort, EnvVar, Namespace, Node, Pod,
-      PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext, Service,
-      Sysctl,
+      Capabilities, ConfigMap, Container, ContainerPort, EnvVar, LocalObjectReference, Namespace,
+      Node, Pod, PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext,
+      Service, Sysctl,
     },
     networking::v1::NetworkPolicy,
   },
@@ -425,6 +425,9 @@ impl Cluster {
           .restricted
           .is_some_and(|r| r)
           .then_some(pod_security_context),
+        image_pull_secrets: env_config
+          .pull_secret
+          .map(|secret| vec![LocalObjectReference { name: secret }]),
         containers: env_config
           .images
           .iter()

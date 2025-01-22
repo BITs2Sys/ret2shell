@@ -683,6 +683,7 @@
       "fetchEnvImagesFailed": "イメージリポジトリの取得に失敗しました",
       "envContainerName": "コンテナ名",
       "envContainerNameRequired": "コンテナ名を入力してください",
+      "pullSecret": "プルシークレット",
       "envContainerTag": "コンテナイメージ",
       "envContainerTagRequired": "コンテナイメージを選択してください",
       "envContainerTagVersion": "ミラーバージョン",

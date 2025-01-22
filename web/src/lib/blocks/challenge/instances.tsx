@@ -65,6 +65,7 @@ function CreateForm(fnProps: {
         internet: challengeStore.env?.internet || false,
         restricted: challengeStore.env?.restricted ?? null,
         images: [...(challengeStore.env?.images || []), result],
+        pull_secret: challengeStore.env?.pull_secret || null,
       });
       addToast({
         level: "success",
@@ -256,8 +257,16 @@ function CreateForm(fnProps: {
                 class="flex-1"
                 placeholder={t("game.challenge.selectEnvContainerServiceType")}
                 items={[
-                  { value: "http", label: "HTTP", icon: "icon-[fluent--globe-20-regular]" },
-                  { value: "tcp", label: "TCP", icon: "icon-[fluent--globe-20-regular]" },
+                  {
+                    value: "http",
+                    label: "HTTP",
+                    icon: "icon-[fluent--globe-20-regular]",
+                  },
+                  {
+                    value: "tcp",
+                    label: "TCP",
+                    icon: "icon-[fluent--globe-20-regular]",
+                  },
                 ]}
                 value={field.value ? [field.value as string] : undefined}
                 inputProps={props}
@@ -425,6 +434,7 @@ export default function (_props: {
   inGame?: boolean;
 }) {
   const [registryConfig, setRegistryConfig] = createSignal<RegistryConfig | null>(null);
+  let pullSecretInput: HTMLInputElement;
   onMount(async () => {
     try {
       setRegistryConfig(await getRegistryConfig(gameStore.current!.id));
@@ -451,6 +461,7 @@ export default function (_props: {
         internet: !challengeStore.env?.internet,
         restricted: challengeStore.env?.restricted ?? null,
         images: challengeStore.env?.images || [],
+        pull_secret: challengeStore.env?.pull_secret || null,
       });
       addToast({
         level: "success",
@@ -468,6 +479,7 @@ export default function (_props: {
         internet: challengeStore.env?.internet || false,
         restricted: !challengeStore.env?.restricted,
         images: challengeStore.env?.images || [],
+        pull_secret: challengeStore.env?.pull_secret || null,
       });
       addToast({
         level: "success",
@@ -485,6 +497,7 @@ export default function (_props: {
         internet: challengeStore.env?.internet || false,
         restricted: challengeStore.env?.restricted ?? null,
         images: challengeStore.env?.images?.filter((image) => image.name !== name) || [],
+        pull_secret: challengeStore.env?.pull_secret || null,
       });
       addToast({
         level: "success",
@@ -507,6 +520,24 @@ export default function (_props: {
       refreshChallengeAssets();
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.deleteEnvFailed")!);
+    }
+  }
+  async function onSavePullSecret(n: string) {
+    try {
+      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
+        internet: challengeStore.env?.internet || false,
+        restricted: challengeStore.env?.restricted ?? null,
+        images: challengeStore.env?.images || [],
+        pull_secret: n ?? null,
+      });
+      addToast({
+        level: "success",
+        description: t("form.saveSuccess")!,
+        duration: 5000,
+      });
+      refreshChallengeAssets();
+    } catch (err) {
+      handleHttpError(err as Error, t("form.saveFailed")!);
     }
   }
   const [formOpen, setFormOpen] = createSignal(false);
@@ -573,14 +604,28 @@ export default function (_props: {
         >
           <span class="flex-1 text-start">{t("game.challenge.envHasInternet")}</span>
         </Checkbox>
-        <IconCheckbox
-          title={t("game.challenge.dropCap")}
+        <Checkbox
           checked={challengeStore.env?.restricted ?? false}
-          uncheckedIcon="icon-[fluent--live-20-regular]"
-          checkedIcon="icon-[fluent--live-off-20-filled]"
           onChange={() => {
             onToggleRestricted();
           }}
+        >
+          <span class="flex-1 text-start">{t("game.challenge.dropCap")}</span>
+        </Checkbox>
+        <Input
+          icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+          placeholder={t("game.challenge.pullSecret")}
+          ref={pullSecretInput!}
+          extraBtn={
+            <Button
+              class="!rounded-l-none"
+              onClick={() => {
+                onSavePullSecret(pullSecretInput!.value);
+              }}
+            >
+              <span> {t("form.save")}</span>
+            </Button>
+          }
         />
       </div>
       <For

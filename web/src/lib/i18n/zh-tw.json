@@ -215,6 +215,7 @@
       "currentEnv": "當前配置",
       "addEnvSuccess": "添加題目環境配置成功",
       "addEnvFailed": "添加題目環境配置失敗",
+      "pullSecret": "鏡像倉庫密鑰名稱（請預先配置k8s）",
       "toggleEnvInternetSuccess": "調整網絡配置成功",
       "toggleEnvInternetFailed": "調整網絡配置失敗",
       "deleteEnvImageSuccess": "移除題目環境配置成功",
