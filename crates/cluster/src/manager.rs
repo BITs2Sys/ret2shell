@@ -584,6 +584,18 @@ impl Cluster {
     let pod = pod
       .first()
       .ok_or(ClusterError::PodNotFound(token.to_owned()))?;
+    if !pod.spec.clone().is_some_and(|spec| {
+      spec.containers.iter().any(|c| {
+        c.ports
+          .iter()
+          .any(|p| p.iter().any(|p| p.container_port == (port as i32)))
+      })
+    }) {
+      return Err(ClusterError::TrafficMapperNotFound(format!(
+        "port: {}",
+        port
+      )));
+    }
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "wsrx link")?);
     let mut pf = api.portforward(&pod.name().unwrap(), &[port]).await?;

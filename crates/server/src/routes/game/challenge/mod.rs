@@ -386,22 +386,20 @@ async fn up_challenge(
   );
 
   cache.at("challenge").del(challenge.id).await.ok();
-  if challenge.release_at.is_some_and(|t| t > Utc::now()) {
-    let event = EventContainer {
-      game_id: challenge.game_id,
-      event: Event::Challenge(ChallengeEvent {
-        event_type: ChallengeEventType::Up,
-        challenge: challenge.clone(),
-        operator: user::Model {
-          id: token.id,
-          nickname: token.nickname.clone(),
-          account: token.account.clone(),
-          ..Default::default()
-        },
-      }),
-    };
-    queue.publish("event", event).await.ok();
-  }
+  let event = EventContainer {
+    game_id: challenge.game_id,
+    event: Event::Challenge(ChallengeEvent {
+      event_type: ChallengeEventType::Up,
+      challenge: challenge.clone(),
+      operator: user::Model {
+        id: token.id,
+        nickname: token.nickname.clone(),
+        account: token.account.clone(),
+        ..Default::default()
+      },
+    }),
+  };
+  queue.publish("event", event).await.ok();
   Ok(Json(challenge))
 }
 
@@ -424,22 +422,20 @@ async fn down_challenge(
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   cache.at("challenge").del(challenge.id).await.ok();
-  if challenge.release_at.is_some_and(|t| t > Utc::now()) {
-    let event = EventContainer {
-      game_id: challenge.game_id,
-      event: Event::Challenge(ChallengeEvent {
-        event_type: ChallengeEventType::Down,
-        challenge: challenge.clone(),
-        operator: user::Model {
-          id: token.id,
-          nickname: token.nickname.clone(),
-          account: token.account.clone(),
-          ..Default::default()
-        },
-      }),
-    };
-    queue.publish("event", event).await.ok();
-  }
+  let event = EventContainer {
+    game_id: challenge.game_id,
+    event: Event::Challenge(ChallengeEvent {
+      event_type: ChallengeEventType::Down,
+      challenge: challenge.clone(),
+      operator: user::Model {
+        id: token.id,
+        nickname: token.nickname.clone(),
+        account: token.account.clone(),
+        ..Default::default()
+      },
+    }),
+  };
+  queue.publish("event", event).await.ok();
   Ok(Json(challenge))
 }
 
