@@ -30,7 +30,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://ctf.vnteam.cn",
+        target: "https://ctfadmin.vnteam.cn",
         changeOrigin: true,
         ws: true,
       },

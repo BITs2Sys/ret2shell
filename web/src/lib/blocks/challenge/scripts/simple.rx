@@ -1,20 +1,19 @@
 //! * simple.rx
-//! Static flag check.
+//! 静态 FLAG
 
 use ret2api::utils;
 use ret2api::regex;
 
-/// check the flag in regex format, only apply to content without prefix
+/// 开启正则
 const ENABLE_REGEX = false;
-/// case sensitive
+/// 大小写敏感
 const CASE_SENSITIVE = true;
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
-const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content, and
-/// if regex enabled, the template is like `^you_.+_impact$`
-const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
+/// FLAG 前缀
+const PREFIX = "VNCTF";
+/// 静态 FLAG 或正则
+const TEMPLATE = "%RANDOM:32%_genshin_impact";
 
-/// Check flag submitted by user.
+/// 检查用户提交的 FLAG
 ///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
@@ -53,7 +52,7 @@ pub async fn check(bucket, user, team, submission) {
   }
 }
 
-/// Provides the environment variables when user starts the challenge container.
+/// 返回的内容将作为环境变量提供给用户的容器
 ///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
