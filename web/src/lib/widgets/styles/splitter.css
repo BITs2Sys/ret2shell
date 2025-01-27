@@ -4,13 +4,13 @@
   }
 
   .splitter-gutter {
-    @apply min-w-2 min-h-2 border-layer-content/10 outline-none;
+    @apply min-w-2 min-h-2 border-layer-content/10 outline-hidden;
 
-    &-vertical {
+    &.splitter-gutter-vertical {
       @apply border-b;
     }
 
-    &-horizontal {
+    &.splitter-gutter-horizontal {
       @apply border-r;
     }
 

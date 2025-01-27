@@ -11,7 +11,7 @@ import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
 import type { Challenge, ChallengeImage } from "@models/challenge";
 import type { RegistryConfig } from "@models/config";
-import { createForm, pattern, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, custom, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { challengeStore, refreshChallengeAssets } from "@storage/challenge";
 import { gameStore } from "@storage/game";
@@ -268,7 +268,17 @@ function CreateForm(fnProps: {
           )}
         </Field>
         <div class="flex flex-row space-x-2 flex-1">
-          <Field name="service_type">
+          <Field
+            name="service_type"
+            validate={[
+              custom((value) => {
+                if (!value && getValue(form, "description")) {
+                  return false;
+                }
+                return true;
+              }, t("game.challenge.selectEnvContainerServiceType")!),
+            ]}
+          >
             {(field, props) => (
               <Select
                 label={t("game.challenge.envContainerServiceType")}
@@ -286,21 +296,36 @@ function CreateForm(fnProps: {
                     icon: "icon-[fluent--globe-20-regular]",
                   },
                 ]}
+                disabled={!getValue(form, "description")}
                 value={field.value ? [field.value as string] : undefined}
                 inputProps={props}
+                error={field.error}
               />
             )}
           </Field>
-          <Field name="port" type="number">
+          <Field
+            name="port"
+            type="number"
+            validate={[
+              custom((value) => {
+                if (!value && getValue(form, "description")) {
+                  return false;
+                }
+                return true;
+              }, t("game.challenge.envContainerPort")!),
+            ]}
+          >
             {(field, props) => (
               <Input
                 class="flex-1"
                 icon={<span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
                 title={t("game.challenge.envContainerPort")}
+                disabled={!getValue(form, "description")}
                 placeholder={t("game.challenge.envContainerPort")}
                 type="number"
                 {...props}
                 value={field.value || undefined}
+                error={field.error}
               />
             )}
           </Field>
@@ -562,7 +587,7 @@ export default function (_props: {
   return (
     <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
       <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5 flex-shrink-0" />
+        <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
         <span class="flex-1 text-start">{t("game.challenge.envImages")}</span>
         <Show when={registryConfig()?.enabled}>
           <span class="font-bold">{t("game.challenge.uploadImageToRegistry")}:</span>
@@ -700,7 +725,7 @@ export default function (_props: {
       </For>
       <Show when={challengeStore.env}>
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5 flex-shrink-0" />
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
           <span class="flex-1 text-start">{t("game.challenge.envInstances")}</span>
         </header>
         <InstanceList />

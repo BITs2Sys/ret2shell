@@ -2,10 +2,14 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import solidPlugin from "vite-plugin-solid";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [
     solidPlugin(),
+    tailwindcss({
+      config: "./tailwind.config.mts",
+    }),
     viteCompression(),
     {
       name: "markdown-loader",

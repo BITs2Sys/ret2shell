@@ -24,31 +24,29 @@
 
 @-webkit-keyframes logo-animate-fill-1 {
   0% {
-    @apply fill-transparent;
+    fill: transparent;
   }
 
   100% {
-    @apply fill-primary;
+    fill: var(--color-primary);
   }
 }
 
 @keyframes logo-animate-fill-1 {
   0% {
-    @apply fill-transparent;
+    fill: transparent;
   }
 
   100% {
-    @apply fill-primary;
+    fill: var(--color-primary);
   }
 }
 
 .logo-elem-1 {
-  -webkit-animation:
-    logo-animate-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both,
-    logo-animate-fill-1 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
-  animation:
-    logo-animate-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both,
-    logo-animate-fill-1 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
+  -webkit-animation: logo-animate-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both, logo-animate-fill-1 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
+  animation: logo-animate-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both, logo-animate-fill-1 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
 }
 
 @-webkit-keyframes logo-animate-stroke-2 {
@@ -81,7 +79,7 @@
   }
 
   100% {
-    @apply fill-error;
+    fill: var(--color-error);
   }
 }
 
@@ -91,17 +89,15 @@
   }
 
   100% {
-    @apply fill-error;
+    fill: var(--color-error);
   }
 }
 
 .logo-elem-2 {
-  -webkit-animation:
-    logo-animate-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both,
-    logo-animate-fill-2 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
-  animation:
-    logo-animate-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both,
-    logo-animate-fill-2 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
+  -webkit-animation: logo-animate-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both, logo-animate-fill-2 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
+  animation: logo-animate-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both, logo-animate-fill-2 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
 }
 
 @-webkit-keyframes logo-animate-stroke-3 {
@@ -149,12 +145,10 @@
 }
 
 .logo-elem-3 {
-  -webkit-animation:
-    logo-animate-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both,
-    logo-animate-fill-3 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
-  animation:
-    logo-animate-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both,
-    logo-animate-fill-3 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
+  -webkit-animation: logo-animate-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both, logo-animate-fill-3 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
+  animation: logo-animate-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both, logo-animate-fill-3 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
 }
 
 @-webkit-keyframes logo-animate-stroke-4 {
@@ -202,10 +196,8 @@
 }
 
 .logo-elem-4 {
-  -webkit-animation:
-    logo-animate-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both,
-    logo-animate-fill-4 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
-  animation:
-    logo-animate-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both,
-    logo-animate-fill-4 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
+  -webkit-animation: logo-animate-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both, logo-animate-fill-4 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
+  animation: logo-animate-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both, logo-animate-fill-4 0.7s
+    cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
 }

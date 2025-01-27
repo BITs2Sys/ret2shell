@@ -119,14 +119,14 @@ export default function (_props: {
         each={hints()}
         fallback={
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
             <span class="font-bold opacity-60">{t("game.challenge.noHints")}</span>
           </div>
         }
       >
         {(hint) => (
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
             <Show
               when={!_props.inGame || isGameAdmin() || hint.cost === 0 || extras().find((e) => e.hint_id === hint.id)}
               fallback={
@@ -181,7 +181,7 @@ export default function (_props: {
       </For>
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+          <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
           <Field name="content" validate={[required(t("game.challenge.hintRequired")!)]}>
             {(field, props) => (
               <Input

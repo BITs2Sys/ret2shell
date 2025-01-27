@@ -21,7 +21,7 @@ use kube::{
 };
 use r2s_config::cluster::{ChallengeEnv, Config};
 use tokio_util::codec::Framed;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 use super::traits::ClusterError;
 use crate::{registry::Registry, traffic::TrafficMapper};
@@ -320,7 +320,7 @@ impl Cluster {
       };
       match self.check_outdated_pod(&pod).await {
         Ok(true) => {
-          debug!("Deleting outdated pod: {}", pod.name().unwrap());
+          info!("Deleting outdated pod: {}", pod.name().unwrap());
           api
             .delete(
               &pod.name().unwrap(),
@@ -403,7 +403,6 @@ impl Cluster {
         drop: Some(vec!["NET_BIND_SERVICE".to_owned()]),
         ..Default::default()
       }),
-
       ..Default::default()
     };
     let pod_security_context = PodSecurityContext {
@@ -529,8 +528,13 @@ impl Cluster {
       }),
       ..Default::default()
     };
-    self.create_service(service).await?;
-    Ok(())
+    match self.create_service(service).await {
+      Ok(_) => Ok(()),
+      Err(err) => {
+        self.delete_pod(&pod_name).await?;
+        Err(err)
+      }
+    }
   }
 
   pub async fn get_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {

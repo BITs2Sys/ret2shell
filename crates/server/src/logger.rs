@@ -70,18 +70,5 @@ pub async fn initialize(
     .with(console_log_layer)
     .init();
 
-  std::panic::set_hook(Box::new(|panic| {
-    if let Some(location) = panic.location() {
-      tracing::error!(
-          message = %panic,
-          panic.file = location.file(),
-          panic.line = location.line(),
-          panic.column = location.column(),
-      );
-    } else {
-      tracing::error!(message = %panic);
-    }
-  }));
-
   Ok((console_guard, file_guard))
 }

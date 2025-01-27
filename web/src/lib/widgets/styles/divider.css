@@ -2,7 +2,7 @@
   .divider {
     @apply bg-layer-content/10 h-[1px] w-auto;
 
-    &-vertical {
+    &.divider-vertical {
       @apply w-[1px] h-auto;
     }
   }

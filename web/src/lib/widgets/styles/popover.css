@@ -1,8 +1,8 @@
-.popover:is([open],[data-open],[data-state=open]) {
+.popover:is([open], [data-open], [data-state="open"]) {
   animation: fade-in 0.2s ease-out;
 }
 
-.popover:is([closed],[data-closed],[data-state=closed]) {
+.popover:is([closed], [data-closed], [data-state="closed"]) {
   animation: fade-out 0.2s ease-out;
 }
 

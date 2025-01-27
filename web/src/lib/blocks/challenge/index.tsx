@@ -101,7 +101,7 @@ function BottomPanel(props: {
   return (
     <div class="w-full h-full overflow-hidden flex flex-col">
       <OverlayScrollbarsComponent
-        class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
+        class="w-full h-16 backdrop-blur-sm border-b border-b-layer-content/10 relative"
         options={{
           scrollbars: {
             theme: `os-theme-${fullTheme()}`,

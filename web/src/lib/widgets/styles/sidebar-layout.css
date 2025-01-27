@@ -1,8 +1,6 @@
 .slide-fade-left-enter-active,
 .slide-fade-left-exit-active {
-  transition:
-    opacity 0.3s,
-    transform 0.3s ease-in-out;
+  transition: opacity 0.3s, transform 0.3s ease-in-out;
 }
 
 .slide-fade-left-enter,
@@ -13,9 +11,7 @@
 
 .slide-fade-right-enter-active,
 .slide-fade-right-exit-active {
-  transition:
-    opacity 0.3s,
-    transform 0.3s ease-in-out;
+  transition: opacity 0.3s, transform 0.3s ease-in-out;
 }
 
 .slide-fade-right-enter,

@@ -97,7 +97,7 @@ api_base_path = '/api'
 # Rate limit use Generic cell rate algorithm
 # https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
 api_burst_limit        = 32
-api_burst_restore_rate = 500             # in miliseconds
+api_burst_restore_rate = 500             # in milliseconds
 cors_origins           = '*'
 external_domain        = 'dev.ret.sh.cn'
 external_https         = true

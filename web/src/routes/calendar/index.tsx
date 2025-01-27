@@ -407,7 +407,7 @@ export default function () {
   }
   return (
     <div class="w-full h-full overflow-hidden flex flex-col lg:flex-row">
-      <div class="flex-none flex flex-col py-3 lg:py-6 w-1/4 min-w-[24rem] max-w-[32rem] backdrop-blur sticky top-0 border-r border-r-layer-content/10">
+      <div class="flex-none flex flex-col py-3 lg:py-6 w-1/4 min-w-[24rem] max-w-[32rem] backdrop-blur-sm sticky top-0 border-r border-r-layer-content/10">
         <Card contentClass="p-2 flex flex-col space-y-2" class="mx-3 lg:mx-6">
           <div class="flex flex-row space-x-2">
             <Button

@@ -1,27 +1,27 @@
 @layer components {
   .slider {
     @apply flex flex-col;
-    &-label {
+    .slider-label {
       @apply flex flex-row justify-between items-end;
     }
 
-    &-control {
+    .slider-control {
       @apply inline-flex flex-row items-center h-8 cursor-pointer;
     }
 
-    &-track {
-      @apply bg-layer-content/15 rounded-full h-[2px] transition-size flex-1;
+    .slider-track {
+      @apply bg-layer-content/15 rounded-full h-[2px] transition-[width] transition-[height] flex-1;
     }
 
-    &-range {
+    .slider-range {
       @apply bg-primary rounded-full h-[2px] transition-all;
     }
 
-    &-thumb {
-      @apply outline-none bg-layer border-4 border-layer-content/60 w-5 h-5 rounded-full -translate-y-1/2 transition-all;
+    .slider-thumb {
+      @apply outline-hidden bg-layer border-4 border-layer-content/60 w-5 h-5 rounded-full -translate-y-1/2 transition-all;
     }
 
-    &-vertical {
+    &.slider-vertical {
       @apply flex-row;
 
       .slider-label {
@@ -33,7 +33,7 @@
       }
 
       .slider-track {
-       @apply w-[2px] transition-size h-auto flex-1;
+        @apply w-[2px] transition-[width] transition-[height] h-auto flex-1;
       }
 
       .slider-range {

@@ -71,7 +71,7 @@ export default function (
         {contents.btnContent}
       </Dialog.Trigger>
       <Portal>
-        <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur bg-layer/60 top-0 left-0 w-screen h-screen" />
+        <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur-sm bg-layer/60 top-0 left-0 w-screen h-screen" />
         <Dialog.Positioner class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center">
           <Dialog.Content
             class={`dialog-content card relative max-h-[calc(100vh-2rem)] ${contents.stretched ? "w-full max-w-5xl mx-4" : ""}`.trim()}
