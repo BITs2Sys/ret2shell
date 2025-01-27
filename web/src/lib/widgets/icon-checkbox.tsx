@@ -10,7 +10,7 @@ export type CheckboxProps = {
   inputProps?: JSX.IntrinsicElements["input"];
 };
 
-export default function (
+export default function(
   props: CheckboxProps &
     CheckboxRootProps & {
       children?: JSX.Element;
@@ -23,20 +23,8 @@ export default function (
   );
   const iconClasses = createMemo(
     () =>
-      `data-[state=unchecked]:${checkboxProps.uncheckedIcon} data-[state=checked]:${checkboxProps.checkedIcon} data-[state=checked]:text-primary !w-5 !h-5`
+      `${checkboxProps.checkedIcon} data-[state=unchecked]:text-layer-content data-[state=checked]:text-primary !w-5 !h-5`
   );
-
-  // data-[state=unchecked]:icon-[fluent--chat-20-regular] data-[state=checked]:icon-[fluent--chat-20-filled]
-  // data-[state=unchecked]:icon-[fluent--pin-20-regular] data-[state=checked]:icon-[fluent--pin-20-filled]
-  // data-[state=unchecked]:icon-[fluent--checkmark-20-regular] data-[state=checked]:icon-[fluent--checkmark-20-filled]
-  // data-[state=unchecked]:icon-[fluent--checkmark-circle-20-regular] data-[state=checked]:icon-[fluent--checkmark-circle-20-filled]
-  // data-[state=unchecked]:icon-[fluent--accessibility-checkmark-20-regular] data-[state=checked]:icon-[fluent--accessibility-checkmark-20-filled]
-  // data-[state=unchecked]:icon-[fluent--wifi-off-20-regular] data-[state=checked]:icon-[fluent--wifi-off-20-filled]
-  // data-[state=unchecked]:icon-[fluent--people-audience-20-regular] data-[state=checked]:icon-[fluent--people-audience-20-filled]
-  // data-[state=unchecked]:icon-[fluent--edit-20-regular] data-[state=checked]:icon-[fluent--edit-20-filled]
-  // data-[state=unchecked]:icon-[fluent--megaphone-loud-20-regular] data-[state=checked]:icon-[fluent--megaphone-loud-20-filled]
-  // data-[state=unchecked]:icon-[fluent--live-20-regular] data-[state=checked]:icon-[fluent--live-off-20-filled]
-
   return (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
       <Popover.Anchor class="flex flex-col">

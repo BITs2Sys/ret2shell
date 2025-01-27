@@ -8,7 +8,7 @@ export type CheckboxProps = {
   inputProps?: JSX.IntrinsicElements["input"];
 };
 
-export default function (
+export default function(
   props: CheckboxProps &
     CheckboxRootProps & {
       children?: JSX.Element;
@@ -30,7 +30,7 @@ export default function (
         <Checkbox.Root {...rest} class={classes()}>
           <Checkbox.Label asChild={() => children} />
           <Checkbox.Control class="w-5 h-5">
-            <Checkbox.Indicator class="data-[state=unchecked]:icon-[fluent--checkmark-circle-20-regular] data-[state=checked]:icon-[fluent--checkmark-circle-20-filled] data-[state=checked]:text-primary !w-5 !h-5" />
+            <Checkbox.Indicator class="data-[state=unchecked]:icon-[fluent--checkmark-circle-20-regular] data-[state=checked]:icon-[fluent--checkmark-circle-20-filled] data-[state=unchecked]:text-layer-content data-[state=checked]:text-primary !w-5 !h-5" />
           </Checkbox.Control>
           <Checkbox.HiddenInput {...checkboxProps.inputProps} />
         </Checkbox.Root>

@@ -17,7 +17,7 @@
       @apply bg-primary rounded-full h-[2px] transition-all;
     }
 
-    &.slider-thumb {
+    .slider-thumb {
       @apply outline-hidden bg-layer border-4 border-layer-content/60 w-5 h-5 rounded-full -translate-y-1/2 transition-all;
     }
 

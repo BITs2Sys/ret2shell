@@ -1,31 +1,29 @@
 @layer components {
-  .progress {
-    .progress-track {
-      @apply bg-layer-content/30 h-[2px] rounded-full;
+  .progress-track {
+    @apply bg-layer-content/30 h-[2px] rounded-full;
+  }
+
+  .progress-range {
+    @apply h-[2px] rounded-full;
+
+    &.progress-range-primary {
+      @apply bg-primary;
     }
 
-    .progress-range {
-      @apply h-[2px] rounded-full;
+    &.progress-range-success {
+      @apply bg-success;
+    }
 
-      &.progress-range-primary {
-        @apply bg-primary;
-      }
+    &.progress-range-warning {
+      @apply bg-warning;
+    }
 
-      &.progress-range-success {
-        @apply bg-success;
-      }
+    &.progress-range-info {
+      @apply bg-info;
+    }
 
-      &.progress-range-warning {
-        @apply bg-warning;
-      }
-
-      &.progress-range-info {
-        @apply bg-info;
-      }
-
-      &.progress-range-error {
-        @apply bg-error;
-      }
+    &.progress-range-error {
+      @apply bg-error;
     }
   }
 }

@@ -206,27 +206,27 @@ article blockquote {
   --quote-bg: rgb(156 163 175 / 0.1);
   &.markdown-alert {
     &.markdown-alert-blue {
-      --quote-color: oklch(var(--info));
-      --quote-bg: oklch(var(--info) / 0.1);
+      --quote-color: var(--color-info);
+      --quote-bg: --alpha(var(--color-info) / 0.1);
     }
     &.markdown-alert-green {
-      --quote-color: oklch(var(--success));
-      --quote-bg: oklch(var(--success) / 0.1);
+      --quote-color: var(--color-success);
+      --quote-bg: --alpha(var(--color-success) / 0.1);
     }
 
     &.markdown-alert-yellow {
-      --quote-color: oklch(var(--warning));
-      --quote-bg: oklch(var(--warning) / 0.1);
+      --quote-color: var(--color-warning);
+      --quote-bg: --alpha(var(--color-warning) / 0.1);
     }
 
     &.markdown-alert-magenta {
-      --quote-color: oklch(var(--secondary));
-      --quote-bg: oklch(var(--secondary) / 0.1);
+      --quote-color: var(--color-violet-500);
+      --quote-bg: --alpha(var(--color-violet-500) / 0.1);
     }
 
     &.markdown-alert-red {
-      --quote-color: oklch(var(--error));
-      --quote-bg: oklch(var(--error) / 0.1);
+      --quote-color: var(--color-error);
+      --quote-bg: --alpha(var(--color-error) / 0.1);
     }
   }
 }

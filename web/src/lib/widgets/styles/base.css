@@ -63,15 +63,15 @@
 
 :root {
   --private-color-primary: oklch(0.64 0.17 248);
-  --private-color-primary-content: white;
+  --private-color-primary-content: black;
   --private-color-error: oklch(0.64 0.17 24);
-  --private-color-error-content: white;
+  --private-color-error-content: black;
   --private-color-warning: oklch(0.64 0.17 48);
-  --private-color-warning-content: white;
+  --private-color-warning-content: black;
   --private-color-success: oklch(0.64 0.17 150);
-  --private-color-success-content: white;
+  --private-color-success-content: black;
   --private-color-info: oklch(0.64 0.17 248);
-  --private-color-info-content: white;
+  --private-color-info-content: black;
 }
 
 [data-theme="cyber-light"] {
@@ -85,6 +85,7 @@
 }
 
 @theme inline {
+  --color-transparent: transparent;
   --color-primary: var(--private-color-primary);
   --color-primary-content: var(--private-color-primary-content);
   --color-error: var(--private-color-error);

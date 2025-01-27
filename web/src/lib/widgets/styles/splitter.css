@@ -6,11 +6,11 @@
   .splitter-gutter {
     @apply min-w-2 min-h-2 border-layer-content/10 outline-hidden;
 
-    &.splitter-vertical {
+    &.splitter-gutter-vertical {
       @apply border-b;
     }
 
-    &.splitter-horizontal {
+    &.splitter-gutter-horizontal {
       @apply border-r;
     }
 
