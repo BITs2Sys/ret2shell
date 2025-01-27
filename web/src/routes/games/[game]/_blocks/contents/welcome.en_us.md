@@ -1,23 +1,24 @@
-## Welcome to the Game!
+## Precautions
 
-We hope you'll enjoy a high-quality competition here, battling for knowledge and fun. To enhance your participation, we kindly ask you to adhere to the following guidelines:
+1. The competition is an individual event. Please abide by the competition rules and do not use any cheating methods. Any participant found violating the rules will be disqualified from the competition.
+2. Collaboration between different contestants is prohibited, as well as sharing any competition-related information such as FLAGs or HINTS.
+3. It is prohibited to attack the competition platform. If you discover any vulnerabilities in the platform, please be sure to report them to us.
+4. It is prohibited to hinder other teams from solving problems during the competition, such as damaging the environment after solving a problem.
+5. Brute-forcing submitted FLAGs is prohibited.
+6. Please do not publish your complete solution in public until the competition is archived after the competition ends.
+7. The winning team must submit a complete solution report;
+8. The competition organizer reserves the right to modify all matters including the competition questions and rules.
 
-1. Please follow the contest rules and refrain from using any cheating methods. Avoid discussing problem-related information or solutions with anyone other than your teammates during the contest, and definitely do not share answers.
-2. Abide by community norms and avoid posting any unfriendly remarks in the contest communication group.
-3. Until the contest concludes, refrain from discussing problem details or strategies in public.
-4. After the contest ends and until the contest materials are archived, do not publicly share your complete solutions.
-5. The organizers may have additional specific instructions, which will be communicated before the contest. Their decisions are final.
+## Answer Guide
 
-Failure to comply with these guidelines may result in disqualification or account suspension. We believe that most participants are friendly, and we hope you are too! ΦωΦ
+Click on the left question interface to view the question details
 
-## Additional Considerations
+If it is a dynamic container problem, click the **`Start`** button in the upper right corner to launch the problem container
 
-In addition to the above guidelines, we encourage you to:
+Please submit the FLAG in the **`Terminal`** section of the panel below. If `Ctrl V` does not work for pasting, please try `Ctrl Shift V`
 
-1. When asking questions, refer to [“How To Ask Questions The Smart Way”](http://www.catb.org/~esr/faqs/smart-questions.html) to help us assist you better. Also, remember to protect your personal privacy when posting questions.
-2. In beginner-oriented contests, refrain from making personal attacks or mockery based on skill level. Let’s maintain a friendly environment.
-3. In more serious formal contests, avoid unnecessary interactions with other participants to ensure fairness.
+If you have any questions that need to be confirmed with the question setter, please click the **`🔨Hammer`** in the panel, and please note the limit on the number of attempts
 
-## Best of luck!
+If not otherwise specified, the format of FLAG is `VNCTF{...}`, case-sensitive.
 
-We wish you a smooth contest experience and great results! 🌟
+If not otherwise specified, the question container does not go online
