@@ -116,12 +116,12 @@ export default function (
                       >
                         <Select.ItemText class="flex-1 text-start data-[state=checked]:text-primary flex flex-row space-x-2 items-center overflow-hidden">
                           <Show when={item().icon}>
-                            <span class={`${item().icon} flex-shrink-0`.trim()} />
+                            <span class={`${item().icon} shrink-0`.trim()} />
                           </Show>
                           <span class="truncate">{item().label}</span>
                         </Select.ItemText>
                         <Select.ItemIndicator class="flex items-center">
-                          <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success flex-shrink-0" />
+                          <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success shrink-0" />
                         </Select.ItemIndicator>
                       </Select.Item>
                     )}

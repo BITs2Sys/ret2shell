@@ -238,7 +238,7 @@ export default function () {
                     >
                       <Picture src={blurredBgDark} class="w-full h-full" />
                     </Show>
-                    <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur flex items-center justify-center">
+                    <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur-sm flex items-center justify-center">
                       <LogoAnimate height="h-1/3" class="grayscale" />
                     </div>
                   </>

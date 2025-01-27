@@ -43,9 +43,7 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
           <Show when={props.icon}>
             {/* rounded-l-lg rounded-l-md */}
             <div
-              class={`rounded-l-${
-                size === "md" ? "lg" : "md"
-              } flex flex-shrink-0 flex-row items-center justify-center ${
+              class={`rounded-l-${size === "md" ? "lg" : "md"} flex shrink-0 flex-row items-center justify-center ${
                 size === "md" ? "h-12 w-12" : "h-8 w-8"
               } bg-layer-content/10`.trim()}
             >

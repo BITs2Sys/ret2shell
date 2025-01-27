@@ -47,7 +47,7 @@ export default function Tabs(props: {
   });
   return (
     <OverlayScrollbarsComponent
-      class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
+      class="w-full h-16 backdrop-blur-sm border-b border-b-layer-content/10 relative"
       options={{
         scrollbars: {
           theme: `os-theme-${fullTheme()}`,

@@ -120,7 +120,7 @@ export default function () {
     <>
       <Title page={t("admin.logs.title")} route="/admin/logs" />
       <div class="flex-1 flex flex-col">
-        <div class="sticky top-16 h-16 z-20 backdrop-blur border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
+        <div class="sticky top-16 h-16 z-20 backdrop-blur-sm border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">
             <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("admin.logs.title")}</span>

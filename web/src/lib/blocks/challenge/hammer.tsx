@@ -172,10 +172,10 @@ export default function (props: {
           when={!isGameAdmin()}
           fallback={
             <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-              <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+              <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
                 <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
               </A>
-              <div class="w-4 flex-shrink-0" />
+              <div class="w-4 shrink-0" />
               <div class="flex flex-col space-y-1">
                 <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
                 <Card contentClass="p-2">
@@ -187,10 +187,10 @@ export default function (props: {
           }
         >
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
               <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
-            <div class="w-4 flex-shrink-0" />
+            <div class="w-4 shrink-0" />
             <div class="flex flex-col space-y-1">
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
@@ -200,10 +200,10 @@ export default function (props: {
             </div>
           </div>
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
               <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
-            <div class="w-4 flex-shrink-0" />
+            <div class="w-4 shrink-0" />
             <div class="flex flex-col space-y-1 items-start">
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
@@ -243,17 +243,17 @@ export default function (props: {
               >
                 <Show
                   when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
-                  fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
+                  fallback={<div class="w-10 h-10 shrink-0 self-start" />}
                 >
                   <Show
                     when={chat.id !== 0}
                     fallback={
-                      <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+                      <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
                         <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
                       </A>
                     }
                   >
-                    <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
+                    <A class="w-10 h-10 shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
                       <Avatar
                         class="w-full h-full"
                         src={chat.avatar ? mediaPath(chat.avatar) : undefined}
@@ -262,7 +262,7 @@ export default function (props: {
                     </A>
                   </Show>
                 </Show>
-                <div class="w-4 flex-shrink-0" />
+                <div class="w-4 shrink-0" />
                 <div
                   class={`flex-1 w-0 flex flex-col ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
                 >

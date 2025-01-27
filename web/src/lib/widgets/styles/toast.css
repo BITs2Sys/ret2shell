@@ -5,8 +5,8 @@
 }
 
 .toast {
-  &-enter,
-  &-exit-to {
+  &.toast-enter,
+  &.toast-exit-to {
     opacity: 0;
     transform: translateX(24px);
   }

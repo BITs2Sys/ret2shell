@@ -1,10 +1,10 @@
 @layer components {
   .progress {
-    &-track {
+    .progress-track {
       @apply bg-layer-content/30 h-[2px] rounded-full;
     }
 
-    &-range {
+    .progress-range {
       @apply h-[2px] rounded-full;
 
       &.progress-range-primary {

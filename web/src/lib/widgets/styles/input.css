@@ -1,6 +1,6 @@
 @layer components {
   .input {
-    @apply backdrop-blur text-layer-content outline-layer-content/60 bg-layer-content/5;
+    @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
     /* @apply outline outline-2 outline-offset-2; */
     @apply px-4 rounded-lg min-h-12;
 
@@ -23,15 +23,15 @@
       @apply bg-layer-content/5 text-layer-content/40 cursor-not-allowed;
     }
 
-    &-md {
+    &.input-md {
       @apply px-4 rounded-lg min-h-12;
     }
 
-    &-sm {
+    &.input-sm {
       @apply px-2 rounded-md min-h-8;
     }
 
-    &-error {
+    &.input-error {
       @apply border border-error outline-error;
     }
   }
@@ -41,10 +41,7 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-transition-delay: 1919810s;
-    -webkit-transition:
-      color 1919810s ease-out,
-      background-color 1919810s ease-out;
+    -webkit-transition: color 1919810s ease-out, background-color 1919810s ease-out;
     -webkit-box-shadow: none;
   }
 

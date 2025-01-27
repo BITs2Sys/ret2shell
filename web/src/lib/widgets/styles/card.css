@@ -4,39 +4,39 @@
 
     @apply bg-layer/60 backdrop-blur;
 
-    &-solid {
+    &.card-solid {
       @apply bg-layer backdrop-filter-none;
     }
 
-    &-content {
+    .card-content {
       @apply bg-layer-content/5 overflow-hidden flex-1;
     }
 
-    &-primary {
+    &.card-primary {
       @apply bg-primary/30;
     }
 
-    &-info {
+    &.card-info {
       @apply bg-info/30;
     }
 
-    &-success {
+    &.card-success {
       @apply bg-success/30;
     }
 
-    &-warning {
+    &.card-warning {
       @apply bg-warning/30;
     }
 
-    &-error {
+    &.card-error {
       @apply bg-error/30;
     }
 
-    &-focused {
+    &.card-focused {
       @apply outline outline-2 outline-offset-2;
     }
 
-    &-field {
+    &.card-field {
       @apply border-transparent bg-transparent;
 
       &.card-error {

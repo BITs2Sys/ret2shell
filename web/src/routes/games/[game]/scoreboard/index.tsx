@@ -212,11 +212,11 @@ export default function () {
           <div
             class={`xl:sticky w-full top-0 left-0 ${
               showChallengeDetail()
-                ? "xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10"
+                ? "xl:w-[20vw] backdrop-blur-sm border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "xl:w-[75vw] justify-center"
                   : "xl:w-[40vw]"
-            } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
+            } transition-[height] transition-[width] duration-500 p-3 lg:p-6 flex flex-col space-y-2 shrink-0`}
           >
             <Card class="relative" contentClass={`p-2 ${showChallengeDetail() ? "h-48" : "aspect-video"}`}>
               <Chart

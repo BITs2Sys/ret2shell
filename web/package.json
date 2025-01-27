@@ -38,7 +38,6 @@
     "lorem-ipsum": "^2.0.8",
     "luxon": "^3.5.0",
     "nanoid": "^5.0.9",
-    "okwind": "^0.1.2",
     "overlayscrollbars": "^2.10.1",
     "overlayscrollbars-solid": "^0.5.6",
     "passive-events-support": "^1.1.0",
@@ -69,18 +68,13 @@
     "@iconify-json/meteocons": "^1.2.2",
     "@iconify/tailwind": "^1.2.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.0.0",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.10",
-    "@types/postcss-import": "^14.0.3",
     "@types/shell-quote": "^1.7.5",
-    "autoprefixer": "^10.4.20",
     "kubernetes-types": "^1.30.0",
-    "postcss": "^8.5.1",
-    "postcss-import": "^16.1.0",
-    "sass": "^1.83.4",
-    "sass-migrator": "^2.3.1",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.0.0",
     "tslib": "^2.8.1",
     "vite": "^6.0.11",
     "vite-plugin-compression": "^0.5.1",
@@ -93,7 +87,6 @@
     "build": "vite build",
     "serve": "vite preview",
     "lint": "biome format --write . && biome lint .",
-    "format": "biome format --write .",
-    "sass-migrator": "sass-migrator"
+    "format": "biome format --write ."
   }
 }
