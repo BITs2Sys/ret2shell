@@ -5,7 +5,7 @@ import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useLocation, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canAccessChallenges, gameStore, inProgress, isGameAdmin } from "@storage/game";
+import { canAccessChallenges, currentTimelinePeriod, gameStore, inProgress, isGameAdmin } from "@storage/game";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { toastStore } from "@storage/toast";
@@ -321,13 +321,15 @@ export default function TitleBar() {
                   <Match when={inProgress()}>
                     <div class="flex flex-col items-center justify-center px-4 relative">
                       <div class="flex flex-row space-x-2">
-                        <span class="font-bold text-primary">
-                          {gameStore.current?.timeline_presets?.find(
-                            (preset) => preset.start_at < DateTime.now() && preset.end_at > DateTime.now()
-                          )?.label ?? ""}
-                        </span>
+                        <Show when={currentTimelinePeriod()?.end_at}>
+                          <span>[</span>
+                          <span class="font-bold text-primary">{currentTimelinePeriod()?.label ?? ""}</span>
+                          <Timer class="text-primary" end={currentTimelinePeriod()!.end_at} hasHours />
+                          <span>]</span>
+                        </Show>
                         <Timer end={gameStore.current!.end_at} hasHours />
                       </div>
+
                       <TimeProgress
                         class="w-full"
                         startAt={gameStore.current!.start_at}

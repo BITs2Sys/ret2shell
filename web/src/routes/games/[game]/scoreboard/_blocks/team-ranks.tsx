@@ -3,12 +3,11 @@ import { randomTips } from "@lib/utils/loading-tips";
 import { type Team, TeamState } from "@models/team";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore } from "@storage/game";
+import { currentTimelinePeriod, gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
-import { DateTime } from "luxon";
-import { createMemo, For, Match, Show, Switch } from "solid-js";
+import { For, Match, Show, Switch } from "solid-js";
 
 export default function TeamRanks(props: {
   teams: Team[];
@@ -22,11 +21,6 @@ export default function TeamRanks(props: {
   function realIndex(index: number) {
     return index + (props.page - 1) * props.pageSize + 1;
   }
-  const currentPeriod = createMemo(() => {
-    return gameStore.current?.timeline_presets?.find(
-      (v) => v.start_at && v.end_at && v.start_at < DateTime.now() && v.end_at > DateTime.now()
-    );
-  });
   return (
     <>
       <ul class="flex-1 flex flex-col w-full max-w-5xl self-center">
@@ -79,13 +73,14 @@ export default function TeamRanks(props: {
                   <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
                 </Tag>
               </Show>
-              <span class={`text-end ${currentPeriod() && props.showTime ? "w-48" : "w-20"}`}>
+              <span class={`text-end ${currentTimelinePeriod() && props.showTime ? "w-48" : "w-20"}`}>
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
-                <Show when={props.showTime && currentPeriod()}>
+                <Show when={props.showTime && currentTimelinePeriod()}>
                   <span class="text-success">
                     &nbsp;+
-                    {team.score - (team.history.find((v) => v.changed_at > currentPeriod()!.start_at)?.score ?? 0)}
+                    {team.score -
+                      (team.history.find((v) => v.changed_at > currentTimelinePeriod()!.start_at)?.score ?? 0)}
                     &nbsp;pts
                   </span>
                 </Show>
