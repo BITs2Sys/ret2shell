@@ -6,7 +6,7 @@ export type ProgressProps = {
   static?: boolean;
 };
 
-export default function(props: ProgressRootProps & ProgressProps) {
+export default function (props: ProgressRootProps & ProgressProps) {
   const value = createMemo(() => {
     if (props.value && props.min && props.value < props.min) {
       return props.min;

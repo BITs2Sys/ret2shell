@@ -90,14 +90,26 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
 }
 
 pub async fn email_worker(mut messages: Stream) {
-  while let Some(message) = messages.next().await {
-    if let Ok(message) = message {
-      process_message(message)
-        .await
-        .inspect_err(|e| error!("Failed to process message: {:?}", e))
-        .ok();
+  let mut retries = 0;
+  loop {
+    while let Some(message) = messages.next().await {
+      retries = 0;
+      if let Ok(message) = message {
+        process_message(message)
+          .await
+          .inspect_err(|e| error!("Failed to process message: {:?}", e))
+          .ok();
+      } else {
+        error!("Failed to receive message from nats: {:?}", message);
+      }
+    }
+    retries += 1;
+    if retries < 5 {
+      warn!("Email worker stopped unexpectedly! Maybe a message queue issue? Trying to restart...");
+      continue;
     } else {
-      error!("Failed to receive message from nats: {:?}", message);
+      error!("Email worker stopped unexpectedly for 5 times, exiting...");
+      return;
     }
   }
 }
