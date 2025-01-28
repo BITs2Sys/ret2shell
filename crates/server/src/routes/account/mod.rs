@@ -160,14 +160,14 @@ async fn generate_account_code(
   {
     cache.at("account-code-rev").del(code.code).await.ok();
   }
-  let mut code: u64 = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+  let mut code: u64 = rand::rng().random_range(0..=0xFF_FFFF);
   while cache
     .at("account-code-rev")
     .get::<i64>(code)
     .await?
     .is_some()
   {
-    code = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+    code = rand::rng().random_range(0..=0xFF_FFFF);
   }
   let resp = CodeWithTime {
     code,
