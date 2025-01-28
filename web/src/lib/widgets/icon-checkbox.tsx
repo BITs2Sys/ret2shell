@@ -10,7 +10,7 @@ export type CheckboxProps = {
   inputProps?: JSX.IntrinsicElements["input"];
 };
 
-export default function(
+export default function (
   props: CheckboxProps &
     CheckboxRootProps & {
       children?: JSX.Element;
@@ -21,15 +21,14 @@ export default function(
   const classes = createMemo(() =>
     `btn btn-md items-center justify-center btn-square ${checkboxProps.ghost ? "btn-ghost" : ""} ${rest.disabled ? "btn-disabled" : ""} ${rest.class}`.trim()
   );
-  const iconClasses = createMemo(
-    () =>
-      `${checkboxProps.checkedIcon} data-[state=unchecked]:text-layer-content data-[state=checked]:text-primary !w-5 !h-5`
-  );
+  const iconClasses = createMemo(() => `${checkboxProps.checkedIcon} text-primary !w-5 !h-5`);
+
   return (
     <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
       <Popover.Anchor class="flex flex-col">
         <Checkbox.Root {...rest} class={classes()}>
-          <Checkbox.Control class="w-5 h-5">
+          <Checkbox.Control class="w-5 h-5 relative">
+            <span class={`${checkboxProps.uncheckedIcon} !w-5 !h-5 absolute top-0 left-0`} />
             <Checkbox.Indicator class={iconClasses()} />
           </Checkbox.Control>
           <Checkbox.HiddenInput {...checkboxProps.inputProps} />
