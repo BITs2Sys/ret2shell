@@ -19,7 +19,7 @@ export default function ScorePicker(props: {
   }
   function getFunctionPlots() {
     const data = [];
-    for (let i = 0; i <= 30; i += 1) {
+    for (let i = 0; i <= 50; i += 1) {
       data.push([i, getScore(i)]);
     }
     return data;
@@ -34,7 +34,7 @@ export default function ScorePicker(props: {
           <RangeSlider
             class="flex-1"
             label={t("game.challenge.scoreRange")}
-            max={1200}
+            max={1500}
             min={50}
             step={50}
             orientation="vertical"
@@ -71,7 +71,7 @@ export default function ScorePicker(props: {
               xAxis: {
                 name: "",
                 min: 0,
-                max: 30,
+                max: 50,
                 minorTick: {
                   show: false,
                 },
@@ -83,7 +83,7 @@ export default function ScorePicker(props: {
               yAxis: {
                 name: "",
                 min: 0,
-                max: 1200,
+                max: 1500,
                 minorTick: {
                   show: false,
                 },
@@ -119,7 +119,7 @@ export default function ScorePicker(props: {
                   silent: true,
                   clip: true,
                   data: [
-                    [props.decay, 1200],
+                    [props.decay, 1500],
                     [props.decay, 0],
                   ],
                   lineStyle: {
@@ -133,7 +133,7 @@ export default function ScorePicker(props: {
           <Slider
             class="flex-1 flex-col-reverse pl-1"
             label={t("game.challenge.scoreDecay")}
-            max={30}
+            max={50}
             min={1}
             step={1}
             value={[props.decay]}

@@ -37,9 +37,15 @@ export function FormBare(props: {
         setValue(form, "name", props.editSource!.name);
         setValue(form, "tag", props.editSource!.tag.map((t) => t.name).join("/"));
         setValue(form, "content", props.editSource!.content || "");
-        setValue(form, "initial", props.editSource!.score_rule.initial);
-        setValue(form, "minimum", props.editSource!.score_rule.minimum);
-        setValue(form, "decay", props.editSource!.score_rule.decay);
+        if (props.editSource?.score_rule) {
+          setValue(form, "initial", props.editSource!.score_rule.initial);
+          setValue(form, "minimum", props.editSource!.score_rule.minimum);
+          setValue(form, "decay", props.editSource!.score_rule.decay);
+        } else {
+          setValue(form, "initial", 1000);
+          setValue(form, "minimum", 500);
+          setValue(form, "decay", 10);
+        }
         setValue(form, "release_at", props.editSource!.release_at?.toSeconds() ?? null);
         setValue(form, "archive_at", props.editSource!.archive_at?.toSeconds() ?? null);
       });
@@ -125,17 +131,17 @@ export function FormBare(props: {
                             error={decayField.error}
                             type="number"
                             min={1}
-                            max={30}
+                            max={50}
                             required
                           />
                         </div>
                         <ScorePicker
                           class="flex-1"
-                          max={initialField.value || 1000}
+                          max={initialField.value ?? 0}
                           onChangeMax={(v) => {
                             setValue(form, "initial", v);
                           }}
-                          min={minField.value || 500}
+                          min={minField.value ?? 0}
                           onChangeMin={(v) => {
                             setValue(form, "minimum", v);
                           }}
@@ -219,7 +225,7 @@ export function FormBare(props: {
   );
 }
 
-export default function (props: {
+export default function(props: {
   onDone: (challenge: ChallengeForm) => void;
   editSource?: Challenge;
   loading?: boolean;
