@@ -322,7 +322,7 @@ export default function () {
                             class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
                           >
                             <Card
-                              contentClass={`flex p-2 ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                              contentClass={`flex p-2 space-x-2 ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
                             >
                               <Article content={chat.content} noExtraPaddings compact extra />
                               <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
