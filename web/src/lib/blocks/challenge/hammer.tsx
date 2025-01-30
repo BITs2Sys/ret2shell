@@ -282,8 +282,11 @@ export default function (props: {
                   <div
                     class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
                   >
-                    <Card contentClass="p-2">
+                    <Card
+                      contentClass={`flex p-2 ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                    >
                       <Article content={chat.content} noExtraPaddings compact extra />
+                      <span class="text-xs opacity-60">{chat.created_at.toFormat("HH:mm")}</span>
                     </Card>
                     <div class="self-end flex items-end">
                       <span
