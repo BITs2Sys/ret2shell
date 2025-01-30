@@ -96,7 +96,7 @@ function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function() {
+export default function () {
   const [searchParams, _] = useSearchParams();
   const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "") || null);
   const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "") || null);
@@ -325,7 +325,7 @@ export default function() {
                               contentClass={`flex p-2 ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
                             >
                               <Article content={chat.content} noExtraPaddings compact extra />
-                              <span class="text-xs opacity-60">{chat.created_at.toFormat("HH:mm")}</span>
+                              <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
                             </Card>
                             <div class="self-end flex items-end">
                               <span
