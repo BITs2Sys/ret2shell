@@ -38,9 +38,9 @@ export function FormBare(props: {
         setValue(form, "tag", props.editSource!.tag.map((t) => t.name).join("/"));
         setValue(form, "content", props.editSource!.content || "");
         if (props.editSource?.score_rule) {
-          setValue(form, "initial", props.editSource!.score_rule.initial);
-          setValue(form, "minimum", props.editSource!.score_rule.minimum);
-          setValue(form, "decay", props.editSource!.score_rule.decay);
+          setValue(form, "initial", props.editSource.score_rule.initial);
+          setValue(form, "minimum", props.editSource.score_rule.minimum);
+          setValue(form, "decay", props.editSource.score_rule.decay);
         } else {
           setValue(form, "initial", 1000);
           setValue(form, "minimum", 500);
@@ -106,8 +106,8 @@ export function FormBare(props: {
                             value={initialField.value}
                             error={initialField.error}
                             type="number"
-                            min={50}
-                            max={1200}
+                            min={0}
+                            max={1500}
                             required
                           />
                           <Input
@@ -118,8 +118,8 @@ export function FormBare(props: {
                             value={minField.value}
                             error={minField.error}
                             type="number"
-                            min={50}
-                            max={1200}
+                            min={0}
+                            max={1500}
                             required
                           />
                           <Input
@@ -225,7 +225,7 @@ export function FormBare(props: {
   );
 }
 
-export default function(props: {
+export default function (props: {
   onDone: (challenge: ChallengeForm) => void;
   editSource?: Challenge;
   loading?: boolean;

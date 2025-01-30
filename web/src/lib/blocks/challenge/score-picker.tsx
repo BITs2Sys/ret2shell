@@ -35,7 +35,7 @@ export default function ScorePicker(props: {
             class="flex-1"
             label={t("game.challenge.scoreRange")}
             max={1500}
-            min={50}
+            min={0}
             step={50}
             orientation="vertical"
             value={[props.min, props.max]}
