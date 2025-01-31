@@ -17,7 +17,6 @@ import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount, u
 import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
 import TeamSolves from "./_blocks/team-solves";
-import { handleHttpError } from "@api";
 import clsx from "clsx";
 
 function ChartOperations(props: {
