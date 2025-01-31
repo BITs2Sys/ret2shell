@@ -15,6 +15,7 @@ import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
+import clsx from "clsx";
 import { Show, createEffect, createSignal, untrack } from "solid-js";
 
 type TeamCreateForm = {
@@ -121,7 +122,10 @@ export default function () {
                         <Card contentClass="p-2 flex flex-col space-y-2">
                           <Button ghost size="sm" justify="start" type="button" onClick={() => setGenerator("hacker")}>
                             <span
-                              class={`icon-[fluent--diversity-20-regular] w-5 h-5 ${generator() === "hacker" ? "text-primary" : ""}`.trim()}
+                              class={clsx(
+                                "icon-[fluent--diversity-20-regular] w-5 h-5",
+                                generator() === "hacker" && "text-primary"
+                              )}
                             />
                             <span>Hacker Names</span>
                           </Button>
@@ -133,7 +137,10 @@ export default function () {
                             onClick={() => setGenerator("chuunibyou")}
                           >
                             <span
-                              class={`icon-[fluent--diversity-20-regular] w-5 h-5 ${generator() === "chuunibyou" ? "text-primary" : ""}`.trim()}
+                              class={clsx(
+                                "icon-[fluent--diversity-20-regular] w-5 h-5",
+                                generator() === "chuunibyou" && "text-primary"
+                              )}
                             />
                             <span>{t("game.team.create.chuunibyouGenerator")}</span>
                           </Button>
