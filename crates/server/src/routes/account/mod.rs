@@ -409,11 +409,11 @@ async fn send_email(
   let verify_email_body = email_config
     .verify_email_body
     .clone()
-    .unwrap_or(r"Hi %USER%, Please verify your account follow this link: %LINK% ".to_owned());
+    .unwrap_or(include_str!("./verify-email.html").to_owned());
   let reset_password_body = email_config
     .reset_password_email_body
     .clone()
-    .unwrap_or(r"Hi %USER%, Please reset your password follow this link: %LINK% ".to_owned());
+    .unwrap_or(include_str!("./reset-password.html").to_owned());
   let (subject, body) = match email_type {
     EmailType::Verify => (verify_email_subject, verify_email_body),
     EmailType::Reset => (reset_password_subject, reset_password_body),
@@ -649,7 +649,10 @@ async fn forgot_password(
   let user = match user {
     Some(u) => u,
     None => {
-      return Err(ResponseError::NotFound("user not found".to_owned()));
+      warn!("user not found: {}", body.email);
+      // shadowing the error to prevent leaking user information
+      //return Err(ResponseError::NotFound("user not found".to_owned()));
+      return Ok(StatusCode::OK);
     }
   };
 
