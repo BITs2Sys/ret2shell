@@ -25,6 +25,7 @@ import Card from "@widgets/card";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
+import clsx from "clsx";
 import type { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
@@ -278,7 +279,11 @@ export default function () {
                   <For each={chats()}>
                     {(chat, index) => (
                       <div
-                        class={`fade-group-up ${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
+                        class={clsx(
+                          "fade-group-up",
+                          chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse",
+                          "w-[calc(100%-4rem)] flex items-center"
+                        )}
                       >
                         <Show
                           when={chat.id !== 0}
@@ -303,7 +308,10 @@ export default function () {
                         </Show>
                         <div class="w-4 shrink-0" />
                         <div
-                          class={`flex-1 w-0 flex flex-col ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                          class={clsx(
+                            "flex-1 w-0 flex flex-col",
+                            chat.user_id !== accountStore.id ? "items-start" : "items-end"
+                          )}
                         >
                           <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
                             <header class="label space-x-2 py-1">
@@ -319,10 +327,16 @@ export default function () {
                             </header>
                           </Show>
                           <div
-                            class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                            class={clsx(
+                              "peer flex max-w-full",
+                              chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
+                            )}
                           >
                             <Card
-                              contentClass={`flex p-2 ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                              contentClass={clsx(
+                                "flex p-2",
+                                chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
+                              )}
                             >
                               <Article content={chat.content} noExtraPaddings compact extra />
                               <div class="w-2" />
@@ -422,7 +436,7 @@ export default function () {
                   </Button>
                 </div>
                 <EditorBare
-                  class={`bg-layer rounded-lg ${editorExpanded() ? "h-64" : "h-16"}`}
+                  class={clsx("bg-layer rounded-lg", editorExpanded() ? "h-64" : "h-16")}
                   value={chat()}
                   placeholder="MARKDOWN"
                   lang="markdown"

@@ -23,6 +23,7 @@ import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
 import UserBox from "./user-box";
+import clsx from "clsx";
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
@@ -209,13 +210,13 @@ export default function TitleBar() {
                         onClick={() => setAdditionalMobileBox("wsrx")}
                       >
                         <span
-                          class={`${
+                          class={clsx(
                             wsrx.instances().length > 0
                               ? "icon-[fluent--fluid-20-filled]"
-                              : "icon-[fluent--fluid-20-regular]"
-                          } w-5 h-5 ${
-                            wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
-                          }`.trim()}
+                              : "icon-[fluent--fluid-20-regular]",
+                            "w-5 h-5",
+                            wsrx.instances().length > 0 && (wsrx.connected() ? "text-success" : "text-warning")
+                          )}
                         />
                         <span>{t("instance.box")}</span>
                       </Button>
@@ -229,11 +230,12 @@ export default function TitleBar() {
                         onClick={() => setAdditionalMobileBox("notification")}
                       >
                         <span
-                          class={`${
+                          class={clsx(
                             toastStore.toasts.length > 0
                               ? "icon-[fluent--alert-badge-20-filled] text-primary"
-                              : "icon-[fluent--alert-20-regular]"
-                          } w-5 h-5`}
+                              : "icon-[fluent--alert-20-regular]",
+                            "w-5 h-5"
+                          )}
                         />
                         <span>{t("platform.notificationBox")}</span>
                       </Button>

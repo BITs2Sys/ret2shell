@@ -2,6 +2,7 @@ import { t } from "@storage/theme";
 import Chart from "@widgets/chart";
 import RangeSlider from "@widgets/range-slider";
 import Slider from "@widgets/slider";
+import clsx from "clsx";
 
 export default function ScorePicker(props: {
   class?: string;
@@ -25,7 +26,7 @@ export default function ScorePicker(props: {
     return data;
   }
   return (
-    <div class={`flex flex-col space-y-1 ${props.class ?? ""}`.trim()}>
+    <div class={clsx("flex flex-col space-y-1", props.class)}>
       <label class="label" for="scorePicker_NOTPOSSIBLE">
         {t("game.challenge.scoreRange")}
       </label>

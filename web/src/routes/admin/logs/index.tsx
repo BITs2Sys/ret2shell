@@ -8,6 +8,7 @@ import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 
@@ -157,13 +158,13 @@ export default function () {
           <For each={logs()}>
             {(log) => (
               <div class="h-8 flex flex-row items-center space-x-2 border-b border-b-layer-content/10 overflow-hidden min-w-0">
-                <span class={`w-16 ${getColor(log.level)}`}>{log.level}</span>
+                <span class={clsx("w-16", getColor(log.level))}>{log.level}</span>
                 <span class="opacity-40">[{log.target}]</span>
                 {log.span?.name && <span class="opacity-60">[{log.span.name}]</span>}
                 {log.span?.method && <span class="opacity-60">[{log.span.method}]</span>}
                 {log.span?.from && <span class="opacity-60">[{log.span.from}]</span>}
                 {log.span?.uri && <span class="opacity-60">[{log.span.uri}]</span>}
-                <span class={`flex-1 truncate w-0 ${getContentColor(log.level)}`} title={log.fields.message}>
+                <span class={clsx("flex-1 truncate w-0", getContentColor(log.level))} title={log.fields.message}>
                   {log.fields.message}
                 </span>
                 <span class="opacity-60 font-bold">

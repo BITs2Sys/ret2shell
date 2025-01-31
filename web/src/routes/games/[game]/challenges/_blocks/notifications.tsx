@@ -132,7 +132,7 @@ export default function () {
                   </Button>
                 </Show>
                 <Button
-                  class={`${createFormExpanded() ? "shrink-0" : "flex-1"}`}
+                  class={createFormExpanded() ? "shrink-0" : "flex-1"}
                   square={createFormExpanded()}
                   type="button"
                   onClick={() => {

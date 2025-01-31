@@ -6,6 +6,7 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
@@ -25,17 +26,21 @@ export default function Tabs(props: {
   function appendChallengeHistory(challenge: Challenge) {
     if (challengeHistory().find((c) => c.id === challenge.id)) {
       setTimeout(() => {
-        document
-          .getElementById(`challenge-${challenge.id}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        document.getElementById(`challenge-${challenge.id}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
       }, 100);
       return;
     }
     setChallengeHistory([...challengeHistory(), { id: challenge.id, name: challenge.name }]);
     setTimeout(() => {
-      document
-        .getElementById(`challenge-${challenge.id}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      document.getElementById(`challenge-${challenge.id}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
     }, 100);
   }
   createEffect(() => {
@@ -153,7 +158,10 @@ export default function Tabs(props: {
                   <span class="truncate flex-1 text-left">{challenge.name}</span>
                 </Link>
                 <Button
-                  class={`!rounded-l-none ${challenge.id === selectedChallengeId() && inCreate() === false ? "btn-active" : ""}`}
+                  class={clsx(
+                    "!rounded-l-none",
+                    challenge.id === selectedChallengeId() && inCreate() === false && "btn-active"
+                  )}
                   square
                   ghost
                   onClick={() => {

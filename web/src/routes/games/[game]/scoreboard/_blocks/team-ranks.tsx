@@ -7,6 +7,7 @@ import { currentTimelinePeriod, gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { For, Match, Show, Switch } from "solid-js";
 
 export default function TeamRanks(props: {
@@ -73,7 +74,7 @@ export default function TeamRanks(props: {
                   <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
                 </Tag>
               </Show>
-              <span class={`text-end ${currentTimelinePeriod() && props.showTime ? "w-48" : "w-20"}`}>
+              <span class={clsx("text-end", currentTimelinePeriod() && props.showTime ? "w-48" : "w-20")}>
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
                 <Show when={props.showTime && currentTimelinePeriod()}>
