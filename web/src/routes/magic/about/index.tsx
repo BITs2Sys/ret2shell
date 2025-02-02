@@ -97,7 +97,12 @@ export default function () {
                     </Tag>
                     <Tag level="info" class="m-1">
                       <a href="https://github.com/CSharperMantle" target="_blank" rel="noreferrer">
-                        Mantle
+                        csmantle
+                      </a>
+                    </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/h4kuy4" target="_blank" rel="noreferrer">
+                        h4kuy4
                       </a>
                     </Tag>
                   </div>
