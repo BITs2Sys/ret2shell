@@ -28,7 +28,7 @@ pub struct RateLimitConfig {
   pub burst_restore_rate: Option<u64>, // in milliseconds
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
   /// The host address of the server.
   pub host: String,
