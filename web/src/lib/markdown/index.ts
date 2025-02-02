@@ -43,8 +43,9 @@ export class Markdown {
   public async renderContent(markdown: string) {
     this.setHtml("");
     this.setToc(null);
-    const result = await this.processor?.process(markdown);
-    this.setHtml(result?.toString() as string);
+    return this.processor?.process(markdown, (_err, result) => {
+      this.setHtml(result?.toString() as string);
+    });
   }
 
   public reset() {
@@ -95,7 +96,13 @@ export class Markdown {
           type: "element",
           tagName: "span",
           properties: {
-            className: ["icon-[fluent--open-20-regular]", "text-primary", "w-4", "h-4", "print:hidden"],
+            className: [
+              "icon-[fluent--open-20-regular]",
+              "text-primary",
+              "w-4",
+              "h-4",
+              "print:hidden",
+            ],
           },
           children: [],
         },
@@ -110,7 +117,9 @@ export class Markdown {
     }
     if (options?.code) {
       const rehypePrettyCode = await import("rehype-pretty-code");
-      const rehypePrettyCodeTransformers = await import("@rehype-pretty/transformers");
+      const rehypePrettyCodeTransformers = await import(
+        "@rehype-pretty/transformers"
+      );
       this.processor?.use(rehypePrettyCode.default, {
         grid: true,
         theme: {
