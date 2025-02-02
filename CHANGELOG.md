@@ -13,8 +13,8 @@
 ...
 
 [server.rate_limit]
-+api_burst_limit        = 32
-+api_burst_restore_rate = 500             # in milliseconds
++burst_limit        = 32
++burst_restore_rate = 500             # in milliseconds
 ```
 
 Move rate limit config to independent section. When `rate_limit` section is missing, the rate limit feature for server will be disabled.
