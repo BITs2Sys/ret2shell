@@ -256,7 +256,7 @@ article blockquote {
   }
 
   & > * {
-    @apply !mx-2;
+    @apply !mx-0;
   }
 
   & > *:last-child {

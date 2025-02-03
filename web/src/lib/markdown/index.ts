@@ -69,7 +69,7 @@ export class Markdown {
           SUCCESS: ["markdown-alert", "markdown-alert-green"],
           DEBUG: ["markdown-alert", "markdown-alert-magenta"],
           WARN: ["markdown-alert", "markdown-alert-yellow"],
-          ERROR: ["markdown-alert", "markdown-alert-error"],
+          ERROR: ["markdown-alert", "markdown-alert-red"],
           DANGER: ["markdown-alert", "markdown-alert-red"],
           // github
           NOTE: ["markdown-alert", "markdown-alert-blue"],
