@@ -91,7 +91,6 @@ export default function UserCodeDialog() {
         </div>
         <Button
           level="primary"
-          square
           title={t("account.code.refresh")}
           onClick={refreshCode}
           loading={loadingCode()}
