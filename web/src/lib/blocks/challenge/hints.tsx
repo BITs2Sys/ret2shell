@@ -27,12 +27,13 @@ type CreateHintForm = {
   cost: number;
 };
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
   const [hints, setHints] = createSignal([] as Hint[]);
   const [extras, setExtras] = createSignal([] as Extra[]);
+  const [unlocking, setUnlocking] = createSignal(false);
   const lorem = new LoremIpsum({
     wordsPerSentence: {
       max: 8,
@@ -106,12 +107,14 @@ export default function (_props: {
   }
 
   async function handleUnlockHint(id: number) {
+    setUnlocking(true);
     try {
       await unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
       refreshHint();
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.unlockHintFailed")!);
     }
+    setUnlocking(false);
   }
   return (
     <div class="flex flex-col p-3 lg:p-6">
@@ -149,7 +152,13 @@ export default function (_props: {
                           cost: hint.cost,
                         })}
                       </span>
-                      <Button size="sm" level="error" onClick={() => handleUnlockHint(hint.id)}>
+                      <Button
+                        size="sm"
+                        level="error"
+                        onClick={() => handleUnlockHint(hint.id)}
+                        disabled={unlocking()}
+                        loading={unlocking()}
+                      >
                         {t("platform.yes")}
                       </Button>
                     </Card>
