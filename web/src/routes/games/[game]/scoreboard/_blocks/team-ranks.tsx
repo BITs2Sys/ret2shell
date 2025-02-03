@@ -88,7 +88,12 @@ export default function TeamRanks(props: {
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
                 <Show when={props.showTime && currentTimelinePeriod()}>
-                  <span class="text-success">&nbsp;+{getScoreDiff(team)}&nbsp;pts</span>
+                  <Show
+                    when={getScoreDiff(team) >= 0}
+                    fallback={<span class="text-error">&nbsp;{getScoreDiff(team)}&nbsp;pts</span>}
+                  >
+                    <span class="text-success">&nbsp;+{getScoreDiff(team)}&nbsp;pts</span>
+                  </Show>
                 </Show>
               </span>
               <Show when={props.showTime}>

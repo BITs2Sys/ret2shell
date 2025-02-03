@@ -12,7 +12,7 @@ import { Transition } from "solid-transition-group";
 import Button from "@widgets/button";
 import clsx from "clsx";
 
-export default function(props: { children?: JSX.Element }) {
+export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
   if (
     !accountStore.permissions.includes(Permission.Statistics) &&
