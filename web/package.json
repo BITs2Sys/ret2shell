@@ -4,6 +4,15 @@
   "type": "module",
   "private": true,
   "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build --mode production",
+    "build:dev": "vite build --mode development",
+    "serve": "vite preview",
+    "lint": "biome format --write . && biome lint .",
+    "format": "biome format --write ."
+  },
   "dependencies": {
     "@ark-ui/solid": "^4.10.1",
     "@e965/xlsx": "^0.20.3",
@@ -81,13 +90,5 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^3.0.4"
-  },
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "lint": "biome format --write . && biome lint .",
-    "format": "biome format --write ."
   }
 }
