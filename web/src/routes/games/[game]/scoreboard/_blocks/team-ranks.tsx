@@ -22,6 +22,16 @@ export default function TeamRanks(props: {
   function realIndex(index: number) {
     return index + (props.page - 1) * props.pageSize + 1;
   }
+  function getScoreDiff(team: Team) {
+    const len = team.history.length;
+    if (len === 0) return 0;
+    for (let i = len - 1; i >= 0; i--) {
+      if (team.history[i].changed_at <= currentTimelinePeriod()!.start_at) {
+        return team.score - team.history[i].score;
+      }
+    }
+    return team.score;
+  }
   return (
     <>
       <ul class="flex-1 flex flex-col w-full max-w-5xl self-center">
@@ -78,12 +88,7 @@ export default function TeamRanks(props: {
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
                 <Show when={props.showTime && currentTimelinePeriod()}>
-                  <span class="text-success">
-                    &nbsp;+
-                    {team.score -
-                      (team.history.find((v) => v.changed_at > currentTimelinePeriod()!.start_at)?.score ?? 0)}
-                    &nbsp;pts
-                  </span>
+                  <span class="text-success">&nbsp;+{getScoreDiff(team)}&nbsp;pts</span>
                 </Show>
               </span>
               <Show when={props.showTime}>
