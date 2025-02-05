@@ -39,8 +39,8 @@ services:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
     volumes:
       - registry:/var/lib/registry
-    # ports:
-    #   - '5000:5000'
+    ports:
+      - '5000:5000'
     command: ['serve', '/etc/docker/registry/config.yml']
 
   platform:
@@ -52,7 +52,8 @@ services:
       - message_queue
       - registry # if internal registry is used
     volumes:
-      - ./platform:/etc/ret2shell:ro
+      - platform:/var/lib/ret2shell
+      - ./config:/etc/ret2shell:ro
       # - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - '8080:8080'
@@ -79,6 +80,7 @@ volumes:
   cache:
   message_queue:
   registry:
+  platform:
 
 networks:
   default:
