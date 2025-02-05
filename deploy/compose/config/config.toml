@@ -37,7 +37,7 @@ enabled           = true
 # ? The following 3 settings are used for specifying the k8s cluster to start challenges.
 # ? If you want to specify the kubernetes configuration manually, set `auto_infer` and `try_default` to `false`.
 # ? The default behavior is to infer the k8s configuration from the environment at this machine.
-auto_infer        = true
+auto_infer        = false
 try_default       = false
 # ! Put kubeconfig.yaml into the mounting path, or mount by yourself in the docker-compose file.
 kube_config_path  = "/etc/ret2shell/kubeconfig.yaml"
@@ -47,7 +47,7 @@ node_selector     = ""
 # ! currently not working
 enable_capture    = true
 capture_directory = "/var/cache/ret2shell/captures"
-cleanup_interval  = 60                # ? in seconds
+cleanup_interval  = 60                              # ? in seconds
 
 # ! deprecated, please use runtime config in the admin panel.
 # traffic          = "pub async fn expose(node, service) { Ok(()) }"
@@ -59,7 +59,7 @@ enabled  = true
 # ! Please ensure that `external` could be visited by the k8s cluster.
 external = "localhost:5000" # ? used for k8s pulling.
 insecure = false
-server   = "registry:5000"   # ? used for platform pushing
+server   = "registry:5000"  # ? used for platform pushing
 # username =
 # password =
 
@@ -93,7 +93,7 @@ level      = 'info,tower_http=info,sqlx=warn'
 # * Media config, for user-uploaded files
 [media]
 anti_theft = true
-limit      = 100            # one user could upload per week
+limit      = 100                        # one user could upload per week
 path       = '/var/lib/ret2shell/media'
 
 # * Queue config
@@ -136,5 +136,5 @@ burst_restore_rate = 500 # ? in milliseconds
 # ? Integrated static server.
 # ? It's recommended to use external high-performance static server like nginx/apache.
 [server.frontend]
-serve_type = 'static'          # static | proxy
+serve_type = 'static'        # static | proxy
 path       = '/var/www/html'
