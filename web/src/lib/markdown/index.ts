@@ -43,9 +43,8 @@ export class Markdown {
   public async renderContent(markdown: string) {
     this.setHtml("");
     this.setToc(null);
-    return this.processor?.process(markdown, (_err, result) => {
-      this.setHtml(result?.toString() as string);
-    });
+    const result = await this.processor?.process(markdown);
+    this.setHtml(result?.toString() as string);
   }
 
   public reset() {
