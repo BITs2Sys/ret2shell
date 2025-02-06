@@ -5,10 +5,10 @@ use ret2api::audit;
 use ret2api::utils;
 
 /// the flag encryption key
-const ENCRYPT_KEY = "kamisato_ayaka";
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
+const ENCRYPT_KEY = "%RANDSTR(16)%";
+/// the flag prefix, the game name for example, `flag` means the flag will be `flag{...}`
 const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content
+/// the flag template (readable recommended), used to generate the correct flag content
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// Check flag submitted by user.
