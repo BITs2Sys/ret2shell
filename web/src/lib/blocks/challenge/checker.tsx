@@ -25,18 +25,21 @@ const checkerMap = {
   "dynamic-uuid": dynamicUuidChecker,
 };
 
+// biome-ignore lint/suspicious/noExplicitAny: Context value can be any type
+type TmplContext = Record<string, any>;
 class Tmpl {
-  context: Record<string, any>;
-  constructor(context: Record<string, any>) {
+  context: TmplContext;
+  constructor(context: TmplContext) {
     this.context = context;
   }
 
-  static with_context(context: Record<string, any>) {
+  static with_context(context: TmplContext) {
     return new Tmpl(context);
   }
 
   // from expression to value
-  protected handleToken(token: string, callable: boolean, args: any[]) {
+  // biome-ignore lint/suspicious/noExplicitAny: arguments can be any type
+    protected handleToken(token: string, callable: boolean, args: any[]) {
     if (!Object.prototype.hasOwnProperty.call(checkerCtx, token)) {
       throw new Error(`Cannot find token in context: ${token}`);
     }
@@ -44,6 +47,7 @@ class Tmpl {
     return this.context[token];
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: everything can income and outcome as string
   private result2str(result: any) {
     if (result === null || typeof result === "undefined") return String(result);
     if (Object.prototype.hasOwnProperty.call(result, "toString")) return result.toString();

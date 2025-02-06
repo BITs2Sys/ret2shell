@@ -36,9 +36,6 @@
       "a11y": {
         "noSvgWithoutTitle": "off"
       },
-      "suspicious": {
-        "noExplicitAny": "off"
-      },
       "correctness": {
         "useJsxKeyInIterable": "off",
         "noUnusedImports": "error",
