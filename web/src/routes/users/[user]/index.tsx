@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getUser, getUserTeams } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
@@ -9,7 +10,6 @@ import Article from "@widgets/article";
 import LoadingTips from "@widgets/loading-tips";
 import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
-import { handleHttpError } from "@api";
 
 export default function () {
   const [user, setUser] = createSignal(null as null | User);

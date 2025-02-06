@@ -1,13 +1,13 @@
+import { handleHttpError } from "@api";
+import { t } from "@storage/theme";
 import type { ButtonProps } from "@widgets/button";
 import Button from "@widgets/button";
+import clsx from "clsx";
 import type { DownloadProgress } from "ky";
 import { Match, Show, Switch, createSignal, splitProps } from "solid-js";
 import { downloadFile } from "../api/file";
 import { humanFileSize } from "../utils/size";
 import Progress from "../widgets/progress";
-import { handleHttpError } from "@api";
-import { t } from "@storage/theme";
-import clsx from "clsx";
 
 export default function DownloadButton(
   props: ButtonProps & {

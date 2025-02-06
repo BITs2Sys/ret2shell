@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import {
   createInstitute,
   createOAuthProvider,
@@ -7,11 +8,14 @@ import {
   updateInstitute,
   updateOAuthProvider,
 } from "@api/account";
+import { mediaPath } from "@lib/utils/media";
 import type { Institute } from "@models/institute";
+import type { OAuthProvider } from "@models/oauth-provider";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
@@ -19,11 +23,7 @@ import Popover from "@widgets/popover";
 import type { HTTPError } from "ky";
 import { For, Show, createSignal, onMount } from "solid-js";
 import InstituteForm from "./_blocks/institute-form";
-import { handleHttpError } from "@api";
 import ProviderForm from "./_blocks/provider-form";
-import type { OAuthProvider } from "@models/oauth-provider";
-import Avatar from "@widgets/avatar";
-import { mediaPath } from "@lib/utils/media";
 
 export default function () {
   const [loading, setLoading] = createSignal(true);

@@ -8,7 +8,7 @@ import { accountStore } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
 import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";
-import { t, breakpoints } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Chart from "@widgets/chart";

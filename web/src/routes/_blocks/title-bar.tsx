@@ -17,13 +17,13 @@ import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
-import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
+import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import UserBox from "./user-box";
-import clsx from "clsx";
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));

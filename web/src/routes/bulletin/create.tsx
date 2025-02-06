@@ -2,9 +2,9 @@ import type { Article } from "@models/article";
 import { Permission } from "@models/user";
 import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import CreateForm from "./_blocks/form";
-import { Title } from "@storage/header";
 
 export default function () {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
-import teapot from "@assets/imgs/teapot.svg";
 // import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
 // import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
+import teapot from "@assets/imgs/teapot.svg";
 import { t } from "@storage/theme";
 import { Match, Show, Switch } from "solid-js";
 

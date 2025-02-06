@@ -1,6 +1,6 @@
+import type { Article } from "@models/article";
 import type { SearchParamsOption } from "ky";
 import api, { api_root } from ".";
-import type { Article } from "@models/article";
 
 export async function getBulletinList(page: number, page_size: number) {
   return await api

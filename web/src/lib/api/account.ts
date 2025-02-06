@@ -1,10 +1,10 @@
 import type { Captcha } from "@models/captcha";
 import type { Institute } from "@models/institute";
 import type { OAuth } from "@models/oauth";
+import type { OAuthProvider } from "@models/oauth-provider";
 import type { User } from "@models/user";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
-import type { OAuthProvider } from "@models/oauth-provider";
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();

@@ -1,10 +1,10 @@
 import { Dialog, type DialogRootProps } from "@ark-ui/solid";
 import { fullTheme } from "@storage/theme";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import type { ButtonProps } from "./button";
-import clsx from "clsx";
 
 export default function (
   props: DialogRootProps &

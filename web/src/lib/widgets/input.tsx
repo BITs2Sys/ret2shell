@@ -1,8 +1,8 @@
 import { type ComponentProps, type JSX, Show, createSignal, splitProps } from "solid-js";
 
 import { Popover } from "@ark-ui/solid";
-import { Portal } from "solid-js/web";
 import clsx from "clsx";
+import { Portal } from "solid-js/web";
 
 export type TextInputProps = {
   icon?: JSX.Element;

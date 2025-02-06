@@ -1,22 +1,22 @@
+import { handleHttpError } from "@api";
+import { deleteGameNodeSelector, deleteGameTraffic, updateGameNodeSelector, updateGameTraffic } from "@api/game";
+import { gameStore, setGameStore } from "@storage/game";
+import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
+import Divider from "@widgets/divider";
+import { EditorBare } from "@widgets/editor";
+import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createSignal, Show } from "solid-js";
-import singleNodeDirect from "./scripts/single_node_direct.rx";
-import multiNodeDirect from "./scripts/multi_node_direct.rx";
-import { EditorBare } from "@widgets/editor";
-import { gameStore, setGameStore } from "@storage/game";
-import { deleteGameNodeSelector, deleteGameTraffic, updateGameNodeSelector, updateGameTraffic } from "@api/game";
-import { addToast } from "@storage/toast";
-import { handleHttpError } from "@api";
-import Input from "@widgets/input";
 import Splitter from "@widgets/splitter";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { AnsiUp } from "ansi_up";
-import Divider from "@widgets/divider";
-import { Title } from "@storage/header";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { Show, createEffect, createSignal } from "solid-js";
+import multiNodeDirect from "./scripts/multi_node_direct.rx";
+import singleNodeDirect from "./scripts/single_node_direct.rx";
 
 type PresetTraffic = "single-node-direct" | "multi-node-direct";
 

@@ -1,17 +1,17 @@
+import { handleHttpError } from "@api";
 import { getGames } from "@api/game";
+import Spin from "@assets/animates/spin";
+import bgGameDefault from "@assets/imgs/bg-game-default.webp";
+import { mediaPath } from "@lib/utils/media";
 import { HostType } from "@models/game";
 import { appendGames, gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Card from "@widgets/card";
+import Pagination from "@widgets/pagination";
 import Picture from "@widgets/picture";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
-import bgGameDefault from "@assets/imgs/bg-game-default.webp";
-import { mediaPath } from "@lib/utils/media";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
-import Pagination from "@widgets/pagination";
-import Spin from "@assets/animates/spin";
-import { handleHttpError } from "@api";
+import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function () {
   const [page, setPage] = createSignal(1);

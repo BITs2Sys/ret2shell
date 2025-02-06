@@ -7,23 +7,23 @@ import LoadingTips from "@widgets/loading-tips";
 import { Match, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import Intro from "../_blocks/intro";
 
+import { handleHttpError } from "@api";
 import { createChallenge, getChallenge, updateGame } from "@api/game";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
 import AdministratorsManagement from "@blocks/game/administrators";
 import GameEdit, { type GameForm } from "@blocks/game/form";
+import { SubmissionList } from "@blocks/game/lists";
 import GameStatistics from "@blocks/game/statistics";
+import { Permission } from "@models/user";
+import { accountStore } from "@storage/account";
 import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
+import { Title } from "@storage/header";
 import { addToast } from "@storage/toast";
+import Tag from "@widgets/tag";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { accountStore } from "@storage/account";
-import { Permission } from "@models/user";
-import { handleHttpError } from "@api";
-import { Title } from "@storage/header";
-import { SubmissionList } from "@blocks/game/lists";
-import Tag from "@widgets/tag";
 
 export default function () {
   const navigate = useNavigate();

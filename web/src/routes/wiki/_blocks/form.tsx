@@ -1,4 +1,4 @@
-import IconCheckbox from "@widgets/icon-checkbox";
+import { handleHttpError } from "@api";
 import { createWiki, updateWiki } from "@api/wiki";
 import { type Article, ArticleAccessPolicy } from "@models/article";
 import { createForm, required, setValues } from "@modular-forms/solid";
@@ -6,10 +6,10 @@ import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, untrack } from "solid-js";
-import { handleHttpError } from "@api";
 
 type WikiForm = {
   title: string;

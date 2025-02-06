@@ -1,16 +1,16 @@
-import { Permission } from "@models/user";
 import SidebarLayout from "@blocks/sidebar-layout";
+import { Permission } from "@models/user";
+import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { t, breakpoints } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import { createSignal, Show, type JSX } from "solid-js";
-import SideBar from "./_blocks/sidebar";
-import { createBreakpoints } from "@solid-primitives/media";
-import { Transition } from "solid-transition-group";
 import Button from "@widgets/button";
 import clsx from "clsx";
+import { type JSX, Show, createSignal } from "solid-js";
+import { Transition } from "solid-transition-group";
+import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();

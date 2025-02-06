@@ -1,6 +1,6 @@
 import TooNarrow from "@assets/animates/too-narrow";
 import { createBreakpoints } from "@solid-primitives/media";
-import { t, breakpoints } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { Show } from "solid-js";
 
 export default function (props: {

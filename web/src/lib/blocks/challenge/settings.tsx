@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { updateChallenge } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { challengeStore, setChallengeStore } from "@storage/challenge";
@@ -7,7 +8,6 @@ import { addToast } from "@storage/toast";
 import { DateTime } from "luxon";
 import { createSignal } from "solid-js";
 import { type ChallengeForm, FormBare } from "./form";
-import { handleHttpError } from "@api";
 
 export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;

@@ -3,11 +3,11 @@ import { type ComponentProps, Show, createEffect, createSignal, splitProps, untr
 import type { Markdown } from "@lib/markdown";
 import { fullTheme } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import Card from "./card";
 import LoadingTips from "./loading-tips";
 import Popover from "./popover";
-import clsx from "clsx";
 
 export type ArticleProps = {
   content: string;

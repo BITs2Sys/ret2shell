@@ -5,7 +5,7 @@ import type { Submission } from "@models/submission";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
 import { gameStore } from "@storage/game";
-import { t, breakpoints } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";

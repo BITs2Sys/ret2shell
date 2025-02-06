@@ -10,8 +10,9 @@
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
     "serve": "vite preview",
-    "lint": "biome format --write . && biome lint .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "lint": "biome lint --write .",
+    "check": "biome check --write ."
   },
   "dependencies": {
     "@ark-ui/solid": "^4.10.1",

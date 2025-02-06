@@ -1,8 +1,8 @@
 import { Progress } from "@ark-ui/solid";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { type ComponentProps, createEffect, createSignal, onCleanup, splitProps, untrack } from "solid-js";
 import type { ProgressProps } from "./progress";
-import clsx from "clsx";
 
 export default function TimeProgress(
   props: {

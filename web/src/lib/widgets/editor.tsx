@@ -1,13 +1,13 @@
+import ace from "ace-builds";
 import { type ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from "solid-js";
 import Card from "./card";
-import ace from "ace-builds";
 import "ace-builds/esm-resolver";
+import { handleHttpError } from "@api";
+import { uploadMedia } from "@api/media";
+import Spin from "@assets/animates/spin";
+import { mediaPath } from "@lib/utils/media";
 import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
-import { uploadMedia } from "@api/media";
-import { mediaPath } from "@lib/utils/media";
-import Spin from "@assets/animates/spin";
-import { handleHttpError } from "@api";
 import clsx from "clsx";
 
 export type EditorProps = {

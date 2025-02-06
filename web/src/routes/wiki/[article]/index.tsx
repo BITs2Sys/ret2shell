@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { deleteWiki, getWiki } from "@api/wiki";
 import Spin from "@assets/animates/spin";
 import type { Article as ArticleModel } from "@models/article";
@@ -13,7 +14,6 @@ import Divider from "@widgets/divider";
 import { HTTPError } from "ky";
 import { Show, createEffect, onCleanup, untrack } from "solid-js";
 import EditForm from "../_blocks/form";
-import { handleHttpError } from "@api";
 
 export default function () {
   const params = useParams();

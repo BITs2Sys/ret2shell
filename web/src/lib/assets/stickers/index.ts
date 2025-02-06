@@ -1,11 +1,11 @@
 import xdsecMascotCrying from "./xdsec-mascot-crying.webp";
-import xdsecMascotHappy from "./xdsec-mascot-happy.webp";
-import xdsecMascotNormal from "./xdsec-mascot-normal.webp";
-import xdsecMascotUnsee from "./xdsec-mascot-unsee.webp";
 import xdsecMascotDead from "./xdsec-mascot-dead.gif";
+import xdsecMascotHappy from "./xdsec-mascot-happy.webp";
 import xdsecMascotLoading from "./xdsec-mascot-loading.gif";
+import xdsecMascotNormal from "./xdsec-mascot-normal.webp";
 import xdsecMascotSparkle from "./xdsec-mascot-sparkle.gif";
 import xdsecMascotSpining from "./xdsec-mascot-spining.gif";
+import xdsecMascotUnsee from "./xdsec-mascot-unsee.webp";
 
 export type Sticker = {
   src: string;

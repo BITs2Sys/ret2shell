@@ -1,8 +1,8 @@
 import { Popover } from "@ark-ui/solid";
+import clsx from "clsx";
 import { type ComponentProps, type JSX, createSignal, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import type { ButtonProps } from "./button";
-import clsx from "clsx";
 export default function (
   props: {
     children?: JSX.Element;

@@ -4,7 +4,7 @@ import DownloadButton from "@blocks/download-button";
 import { createBreakpoints } from "@solid-primitives/media";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { t, breakpoints } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";

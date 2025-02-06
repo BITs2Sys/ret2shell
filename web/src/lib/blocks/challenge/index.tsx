@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { deleteChallenge, publishChallenge, withdrawChallenge } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { useSearchParams } from "@solidjs/router";
@@ -10,6 +11,7 @@ import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import Popover from "@widgets/popover";
 import Splitter from "@widgets/splitter";
+import clsx from "clsx";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show, createMemo, createSignal, onCleanup } from "solid-js";
@@ -24,8 +26,6 @@ import Intro from "./intro";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
-import { handleHttpError } from "@api";
-import clsx from "clsx";
 
 function BottomPanel(props: {
   onStateChange?: (challenge?: Challenge) => void;

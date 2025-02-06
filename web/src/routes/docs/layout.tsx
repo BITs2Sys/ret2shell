@@ -1,12 +1,12 @@
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
+import { Title } from "@storage/header";
+import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
+import clsx from "clsx";
 import { type JSX, Show, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
-import { t, breakpoints } from "@storage/theme";
-import { Title } from "@storage/header";
-import clsx from "clsx";
 
 export default function (props: { children?: JSX.Element }) {
   const matches = createBreakpoints(breakpoints);

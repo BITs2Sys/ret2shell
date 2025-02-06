@@ -3,8 +3,8 @@ import { gameStore, isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Progress from "@widgets/progress";
-import { createMemo, Match, Switch } from "solid-js";
 import { DateTime } from "luxon";
+import { Match, Switch, createMemo } from "solid-js";
 
 export default function () {
   const solvedChallenges = createMemo(() => gameStore.team?.history.filter((h) => !!h.challenge_id).length);
