@@ -54,7 +54,7 @@ export default function TeamDetails(props: {
   challenges: Challenge[];
 }) {
   return (
-    <ul class="xl:flex flex-col space-y-2 w-full max-w-5xl self-center py-6 hidden">
+    <ul class="lg:flex flex-col space-y-2 w-full max-w-5xl self-center py-6 hidden">
       <For each={props.topTeams}>
         {(team, index) => <TeamDetail team={team} challenges={props.challenges} index={index() + 1} />}
       </For>

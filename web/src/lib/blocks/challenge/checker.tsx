@@ -39,7 +39,7 @@ class Tmpl {
 
   // from expression to value
   // biome-ignore lint/suspicious/noExplicitAny: arguments can be any type
-    protected handleToken(token: string, callable: boolean, args: any[]) {
+  protected handleToken(token: string, callable: boolean, args: any[]) {
     if (!Object.prototype.hasOwnProperty.call(checkerCtx, token)) {
       throw new Error(`Cannot find token in context: ${token}`);
     }

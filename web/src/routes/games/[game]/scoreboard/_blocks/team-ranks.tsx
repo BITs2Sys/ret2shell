@@ -97,7 +97,7 @@ export default function TeamRanks(props: {
                 </Show>
               </span>
               <Show when={props.showTime}>
-                <span class="w-56 text-end font-bold opacity-40 hidden xl:inline-block">
+                <span class="w-56 text-end font-bold opacity-40 hidden lg:inline-block">
                   <span>{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                 </span>
               </Show>

@@ -29,7 +29,7 @@ function GlobalTitleLink() {
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
   return (
     <Link ghost href={inDocs() ? "/docs" : "/"}>
-      <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+      <LogoAnimate class="hidden lg:inline-block" width={24} height={24} />
       <span />
       <span>
         {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
@@ -176,7 +176,7 @@ export default function TitleBar() {
       </div>
       <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur-sm z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
-          <div class="xl:hidden">
+          <div class="lg:hidden">
             <Popover
               btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
               square
@@ -281,7 +281,7 @@ export default function TitleBar() {
             </Match>
           </Switch>
           <div class="w-4" />
-          <ul class="xl:flex flex-row space-x-2 items-center hidden">
+          <ul class="lg:flex flex-row space-x-2 items-center hidden">
             <Switch fallback={<LoadingTips class="opacity-60" />}>
               <Match
                 when={
@@ -307,7 +307,7 @@ export default function TitleBar() {
           </ul>
           <div class="flex-1" />
           <div class="flex flex-row space-x-2">
-            <div class="hidden xl:flex flex-row space-x-2">
+            <div class="hidden lg:flex flex-row space-x-2">
               <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
                 <Switch>
                   <Match when={gameStore.current && gameStore.current.host_type === HostType.Training}>

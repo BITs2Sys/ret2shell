@@ -27,28 +27,15 @@ export default function () {
   return (
     <>
       <Title page={t("admin.statistics.title")} route="/admin/statistics" />
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6">
-        <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
-          <LogoAnimate class="w-36 h-36" />
-          <h1 class="text-5xl font-bold">{platformStore.config.name || t("platform.name")!}</h1>
+      <div class="flex-1 grid grid-cols-1 md:grid-cols-6 p-3 lg:p-6 gap-3 lg:gap-6">
+        <div class="flex md:col-span-6 lg:col-span-3 items-center justify-start space-x-12 px-3 lg:px-6 xl:px-9">
+          <LogoAnimate class="m-0 w-16 h-16 md:w-32 md:h-32 xl:w-36 xl:h-36" />
+          <h1 class="ml-6 text-2xl md:text-4xl xl:text-5xl font-bold">
+            {platformStore.config.name || t("platform.name")!}
+          </h1>
         </div>
-        <div class="col-span-1 h-48 p-6 flex flex-row items-center space-x-8">
-          <div class="flex-1 flex flex-col space-y-4">
-            <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl text-info">
-                {statistics()?.games.filter((g) => g.host_type === HostType.Training).length}
-              </span>
-              <span class="opacity-60">{t("admin.statistics.trainings")}</span>
-            </div>
-            <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl text-error">
-                {statistics()?.games.filter((g) => g.host_type === HostType.Game).length}
-              </span>
-              <span class="opacity-60">{t("admin.statistics.totalGames")}</span>
-            </div>
-          </div>
+        <Divider class="flex col-span-1 md:col-span-6 lg:hidden" />
+        <div class="col-span-1 md:col-span-3 xl:col-span-3 h-48 p-3 xl:p-6 dir-ltr lg:dir-rtl flex flex-row items-center self-center max-md:justify-self-center max-md:min-w-[50vw] space-x-8">
           <div class="h-full aspect-square flex items-center justify-center">
             <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
               <Chart
@@ -177,10 +164,26 @@ export default function () {
               />
             </Show>
           </div>
+          <div class="flex flex-col space-y-4 dir-ltr">
+            <div class="flex flex-row space-x-4 items-center flex-1">
+              <span class="icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
+              <span class="font-bold text-3xl text-info">
+                {statistics()?.games.filter((g) => g.host_type === HostType.Training).length}
+              </span>
+              <span class="opacity-60">{t("admin.statistics.trainings")}</span>
+            </div>
+            <div class="flex flex-row space-x-4 items-center flex-1">
+              <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
+              <span class="font-bold text-3xl text-error">
+                {statistics()?.games.filter((g) => g.host_type === HostType.Game).length}
+              </span>
+              <span class="opacity-60">{t("admin.statistics.totalGames")}</span>
+            </div>
+          </div>
         </div>
-        <Divider class="hidden xl:flex col-span-3" />
-        <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
-          <div class="h-full aspect-square flex items-center justify-center">
+        <Divider class="hidden col-span-6 lg:flex" />
+        <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
+          <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
             <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
@@ -235,8 +238,8 @@ export default function () {
             </div>
           </div>
         </div>
-        <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
-          <div class="h-full aspect-square flex items-center justify-center">
+        <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
+          <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
             <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
@@ -298,8 +301,8 @@ export default function () {
             </div>
           </div>
         </div>
-        <div class="col-span-1 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center space-x-8">
-          <div class="h-full aspect-square flex items-center justify-center">
+        <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
+          <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
             <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
@@ -361,7 +364,7 @@ export default function () {
             </div>
           </div>
         </div>
-        <div class="col-span-1 xl:col-span-3 min-h-64 lg:min-h-80 p-3 lg:p-6 flex flex-row items-center">
+        <div class="col-span-1 md:col-span-6 min-h-64 lg:min-h-80 p-3 lg:p-6 flex flex-row items-center">
           <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
             <Chart
               option={{

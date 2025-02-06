@@ -182,7 +182,7 @@ export default function () {
           onPageChange={(page) => setSearchParams({ page: page.page })}
         />
 
-        <NarrowTips breakpoint="lg" />
+        <NarrowTips breakpoint="md" />
       </div>
     </>
   );

@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getGameScoreboard } from "@api/game";
 import type { Team } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -7,17 +8,16 @@ import { accountStore } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
 import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { t, breakpoints } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Select from "@widgets/select";
+import clsx from "clsx";
 import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
 import TeamSolves from "./_blocks/team-solves";
-import { handleHttpError } from "@api";
-import clsx from "clsx";
 
 function ChartOperations(props: {
   onRefresh?: () => void;
@@ -98,10 +98,6 @@ export default function () {
   const selectedInstituteId = createMemo(() => Number.parseInt((searchParams.institute as string) || "NaN") || null);
   const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
-  const breakpoints = {
-    xl: "1440px",
-    lg: "1024px",
-  };
   const matches = createBreakpoints(breakpoints);
 
   onMount(async () => {
@@ -207,17 +203,17 @@ export default function () {
   return (
     <>
       <Title page={t("game.scoreboard.title")} route={`/games/${gameStore.current?.id}/scoreboard`} />
-      <div class="flex flex-col xl:flex-row flex-1 min-w-min">
+      <div class="flex flex-col lg:flex-row flex-1 min-w-min">
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={topTeams().length > 0}>
           <div
             class={clsx(
-              "xl:sticky w-full top-0 left-0",
+              "lg:sticky w-full top-0 left-0",
               showChallengeDetail()
-                ? "xl:w-[20vw] backdrop-blur-sm border-r border-r-layer-content/10"
+                ? "lg:w-[30vw] backdrop-blur-sm border-r border-r-layer-content/10"
                 : showLargePanel()
-                  ? "xl:w-[75vw] justify-center"
-                  : "xl:w-[40vw]",
+                  ? "lg:w-[75vw] justify-center"
+                  : "lg:w-[40vw]",
               "transition-[height,width] duration-500 p-3 lg:p-6 flex flex-col space-y-2 shrink-0"
             )}
           >
@@ -278,7 +274,7 @@ export default function () {
                     square
                     level="info"
                     onClick={() => setShowLargePanel(!showLargePanel())}
-                    class="hidden xl:flex"
+                    class="hidden lg:flex"
                     size={showChallengeDetail() ? "sm" : "md"}
                   >
                     <Show
@@ -293,7 +289,7 @@ export default function () {
                     square
                     level="info"
                     onClick={() => setShowPlane(!showPlane())}
-                    class="hidden xl:flex"
+                    class="hidden lg:flex"
                     size={showChallengeDetail() ? "sm" : "md"}
                   >
                     <Show when={showPlane()} fallback={<span class="icon-[fluent--airplane-20-regular] w-5 h-5" />}>
@@ -307,7 +303,7 @@ export default function () {
                   level="info"
                   size={showChallengeDetail() ? "sm" : "md"}
                   onClick={() => setShowChallengeDetail(!showChallengeDetail())}
-                  class="hidden xl:flex"
+                  class="hidden lg:flex"
                   disabled={!canAccessChallenges()[0] && !inArchived()}
                 >
                   <Show when={showChallengeDetail()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
@@ -360,7 +356,7 @@ export default function () {
             when={showChallengeDetail()}
             fallback={
               <>
-                <h1 class="text-3xl font-bold py-6 text-center hidden xl:inline-block">{t("game.scoreboard.title")}</h1>
+                <h1 class="text-3xl font-bold py-6 text-center hidden lg:inline-block">{t("game.scoreboard.title")}</h1>
                 <TeamRanks
                   teams={teams()}
                   page={page()}

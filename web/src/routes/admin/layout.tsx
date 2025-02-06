@@ -3,7 +3,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { t, breakpoints } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { createSignal, Show, type JSX } from "solid-js";
 import SideBar from "./_blocks/sidebar";
@@ -27,9 +27,6 @@ export default function (props: { children?: JSX.Element }) {
     navigate("/sigtrap/403");
     return null;
   }
-  const breakpoints = {
-    lg: "1024px",
-  };
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (

@@ -6,14 +6,12 @@ import { type JSX, Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 import clsx from "clsx";
+import { breakpoints } from "@storage/theme";
 
 export default function (props: { children?: JSX.Element }) {
   onCleanup(() => {
     setGameStore({ current: null, games: [], preload: null });
   });
-  const breakpoints = {
-    lg: "1024px",
-  };
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (
