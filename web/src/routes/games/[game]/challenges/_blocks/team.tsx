@@ -2,6 +2,7 @@ import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
+import Link from "@widgets/link";
 import Progress from "@widgets/progress";
 import { DateTime } from "luxon";
 import { Match, Switch, createMemo } from "solid-js";
@@ -19,12 +20,17 @@ export default function () {
           </Button>
         </Match>
         <Match when={gameStore.team}>
-          <Button ghost class="w-full" justify="start">
+          <Link
+            ghost
+            class="w-full"
+            justify="start"
+            href={`/games/${gameStore.current?.id}/teams/${gameStore.team?.id}`}
+          >
             <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
             <span class="flex-1 text-start truncate">{gameStore.team?.name}</span>
             <span class="text-success">{gameStore.team?.score} pts</span>
             <span class="text-warning">#{gameStore.rank}</span>
-          </Button>
+          </Link>
           <Progress
             class="absolute bottom-2 left-4 right-4"
             max={1}
