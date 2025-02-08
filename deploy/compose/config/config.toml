@@ -58,7 +58,7 @@ cleanup_interval  = 60                              # ? in seconds
 enabled  = true
 # ! Please ensure that `external` could be visited by the k8s cluster.
 external = "localhost:5000" # ? used for k8s pulling.
-insecure = false
+insecure = true
 server   = "registry:5000"  # ? used for platform pushing
 # username =
 # password =

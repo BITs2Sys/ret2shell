@@ -1,7 +1,7 @@
 import { Title } from "@storage/header";
+import { t } from "@storage/theme";
 import KeyGames from "./_blocks/key-games";
 import OtherGames from "./_blocks/other-games";
-import { t } from "@storage/theme";
 
 export default function () {
   return (

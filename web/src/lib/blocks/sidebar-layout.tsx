@@ -1,4 +1,5 @@
 import { createBreakpoints } from "@solid-primitives/media";
+import { breakpoints } from "@storage/theme";
 import { type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
@@ -11,10 +12,6 @@ export type SidebarLayoutProps = {
 };
 
 export default function SidebarLayout(props: SidebarLayoutProps) {
-  const breakpoints = {
-    xl: "1440px",
-    lg: "1024px",
-  };
   const matches = createBreakpoints(breakpoints);
   return (
     <div class="flex-1 flex flex-row">

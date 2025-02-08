@@ -375,6 +375,13 @@ export default function (props: {
           placeholder={t("game.challenge.hammerInput")}
           lang="markdown"
           onValueChanged={(v) => setChat(v)}
+          commands={[
+            {
+              name: "send",
+              bindKey: "Ctrl+Enter",
+              exec: handleSendChat,
+            },
+          ]}
         />
       </div>
       <div ref={chatBottomEl!} />

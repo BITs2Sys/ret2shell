@@ -1,18 +1,18 @@
+import { handleHttpError } from "@api";
 import { type GameStatisticsExport, getGameStatistics, getGameStatisticsExport } from "@api/game";
-import { gameStore } from "@storage/game";
-import { t } from "@storage/theme";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
-import logo from "@assets/logo.svg";
-import { mediaPath } from "@lib/utils/media";
-import Divider from "@widgets/divider";
 import Spin from "@assets/animates/spin";
-import Chart from "@widgets/chart";
+import logo from "@assets/logo.svg";
+import XLSX from "@e965/xlsx";
+import { mediaPath } from "@lib/utils/media";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
+import { gameStore } from "@storage/game";
+import { t } from "@storage/theme";
 import Button from "@widgets/button";
+import Chart from "@widgets/chart";
+import Divider from "@widgets/divider";
 import Select from "@widgets/select";
-import XLSX from "@e965/xlsx";
-import { handleHttpError } from "@api";
+import { Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function GameStatistics(props: { inGame?: boolean }) {
   const [loading, setLoading] = createSignal(false);
@@ -209,7 +209,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
   return (
     <>
       <div class="flex-1 flex flex-col p-3 lg:p-6 gap-3 lg:gap-6 w-full">
-        <div class="hidden xl:flex items-center justify-start space-x-12 px-12">
+        <div class="hidden lg:flex items-center justify-start space-x-12 px-12">
           <img class="w-24 h-24" src={gameStore.current?.logo ? mediaPath(gameStore.current!.logo) : logo} alt="CTF" />
           <h1 class="text-5xl font-bold flex-1 truncate">{gameStore.current?.name}</h1>
           <h2 class="text-5xl font-bold">{t("game.statistics.title")}</h2>
@@ -241,8 +241,8 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           </Button>
         </div>
         <Divider />
-        <div class="flex flex-col xl:flex-row space-x-2 p-3">
-          <div class="xl:flex-1 flex flex-col space-y-2 lg:space-y-4">
+        <div class="flex flex-col lg:flex-row space-x-2 p-3">
+          <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
@@ -258,7 +258,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
               <span class="opacity-60">TEAMS</span>
             </div>
           </div>
-          <div class="xl:flex-1 flex flex-col space-y-2 lg:space-y-4">
+          <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
@@ -274,7 +274,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
               <span class="opacity-60">SUBMITS</span>
             </div>
           </div>
-          <div class="xl:flex-1 flex flex-col space-y-2 lg:space-y-4">
+          <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>

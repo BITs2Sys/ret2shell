@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import {
   getChallenge,
   getChallengeAttachments,
@@ -11,7 +12,6 @@ import type { Submission } from "@models/submission";
 import { createStore } from "solid-js/store";
 import { gameStore } from "./game";
 import { t } from "./theme";
-import { handleHttpError } from "@api";
 
 type FileType = "static" | "mapped" | "checker";
 type Attachment = { file: string; folder: FileType };

@@ -2,6 +2,7 @@ import { isMobile } from "@solid-primitives/platform";
 import { mergeRefs } from "@solid-primitives/refs";
 import { type Size, createElementSize } from "@solid-primitives/resize-observer";
 import { fullTheme } from "@storage/theme";
+import clsx from "clsx";
 import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from "echarts/charts";
 import {
   DataZoomComponent,
@@ -21,7 +22,6 @@ import { passiveSupport } from "passive-events-support/src/utils";
 import { type JSX, type Ref, createEffect, on, onCleanup, onMount } from "solid-js";
 import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
-import clsx from "clsx";
 
 use([
   LabelLayout,

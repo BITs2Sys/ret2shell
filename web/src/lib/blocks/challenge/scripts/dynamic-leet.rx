@@ -4,11 +4,11 @@
 use ret2api::audit;
 use ret2api::utils;
 
-/// 隐写密钥
-const ENCRYPT_KEY = "%RANDOM:16%";
-/// FLAG 前缀
-const PREFIX = "VNCTF";
-/// 有意义的 FLAG 内容，根据替换相似字符实现动态隐写
+/// the flag encryption key
+const ENCRYPT_KEY = "%RANDSTR(16)%";
+/// the flag prefix, the game name for example, `flag` means the flag will be `flag{...}`
+const PREFIX = "flag";
+/// the flag template (readable recommended), used to generate the correct flag content
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// 检查用户提交的 FLAG

@@ -2,6 +2,7 @@ import type { Article } from "@models/article";
 import type { Audit } from "@models/audit";
 import type { Challenge, ChallengeEnv, CommitHistory } from "@models/challenge";
 import type { Chat, ChatSession } from "@models/chat";
+import type { RegistryConfig } from "@models/config";
 import type { Game, HostType } from "@models/game";
 import type { Instance } from "@models/instance";
 import type { Submission } from "@models/submission";
@@ -13,7 +14,6 @@ import type { DateTime } from "luxon";
 import api, { api_root } from ".";
 import type { Extra } from "../models/extra";
 import type { Hint } from "../models/hint";
-import type { RegistryConfig } from "@models/config";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (

@@ -9,9 +9,6 @@ export type AuthConfig = {
   signing_key: string;
   buffer_time: number;
   expires_time: number;
-  oauth_keys: {
-    [key: string]: OAuthKey;
-  };
 };
 export type AutomateConfig = {
   enabled: boolean;

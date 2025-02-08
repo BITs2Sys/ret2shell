@@ -1,4 +1,4 @@
-import Checkbox from "@widgets/checkbox";
+import { handleHttpError } from "@api";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
@@ -8,10 +8,10 @@ import { platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
+import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
-import { handleHttpError } from "@api";
 
 type PlatformConfigForm = {
   name?: string;

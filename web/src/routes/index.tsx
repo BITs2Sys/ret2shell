@@ -167,7 +167,7 @@ export default function () {
           {/*     class="h-full min-h-full snap-center relative overflow-scroll" */}
           {/*   > */}
           {/*     <Calendar /> */}
-          {/*     <NarrowTips breakpoint="lg" /> */}
+          {/*     <NarrowTips breakpoint="md" /> */}
           {/*   </section> */}
           {/* </Show> */}
         </div>

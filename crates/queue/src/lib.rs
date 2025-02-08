@@ -49,7 +49,7 @@ impl Queue {
         name: subject.clone(),
         max_messages: 10_000,
         consumer_limits: Some(async_nats::jetstream::stream::ConsumerLimits {
-          inactive_threshold: Duration::from_secs(60),
+          inactive_threshold: Duration::from_secs(120),
           max_ack_pending: 3,
         }),
         ..Default::default()

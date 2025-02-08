@@ -2,15 +2,16 @@ import { handleHttpError } from "@api";
 import { getGameAuditLogs, getGameSubmissions, updateGameAuditLog } from "@api/game";
 import { type Audit, AuditState } from "@models/audit";
 import type { Submission } from "@models/submission";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
 import { gameStore } from "@storage/game";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 
 export function AuditList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -74,6 +75,7 @@ export function AuditList() {
       handleHttpError(err as Error, t("form.saveFailed")!);
     }
   }
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <div class="flex-1 flex flex-col">
@@ -151,7 +153,11 @@ export function AuditList() {
               >
                 <span class="icon-[fluent--emoji-angry-20-regular] w-5 h-5" />
               </Button>
-              <span>{audit.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+              <span>
+                <Switch fallback={audit.created_at.toFormat("MM-dd HH:mm:ss")}>
+                  <Match when={matches.xl}>{audit.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                </Switch>
+              </span>
             </div>
           )}
         </For>
@@ -198,6 +204,7 @@ export function SubmissionList(props: {
   onCleanup(() => {
     clearInterval(timer);
   });
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <div class="flex-1 flex flex-col">
@@ -254,7 +261,11 @@ export function SubmissionList(props: {
                       : t("game.admin.monitor.notSolved")}
                 </span>
               </Tag>
-              <span>{submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+              <span>
+                <Switch fallback={submission.created_at.toFormat("MM-dd HH:mm:ss")}>
+                  <Match when={matches.xl}>{submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                </Switch>
+              </span>
             </div>
           )}
         </For>

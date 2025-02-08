@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getUser, getUserList, updateUser } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { type User, permissionToIcon } from "@models/user";
@@ -14,7 +15,6 @@ import Select from "@widgets/select";
 import Tag from "@widgets/tag";
 import { For, Show, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import Form from "./_blocks/form";
-import { handleHttpError } from "@api";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";
 

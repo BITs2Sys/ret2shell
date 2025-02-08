@@ -1,13 +1,13 @@
+import { handleHttpError } from "@api";
 import { getCaptcha } from "@api/account";
 import Spin from "@assets/animates/spin";
 import type { Captcha } from "@models/captcha";
 import { type FormStore, type Maybe, setValue } from "@modular-forms/solid";
+import { base64 } from "@scure/base";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input, { type TextInputProps } from "@widgets/input";
-import { base64 } from "@scure/base";
 import { type ComponentProps, createEffect, createSignal, splitProps, untrack } from "solid-js";
-import { handleHttpError } from "@api";
 
 export default function (
   props: TextInputProps &

@@ -1,13 +1,13 @@
-import LogoAnimate from "@assets/animates/logo-animate";
 import { Reverier } from "@assets/animates/Reverier";
+import LogoAnimate from "@assets/animates/logo-animate";
+import thanksForUsingMySoftware from "@assets/imgs/thanks-for-using-my-software.svg";
+import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { fullTheme, t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show } from "solid-js";
-import thanksForUsingMySoftware from "@assets/imgs/thanks-for-using-my-software.svg";
-import { Title } from "@storage/header";
 
 export default function () {
   return (

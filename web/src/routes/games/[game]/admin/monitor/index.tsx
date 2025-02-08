@@ -48,7 +48,7 @@ export default function () {
             <AuditList />
           </Match>
         </Switch>
-        <NarrowTips breakpoint="xl" />
+        <NarrowTips breakpoint="md" />
       </div>
     </>
   );

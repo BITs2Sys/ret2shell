@@ -2,6 +2,7 @@ import { getGameIntroduction, updateGame, updateGameIntroduction } from "@api/ga
 import { uploadMedia } from "@api/media";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
+import EditFlag from "@assets/icons/edit-flag";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
 import type { Article as ArticleModel } from "@models/article";
@@ -26,14 +27,13 @@ import Link from "@widgets/link";
 import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
-import EditFlag from "@assets/icons/edit-flag";
 
+import { handleHttpError } from "@api";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { useSearchParams } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import IntroForm from "./_blocks/intro-form";
-import { handleHttpError } from "@api";
 
 function BannedWarning() {
   const [close, setClose] = createSignal(false);

@@ -151,3 +151,11 @@ body {
   pointer-events: auto;
   visibility: visible !important;
 }
+
+@utility dir-ltr {
+  direction: ltr;
+}
+
+@utility dir-rtl {
+  direction: rtl;
+}

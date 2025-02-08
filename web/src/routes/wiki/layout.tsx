@@ -1,16 +1,14 @@
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
+import { breakpoints } from "@storage/theme";
 import { refreshWikiToc } from "@storage/wiki";
 import Button from "@widgets/button";
+import clsx from "clsx";
 import { type JSX, Show, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
-import clsx from "clsx";
 
 export default function (props: { children?: JSX.Element }) {
-  const breakpoints = {
-    lg: "1024px",
-  };
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
   refreshWikiToc();

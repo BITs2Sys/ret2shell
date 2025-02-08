@@ -1,19 +1,24 @@
+import ace from "ace-builds";
 import { type ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from "solid-js";
 import Card from "./card";
-import ace from "ace-builds";
 import "ace-builds/esm-resolver";
+import { handleHttpError } from "@api";
+import { uploadMedia } from "@api/media";
+import Spin from "@assets/animates/spin";
+import { mediaPath } from "@lib/utils/media";
 import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
-import { uploadMedia } from "@api/media";
-import { mediaPath } from "@lib/utils/media";
-import Spin from "@assets/animates/spin";
-import { handleHttpError } from "@api";
 import clsx from "clsx";
 
 export type EditorProps = {
   value?: string;
   lang?: string;
   onValueChanged?: (value: string) => void;
+  commands?: {
+    name: string;
+    bindKey: string | { mac?: string | undefined; win?: string | undefined };
+    exec: () => void;
+  }[];
   onBlur?: () => void;
   readonly?: boolean;
   placeholder?: string;
@@ -40,6 +45,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     "form",
     "error",
     "onFocusIn",
+    "commands",
   ]);
   const [imageFile, setImageFile] = createSignal<File | null>(null);
   const [uploading, setUploading] = createSignal(false);
@@ -97,6 +103,15 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     editor.on("focus", () => {
       editorProps.onFocusIn?.();
     });
+
+    for (const command of editorProps.commands || []) {
+      editor.commands.addCommand({
+        name: command.name,
+        bindKey: command.bindKey,
+        exec: command.exec,
+      });
+    }
+
     editor.container.addEventListener("paste", (e) => {
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -183,6 +198,7 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
     "error",
     "onFocusIn",
     "lineNumbers",
+    "commands",
   ]);
   const [focused, setFocused] = createSignal(false);
   return (

@@ -43,6 +43,10 @@ export default function Tabs(props: {
       });
     }, 100);
   }
+  function closeChallengeTab(challengeId: number) {
+    if (challengeId === selectedChallengeId()) setSearchParams({ challenge: null });
+    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challengeId)]);
+  }
   createEffect(() => {
     if (challengeStore.current) {
       untrack(() => {
@@ -146,30 +150,36 @@ export default function Tabs(props: {
           <For each={challengeHistory()}>
             {(challenge) => (
               <div class="fade-group-dive-left flex flex-row">
-                <Link
-                  href={`${props.baseUrl}?challenge=${challenge.id}`}
-                  onClick={() => setSearchParams({ challenge: challenge.id })}
+                <Button
+                  // href={`${props.baseUrl}?challenge=${challenge.id}`}
+                  onClick={() => {
+                    setSearchParams({ challenge: challenge.id });
+                  }}
+                  onMouseUp={(e) => {
+                    if (e.button === 1) closeChallengeTab(challenge.id);
+                  }}
                   id={`challenge-${challenge.id}`}
-                  active={challenge.id === selectedChallengeId() && inCreate() === false}
+                  // active={challenge.id === selectedChallengeId() && inCreate() === false}
                   ghost
-                  class="max-w-48 rounded-r-none"
+                  class={clsx(
+                    "max-w-48",
+                    "pr-0",
+                    challenge.id === selectedChallengeId() && inCreate() === false && "btn-active"
+                  )}
                 >
                   <span class="icon-[fluent--code-20-regular] w-5 h-5" />
                   <span class="truncate flex-1 text-left">{challenge.name}</span>
-                </Link>
-                <Button
-                  class={clsx(
-                    "!rounded-l-none",
-                    challenge.id === selectedChallengeId() && inCreate() === false && "btn-active"
-                  )}
-                  square
-                  ghost
-                  onClick={() => {
-                    if (challenge.id === selectedChallengeId()) setSearchParams({ challenge: null });
-                    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challenge.id)]);
-                  }}
-                >
-                  <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                  <Button
+                    class="!rounded-l-none"
+                    square
+                    ghost
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeChallengeTab(challenge.id);
+                    }}
+                  >
+                    <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                  </Button>
                 </Button>
               </div>
             )}

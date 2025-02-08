@@ -1,28 +1,28 @@
-import { fullTheme, t } from "@storage/theme";
-import Button from "@widgets/button";
-import Card from "@widgets/card";
-import Popover from "@widgets/popover";
-import Select from "@widgets/select";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
-import singleNodeDirect from "./scripts/single_node_direct.rx";
-import multiNodeDirect from "./scripts/multi_node_direct.rx";
-import { EditorBare } from "@widgets/editor";
-import { addToast } from "@storage/toast";
 import { handleHttpError } from "@api";
-import Input from "@widgets/input";
-import Splitter from "@widgets/splitter";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { AnsiUp } from "ansi_up";
-import Divider from "@widgets/divider";
-import { getPlatformConfig } from "@api/platform";
-import type { Config } from "@models/config";
 import {
   deleteDefaultNodeSelector,
   deleteGlobalTrafficScript,
   updateDefaultNodeSelector,
   updateGlobalTrafficScript,
 } from "@api/cluster";
+import { getPlatformConfig } from "@api/platform";
+import type { Config } from "@models/config";
 import { Title } from "@storage/header";
+import { fullTheme, t } from "@storage/theme";
+import { addToast } from "@storage/toast";
+import Button from "@widgets/button";
+import Card from "@widgets/card";
+import Divider from "@widgets/divider";
+import { EditorBare } from "@widgets/editor";
+import Input from "@widgets/input";
+import Popover from "@widgets/popover";
+import Select from "@widgets/select";
+import Splitter from "@widgets/splitter";
+import { AnsiUp } from "ansi_up";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { Show, createEffect, createSignal, onMount } from "solid-js";
+import multiNodeDirect from "./scripts/multi_node_direct.rx";
+import singleNodeDirect from "./scripts/single_node_direct.rx";
 
 type PresetTraffic = "single-node-direct" | "multi-node-direct";
 

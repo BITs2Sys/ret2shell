@@ -5,11 +5,11 @@ import vidarTeam from "@assets/brands/vidar.svg";
 import cnssMascot from "@assets/imgs/cnss-mascot.webp";
 import vidarMascot from "@assets/imgs/vidar-mascot.webp";
 import xdsecMascot from "@assets/imgs/xdsec-mascot.webp";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import SakanaWidget from "sakana-widget";
 import { onMount } from "solid-js";
-import { Title } from "@storage/header";
 
 export default function () {
   const xdsec = SakanaWidget.getCharacter("takina");

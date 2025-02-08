@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getGames } from "@api/game";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
@@ -19,11 +20,10 @@ import Link from "@widgets/link";
 import Picture from "@widgets/picture";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import CreateGame from "./create";
-import { handleHttpError } from "@api";
-import clsx from "clsx";
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();

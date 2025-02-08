@@ -8,10 +8,11 @@ use ret2api::regex;
 const ENABLE_REGEX = false;
 /// 大小写敏感
 const CASE_SENSITIVE = true;
-/// FLAG 前缀
-const PREFIX = "VNCTF";
-/// 静态 FLAG 或正则
-const TEMPLATE = "%RANDOM:32%_genshin_impact";
+/// the flag prefix, the game name for example, `flag` means the flag will be `flag{...}`
+const PREFIX = "flag";
+/// the flag template (readable recommended), used to generate the correct flag content
+/// if regex enabled, the template is like `^you_.+_impact$`
+const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// 检查用户提交的 FLAG
 ///

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
@@ -25,18 +23,12 @@ pub struct Config {
   pub signing_key: String,
   pub buffer_time: i64,
   pub expires_time: i64,
-  pub oauth_keys: HashMap<String, OAuthKey>,
 }
 
 impl Config {
   pub fn desensitize(self) -> Self {
     Config {
       signing_key: "".to_owned(),
-      oauth_keys: self
-        .oauth_keys
-        .into_iter()
-        .map(|(k, v)| (k, v.desensitize()))
-        .collect(),
       ..self
     }
   }

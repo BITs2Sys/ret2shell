@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
 
@@ -19,13 +19,13 @@ import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
 
+import { handleHttpError } from "@api";
 import Tabs from "@blocks/challenge/tabs";
 import { createBreakpoints } from "@solid-primitives/media";
 import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
 import Button from "@widgets/button";
-import { Transition } from "solid-transition-group";
-import { handleHttpError } from "@api";
 import clsx from "clsx";
+import { Transition } from "solid-transition-group";
 
 export default function () {
   const navigate = useNavigate();
@@ -115,10 +115,6 @@ export default function () {
     }
     setCreating(false);
   }
-  const breakpoints = {
-    lg: "1024px",
-    xl: "1440px",
-  };
   const matches = createBreakpoints(breakpoints);
   const [showLeftSidebar, setShowLeftSidebar] = createSignal(false);
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);

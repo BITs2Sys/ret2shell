@@ -80,7 +80,7 @@ export default function () {
             )}
           </For>
         </div>
-        <NarrowTips breakpoint="lg" />
+        <NarrowTips breakpoint="md" />
       </div>
     </>
   );

@@ -1,17 +1,17 @@
+import { handleHttpError } from "@api";
 import { deleteBulletin, getBulletin } from "@api/bulletin";
 import Spin from "@assets/animates/spin";
 import type { Article as ArticleModel } from "@models/article";
 import { Permission } from "@models/user";
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
+import { HTTPError } from "ky";
 import { Show, createSignal, onMount } from "solid-js";
 import EditForm from "../_blocks/form";
-import { handleHttpError } from "@api";
-import { HTTPError } from "ky";
-import { Title } from "@storage/header";
 
 export default function () {
   const params = useParams();

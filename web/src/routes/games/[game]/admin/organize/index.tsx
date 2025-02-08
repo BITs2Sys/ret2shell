@@ -122,7 +122,7 @@ export default function () {
         <div class="h-12" />
         <AdministratorsManagement />
       </div>
-      <NarrowTips breakpoint="lg" />
+      <NarrowTips breakpoint="md" />
     </div>
   );
 }

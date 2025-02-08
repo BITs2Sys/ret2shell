@@ -125,7 +125,7 @@ export default function ChallengeList(props: {
               <Show when={props.inGame}>
                 <div class="flex flex-row space-x-1">
                   <Button
-                    class="my-1"
+                    class="my-1 bg-layer"
                     size="sm"
                     title={t("game.challenge.hideSolved")}
                     onClick={() => {
@@ -141,7 +141,7 @@ export default function ChallengeList(props: {
                     <span>{t("game.challenge.solved")}</span>
                   </Button>
                   <Button
-                    class="my-1"
+                    class="my-1 bg-layer"
                     size="sm"
                     title={t("game.challenge.hideArchived")}
                     onClick={() => {

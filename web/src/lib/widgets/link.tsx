@@ -1,8 +1,8 @@
 import Spin from "@assets/animates/spin";
 import { A, useMatch } from "@solidjs/router";
+import clsx from "clsx";
 import { type ComponentProps, type JSX, Show, children } from "solid-js";
 import type { ButtonProps } from "./button";
-import clsx from "clsx";
 
 export type LinkProps = {
   activeMatch?: "exact" | "partial";

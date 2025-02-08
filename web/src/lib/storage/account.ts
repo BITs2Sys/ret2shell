@@ -1,8 +1,8 @@
 import { getInstitutes, getProfile } from "@api/account";
 import type { Institute } from "@models/institute";
 import type { Permission, Token, User } from "@models/user";
-import { makePersisted } from "@solid-primitives/storage";
 import { base64urlnopad } from "@scure/base";
+import { makePersisted } from "@solid-primitives/storage";
 import { createStore } from "solid-js/store";
 
 export const [accountStore, setAccountStore] = makePersisted(

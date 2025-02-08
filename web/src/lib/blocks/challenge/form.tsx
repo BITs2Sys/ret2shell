@@ -1,14 +1,14 @@
 import type { Challenge } from "@models/challenge";
 import { createForm, getValue, required, setValue } from "@modular-forms/solid";
+import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
+import Select from "@widgets/select";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show, createEffect, untrack } from "solid-js";
 import ScorePicker from "./score-picker";
-import Select from "@widgets/select";
-import { gameStore } from "@storage/game";
 
 export type ChallengeForm = {
   name: string;
@@ -89,7 +89,7 @@ export function FormBare(props: {
         )}
       </Field>
       <Show when={props.inGame}>
-        <div class="flex space-y-2 xl:space-x-2 xl:space-y-0 flex-col xl:flex-row">
+        <div class="flex space-y-2 lg:space-x-2 lg:space-y-0 flex-col lg:flex-row">
           <Field name="initial" type="number">
             {(initialField, initialProps) => (
               <Field name="minimum" type="number">

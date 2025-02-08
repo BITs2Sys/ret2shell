@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getChallengeCommitHistory, getChallengeSubmission } from "@api/game";
 import type { Challenge, CommitHistory } from "@models/challenge";
 import type { Submission } from "@models/submission";
@@ -6,12 +7,11 @@ import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
-import Pagination from "@widgets/pagination";
 import LoadingTips from "@widgets/loading-tips";
+import Pagination from "@widgets/pagination";
+import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
-import { handleHttpError } from "@api";
-import Tag from "@widgets/tag";
 
 function StatisticsPanel() {
   const [solves, setSolves] = createSignal([] as Submission[]);

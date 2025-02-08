@@ -436,6 +436,13 @@ export default function () {
                   </Button>
                 </div>
                 <EditorBare
+                  commands={[
+                    {
+                      name: "send",
+                      bindKey: "Ctrl+Enter",
+                      exec: handleSendChat,
+                    },
+                  ]}
                   class={clsx("bg-layer rounded-lg", editorExpanded() ? "h-64" : "h-16")}
                   value={chat()}
                   placeholder="MARKDOWN"

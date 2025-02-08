@@ -1,16 +1,17 @@
 import { api_root, handleHttpError } from "@api";
 import { getPlatformLogs } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
+import { createBreakpoints } from "@solid-primitives/media";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { For, Match, Show, Switch, createSignal, onCleanup, onMount } from "solid-js";
 
 type Log = {
   timestamp: string;
@@ -116,6 +117,7 @@ export default function () {
         return "text-layer-content";
     }
   }
+  const matches = createBreakpoints(breakpoints);
   let bottomDiv: HTMLDivElement;
   return (
     <>
@@ -157,19 +159,34 @@ export default function () {
         <div class="flex-1 flex flex-col p-3 lg:p-6">
           <For each={logs()}>
             {(log) => (
-              <div class="h-8 flex flex-row items-center space-x-2 border-b border-b-layer-content/10 overflow-hidden min-w-0">
-                <span class={clsx("w-16", getColor(log.level))}>{log.level}</span>
-                <span class="opacity-40">[{log.target}]</span>
-                {log.span?.name && <span class="opacity-60">[{log.span.name}]</span>}
-                {log.span?.method && <span class="opacity-60">[{log.span.method}]</span>}
-                {log.span?.from && <span class="opacity-60">[{log.span.from}]</span>}
-                {log.span?.uri && <span class="opacity-60">[{log.span.uri}]</span>}
-                <span class={clsx("flex-1 truncate w-0", getContentColor(log.level))} title={log.fields.message}>
-                  {log.fields.message}
-                </span>
-                <span class="opacity-60 font-bold">
-                  {DateTime.fromISO(log.timestamp).toFormat("yyyy-MM-dd HH:mm:ss")}
-                </span>
+              <div
+                class={clsx(
+                  "group min-h-8 flex flex-row items-start h-auto hover:bg-layer-content/15",
+                  "px-2 py-1 items-center border-b border-b-layer-content/10 overflow-hidden min-w-0"
+                )}
+              >
+                <span class={clsx("w-16 mr-2 inline-block", getColor(log.level))}>{log.level}</span>
+                <div class="grid grid-cols-[auto_1fr_auto] group-hover:block w-full">
+                  <span class="opacity-40 mr-2">[{log.target}]</span>
+                  {log.span?.name && <span class="opacity-60">[{log.span.name}]</span>}
+                  {log.span?.method && <span class="opacity-60">[{log.span.method}]</span>}
+                  {log.span?.from && <span class="opacity-60">[{log.span.from}]</span>}
+                  {log.span?.uri && <span class="opacity-60">[{log.span.uri}]</span>}
+                  <span
+                    class={clsx("truncate group-hover:whitespace-normal", getContentColor(log.level))}
+                    // title={log.fields.message}
+                  >
+                    {log.fields.message}
+                  </span>
+                  <span class="opacity-60 font-bold ml-2 group-hover:float-right">
+                    <Switch fallback={DateTime.fromISO(log.timestamp).toFormat("HH:mm:ss")}>
+                      <Match when={matches.xl}>{DateTime.fromISO(log.timestamp).toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.lg}>{DateTime.fromISO(log.timestamp).toFormat("MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.md}>{DateTime.fromISO(log.timestamp).toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.sm}>{DateTime.fromISO(log.timestamp).toFormat("MM-dd HH:mm:ss")}</Match>
+                    </Switch>
+                  </span>
+                </div>
               </div>
             )}
           </For>

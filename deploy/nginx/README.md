@@ -9,7 +9,7 @@ Configuare `upstream`, and change `root` directory under `location /`, in order 
 Put [ret2shell.conf](ret2shell.conf) into `/etc/nginx/sites-available/`, and link it to `/etc/nginx/sites-enabled/`:
 
 ```sh
-ln -s /etc/nginx/sites-available/ret2shell.conf /etc/nginx/sites-enabled/ret2shell.conf
+ln -s /etc/nginx/sites-available/ret2shell.conf /etc/nginx/sites-enabled/
 ```
 
 Then restart the nginx service.

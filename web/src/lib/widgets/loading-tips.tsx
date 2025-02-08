@@ -1,7 +1,7 @@
 import Spin from "@assets/animates/spin";
+import clsx from "clsx";
 import { type ComponentProps, createSignal, onCleanup } from "solid-js";
 import { randomTips } from "../utils/loading-tips";
-import clsx from "clsx";
 
 export default function (props: ComponentProps<"span">) {
   const [tips, setTips] = createSignal(randomTips());

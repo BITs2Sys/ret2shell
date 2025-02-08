@@ -401,8 +401,8 @@ async fn submission_worker_exec(
     txn.commit().await?;
   }
 
-  let txn = db.conn.begin().await?;
   // stage 4: create audit if necessary
+  let txn = db.conn.begin().await?;
   if let Some(audit) = audit {
     let peer_team = if audit.peer_team != 0 {
       let peer_team = team::get(&txn, audit.peer_team).await?;

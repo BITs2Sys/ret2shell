@@ -1,9 +1,9 @@
 import { t } from "@storage/theme";
 import { type ToastMessage, removeToast } from "@storage/toast";
+import clsx from "clsx";
 import { type ComponentProps, Show, onMount, splitProps } from "solid-js";
 import Button from "./button";
 import Card from "./card";
-import clsx from "clsx";
 
 export type ToastProps = {
   toast: ToastMessage;

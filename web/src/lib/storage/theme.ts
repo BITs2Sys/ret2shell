@@ -82,3 +82,11 @@ export const colorPalette = {
   warning: "#db640e",
   error: "#e05864",
 };
+
+export const breakpoints = {
+  "2xl": "1536px",
+  xl: "1280px",
+  lg: "1024px",
+  md: "768px",
+  sm: "640px",
+} as const;

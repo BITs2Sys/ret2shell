@@ -14,12 +14,12 @@ import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import DownloadButton from "../download-button";
-import clsx from "clsx";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],

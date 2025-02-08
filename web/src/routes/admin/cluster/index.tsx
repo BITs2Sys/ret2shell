@@ -191,7 +191,7 @@ export default function () {
             </div>
             <div class="flex flex-col">
               <h3 class="text-center font-bold">{t("admin.cluster.nodeResources")}</h3>
-              <div class="flex flex-col xl:flex-row p-3 lg:p-6">
+              <div class="flex flex-col lg:flex-row p-3 lg:p-6">
                 <table class="flex-1">
                   <tbody>
                     <For each={Object.entries(shownNode()!.status!.capacity!)}>

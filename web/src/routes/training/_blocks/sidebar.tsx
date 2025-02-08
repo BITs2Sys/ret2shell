@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getGame } from "@api/game";
 import ChallengeList from "@blocks/challenge/list";
 import { useNavigate, useParams } from "@solidjs/router";
@@ -7,7 +8,6 @@ import Link from "@widgets/link";
 import { HTTPError } from "ky";
 import { Show, createEffect, untrack } from "solid-js";
 import Playgrounds from "./playgrounds";
-import { handleHttpError } from "@api";
 
 export default function SideBar() {
   const params = useParams();

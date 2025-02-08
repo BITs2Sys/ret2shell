@@ -1,15 +1,15 @@
+import { handleHttpError } from "@api";
 import { getGame } from "@api/game";
 import { HostType } from "@models/game";
 import { useNavigate, useParams } from "@solidjs/router";
+import { refreshInstitutes } from "@storage/account";
 import { setChallengeStore } from "@storage/challenge";
 import { gameStore, refreshSelfTeam, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
+import { t } from "@storage/theme";
 import { HTTPError } from "ky";
 import { type JSX, onCleanup, onMount } from "solid-js";
 import TeamCover from "./_blocks/team-cover";
-import { refreshInstitutes } from "@storage/account";
-import { handleHttpError } from "@api";
-import { t } from "@storage/theme";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();

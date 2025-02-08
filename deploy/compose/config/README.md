@@ -8,6 +8,8 @@ You can still override them to fit your needs, especially for **KEYs** and those
 
 > [!CAUTION]
 >
+> `kubeconfig.yaml` is the configuration file for k8s cluster, which launches all challenges.
+>
 > Note that `kubeconfig.yaml` is not given but configured at [config.toml](config.toml), in this directory. You can take one of following suggestions:
 >
 > - Put your `kubeconfig.yaml` in this directory. Note that if you enable `cluster.registry`, `cluster.registry.external` should be correctly configured to ensure that the k8s cluster can visit the registry.

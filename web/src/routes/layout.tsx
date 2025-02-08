@@ -1,18 +1,18 @@
+import { handleHttpError } from "@api";
 import { getPlatformInfo, getPlatformLicense, getVersion } from "@api/platform";
 import Background from "@blocks/background";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { Title } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
 import { type JSX, Show, createEffect, createSignal, onMount, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
-import Toasts from "./_blocks/toasts";
-import { handleHttpError } from "@api";
-import { Title } from "@storage/header";
 import TitleBar from "./_blocks/title-bar";
+import Toasts from "./_blocks/toasts";
 
 function checkCookiePolicy() {
   if (!platformStore.accept_cookies) {

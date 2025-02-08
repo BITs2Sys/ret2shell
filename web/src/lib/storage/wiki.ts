@@ -1,9 +1,9 @@
+import { handleHttpError } from "@api";
 import { getWikiTree } from "@api/wiki";
 import type { Article } from "@models/article";
 import type { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
 import { t } from "./theme";
-import { handleHttpError } from "@api";
 
 export const [wikiStore, setWikiStore] = createStore({
   toc: [] as Article[],
