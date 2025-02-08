@@ -210,7 +210,7 @@ export default function () {
             class={clsx(
               "lg:sticky w-full top-0 left-0",
               showChallengeDetail()
-                ? "lg:w-[30vw] backdrop-blur-sm border-r border-r-layer-content/10"
+                ? "lg:w-[30vw] lg:max-w-[400px] backdrop-blur-sm border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "lg:w-[75vw] justify-center"
                   : "lg:w-[40vw]",
