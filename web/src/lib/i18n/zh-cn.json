@@ -268,10 +268,6 @@
       "dropCap": "无特权运行（无特权端口权限）",
       "hintHistory": "提示情况",
       "hintHistoryTips": "谁买了我的题？",
-      "chatQuickReply1": "请独立思考并解题。",
-      "chatQuickReply2": "请仔细阅读参赛须知和手册。",
-      "chatQuickReply3": "再想一想，加油！",
-      "chatQuickReply4": "别着急，再想想。",
       "hammerTips3": "日志、代码等过长的消息建议使用网络剪贴板发送，例如：",
       "hammerHowto": "如何使用 Markdown？",
       "hammerSend": "发送",
@@ -962,8 +958,7 @@
       "invalidLink": "链接无效，请检查邮箱重置链接是否一致",
       "confirm": "重置"
     },
-    "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限",
-    "verify": {}
+    "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限"
   },
   "instance": {
     "disconnected": "WSRX 未连接",

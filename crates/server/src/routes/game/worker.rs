@@ -202,8 +202,8 @@ async fn submission_worker(
 
 fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
   if let Some(award_rates) = game.award_rates.clone() {
-    if blood_state < award_rates.0.len() as i32 {
-      return award_rates.0[blood_state as usize];
+    if blood_state - 1 < award_rates.0.len() as i32 {
+      return award_rates.0[blood_state as usize - 1];
     }
     return 0;
   } else if blood_state <= 3 && game.award_rate > 0 {

@@ -33,6 +33,7 @@ export default function DownloadButton(
       const a = document.createElement("a");
       a.href = url;
       a.download = downloadProps.file;
+      a.type = blob.type;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {

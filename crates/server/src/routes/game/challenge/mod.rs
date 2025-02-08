@@ -697,23 +697,29 @@ async fn get_player_attachment(
   if query.file.is_none() || query.folder.is_none() {
     Ok(Json(files).into_response())
   } else {
-    let file = query.file.unwrap();
+    let file_name = query.file.unwrap();
     let folder = query.folder.unwrap();
     let checked_file = files
       .into_iter()
-      .find(|f| f.folder == folder && f.file == file);
+      .find(|f| f.folder == folder && f.file == file_name);
     if checked_file.is_none() && !is_game_admin!(token, game) {
       return Err(ResponseError::NotFound("file".to_string()));
     }
     let file = match folder {
-      FileType::Static => challenge_bucket.download_static(&file).await?,
-      FileType::Mapped => challenge_bucket.download_mapped(&file).await?,
-      FileType::Checker => challenge_bucket.download_checker(&file).await?,
+      FileType::Static => challenge_bucket.download_static(&file_name).await?,
+      FileType::Mapped => challenge_bucket.download_mapped(&file_name).await?,
+      FileType::Checker => challenge_bucket.download_checker(&file_name).await?,
     };
 
     let mut header = HeaderMap::new();
     header.insert("Content-Length", file.metadata().await?.len().into());
-
+    header.insert(
+      "Content-Disposition",
+      format!(r#"attachment; filename="{file_name}""#)
+        .parse()
+        .unwrap(),
+    );
+    header.insert("Content-Type", "application/octet-stream".parse().unwrap());
     let stream = ReaderStream::new(file);
     Ok((StatusCode::OK, header, Body::from_stream(stream)).into_response())
   }

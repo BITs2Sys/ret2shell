@@ -8,6 +8,7 @@ import {
 } from "@api/game";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
+import { m_chat } from "@lib/i18n/chats";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
@@ -17,7 +18,7 @@ import { A, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { fullTheme, t } from "@storage/theme";
+import { fullTheme, t, themeStore } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -31,12 +32,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-const quickReplies = [
-  t("game.challenge.chatQuickReply1"),
-  t("game.challenge.chatQuickReply2"),
-  t("game.challenge.chatQuickReply3"),
-  t("game.challenge.chatQuickReply4"),
-];
+const chatConfig = await m_chat(themeStore.locale);
 
 function mergeChats(
   challengeId: number,
@@ -376,7 +372,7 @@ export default function () {
                         defer
                       >
                         <div class="flex flex-col space-y-2">
-                          <For each={quickReplies}>
+                          <For each={chatConfig.quickReplies ?? []}>
                             {(reply) => (
                               <Button
                                 size="sm"
