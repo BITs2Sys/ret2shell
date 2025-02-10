@@ -127,13 +127,15 @@ export default function() {
           if (prevUnreadChats.find((c) => chat.id === c.id)) {
             continue;
           }
-          let msg = `${chat.user_name}: ${chat.content}`;
-          if (msg.length > 64) {
-            msg = `${msg.slice(0, 64)}...`;
+          let msg = chat.content;
+          if (msg.length > 32) {
+            msg = `${msg.slice(0, 32)}...`;
           }
           const toastId = addToast({
             level: "info",
-            description: msg,
+            description: `${t("game.challenge.hammerResponse", {
+              challenge: challengeStore.challenges.find((v) => v.id === chat.challenge_id)?.name ?? "[DELETED]",
+            })}: ${msg}`,
             accept: () => {
               navigate(`/games/${gameStore.current?.id}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
               setTimeout(() => {
