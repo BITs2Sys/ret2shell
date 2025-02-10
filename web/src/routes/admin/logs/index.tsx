@@ -117,6 +117,7 @@ export default function () {
         return "text-layer-content";
     }
   }
+  const time = (ts: string, _format: string) => DateTime.fromISO(ts).toFormat(_format);
   const matches = createBreakpoints(breakpoints);
   let bottomDiv: HTMLDivElement;
   return (
@@ -179,12 +180,15 @@ export default function () {
                     {log.fields.message}
                   </span>
                   <span class="opacity-60 font-bold ml-2 group-hover:float-right">
-                    <Switch fallback={DateTime.fromISO(log.timestamp).toFormat("HH:mm:ss")}>
-                      <Match when={matches.xl}>{DateTime.fromISO(log.timestamp).toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.lg}>{DateTime.fromISO(log.timestamp).toFormat("MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.md}>{DateTime.fromISO(log.timestamp).toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.sm}>{DateTime.fromISO(log.timestamp).toFormat("MM-dd HH:mm:ss")}</Match>
-                    </Switch>
+                    <span class="hidden group-hover:inline">{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</span>
+                    <span class="group-hover:hidden">
+                      <Switch fallback={time(log.timestamp, "HH:mm:ss")}>
+                        <Match when={matches.xl}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
+                        <Match when={matches.lg}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
+                        <Match when={matches.md}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
+                        <Match when={matches.sm}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
+                      </Switch>
+                    </span>
                   </span>
                 </div>
               </div>

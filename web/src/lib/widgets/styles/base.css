@@ -159,3 +159,6 @@ body {
 @utility dir-rtl {
   direction: rtl;
 }
+
+/* https://tailwindcss.com/docs/upgrade-guide#hover-styles-on-mobile */
+@custom-variant hover (&:hover);

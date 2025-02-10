@@ -23,7 +23,7 @@ export default function ChallengeList(props: {
   const [loading, setLoading] = createSignal(false);
   const [search, setSearch] = createSignal("");
   const [hideSolved, setHideSolved] = createSignal(false);
-  const [hideArchived, setHideArchived] = createSignal(true);
+  const [hideArchived, setHideArchived] = createSignal(false);
   const selectedChallenge = createMemo(() => challengeStore.challenges.find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];

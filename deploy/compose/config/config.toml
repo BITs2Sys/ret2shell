@@ -47,7 +47,8 @@ node_selector     = ""
 # ! currently not working
 enable_capture    = true
 capture_directory = "/var/cache/ret2shell/captures"
-cleanup_interval  = 60                              # ? in seconds
+# DEPRECATED: cleanup_interval is not configurable anymore, it's fixed to 30 seconds.
+#cleanup_interval  = 60                              # ? in seconds
 
 # ! deprecated, please use runtime config in the admin panel.
 # traffic          = "pub async fn expose(node, service) { Ok(()) }"

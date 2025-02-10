@@ -39,7 +39,8 @@ pub struct Config {
   /// `capture_directory` is the directory to store the capture files.
   pub capture_directory: Option<String>,
   /// `cleanup_interval` is the interval to cleanup the challenge pods.
-  pub cleanup_interval: Option<u64>,
+  /// DEPRECATED: not configurable anymore.
+  // pub cleanup_interval: Option<u64>,
   /// `registry` is the private registry for challenge images.
   pub registry: Option<RegistryConfig>,
 }
@@ -57,7 +58,6 @@ impl Merge for Option<Config> {
         traffic: b.traffic,
         enable_capture: b.enable_capture.or(a.enable_capture),
         capture_directory: b.capture_directory.or(a.capture_directory),
-        cleanup_interval: b.cleanup_interval.or(a.cleanup_interval),
         registry: a.registry,
       }),
       (Some(a), None) => Some(a),

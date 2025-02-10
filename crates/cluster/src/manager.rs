@@ -292,7 +292,7 @@ impl Cluster {
     );
     let pods = api
       .list(&ListParams {
-        field_selector: Some("status.phase!=Succeeded,status.phase!=Failed".to_owned()),
+        // field_selector: Some("status.phase!=Succeeded,status.phase!=Failed".to_owned()),
         ..Default::default()
       })
       .await?;
@@ -314,13 +314,16 @@ impl Cluster {
       match phase.as_str() {
         "Running" => running += 1,
         "Pending" => pending += 1,
-        _ => {
-          warn!("Deleting unknown pod: {}", pod.name().unwrap());
+        n => {
+          warn!(
+            "Deleting unknown pod {} with status {n}",
+            pod.name().unwrap()
+          );
         }
       };
       match self.check_outdated_pod(&pod).await {
         Ok(true) => {
-          info!("Deleting outdated pod: {}", pod.name().unwrap());
+          info!("Deleting outdated pod {}", pod.name().unwrap());
           api
             .delete(
               &pod.name().unwrap(),

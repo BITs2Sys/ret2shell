@@ -225,15 +225,15 @@ export default function () {
             </Link>
             <Switch>
               <Match when={oauthServices().filter((s) => s.portal).length === 1}>
-                <Link class="w-full !mt-4" href={oauthServices()[0].portal} title={oauthServices()[0].name}>
-                  <img
-                    src={mediaPath(oauthServices()[0].avatar ?? "")}
-                    alt={oauthServices()[0].name}
-                    width={24}
-                    height={24}
-                  />
-                  <span>{oauthServices()[0].name}</span>
-                </Link>
+                {(() => {
+                  const svc = oauthServices().find((s) => s.portal)!;
+                  return (
+                    <Link class="w-full !mt-4" href={svc.portal} title={svc.name}>
+                      <img src={mediaPath(svc.avatar ?? "")} alt={svc.name} width={24} height={24} />
+                      <span>{svc.name}</span>
+                    </Link>
+                  );
+                })()}
               </Match>
               <Match when={oauthServices().filter((s) => s.portal).length > 1}>
                 <Popover

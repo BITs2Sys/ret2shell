@@ -54,20 +54,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     )))
 }
 
-async fn cluster_maintain_worker(state: GlobalState, cluster: Cluster, queue: Queue) {
+async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Queue) {
   info!("Cluster maintain worker started");
   let mut overloaded = false;
   loop {
-    tokio::time::sleep(std::time::Duration::from_secs(
-      state
-        .config
-        .cluster
-        .clone()
-        .unwrap_or_default()
-        .cleanup_interval
-        .unwrap_or(60),
-    ))
-    .await;
+    tokio::time::sleep(std::time::Duration::from_secs(30)).await;
     match cluster
       .at("ret2shell-challenge")
       .delete_outdated_pods()
