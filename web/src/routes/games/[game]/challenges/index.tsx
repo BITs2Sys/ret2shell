@@ -11,10 +11,10 @@ import { breakpoints, t } from "@storage/theme";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
 
-import { createChallenge, getChallenge } from "@api/game";
-import { addToast } from "@storage/toast";
+import { checkUnreadMessages, createChallenge, getChallenge } from "@api/game";
+import { addToast, removeToast } from "@storage/toast";
 import { DateTime } from "luxon";
-import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
@@ -115,6 +115,39 @@ export default function () {
     }
     setCreating(false);
   }
+
+  // hammer chats timer
+  const chatsRefreshTimer = setInterval(async () => {
+    if (gameStore.current) {
+      try {
+        const unreadChats = await checkUnreadMessages(gameStore.current.id);
+        for (const chat of unreadChats) {
+          let msg = `${chat.user_name}: ${chat.content}`;
+          if (msg.length > 64) {
+            msg = `${msg.slice(0, 64)}...`;
+          }
+          const toastId = addToast({
+            level: "info",
+            description: msg,
+            accept: () => {
+              navigate(`/games/${gameStore.current?.id}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
+              setTimeout(() => {
+                removeToast(toastId);
+              }, 50);
+            },
+            acceptLabel: t("form.goto"),
+          });
+        }
+      } catch (err) {
+        handleHttpError(err as Error, t("game.challenge.fetchChatError")!);
+      }
+    }
+  }, 30 * 1000);
+
+  onCleanup(() => {
+    clearInterval(chatsRefreshTimer);
+  });
+
   const matches = createBreakpoints(breakpoints);
   const [showLeftSidebar, setShowLeftSidebar] = createSignal(false);
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);

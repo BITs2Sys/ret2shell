@@ -14,7 +14,7 @@ import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
 
 type NotificationForm = {
   title: string;
@@ -81,6 +81,15 @@ export default function () {
       refreshNotifications();
     }
   });
+
+  const refreshTimer = setInterval(() => {
+    refreshNotifications();
+  }, 30 * 1000);
+
+  onCleanup(() => {
+    clearInterval(refreshTimer);
+  });
+
   return (
     <div class="flex-1 overflow-hidden">
       <OverlayScrollbarsComponent
