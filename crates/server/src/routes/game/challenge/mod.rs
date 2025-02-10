@@ -566,6 +566,14 @@ async fn submit_flag(
   // Only game in progress and has a team, the submission record will be marked as
   // team's. otherwise the submission will only be marked as user-solved.
   let team = extract_team!(game, team_ext, token);
+  let team = if team.is_some()
+    && game.in_progress()
+    && challenge.archive_at.is_none_or(|t| t > Utc::now())
+  {
+    team
+  } else {
+    None
+  };
   let submission = submission::Model {
     id: 0,
     created_at: Utc::now(),
@@ -573,15 +581,7 @@ async fn submit_flag(
     content: Some(req.content.clone()),
     solved: None,
     result: None,
-    team_id: if let Some(team) = team.clone() {
-      if game.in_progress() && challenge.archive_at.is_none_or(|t| t > Utc::now()) {
-        Some(team.id)
-      } else {
-        None
-      }
-    } else {
-      None
-    },
+    team_id: team.as_ref().map(|t| t.id),
     user_id: token.id,
   };
   // check submission frequency, skip admin
@@ -1012,6 +1012,14 @@ async fn start_challenge_env(
   Extension(token): Extension<Token>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
+  let team = if team.is_some()
+    && game.in_progress()
+    && challenge.archive_at.is_none_or(|t| t > Utc::now())
+  {
+    team
+  } else {
+    None
+  };
   let config = if let Some(config) = &config.cluster {
     config
   } else {
