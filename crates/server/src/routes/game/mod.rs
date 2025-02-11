@@ -509,19 +509,20 @@ async fn get_self_envs(
   Extension(token): Extension<Token>, team_ext: Extension<Option<team_db::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
-  let envs = if let Some(team) = team {
-    cluster
-      .at(CHALLENGE_NS)
-      .get_challenge_env_by_team(team.id)
-      .await?
-  } else {
-    cluster
-      .at(CHALLENGE_NS)
-      .get_challenge_env_by_user(token.id)
-      .await?
-      .map(|pod| Vec::from([pod]))
-      .unwrap_or_default()
-  };
+  let mut envs = cluster
+    .at(CHALLENGE_NS)
+    .get_challenge_env_by_user(token.id)
+    .await?
+    .map(|pod| Vec::from([pod]))
+    .unwrap_or_default();
+  if let Some(team) = team {
+    envs.extend(
+      cluster
+        .at(CHALLENGE_NS)
+        .get_challenge_env_by_team(team.id)
+        .await?,
+    );
+  }
   let config = if let Some(config) = &config.cluster {
     config
   } else {
@@ -564,6 +565,10 @@ async fn get_self_envs(
 
     if traffic_script.is_none() || traffic_script.clone().unwrap().is_empty() {
       result.push(i);
+      continue;
+    }
+
+    if result.iter().any(|r| r.traffic == i.traffic) {
       continue;
     }
 
