@@ -181,9 +181,11 @@ export default function (compProps: {
         </Link>
         <Popover size="sm" level="error" btnContent={<span>{t("form.delete")}</span>}>
           <Card contentClass="p-2 flex flex-col space-y-2 items-center">
-            <div class="flex flex-row space-x-2 items-center">
-              <span class="icon-[fluent--warning-20-filled] text-warning w-5 h-5" />
-              <span class="font-bold rainbow">{t("admin.users.warningDelete")}</span>
+            <div class="flex flex-col space-x-2 items-center">
+              <span class="font-bold text-error">{t("admin.users.warningDelete")}</span>
+              <span class="font-bold text-error animate-ping p-2">{t("admin.users.warningDelete")}</span>
+              <span class="font-bold text-error animate-spin p-4">{t("admin.users.warningDelete")}</span>
+              <span class="font-bold text-error animate-bounce p-2">{t("admin.users.warningDelete")}</span>
             </div>
             <Button level="warning" class="w-full" onClick={handleDeleteUser}>
               <span>{t("form.delete")}</span>
