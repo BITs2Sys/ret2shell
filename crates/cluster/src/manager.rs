@@ -472,6 +472,7 @@ impl Cluster {
         ..Default::default()
       },
       spec: Some(PodSpec {
+        enable_service_links: Some(false),
         security_context: env_config
           .restricted
           .is_some_and(|r| r)

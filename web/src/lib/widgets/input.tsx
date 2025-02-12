@@ -44,7 +44,7 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
           <input
             id={props.name}
             {...others}
-            value={others.value || ""}
+            value={others.value}
             class={clsx(
               // input-sm input-md
               `input w-0 flex-1 input-${size}`,

@@ -330,9 +330,19 @@ async fn update_challenge(
   )
   .await?;
   let challenge = if score_changed {
-    let (changed, _, challenge) = challenge::maintain_score(&db.conn, challenge.clone()).await?;
-    if changed {
-      queue.publish("scoreboard", challenge.clone()).await.ok();
+    let (actually_changed, _, challenge) =
+      challenge::maintain_score(&txn, challenge.clone()).await?;
+    if actually_changed {
+      info!(
+        "challenge {}:'{}' score changed from {} to {} by user {}:'{}' ({}), will trigger scoreboard update",
+        challenge.id,
+        challenge.name,
+        prev_challenge.score,
+        challenge.score,
+        token.id,
+        token.account,
+        token.nickname
+      );
     }
     challenge
   } else {
@@ -346,7 +356,6 @@ async fn update_challenge(
   challenge_bucket
     .set_description(challenge.content.clone().unwrap_or_default())
     .await?;
-
   game_bucket
     .commit(
       format!("update challenge config {}", challenge.name),
@@ -356,6 +365,9 @@ async fn update_challenge(
     .await?;
   // }
   txn.commit().await?;
+  if score_changed {
+    queue.publish("scoreboard", challenge.clone()).await.ok();
+  }
   cache.at("challenge").del(challenge.id).await.ok();
 
   Ok(Json(challenge))
