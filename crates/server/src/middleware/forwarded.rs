@@ -18,7 +18,7 @@ use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{key_extractor::KeyExtractor, GovernorError};
-use tracing::{debug, debug_span, error, warn, Instrument};
+use tracing::{debug, error, info_span, warn, Instrument};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -331,7 +331,7 @@ pub async fn ip_record(
     .await?;
   debug!("IP record message published");
   let span =
-    debug_span!("http",from = %ip.to_string(), method = %req.method(), uri = %req.uri().path());
+    info_span!("http",from = %ip.to_string(), method = %req.method(), uri = %req.uri().path());
   async move {
     let res = next.run(req).await;
     Ok(res)
