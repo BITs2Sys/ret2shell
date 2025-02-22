@@ -1328,9 +1328,9 @@ async fn get_answer(
   State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if game.host_type == HostType::Game && !game.archived() && !is_game_admin!(token, game) {
+  if game.host_type == HostType::Game && !game.archived() && !is_game_admin!(token, game) && challenge.archive_at.is_none_or(|t| t > Utc::now()) {
     return Err(ResponseError::Forbidden(
-      "you can only get the answer after the game is archived".to_owned(),
+      "you can only get the answer after the game or challenge is archived".to_owned(),
       format!(
         "user {}:'{}' ({}) want to get the answer for challenge {}:'{}'",
         token.id, token.account, token.nickname, challenge.id, challenge.name
