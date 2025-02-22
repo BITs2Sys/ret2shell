@@ -109,6 +109,10 @@ Run the following command to start the backend server:
 cargo run --bin r2s-server
 ```
 
+> [!CAUTION]
+>
+> To run or build `r2s-server`, please make sure that the CMake version is below 4. As compatibility with CMake < 3.5 has been removed from CMake 4, while some dependencies declared `cmake_minimum_required` version not compatible.
+
 ## Build
 
 Make sure you have installed the toolchains.
