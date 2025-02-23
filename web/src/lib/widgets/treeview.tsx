@@ -14,6 +14,7 @@ export type TreeNode = {
   | {
       type: "item";
       link?: string;
+      period: [number | null, number | null];
       extraPart?: JSX.Element;
       searchValue?: string;
       onClick?: () => void;
@@ -30,6 +31,49 @@ export type TreeViewProps = {
   activeMatch?: "exact" | "partial";
   activeSearchParams?: string;
 };
+
+function is_challenge_in_time(n: TreeNode) {
+  return n.type === "item" && n.period[0] && n.period[1] && n.period[0] <= Date.now() && n.period[1] >= Date.now();
+}
+
+function parse_emoji(node: TreeNode) {
+  if (node.type !== "category") return;
+  if (/(Sign|Check)\s*In/i.test(node.name) || /签到/.test(node.name)) return "icon-[twemoji--wrapped-gift]";
+  const week = node.name.match(/Week\s*(\d+)/i);
+  if (node.children.find(is_challenge_in_time)) return "icon-[twemoji--sparkles]";
+  if (week && !Number.isNaN(Number.parseInt(week[1]))) {
+    const n = Number.parseInt(week[1]);
+    if (n > 10) return "icon-[twemoji--keycap-pound]";
+    return [
+      "icon-[twemoji--keycap-0]",
+      "icon-[twemoji--keycap-1]",
+      "icon-[twemoji--keycap-2]",
+      "icon-[twemoji--keycap-3]",
+      "icon-[twemoji--keycap-4]",
+      "icon-[twemoji--keycap-5]",
+      "icon-[twemoji--keycap-6]",
+      "icon-[twemoji--keycap-7]",
+      "icon-[twemoji--keycap-8]",
+      "icon-[twemoji--keycap-9]",
+      "icon-[twemoji--keycap-10]",
+    ][n];
+  }
+}
+
+function resort_tree(tree: TreeNode[]) {
+  const p1: TreeNode[] = [];
+  const p2: TreeNode[] = [];
+  const p3: TreeNode[] = [];
+  while (tree.length > 0) {
+    const node = tree.shift()!;
+    if (node.children.find(is_challenge_in_time)) {
+      if (/Week\s*(\d+)/i.test(node.name)) p2.push(node);
+      else p1.push(node);
+    } else p3.push(node);
+  }
+  tree.push(...p1, ...p2, ...p3);
+  return tree;
+}
 
 export default function TreeView(props: TreeViewProps) {
   const [searchParams, _] = useSearchParams();
@@ -79,7 +123,7 @@ export default function TreeView(props: TreeViewProps) {
               setShowChildren(!showChildren());
             }}
           >
-            <span class={clsx("w-5 h-5", node.icon)} />
+            <span class={clsx("w-5 h-5", parse_emoji(node) ?? node.icon)} />
             <span class="flex-1 text-start truncate">{node.name}</span>
             <span
               class={clsx(
@@ -100,7 +144,7 @@ export default function TreeView(props: TreeViewProps) {
 
   return (
     <ul class="flex flex-col space-y-2">
-      <For each={props.tree}>{(node) => renderNode(node)}</For>
+      <For each={resort_tree(props.tree)}>{(node) => renderNode(node)}</For>
     </ul>
   );
 }

@@ -72,6 +72,7 @@ export default function ChallengeList(props: {
             : c.solved
               ? "icon-[fluent--checkmark-circle-20-regular] text-success"
               : "icon-[fluent--flag-20-regular]",
+          period: [c.challenge.release_at?.toMillis() ?? null, c.challenge.archive_at?.toMillis() ?? null],
           extraPart: props.showScore ? (
             <span
               class={clsx(
