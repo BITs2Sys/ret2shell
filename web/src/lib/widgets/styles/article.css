@@ -109,6 +109,10 @@ pre code {
   counter-reset: line;
 }
 
+pre code > button {
+  @apply cursor-pointer;
+}
+
 pre code > [data-line] {
   @apply before:w-[1.8em] pl-[2.8em] relative;
 }
