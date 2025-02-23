@@ -30,6 +30,7 @@
 @import "./darkmode-button.css";
 @import "./sidebar-layout.css";
 
+@plugin "@iconify/tailwind4";
 @config "../../../../tailwind.config.mts";
 @plugin "@tailwindcss/typography";
 
