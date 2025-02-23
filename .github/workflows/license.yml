@@ -1,4 +1,4 @@
-name: License
+name: Sign License
 
 on:
   workflow_dispatch:
@@ -55,5 +55,5 @@ jobs:
       with:
         name: license_${{ steps.export.outputs.website }}+pub-${{ steps.export.outputs.pub_hash }}
         path: |
-          output/
+          ${{ runner.temp }}/output/
         retention-days: 1
