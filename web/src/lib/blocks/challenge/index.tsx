@@ -259,7 +259,7 @@ function BottomPanel(props: {
 export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
-  archived?: boolean;
+  archived: boolean;
 }) {
   onCleanup(() => {
     setChallengeStore({ current: null, env: null, files: [], adminFiles: [] });
@@ -285,10 +285,7 @@ export default function (props: {
         endPanel={() => (
           <BottomPanel
             inGame={props.inGame ?? false}
-            archived={
-              props.archived ??
-              (props.inGame ? !((challengeStore.current?.archive_at?.toMillis() || 0) > Date.now()) : true)
-            }
+            archived={props.archived}
             onStateChange={props.onStateChange}
             expanded={expanded()}
             onExpand={() => {

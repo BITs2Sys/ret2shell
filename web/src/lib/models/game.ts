@@ -11,6 +11,15 @@ export type GameAccessPolicy = {
   sync: number;
 };
 
+export type ArchivePolicyChallenge = {
+  show_answer: boolean;
+  show_hints: boolean;
+}
+
+export type ArchivePolicy = {
+  challenge: ArchivePolicyChallenge;
+}
+
 export type Game = {
   id: number;
   updated_at: DateTime;
@@ -27,6 +36,7 @@ export type Game = {
   host_type: HostType;
   team_size: number;
   access_policy: GameAccessPolicy;
+  archive_policy: ArchivePolicy,
   cover: string | null;
   logo: string | null;
   enable_audit: boolean;

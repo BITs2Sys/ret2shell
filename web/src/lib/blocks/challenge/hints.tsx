@@ -18,6 +18,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
+import clsx from "clsx";
 import { LoremIpsum } from "lorem-ipsum";
 import { DateTime } from "luxon";
 import { For, Show, createEffect, createSignal, untrack } from "solid-js";
@@ -60,8 +61,8 @@ export default function (_props: {
       });
       refreshHint();
       setValues(form, {
-        content: undefined,
-        cost: undefined,
+        content: "",
+        cost: 0,
       });
     } catch (err) {
       handleHttpError(err as Error, t("form.createFailed")!);
@@ -95,6 +96,11 @@ export default function (_props: {
         refreshHint();
       });
     }
+    if (gameStore.current && gameStore.team) {
+      untrack(() => {
+        refreshHint();
+      });
+    }
   });
 
   async function handleDeleteHint(id: number) {
@@ -116,6 +122,12 @@ export default function (_props: {
     }
     setUnlocking(false);
   }
+
+  const plus_or_minus = (n: number) => `${n < 0 ? "- " : n > 0 ? "+ " : ""}${Math.abs(n)}`;
+  const hint_color = (cost: number, is_admin = false) => {
+    if (is_admin) return cost >= 0 ? "text-info" : "text-warning";
+    return cost > 0 ? "text-warning" : "text-success";
+  };
   return (
     <div class="flex flex-col p-3 lg:p-6">
       <For
@@ -136,7 +148,9 @@ export default function (_props: {
                 isGameAdmin() ||
                 hint.cost === 0 ||
                 extras().find((e) => e.hint_id === hint.id) ||
-                (challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()) ||
+                (challengeStore.current?.archive_at &&
+                  challengeStore.current.archive_at < DateTime.now() &&
+                  gameStore.current?.archive_policy.challenge.show_hints) ||
                 (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now())
               }
               fallback={
@@ -147,9 +161,9 @@ export default function (_props: {
                     ghost
                     btnContent={
                       <>
-                        <span class="text-warning">-{hint.cost}</span>
-                        <span class="opacity-60 text-warning">pts</span>
-                        <span class="icon-[fluent--lock-20-regular] w-5 h-5 text-warning" />
+                        <span class={hint_color(hint.cost)}>{plus_or_minus(-hint.cost)}</span>
+                        <span class={clsx("opacity-60", hint_color(hint.cost))}>pts</span>
+                        <span class={clsx("icon-[fluent--lock-20-regular] w-5 h-5", hint_color(hint.cost))} />
                       </>
                     }
                   >
@@ -174,10 +188,20 @@ export default function (_props: {
               }
             >
               <span class="flex-1 text-start">{hint.content}</span>
-              <Show when={hint.cost > 0}>
-                <span class="text-success">-{hint.cost}</span>
-                <span class="opacity-60 text-success">pts</span>
-                <span class="icon-[fluent--lock-open-20-regular] w-5 h-5 text-success" />
+              <Show when={hint.cost !== 0}>
+                <div class="btn btn-sm btn-ghost justify-center hover:bg-transparent cursor-auto">
+                  <span class={clsx(isGameAdmin() ? "" : "opacity-60", hint_color(hint.cost, isGameAdmin()))}>
+                    {plus_or_minus(-hint.cost)}
+                  </span>
+                  <span class={clsx(isGameAdmin() ? "" : "opacity-60", hint_color(hint.cost, isGameAdmin()))}>pts</span>
+                  <span
+                    class={clsx(
+                      "icon-[fluent--lock-open-20-regular] w-5 h-5",
+                      isGameAdmin() ? "" : "opacity-60",
+                      hint_color(hint.cost, isGameAdmin())
+                    )}
+                  />
+                </div>
               </Show>
             </Show>
             <Show when={isGameAdmin()}>
@@ -198,7 +222,12 @@ export default function (_props: {
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
           <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
-          <Field name="content" validate={[required(t("game.challenge.hintRequired")!)]}>
+          <Field
+            name="content"
+            validate={[required(t("game.challenge.hintRequired")!)]}
+            validateOn="submit"
+            revalidateOn="submit"
+          >
             {(field, props) => (
               <Input
                 type="text"
@@ -210,16 +239,41 @@ export default function (_props: {
                 placeholder={t("game.challenge.createHint")}
                 class="flex-1"
                 size="sm"
+                onInput={(e) => {
+                  return props.onInput(e);
+                }}
               />
             )}
           </Field>
           <Field name="cost" type="number">
             {(field, props) => (
               <Input
-                type="number"
+                type="text" // use text, we will convert to number manually
                 value={field.value}
                 error={field.error}
                 {...props}
+                onInput={(e) => {
+                  // set num to `null` for prevValue
+                  const setNumber = (num: number | null, str?: string) => {
+                    if (typeof str === "string") e.currentTarget.value = str;
+                    Object.defineProperty(e.currentTarget, "valueAsNumber", { writable: true });
+                    e.currentTarget.valueAsNumber = num || 0;
+                    Object.freeze(e.currentTarget.valueAsNumber);
+                  };
+                  // manually parse number
+                  function parseNumber(_v: string): [number | null, string] {
+                    let value = _v;
+                    if (value === "0-") return [0, "-"];
+                    const neg = value.startsWith("-");
+                    // const neg = false; // disable negative
+                    value = value.replace(/[^\d]/g, "").replace(/^0+(?=\d)/, "");
+                    value = neg ? `-${value}` : value;
+                    const n = Number.parseInt(value);
+                    return [!Number.isNaN(n) ? n : 0, value];
+                  }
+                  setNumber(...parseNumber(e.currentTarget.value));
+                  return props.onInput(e);
+                }}
                 noLabel
                 placeholder={t("game.challenge.createHintCost")}
                 class="w-24"
@@ -228,7 +282,7 @@ export default function (_props: {
             )}
           </Field>
           <span class="font-bold opacity-60">pts</span>
-          <span class="w-8" />
+          <span class="w-2" />
           <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
             <span class="icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("form.create")}</span>

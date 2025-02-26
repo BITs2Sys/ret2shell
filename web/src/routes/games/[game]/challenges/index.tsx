@@ -195,7 +195,14 @@ export default function () {
               <Form onDone={onCreateChallenge} loading={creating()} inGame />
             </Match>
             <Match when={challengeStore.current}>
-              <Challenge inGame onStateChange={refreshChallenges} />
+              <Challenge
+                inGame
+                onStateChange={refreshChallenges}
+                archived={
+                  !!gameStore.current?.archive_policy.challenge.show_answer &&
+                  (challengeStore.current?.archive_at?.toMillis() || Number.POSITIVE_INFINITY) < Date.now()
+                }
+              />
             </Match>
           </Switch>
         </div>
