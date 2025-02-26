@@ -49,6 +49,33 @@ pub struct AccessPolicy {
   pub sync: i32,
 }
 
+/// Archive policy -> Challenge
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct ArchivePolicyChallenge {
+  pub show_answer: bool,
+}
+
+impl Default for ArchivePolicyChallenge {
+  fn default() -> Self {
+    Self { show_answer: false }
+  }
+}
+
+/// Archive policy
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct ArchivePolicy {
+  pub challenge: ArchivePolicyChallenge,
+}
+
+impl Default for ArchivePolicy {
+  fn default() -> Self {
+    Self {
+      challenge: ArchivePolicyChallenge::default(),
+    }
+  }
+}
+
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Admins(pub Vec<i64>);
 
@@ -92,6 +119,7 @@ pub struct Model {
   pub team_size: i32,
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
+  pub archive_policy: ArchivePolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,
   pub enable_audit: bool,

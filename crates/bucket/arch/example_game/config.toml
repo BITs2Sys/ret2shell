@@ -14,3 +14,6 @@ weight                     = 3
 
 [access_policy]
 sync = 0
+
+[archive_policy.challenge]
+show_answer = false
