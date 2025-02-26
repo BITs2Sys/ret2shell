@@ -135,6 +135,7 @@ pub struct Model {
   pub team_size: i32,
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
+  #[sea_orm(column_type = "JsonBinary")]
   pub archive_policy: ArchivePolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,
