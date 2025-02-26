@@ -131,7 +131,14 @@ export default function (_props: {
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
             <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
             <Show
-              when={!_props.inGame || isGameAdmin() || hint.cost === 0 || extras().find((e) => e.hint_id === hint.id)}
+              when={
+                !_props.inGame ||
+                isGameAdmin() ||
+                hint.cost === 0 ||
+                extras().find((e) => e.hint_id === hint.id) ||
+                (challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()) ||
+                (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now())
+              }
               fallback={
                 <>
                   <span class="blur pointer-events-none select-none flex-1">{lorem.generateSentences(1)}</span>

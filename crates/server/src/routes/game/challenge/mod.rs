@@ -837,6 +837,12 @@ async fn get_challenge_hints(
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let hints = hint::get_list(&db.conn, challenge.id).await?;
+  if challenge.archive_at.is_some_and(|t| t > Utc::now()) {
+    return Ok(Json(hints));
+  }
+  if game.start_at < Utc::now() && !game.in_progress() {
+    return Ok(Json(hints));
+  }
   if let Some(team) = team {
     let extras = extra::get_list(&db.conn, team.id).await?;
     let hints = hints
