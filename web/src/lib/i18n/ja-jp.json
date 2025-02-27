@@ -600,6 +600,14 @@
         "selectPresetScripts": "プリセットスクリプトを選択...",
         "singleNodeDirectScript": "シングルノードダイレクト接続",
         "title": "環境ルーティング"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "回答の閲覧を許可",
+          "title": "アーカイブ戦略：問題",
+          "showHints": "ヒントの閲覧を許可"
+        },
+        "title": "戦略管理"
       }
     },
     "adminCanNotTakePartIn": "管理者は参加できません。",

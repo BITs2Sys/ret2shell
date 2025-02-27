@@ -450,6 +450,14 @@
         "selectPresetScripts": "Select Preset Script...",
         "singleNodeDirectScript": "Single-node direct connection",
         "title": "Environmental Routing"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "Allow to view answers",
+          "title": "Challenge archive policies",
+          "showHints": "Allow to view hints"
+        },
+        "title": "Policies"
       }
     },
     "introduction": {
