@@ -29,6 +29,7 @@ pub enum Game {
   HostType,
   TeamSize,
   AccessPolicy,
+  ArchivePolicy,
   Cover,
   Logo,
   EnableAudit,

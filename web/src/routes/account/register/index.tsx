@@ -83,6 +83,7 @@ export default function () {
                   minLength(2, t("account.register.nicknameMinLength")!),
                   maxLength(32, t("account.register.nicknameMaxLength")!),
                 ]}
+                revalidateOn="submit"
               >
                 {(field, props) => (
                   <Input
@@ -114,6 +115,7 @@ export default function () {
                   // only ascii visible characters, no whitespaces
                   pattern(/^[0-9a-zA-Z_]*$/, t("account.register.accountPattern")!),
                 ]}
+                revalidateOn="submit"
               >
                 {(field, props) => (
                   <Input
@@ -149,6 +151,7 @@ export default function () {
             <Field
               name="email"
               validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -176,6 +179,7 @@ export default function () {
                     t("account.register.passwordTooWeak")!
                   ),
                 ]}
+                revalidateOn="submit"
               >
                 {(field, props) => (
                   <Input
@@ -197,6 +201,7 @@ export default function () {
                   <Field
                     name="captcha_answer"
                     validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                    revalidateOn="submit"
                   >
                     {(answerField, props) => (
                       <Captcha

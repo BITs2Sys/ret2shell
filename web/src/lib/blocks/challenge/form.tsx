@@ -62,7 +62,7 @@ export function FormBare(props: {
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.challenge.create")}</span>
       </h3>
-      <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]}>
+      <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]} revalidateOn="submit">
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -75,7 +75,7 @@ export function FormBare(props: {
           />
         )}
       </Field>
-      <Field name="tag" validate={[required(t("game.challenge.tagRequired")!)]}>
+      <Field name="tag" validate={[required(t("game.challenge.tagRequired")!)]} revalidateOn="submit">
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
@@ -203,7 +203,7 @@ export function FormBare(props: {
           )}
         </Field>
       </Show>
-      <Field name="content" validate={[required(t("game.challenge.contentRequired")!)]}>
+      <Field name="content" validate={[required(t("game.challenge.contentRequired")!)]} revalidateOn="submit">
         {(field) => (
           <Editor
             form={form}

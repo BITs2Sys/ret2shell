@@ -174,6 +174,7 @@ export default function () {
                   return true;
                 }, t("platform.form.hideMakerDisabled")!),
               ]}
+              revalidateOn="submit"
             >
               {(field, props) => (
                 <Checkbox

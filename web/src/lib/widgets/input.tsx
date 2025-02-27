@@ -1,4 +1,4 @@
-import { type ComponentProps, type JSX, Show, createSignal, splitProps } from "solid-js";
+import { type ComponentProps, type JSX, Show, createEffect, createSignal, splitProps } from "solid-js";
 
 import { Popover } from "@ark-ui/solid";
 import clsx from "clsx";
@@ -11,6 +11,7 @@ export type TextInputProps = {
   error?: string;
   noLabel?: boolean;
   extraLabel?: JSX.Element;
+  alwaysValidate?: boolean;
 };
 
 export default function (props: TextInputProps & ComponentProps<"input">) {
@@ -18,8 +19,13 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
   const [inputProps, others] = splitProps(props, ["icon", "extraBtn", "size", "error", "noLabel", "extraLabel"]);
 
   const [type, setType] = createSignal(props.type);
+  const [error, setError] = createSignal(props.error);
+
+  createEffect(() => {
+    setError(props.error);
+  });
   return (
-    <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
+    <Popover.Root autoFocus={false} open={!!error()} closeOnInteractOutside={false}>
       <Popover.Anchor class={clsx("flex flex-col relative space-y-1", props.class, props.classList)}>
         <Show when={!inputProps.noLabel && (props.title || props.name)}>
           <label class="label" for={props.name}>
@@ -27,7 +33,14 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             {inputProps.extraLabel}
           </label>
         </Show>
-        <div class="flex flex-row">
+        <div
+          class={clsx(
+            "flex flex-row",
+            props.icon
+              ? "rounded has-[input:focus]:outline-2 has-[input:focus]:outline-offset-2 has-[input:focus]:outline-layer-content/60"
+              : ""
+          )}
+        >
           <Show when={props.icon}>
             {/* rounded-l-lg rounded-l-md */}
             <div
@@ -48,11 +61,14 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             class={clsx(
               // input-sm input-md
               `input w-0 flex-1 input-${size}`,
-              inputProps.icon && "!rounded-l-none",
+              inputProps.icon && "!rounded-l-none outline-none",
               (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none",
-              inputProps.error && "input-error"
+              error() && "input-error"
             )}
             type={type()}
+            on:input={() => {
+              if (!props.alwaysValidate) setError("");
+            }}
           />
           <Show when={props.type === "password"}>
             {/* btn-sm btn-md */}
@@ -70,8 +86,8 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
       </Popover.Anchor>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={clsx("card", props.error && "card-error")}>
-            <p class="card-content px-4 p-2">{props.error}</p>
+          <Popover.Content class={clsx("card", error() && "card-error")}>
+            <p class="card-content px-4 p-2">{error()}</p>
           </Popover.Content>
         </Popover.Positioner>
       </Portal>

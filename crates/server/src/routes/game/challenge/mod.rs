@@ -1,22 +1,22 @@
 use axum::{
+  Extension, Json, Router,
   body::Body,
   extract::{DefaultBodyLimit, Multipart, Query, State},
   http::{HeaderMap, StatusCode},
   middleware,
   response::{IntoResponse, Response},
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
 use chrono::Utc;
 use futures::TryStreamExt;
 use nanoid::nanoid;
 use r2s_bucket::{
-  challenge::{ChallengeBucket, Hints},
   Bucket,
+  challenge::{ChallengeBucket, Hints},
 };
 use r2s_cache::Cache;
-use r2s_checker::{traits::CheckerError, Checker};
-use r2s_cluster::{Cluster, CHALLENGE_NS};
+use r2s_checker::{Checker, traits::CheckerError};
+use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, config, extra,
@@ -25,10 +25,10 @@ use r2s_database::{
   user::{self, Permission},
 };
 use r2s_event::{
+  Event,
   events::{
     ChallengeEvent, ChallengeEventType, EventContainer, SubmissionEvent, SubmissionEventType,
   },
-  Event,
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;
@@ -40,7 +40,7 @@ use tracing::{debug, info, warn};
 use super::worker;
 use crate::{
   middleware::{
-    auth::{self, is_game_admin, Token},
+    auth::{self, Token, is_game_admin},
     data::{self, extract_team},
   },
   traits::{GlobalState, ResponseError},
@@ -837,6 +837,14 @@ async fn get_challenge_hints(
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let hints = hint::get_list(&db.conn, challenge.id).await?;
+  if game.archive_policy.challenge.show_hints
+    && challenge.archive_at.is_some_and(|t| t < Utc::now())
+  {
+    return Ok(Json(hints));
+  }
+  if game.start_at < Utc::now() && !game.in_progress() {
+    return Ok(Json(hints));
+  }
   if let Some(team) = team {
     let extras = extra::get_list(&db.conn, team.id).await?;
     let hints = hints
@@ -1328,9 +1336,26 @@ async fn get_answer(
   State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if game.host_type == HostType::Game && !game.archived() && !is_game_admin!(token, game) && challenge.archive_at.is_none_or(|t| t > Utc::now()) {
+  let not_archived_or_hide_after_archiving = if challenge.archive_at.is_some_and(|t| t < Utc::now())
+  {
+    !game.archive_policy.challenge.show_answer
+  } else {
+    true
+  };
+  if game.host_type == HostType::Game
+    && !game.archived()
+    && !is_game_admin!(token, game)
+    && not_archived_or_hide_after_archiving
+  {
     return Err(ResponseError::Forbidden(
-      "you can only get the answer after the game or challenge is archived".to_owned(),
+      format!(
+        "you can only get the answer after the {} is archived",
+        if game.archive_policy.challenge.show_answer {
+          "game or challenge"
+        } else {
+          "game"
+        }
+      ),
       format!(
         "user {}:'{}' ({}) want to get the answer for challenge {}:'{}'",
         token.id, token.account, token.nickname, challenge.id, challenge.name

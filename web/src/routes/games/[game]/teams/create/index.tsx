@@ -87,6 +87,7 @@ export default function () {
                 required(t("game.team.create.nameRequired")!),
                 maxLength(32, t("game.team.create.nameMaxLength")!),
               ]}
+              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -151,7 +152,12 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("game.team.create.acceptedRequired")!)]}>
+            <Field
+              name="accepted"
+              type="boolean"
+              validate={[required(t("game.team.create.acceptedRequired")!)]}
+              revalidateOn="submit"
+            >
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />

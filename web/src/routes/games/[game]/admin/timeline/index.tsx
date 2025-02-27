@@ -86,7 +86,7 @@ export default function Timeline() {
       <Title page={t("game.admin.timeline.title")} route={`/games/${gameStore.current?.id}/admin/timeline`} />
       <div class="flex flex-col space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 p-3 lg:p-6 w-full">
         <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
-          <Field name="label" validate={[required(t("game.admin.timeline.labelRequired")!)]}>
+          <Field name="label" validate={[required(t("game.admin.timeline.labelRequired")!)]} revalidateOn="submit">
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
@@ -99,9 +99,19 @@ export default function Timeline() {
               />
             )}
           </Field>
-          <Field name="start_at" type="number" validate={[required(t("game.admin.timeline.startAtRequired")!)]}>
+          <Field
+            name="start_at"
+            type="number"
+            validate={[required(t("game.admin.timeline.startAtRequired")!)]}
+            revalidateOn="submit"
+          >
             {(startAtField) => (
-              <Field name="end_at" type="number" validate={[required(t("game.admin.timeline.endAtRequired")!)]}>
+              <Field
+                name="end_at"
+                type="number"
+                validate={[required(t("game.admin.timeline.endAtRequired")!)]}
+                revalidateOn="submit"
+              >
                 {(endAtField) => (
                   <TimePicker
                     form={form}

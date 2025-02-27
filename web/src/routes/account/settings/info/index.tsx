@@ -123,7 +123,11 @@ export default function () {
                 value={accountStore.account!}
                 disabled
               />
-              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+              <Field
+                name="nickname"
+                validate={[required(t("account.settings.info.nicknameRequired")!)]}
+                revalidateOn="submit"
+              >
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
@@ -190,6 +194,7 @@ export default function () {
               required(t("account.settings.info.emailRequired")!),
               email(t("account.settings.info.emailInvalid")!),
             ]}
+            revalidateOn="submit"
           >
             {(field, props) => (
               <Input

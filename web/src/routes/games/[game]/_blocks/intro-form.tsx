@@ -57,7 +57,7 @@ export default function IntroForm(props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
-      <Field name="content" validate={[required(t("game.introRequired")!)]}>
+      <Field name="content" validate={[required(t("game.introRequired")!)]} revalidateOn="submit">
         {(field) => (
           <Editor
             form={form}

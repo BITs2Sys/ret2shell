@@ -43,7 +43,7 @@ export default function InstituteForm(props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-96 space-y-2 relative">
-      <Field name="name" validate={[required(t("admin.institute.nameRequired")!)]}>
+      <Field name="name" validate={[required(t("admin.institute.nameRequired")!)]} revalidateOn="submit">
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}

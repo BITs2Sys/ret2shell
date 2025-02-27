@@ -97,6 +97,7 @@ function CreateForm(fnProps: {
             required(t("game.challenge.envContainerNameRequired")!),
             pattern(/^[a-z\-]{3,40}$/, t("game.challenge.envContainerNameFormat")!),
           ]}
+          revalidateOn="submit"
         >
           {(field, props) => (
             <Input
@@ -111,7 +112,7 @@ function CreateForm(fnProps: {
             />
           )}
         </Field>
-        <Field name="tag" validate={[required(t("game.challenge.envContainerTagRequired")!)]}>
+        <Field name="tag" validate={[required(t("game.challenge.envContainerTagRequired")!)]} revalidateOn="submit">
           {(field, props) => (
             <Show
               when={fnProps.registryConfig?.enabled}
@@ -278,6 +279,7 @@ function CreateForm(fnProps: {
                 return true;
               }, t("game.challenge.selectEnvContainerServiceType")!),
             ]}
+            revalidateOn="submit"
           >
             {(field, props) => (
               <Select
@@ -314,6 +316,7 @@ function CreateForm(fnProps: {
                 return true;
               }, t("game.challenge.envContainerPort")!),
             ]}
+            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -332,7 +335,12 @@ function CreateForm(fnProps: {
         </div>
       </div>
       <div class="flex flex-row space-x-2">
-        <Field name="cpu" type="number" validate={[required(t("game.challenge.envContainerCpuRequired")!)]}>
+        <Field
+          name="cpu"
+          type="number"
+          validate={[required(t("game.challenge.envContainerCpuRequired")!)]}
+          revalidateOn="submit"
+        >
           {(field, props) => (
             <Slider
               class="flex-1"
@@ -346,7 +354,7 @@ function CreateForm(fnProps: {
             />
           )}
         </Field>
-        <Field name="mem" validate={[required(t("game.challenge.envContainerMemRequired")!)]}>
+        <Field name="mem" validate={[required(t("game.challenge.envContainerMemRequired")!)]} revalidateOn="submit">
           {(field, props) => (
             <>
               <Slider
@@ -365,7 +373,11 @@ function CreateForm(fnProps: {
             </>
           )}
         </Field>
-        <Field name="storage" validate={[required(t("game.challenge.envContainerStorageRequired")!)]}>
+        <Field
+          name="storage"
+          validate={[required(t("game.challenge.envContainerStorageRequired")!)]}
+          revalidateOn="submit"
+        >
           {(field, props) => (
             <>
               <Slider

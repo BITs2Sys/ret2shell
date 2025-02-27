@@ -69,7 +69,7 @@ export default function (props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 w-full max-w-5xl flex-1">
-      <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
+      <Field name="title" validate={[required(t("bulletin.titleRequired")!)]} revalidateOn="submit">
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
@@ -113,7 +113,7 @@ export default function (props: {
           />
         )}
       </Field>
-      <Field name="content" validate={[required(t("bulletin.contentRequired")!)]}>
+      <Field name="content" validate={[required(t("bulletin.contentRequired")!)]} revalidateOn="submit">
         {(field) => (
           <Editor
             form={form}

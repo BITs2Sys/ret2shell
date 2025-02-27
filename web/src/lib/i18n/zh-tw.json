@@ -404,6 +404,14 @@
         "startEndTime": "開始與結束時間",
         "noTimeline": "沒有時段",
         "deleteTips": "確定要刪除這個時段嗎？即使刪除了也不影響現有題目的時段控制。"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "允許查看題解",
+          "title": "題目歸檔策略",
+          "showHints": "允許查看提示"
+        },
+        "title": "策略管理"
       }
     },
     "exit": "退出",

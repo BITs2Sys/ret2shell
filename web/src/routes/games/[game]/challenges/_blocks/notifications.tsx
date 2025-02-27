@@ -106,7 +106,7 @@ export default function () {
           <Show when={isGameAdmin()}>
             <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
               <Show when={createFormExpanded()}>
-                <Field name="title" validate={[required(t("game.notification.titleRequired")!)]}>
+                <Field name="title" validate={[required(t("game.notification.titleRequired")!)]} revalidateOn="submit">
                   {(field, props) => (
                     <Input
                       placeholder={t("game.notification.titlePlaceholder")}
@@ -118,7 +118,11 @@ export default function () {
                     />
                   )}
                 </Field>
-                <Field name="content" validate={[required(t("game.notification.contentRequired")!)]}>
+                <Field
+                  name="content"
+                  validate={[required(t("game.notification.contentRequired")!)]}
+                  revalidateOn="submit"
+                >
                   {(field) => (
                     <Editor
                       form={form}

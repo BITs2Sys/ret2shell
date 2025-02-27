@@ -63,6 +63,7 @@ export default function () {
             <Field
               name="email"
               validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -83,6 +84,7 @@ export default function () {
                 <Field
                   name="captcha_answer"
                   validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                  revalidateOn="submit"
                 >
                   {(answerField, props) => (
                     <Captcha

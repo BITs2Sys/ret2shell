@@ -56,7 +56,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
         {t("training.create")} - {t("training.title")}
       </h1>
       <Form onSubmit={onSubmit} class="flex flex-col space-y-2 py-3 lg:py-6">
-        <Field name="name" validate={[required(t("training.nameRequired")!)]}>
+        <Field name="name" validate={[required(t("training.nameRequired")!)]} revalidateOn="submit">
           {(field, props) => (
             <Input
               icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -70,7 +70,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
             />
           )}
         </Field>
-        <Field name="brief" validate={[required(t("training.briefRequired")!)]}>
+        <Field name="brief" validate={[required(t("training.briefRequired")!)]} revalidateOn="submit">
           {(field, props) => (
             <Input
               icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}

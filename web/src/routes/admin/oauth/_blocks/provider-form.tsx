@@ -110,7 +110,7 @@ export default function ProviderForm(props: {
     <Form onSubmit={onSubmit} class="flex flex-col w-screen max-w-5xl space-y-2 relative">
       <div class="flex flex-row space-x-4 items-end">
         <div class="flex flex-col space-y-2 flex-1">
-          <Field name="name" validate={[required(t("admin.institute.providerNameRequired")!)]}>
+          <Field name="name" validate={[required(t("admin.institute.providerNameRequired")!)]} revalidateOn="submit">
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -132,6 +132,7 @@ export default function ProviderForm(props: {
               // only ascii visible characters, no whitespaces
               pattern(/^[0-9a-z_]*$/, t("admin.institute.providerIdentifierPattern")!),
             ]}
+            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -187,7 +188,7 @@ export default function ProviderForm(props: {
           )}
         </Field>
       </div>
-      <Field name="portal" validate={[url(t("admin.institute.providerPortalInvalid")!)]}>
+      <Field name="portal" validate={[url(t("admin.institute.providerPortalInvalid")!)]} revalidateOn="submit">
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -237,7 +238,7 @@ export default function ProviderForm(props: {
           }}
         />
       </header>
-      <Field name="script" validate={[required(t("admin.institute.providerScriptRequired")!)]}>
+      <Field name="script" validate={[required(t("admin.institute.providerScriptRequired")!)]} revalidateOn="submit">
         {(field) => (
           <Editor
             form={form}
