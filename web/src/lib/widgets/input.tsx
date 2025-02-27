@@ -11,7 +11,6 @@ export type TextInputProps = {
   error?: string;
   noLabel?: boolean;
   extraLabel?: JSX.Element;
-  alwaysValidate?: boolean;
 };
 
 export default function (props: TextInputProps & ComponentProps<"input">) {
@@ -21,7 +20,9 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
   const [type, setType] = createSignal(props.type);
   const [error, setError] = createSignal(props.error);
 
+  let lastError = props.error;
   createEffect(() => {
+    lastError = props.error;
     setError(props.error);
   });
   return (
@@ -35,10 +36,10 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
         </Show>
         <div
           class={clsx(
-            "flex flex-row",
-            props.icon
-              ? "rounded has-[input:focus]:outline-2 has-[input:focus]:outline-offset-2 has-[input:focus]:outline-layer-content/60"
-              : ""
+            "flex flex-row border border-transparent",
+            size === "md" ? "rounded-lg" : "rounded-md",
+            "has-[input:focus]:outline-2 has-[input:focus]:outline-offset-2 has-[input:focus]:outline-layer-content/60",
+            inputProps.error && "!border-error !outline-error"
           )}
         >
           <Show when={props.icon}>
@@ -60,14 +61,17 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             value={others.value}
             class={clsx(
               // input-sm input-md
-              `input w-0 flex-1 input-${size}`,
-              inputProps.icon && "!rounded-l-none outline-none",
-              (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none",
-              error() && "input-error"
+              `input w-0 flex-1 input-${size} border-0 outline-none`,
+              inputProps.icon && "!rounded-l-none",
+              (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none"
             )}
             type={type()}
-            on:input={() => {
-              if (!props.alwaysValidate) setError("");
+            on:blur={() => {
+              lastError = error();
+              setError();
+            }}
+            on:focus={() => {
+              setError(lastError);
             }}
           />
           <Show when={props.type === "password"}>

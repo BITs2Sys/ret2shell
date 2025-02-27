@@ -9,7 +9,7 @@ import {
 import type { Challenge } from "@models/challenge";
 import type { Extra } from "@models/extra";
 import type { Hint } from "@models/hint";
-import { createForm, required, setValue, reset as resetForm, setValues } from "@modular-forms/solid";
+import { clearError, createForm, required, reset as resetForm, setValue } from "@modular-forms/solid";
 import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
@@ -61,13 +61,14 @@ export default function (_props: {
         description: t("form.createSuccess")!,
         duration: 5000,
       });
-      resetForm(form);
+      resetForm(form, {
+        initialValues: {
+          content: "",
+          cost: 0,
+        },
+      });
       refreshHint();
       setPtsInputIconIndex(0);
-      setValues(form, {
-        content: "",
-        cost: 0,
-      });
     } catch (err) {
       handleHttpError(err as Error, t("form.createFailed")!);
     }
@@ -226,12 +227,7 @@ export default function (_props: {
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
           <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
-          <Field
-            name="content"
-            validate={[required(t("game.challenge.hintRequired")!)]}
-            validateOn="submit"
-            revalidateOn="submit"
-          >
+          <Field name="content" validate={[required(t("game.challenge.hintRequired")!)]}>
             {(field, props) => (
               <Input
                 type="text"
@@ -243,8 +239,9 @@ export default function (_props: {
                 placeholder={t("game.challenge.createHint")}
                 class="flex-1"
                 size="sm"
-                onInput={(e) => {
-                  return props.onInput(e);
+                onBlur={(e) => {
+                  clearError(form, "content");
+                  return props.onBlur(e);
                 }}
               />
             )}
