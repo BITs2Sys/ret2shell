@@ -197,11 +197,7 @@ export default function (compProps: {
         <div class="flex flex-row space-x-4 items-center">
           <div class="flex flex-col space-y-2 flex-1">
             <div class="flex flex-row space-x-2">
-              <Field
-                name="account"
-                validate={[required(t("account.settings.info.accountRequired")!)]}
-                revalidateOn="submit"
-              >
+              <Field name="account" validate={[required(t("account.settings.info.accountRequired")!)]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
@@ -215,11 +211,7 @@ export default function (compProps: {
                   />
                 )}
               </Field>
-              <Field
-                name="nickname"
-                validate={[required(t("account.settings.info.nicknameRequired")!)]}
-                revalidateOn="submit"
-              >
+              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
@@ -241,7 +233,6 @@ export default function (compProps: {
                   required(t("account.settings.info.emailRequired")!),
                   email(t("account.settings.info.emailInvalid")!),
                 ]}
-                revalidateOn="submit"
               >
                 {(field, props) => (
                   <Input

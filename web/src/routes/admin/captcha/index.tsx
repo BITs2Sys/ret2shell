@@ -83,7 +83,7 @@ export default function () {
                 </Checkbox>
               )}
             </Field>
-            <Field name="validator" validate={[required(t("admin.captcha.validatorRequired")!)]} revalidateOn="submit">
+            <Field name="validator" validate={[required(t("admin.captcha.validatorRequired")!)]}>
               {(field, props) => (
                 <Select
                   name={field.name}

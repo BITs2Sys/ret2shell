@@ -83,7 +83,6 @@ export default function () {
                   return true;
                 }, t("admin.email.tlsRequired")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Select
@@ -125,7 +124,6 @@ export default function () {
                   return true;
                 }, t("admin.email.hostRequired")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -157,7 +155,6 @@ export default function () {
                   return true;
                 }, t("admin.email.portRangeNotMatch")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -184,7 +181,6 @@ export default function () {
                 return true;
               }, t("admin.email.senderRequired")!),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -210,7 +206,6 @@ export default function () {
                   return true;
                 }, t("admin.email.usernameRequired")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -235,7 +230,6 @@ export default function () {
                   return true;
                 }, t("admin.email.passwordRequired")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -263,7 +257,6 @@ export default function () {
                 return true;
               }, t("admin.email.verifyEmailSubjectRequired")!),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -288,7 +281,6 @@ export default function () {
                 return true;
               }, t("admin.email.verifyEmailBodyRequired")!),
             ]}
-            revalidateOn="submit"
           >
             {(field) => (
               <Editor
@@ -315,7 +307,6 @@ export default function () {
                 return true;
               }, t("admin.email.resetEmailSubjectRequired")!),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -340,7 +331,6 @@ export default function () {
                 return true;
               }, t("admin.email.resetEmailBodyRequired")!),
             ]}
-            revalidateOn="submit"
           >
             {(field) => (
               <Editor

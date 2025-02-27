@@ -78,7 +78,6 @@ export default function () {
                 <Field
                   name="captcha_answer"
                   validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
-                  revalidateOn="submit"
                 >
                   {(answerField, props) => (
                     <Captcha

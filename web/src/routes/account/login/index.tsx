@@ -95,7 +95,6 @@ export default function () {
                 required(t("account.login.accountRequired")!),
                 minLength(4, t("account.login.accountMinLength")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -127,7 +126,6 @@ export default function () {
                   t("account.login.passwordTooWeak")!
                 ),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -159,7 +157,6 @@ export default function () {
                 <Field
                   name="captcha_answer"
                   validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
-                  revalidateOn="submit"
                 >
                   {(answerField, props) => (
                     <Captcha

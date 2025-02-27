@@ -67,7 +67,7 @@ export default function () {
         >
           <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("game.team.join.title")}</h2>
-            <Field name="token" validate={[required(t("game.team.join.tokenRequired")!)]} revalidateOn="submit">
+            <Field name="token" validate={[required(t("game.team.join.tokenRequired")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -80,12 +80,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field
-              name="accepted"
-              type="boolean"
-              validate={[required(t("game.team.create.acceptedRequired")!)]}
-              revalidateOn="submit"
-            >
+            <Field name="accepted" type="boolean" validate={[required(t("game.team.create.acceptedRequired")!)]}>
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />

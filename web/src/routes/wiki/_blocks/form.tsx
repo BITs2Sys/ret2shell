@@ -72,7 +72,7 @@ export default function (props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
-      <Field name="title" validate={[required(t("wiki.titleRequired")!)]} revalidateOn="submit">
+      <Field name="title" validate={[required(t("wiki.titleRequired")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
@@ -131,7 +131,7 @@ export default function (props: {
           />
         )}
       </Field>
-      <Field name="path" validate={[required(t("wiki.pathRequired")!)]} revalidateOn="submit">
+      <Field name="path" validate={[required(t("wiki.pathRequired")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
@@ -144,7 +144,7 @@ export default function (props: {
           />
         )}
       </Field>
-      <Field name="content" validate={[required(t("wiki.contentRequired")!)]} revalidateOn="submit">
+      <Field name="content" validate={[required(t("wiki.contentRequired")!)]}>
         {(field) => (
           <Editor
             form={form}

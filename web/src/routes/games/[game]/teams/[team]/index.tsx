@@ -109,7 +109,6 @@ function AdminManagement(props: {
                 required(t("game.team.create.nameRequired")!),
                 maxLength(32, t("game.team.create.nameMaxLength")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -259,7 +258,6 @@ function SelfManagement(props: { members: User[] }) {
                 required(t("game.team.create.nameRequired")!),
                 maxLength(32, t("game.team.create.nameMaxLength")!),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -334,7 +332,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
   return (
     <Form onSubmit={onSubmit} class="min-h-12 border-b border-b-layer-content/10 flex flex-1 items-center space-x-2">
       <span class="icon-[fluent--add-circle-20-regular] w-5 h-5 text-info" />
-      <Field name="reason" validate={[required(t("game.team.extraReasonRequired")!)]} revalidateOn="submit">
+      <Field name="reason" validate={[required(t("game.team.extraReasonRequired")!)]}>
         {(field, props) => (
           <Input
             type="text"
@@ -349,7 +347,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
           />
         )}
       </Field>
-      <Field name="score" type="number" validate={[required(t("game.team.extraScoreRequired")!)]} revalidateOn="submit">
+      <Field name="score" type="number" validate={[required(t("game.team.extraScoreRequired")!)]}>
         {(field, props) => (
           <Input
             type="number"

@@ -57,7 +57,7 @@ export default function GameEdit(props: {
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.admin.edit.title")}</span>
       </h3>
-      <Field name="name" validate={[required(t("game.nameRequired")!)]} revalidateOn="submit">
+      <Field name="name" validate={[required(t("game.nameRequired")!)]}>
         {(field, props) => (
           <Input
             title={t("game.admin.namePlaceholder")}
@@ -69,7 +69,7 @@ export default function GameEdit(props: {
           />
         )}
       </Field>
-      <Field name="brief" validate={[required(t("game.briefRequired")!)]} revalidateOn="submit">
+      <Field name="brief" validate={[required(t("game.briefRequired")!)]}>
         {(field, props) => (
           <Input
             title={t("game.admin.briefPlaceholder")}
@@ -82,23 +82,13 @@ export default function GameEdit(props: {
         )}
       </Field>
       <Show when={props.inGame}>
-        <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]} revalidateOn="submit">
+        <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
           {(startAtField) => (
-            <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]} revalidateOn="submit">
+            <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
               {(endAtField) => (
-                <Field
-                  name="register_at"
-                  type="number"
-                  validate={[required(t("game.registerAtRequired")!)]}
-                  revalidateOn="submit"
-                >
+                <Field name="register_at" type="number" validate={[required(t("game.registerAtRequired")!)]}>
                   {(registerAtField) => (
-                    <Field
-                      name="archive_at"
-                      type="number"
-                      validate={[required(t("game.archiveAtRequired")!)]}
-                      revalidateOn="submit"
-                    >
+                    <Field name="archive_at" type="number" validate={[required(t("game.archiveAtRequired")!)]}>
                       {(archiveAtField) => (
                         <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                           <TimePicker
@@ -195,7 +185,6 @@ export default function GameEdit(props: {
               minRange(1, t("game.team.sizeMinExceeded")!),
               maxRange(99, t("game.team.sizeMaxExceeded")!),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input

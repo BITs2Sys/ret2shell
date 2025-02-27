@@ -58,11 +58,7 @@ export default function () {
             autocomplete="username"
             disabled
           />
-          <Field
-            name="old_password"
-            validate={[required(t("account.settings.password.oldPasswordRequired")!)]}
-            revalidateOn="submit"
-          >
+          <Field name="old_password" validate={[required(t("account.settings.password.oldPasswordRequired")!)]}>
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
@@ -88,7 +84,6 @@ export default function () {
                 t("account.register.passwordTooWeak")!
               ),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input
@@ -115,7 +110,6 @@ export default function () {
                 return true;
               }, t("account.settings.password.confirmPasswordMismatch")!),
             ]}
-            revalidateOn="submit"
           >
             {(field, props) => (
               <Input

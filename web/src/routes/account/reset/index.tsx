@@ -79,7 +79,6 @@ export default function () {
             <Field
               name="email"
               validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -96,7 +95,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="token" validate={[required(t("account.reset.tokenRequired")!)]} revalidateOn="submit">
+            <Field name="token" validate={[required(t("account.reset.tokenRequired")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--key-20-regular] w-5 h-5" />}
@@ -123,7 +122,6 @@ export default function () {
                   t("account.register.passwordTooWeak")!
                 ),
               ]}
-              revalidateOn="submit"
             >
               {(field, props) => (
                 <Input
@@ -145,7 +143,6 @@ export default function () {
                 <Field
                   name="captcha_answer"
                   validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
-                  revalidateOn="submit"
                 >
                   {(answerField, props) => (
                     <Captcha
