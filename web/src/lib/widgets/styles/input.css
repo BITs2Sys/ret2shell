@@ -1,7 +1,7 @@
 @layer components {
   .input {
     @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
-    /* @apply outline outline-2 outline-offset-2; */
+    /* @apply outline-2 outline-offset-2; */
     @apply px-4 rounded-lg min-h-12;
 
     &:active:hover,

@@ -8,7 +8,7 @@
     .ace_search_field {
       @apply text-base m-1 border-none;
       @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
-      /* @apply outline outline-2 outline-offset-2; */
+      /* @apply outline-2 outline-offset-2; */
       @apply px-2 rounded-md min-h-8;
 
       &:active:hover,
@@ -23,7 +23,7 @@
       }
 
       &:focus {
-        @apply outline outline-2 outline-offset-2 bg-layer-content/5;
+        @apply outline-2 outline-offset-2 bg-layer-content/5;
       }
 
       &:disabled {
@@ -38,7 +38,7 @@
       @apply px-2 rounded-md min-h-8;
 
       &:focus-visible {
-        @apply outline outline-2 outline-offset-2;
+        @apply outline-2 outline-offset-2;
       }
       &:disabled,
       &[disabled] {
@@ -71,7 +71,7 @@
       @apply px-2 rounded-md min-h-8;
 
       &:focus-visible {
-        @apply outline outline-2 outline-offset-2;
+        @apply outline-2 outline-offset-2;
       }
       &:disabled,
       &[disabled] {
@@ -111,7 +111,7 @@
     .ace_search_field {
       @apply text-base m-1 border-none;
       @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
-      /* @apply outline outline-2 outline-offset-2; */
+      /* @apply outline-2 outline-offset-2; */
       @apply px-2 rounded-md min-h-8;
 
       &:active:hover,
@@ -126,7 +126,7 @@
       }
 
       &:focus {
-        @apply outline outline-2 outline-offset-2 bg-layer-content/5;
+        @apply outline-2 outline-offset-2 bg-layer-content/5;
       }
 
       &:disabled {
@@ -141,7 +141,7 @@
       @apply px-2 rounded-md min-h-8;
 
       &:focus-visible {
-        @apply outline outline-2 outline-offset-2;
+        @apply outline-2 outline-offset-2;
       }
       &:disabled,
       &[disabled] {
@@ -181,7 +181,7 @@
     @apply px-2 rounded-md min-h-8;
 
     &:focus-visible {
-      @apply outline outline-2 outline-offset-2;
+      @apply outline-2 outline-offset-2;
     }
     &:disabled,
     &[disabled] {
