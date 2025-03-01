@@ -1,4 +1,4 @@
-import { type ComponentProps, type JSX, Show, createEffect, createSignal, splitProps } from "solid-js";
+import { type ComponentProps, type JSX, Show, createSignal, splitProps } from "solid-js";
 
 import { Popover } from "@ark-ui/solid";
 import clsx from "clsx";
@@ -18,15 +18,10 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
   const [inputProps, others] = splitProps(props, ["icon", "extraBtn", "size", "error", "noLabel", "extraLabel"]);
 
   const [type, setType] = createSignal(props.type);
-  const [error, setError] = createSignal(props.error);
+  const [focusing, setFocusing] = createSignal(false);
 
-  let lastError = props.error;
-  createEffect(() => {
-    lastError = props.error;
-    setError(props.error);
-  });
   return (
-    <Popover.Root autoFocus={false} open={!!error()} closeOnInteractOutside={false}>
+    <Popover.Root autoFocus={false} open={focusing() && !!props.error} closeOnInteractOutside={false}>
       <Popover.Anchor class={clsx("flex flex-col relative space-y-1", props.class, props.classList)}>
         <Show when={!inputProps.noLabel && (props.title || props.name)}>
           <label class="label" for={props.name}>
@@ -66,13 +61,8 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
               (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none"
             )}
             type={type()}
-            on:blur={() => {
-              lastError = error();
-              setError();
-            }}
-            on:focus={() => {
-              setError(lastError);
-            }}
+            on:blur={() => setFocusing(false)}
+            on:focus={() => setFocusing(true)}
           />
           <Show when={props.type === "password"}>
             {/* btn-sm btn-md */}
@@ -90,8 +80,8 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
       </Popover.Anchor>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={clsx("card", error() && "card-error")}>
-            <p class="card-content px-4 p-2">{error()}</p>
+          <Popover.Content class={clsx("card", props.error && "card-error")}>
+            <p class="card-content px-4 p-2">{props.error}</p>
           </Popover.Content>
         </Popover.Positioner>
       </Portal>
