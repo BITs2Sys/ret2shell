@@ -1,14 +1,14 @@
 use axum::{
+  Extension, Json, Router,
   extract::{Query, State},
   middleware,
   response::IntoResponse,
   routing::get,
-  Extension, Json, Router,
 };
 use r2s_database::{challenge, chat, game, team, user};
 use r2s_event::{
-  events::{ChatEvent, ChatEventType, EventContainer},
   Event,
+  events::{ChatEvent, ChatEventType, EventContainer},
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;

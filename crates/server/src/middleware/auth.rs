@@ -1,14 +1,14 @@
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::{Arc, atomic::AtomicBool};
 
 use axum::{
+  Extension,
   extract::{Request, State},
   http::header,
   middleware::Next,
   response::IntoResponse,
-  Extension,
 };
 use chrono::Utc;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use r2s_cache::Cache;
 use r2s_config::auth;
 use r2s_database::{
@@ -257,9 +257,7 @@ pub(crate) use permission_required_any;
 use super::data::extract_team;
 
 macro_rules! is_game_admin {
-  ($token:expr, $game:expr) => {{
-    $token.permissions.0.contains(&Permission::Game) && $game.admins.0.contains(&$token.id)
-  }};
+  ($token:expr, $game:expr) => {{ $token.permissions.0.contains(&Permission::Game) && $game.admins.0.contains(&$token.id) }};
 }
 
 pub(crate) use is_game_admin;

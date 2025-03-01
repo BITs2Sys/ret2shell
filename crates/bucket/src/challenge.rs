@@ -6,12 +6,12 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::{
-  fs::{create_dir, read_dir, read_to_string, write, File},
+  fs::{File, create_dir, read_dir, read_to_string, write},
   io::AsyncRead,
 };
 use tracing::debug;
 
-use crate::traits::{init_dir, BucketError};
+use crate::traits::{BucketError, init_dir};
 
 #[derive(Debug)]
 pub struct ChallengeBucket {

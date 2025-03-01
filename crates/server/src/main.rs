@@ -3,7 +3,7 @@ use std::process::exit;
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use r2s_config::GlobalConfig;
-use r2s_server::{down, greet, up, R2S_VERSION};
+use r2s_server::{R2S_VERSION, down, greet, up};
 
 /// Clap arg definition.
 #[derive(Parser, Debug)]
@@ -51,7 +51,9 @@ async fn main() {
       eprintln!("Version: {}", R2S_VERSION);
       eprintln!("{}: {e}", "Failed to load server config".red().bold());
       eprintln!("Please check your configuration file and try again.");
-      eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>.");
+      eprintln!(
+        "If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>."
+      );
       exit(1)
     }
   };
@@ -74,7 +76,9 @@ async fn main() {
       eprintln!("Version: {}", R2S_VERSION);
       eprintln!("{}: {e}", "Failed to start server".red().bold());
       eprintln!("Please check your configuration file and try again.");
-      eprintln!("If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>.");
+      eprintln!(
+        "If you are still suffering from this problem and don't know how to fix it, please contact tech support <support@ret.sh.cn>."
+      );
       exit(1)
     }
   }

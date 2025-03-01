@@ -2,7 +2,7 @@
 //! WARN: DEPRECATED, DO NOT USE THIS ENTITY
 
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel};
+use sea_orm::{ActiveValue, FromJsonQueryResult, IntoActiveModel, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 

@@ -4,8 +4,8 @@ use colored::Colorize;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use r2s_config::GlobalConfig;
 use r2s_event::{
-  events::{DevopsEvent, DevopsEventType, EventContainer},
   Event,
+  events::{DevopsEvent, DevopsEventType, EventContainer},
 };
 use rustls::crypto;
 use tokio::signal;

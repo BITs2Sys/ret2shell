@@ -14,11 +14,11 @@ export type GameAccessPolicy = {
 export type ArchivePolicyChallenge = {
   show_answer: boolean;
   show_hints: boolean;
-}
+};
 
 export type ArchivePolicy = {
   challenge: ArchivePolicyChallenge;
-}
+};
 
 export type Game = {
   id: number;
@@ -36,7 +36,7 @@ export type Game = {
   host_type: HostType;
   team_size: number;
   access_policy: GameAccessPolicy;
-  archive_policy: ArchivePolicy,
+  archive_policy: ArchivePolicy;
   cover: string | null;
   logo: string | null;
   enable_audit: boolean;

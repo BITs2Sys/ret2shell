@@ -1,9 +1,9 @@
 use axum::{
+  Extension, Json, Router,
   extract::{Query, State},
   middleware,
   response::IntoResponse,
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
 use chrono::Utc;
 use nanoid::nanoid;

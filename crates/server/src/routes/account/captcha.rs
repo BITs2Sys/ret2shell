@@ -1,9 +1,9 @@
 use axum::{
+  Extension, Json, Router,
   extract::State,
   middleware,
   response::IntoResponse,
   routing::{get, post},
-  Extension, Json, Router,
 };
 use r2s_cache::Cache;
 use r2s_config::captcha::ValidatorType;
