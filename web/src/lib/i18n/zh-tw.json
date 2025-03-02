@@ -677,6 +677,7 @@
       "registeredAt": "註冊時間",
       "fetchUserFailed": "獲取用戶詳細信息失敗",
       "warningDelete": "真的要刪除此用戶嗎？這是真正的刪除！",
+      "warningDeleteConfirmTip": "請在下方輸入此賬戶的完整用戶名 {{name}} 以確認刪除操作：",
       "hidden": "隱藏",
       "banned": "封禁",
       "permBasic": "基礎權限",

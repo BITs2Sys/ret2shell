@@ -307,6 +307,7 @@
       "registeredAt": "登録時間",
       "fetchUserFailed": "ユーザー詳細情報の取得に失敗しました",
       "warningDelete": "本当にこのユーザーを削除しますか？これは本当の削除です！",
+      "warningDeleteConfirmTip": "削除を確認するため、このアカウントの完全なユーザー名 {{name}} を以下に入力してください：",
       "hidden": "隠す",
       "banned": "禁止",
       "permBasic": "基本権限",
