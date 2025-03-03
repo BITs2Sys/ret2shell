@@ -1,78 +1,108 @@
 # CHANGELOG
 
+## 3.6.0
+
+### BREAKING CHANGES
+
+- No longer support to configure `cluster.cleanup_interval`, fixed to 30 seconds.
+- Add archive policy for games and related configuration page. Now we can control the performance about archived challenges, whether to show hints or anwers for example. (#149)
+
+### Fixed
+
+- Fixes blockquote title highlight error in specific formats. (#104)
+- Only display error tips when focusing, which avoid always hanging on and hiding other fields. (#150)
+- Fixes where there is a probability taht unlocked tips cannot be loaded if refreshing at hint page directly. (#153)
+- Fixes incorrect blood score calculation.
+
+### Common Developing Changes
+
+- Use `octet-stream` as restricted attachment type.
+- Add refresh timers to notifications and chats.
+- Better performance for popover of publish button
+- Enhance the check at backend when unlocking hints.
+
+### User Changes
+
+- Randomly fill key when selecting checker preset. (#127)
+- Challenge tabs now support middle mouse click to close.
+- Support to display full log message when hovering.
+- Add `Ctrl`+`Enter` shortcut for hammer chat
+- Optimize some translations.
+- Users now won't be logged out when update permissions of themselves.
+- Add an input box for further confirmation when deleting users.
+
 ## 3.5.8
 
-### Breaking Changes
+### BREAKING CHANGES
 
-```diff toml
-# config.toml
+- Move rate limit config to independent section. When `rate_limit` section is missing, the rate limit feature for server will be disabled.
 
-[server]
--api_burst_limit        = 32
--api_burst_restore_rate = 500             # in milliseconds
-...
+  ```diff toml
+  # config.toml
 
-[server.rate_limit]
-+burst_limit        = 32
-+burst_restore_rate = 500             # in milliseconds
-```
+   [server]
+  -api_burst_limit        = 32
+  -api_burst_restore_rate = 500             # in milliseconds
 
-Move rate limit config to independent section. When `rate_limit` section is missing, the rate limit feature for server will be disabled.
+  +[server.rate_limit]
+  +burst_limit        = 32
+  +burst_restore_rate = 500                 # in milliseconds
+  ```
 
 ## 3.5.7
 
 ### Common Developing Changes
 
-- using better default email html template in backend fallback #91 .
-- add menu button for admin page on mobile view #106 .
-- se clsx to construct component classes.
-- add time info on chat message.
+- Using better default email html template in backend fallback. (#91)
+- Add menu button for admin page on mobile view. (#106)
+- Use `clsx` to construct component classes.
+- Add time info on chat message.
 
 ### User Changes
 
-- increase dynamic score limit, now the platform supports 0-1500 score ranges with max to 50 decays.
+- Increase dynamic score limit. Now the platform supports 0-1500 score ranges with max to 50 decays.
 
 ## 3.5.6
 
-### Breaking Changes
+### BREAKING CHANGES
 
 - Event API will always report challenge state changes.
 
 ### Fixed
 
-- setup nats consumer inactive state, which may fix email worker stuck issue.
-- delete pods when creating corresponding services failed, partially fixes #111 .
-- fixes cluster maintain worker, add server panic event to Event API.
+- Setup nats consumer inactive state, which may fix email worker stuck issue.
+- Delete pods when creating corresponding services failed. Partially fixes #111.
+- Fixes cluster maintain worker, add server panic event to Event API.
 
 ### Common Developing Changes
 
-- migrate to tailwindcss v4.
+- Migrate to tailwindcss v4.
 
 ### User Changes
 
-- the service port in challenge environment configuration of challenge have state check now.
+- The service port in challenge environment configuration of challenge have state check now.
 
 ## 3.5.5
 
 ### Fixed
 
-- \[SECURITY\] traffic API through wsrx will check service ports before proxing.
+- [SECURITY] Traffic API through wsrx will check service ports before proxing.
 
 ### User Changes
 
-- support ImagePullSecret in challenge environment configuration.
+- Support `ImagePullSecret` in challenge environment configuration.
 
 ## 3.5.4
 
-### Breaking Changes
+### BREAKING CHANGES
 
-- use generic cell rate algorithm for rate limit.
+- Use generic cell rate algorithm for rate limit.
 
-```diff toml
-# config.toml
+  ```diff toml
+  # config.toml
 
-[server]
--api_rate_limit = 0
-+api_burst_limit        = 32
-+api_burst_restore_rate = 500             # in milliseconds
-```
+   [server]
+  -api_rate_limit = 0
+  +api_burst_limit        = 32
+  +api_burst_restore_rate = 500             # in milliseconds
+  ```
