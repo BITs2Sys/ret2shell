@@ -136,6 +136,7 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
   #[sea_orm(column_type = "JsonBinary")]
+  #[serde(default = "ArchivePolicy::default")]
   pub archive_policy: ArchivePolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,
