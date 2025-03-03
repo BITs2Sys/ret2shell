@@ -837,13 +837,24 @@ async fn get_challenge_hints(
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let hints = hint::get_list(&db.conn, challenge.id).await?;
-  if challenge.archive_at.is_some_and(|t| t > Utc::now()) {
-    return Ok(Json(hints));
+
+  // block hints if the game or challenge is not started
+  if game.start_at > Utc::now() || challenge.release_at.is_some_and(|t| t > Utc::now()) {
+    return Ok(Json(Vec::new()));
   }
+  // show hints if the game is ended
   if game.start_at < Utc::now() && !game.in_progress() {
     return Ok(Json(hints));
   }
+  // show hints after the challenge is archived
+  if game.archive_policy.challenge.show_hints
+    && challenge.archive_at.is_some_and(|t| t < Utc::now())
+  {
+    return Ok(Json(hints));
+  }
+
   if let Some(team) = team {
+    // user hints
     let extras = extra::get_list(&db.conn, team.id).await?;
     let hints = hints
       .iter()
@@ -857,6 +868,7 @@ async fn get_challenge_hints(
       .collect();
     Ok(Json(hints))
   } else {
+    // admin hints
     Ok(Json(hints))
   }
 }
@@ -868,15 +880,39 @@ struct UnlockHintRequest {
 
 async fn unlock_hint(
   State(db): State<Database>, Extension(team): Extension<Option<team::Model>>,
-  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UnlockHintRequest>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Json(req): Json<UnlockHintRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  // block if the game is not in progress
+  if !game.in_progress() {
+    return Err(ResponseError::Forbidden(
+      "you cannot unlock hint when the game is not in progress".to_owned(),
+      "game is not in progress".to_owned(),
+    ));
+  }
+  // block if the challenge is not released
+  if challenge.release_at.is_some_and(|t| t > Utc::now()) {
+    return Err(ResponseError::Forbidden(
+      "you cannot unlock hint when the challenge is not started".to_owned(),
+      "challenge is not released".to_owned(),
+    ));
+  }
+  // block if the challenge is archived and can show hints
+  if game.archive_policy.challenge.show_hints
+    && challenge.archive_at.is_some_and(|t| t < Utc::now())
+  {
+    return Err(ResponseError::Conflict(
+      "there's no need to unlock this hint".to_owned(),
+    ));
+  }
+
   let team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
   let txn = db.conn.begin().await?;
   let hint = hint::get(&txn, req.id).await?;
   if let Some(hint) = hint {
     if hint.challenge_id != challenge.id {
       return Err(ResponseError::PreconditionFailed(
-        "hint does not belong to this challenge".to_owned(),
+        "the hint does not belong to this challenge".to_owned(),
       ));
     }
     if hint.cost > team.score {
@@ -884,6 +920,16 @@ async fn unlock_hint(
         "you does not have enough score to unlock this hint".to_owned(),
       ));
     }
+    if extra::get_list(&txn, team.id)
+      .await?
+      .iter()
+      .any(|e| e.hint_id == Some(hint.id))
+    {
+      return Err(ResponseError::Conflict(
+        "you have already unlocked this hint".to_owned(),
+      ));
+    }
+    // handle hint unlock
     let extra = extra::create(
       &txn,
       extra::Model {
@@ -1334,9 +1380,26 @@ async fn get_answer(
   State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if game.host_type == HostType::Game && !game.archived() && !is_game_admin!(token, game) {
+  let not_archived_or_hide_after_archiving = if challenge.archive_at.is_some_and(|t| t < Utc::now())
+  {
+    !game.archive_policy.challenge.show_answer
+  } else {
+    true
+  };
+  if game.host_type == HostType::Game
+    && !game.archived()
+    && !is_game_admin!(token, game)
+    && not_archived_or_hide_after_archiving
+  {
     return Err(ResponseError::Forbidden(
-      "you can only get the answer after the game is archived".to_owned(),
+      format!(
+        "you can only get the answer after the {} is archived",
+        if game.archive_policy.challenge.show_answer {
+          "game or challenge"
+        } else {
+          "game"
+        }
+      ),
       format!(
         "user {}:'{}' ({}) want to get the answer for challenge {}:'{}'",
         token.id, token.account, token.nickname, challenge.id, challenge.name

@@ -4,9 +4,9 @@ use chrono::{DateTime, Utc};
 use k8s_openapi::api::core::v1::{Pod, Service};
 use kube::ResourceExt;
 use rune::{
+  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;

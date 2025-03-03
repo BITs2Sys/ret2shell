@@ -1,26 +1,28 @@
 use std::collections::HashMap;
 
 use axum::{
+  Extension, Json, Router,
   extract::{DefaultBodyLimit, Multipart, Path, Query, State},
   middleware,
   response::IntoResponse,
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
-use chrono::{serde::ts_seconds, DateTime, Utc};
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use futures::TryStreamExt;
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
-use r2s_cluster::{traffic::MappedPort, Cluster, ClusterError, Pod, CHALLENGE_NS};
+use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError, Pod, traffic::MappedPort};
 use r2s_config::GlobalConfig;
 use r2s_database::{
-  article, audit, challenge as challenge_db, config, game, institute, submission, team as team_db,
+  article, audit, challenge as challenge_db, config,
+  game::{self, ArchivePolicy},
+  institute, submission, team as team_db,
   user::{self, Permission},
 };
 use r2s_event::{
-  events::{EventContainer, GameEvent, GameEventType},
   Event, EventManager,
+  events::{EventContainer, GameEvent, GameEventType},
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;
@@ -31,7 +33,7 @@ use tracing::{info, warn};
 
 use crate::{
   middleware::{
-    auth::{self, is_game_admin, Token},
+    auth::{self, Token, is_game_admin},
     data::{self, extract_team},
   },
   traits::{GlobalState, ResponseError},
@@ -42,6 +44,15 @@ mod chat;
 mod notification;
 mod team;
 pub mod worker;
+
+// // default_chain!(game.archive_policy.clone(), challenge.show_answer)
+// #[macro_export]
+// macro_rules! default_chain {
+//   ($root:expr, $($key:ident).+) => {
+//       $root.unwrap_or_default()
+//       $(.$key.unwrap_or_default())+
+//   };
+// }
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   tokio::spawn(worker::spawn_game_workers(state.clone()));
@@ -216,6 +227,7 @@ async fn create_game(
       admins: game::Admins(vec![token.id]),
       introduction_id: None,
       token: Some(nanoid!()),
+      archive_policy: ArchivePolicy::default(),
       ..model
     },
   )

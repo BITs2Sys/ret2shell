@@ -8,7 +8,7 @@ use axum::{
 use chrono::{DateTime, Utc};
 use events::{Broadcast, EventContainer};
 use futures::{SinkExt, StreamExt};
-use tokio::sync::{broadcast, RwLock};
+use tokio::sync::{RwLock, broadcast};
 
 pub mod events;
 mod worker;

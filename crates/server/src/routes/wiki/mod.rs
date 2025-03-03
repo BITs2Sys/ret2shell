@@ -1,9 +1,9 @@
 use axum::{
+  Extension, Json, Router,
   extract::{Path, State},
   middleware,
   response::IntoResponse,
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
 use r2s_cache::Cache;
 use r2s_database::{article, user::Permission};

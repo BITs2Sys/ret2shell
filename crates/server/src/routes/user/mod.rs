@@ -1,9 +1,9 @@
 use axum::{
+  Extension, Json, Router,
   extract::{Query, State},
   middleware,
   response::IntoResponse,
   routing::{get, patch},
-  Extension, Json, Router,
 };
 use r2s_cache::Cache;
 use r2s_database::{
@@ -15,7 +15,7 @@ use serde::Deserialize;
 
 use crate::{
   middleware::{
-    auth::{self, Token},
+    auth::{self, Token, TokenTracker},
     data,
   },
   traits::{GlobalState, ResponseError},
@@ -116,7 +116,8 @@ async fn logout_user(cache: &Cache, user_id: i64) -> Result<(), ResponseError> {
 
 async fn update_user(
   State(ref db): State<Database>, State(ref cache): State<Cache>,
-  Extension(user): Extension<user::Model>, Json(data): Json<user::Model>,
+  Extension(user): Extension<user::Model>, Extension(token): Extension<Token>,
+  Extension(token_tracker): Extension<TokenTracker>, Json(data): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let user = user::update(
     &db.conn,
@@ -134,7 +135,22 @@ async fn update_user(
     },
   )
   .await?;
+
   logout_user(cache, user.id).await?;
+
+  if token.id == user.id {
+    *(token_tracker.token.lock().await) = Token {
+      id: user.id.clone(),
+      account: user.account.clone(),
+      nickname: user.nickname.clone(),
+      permissions: user.permissions.clone(),
+      ..Default::default()
+    };
+    token_tracker
+      .renew_requested
+      .store(true, std::sync::atomic::Ordering::Relaxed);
+  }
+
   Ok(Json(user))
 }
 

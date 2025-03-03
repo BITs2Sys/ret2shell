@@ -1,10 +1,10 @@
 use std::net::IpAddr;
 
 use axum::{
+  Extension, Router,
   extract::{Query, State, WebSocketUpgrade},
   response::IntoResponse,
   routing::get,
-  Extension, Router,
 };
 use r2s_database::game;
 use r2s_event::EventManager;

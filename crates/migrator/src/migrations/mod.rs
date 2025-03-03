@@ -26,3 +26,4 @@ pub mod m_20241220_000001_game_award_rates;
 pub mod m_20241226_000001_game_traffic;
 pub mod m_20250105_000001_create_oauth_provider;
 pub mod m_20250114_000001_create_oauth_index;
+pub mod m_20250226_000001_game_archive_policy;

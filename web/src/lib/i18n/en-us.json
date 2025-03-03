@@ -450,6 +450,14 @@
         "selectPresetScripts": "Select Preset Script...",
         "singleNodeDirectScript": "Single-node direct connection",
         "title": "Environmental Routing"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "Allow to view answers",
+          "title": "Challenge archive policies",
+          "showHints": "Allow to view hints"
+        },
+        "title": "Policies"
       }
     },
     "introduction": {
@@ -669,6 +677,7 @@
       "registeredAt": "Registration Time",
       "fetchUserFailed": "failed to fetch user details",
       "warningDelete": "Are you sure you want to delete this user? This is a real deletion!",
+      "warningDeleteConfirmTip": "Please enter the full username {{name}} of this account below to confirm deletion:",
       "hidden": "Hidden",
       "banned": "Banned",
       "permBasic": "Basic Permissions",

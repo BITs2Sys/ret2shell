@@ -1,15 +1,15 @@
 use axum::{
+  Extension, Json, Router,
   extract::State,
   middleware,
   response::IntoResponse,
   routing::{delete, get, post},
-  Extension, Json, Router,
 };
 use chrono::Utc;
 use r2s_database::{game, notification, user};
 use r2s_event::{
-  events::{EventContainer, GameEvent, GameEventType},
   Event,
+  events::{EventContainer, GameEvent, GameEventType},
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;

@@ -1,10 +1,10 @@
 use axum::{
+  Router,
   extract::{Path, Query, State, WebSocketUpgrade},
   response::IntoResponse,
   routing::get,
-  Router,
 };
-use r2s_cluster::{Cluster, CHALLENGE_NS};
+use r2s_cluster::{CHALLENGE_NS, Cluster};
 use serde::Deserialize;
 use tracing::debug;
 

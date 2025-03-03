@@ -5,9 +5,9 @@ use std::{collections::HashMap, sync::Arc};
 use chrono::{DateTime, Utc};
 use r2s_config::auth::Config;
 use rune::{
+  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
 };
 use tokio::sync::RwLock;
 pub use traits::OAuthError;

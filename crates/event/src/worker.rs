@@ -1,8 +1,8 @@
-use async_nats::jetstream::{consumer::pull::Stream, Message};
+use async_nats::jetstream::{Message, consumer::pull::Stream};
 use futures::StreamExt;
 use tracing::{error, warn};
 
-use crate::{events::EventContainer, traits::EventError, EventManager};
+use crate::{EventManager, events::EventContainer, traits::EventError};
 
 pub async fn event_pusher(mut messages: Stream, manager: EventManager) {
   let mut retries = 0;
@@ -20,7 +20,9 @@ pub async fn event_pusher(mut messages: Stream, manager: EventManager) {
     }
     retries += 1;
     if retries < 5 {
-      warn!("Event pusher worker stopped unexpectedly! Maybe a message queue issue? Trying to restart...");
+      warn!(
+        "Event pusher worker stopped unexpectedly! Maybe a message queue issue? Trying to restart..."
+      );
       continue;
     } else {
       error!("Event pusher worker stopped unexpectedly for 5 times, exiting...");

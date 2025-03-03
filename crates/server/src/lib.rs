@@ -4,8 +4,8 @@ use colored::Colorize;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use r2s_config::GlobalConfig;
 use r2s_event::{
-  events::{DevopsEvent, DevopsEventType, EventContainer},
   Event,
+  events::{DevopsEvent, DevopsEventType, EventContainer},
 };
 use rustls::crypto;
 use tokio::signal;
@@ -71,9 +71,9 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   info!("Loading module: < Auditor >");
   let auditor = r2s_auditor::initialize(&config.auditor).await?;
   info!("Loading module: < Database >");
-  let db = r2s_migrator::initialize(&config.database).await?;
+  let (db, migrated) = r2s_migrator::initialize(&config.database).await?;
   info!("Loading module: < Cache >");
-  let cache = r2s_cache::initialize(&config.cache).await?;
+  let cache = r2s_cache::initialize(&config.cache, Some(migrated)).await?;
   info!("Loading module: < Bucket >");
   let bucket = r2s_bucket::initialize(&config.bucket).await?;
   info!("Loading module: < Message Queue >");

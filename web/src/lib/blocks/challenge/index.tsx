@@ -32,6 +32,7 @@ function BottomPanel(props: {
   expanded: boolean;
   onExpand?: () => void;
   inGame: boolean;
+  archived: boolean;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const pages = {
@@ -143,7 +144,7 @@ function BottomPanel(props: {
           <Button
             onClick={() => setSearchParams({ tab: "answer" })}
             ghost={page() !== "answer"}
-            disabled={props.inGame && !isGameAdmin()}
+            disabled={!props.archived && !isGameAdmin()}
           >
             <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("game.challenge.answer")}</span>
@@ -258,6 +259,7 @@ function BottomPanel(props: {
 export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
+  archived: boolean;
 }) {
   onCleanup(() => {
     setChallengeStore({ current: null, env: null, files: [], adminFiles: [] });
@@ -283,6 +285,7 @@ export default function (props: {
         endPanel={() => (
           <BottomPanel
             inGame={props.inGame ?? false}
+            archived={props.archived}
             onStateChange={props.onStateChange}
             expanded={expanded()}
             onExpand={() => {

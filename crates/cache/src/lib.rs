@@ -191,12 +191,17 @@ impl Cache {
 /// * `url` - The redis url, supports centralized / clustered and
 ///   sentinel-layered node.
 /// * `max_connections` - The max connections for each node.
-pub async fn initialize(config: &Option<cache::Config>) -> Result<Cache, CacheError> {
+pub async fn initialize(
+  config: &Option<cache::Config>, flush: Option<bool>,
+) -> Result<Cache, CacheError> {
   let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
   debug!("initialize cache manager with url: {:?}", config.url);
   let config = Config::from_url(&config.url)?;
   let client = Client::new(config, None, None, None);
   client.init().await?;
+  if flush.unwrap_or(false) {
+    client.flushall::<()>(false).await?;
+  }
   Ok(Cache::new(client))
 }
 

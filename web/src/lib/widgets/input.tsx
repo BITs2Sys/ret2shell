@@ -18,8 +18,10 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
   const [inputProps, others] = splitProps(props, ["icon", "extraBtn", "size", "error", "noLabel", "extraLabel"]);
 
   const [type, setType] = createSignal(props.type);
+  const [focusing, setFocusing] = createSignal(false);
+
   return (
-    <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
+    <Popover.Root autoFocus={false} open={focusing() && !!props.error} closeOnInteractOutside={false}>
       <Popover.Anchor class={clsx("flex flex-col relative space-y-1", props.class, props.classList)}>
         <Show when={!inputProps.noLabel && (props.title || props.name)}>
           <label class="label" for={props.name}>
@@ -27,7 +29,14 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             {inputProps.extraLabel}
           </label>
         </Show>
-        <div class="flex flex-row">
+        <div
+          class={clsx(
+            "flex flex-row border border-transparent",
+            size === "md" ? "rounded-lg" : "rounded-md",
+            "has-[input:focus]:outline-2 has-[input:focus]:outline-offset-2 has-[input:focus]:outline-layer-content/60",
+            inputProps.error && "!border-error !outline-error"
+          )}
+        >
           <Show when={props.icon}>
             {/* rounded-l-lg rounded-l-md */}
             <div
@@ -47,12 +56,13 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             value={others.value}
             class={clsx(
               // input-sm input-md
-              `input w-0 flex-1 input-${size}`,
+              `input w-0 flex-1 input-${size} border-0 outline-none`,
               inputProps.icon && "!rounded-l-none",
-              (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none",
-              inputProps.error && "input-error"
+              (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none"
             )}
             type={type()}
+            on:blur={() => setFocusing(false)}
+            on:focus={() => setFocusing(true)}
           />
           <Show when={props.type === "password"}>
             {/* btn-sm btn-md */}

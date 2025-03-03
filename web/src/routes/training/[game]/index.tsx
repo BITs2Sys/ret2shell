@@ -224,7 +224,7 @@ export default function () {
             <Form onDone={onCreateChallenge} loading={creating()} />
           </Match>
           <Match when={challengeStore.current}>
-            <Challenge onStateChange={refreshChallenges} />
+            <Challenge onStateChange={refreshChallenges} archived />
           </Match>
         </Switch>
       </div>

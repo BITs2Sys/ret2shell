@@ -307,6 +307,7 @@
       "registeredAt": "登録時間",
       "fetchUserFailed": "ユーザー詳細情報の取得に失敗しました",
       "warningDelete": "本当にこのユーザーを削除しますか？これは本当の削除です！",
+      "warningDeleteConfirmTip": "削除を確認するため、このアカウントの完全なユーザー名 {{name}} を以下に入力してください：",
       "hidden": "隠す",
       "banned": "禁止",
       "permBasic": "基本権限",
@@ -600,6 +601,14 @@
         "selectPresetScripts": "プリセットスクリプトを選択...",
         "singleNodeDirectScript": "シングルノードダイレクト接続",
         "title": "環境ルーティング"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "回答の閲覧を許可",
+          "title": "アーカイブ戦略：問題",
+          "showHints": "ヒントの閲覧を許可"
+        },
+        "title": "戦略管理"
       }
     },
     "adminCanNotTakePartIn": "管理者は参加できません。",

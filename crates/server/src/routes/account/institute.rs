@@ -1,9 +1,9 @@
 use axum::{
+  Extension, Json, Router,
   extract::State,
   middleware,
   response::IntoResponse,
   routing::{get, post},
-  Extension, Json, Router,
 };
 use r2s_database::{institute, user::Permission};
 use r2s_migrator::Database;

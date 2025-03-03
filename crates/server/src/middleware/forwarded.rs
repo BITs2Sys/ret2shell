@@ -5,11 +5,11 @@ use std::{
 
 use async_nats::jetstream::{self, consumer::pull::Stream};
 use axum::{
+  Extension,
   extract::{ConnectInfo, Request, State},
-  http::{header::FORWARDED, HeaderMap},
+  http::{HeaderMap, header::FORWARDED},
   middleware::Next,
   response::IntoResponse,
-  Extension,
 };
 use futures::StreamExt;
 use r2s_database::ip;
@@ -17,8 +17,8 @@ use r2s_migrator::Database;
 use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tower_governor::{key_extractor::KeyExtractor, GovernorError};
-use tracing::{debug, error, info_span, warn, Instrument};
+use tower_governor::{GovernorError, key_extractor::KeyExtractor};
+use tracing::{Instrument, debug, error, info_span, warn};
 
 use super::auth::Token;
 use crate::traits::ResponseError;

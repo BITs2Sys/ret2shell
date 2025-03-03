@@ -404,6 +404,14 @@
         "startEndTime": "开始与结束时间",
         "noTimeline": "没有时段",
         "deleteTips": "确定要删除这个时段吗？即使删除了也不影响现有题目的时段控制。"
+      },
+      "policies": {
+        "challenge": {
+          "showAnswer": "允许查看题解",
+          "title": "题目归档策略",
+          "showHints": "允许查看提示"
+        },
+        "title": "策略管理"
       }
     },
     "exit": "退出",
@@ -668,7 +676,8 @@
       "institute": "组织",
       "registeredAt": "注册时间",
       "fetchUserFailed": "获取用户详细信息失败",
-      "warningDelete": "真的要删除此用户吗？这是真正的删除！",
+      "warningDelete": "这是真正的删除操作，用户数据将被永久清除，确认删除吗？",
+      "warningDeleteConfirmTip": "请在下方输入此账户的完整用户名 {{name}} 以确认删除操作：",
       "hidden": "隐藏",
       "banned": "封禁",
       "permBasic": "基础权限",

@@ -66,6 +66,20 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/policies`}
+            justify={expanded() ? "start" : "center"}
+            title={t("game.admin.policies.title")}
+          >
+            <span class="icon-[fluent--document-multiple-prohibited-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.policies.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/timeline`}
             justify={expanded() ? "start" : "center"}
             title={t("game.admin.timeline.title")}
