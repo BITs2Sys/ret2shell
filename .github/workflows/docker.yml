@@ -1,6 +1,10 @@
 name: Docker
 
 on:
+  push:
+    tags:
+      - '*'
+
   workflow_dispatch:
     inputs:
       image:
@@ -11,7 +15,6 @@ on:
 jobs:
   # Build and export the docker image
   build:
-    if: github.event_name == 'workflow_dispatch'
     name: Build
     runs-on: [self-hosted, linux, x64]
     env:
