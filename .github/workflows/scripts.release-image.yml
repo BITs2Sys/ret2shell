@@ -3,10 +3,10 @@ name: Script Image
 on:
   push:
     paths:
-      - '.github/workflows/scripts.release-image.yml'
-      - 'Containerfile'
-      - 'release-image.fish'
-      - 'release-image.sh'
+      - ".github/workflows/scripts.release-image.yml"
+      - "Containerfile"
+      - "release-image.fish"
+      - "release-image.sh"
 
   workflow_dispatch:
 
@@ -25,14 +25,14 @@ jobs:
             script: release-image.sh
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        # fetch depth 0 to fetch all history for git-restore-mtime-action
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          # fetch depth 0 to fetch all history for git-restore-mtime-action
+          fetch-depth: 0
 
-    - uses: chetan/git-restore-mtime-action@v2
+      - uses: chetan/git-restore-mtime-action@v2
 
-    - name: Test ${{ matrix.steps.script }}
-      run: |
-        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
-        ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'
+      - name: Test ${{ matrix.steps.script }}
+        run: |
+          base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+          ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'

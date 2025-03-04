@@ -8,6 +8,8 @@ on:
       - "crates/**"
       - "Cargo.toml"
       - "Cargo.lock"
+  pull_request:
+    types: [review_requested]
 
   workflow_dispatch:
 
@@ -42,6 +44,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Setup clippy
+        id: setup-clippy
+        run: rustup component add clippy
 
       - name: Cache cargo
         uses: actions/cache@v4
