@@ -4,7 +4,7 @@
   </a>
   <p><em>A feature-riches CTF challenge platform</em></p>
 
-[![MSRV 1.83.0+](https://img.shields.io/badge/MSRV-1.83.0+-blue)](https://releases.rs/docs/1.83.0/)
+[![MSRV 1.85.0+](https://img.shields.io/badge/MSRV-1.85.0+-blue)](https://releases.rs/docs/1.85.0/)
 [![Solid.js 1.9+](https://img.shields.io/badge/Solid.js-1.9+-orange)](https://www.solidjs.com/)
 
 </div>

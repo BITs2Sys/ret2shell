@@ -76,3 +76,22 @@ jobs:
           name: r2s-server
           path: target/${{ matrix.target }}/release/r2s-server
           retention-days: 1
+
+  clippy-check:
+    name: Check
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: [self-hosted, linux, x64]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Setup clippy
+      id: setup-clippy
+      run: rustup component add clippy
+
+    - name: Cargo clippy checks
+      run: |
+        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+        cargo clippy --all-features --all-targets -- -D warnings
