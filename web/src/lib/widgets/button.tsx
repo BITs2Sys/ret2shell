@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
 
 export type ButtonProps = ComponentProps<"button"> & {
+  active?: boolean;
   level?: "primary" | "info" | "success" | "warning" | "error" | null;
   size?: "sm" | "md";
   ghost?: boolean;
@@ -15,6 +16,7 @@ export type ButtonProps = ComponentProps<"button"> & {
 
 export default function (props: ButtonProps & { children?: JSX.Element }) {
   const [buttonProps, _1] = splitProps(props, [
+    "active",
     "level",
     "size",
     "ghost",
@@ -45,7 +47,8 @@ export default function (props: ButtonProps & { children?: JSX.Element }) {
         buttonProps.square && "btn-square",
         nativeProps.disabled && "btn-disabled",
         nativeProps.class,
-        nativeProps.classList
+        nativeProps.classList,
+        buttonProps.active && "btn-active"
       )}
     >
       <Show when={props.loading}>

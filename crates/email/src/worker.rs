@@ -1,12 +1,12 @@
-use async_nats::jetstream::{self, consumer::pull::Stream, AckKind};
+use async_nats::jetstream::{self, AckKind, consumer::pull::Stream};
 use futures::StreamExt;
 use lettre::{
-  message::{header, SinglePart},
+  AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
+  message::{SinglePart, header},
   transport::smtp::{
     authentication::Credentials,
     client::{Tls, TlsParameters},
   },
-  AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
 };
 use r2s_config::email;
 use tracing::{debug, error, info, warn};

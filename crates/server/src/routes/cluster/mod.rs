@@ -1,17 +1,17 @@
 use axum::{
+  Extension, Json, Router,
   extract::State,
   middleware,
   response::IntoResponse,
   routing::{get, patch},
-  Extension, Json, Router,
 };
 use r2s_cache::Cache;
 use r2s_cluster::{Cluster, ClusterError};
 use r2s_config::cluster;
 use r2s_database::{config, user::Permission};
 use r2s_event::{
-  events::{DevopsEvent, DevopsEventType, EventContainer},
   Event,
+  events::{DevopsEvent, DevopsEventType, EventContainer},
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;

@@ -16,7 +16,7 @@ print_error() {
 
 # print info
 app_v="$(grep -m 1 -oP '^\s*version\s*=\s*"\K[^"]+' Cargo.toml 2>/dev/null || echo "unknown")"
-git_v="$(command_t git && git describe --abbrev=8 --always --dirty='*' 2>/dev/null || echo "unknown")"
+git_v="$(command_t git && git describe --abbrev=8 --always --dirty='*' --match='' 2>/dev/null || echo "unknown")"
 echo '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 echo "${x1b}[1;34mR${x1b}[0met 2 ${x1b}[1;31mS${x1b}[0mhell OCI Distribution Script" && echo
 echo "Build on version: ${x1b}[1;36m$app_v-$git_v${x1b}[0m"

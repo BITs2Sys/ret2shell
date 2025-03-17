@@ -1,11 +1,11 @@
 use axum::{
+  Extension, Json, Router,
   extract::{Path, Query, State},
   middleware,
   response::IntoResponse,
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
-use chrono::{serde::ts_seconds, DateTime, Utc};
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use r2s_database::{calendar, user::Permission};
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};

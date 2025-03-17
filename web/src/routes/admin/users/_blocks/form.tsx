@@ -48,6 +48,8 @@ export default function (compProps: {
   editSource?: User;
   loading: boolean;
 }) {
+  const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
+  const [deletLoading, setDeleteLoading] = createSignal(false);
   const [form, { Form, Field }] = createForm<UserForm>();
   createEffect(() => {
     if (compProps.editSource) {
@@ -122,8 +124,11 @@ export default function (compProps: {
   }
   async function handleDeleteUser() {
     try {
+      setDeleteLoading(true);
       await deleteUser(compProps.editSource!.id);
       // compProps.onDone?.(compProps.editSource!);
+      setDeleteConfirmValue("");
+      setDeleteLoading(false);
       addToast({
         level: "success",
         description: t("form.deleteSuccess")!,
@@ -180,16 +185,35 @@ export default function (compProps: {
           {t("form.backToList")}
         </Link>
         <Popover size="sm" level="error" btnContent={<span>{t("form.delete")}</span>}>
-          <Card contentClass="p-2 flex flex-col space-y-2 items-center">
-            <div class="flex flex-col space-x-2 items-center">
-              <span class="font-bold text-error">{t("admin.users.warningDelete")}</span>
-              <span class="font-bold text-error animate-ping p-2">{t("admin.users.warningDelete")}</span>
-              <span class="font-bold text-error animate-spin p-4">{t("admin.users.warningDelete")}</span>
-              <span class="font-bold text-error animate-bounce p-2">{t("admin.users.warningDelete")}</span>
+          <Card contentClass="p-4 flex flex-col space-y-2 items-stretch max-w-lg">
+            {/* <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-12 md:h-12" /> */}
+            <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
+              <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
+              <p class="font-bold">{t("admin.users.warningDelete")}</p>
+            </Card>
+            <div class="flex flex-col space-x-2">
+              <span class="font-bold text-error">
+                {t("admin.users.warningDeleteConfirmTip", { name: `${compProps.editSource?.account}` })}
+              </span>
             </div>
-            <Button level="warning" class="w-full" onClick={handleDeleteUser}>
-              <span>{t("form.delete")}</span>
-            </Button>
+            <Input
+              size="sm"
+              value={deleteConfirmValue()}
+              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+              extraBtn={
+                <Button
+                  size="sm"
+                  level="warning"
+                  class="rounded-l-none"
+                  disabled={deleteConfirmValue() !== compProps.editSource?.account || deletLoading()}
+                  loading={deletLoading()}
+                  onClick={handleDeleteUser}
+                >
+                  <span>{t("form.delete")}</span>
+                </Button>
+              }
+              onInput={(e) => setDeleteConfirmValue(e.currentTarget.value)}
+            />
           </Card>
         </Popover>
       </h3>

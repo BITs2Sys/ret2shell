@@ -5,9 +5,9 @@ use k8s_openapi::{
   apimachinery::pkg::apis::meta::v1::LabelSelector,
 };
 use kube::{
+  Client, Config,
   api::ObjectMeta,
   config::{KubeConfigOptions, Kubeconfig},
-  Client, Config,
 };
 
 mod manager;
@@ -17,7 +17,7 @@ mod traits;
 
 pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod};
 pub use kube::api::ObjectList;
-pub use manager::{Cluster, CHALLENGE_NS};
+pub use manager::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster;
 use tracing::{error, info};
 pub use traits::ClusterError;
@@ -64,7 +64,9 @@ async fn check_namespace(client: &Cluster) -> Result<(), ClusterError> {
   } else {
     info!("Namespace `ret2shell-challenge` already exists in cluster, skipping...");
   }
-  info!("Note: `ret2shell-challenge` namespace is used for challenge deployment, the pod will be managed automatically by Ret2Shell, please don't operate on it manually.");
+  info!(
+    "Note: `ret2shell-challenge` namespace is used for challenge deployment, the pod will be managed automatically by Ret2Shell, please don't operate on it manually."
+  );
   Ok(())
 }
 

@@ -4,9 +4,9 @@ use chrono::{DateTime, Utc};
 use r2s_bucket::challenge::ChallengeBucket;
 use r2s_database::{challenge, submission, team, user};
 use rune::{
+  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;

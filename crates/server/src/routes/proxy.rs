@@ -1,10 +1,10 @@
 use axum::{
+  Router,
   body::Body,
   extract::{Request, State},
   http::Uri,
   response::IntoResponse,
   routing::{any, get},
-  Router,
 };
 use hyper_util::client::legacy::connect::HttpConnector;
 use r2s_config::server::FrontendServeType;
@@ -47,7 +47,7 @@ async fn frontend_proxy_handler(
     None => {
       return Err(ResponseError::PreconditionFailed(String::from(
         "Frontend proxy not set for ret2shell, please contact the website devops",
-      )))
+      )));
     }
   };
   let path = req.uri().path();

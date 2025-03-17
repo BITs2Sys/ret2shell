@@ -50,7 +50,7 @@ pub struct Database {
   pub conn: DatabaseConnection,
 }
 
-pub async fn initialize(config: &Option<database::Config>) -> Result<Database, DbErr> {
+pub async fn initialize(config: &Option<database::Config>) -> Result<(Database, bool), DbErr> {
   let config = config
     .clone()
     .ok_or(DbErr::Custom("database config not found".to_string()))?;
@@ -61,8 +61,11 @@ pub async fn initialize(config: &Option<database::Config>) -> Result<Database, D
     .sqlx_logging_level(LevelFilter::Debug);
 
   let conn = sea_orm::Database::connect(connect_options).await?;
-  Migrator::up(&conn, None).await?;
-  Ok(Database { conn })
+  let needs_migrate = !Migrator::get_pending_migrations(&conn).await?.is_empty();
+  if needs_migrate {
+    Migrator::up(&conn, None).await?;
+  }
+  Ok((Database { conn }, needs_migrate))
 }
 
 pub async fn down(config: &Option<database::Config>) -> Result<(), DbErr> {

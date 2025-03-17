@@ -6,7 +6,7 @@ app_v_minor="$(echo "$app_v" | cut -d. -f2)"
 app_v_patch="$(echo "$app_v "| cut -d. -f3)"
 echo "APP_VERSION: $app_v"
 
-commit_sha="$(git describe --abbrev=8 --always --dirty='*' 2>/dev/null || echo "unknown")"
+commit_sha="$(git describe --abbrev=8 --always --dirty='*' --match='' 2>/dev/null || echo "unknown")"
 echo "COMMIT_SHA: $commit_sha"
 
 cache_v="$app_v_major.$app_v_minor"

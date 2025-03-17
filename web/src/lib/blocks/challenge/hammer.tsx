@@ -213,11 +213,11 @@ export default function (props: {
                   <span>{t("game.challenge.hammerTips3")}</span>
                   <a
                     class="align-middle space-x-1 text-primary hover:underline"
-                    href="https://paste.mozilla.org/"
+                    href="https://bpa.st"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <span>Mozilla Public Pastebin</span>
+                    <span>bpa.st</span>
                     <span class="icon-[fluent--open-20-regular]" />
                   </a>
                   <span>&nbsp;</span>

@@ -1,29 +1,29 @@
 use std::{net::IpAddr, sync::Arc, time::Duration};
 
 use axum::{
+  Router,
   body::Body,
   error_handling::HandleErrorLayer,
   http::{HeaderValue, Request, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
   routing::get,
-  Router,
 };
 use r2s_config::server;
-use tower::{buffer::BufferLayer, ServiceBuilder};
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
+use tower::{ServiceBuilder, buffer::BufferLayer};
+use tower_governor::{GovernorLayer, governor::GovernorConfigBuilder};
 use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
 };
-use tracing::{debug, debug_span, Span};
+use tracing::{Span, debug, debug_span};
 
 use crate::{
   middleware::{
     self,
     auth::extract_user_info,
     codec,
-    forwarded::{ip_record, ip_record_worker, ProxiedIpExtractor},
+    forwarded::{ProxiedIpExtractor, ip_record, ip_record_worker},
   },
   traits::GlobalState,
 };

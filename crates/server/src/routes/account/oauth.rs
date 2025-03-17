@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use axum::{
+  Extension, Json, Router,
   extract::{Path, Query, State},
   http::StatusCode,
   middleware,
   response::IntoResponse,
   routing::{get, post},
-  Extension, Json, Router,
 };
 use chrono::Utc;
 use r2s_cache::Cache;
@@ -24,10 +24,10 @@ use tracing::info;
 
 use crate::{
   middleware::{
-    auth::{captcha_protected, permission_required_all, Token, TokenTracker},
+    auth::{Token, TokenTracker, captcha_protected, permission_required_all},
     data,
   },
-  routes::account::{send_email, EmailType},
+  routes::account::{EmailType, send_email},
   traits::{GlobalState, ResponseError},
   utility::password::hash_password,
 };

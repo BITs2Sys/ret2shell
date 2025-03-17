@@ -1,14 +1,14 @@
 use std::{path::PathBuf, str::FromStr};
 
 use axum::{
+  Extension, Json, Router,
   extract::{
-    ws::{Message, WebSocket},
     Query, State, WebSocketUpgrade,
+    ws::{Message, WebSocket},
   },
   middleware,
   response::{IntoResponse, Response},
   routing::get,
-  Extension, Json, Router,
 };
 use futures::future::join_all;
 use r2s_cache::Cache;

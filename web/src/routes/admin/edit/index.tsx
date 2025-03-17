@@ -69,12 +69,12 @@ export default function () {
       const resp = await getPlatformConfig();
       setConfig(resp);
       setValues(form, {
-        name: resp.server.name || undefined,
-        footer_info: resp.server.footer_info || undefined,
-        footer_url: resp.server.footer_url || undefined,
-        subject_info: resp.server.subject_info || undefined,
-        subject_url: resp.server.subject_url || undefined,
-        record: resp.server.record || undefined,
+        name: resp.server.name || "",
+        footer_info: resp.server.footer_info || "",
+        footer_url: resp.server.footer_url || "",
+        subject_info: resp.server.subject_info || "",
+        subject_url: resp.server.subject_url || "",
+        record: resp.server.record || "",
         hide_maker: resp.server.hide_maker || false,
       });
     } catch (err) {

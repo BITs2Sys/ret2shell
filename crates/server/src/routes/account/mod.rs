@@ -1,14 +1,14 @@
 use std::net::IpAddr;
 
 use axum::{
+  Extension, Json, Router,
   extract::{Query, State},
   http::StatusCode,
   middleware,
   response::IntoResponse,
   routing::{get, patch, post},
-  Extension, Json, Router,
 };
-use chrono::{serde::ts_seconds, DateTime, Utc};
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use nanoid::{alphabet, nanoid};
 use r2s_cache::Cache;
 use r2s_config::{captcha::ValidatorType, email};
@@ -26,7 +26,7 @@ use tracing::{debug, info, warn};
 
 use crate::{
   middleware::{
-    auth::{captcha_protected, permission_required_all, Token, TokenTracker},
+    auth::{Token, TokenTracker, captcha_protected, permission_required_all},
     data,
   },
   traits::{GlobalState, ResponseError},
@@ -793,7 +793,13 @@ async fn change_profile(
       return Err(ResponseError::BadRequest("email is required".to_owned()));
     }
   };
-
+  if email_changed
+    && user::get_by_account_or_email(&db.conn, &email)
+      .await?
+      .is_some()
+  {
+    return Err(ResponseError::Conflict("email already used".to_owned()));
+  }
   let user = user::Model {
     nickname: body.nickname.clone(),
     email: Some(email.clone()),

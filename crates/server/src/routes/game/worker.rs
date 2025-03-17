@@ -10,8 +10,8 @@ use r2s_database::{
   user,
 };
 use r2s_event::{
-  events::{EventContainer, SubmissionEvent, SubmissionEventType},
   Event,
+  events::{EventContainer, SubmissionEvent, SubmissionEventType},
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;

@@ -2,14 +2,13 @@
 
 use axum::{
   body::Body,
-  http::{header, Request},
+  http::{Request, header},
   middleware::Next,
   response::Response,
 };
 use base64::{
-  alphabet,
+  Engine, alphabet,
   engine::{self, GeneralPurpose, GeneralPurposeConfig},
-  Engine,
 };
 use futures::TryStreamExt;
 use tokio_util::{

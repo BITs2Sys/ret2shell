@@ -49,16 +49,14 @@ pub struct AccessPolicy {
   pub sync: i32,
 }
 
-/// ----------------------------------------------------------------------------
-/// NOTE: Archive policy
-/// Each struct must have a default implementation for all their fields.
-/// And please add `#[serde(default)]` to each field.
-/// It's because that the policy may update its fields in the future, and it's
-/// hard to update all this column in the database for all outdated games.
-/// ----------------------------------------------------------------------------
+// NOTE: Archive policy
+// Each struct must have a default implementation for all their fields.
+// And please add `#[serde(default)]` to each field.
+// It's because that the policy may update its fields in the future, and it's
+// hard to update all this column in the database for all outdated games.
 
 /// Archive policy -> Challenge
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ArchivePolicyChallenge {
   #[serde(default)]
   pub show_answer: bool,
@@ -66,31 +64,12 @@ pub struct ArchivePolicyChallenge {
   pub show_hints: bool,
 }
 
-impl Default for ArchivePolicyChallenge {
-  fn default() -> Self {
-    Self {
-      show_answer: false,
-      show_hints: false,
-    }
-  }
-}
-
 /// Archive policy
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ArchivePolicy {
   #[serde(default)]
   pub challenge: ArchivePolicyChallenge,
 }
-
-impl Default for ArchivePolicy {
-  fn default() -> Self {
-    Self {
-      challenge: ArchivePolicyChallenge::default(),
-    }
-  }
-}
-
-/// ----------------------------------------------------------------------------
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Admins(pub Vec<i64>);
@@ -136,6 +115,7 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
   #[sea_orm(column_type = "JsonBinary")]
+  #[serde(default = "ArchivePolicy::default")]
   pub archive_policy: ArchivePolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,

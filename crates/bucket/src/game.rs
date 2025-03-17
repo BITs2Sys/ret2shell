@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use chrono::{serde::ts_seconds, DateTime, Utc};
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use deunicode::deunicode_with_tofu;
 use heck::ToSnakeCase;
 use serde::{Deserialize, Serialize};
@@ -12,7 +12,7 @@ use tracing::error;
 use crate::{
   challenge,
   git::{CommitLog, Git},
-  traits::{init_dir, BucketError},
+  traits::{BucketError, init_dir},
 };
 
 #[derive(Debug)]

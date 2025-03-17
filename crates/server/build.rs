@@ -8,7 +8,7 @@ fn main() {
     env::var("R2S_GIT_VERSION").unwrap().to_uppercase()
   } else {
     git_version::git_version!(
-      args = ["--abbrev=8", "--always", "--dirty=*"],
+      args = ["--abbrev=8", "--always", "--dirty=*", "--match=''"],
       fallback = "unknown"
     )
     .to_uppercase()

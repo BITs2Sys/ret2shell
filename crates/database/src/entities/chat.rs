@@ -1,7 +1,7 @@
-use chrono::{serde::ts_seconds, DateTime, Utc};
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use sea_orm::{
-  entity::prelude::*, ActiveValue, Condition, FromQueryResult, IntoActiveModel, JoinType, Order,
-  QueryOrder, QuerySelect, QueryTrait,
+  ActiveValue, Condition, FromQueryResult, IntoActiveModel, JoinType, Order, QueryOrder,
+  QuerySelect, QueryTrait, entity::prelude::*,
 };
 use serde::{Deserialize, Serialize};
 

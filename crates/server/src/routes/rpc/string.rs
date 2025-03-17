@@ -1,4 +1,4 @@
-use axum::{extract::Query, response::IntoResponse, routing::get, Router};
+use axum::{Router, extract::Query, response::IntoResponse, routing::get};
 use deunicode::deunicode_with_tofu;
 use heck::ToSnakeCase;
 use serde::Deserialize;

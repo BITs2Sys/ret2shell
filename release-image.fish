@@ -7,7 +7,7 @@ end
 
 # print info
 set app_v (grep -m 1 -oP '^\s*version\s*=\s*"\K[^"]+' Cargo.toml; or echo "unknown")
-set git_v (command -q git; and git describe --abbrev=8 --always --dirty='*' 2>/dev/null; or echo "unknown")
+set git_v (command -q git; and git describe --abbrev=8 --always --dirty='*' --match='' 2>/dev/null; or echo "unknown")
 
 echo '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 echo -e "\033[1;34mR\033[0met 2 \033[1;31mS\033[0mhell OCI Distribution Script\n"

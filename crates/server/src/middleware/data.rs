@@ -1,8 +1,8 @@
 use axum::{
+  Extension,
   extract::{Request, State},
   middleware::Next,
   response::IntoResponse,
-  Extension,
 };
 use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
