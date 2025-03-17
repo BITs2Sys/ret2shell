@@ -558,6 +558,9 @@ packages:
   '@iconify-json/meteocons@1.2.2':
     resolution: {integrity: sha512-IYkII3CGvqDAGbLNqIN6bWIz6dKHPvZvPoTq34veKJy0clRRrSwiEQUrK4IOiF8MXPzhRchsVwtH7U/F3clMbw==}
 
+  '@iconify-json/twemoji@1.2.2':
+    resolution: {integrity: sha512-ckWEY5KhIQgdFd9VGvfhecTtYUx3ihXycwlZcEws87LxuvIThMHNBCblrQQ5afhbGMfg21dF+z9F+ODMRDYHMg==}
+
   '@iconify/tailwind4@1.0.6':
     resolution: {integrity: sha512-43ZXe+bC7CuE2LCgROdqbQeFYJi/J7L/k1UpSy8KDQlWVsWxPzLSWbWhlJx4uRYLOh1NRyw02YlDOgzBOFNd+A==}
     peerDependencies:
@@ -2468,6 +2471,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/meteocons@1.2.2':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/twemoji@1.2.2':
     dependencies:
       '@iconify/types': 2.0.0
 
