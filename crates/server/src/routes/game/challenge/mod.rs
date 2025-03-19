@@ -838,22 +838,21 @@ async fn get_challenge_hints(
   let team = extract_team!(game, team_ext, token);
   let hints = hint::get_list(&db.conn, challenge.id).await?;
 
-  // block hints if the game or challenge is not started
-  if game.start_at > Utc::now() || challenge.release_at.is_some_and(|t| t > Utc::now()) {
-    return Ok(Json(Vec::new()));
-  }
-  // show hints if the game is ended
-  if game.start_at < Utc::now() && !game.in_progress() {
-    return Ok(Json(hints));
-  }
-  // show hints after the challenge is archived
-  if game.archive_policy.challenge.show_hints
-    && challenge.archive_at.is_some_and(|t| t < Utc::now())
-  {
-    return Ok(Json(hints));
-  }
-
   if let Some(team) = team {
+    // block hints if the game or challenge is not started
+    if game.start_at > Utc::now() || challenge.release_at.is_some_and(|t| t > Utc::now()) {
+      return Ok(Json(Vec::new()));
+    }
+    // show hints if the game is ended
+    if game.start_at < Utc::now() && !game.in_progress() {
+      return Ok(Json(hints));
+    }
+    // show hints after the challenge is archived
+    if game.archive_policy.challenge.show_hints
+      && challenge.archive_at.is_some_and(|t| t < Utc::now())
+    {
+      return Ok(Json(hints));
+    }
     // user hints
     let extras = extra::get_list(&db.conn, team.id).await?;
     let hints = hints
