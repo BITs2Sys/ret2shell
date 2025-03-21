@@ -88,7 +88,11 @@ async fn upload_media(
   Query(query): Query<UploadMediaQuery>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
   let uploads: Option<i32> = cache.at("media").get(token.id).await?;
-  if uploads.is_some_and(|u| config.media.is_some_and(|m| u >= m.limit)) {
+  if !token.permissions.0.contains(&Permission::Bulletin)
+    && !token.permissions.0.contains(&Permission::Game)
+    && !token.permissions.0.contains(&Permission::Wiki)
+    && uploads.is_some_and(|u| config.media.is_some_and(|m| u >= m.limit))
+  {
     return Err(ResponseError::TooManyRequests(
       "too many uploads".to_owned(),
       format!(
