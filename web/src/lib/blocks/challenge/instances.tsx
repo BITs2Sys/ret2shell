@@ -9,9 +9,10 @@ import {
 } from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
+import { wsrx } from "@lib/wsrx";
 import type { Challenge, ChallengeImage } from "@models/challenge";
 import type { RegistryConfig } from "@models/config";
-import { createForm, custom, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { challengeStore, refreshChallengeAssets } from "@storage/challenge";
 import { gameStore } from "@storage/game";
@@ -30,7 +31,18 @@ import Slider from "@widgets/slider";
 import type { Pod } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Match, Show, Switch, createEffect, createSignal, onMount, untrack } from "solid-js";
+import {
+  For,
+  Match,
+  Show,
+  Switch,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+  onMount,
+  untrack,
+} from "solid-js";
 
 function CreateForm(fnProps: {
   repos: string[];
@@ -58,13 +70,21 @@ function CreateForm(fnProps: {
     setLoading(false);
   }
   const [adding, setAdding] = createSignal(false);
+  function sanitizeChallengeImage(image: ChallengeImage): ChallengeImage {
+    return {
+      ...image,
+      description: image.description || null,
+      service_type: image.service_type || null,
+      port: image.port && !Number.isNaN(image.port) && image.port > 0 && image.port < 65536 ? image.port : null,
+    };
+  }
   async function onSubmit(result: ChallengeImage) {
     setAdding(true);
     try {
       await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
         internet: challengeStore.env?.internet || false,
         restricted: challengeStore.env?.restricted ?? null,
-        images: [...(challengeStore.env?.images || []), result],
+        images: [...(challengeStore.env?.images || []), sanitizeChallengeImage(result)],
         pull_secret: challengeStore.env?.pull_secret || null,
       });
       addToast({
@@ -255,7 +275,17 @@ function CreateForm(fnProps: {
         </Field>
       </div>
       <div class="flex flex-row space-x-2">
-        <Field name="description">
+        <Field
+          name="description"
+          validate={[
+            (value) => {
+              if (!value?.trim() && [getValue(form, "service_type"), getValue(form, "port")].some(Boolean)) {
+                return t("game.challenge.envContainerDescriptionRequired")!;
+              }
+              return "";
+            },
+          ]}
+        >
           {(field, props) => (
             <Input
               class="flex-1"
@@ -264,6 +294,7 @@ function CreateForm(fnProps: {
               placeholder={t("game.challenge.envContainerDescription")}
               {...props}
               value={field.value ?? ""}
+              error={field.error}
             />
           )}
         </Field>
@@ -271,12 +302,12 @@ function CreateForm(fnProps: {
           <Field
             name="service_type"
             validate={[
-              custom((value) => {
-                if (!value && getValue(form, "description")) {
-                  return false;
+              (value) => {
+                if (!value && [getValue(form, "description"), getValue(form, "port")].some(Boolean)) {
+                  return t("game.challenge.selectEnvContainerServiceType")!;
                 }
-                return true;
-              }, t("game.challenge.selectEnvContainerServiceType")!),
+                return "";
+              },
             ]}
           >
             {(field, props) => (
@@ -296,8 +327,7 @@ function CreateForm(fnProps: {
                     icon: "icon-[fluent--globe-20-regular]",
                   },
                 ]}
-                disabled={!getValue(form, "description")}
-                value={field.value ? [field.value as string] : undefined}
+                value={field.value ? [field.value as string] : []}
                 inputProps={props}
                 error={field.error}
               />
@@ -307,12 +337,18 @@ function CreateForm(fnProps: {
             name="port"
             type="number"
             validate={[
-              custom((value) => {
-                if (!value && getValue(form, "description")) {
-                  return false;
+              (value) => {
+                if ((value || value === 0) && (value < 1 || value > 65535)) {
+                  return t("game.challenge.envContainerPortValidation")!;
                 }
-                return true;
-              }, t("game.challenge.envContainerPort")!),
+                if (value && challengeStore.env?.images?.some((image) => image.port && image.port === value)) {
+                  return t("game.challenge.envContainerPortConflict")!;
+                }
+                if (!value && [getValue(form, "description"), getValue(form, "service_type")].some(Boolean)) {
+                  return t("game.challenge.envContainerPortRequired")!;
+                }
+                return "";
+              },
             ]}
           >
             {(field, props) => (
@@ -320,7 +356,6 @@ function CreateForm(fnProps: {
                 class="flex-1"
                 icon={<span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
                 title={t("game.challenge.envContainerPort")}
-                disabled={!getValue(form, "description")}
                 placeholder={t("game.challenge.envContainerPort")}
                 type="number"
                 {...props}
@@ -394,16 +429,34 @@ function CreateForm(fnProps: {
 
 function InstanceList() {
   const [pods, setPods] = createSignal<Pod[]>([]);
-  createEffect(() => {
+  async function refreshPods() {
+    setPods(await getChallengeInstance(challengeStore!.current!.game_id, challengeStore!.current!.id));
+  }
+  const launchedInstances = createMemo(() => {
+    if (challengeStore.current && challengeStore.env) {
+      return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
+    }
+    return null;
+  });
+  createEffect(async () => {
     if (challengeStore.current) {
       untrack(async () => {
         try {
-          setPods(await getChallengeInstance(challengeStore!.current!.game_id, challengeStore!.current!.id));
+          await refreshPods();
         } catch (err) {
           handleHttpError(err as Error, t("game.challenge.fetchEnvInstancesFailed")!);
         }
       });
+      if (launchedInstances()) {
+        await refreshPods();
+      }
     }
+  });
+  const refreshTimer = setInterval(() => {
+    refreshPods();
+  }, 30 * 1000);
+  onCleanup(() => {
+    clearInterval(refreshTimer);
   });
   return (
     <ul class="flex flex-col">
@@ -673,6 +726,12 @@ export default function (_props: {
           }
         />
       </div>
+      <Show when={challengeStore.env?.images.every((image) => !image.port)}>
+        <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
+          <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
+          <p class="font-bold">{t("game.challenge.serviceMinimumRequired")}</p>
+        </Card>
+      </Show>
       <For
         each={challengeStore.env?.images || []}
         fallback={
@@ -710,10 +769,12 @@ export default function (_props: {
             </div>
             <div class="flex flex-row space-x-2 items-center opacity-80">
               <span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />
-              <span class="text-warning font-bold">
-                {image.service_type}:{image.port}
-              </span>
-              <span>({image.description})</span>
+              <Show when={image.port} fallback={<span class="font-bold opacity-60">N/A</span>}>
+                <span class="text-warning font-bold">
+                  {image.service_type}:{image.port}
+                </span>
+                <span>({image.description})</span>
+              </Show>
               <span class="flex-1" />
               <span class="icon-[fluent--engine-20-regular] w-5 h-5" />
               <span class="font-bold opacity-60">CPU: {image.cpu}</span>

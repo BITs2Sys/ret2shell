@@ -545,7 +545,7 @@ impl Cluster {
       }),
       ..Default::default()
     };
-    self.create_pod(pod).await?;
+
     let service_type = if need_expose { "NodePort" } else { "ClusterIP" };
     let service = Service {
       metadata: ObjectMeta {
@@ -585,6 +585,13 @@ impl Cluster {
       }),
       ..Default::default()
     };
+    if let Some(svc_spec) = service.spec.clone() {
+      if svc_spec.ports.is_none_or(|p| p.is_empty()) {
+        return Err(ClusterError::MissingField("service ports".to_string()));
+      }
+    }
+    self.create_pod(pod).await?;
+    debug!("service: {:?}", service);
     match self.create_service(service).await {
       Ok(_) => Ok(()),
       Err(err) => {

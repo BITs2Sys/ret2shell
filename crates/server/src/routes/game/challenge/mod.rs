@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use axum::{
   Extension, Json, Router,
   body::Body,
@@ -1109,6 +1111,12 @@ async fn start_challenge_env(
   let challenge_bucket = get_challenge_bucket!(bucket, game.clone(), challenge.clone());
 
   if let Some(env_config) = challenge_bucket.env().await? {
+    if env_config.images.is_empty() || env_config.images.iter().all(|i| i.port.is_none()) {
+      return Err(ResponseError::PreconditionFailed(
+        "at least one service with its exposed port is required".to_owned(),
+      ));
+    }
+
     info!(
       "starting challenge env {}:'{}' for user {}:'{}' ({})",
       challenge.id, challenge.name, token.id, token.account, token.nickname
@@ -1215,6 +1223,21 @@ async fn update_challenge_env(
   Json(env): Json<ChallengeEnv>,
 ) -> Result<impl IntoResponse, ResponseError> {
   check_challenge_publishing!(challenge);
+  // check if all ports are empty
+  // if !env.images.is_empty() && env.images.iter().all(|i| i.port.is_none()) {
+  //   return Err(ResponseError::BadRequest(
+  //     "at least one port is required".to_owned(),
+  //   ));
+  // }
+  // check port conflict
+  let mut ports = HashSet::new();
+  for image in &env.images {
+    if let Some(port) = image.port {
+      if !ports.insert(port) {
+        return Err(ResponseError::BadRequest("port conflict".to_owned()));
+      }
+    }
+  }
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket
     .set_env(serde_json::to_value(&env)?)

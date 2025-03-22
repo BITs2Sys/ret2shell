@@ -288,7 +288,11 @@ export default function (props: { inGame?: boolean }) {
                         size="sm"
                         onClick={handleStartChallengeEnv}
                         loading={starting()}
-                        disabled={starting() || calmdownStart() !== null}
+                        disabled={
+                          starting() ||
+                          calmdownStart() !== null ||
+                          challengeStore.env?.images.every((image) => !image.port)
+                        }
                       >
                         <Show
                           when={calmdownStart()}
@@ -306,7 +310,7 @@ export default function (props: { inGame?: boolean }) {
                             onTimeout={() => {
                               setTimeout(() => {
                                 refreshCalmdown();
-                              }, 1500);
+                              }, 500);
                             }}
                           />
                         </Show>
