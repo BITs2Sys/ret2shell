@@ -112,10 +112,10 @@ function UserList() {
           class="w-80"
           size="sm"
           icon={<span class="icon-[fluent--filter-16-regular] w-5 h-5" />}
-          value={filter() || undefined}
+          value={filter() ?? ""}
           placeholder={t("admin.users.filterPlaceholder")}
           onChange={(e) => {
-            setSearchParams({ filter: e.target.value });
+            setSearchParams({ filter: e.target.value || undefined });
             setTimeout(refreshUsers, 100);
           }}
         />

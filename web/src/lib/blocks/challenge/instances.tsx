@@ -263,7 +263,7 @@ function CreateForm(fnProps: {
               title={t("game.challenge.envContainerDescription")}
               placeholder={t("game.challenge.envContainerDescription")}
               {...props}
-              value={field.value || undefined}
+              value={field.value ?? ""}
             />
           )}
         </Field>
@@ -324,7 +324,7 @@ function CreateForm(fnProps: {
                 placeholder={t("game.challenge.envContainerPort")}
                 type="number"
                 {...props}
-                value={field.value || undefined}
+                value={field.value ?? ""}
                 error={field.error}
               />
             )}
