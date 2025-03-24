@@ -25,6 +25,15 @@ article.article-compact {
   }
 }
 
+/* --- Override prose --- */
+
+.article {
+  :where(blockquote p:first-of-type):before,
+  :where(blockquote p:last-of-type):after {
+    @apply content-[''];
+  }
+}
+
 /* --- */
 
 .article-compact.prose * {
@@ -205,6 +214,10 @@ article > h6 > a:hover::after {
   @apply text-primary opacity-60 ml-4;
 }
 
+article a:not(h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a) {
+  @apply text-primary !no-underline hover:!underline;
+}
+
 article blockquote {
   --quote-color: rgb(156 163 175);
   --quote-bg: rgb(156 163 175 / 0.1);
@@ -238,6 +251,7 @@ article blockquote {
 article blockquote {
   border-left-color: var(--quote-color) !important;
   background-color: var(--quote-bg) !important;
+
   @apply !not-italic text-layer-content/80 border-l-[5px] rounded-[4px] !px-4 !py-3 !mx-0 backdrop-blur-xs;
 
   & figure,
@@ -270,10 +284,6 @@ article blockquote {
   /* & pre code {
     @apply not-italic;
   } */
-}
-
-article a:not(h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a) {
-  @apply text-primary !no-underline hover:!underline;
 }
 
 @layer components {
