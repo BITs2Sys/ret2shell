@@ -3,6 +3,7 @@ import type { Institute } from "@models/institute";
 import type { Permission, Token, User } from "@models/user";
 import { base64urlnopad } from "@scure/base";
 import { makePersisted } from "@solid-primitives/storage";
+import { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
 
 export const [accountStore, setAccountStore] = makePersisted(
@@ -47,8 +48,10 @@ export async function refreshUser() {
   if (!accountStore.token) return;
   try {
     setAccountStore({ info: await getProfile() });
-  } catch {
-    resetUser();
+  } catch (e) {
+    if (e instanceof HTTPError && e.response.status >= 400 && e.response.status < 500) {
+      resetUser();
+    }
   }
 }
 
