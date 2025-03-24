@@ -1,10 +1,11 @@
 import Spin from "@assets/animates/spin";
 import { randomTips } from "@lib/utils/loading-tips";
 import { type Team, TeamState } from "@models/team";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { currentTimelinePeriod, gameStore } from "@storage/game";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
@@ -32,6 +33,7 @@ export default function TeamRanks(props: {
     }
     return team.score;
   }
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <ul class="flex-1 flex flex-col w-full max-w-5xl self-center">
@@ -64,26 +66,31 @@ export default function TeamRanks(props: {
                     <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) > 3}>
-                    <span class="font-bold opacity-60">{realIndex(index()).toString().padStart(4, "0")}</span>
+                    <span class="font-bold opacity-60">{realIndex(index())}</span>
                   </Match>
                 </Switch>
               </span>
               <A
-                class="font-bold hover:underline flex-1 w-0 truncate"
+                class="flex-1 w-0 font-bold hover:underline truncate"
                 href={`/games/${gameStore.current?.id}/teams/${team.id}`}
               >
                 {team.name}
               </A>
-              <Show when={team.state === TeamState.Hidden}>
-                <Tag class="truncate" level="warning">
-                  <span>{t("game.team.state.hidden")}</span>
-                </Tag>
-              </Show>
-              <Show when={props.showTime && team.institute_id}>
-                <Tag class="truncate" level="info">
-                  <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
-                </Tag>
-              </Show>
+              <span class="flex-1 w-0 flex flex-row items-center space-x-2">
+                <span class="flex-1" />
+                <Show when={team.state === TeamState.Hidden}>
+                  <Tag level="warning">
+                    <span class="flex-1 truncate">{t("game.team.state.hidden")}</span>
+                  </Tag>
+                </Show>
+                <Show when={props.showTime && team.institute_id}>
+                  <Tag level="info">
+                    <span class="flex-1 truncate">
+                      {accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
+                    </span>
+                  </Tag>
+                </Show>
+              </span>
               <span class={clsx("text-end", currentTimelinePeriod() && props.showTime ? "w-48" : "w-20")}>
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
@@ -97,8 +104,10 @@ export default function TeamRanks(props: {
                 </Show>
               </span>
               <Show when={props.showTime}>
-                <span class="w-56 text-end font-bold opacity-40 hidden lg:inline-block">
-                  <span>{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                <span class="w-max ml-4 text-end font-bold opacity-40 hidden lg:inline-block">
+                  <Switch fallback={team.last_active_at.toFormat("MM-dd HH:mm:ss")}>
+                    <Match when={matches["2xl"]}>{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                  </Switch>
                 </span>
               </Show>
             </li>

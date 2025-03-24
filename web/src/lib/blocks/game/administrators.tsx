@@ -17,6 +17,7 @@ import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createSignal, untrack } from "solid-js";
 
@@ -194,27 +195,36 @@ export default function AdministratorsManagement() {
           </ArkPopover.Content>
         </ArkPopover.Positioner>
       </ArkPopover.Root>
-      <div class="flex-1 flex flex-col">
+      <div class="grid grid-cols-1 w-full">
         <For each={admins()}>
           {(user) => (
             <div class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2">
               <Avatar
-                class="w-6 h-6"
+                class="w-6 h-6 shrink-0"
                 src={(user.avatar && mediaPath(user.avatar)) || undefined}
                 fallback={user.account || undefined}
               />
-              <A class="flex-1 truncate text-start hover:underline" href={`/users/${user.id}`}>
-                <span>{user.nickname}</span>
-                <span class="font-normal px-2 opacity-60">
-                  {user.account}#{user.id.toString(16).padStart(6, "0")}
+              <A class="flex truncate text-start hover:underline" href={`/users/${user.id}`}>
+                <span class="flex-1 min-w-16 truncate">
+                  <span>{user.nickname}</span>
+                  <span class="font-normal px-2 opacity-60">
+                    {user.account}#{user.id.toString(16).padStart(6, "0")}
+                  </span>
                 </span>
               </A>
-              <For each={user.permissions}>{(permission) => <span class={permissionToIcon(permission)} />}</For>
-              <Show when={user.institute_id}>
-                <Tag level="info">
-                  <span>{accountStore.institutes.find((v) => v.id === user.institute_id)?.name}</span>
-                </Tag>
-              </Show>
+              <span class="flex-1" />
+              <span class="flex flex-row items-center justify-end space-x-4 overflow-auto">
+                <For each={user.permissions}>
+                  {(permission) => <span class={clsx(permissionToIcon(permission), "shrink-0")} />}
+                </For>
+                <Show when={user.institute_id}>
+                  <Tag class="min-w-16" level="info">
+                    <span class="flex-1 truncate">
+                      {accountStore.institutes.find((v) => v.id === user.institute_id)?.name}
+                    </span>
+                  </Tag>
+                </Show>
+              </span>
               <Popover
                 size="sm"
                 ghost

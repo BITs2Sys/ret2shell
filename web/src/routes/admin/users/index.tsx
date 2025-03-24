@@ -2,10 +2,11 @@ import { handleHttpError } from "@api";
 import { getUser, getUserList, updateUser } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { type User, permissionToIcon } from "@models/user";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Input from "@widgets/input";
@@ -13,7 +14,8 @@ import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import { For, Show, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
+import clsx from "clsx";
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import Form from "./_blocks/form";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";
@@ -60,13 +62,17 @@ function UserList() {
       untrack(refreshUsers);
     }
   });
+  const matches = createBreakpoints(breakpoints);
   return (
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1">
-      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span class="flex-1 text-start">{t("admin.users.title")}</span>
+      <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
+        <div class="flex flex-row">
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+          <span class="flex-1 text-start">{t("admin.users.title")}</span>
+        </div>
+        <span class="flex-1" />
         <Select
-          class="flex-1 max-w-48 min-w-0"
+          class="flex-1 max-w-48 min-w-32"
           size="sm"
           placeholder={t("admin.users.sortBy")}
           items={[
@@ -98,7 +104,7 @@ function UserList() {
           value={order() ? [order()!] : undefined}
         />
         <Select
-          class="flex-1 max-w-64 min-w-0"
+          class="flex-1 max-w-64 min-w-48"
           size="sm"
           placeholder={t("admin.users.selectInstitute")}
           items={institutesSelect()}
@@ -125,7 +131,7 @@ function UserList() {
           <LoadingTips />
         </div>
       </Show>
-      <div class="flex-1 flex flex-col">
+      <div class="grid grid-cols-1">
         <For each={users()}>
           {(user) => (
             <A
@@ -133,23 +139,37 @@ function UserList() {
               href={`/admin/users?user=${user.id}`}
             >
               <Avatar
-                class="w-6 h-6"
+                class="w-6 h-6 shrink-0"
                 src={(user.avatar && mediaPath(user.avatar)) || undefined}
                 fallback={user.account || undefined}
               />
-              <span class="flex-1 truncate text-start">
-                <span>{user.nickname}</span>
-                <span class="font-normal px-2 opacity-60">
-                  {user.account}#{user.id.toString(16).padStart(6, "0")}
+              <span class="flex text-start truncate">
+                <span class="flex-1 min-w-16 truncate">
+                  <span>{user.nickname}</span>
+                  <span class="font-normal px-2 opacity-60">
+                    {user.account}#{user.id.toString(16).padStart(6, "0")}
+                  </span>
                 </span>
               </span>
-              <For each={user.permissions}>{(permission) => <span class={permissionToIcon(permission)} />}</For>
-              <Show when={user.institute_id}>
-                <Tag level="info">
-                  <span>{accountStore.institutes.find((v) => v.id === user.institute_id)?.name}</span>
-                </Tag>
-              </Show>
-              <span class="font-normal">{user.registered_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+              <span class="flex-1" />
+              <span class="flex flex-row items-center justify-end space-x-4 overflow-auto">
+                <For each={user.permissions}>
+                  {(permission) => <span class={clsx(permissionToIcon(permission), "shrink-0")} />}
+                </For>
+                <Show when={user.institute_id}>
+                  <Tag class="min-w-16" level="info">
+                    <span class="flex-1 truncate">
+                      {accountStore.institutes.find((v) => v.id === user.institute_id)?.name}
+                    </span>
+                  </Tag>
+                </Show>
+              </span>
+              <span class="font-normal whitespace-nowrap">
+                <Switch fallback={user.registered_at.toFormat("MM-dd HH:mm")}>
+                  <Match when={matches.lg}>{user.registered_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                  <Match when={matches.md}>{user.registered_at.toFormat("MM-dd HH:mm:ss")}</Match>
+                </Switch>
+              </span>
             </A>
           )}
         </For>

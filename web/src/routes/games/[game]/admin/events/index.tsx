@@ -1,12 +1,13 @@
 import { handleHttpError } from "@api";
 import { type EventDeviceInfo, getGameDevices } from "@api/game";
 import NarrowTips from "@blocks/narrow-tips";
+import { createBreakpoints } from "@solid-primitives/media";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
-import { For, createEffect, createSignal, untrack } from "solid-js";
+import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {
   const [linkedDevices, setLinkedDevices] = createSignal([] as EventDeviceInfo[]);
@@ -22,6 +23,7 @@ export default function () {
       });
     }
   });
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <Title page={t("game.admin.events.title")} route={`/games/${gameStore.current?.id}/admin/events`} />
@@ -74,13 +76,17 @@ export default function () {
                   <span class="flex-1 opacity-60 truncate" title={device.client}>
                     {device.client}
                   </span>
-                  <span class="shrink-0">{device.connected_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                  <span class="shrink-0">
+                    <Switch fallback={device.connected_at.toFormat("MM-dd HH:mm:ss")}>
+                      <Match when={matches.sm}>{device.connected_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                    </Switch>
+                  </span>
                 </div>
               </>
             )}
           </For>
         </div>
-        <NarrowTips breakpoint="md" />
+        {/* <NarrowTips breakpoint="md" /> */}
       </div>
     </>
   );

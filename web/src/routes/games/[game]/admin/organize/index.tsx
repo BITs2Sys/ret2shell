@@ -79,8 +79,8 @@ function InstituteManagement() {
           <LoadingTips />
         </div>
       </Show>
-      <div class="flex flex-wrap items-center">
-        <span class="flex-1">{t("game.admin.organize.restrictWarning")}</span>
+      <div class="grid grid-cols-fit-xs items-center">
+        <span class="my-2">{t("game.admin.organize.restrictWarning")}</span>
         <Checkbox
           checked={gameStore.current?.access_policy.restrict}
           title={t("game.admin.organize.restrict")}
@@ -122,7 +122,7 @@ export default function () {
         <div class="h-12" />
         <AdministratorsManagement />
       </div>
-      <NarrowTips breakpoint="md" />
+      {/* <NarrowTips breakpoint="md" /> */}
     </div>
   );
 }

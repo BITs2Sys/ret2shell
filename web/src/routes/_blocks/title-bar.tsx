@@ -53,25 +53,25 @@ function GameTitleLink() {
 function GlobalNav(props: { size: "sm" | "md" }) {
   return (
     <>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
           <span>{t("wiki.title")}</span>
         </Link>
       </li>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
           <span>{t("training.title")}</span>
         </Link>
       </li>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
           <span>{t("game.title")}</span>
         </Link>
       </li>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
           <span>{t("bulletin.title")}</span>
@@ -86,7 +86,7 @@ function GlobalNav(props: { size: "sm" | "md" }) {
             accountStore.info?.permissions.includes(Permission.User))
         }
       >
-        <li class="nav">
+        <li class="nav whitespace-nowrap">
           <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("admin.title")}</span>
@@ -100,7 +100,7 @@ function GlobalNav(props: { size: "sm" | "md" }) {
 function GameNav(props: { size: "sm" | "md" }) {
   return (
     <>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/challenges`}
@@ -115,7 +115,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           <span>{t("game.challenge.title")}</span>
         </Link>
       </li>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/scoreboard`}
@@ -129,7 +129,7 @@ function GameNav(props: { size: "sm" | "md" }) {
         </Link>
       </li>
       <Show when={isGameAdmin()}>
-        <li class="nav">
+        <li class="nav whitespace-nowrap">
           <Link
             class="w-full"
             href={`/games/${gameStore.current?.id}/admin`}
@@ -143,7 +143,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           </Link>
         </li>
       </Show>
-      <li class="nav">
+      <li class="nav whitespace-nowrap">
         <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
           <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
           <span>{t("game.exit")}</span>
@@ -311,31 +311,35 @@ export default function TitleBar() {
               <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
                 <Switch>
                   <Match when={gameStore.current && gameStore.current.host_type === HostType.Training}>
-                    <div class="flex flex-col items-center justify-center px-4 relative">
-                      <span>{t("training.openForever")}</span>
-                      <TimeProgress
-                        class="w-full"
-                        startAt={gameStore.current!.start_at}
-                        endAt={gameStore.current!.start_at}
-                      />
+                    <div class="grid grid-cols-1 items-center justify-center px-4 relative">
+                      <div>
+                        <span class="space-x-2 truncate max-w-full">{t("training.openForever")}</span>
+                        <TimeProgress
+                          class="w-full"
+                          startAt={gameStore.current!.start_at}
+                          endAt={gameStore.current!.start_at}
+                        />
+                      </div>
                     </div>
                   </Match>
                   <Match when={inProgress()}>
-                    <div class="flex flex-col items-center justify-center px-4 relative">
-                      <div class="flex flex-row space-x-2">
-                        <Show when={currentTimelinePeriod()?.end_at}>
-                          <span>[</span>
-                          <span class="font-bold text-primary">{currentTimelinePeriod()?.label ?? ""}</span>
-                          <Timer class="text-primary" end={currentTimelinePeriod()!.end_at} hasHours />
-                          <span>]</span>
-                        </Show>
-                        <Timer end={gameStore.current!.end_at} hasHours />
+                    <div class="grid grid-cols-1 items-center justify-center px-4 relative">
+                      <div>
+                        <div class="space-x-2 truncate max-w-full">
+                          <Show when={currentTimelinePeriod()?.end_at}>
+                            <span>[</span>
+                            <span class="font-bold text-primary">{currentTimelinePeriod()?.label ?? ""}</span>
+                            <Timer class="text-primary" end={currentTimelinePeriod()!.end_at} hasHours />
+                            <span>]</span>
+                          </Show>
+                          <Timer end={gameStore.current!.end_at} hasHours />
+                        </div>
+                        <TimeProgress
+                          class="w-full"
+                          startAt={gameStore.current!.start_at}
+                          endAt={gameStore.current!.end_at}
+                        />
                       </div>
-                      <TimeProgress
-                        class="w-full"
-                        startAt={gameStore.current!.start_at}
-                        endAt={gameStore.current!.end_at}
-                      />
                     </div>
                   </Match>
                 </Switch>
