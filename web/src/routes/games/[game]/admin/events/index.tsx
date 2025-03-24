@@ -76,8 +76,9 @@ export default function () {
                     {device.client}
                   </span>
                   <span class="shrink-0">
-                    <Switch fallback={device.connected_at.toFormat("MM-dd HH:mm:ss")}>
+                    <Switch fallback={device.connected_at.toFormat("MM-dd HH:mm")}>
                       <Match when={matches.sm}>{device.connected_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.xs}>{device.connected_at.toFormat("MM-dd HH:mm:ss")}</Match>
                     </Switch>
                   </span>
                 </div>
