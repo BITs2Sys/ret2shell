@@ -1,6 +1,5 @@
 import { handleHttpError } from "@api";
 import { getTeamList } from "@api/game";
-import NarrowTips from "@blocks/narrow-tips";
 import { type Team, TeamState } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";

@@ -1,5 +1,4 @@
 import { AuditList, SubmissionList } from "@blocks/game/lists";
-import NarrowTips from "@blocks/narrow-tips";
 import { useSearchParams } from "@solidjs/router";
 import { gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";

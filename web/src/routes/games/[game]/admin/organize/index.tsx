@@ -1,7 +1,6 @@
 import { handleHttpError } from "@api";
 import { updateGame } from "@api/game";
 import AdministratorsManagement from "@blocks/game/administrators";
-import NarrowTips from "@blocks/narrow-tips";
 import { accountStore } from "@storage/account";
 import { gameStore, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";

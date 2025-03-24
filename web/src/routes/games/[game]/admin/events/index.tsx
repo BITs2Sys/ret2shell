@@ -1,6 +1,5 @@
 import { handleHttpError } from "@api";
 import { type EventDeviceInfo, getGameDevices } from "@api/game";
-import NarrowTips from "@blocks/narrow-tips";
 import { createBreakpoints } from "@solid-primitives/media";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
