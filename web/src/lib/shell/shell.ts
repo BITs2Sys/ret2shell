@@ -148,6 +148,7 @@ export class Shell {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         this.stdio.clear();
         this.greet();
+        continue;
       }
       this.history.push(stripAnsi(this.inputBuffer));
       const args = parse(this.inputBuffer);
