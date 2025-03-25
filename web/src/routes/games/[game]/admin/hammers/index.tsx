@@ -93,7 +93,7 @@ function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function () {
+export default function() {
   const [searchParams, _] = useSearchParams();
   const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "") || null);
   const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "") || null);
@@ -338,8 +338,8 @@ export default function () {
                             </Card>
                             <div
                               class={clsx(
-                                "self-end flex",
-                                chat.user_id !== accountStore.id ? "items-start" : "items-end"
+                                "self-end flex items-end",
+                                chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
                               )}
                             >
                               <span

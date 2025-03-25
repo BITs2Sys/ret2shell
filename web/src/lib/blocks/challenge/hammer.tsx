@@ -83,7 +83,7 @@ function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function (props: {
+export default function(props: {
   onStateChange?: (challenge?: Challenge) => void;
   onExpand?: () => void;
   expanded?: boolean;
@@ -303,7 +303,12 @@ export default function (props: {
                       <div class="w-2" />
                       <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
                     </Card>
-                    <div class={clsx("self-end flex", chat.user_id !== accountStore.id ? "items-start" : "items-end")}>
+                    <div
+                      class={clsx(
+                        "self-end flex items-end",
+                        chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
+                      )}
+                    >
                       <span
                         class={
                           chat.checked
@@ -331,8 +336,8 @@ export default function (props: {
               {availableMsg() <= 0
                 ? t("game.challenge.hammerInputAlreadySend")
                 : t("game.challenge.hammerLastMessage", {
-                    last: availableMsg(),
-                  })}
+                  last: availableMsg(),
+                })}
             </span>
           </span>
           <div class="flex-1" />
