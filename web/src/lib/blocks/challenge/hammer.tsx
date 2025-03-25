@@ -109,7 +109,7 @@ export default function (props: {
     }
   }
 
-  const [_loading, setLoading] = createSignal(false);
+  const [loading, setLoading] = createSignal(false);
 
   async function _refreshChats() {
     if (gameStore.current && challengeStore.current && !isGameAdmin()) {
@@ -303,7 +303,7 @@ export default function (props: {
                       <div class="w-2" />
                       <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
                     </Card>
-                    <div class="self-end flex items-end">
+                    <div class={clsx("self-end flex", chat.user_id !== accountStore.id ? "items-start" : "items-end")}>
                       <span
                         class={
                           chat.checked
@@ -311,6 +311,7 @@ export default function (props: {
                             : "icon-[fluent--circle-20-regular] w-2 h-2 opacity-40"
                         }
                       />
+                      <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
                     </div>
                   </div>
                   <header class="opacity-0 h-0 peer-hover:h-4 peer-hover:opacity-60 text-sm transition-all duration-300">
@@ -335,6 +336,9 @@ export default function (props: {
             </span>
           </span>
           <div class="flex-1" />
+          <Show when={loading()}>
+            <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
+          </Show>
           <Link
             href="https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
             ghost
