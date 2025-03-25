@@ -90,7 +90,11 @@ export class Service implements Command {
       }
     }
     const d_service_name = await deunicode(challengeStore.current!.name);
-    io.info(t("shell.service.starting", { service: ansiColors.blueBright(d_service_name) })!);
+    io.info(
+      t("shell.service.starting", {
+        service: ansiColors.blueBright(d_service_name),
+      })!
+    );
     await new Promise((r) => setTimeout(r, 500));
     try {
       await startChallengeEnv(challengeStore.current!.game_id, challengeStore.current!.id);
@@ -110,7 +114,11 @@ export class Service implements Command {
       return 1;
     }
     const d_service_name = await deunicode(challengeStore.current!.name);
-    io.info(t("shell.service.stopping", { service: ansiColors.blueBright(d_service_name) })!);
+    io.info(
+      t("shell.service.stopping", {
+        service: ansiColors.blueBright(d_service_name),
+      })!
+    );
     try {
       await stopGameSelfEnv(challengeStore.current!.game_id);
     } catch (e) {
@@ -170,12 +178,9 @@ export class Service implements Command {
       io.println(`       ${ansiColors.dim("└─")} wsrx_local.service: ${getInstState(inst_wsrx_local, false)}`);
       // wsrx address
       for (const image of challengeStore.env.images) {
-        const locals = wsrx.getTrafficLocal(inst, image.port!);
-        if (locals.length > 0) {
-          io.println(
-            `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(getWsrxLink(inst.traffic, image.port!))} *-> ${image.name}.service`
-          );
-        }
+        io.println(
+          `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(getWsrxLink(inst.traffic, image.port!))} *-> ${image.name}.service`
+        );
       }
       // env routes
       for (const image of challengeStore.env.images) {
