@@ -22,7 +22,7 @@ export interface SelectItemType extends CollectionItem {
   disabled?: boolean;
 }
 
-export default function(
+export default function (
   props: Pick<SelectRootProps<SelectItemType>, Exclude<keyof SelectRootProps<SelectItemType>, "collection">> &
     SelectProps
 ) {
