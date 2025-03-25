@@ -167,7 +167,7 @@ export class Service implements Command {
     if (inst) {
       // await wsrx.openAllTraffic();
       await wsrx.refreshTraffic();
-      // wsrx_local.service
+      // wsrx-local.service
       const inst_wsrx_local = Object.assign(Object.create(inst), {
         state: {
           [WsrxState.Disconnected]: "Stopped",
@@ -175,7 +175,7 @@ export class Service implements Command {
           [WsrxState.Connected]: "Running",
         }[wsrx.connected()],
       });
-      io.println(`       ${ansiColors.dim("└─")} wsrx_local.service: ${getInstState(inst_wsrx_local, false)}`);
+      io.println(`       ${ansiColors.dim("└─")} wsrx-local.service: ${getInstState(inst_wsrx_local, false)}`);
       // wsrx address
       for (const image of challengeStore.env.images) {
         io.println(
@@ -199,7 +199,7 @@ export class Service implements Command {
           for (const local of locals) {
             if (local) {
               io.println(
-                `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx_local.service`
+                `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx-local.service`
               );
             }
           }
