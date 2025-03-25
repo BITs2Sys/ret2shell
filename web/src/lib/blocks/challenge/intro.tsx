@@ -31,7 +31,7 @@ passiveSupport({
   ],
 });
 
-export default function (props: { inGame?: boolean }) {
+export default function(props: { inGame?: boolean }) {
   const instance = createMemo(() => {
     if (challengeStore.current && challengeStore.env) {
       return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
@@ -266,15 +266,6 @@ export default function (props: { inGame?: boolean }) {
             <Show when={challengeStore.env}>
               <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 relative py-2 gap-y-2">
                 <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
-                  <Show when={instance()}>
-                    <TimeProgress
-                      class="absolute bottom-0 left-0 right-0"
-                      startAt={instance()!.created_at}
-                      endAt={instance()!.created_at.plus({
-                        hours: instance()!.renew_count + 1,
-                      })}
-                    />
-                  </Show>
                   <h3 class="font-bold flex space-x-2 items-center flex-1">
                     <span
                       class={clsx(
@@ -345,17 +336,26 @@ export default function (props: { inGame?: boolean }) {
                     }
                   >
                     <Match when={instance()}>
-                      <Timer
-                        end={instance()!.created_at.plus({
-                          hours: instance()!.renew_count + 1,
-                        })}
-                        onTimeout={() => {
-                          setTimeout(() => {
-                            maintainInstances();
-                          }, 500);
-                        }}
-                        hasHours
-                      />
+                      <div class="grid grid-cols-1 items-center justify-center px-4 relative">
+                        <Timer
+                          end={instance()!.created_at.plus({
+                            hours: instance()!.renew_count + 1,
+                          })}
+                          onTimeout={() => {
+                            setTimeout(() => {
+                              maintainInstances();
+                            }, 500);
+                          }}
+                          hasHours
+                        />
+                        <TimeProgress
+                          class="w-full"
+                          startAt={instance()!.created_at}
+                          endAt={instance()!.created_at.plus({
+                            hours: instance()!.renew_count + 1,
+                          })}
+                        />
+                      </div>
                       <Divider class="h-8" direction="horizontal" />
                       <Button
                         ghost
@@ -456,8 +456,6 @@ export default function (props: { inGame?: boolean }) {
                             label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
                           />
                         </Show>
-
-                        <div class="block" />
                       </section>
                     </Show>
                   )}
