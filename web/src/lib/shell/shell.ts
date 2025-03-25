@@ -82,7 +82,9 @@ export class Shell {
   public greet() {
     this.stdio.println(
       ansiColors.bold(
-        t("shell.welcome", { shell: `${ansiColors.blue("Rx")}${ansiColors.dim("::")}${ansiColors.blue("Shell")}` })!
+        t("shell.welcome", {
+          shell: `${ansiColors.blue("Rx")}${ansiColors.dim("::")}${ansiColors.blue("Shell")}`,
+        })!
       )
     );
     this.stdio.info(
@@ -139,7 +141,14 @@ export class Shell {
       }
       this.stdio.print("\n");
       if (stripAnsi(this.inputBuffer).trim().length === 0) continue;
-      if (this.inputBuffer.trim() === "exit") break;
+      if (this.inputBuffer.trim() === "exit") {
+        this.stdio.error(`[exit from shell ${location.host}:${location.port}]`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        this.stdio.info("[auto reconnecting...]");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        this.stdio.clear();
+        this.greet();
+      }
       this.history.push(stripAnsi(this.inputBuffer));
       const args = parse(this.inputBuffer);
       const result = await this.exec.exec(this.stdio, args, this.inputBuffer);
@@ -157,9 +166,8 @@ export class Shell {
       slicedChallengeName = challengeName;
     }
     const leftPart = `${ansiColors.green(accountStore.account || "guest")}:${ansiColors.blue(gameStore.team?.name || "wheel")} ${ansiColors.yellow(`~/${slicedChallengeName}`)}`;
-    const rightPart = `${ansiColors.dim("in")} ${ansiColors.blue(gameStore.current?.name || "unknown")}${
-      this.code === 0 ? "" : ansiColors.redBright(` [${this.code}]`)
-    } [${DateTime.now().toFormat("HH:mm:ss")}]`;
+    const rightPart = `${ansiColors.dim("in")} ${ansiColors.blue(gameStore.current?.name || "unknown")}${this.code === 0 ? "" : ansiColors.redBright(` [${this.code}]`)
+      } [${DateTime.now().toFormat("HH:mm:ss")}]`;
     // console.log(this.stdio.termWidth());
     // console.log(unicodeStrDisplayLength(leftPart));
     // console.log(unicodeStrDisplayLength(rightPart));
