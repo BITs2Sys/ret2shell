@@ -87,6 +87,7 @@ export default function Traffic() {
     try {
       await deleteGlobalTrafficScript();
       setLint(null);
+      setScript("");
       addToast({
         level: "success",
         description: t("form.deleteSuccess")!,
@@ -211,12 +212,13 @@ export default function Traffic() {
                 </Card>
               </Popover>
             </Show>
-          </h2>{" "}
+          </h2>
           <Splitter
             orientation="vertical"
-            size={[
-              { id: "a", size: 80, minSize: 24 },
-              { id: "b", size: 20, minSize: 10 },
+            defaultSize={[80, 20]}
+            panels={[
+              { id: "a", minSize: 24 },
+              { id: "b", minSize: 10 },
             ]}
             class="flex-1"
             startPanel={() => (

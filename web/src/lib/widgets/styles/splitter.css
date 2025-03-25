@@ -17,5 +17,9 @@
     &:focus {
       @apply border-primary;
     }
+
+    &:hover {
+      @apply border-primary;
+    }
   }
 }

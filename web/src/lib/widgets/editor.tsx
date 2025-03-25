@@ -65,7 +65,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   let editorElement: HTMLPreElement;
   let editor: ace.Ace.Editor | null = null;
   function initEditor() {
-    editor = ace.edit(editorElement, {
+    editor = ace.edit(editorElement!, {
       mode: `ace/mode/${editorProps.lang || "text"}`,
       theme: `ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`,
       readOnly: editorProps.readonly,
@@ -94,6 +94,12 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       const content = editor?.getValue();
       editorProps.onValueChanged?.(content || "");
       if (editorProps.form && editorProps.name) setValue(editorProps.form, editorProps.name, content);
+    });
+
+    createEffect(() => {
+      if (themeStore.colorScheme && editor) {
+        editor.setTheme(`ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`);
+      }
     });
 
     editor.on("blur", () => {

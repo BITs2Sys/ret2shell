@@ -22,7 +22,7 @@ export interface SelectItemType extends CollectionItem {
   disabled?: boolean;
 }
 
-export default function (
+export default function(
   props: Pick<SelectRootProps<SelectItemType>, Exclude<keyof SelectRootProps<SelectItemType>, "collection">> &
     SelectProps
 ) {
@@ -42,28 +42,32 @@ export default function (
     })
   );
 
+  let selectEl: HTMLSelectElement;
+
+  // const [, setSelectedItems] = createSignal<SelectItemType[]>([]);
+
   return (
     <Select.Root
       {...others}
       class={clsx("flex flex-col", others.class)}
+      immediate
       collection={collection()}
-      // value={selectProps.inputProps?.value}
+      // value={[selectProps.inputProps?.value?.toString() || ""]}
       positioning={{
         sameWidth: true,
+      }}
+      onValueChange={(e) => {
+        selectEl!.value = e.value[0] || "";
+        if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
+          selectEl!.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        // if (selectProps.inputProps?.onChange && typeof selectProps.inputProps.onChange === "function")
+        //   selectProps.inputProps.onChange(e);
+        others.onValueChange?.(e);
       }}
     >
       <Show when={selectProps.label}>
         <Select.Label class="label mb-1">{selectProps.label}</Select.Label>
       </Show>
-      <Select.HiddenSelect
-        {...selectProps.inputProps}
-        onChange={(e) => {
-          if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
-            e.target.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-          if (selectProps.inputProps?.onChange && typeof selectProps.inputProps.onChange === "function")
-            selectProps.inputProps.onChange(e);
-        }}
-      />
       <Select.Control class="w-full">
         <Select.Trigger
           class={clsx(
@@ -153,6 +157,7 @@ export default function (
           </Select.Content>
         </Select.Positioner>
       </Portal>
+      <Select.HiddenSelect {...selectProps.inputProps} ref={selectEl!} />
     </Select.Root>
   );
 }

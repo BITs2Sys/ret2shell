@@ -256,7 +256,7 @@ function BottomPanel(props: {
   );
 }
 
-export default function (props: {
+export default function(props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
   archived: boolean;
@@ -267,15 +267,17 @@ export default function (props: {
   const [expanded, setExpanded] = createSignal(false);
   const size = () => {
     if (expanded()) {
-      return [
-        { id: "a", size: 24, minSize: 24 },
-        { id: "b", size: 76, minSize: 20 },
-      ];
+      // return [
+      //   { id: "a", size: 24, minSize: 24 },
+      //   { id: "b", size: 76, minSize: 20 },
+      // ];
+      return [24, 76];
     }
-    return [
-      { id: "a", size: 64, minSize: 24 },
-      { id: "b", size: 36, minSize: 20 },
-    ];
+    // return [
+    //   { id: "a", size: 64, minSize: 24 },
+    //   { id: "b", size: 36, minSize: 20 },
+    // ];
+    return [64, 36];
   };
 
   return (
@@ -294,7 +296,11 @@ export default function (props: {
           />
         )}
         orientation="vertical"
-        size={size()}
+        defaultSize={size()}
+        panels={[
+          { id: "a", minSize: 24 },
+          { id: "b", minSize: 20 },
+        ]}
       />
     </div>
   );

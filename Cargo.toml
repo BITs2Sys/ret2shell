@@ -9,7 +9,7 @@ homepage     = "https://ret.sh.cn/"
 publish      = false
 repository   = "https://github.com/ret2shell/ret2shell"
 rust-version = "1.85.0"
-version      = "3.6.0"
+version      = "3.6.1"
 
 [profile.release]
 codegen-units = 1
@@ -22,7 +22,7 @@ strip         = true
 aho-corasick       = "1.1"
 anyhow             = "1.0"
 argon2             = "0.5"
-async-nats         = "0.39"
+async-nats         = "0.40"
 async-trait        = "0.1"
 base64             = "0.22"
 bcrypt             = "0.17"
@@ -69,7 +69,7 @@ tokio              = { version = "1.44", features = ["full"] }
 tokio-stream       = "0.1"
 tokio-util         = { version = "0.7", features = ["codec"] }
 toml               = "0.8"
-tower_governor     = "0.6"
+tower_governor     = "0.7"
 tracing            = "0.1"
 tracing-appender   = "0.2"
 tracing-core       = "0.1"

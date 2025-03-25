@@ -76,7 +76,7 @@ const checkerCtx = {
   },
 } as const;
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -169,9 +169,10 @@ export default function (_props: {
       </header>
       <Splitter
         orientation="vertical"
-        size={[
-          { id: "a", size: 80, minSize: 24 },
-          { id: "b", size: 20, minSize: 10 },
+        defaultSize={[80, 20]}
+        panels={[
+          { id: "a", minSize: 24 },
+          { id: "b", minSize: 10 },
         ]}
         class="flex-1"
         startPanel={() => (

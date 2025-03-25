@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 3.6.1
+
+### Fixed
+
+- add validation for service creation (#111)
+- fix serval ui bugs
+- sync code editor theme with platform theme
+
+### User Changes
+
+- wsrx ui optimization (#181)
+- improve update alert (#178)
+- user with edit permissions can upload unlimited images to media API
+- mobile view for all pages is available now (thanks to @Cnily03)
+- redirect challenge management links to training when game is archived
+
+### Common Developing Changes
+
+- update @ark-ui/solid to `^5`, with bug fixes.
+
 ## 3.6.0
 
 ### BREAKING CHANGES

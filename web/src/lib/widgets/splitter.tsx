@@ -2,7 +2,7 @@ import { Splitter, type SplitterRootProps } from "@ark-ui/solid";
 import clsx from "clsx";
 import type { JSX } from "solid-js";
 
-export default function (
+export default function(
   props: SplitterRootProps & {
     startPanel: () => JSX.Element;
     endPanel: () => JSX.Element;

@@ -99,7 +99,9 @@ export default function Traffic() {
           description: t("form.saveSuccess")!,
           duration: 5000,
         });
-        setGameStore({ current: { ...gameStore.current, node_selector: nodeSelector() } });
+        setGameStore({
+          current: { ...gameStore.current, node_selector: nodeSelector() },
+        });
       } catch (err) {
         handleHttpError(err as Error, t("form.saveFailed")!);
       }
@@ -211,9 +213,14 @@ export default function Traffic() {
           </h2>{" "}
           <Splitter
             orientation="vertical"
-            size={[
-              { id: "a", size: 80, minSize: 24 },
-              { id: "b", size: 20, minSize: 10 },
+            // size={[
+            //   { id: "a", size: 80, minSize: 24 },
+            //   { id: "b", size: 20, minSize: 10 },
+            // ]}
+            defaultSize={[80, 20]}
+            panels={[
+              { id: "a", minSize: 24 },
+              { id: "b", minSize: 10 },
             ]}
             class="flex-1"
             startPanel={() => (

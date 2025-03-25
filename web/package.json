@@ -1,6 +1,6 @@
 {
   "name": "ret2shell",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "type": "module",
   "private": true,
   "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
@@ -14,7 +14,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^4.10.2",
+    "@ark-ui/solid": "^5.3.1",
     "@e965/xlsx": "^0.20.3",
     "@fontsource/jetbrains-mono": "^5.2.5",
     "@jsdevtools/rehype-toc": "^3.0.2",

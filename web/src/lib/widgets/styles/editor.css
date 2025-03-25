@@ -253,3 +253,7 @@
 .ace_placeholder {
   @apply text-base font-mono opacity-30 transform-none;
 }
+
+.ace-kuroir .ace_comment {
+  @apply bg-transparent;
+}
