@@ -23,7 +23,7 @@ type TeamCreateForm = {
   accepted: boolean;
 };
 
-export default function () {
+export default function() {
   const navigate = useNavigate();
   const [customDisabled, setCustomDisabled] = createSignal(false);
   const [form, { Form, Field }] = createForm<TeamCreateForm>();
@@ -161,7 +161,7 @@ export default function () {
                     open={dialogOpen()}
                     stretched
                     onOpenChange={(details) => setDialogOpen(details.open)}
-                    onClick={() => setDialogOpen(true)}
+                    // onClick={() => setDialogOpen(true)}
                     level={field.error ? "error" : null}
                     btnContent={
                       <>

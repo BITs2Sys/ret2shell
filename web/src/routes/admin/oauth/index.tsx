@@ -25,7 +25,7 @@ import { For, Show, createSignal, onMount } from "solid-js";
 import InstituteForm from "./_blocks/institute-form";
 import ProviderForm from "./_blocks/provider-form";
 
-export default function () {
+export default function() {
   const [loading, setLoading] = createSignal(true);
   const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
   onMount(async () => {
@@ -166,7 +166,7 @@ export default function () {
                   <span>{t("form.create")}</span>
                 </>
               }
-              onClick={() => setProviderFormOpen(true)}
+              // onClick={() => setProviderFormOpen(true)}
               open={providerFormOpen()}
               onOpenChange={(detail) => setProviderFormOpen(detail.open)}
             >
@@ -228,7 +228,7 @@ export default function () {
                   <span>{t("form.create")}</span>
                 </>
               }
-              onClick={() => setInstituteFormOpen(true)}
+              // onClick={() => setInstituteFormOpen(true)}
               onOpenChange={(detail) => setInstituteFormOpen(detail.open)}
               open={instituteFormOpen()}
             >
