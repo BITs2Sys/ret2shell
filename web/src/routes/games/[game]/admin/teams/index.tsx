@@ -65,7 +65,7 @@ export default function () {
       <Title page={t("game.admin.teams.title")} route={`/games/${gameStore.current?.id}/admin/teams`} />
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
-          <div class="flex flex-row space-x-2">
+          <div class="flex flex-row items-center space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("game.admin.teams.title")}</span>
           </div>

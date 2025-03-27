@@ -2,9 +2,10 @@ import { handleHttpError } from "@api";
 import { getChallengeCommitHistory, getChallengeSubmission } from "@api/game";
 import type { Challenge, CommitHistory } from "@models/challenge";
 import type { Submission } from "@models/submission";
+import { createBreakpoints } from "@solid-primitives/media";
 import { challengeStore } from "@storage/challenge";
 import { gameStore } from "@storage/game";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
@@ -46,6 +47,7 @@ function StatisticsPanel() {
       untrack(fetchSolves);
     }
   });
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
@@ -73,29 +75,38 @@ function StatisticsPanel() {
       </Show>
       <For each={solves()}>
         {(item) => (
-          <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-            <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
-            <a class="truncate hover:underline" href={`/users/${item.user_id}`}>
-              {item.user_name}
-            </a>
-            <span class="opacity-60">@</span>
-            <a class="truncate hover:underline" href={`/games/${gameStore.current?.id}/teams/${item.team_id}`}>
-              {item.team_name ?? "wheel"}
-            </a>
-            <span>{t("game.monitor.submit")}</span>
-            <span class="flex-1 w-0 overflow-hidden flex items-center" title={item.content!}>
-              <span class="max-w-full truncate py-1 px-2 rounded-lg bg-layer-content/5">{item.content}</span>
-            </span>
-            <Tag level={item.solved ? "success" : "warning"}>
-              <span>
-                {item.solved === null
-                  ? t("game.admin.monitor.pending")
-                  : item.solved
-                    ? t("game.admin.monitor.solved")
-                    : t("game.admin.monitor.notSolved")}
+          <div class="min-h-12 w-full flex flex-row py-2 gap-y-2 px-2 flex-wrap justify-end space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+            <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
+              <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success shrink-0" />
+              <a class="truncate hover:underline" href={`/users/${item.user_id}`}>
+                {item.user_name}
+              </a>
+              <span class="opacity-60">@</span>
+              <a class="truncate hover:underline" href={`/games/${gameStore.current?.id}/teams/${item.team_id}`}>
+                {item.team_name ?? "wheel"}
+              </a>
+              <span>{t("game.monitor.submit")}</span>
+              <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={item.content}>
+                {item.content}
               </span>
-            </Tag>
-            <span class="opacity-40">{item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+            </div>
+            <span class="flex-1 mx-0" />
+            <div class="gap-y-2 flex flex-row space-x-2 items-center flex-wrap justify-end">
+              <Tag level={item.solved ? "success" : "warning"}>
+                <span>
+                  {item.solved === null
+                    ? t("game.admin.monitor.pending")
+                    : item.solved
+                      ? t("game.admin.monitor.solved")
+                      : t("game.admin.monitor.notSolved")}
+                </span>
+              </Tag>
+              <span class="opacity-40" title={item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>
+                <Switch fallback={item.created_at.toFormat("MM-dd HH:mm:ss")}>
+                  <Match when={matches.xl}>{item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
+                </Switch>
+              </span>
+            </div>
           </div>
         )}
       </For>
@@ -126,6 +137,7 @@ function HistoryPanel() {
       });
     }
   });
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
@@ -140,11 +152,23 @@ function HistoryPanel() {
       <For each={history()}>
         {(item) => (
           <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-            <span class="icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary" />
-            <span class="flex-1 truncate w-0">{item.subject}</span>
+            <span class="icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary shrink-0" />
+            <span class="truncate" title={item.subject}>
+              {item.subject}
+            </span>
+            <span class="flex-1" />
             <span class="font-bold">{item.author.name}</span>
-            <span class="font-bold text-primary opacity-40">{item.abbreviated_commit}</span>
-            <span class="opacity-40">{DateTime.fromSeconds(item.author.date).toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+            <span class="font-bold text-primary opacity-40 truncate">{item.abbreviated_commit}</span>
+            <span class="opacity-40 whitespace-nowrap">
+              <Switch fallback={DateTime.fromSeconds(item.author.date).toFormat("MM-dd")}>
+                <Match when={matches.xl}>
+                  {DateTime.fromSeconds(item.author.date).toFormat("yyyy-MM-dd HH:mm:ss")}
+                </Match>
+                <Match when={matches.lg}>{DateTime.fromSeconds(item.author.date).toFormat("MM-dd HH:mm:ss")}</Match>
+                <Match when={matches.md}>{DateTime.fromSeconds(item.author.date).toFormat("MM-dd HH:mm:ss")}</Match>
+                <Match when={matches.sm}>{DateTime.fromSeconds(item.author.date).toFormat("MM-dd HH:mm")}</Match>
+              </Switch>
+            </span>
           </div>
         )}
       </For>

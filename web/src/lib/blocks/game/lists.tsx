@@ -235,7 +235,7 @@ export function SubmissionList(props: {
         >
           {(submission) => (
             <div class="min-h-12 py-2 gap-y-2 px-2 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center">
-              <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap">
+              <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
                 <A class="font-bold" href={`/users/${submission.user_id}`}>
                   {submission.user_name}
                 </A>
@@ -246,9 +246,11 @@ export function SubmissionList(props: {
                   </A>
                 </Show>
                 <span>{t("game.monitor.submit")}</span>
-                <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5">{submission.content}</span>
+                <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={submission.content}>
+                  {submission.content}
+                </span>
               </div>
-              <span class="flex-1" />
+              <span class="flex-1 mx-0" />
               <div class="gap-y-2 flex flex-row space-x-2 items-center flex-wrap justify-end">
                 <A
                   class="hover:underline flex space-x-2 items-center"
@@ -270,7 +272,7 @@ export function SubmissionList(props: {
                         : t("game.admin.monitor.notSolved")}
                   </span>
                 </Tag>
-                <span>
+                <span title={submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>
                   <Switch fallback={submission.created_at.toFormat("MM-dd HH:mm:ss")}>
                     <Match when={matches.xl}>{submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</Match>
                   </Switch>

@@ -89,7 +89,7 @@ export default function (props: ComponentProps<"div">) {
           </div>
           <div
             class={clsx(
-              "flex flex-col items-center space-y-4 transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8",
+              "flex flex-col items-center space-y-4 transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8 text-center",
               expanded() ? "h-32" : "h-0"
             )}
           >
