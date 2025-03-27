@@ -162,7 +162,9 @@ export default function Tabs(props: {
                   // href={`${props.baseUrl}?challenge=${challenge.id}`}
                   onClick={() => {
                     // setSearchParams({ challenge: challenge.id });
-                    navigate(`${props.baseUrl}?challenge=${challenge.id}`);
+                    navigate(
+                      `${props.baseUrl}?challenge=${challenge.id}${searchParams.tab ? `&tab=${searchParams.tab}` : ""}`
+                    );
                   }}
                   onMouseUp={(e) => {
                     if (e.button === 1) closeChallengeTab(challenge.id);
