@@ -3,12 +3,16 @@ import { getUser, getUserTeams } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
+import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
-import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
+import clsx from "clsx";
+import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
 export default function () {
@@ -35,11 +39,13 @@ export default function () {
       setLoading(false);
     });
   });
+  const matches = createBreakpoints(breakpoints);
+  const [showSidebar, setShowSidebar] = createSignal(false);
 
   return (
     <>
       <Title page={user()?.nickname} route={`/users/${user()?.id}`} />
-      <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />}>
+      <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />} showLeftBar={showSidebar()}>
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
@@ -83,6 +89,25 @@ export default function () {
           </div>
         </div>
       </SidebarLayout>
+      <Transition name="slide-fade-right">
+        <Show when={!matches.lg}>
+          <Button
+            class="fixed bottom-3 right-3 z-30"
+            square
+            onClick={() => setShowSidebar(!showSidebar())}
+            type="button"
+          >
+            <span
+              class={clsx(
+                "transition-transform",
+                showSidebar() ? "rotate-90" : "rotate-0",
+                showSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--person-20-regular]",
+                "w-5 h-5"
+              )}
+            />
+          </Button>
+        </Show>
+      </Transition>
     </>
   );
 }

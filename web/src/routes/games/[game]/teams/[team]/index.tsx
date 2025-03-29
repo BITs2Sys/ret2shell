@@ -22,11 +22,12 @@ import {
   setValue,
   setValues,
 } from "@modular-forms/solid";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore, isGameAdmin, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Chart from "@widgets/chart";
@@ -37,6 +38,7 @@ import clsx from "clsx";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
 type TeamAdminUpdateForm = {
@@ -485,6 +487,8 @@ export default function () {
       });
     }
   });
+  const matches = createBreakpoints(breakpoints);
+  const [showSidebar, setShowSidebar] = createSignal(false);
 
   return (
     <>
@@ -492,7 +496,10 @@ export default function () {
         page={team()?.name ?? t("game.team.title")}
         route={`/games/${gameStore.current?.id}/teams/${team()?.id}`}
       />
-      <SidebarLayout leftBar={() => <Sidebar team={team()} members={members()} loading={loadingMembers()} />}>
+      <SidebarLayout
+        leftBar={() => <Sidebar team={team()} members={members()} loading={loadingMembers()} />}
+        showLeftBar={showSidebar()}
+      >
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
             <Show when={isSelfTeam()}>
@@ -637,6 +644,25 @@ export default function () {
           </div>
         </div>
       </SidebarLayout>
+      <Transition name="slide-fade-right">
+        <Show when={!matches.lg}>
+          <Button
+            class="fixed bottom-3 right-3 z-30"
+            square
+            onClick={() => setShowSidebar(!showSidebar())}
+            type="button"
+          >
+            <span
+              class={clsx(
+                "transition-transform",
+                showSidebar() ? "rotate-90" : "rotate-0",
+                showSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--people-team-20-regular]",
+                "w-5 h-5"
+              )}
+            />
+          </Button>
+        </Show>
+      </Transition>
     </>
   );
 }
