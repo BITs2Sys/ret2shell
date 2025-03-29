@@ -13,7 +13,15 @@ import type { Extra } from "@models/extra";
 import type { Submission } from "@models/submission";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
-import { createForm, maxLength, required, setValue, setValues } from "@modular-forms/solid";
+import {
+  clearError,
+  createForm,
+  maxLength,
+  required,
+  reset as resetForm,
+  setValue,
+  setValues,
+} from "@modular-forms/solid";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore, isGameAdmin, setGameStore } from "@storage/game";
@@ -309,6 +317,9 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<CreateExtraForm>();
   setValue(form, "score", 0);
 
+  const ptsInputIcon = ["icon-[fluent--subtract-20-regular]", "icon-[fluent--add-20-regular]"];
+  const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(0);
+
   const [loading, setLoading] = createSignal(false);
   async function onSubmit(result: CreateExtraForm) {
     setLoading(true);
@@ -321,6 +332,12 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
         hint_id: null,
         challenge_id: null,
         team_id: props.team!.id,
+      });
+      resetForm(form, {
+        initialValues: {
+          reason: "",
+          score: 0,
+        },
       });
       props.onDone?.();
     } catch (err) {
@@ -344,21 +361,49 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
             placeholder={t("game.team.createExtraReason")}
             class="flex-1"
             size="sm"
+            onBlur={(e) => {
+              clearError(form, "reason");
+              return props.onBlur(e);
+            }}
           />
         )}
       </Field>
       <Field name="score" type="number" validate={[required(t("game.team.extraScoreRequired")!)]}>
         {(field, props) => (
           <Input
-            type="number"
+            type="text" // use text, we will convert to number manually
             value={field.value}
             error={field.error}
             {...props}
-            noLabel
             required
+            onInput={(e) => {
+              // set num to `null` for prevValue
+              const setNumber = (num: number | null, str: string, _switch: boolean) => {
+                if (_switch) {
+                  setPtsInputIconIndex(ptsInputIconIndex() === 0 ? 1 : 0);
+                }
+                e.currentTarget.value = str;
+                Object.defineProperty(e.currentTarget, "valueAsNumber", { writable: true });
+                e.currentTarget.valueAsNumber = num || 0;
+                Object.freeze(e.currentTarget.valueAsNumber);
+              };
+              // manually parse number
+              function parseNumber(_v: string): [number | null, string, boolean] {
+                let value = _v;
+                if (value === "0-") return [0, "0", true];
+                const neg = (/^(-*)/.exec(value)?.[1].length ?? 0) % 2 === 1;
+                value = value.replace(/[^\d]/g, "").replace(/^0+(?=\d)/, "");
+                const n = Number.parseInt(value);
+                return [!Number.isNaN(n) ? n : 0, value, neg];
+              }
+              setNumber(...parseNumber(e.currentTarget.value));
+              return props.onInput(e);
+            }}
+            noLabel
             placeholder={t("game.team.extraScore")}
-            class="w-24"
+            class="w-32"
             size="sm"
+            icon={<span class={ptsInputIcon[ptsInputIconIndex()]} />}
           />
         )}
       </Field>
