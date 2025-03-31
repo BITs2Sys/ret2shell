@@ -44,7 +44,7 @@
     "hastscript": "^9.0.1",
     "howler": "^2.2.4",
     "katex": "^0.16.21",
-    "ky": "^1.7.5",
+    "ky": "^1.8.0",
     "lorem-ipsum": "^2.0.8",
     "luxon": "^3.6.0",
     "nanoid": "^5.1.5",
@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@iconify-json/fluent": "^1.2.16",
+    "@iconify-json/fluent": "^1.2.17",
     "@iconify-json/fluent-emoji-flat": "^1.2.3",
     "@iconify-json/meteocons": "^1.2.2",
     "@iconify/tailwind4": "^1.0.6",
