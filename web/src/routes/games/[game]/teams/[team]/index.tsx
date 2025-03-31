@@ -320,7 +320,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
   setValue(form, "score", 0);
 
   const ptsInputIcon = ["icon-[fluent--subtract-20-regular]", "icon-[fluent--add-20-regular]"];
-  const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(0);
+  const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(1);
 
   const [loading, setLoading] = createSignal(false);
   async function onSubmit(result: CreateExtraForm) {
@@ -330,7 +330,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
         id: 0,
         created_at: DateTime.now(),
         reason: result.reason,
-        score: result.score,
+        score: result.score * (ptsInputIconIndex() === 0 ? -1 : 1),
         hint_id: null,
         challenge_id: null,
         team_id: props.team!.id,
