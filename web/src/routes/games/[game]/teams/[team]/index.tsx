@@ -320,7 +320,7 @@ function SelfManagement(props: { members: User[] }) {
               )}
             </Field>
           </div>
-          <Field name="tag" validate={[maxLength(32, t("game.team.create.tagMaxLength")!)]}>
+          <Field name="tag" validate={[required("Please fill"), maxLength(32, t("game.team.create.tagMaxLength")!)]}>
             {(field, props) => (
               <Input
                 class="flex-1"

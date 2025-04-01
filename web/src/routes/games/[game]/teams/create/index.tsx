@@ -152,7 +152,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="tag" validate={[maxLength(32, t("game.team.create.tagMaxLength")!)]}>
+            <Field name="tag" validate={[required("Please fill"), maxLength(32, t("game.team.create.tagMaxLength")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
