@@ -374,6 +374,8 @@
         "fetchDevicesFailed": "Failed to retrieve device list",
         "linkedDevices": "Connected devices",
         "noDevicesLinked": "No connected devices.",
+        "regenerateTokenTips": "Are you sure to regenerate the token? The old token will be invalidated.",
+        "regenerateTokenFailed": "Failed to regenerate token",
         "tips1": "Connect to the following WebSocket address to access the platform event API subscription. You can find the integration method for the event API here:",
         "tips2": "Please note that the Event API only authenticates through a Token. Be cautious to prevent this link from being leaked."
       },

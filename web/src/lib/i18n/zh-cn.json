@@ -334,6 +334,8 @@
         "tips1": "连接下述 WebSocket 地址即可接入平台事件 API 订阅。你可以在这里找到事件 API 的对接方法：",
         "tips2": "请注意，事件 API 只通过 Token 进行鉴权，谨防此链接泄露。",
         "linkedDevices": "已连接的设备",
+        "regenerateTokenTips": "确定要重新生成 Token 吗？已连接的设备将失去连接。",
+        "regenerateTokenFailed": "重新生成 Token 失败",
         "noDevicesLinked": "没有已连接的设备",
         "fetchDevicesFailed": "获取设备列表失败"
       },

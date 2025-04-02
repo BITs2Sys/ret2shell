@@ -496,6 +496,8 @@
         "title": "イベントカード",
         "fetchDevicesFailed": "デバイスリストの取得に失敗しました",
         "linkedDevices": "接続されたデバイス",
+        "regenerateTokenTips": "このトークンは、プラットフォームイベントAPIのサブスクリプションに使用されます。トークンを再生成すると、以前のトークンは無効になります。新しいトークンをコピーして、サブスクリプションに使用してください。",
+        "regenerateTokenFailed": "トークンの再生成に失敗しました",
         "noDevicesLinked": "接続されているデバイスはありません",
         "tips1": "以下のWebSocketアドレスに接続することで、プラットフォームイベントAPIのサブスクリプションにアクセスできます。ここでイベントAPIの連携方法を見つけることができます：",
         "tips2": "イベントAPIはトークンによる認証のみを行いますので、このリンクの漏洩にご注意ください。"
@@ -1084,7 +1086,7 @@
       "noSuchFileOrDirectory": "ファイルが存在しません。",
       "invalidPath": "リモートホストがディレクトリトラバーサルを拒否しました。",
       "permissionDenied": "権限が不足しています。アクセスを拒否します。",
-      "invalidOption": "未知オプション: `{{option}}`；ls コマンドは /bin/ls -l のエイリアスであり、他の引数オプションを受け付けません。"
+      "invalidOption": "未知オプション: `{{option}}`；ls コマンドは /bin/ls -l のエイリアスであり、他の引数���プションを受け付けません。"
     },
     "noChallengeSpecified": "問題には含まれていません。",
     "noChallengeSpecifiedTips": "添付ファイルは課題環境でのみダウンロードできます。",
@@ -1171,7 +1173,7 @@
     "gameJournal": "{{team}} のメンバーとして {{game}} に参加しました。",
     "introductionTitle": "自己紹介",
     "joinedGamesTitle": "試合経験",
-    "moreJournal": "命がある限り、探求は続く……",
+    "moreJournal": "命がある��り、探求は続く……",
     "noDescription": "この大きなハッカーは何も残していません...",
     "noInstitute": "組織に加入していない",
     "registeredAt": "{{time}} に参加",

@@ -100,6 +100,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             .route("/{image}", get(get_cluster_registry_image)),
         )
         .route("/device", get(get_connected_devices))
+        .route("/token", post(regenerate_game_token))
         .route("/introduction", patch(update_game_intro))
         .route("/submission", get(get_submissions))
         .nest(
@@ -663,6 +664,23 @@ async fn get_connected_devices(
     })
     .collect::<Vec<_>>();
   Ok(Json(clients))
+}
+
+async fn regenerate_game_token(
+  State(ref db): State<Database>, State(ref cache): State<Cache>,
+  Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let token = game::update(
+    &db.conn,
+    game::Model {
+      id: game.id,
+      token: Some(nanoid!()),
+      ..game.clone()
+    },
+  )
+  .await?;
+  cache.at("game").del(game.id).await?;
+  Ok(Json(token))
 }
 
 async fn get_game_administrator(
