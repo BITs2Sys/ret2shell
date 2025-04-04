@@ -90,7 +90,7 @@ impl Registry {
     for i in result {
       if i.contains('/') {
         let org = i.split('/').next().unwrap();
-        let repo = i.split('/').last().unwrap();
+        let repo = i.split('/').next_back().unwrap();
         orgs
           .entry(org.to_string())
           .or_default()

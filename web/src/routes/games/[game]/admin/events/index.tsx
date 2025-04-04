@@ -1,11 +1,13 @@
 import { handleHttpError } from "@api";
-import { type EventDeviceInfo, getGameDevices } from "@api/game";
+import { type EventDeviceInfo, getGameDevices, regenerateGameToken } from "@api/game";
 import { createBreakpoints } from "@solid-primitives/media";
-import { gameStore } from "@storage/game";
+import { gameStore, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
+import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
+import Popover from "@widgets/popover";
 import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {
@@ -22,6 +24,16 @@ export default function () {
       });
     }
   });
+
+  async function handleRefreshToken() {
+    try {
+      const resp = await regenerateGameToken(gameStore.current!.id);
+      setGameStore({ current: { ...gameStore.current!, token: resp.token } });
+    } catch (err) {
+      handleHttpError(err as Error, t("game.admin.events.regenerateTokenFailed")!);
+    }
+  }
+
   const matches = createBreakpoints(breakpoints);
   return (
     <>
@@ -49,10 +61,23 @@ export default function () {
               <span>{t("game.admin.events.tips2")}</span>
             </p>
           </Card>
-          <Clipboard
-            class="w-full mt-2"
-            value={`${window.origin.replace("http", "ws")}/api/event/connect?game_id=${gameStore.current?.id}&token=${gameStore.current?.token || undefined}`}
-          />
+          <div class="flex flex-row space-x-2 mt-2">
+            <Clipboard
+              class="flex-1"
+              value={`${window.origin.replace("http", "ws")}/api/event/connect?game_id=${gameStore.current?.id}&token=${gameStore.current?.token || undefined}`}
+            />
+            <Popover square btnContent={<span class="icon-[fluent--arrow-sync-20-regular] text-error w-5 h-5" />}>
+              <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
+                <span class="inline-block space-x-2">
+                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span>{t("game.admin.events.regenerateTokenTips")}</span>
+                </span>
+                <Button level="primary" size="sm" class="self-end" onClick={handleRefreshToken}>
+                  {t("platform.accept")}
+                </Button>
+              </Card>
+            </Popover>
+          </div>
           <div class="h-4" />
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--developer-board-lightning-20-regular] w-5 h-5" />

@@ -100,7 +100,9 @@ export async function createChallenge(game_id: number, challenge: Challenge) {
 
 export async function updateChallenge(game_id: number, challenge: Challenge) {
   return await api
-    .patch(`${api_root}/game/${game_id}/challenge/${challenge.id}`, { json: challenge })
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge.id}`, {
+      json: challenge,
+    })
     .json<Challenge>();
 }
 
@@ -334,6 +336,14 @@ export type EventDeviceInfo = {
 
 export async function getGameDevices(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/device`).json<EventDeviceInfo[]>();
+}
+
+export async function regenerateGameToken(game_id: number) {
+  return await api
+    .post(`${api_root}/game/${game_id}/token`, {
+      json: {},
+    })
+    .json<{ token: string }>();
 }
 
 export async function getGameAdmins(game_id: number) {

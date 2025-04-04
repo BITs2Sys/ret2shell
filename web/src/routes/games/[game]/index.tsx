@@ -30,10 +30,11 @@ import Timer from "@widgets/timer";
 
 import { handleHttpError } from "@api";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
-import { useSearchParams } from "@solidjs/router";
+import { A, useSearchParams } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import IntroForm from "./_blocks/intro-form";
+import Clipboard from "@widgets/clipboard";
 
 function BannedWarning() {
   const [close, setClose] = createSignal(false);
@@ -53,7 +54,7 @@ function BannedWarning() {
   );
 }
 
-export default function () {
+export default function() {
   const [searchParams, setSearchParams] = useSearchParams();
   const inEdit = () => searchParams.edit === "true";
   const period = () => {
@@ -333,7 +334,7 @@ export default function () {
             </div>
           </div>
           <Show when={gameStore.team}>
-            <Card contentClass="p-3 lg:px-6 flex flex-row space-x-2 lg:space-x-4 print:hidden">
+            <Card contentClass="p-3 lg:px-6 flex flex-row space-x-2 lg:space-x-4 print:hidden relative">
               <div class="flex items-center justify-center">
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60" />
               </div>
@@ -356,8 +357,13 @@ export default function () {
                   <span class="text-primary">{gameStore.rank || "NULL"}</span>
                 </span>
                 <span>{gameStore.team?.score || 0} pts</span>
+                <A
+                  class="absolute top-0 left-0 w-full h-full"
+                  href={`/games/${gameStore.current?.id}/teams/${gameStore.team?.id}`}
+                />
               </p>
             </Card>
+            {/* <Clipboard value={gameStore.team?.token || ""} /> */}
           </Show>
           <div class="flex flex-row space-x-2 print:hidden">
             <Show when={isGameAdmin()}>

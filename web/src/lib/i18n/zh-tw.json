@@ -334,6 +334,8 @@
         "tips1": "連接下述 WebSocket 地址即可接入平臺事件 API 訂閱。你可以在這裡找到事件 API 的對接方法：",
         "tips2": "請注意，事件 API 只通過 Token 進行鑑權，謹防此鏈接洩露。",
         "linkedDevices": "已連接的設備",
+        "regenerateTokenTips": "確定要重新生成 Token 嗎？已連接的設備將失去連接。",
+        "regenerateTokenFailed": "重新生成 Token 失敗",
         "noDevicesLinked": "沒有已連接的設備",
         "fetchDevicesFailed": "獲取設備列表失敗"
       },
