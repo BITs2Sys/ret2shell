@@ -132,7 +132,7 @@ pub async fn extract_user_info(
     let token_str = distribute_token(&token_stored, signing_key, expires_time).await;
     cache
       .at("token")
-      .set_ex(&token_str, token_stored.id, 3 * 24 * 60 * 60)
+      .set_ex(&token_str, token_stored.id, expires_time)
       .await
       .map_err(|err| {
         error!("failed to store new token: {:?}", err);

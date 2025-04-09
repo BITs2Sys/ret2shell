@@ -106,7 +106,7 @@ export default function (_props: {
     setRenderedLint(null);
   }
   createEffect(() => {
-    if (!challengeStore.current?.hidden) {
+    if (challengeStore.current) {
       untrack(refreshScript);
     }
   });
