@@ -102,8 +102,6 @@ export default function (_props: {
   }
   function restoreScript() {
     setScript(serverScript);
-    setLint(null);
-    setRenderedLint(null);
   }
   createEffect(() => {
     if (challengeStore.current) {

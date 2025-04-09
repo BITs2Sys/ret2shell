@@ -34,7 +34,6 @@ import { A, useSearchParams } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import IntroForm from "./_blocks/intro-form";
-import Clipboard from "@widgets/clipboard";
 
 function BannedWarning() {
   const [close, setClose] = createSignal(false);
@@ -54,7 +53,7 @@ function BannedWarning() {
   );
 }
 
-export default function() {
+export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
   const inEdit = () => searchParams.edit === "true";
   const period = () => {
