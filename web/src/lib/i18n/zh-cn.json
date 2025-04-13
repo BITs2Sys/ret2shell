@@ -139,6 +139,7 @@
       "settings": "设置",
       "hammer": "锤子",
       "instances": "实例",
+      "managedByMate": "队友的环境，仅可访问",
       "hammerTips": "你在这里发送的消息将会与题目状态一起转发给出题人，出题人可能会在这里回复或者通过其他渠道联系你。",
       "hammerResponse": "出题人在 {{challenge}} 回复了你的消息",
       "hammerInput": "请输入你要反馈的问题，支持 Markdown 语法",

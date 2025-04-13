@@ -178,6 +178,7 @@
       "settings": "Settings",
       "hammer": "Hammer",
       "instances": "Instances",
+      "managedByMate": "Teammate's env, accessible only",
       "hammerResponse": "The challenger replied to your message in {{challenge}}",
       "hammerTips": "The messages you send here will be forwarded along with the challenge status to the challenger, who may reply here or contact you through other channels.",
       "hammerInput": "Please input your question to be reflected, supports Markdown syntax",

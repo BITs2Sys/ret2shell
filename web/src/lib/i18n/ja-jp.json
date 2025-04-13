@@ -567,7 +567,7 @@
         "solved": "正しい",
         "notSolved": "エラー",
         "needReview": "再審査待ち",
-        "misjudged": "誤判定",
+        "misjudged": "誤判",
         "confirmed": "実在する",
         "title": "イベントボード"
       },
@@ -649,6 +649,7 @@
       "hintRequired": "指示内容を入力してください",
       "info": "基本情報",
       "instances": "例",
+      "managedByMate": "チームメイトの環境のみアクセス可能",
       "list": "問題リスト",
       "maxScore": "初期スコア",
       "minScore": "最低点",
@@ -1086,7 +1087,7 @@
       "noSuchFileOrDirectory": "ファイルが存在しません。",
       "invalidPath": "リモートホストがディレクトリトラバーサルを拒否しました。",
       "permissionDenied": "権限が不足しています。アクセスを拒否します。",
-      "invalidOption": "未知オプション: `{{option}}`；ls コマンドは /bin/ls -l のエイリアスであり、他の引数���プションを受け付けません。"
+      "invalidOption": "未知オプション: `{{option}}`；ls コマンドは /bin/ls -l のエイリア��であり、他の引数���プションを受け付けません。"
     },
     "noChallengeSpecified": "問題には含まれていません。",
     "noChallengeSpecifiedTips": "添付ファイルは課題環境でのみダウンロードできます。",
