@@ -36,29 +36,41 @@ export function InstanceBoxContent() {
   }
 
   async function tryConnect() {
-    const resp = await wsrx.check();
-    if (wsrx.state() !== WsrxState.Invalid || (resp instanceof WsrxError && resp.kind === WsrxErrorKind.MissingScope)) {
-      setConnecting(true);
-      setTimeout(async () => {
-        await wsrx.connect();
-        setConnecting(false);
-      }, 1000);
-      return true;
-    }
-    return false;
+    await wsrx.connect().catch(() => {});
   }
 
   async function retryConnect() {
-    if (!tryConnect()) {
+    setConnecting(true);
+    setTimeout(async () => {
+      await wsrx.connect().catch((e) => {
+        if (e instanceof WsrxError) {
+          switch (e.kind) {
+            case WsrxErrorKind.VersionMismatch:
+              addToast({
+                level: "error",
+                description: t("instance.wsrxVersionMismatch")!,
+                duration: 5000,
+              });
+              break;
+            case WsrxErrorKind.DaemonError:
+              addToast({
+                level: "error",
+                description: e.message!,
+                duration: 5000,
+              });
+              break;
+            case WsrxErrorKind.DaemonUnavailable:
+              addToast({
+                level: "error",
+                description: t("instance.wsrxDaemonOffline")!,
+                duration: 5000,
+              });
+              break;
+          }
+        }
+      });
       setConnecting(false);
-      if (wsrx.state() === WsrxState.Invalid) {
-        addToast({
-          level: "warning",
-          description: t("instance.wsrxDaemonOffline")!,
-          duration: 10 * 1000,
-        });
-      }
-    }
+    }, 1000);
   }
 
   createEffect(() => {

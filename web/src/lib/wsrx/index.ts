@@ -4,15 +4,7 @@ import { gameStore } from "@storage/game";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import {
-  Wsrx,
-  WsrxFeature,
-  type WsrxInstance,
-  type WsrxOptions,
-  WsrxState,
-  WsrxError,
-  WsrxErrorKind,
-} from "@xdsec/wsrx";
+import { Wsrx, WsrxError, WsrxFeature, type WsrxInstance, type WsrxOptions, WsrxState } from "@xdsec/wsrx";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { type Accessor, createEffect, createSignal } from "solid-js";
@@ -65,32 +57,8 @@ export class WsrxWrapper {
     this.wsrx.setOptions(options);
   }
 
-  async check() {
-    try {
-      await this.wsrx.check();
-      return true;
-    } catch (err) {
-      if (err instanceof WsrxError) {
-        return err;
-      }
-    }
-  }
-
   async connect() {
-    await this.wsrx.checkVersion().catch((err) => {
-      if (err instanceof WsrxError) {
-        switch (err.kind) {
-          case WsrxErrorKind.VersionMismatch:
-            addToast({
-              level: "error",
-              description: t("instance.wsrxVersionMismatch")!,
-              duration: 10 * 1000,
-            });
-            break;
-        }
-      }
-    });
-    await this.wsrx.connect().catch(() => {});
+    await this.wsrx.connect();
   }
 
   public async syncRemote() {

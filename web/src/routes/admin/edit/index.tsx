@@ -21,6 +21,7 @@ type PlatformConfigForm = {
   subject_url?: string;
   record?: string;
   hide_maker: boolean;
+  highlight_banner?: string;
 };
 
 export default function () {
@@ -48,6 +49,7 @@ export default function () {
         subject_url: result.subject_url,
         record: result.record,
         hide_maker: result.hide_maker,
+        highlight_banner: result.highlight_banner,
       },
     } as Config;
     try {
@@ -76,6 +78,7 @@ export default function () {
         subject_url: resp.server.subject_url || "",
         record: resp.server.record || "",
         hide_maker: resp.server.hide_maker || false,
+        highlight_banner: resp.server.highlight_banner || "",
       });
     } catch (err) {
       handleHttpError(err as HTTPError, t("errors.500")!);
@@ -143,6 +146,18 @@ export default function () {
                 icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
                 placeholder="https://github.com/ret2shell"
                 title={t("platform.form.subjectUrlTitle")}
+                {...props}
+                value={field.value}
+                error={field.error}
+              />
+            )}
+          </Field>
+          <Field name="highlight_banner">
+            {(field, props) => (
+              <Input
+                icon={<span class="icon-[fluent--image-20-regular] w-5 h-5" />}
+                placeholder={t("platform.form.highlightBannerPlaceholder")}
+                title={t("platform.form.highlightBannerTitle")}
                 {...props}
                 value={field.value}
                 error={field.error}

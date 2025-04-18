@@ -160,6 +160,7 @@ export default function TitleBar() {
   const location = useLocation();
   const inDocs = () => location.pathname.startsWith("/docs");
   const [offlineLoading, setOfflineLoading] = createSignal(false);
+  const [bannerRead, setBannerRead] = createSignal(false);
   function reloadPage() {
     setOfflineLoading(true);
     setTimeout(() => {
@@ -373,8 +374,18 @@ export default function TitleBar() {
               </Match>
             </Switch>
           </div>
+          <Show when={platformStore.config.highlight_banner && !bannerRead()}>
+            <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2">
+              <span class="icon-[fluent--warning-20-filled] mx-2" />
+              <span class="font-bold flex-1 truncate">{platformStore.config.highlight_banner}</span>
+              <Button ghost size="sm" onClick={() => setBannerRead(true)}>
+                <span class="icon-[fluent--dismiss-20-regular] w-5 h-5" />
+              </Button>
+            </div>
+          </Show>
         </div>
       </div>
     </>
   );
 }
+

@@ -38,6 +38,8 @@
       "subjectUrlTitle": "Subtitle Link",
       "recordPlaceholder": "China MIIT Record Number (Not required for non-mainland China services)",
       "recordTitle": "China MIIT Record Number",
+      "highlightBannerPlaceholder": "Title Bar Highlight Banner, suitable for important notifications",
+      "highlightBannerTitle": "Title Bar Highlight Banner",
       "hideMaker": "Hide Developer Information",
       "hideMakerDisabled": "Your permission does not allow hiding developer information"
     },

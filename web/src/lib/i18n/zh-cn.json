@@ -35,6 +35,8 @@
       "subjectUrlTitle": "副标题链接",
       "recordPlaceholder": "中国工信部备案号（不对中国大陆服务则不需要填写）",
       "recordTitle": "中国工信部备案号",
+      "highlightBannerPlaceholder": "标题栏高亮横幅，适合重要通知",
+      "highlightBannerTitle": "标题栏高亮横幅",
       "hideMaker": "隐藏开发者信息",
       "hideMakerDisabled": "你的许可证不允许隐藏开发者信息"
     },

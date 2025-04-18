@@ -97,6 +97,7 @@ export type ServerConfig = {
   subject_url: string | null;
   record: string | null;
   hide_maker: boolean | null;
+  highlight_banner: string | null;
 };
 export type Config = {
   auditor: AuditorConfig;

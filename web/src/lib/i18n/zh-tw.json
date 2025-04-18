@@ -35,6 +35,8 @@
       "subjectUrlTitle": "副標題鏈接",
       "recordPlaceholder": "中國工信部備案號（不對中國大陸服務則不需要填寫）",
       "recordTitle": "中國工信部備案號",
+      "highlightBannerPlaceholder": "標題欄高亮橫幅，適合重要通知",
+      "highlightBannerTitle": "標題欄高亮橫幅",
       "hideMaker": "隱藏開發者信息",
       "hideMakerDisabled": "你的許可證不允許隱藏開發者信息"
     },

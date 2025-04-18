@@ -54,6 +54,7 @@ pub struct Config {
   pub subject_url: Option<String>,
   pub record: Option<String>,
   pub hide_maker: Option<bool>,
+  pub highlight_banner: Option<String>,
 }
 
 impl Config {
@@ -97,6 +98,7 @@ impl Config {
       subject_url: self.subject_url.clone(),
       record: self.record.clone(),
       hide_maker: self.hide_maker,
+      highlight_banner: self.highlight_banner.clone(),
       // api_rate_limit: self.api_rate_limit,
       rate_limit: None,
     }
@@ -122,6 +124,7 @@ impl Merge for Option<Config> {
         subject_url: b.subject_url.or(a.subject_url),
         record: b.record.or(a.record),
         hide_maker: b.hide_maker.or(a.hide_maker),
+        highlight_banner: b.highlight_banner.or(a.highlight_banner),
         // api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
         rate_limit: a.rate_limit,
       }),
