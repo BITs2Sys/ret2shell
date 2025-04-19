@@ -407,6 +407,7 @@ fn to_file_name(file: &str) -> String {
   let escape_filesystem = Regex::new(r#"[\\\/:\*\?\"<>\|\ ]"#).unwrap();
   let escape_printable = Regex::new(r#"[^[:print:]]"#).unwrap();
   let file = escape_filesystem.replace_all(&file, "_").to_string();
+  let file = file.trim_matches('_').to_lowercase().to_owned();
   escape_printable.replace_all(&file, "").to_string()
 }
 
