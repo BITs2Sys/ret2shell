@@ -30,7 +30,7 @@
     "@solid-primitives/resize-observer": "^2.1.0",
     "@solid-primitives/storage": "^4.3.1",
     "@solidjs/router": "^0.15.3",
-    "@xdsec/wsrx": "^0.4.17",
+    "@xdsec/wsrx": "^0.4.18",
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.11.0",

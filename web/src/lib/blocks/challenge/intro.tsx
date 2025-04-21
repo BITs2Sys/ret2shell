@@ -32,7 +32,7 @@ passiveSupport({
   ],
 });
 
-export default function (props: { inGame?: boolean }) {
+export default function(props: { inGame?: boolean }) {
   const instance = createMemo(() => {
     if (challengeStore.current && challengeStore.env) {
       return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
@@ -65,7 +65,6 @@ export default function (props: { inGame?: boolean }) {
     await wsrx.syncRemote();
     await wsrx.deleteOutdatedLocal();
     await wsrx.openAllTraffic();
-    await wsrx.syncLocal();
   }
   function maintainInstancesWorker() {
     if (instance()?.state === "Pending" || instanceStateIter === 0) {
@@ -84,6 +83,12 @@ export default function (props: { inGame?: boolean }) {
       return wsrx.instances().find((s) => s.user_id === accountStore.id) ?? null;
     }
     return null;
+  });
+
+  createEffect(() => {
+    if (wsrx.state() === WsrxState.Usable) {
+      untrack(maintainInstances);
+    }
   });
 
   const [starting, setStarting] = createSignal(false);
@@ -438,12 +443,30 @@ export default function (props: { inGame?: boolean }) {
                         <Show when={wsrx.state() === WsrxState.Usable}>
                           <For each={wsrx.getTrafficLocal(instance()!, image.port!)}>
                             {(local) => (
-                              <ClipboardBtn
-                                size="sm"
-                                title={t("instance.copyLocalAddr")}
-                                value={local.local}
-                                label={local.local}
-                              />
+                              <div class="flex">
+                                <ClipboardBtn
+                                  size="sm"
+                                  class="!rounded-r-none"
+                                  title={t("instance.copyLocalAddr")}
+                                  value={local.local}
+                                  label={local.local}
+                                />
+                                <Button size="sm" class="!rounded-l-none">
+                                  <span
+                                    class={clsx(
+                                      (local.latency &&
+                                        (local.latency < 0
+                                          ? "text-error"
+                                          : local.latency > 100
+                                            ? "text-warning"
+                                            : "text-success")) ??
+                                      "text-error"
+                                    )}
+                                  >
+                                    {(local.latency ?? -1) < 0 ? "--" : local.latency} ms
+                                  </span>
+                                </Button>
+                              </div>
                             )}
                           </For>
                         </Show>

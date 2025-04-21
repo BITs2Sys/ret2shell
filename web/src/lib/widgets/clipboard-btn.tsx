@@ -23,7 +23,8 @@ export default function ClipboardBtn(
             "btn",
             btnProps.size && `btn-${btnProps.size}`,
             btnProps.square && "btn-square",
-            "flex items-center space-x-2 justify-center"
+            "flex items-center space-x-2 justify-center",
+            others.class
           )}
           title={others.title ?? t("form.copy")}
         >

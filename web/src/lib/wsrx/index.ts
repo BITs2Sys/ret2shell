@@ -39,8 +39,8 @@ export class WsrxWrapper {
       }
       this.setState(state);
     });
-    this.wsrx.onInstancesChange(() => {
-      this.setTraffics(this.wsrx.list());
+    this.wsrx.onInstancesChange((data) => {
+      this.setTraffics(data);
     });
 
     createEffect(() => {
@@ -100,15 +100,7 @@ export class WsrxWrapper {
     if (this.wsrx.getState() === WsrxState.Usable) {
       try {
         await this.wsrx.delete(local);
-      } catch (err) {
-        if (err instanceof WsrxError) {
-          addToast({
-            level: "error",
-            description: `${t("traffic.deleteFailed")}: ${err.message}`,
-            duration: 5000,
-          });
-        }
-      }
+      } catch { }
     }
   }
 
@@ -137,7 +129,7 @@ export class WsrxWrapper {
         if (!this.traffics().some((t) => t.remote === remote)) {
           try {
             await this.wsrx.add({
-              label: `${instance.name} (${port})`,
+              label: `${instance.challenge_name} (${port}) in ${instance.game_name}`,
               local: "127.0.0.1:0",
               remote,
             });
@@ -158,7 +150,6 @@ export class WsrxWrapper {
 
   public async openAllTraffic() {
     if (this.wsrx.getState() === WsrxState.Usable) {
-      await this.syncLocal();
       for (const instance of this.instances()) {
         await this.addLocal(instance);
       }
