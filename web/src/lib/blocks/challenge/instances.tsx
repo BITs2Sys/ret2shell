@@ -5,6 +5,7 @@ import {
   getRegistryConfig,
   getRegistryImageTags,
   getRegistryRepositories,
+  refreshRegistry,
   updateChallengeEnv,
 } from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
@@ -46,6 +47,7 @@ import {
 
 function CreateForm(fnProps: {
   repos: string[];
+  refreshRepos?: () => Promise<void>;
   registryConfig: RegistryConfig | null;
   onDone?: () => void;
 }) {
@@ -108,6 +110,18 @@ function CreateForm(fnProps: {
     setAdding(false);
     fnProps.onDone?.();
   }
+
+  async function onRefreshRegistry() {
+    if (gameStore.current) {
+      try {
+        await refreshRegistry(gameStore.current.id);
+        await fnProps.refreshRepos?.();
+      } catch (err) {
+        handleHttpError(err as Error, t("game.challenge.refreshRegistryFailed")!);
+      }
+    }
+  }
+
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
       <div class="flex flex-row space-x-2">
@@ -188,6 +202,11 @@ function CreateForm(fnProps: {
                           setSelected(false);
                           setValue(form, "tag", "");
                         }}
+                        extraBtn={
+                          <Button square class="!rounded-l-none" onClick={onRefreshRegistry} type="button">
+                            <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
+                          </Button>
+                        }
                       />
                     </ArkPopover.Anchor>
                     <ArkPopover.Positioner class="w-full">
@@ -525,7 +544,7 @@ function InstanceList() {
   );
 }
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -671,13 +690,14 @@ export default function (_props: {
             onOpenChange={(details) => {
               setFormOpen(details.open);
             }}
-            // onClick={() => {
-            //   setFormOpen(true);
-            // }}
+          // onClick={() => {
+          //   setFormOpen(true);
+          // }}
           >
             <CreateForm
               repos={repos()}
               registryConfig={registryConfig()}
+              refreshRepos={fetchRepos}
               onDone={() => {
                 setFormOpen(false);
               }}

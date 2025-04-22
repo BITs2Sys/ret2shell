@@ -166,6 +166,7 @@
       "tagRequired": "请输入题目标签",
       "tagPlaceholder": "题目标签，以 `/` 作为分隔，第一个标签将成为题目分类...",
       "contentRequired": "请输入题目内容",
+      "refreshRegistryFailed": "刷新镜像仓库失败",
       "fetchFilesFailed": "获取题目附件失败",
       "fetchHintFailed": "获取题目提示信息失败",
       "fetchEnvFailed": "获取题目环境信息失败",

@@ -199,6 +199,7 @@
       "scoreRange": "score range",
       "tag": "tag",
       "fetchFailed": "failed to fetch challenge list",
+      "refreshRegistryFailed": "failed to refresh image repository",
       "fetchChallengeFailed": "failed to fetch challenge",
       "createFailed": "failed to create challenge",
       "nameRequired": "challenge name required",

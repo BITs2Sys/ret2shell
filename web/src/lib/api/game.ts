@@ -589,6 +589,10 @@ export async function getRegistryRepositories(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/registry`).json<string[]>();
 }
 
+export async function refreshRegistry(game_id: number) {
+  return await api.delete(`${api_root}/game/${game_id}/registry/refresh`).json<void>();
+}
+
 export async function getRegistryImageTags(game_id: number, repo: string) {
   return await api.get(`${api_root}/game/${game_id}/registry/${repo}`).json<string[]>();
 }

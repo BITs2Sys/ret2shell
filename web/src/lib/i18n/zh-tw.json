@@ -166,6 +166,7 @@
       "tagRequired": "請輸入題目標籤",
       "tagPlaceholder": "題目標籤，以 `/` 作為分隔，第一個標籤將成為題目分類...",
       "contentRequired": "請輸入題目內容",
+      "refreshRegistryFailed": "刷新鏡像倉庫失敗",
       "fetchFilesFailed": "獲取題目附件失敗",
       "fetchHintFailed": "獲取題目提示信息失敗",
       "fetchEnvFailed": "獲取題目環境信息失敗",

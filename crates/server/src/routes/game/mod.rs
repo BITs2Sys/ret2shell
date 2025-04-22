@@ -5,7 +5,7 @@ use axum::{
   extract::{DefaultBodyLimit, Multipart, Path, Query, State},
   middleware,
   response::IntoResponse,
-  routing::{get, patch, post},
+  routing::{delete, get, patch, post},
 };
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use futures::TryStreamExt;
@@ -95,6 +95,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/registry",
           Router::new()
             .route("/config", get(get_cluster_registry_config))
+            .route("/refresh", delete(refresh_cluster_registry))
             .route("/", get(get_cluster_registry_repo).post(upload_image))
             .route_layer(DefaultBodyLimit::max(2 * 1024 * 1024 * 1024))
             .route("/{image}", get(get_cluster_registry_image)),
@@ -1043,6 +1044,17 @@ async fn get_cluster_registry_config(
   } else {
     Ok(Json(None))
   }
+}
+
+async fn refresh_cluster_registry(
+  State(cache): State<Cache>, Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  cache.at("registry").del("_").await?;
+  cache
+    .at("registry")
+    .del(&game.bucket.clone().unwrap_or("_".to_string()))
+    .await?;
+  Ok(())
 }
 
 #[derive(Deserialize)]
