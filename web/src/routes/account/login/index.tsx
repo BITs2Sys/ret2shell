@@ -66,6 +66,7 @@ export default function () {
         if (redirectUrl) {
           const url = Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl;
           if (/^(\w+):\/\//.test(url)) {
+            navigate("/", { replace: true });
             window.location.replace(url);
           } else {
             navigate(url, { replace: true });
