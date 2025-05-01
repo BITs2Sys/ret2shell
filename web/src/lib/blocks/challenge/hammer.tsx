@@ -14,7 +14,6 @@ import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
-import Card from "@widgets/card";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
@@ -22,9 +21,53 @@ import clsx from "clsx";
 import type { DateTime } from "luxon";
 // import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createMemo, createSignal, onCleanup, onMount } from "solid-js";
-import { TransitionGroup } from "solid-transition-group";
 
-function mergeChats(
+export function ChatBlock(props: {
+  avatar?: string;
+  showAvatar?: boolean;
+  roleLabel: string;
+  nameLabel: string;
+  labelClasses: string;
+  link: string;
+  content: string;
+  sendAt: DateTime;
+  isChecked?: boolean;
+}) {
+  return (
+    <>
+      <div class="self-start flex-row w-[calc(100%-4rem)] flex items-center">
+        <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
+          <A class="w-10 h-10 shrink-0 self-start mt-2" href={props.link}>
+            <Avatar class="w-full h-full" src={props.avatar} fallback={props.nameLabel} />
+          </A>
+        </Show>
+        <div class="w-2 shrink-0" />
+        <div class="flex flex-col space-y-1 hover:bg-layer-content/5 flex-1 p-2 rounded-md">
+          <Show when={props.showAvatar}>
+            <header class={clsx("label", props.labelClasses)}>
+              <A href={props.link} class="space-x-2">
+                <span>[{props.roleLabel}]</span>
+                <span>{props.nameLabel}</span>
+              </A>
+            </header>
+          </Show>
+          <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
+          <footer class="text-xs flex items-center space-x-2">
+            <span class="opacity-60">{props.sendAt.toFormat("yyyy-MM-dd HH:mm")}</span>
+            <Show
+              when={props.isChecked}
+              fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
+            >
+              <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
+            </Show>
+          </footer>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function mergeChats(
   challengeId: number,
   teamId: number,
   a: Chat[],
@@ -168,164 +211,68 @@ export default function (props: {
 
   return (
     <div class="flex flex-col min-h-full relative">
-      <div class="flex flex-col flex-1 px-3 lg:px-6 pt-3 space-y-1">
+      <div class="flex flex-col flex-1 px-3 lg:px-6 pt-3">
         <Show
           when={!isGameAdmin()}
           fallback={
-            <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-              <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-                <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-              </A>
-              <div class="w-4 shrink-0" />
-              <div class="flex flex-col space-y-1">
-                <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
-                <Card contentClass="p-2">
-                  <p class="text-wrap">{t("game.admin.hammer.shouldGoto")}</p>
-                </Card>
-                <div class="h-3" />
-              </div>
-            </div>
+            <ChatBlock
+              avatar={platformAvatar}
+              showAvatar
+              roleLabel=">_<"
+              link="/magic/sakana"
+              nameLabel="Ciallo～(∠・ω< )⌒☆"
+              labelClasses="text-primary"
+              content={t("game.admin.hammer.shouldGoto")!}
+              sendAt={gameStore.current!.start_at}
+              isChecked
+            />
           }
         >
-          <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-              <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-            </A>
-            <div class="w-4 shrink-0" />
-            <div class="flex flex-col space-y-1">
-              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
-              <Card contentClass="p-2">
-                <p class="text-wrap">{t("game.challenge.hammerTips")}</p>
-              </Card>
-              <div class="h-3" />
-            </div>
-          </div>
-          <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-              <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-            </A>
-            <div class="w-4 shrink-0" />
-            <div class="flex flex-col space-y-1 items-start">
-              <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
-              <Card contentClass="p-2">
-                <p class="text-wrap inline">
-                  <span>{t("game.challenge.hammerTips2")}</span>
-                  <span>{t("game.challenge.hammerTips3")}</span>
-                  <a
-                    class="align-middle space-x-1 text-primary hover:underline"
-                    href="https://bpa.st"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <span>bpa.st</span>
-                    <span class="icon-[fluent--open-20-regular]" />
-                  </a>
-                  <span>&nbsp;</span>
-                  <a
-                    class="align-middle space-x-1 text-primary hover:underline"
-                    href="https://0x0.st"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <span>0x0.st</span>
-                    <span class="icon-[fluent--open-20-regular]" />
-                  </a>
-                </p>
-              </Card>
-              <div class="h-3" />
-            </div>
-          </div>
+          <ChatBlock
+            avatar={platformAvatar}
+            showAvatar
+            roleLabel=">_<"
+            link="/magic/sakana"
+            nameLabel="Ciallo～(∠・ω< )⌒☆"
+            labelClasses="text-primary"
+            content={t("game.challenge.hammerTips")!}
+            sendAt={gameStore.current!.start_at}
+            isChecked
+          />
+          <ChatBlock
+            avatar={platformAvatar}
+            roleLabel=">_<"
+            link="/magic/sakana"
+            nameLabel="Ciallo～(∠・ω< )⌒☆"
+            labelClasses="text-primary"
+            content={`${t("game.challenge.hammerTips2")}\n\n${t("game.challenge.hammerTips3")} [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
+            sendAt={gameStore.current!.start_at}
+            isChecked
+          />
         </Show>
-        <TransitionGroup name="fade-group-up">
-          <For each={chats()}>
-            {(chat, index) => (
-              <div
-                class={clsx(
-                  "fade-group-up",
-                  chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse",
-                  "w-[calc(100%-4rem)] flex items-center"
-                )}
-              >
-                <Show
-                  when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
-                  fallback={<div class="w-10 h-10 shrink-0 self-start" />}
-                >
-                  <Show
-                    when={chat.id !== 0}
-                    fallback={
-                      <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-                        <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-                      </A>
-                    }
-                  >
-                    <A class="w-10 h-10 shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
-                      <Avatar
-                        class="w-full h-full"
-                        src={chat.avatar ? mediaPath(chat.avatar) : undefined}
-                        fallback={chat.user_name}
-                      />
-                    </A>
-                  </Show>
-                </Show>
-                <div class="w-4 shrink-0" />
-                <div
-                  class={clsx(
-                    chat.user_id !== accountStore.id ? "items-start" : "items-end",
-                    "flex-1 w-0 flex flex-col"
-                  )}
-                >
-                  <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
-                    <header class="label space-x-2 py-1">
-                      <Show when={chat.user_id !== 0}>
-                        <Show
-                          when={chat.is_admin}
-                          fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
-                        >
-                          <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
-                        </Show>
-                      </Show>
-                      <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
-                    </header>
-                  </Show>
-                  <div
-                    class={clsx(
-                      chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse",
-                      "peer flex max-w-full"
-                    )}
-                  >
-                    <Card
-                      contentClass={clsx(
-                        chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse",
-                        "flex p-2"
-                      )}
-                    >
-                      <Article content={chat.content} noExtraPaddings compact extra />
-                    </Card>
-                    <div
-                      class={clsx(
-                        "self-end flex items-end",
-                        chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
-                      )}
-                    >
-                      <span
-                        class={
-                          chat.checked
-                            ? "icon-[fluent--circle-20-filled] w-2 h-2 m-1 text-success"
-                            : "icon-[fluent--circle-20-regular] w-2 h-2 m-1 opacity-40"
-                        }
-                      />
-                      <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
-                    </div>
-                  </div>
-                  <header class="opacity-0 h-0 peer-hover:h-4 peer-hover:opacity-60 text-sm transition-all duration-300">
-                    {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                  </header>
-                </div>
-              </div>
-            )}
-          </For>
-        </TransitionGroup>
+        <For each={chats()}>
+          {(chat, index) => (
+            <ChatBlock
+              avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
+              showAvatar={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
+              roleLabel={
+                chat.id === 0
+                  ? ">_<"
+                  : chat.is_admin
+                    ? t("game.challenge.chatAdminRole")!
+                    : t("game.challenge.chatPlayerRole")!
+              }
+              link={chat.id === 0 ? "Ciallo～(∠・ω< )⌒☆" : `/users/${chat.user_id}`}
+              nameLabel={chat.user_name || "Unknown"}
+              labelClasses={chat.is_admin ? "text-success" : "text-warning"}
+              content={chat.content}
+              sendAt={chat.created_at}
+              isChecked={chat.checked}
+            />
+          )}
+        </For>
       </div>
+      <div class="h-6 shrink-0" />
       <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
         <div class="flex flex-row items-center h-8 space-x-2">
           <span class="hidden lg:flex items-center space-x-2">
