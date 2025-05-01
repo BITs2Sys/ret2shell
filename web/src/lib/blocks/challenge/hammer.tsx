@@ -43,30 +43,28 @@ export function ChatBlock(props: {
           </A>
         </Show>
         <div class="w-2 shrink-0" />
-        <div class="flex flex-col flex-1">
+
+        <div class="flex flex-col space-y-1 bg-transparent hover:bg-layer-content/5 flex-1 p-2 rounded-md group transition-colors duration-300">
           <Show when={props.showAvatar}>
-            <Divider />
+            <header class="label">
+              <A href={props.link} class="space-x-2 hover:underline">
+                <span class={props.labelClasses}>[{props.roleLabel}]</span>
+                <span>{props.nameLabel}</span>
+              </A>
+            </header>
           </Show>
-          <div class="flex flex-col space-y-1 hover:bg-layer-content/5 w-full p-2 rounded-md">
-            <Show when={props.showAvatar}>
-              <header class="label">
-                <A href={props.link} class="space-x-2 hover:underline">
-                  <span class={props.labelClasses}>[{props.roleLabel}]</span>
-                  <span>{props.nameLabel}</span>
-                </A>
-              </header>
+          <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
+          <footer class="text-xs flex items-center space-x-2">
+            <span class="opacity-30 group-hover:opacity-80 transition-opacity duration-300">
+              {props.sendAt.toFormat("yyyy-MM-dd HH:mm")}
+            </span>
+            <Show
+              when={props.isChecked}
+              fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
+            >
+              <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
             </Show>
-            <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
-            <footer class="text-xs flex items-center space-x-2">
-              <span class="opacity-60">{props.sendAt.toFormat("yyyy-MM-dd HH:mm")}</span>
-              <Show
-                when={props.isChecked}
-                fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
-              >
-                <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
-              </Show>
-            </footer>
-          </div>
+          </footer>
         </div>
       </div>
     </>
