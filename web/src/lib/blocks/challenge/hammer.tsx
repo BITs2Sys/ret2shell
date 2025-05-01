@@ -79,7 +79,7 @@ export function mergeChats(
       id: 0,
       user_id: 0,
       user_name: "Ciallo～(∠・ω< )⌒☆",
-      avatar: undefined,
+      avatar: platformAvatar,
       content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•ω•๑)۶`,
       created_at: solvedAt,
       is_admin: true,
@@ -90,7 +90,7 @@ export function mergeChats(
     });
   }
   const bb = b.sort((x, y) => x.id - y.id);
-  const aa = a.sort((x, y) => x.id - y.id);
+  const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId).sort((x, y) => x.id - y.id);
 
   let i = 0;
   const iLen = aa.length;

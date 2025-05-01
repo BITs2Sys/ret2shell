@@ -25,6 +25,7 @@ import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import clsx from "clsx";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 
@@ -178,7 +179,7 @@ export default function () {
                   nameLabel="Ciallo～(∠・ω< )⌒☆"
                   labelClasses="text-primary"
                   content={`${t("game.challenge.adminHammerTips")}\n\n> [!WARNING] ${t("game.challenge.title")}\n> [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${challenge()?.score} pts\n\n> [!TIP] ${t("game.team.title")}\n> [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()}), ${team()?.score} pts`}
-                  sendAt={gameStore.current!.start_at}
+                  sendAt={gameStore.current?.start_at ?? DateTime.now()}
                   isChecked
                 />
                 <For each={chats()}>
