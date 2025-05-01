@@ -178,7 +178,7 @@ export default function () {
                   link="/magic/sakana"
                   nameLabel="Ciallo～(∠・ω< )⌒☆"
                   labelClasses="text-primary"
-                  content={`${t("game.challenge.adminHammerTips")}\n\n> [!WARNING] ${t("game.challenge.title")}\n> [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${challenge()?.score} pts\n\n> [!TIP] ${t("game.team.title")}\n> [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()}), ${team()?.score} pts`}
+                  content={`${t("game.challenge.title")}: [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${t("game.team.title")}: [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()})`}
                   sendAt={gameStore.current?.start_at ?? DateTime.now()}
                   isChecked
                 />

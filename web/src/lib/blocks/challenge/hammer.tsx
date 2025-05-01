@@ -14,6 +14,7 @@ import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
+import Divider from "@widgets/divider";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
@@ -42,25 +43,30 @@ export function ChatBlock(props: {
           </A>
         </Show>
         <div class="w-2 shrink-0" />
-        <div class="flex flex-col space-y-1 hover:bg-layer-content/5 flex-1 p-2 rounded-md">
+        <div class="flex flex-col flex-1">
           <Show when={props.showAvatar}>
-            <header class={clsx("label", props.labelClasses)}>
-              <A href={props.link} class="space-x-2">
-                <span>[{props.roleLabel}]</span>
-                <span>{props.nameLabel}</span>
-              </A>
-            </header>
+            <Divider />
           </Show>
-          <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
-          <footer class="text-xs flex items-center space-x-2">
-            <span class="opacity-60">{props.sendAt.toFormat("yyyy-MM-dd HH:mm")}</span>
-            <Show
-              when={props.isChecked}
-              fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
-            >
-              <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
+          <div class="flex flex-col space-y-1 hover:bg-layer-content/5 w-full p-2 rounded-md">
+            <Show when={props.showAvatar}>
+              <header class="label">
+                <A href={props.link} class="space-x-2 hover:underline">
+                  <span class={props.labelClasses}>[{props.roleLabel}]</span>
+                  <span>{props.nameLabel}</span>
+                </A>
+              </header>
             </Show>
-          </footer>
+            <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
+            <footer class="text-xs flex items-center space-x-2">
+              <span class="opacity-60">{props.sendAt.toFormat("yyyy-MM-dd HH:mm")}</span>
+              <Show
+                when={props.isChecked}
+                fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
+              >
+                <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
+              </Show>
+            </footer>
+          </div>
         </div>
       </div>
     </>
