@@ -64,14 +64,14 @@ export default function(props: ComponentProps<"div">) {
   term.loadAddon(webLinksAddon);
 
   onMount(() => {
-    term.open(terminal);
+    term.open(terminal!);
     term.focus();
     fitAddon.fit();
 
     const resizeObserver = new ResizeObserver(() => {
       fitAddon.fit();
     });
-    resizeObserver.observe(terminal);
+    resizeObserver.observe(terminal!);
 
     shell = new Shell(term, (_cmd, _code) => { });
     shell.run();
