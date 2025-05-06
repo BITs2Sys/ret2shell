@@ -7,7 +7,7 @@ import { Show } from "solid-js";
 
 export function ThemeBoxContent() {
   return (
-    <div class="flex flex-col space-y-2 max-w-64">
+    <div class="flex flex-col space-y-2 min-w-48">
       <Card contentClass="flex flex-col p-0 hover:p-2 hover:space-y-2 transition-all duration-300 group">
         <DarkmodeButton />
         <Button
