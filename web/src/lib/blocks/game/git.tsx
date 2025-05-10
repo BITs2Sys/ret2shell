@@ -84,7 +84,7 @@ export default function () {
             <>
               <A
                 class="text-layer-content/60"
-                href={`/games/${gameStore.current?.id}/admin/git?path=${path().split(p)[0]}/${p}`}
+                href={`/games/${gameStore.current?.id}/admin/git?path=${path().split(p)[0]}${p}`}
               >
                 {p}
               </A>
