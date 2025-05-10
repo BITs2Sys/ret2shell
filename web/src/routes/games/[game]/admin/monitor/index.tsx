@@ -50,7 +50,7 @@ export default function () {
         </h3>
         <Switch>
           <Match when={tab() === "submissions"}>
-            <SubmissionList inGame={!inArchived()} />
+            <SubmissionList inGame archived={inArchived()} />
           </Match>
           <Match when={tab() === "audits"}>
             <AuditList />

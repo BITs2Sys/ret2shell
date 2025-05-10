@@ -4,9 +4,7 @@ import api, { api_root } from ".";
 export async function deunicode(text: string, keep_case = false) {
   return (
     await api.get(`${api_root}/rpc/string/deunicode`, {
-      searchParams: JSON.parse(
-        JSON.stringify({ text, keep_case }),
-      ) as SearchParamsOption,
+      searchParams: JSON.parse(JSON.stringify({ text, keep_case })) as SearchParamsOption,
     })
   ).text();
 }

@@ -180,7 +180,10 @@ export function AuditList() {
   );
 }
 
-export function SubmissionList(props: { inGame?: boolean }) {
+export function SubmissionList(props: {
+  inGame?: boolean;
+  archived?: boolean;
+}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
   const pageSize = 15;
@@ -253,9 +256,9 @@ export function SubmissionList(props: { inGame?: boolean }) {
                 <A
                   class="hover:underline flex space-x-2 items-center"
                   href={
-                    props.inGame
-                      ? `/games/${gameStore.current?.id}/challenges?challenge=${submission.challenge_id}`
-                      : `/training/${gameStore.current?.id}?challenge=${submission.challenge_id}`
+                    props.archived
+                      ? `/training/${gameStore.current?.id}?challenge=${submission.challenge_id}`
+                      : `/games/${gameStore.current?.id}/challenges?challenge=${submission.challenge_id}`
                   }
                 >
                   <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
