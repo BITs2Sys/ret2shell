@@ -108,8 +108,8 @@ export default function () {
                 />
                 <span class="flex-1 text-start truncate font-normal">{object.path.split("/").slice(-1)[0]}</span>
                 <span class="text-primary opacity-60">{object.commit}</span>
-                <span class="flex-1 text-start truncate opacity-60">{object.subject}</span>
-                <span class="opacity-60">
+                <span class="flex-1 text-start truncate opacity-60 font-normal">{object.subject}</span>
+                <span class="opacity-60 font-normal">
                   {DateTime.fromSeconds(object.last_modified || 0).toFormat("yyyy-MM-dd HH:mm")}
                 </span>
               </Link>
