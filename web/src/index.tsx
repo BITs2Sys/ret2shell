@@ -88,6 +88,7 @@ render(() => {
               type="button"
               onClick={() => {
                 reset();
+                window.location.reload();
               }}
             />
             <span class="icon-[fluent-emoji-flat--backhand-index-pointing-left] w-8 h-8" />
