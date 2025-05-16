@@ -783,10 +783,7 @@ async fn upload_challenge_attachment(
         "file name is required".to_owned(),
       ))?
       .to_owned();
-    let reader =
-      StreamReader::new(field.map_err(|multipart_error| {
-        std::io::Error::new(std::io::ErrorKind::Other, multipart_error)
-      }));
+    let reader = StreamReader::new(field.map_err(std::io::Error::other));
     match query.folder {
       FileType::Static => challenge_bucket.upload_static(&file_name, reader).await?,
       FileType::Mapped => challenge_bucket.upload_mapped(&file_name, reader).await?,

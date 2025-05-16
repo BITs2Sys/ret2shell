@@ -1,6 +1,6 @@
-use axum::{ServiceExt, extract::Request};
 use std::{io::Write, net::SocketAddr, process};
 
+use axum::{ServiceExt, extract::Request};
 use colored::Colorize;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use r2s_config::GlobalConfig;

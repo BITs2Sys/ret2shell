@@ -37,7 +37,7 @@ impl Decoder for Ret2Codec {
     let decoded = self
       .engine
       .decode(src.clone())
-      .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+      .map_err(std::io::Error::other)?;
     src.advance(consumed);
     Ok(Some(decoded))
   }
@@ -73,9 +73,7 @@ pub async fn encrypt_stream_codec(
       .with_decode_padding_mode(engine::DecodePaddingMode::RequireCanonical);
     let engine = GeneralPurpose::new(&alphabet, config);
     let (parts, body) = req.into_parts();
-    let body_stream = body
-      .into_data_stream()
-      .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e));
+    let body_stream = body.into_data_stream().map_err(std::io::Error::other);
     let new_body =
       FramedRead::new(StreamReader::new(body_stream), Ret2Codec { engine }).into_stream();
     let mut new_req = Request::from_parts(parts, Body::from_stream(new_body));

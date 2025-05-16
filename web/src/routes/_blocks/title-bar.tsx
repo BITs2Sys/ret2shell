@@ -376,7 +376,7 @@ export default function TitleBar() {
             </Switch>
           </div>
           <Show when={platformStore.config.highlight_banner && !bannerRead()}>
-            <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2">
+            <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2 backdrop-blur-lg">
               <span class="icon-[fluent--warning-20-filled] mx-2" />
               <span class="font-bold flex-1 truncate">{platformStore.config.highlight_banner}</span>
               <Button ghost size="sm" onClick={() => setBannerRead(true)}>

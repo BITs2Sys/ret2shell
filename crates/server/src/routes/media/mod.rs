@@ -121,10 +121,7 @@ async fn upload_media(
     .await
     .map_err(|err| ResponseError::BadRequest(err.to_string()))?
   {
-    let reader =
-      StreamReader::new(field.map_err(|multipart_error| {
-        std::io::Error::new(std::io::ErrorKind::Other, multipart_error)
-      }));
+    let reader = StreamReader::new(field.map_err(std::io::Error::other));
     let model = media.save(reader).await?;
     if query.thumbnail.unwrap_or(false) {
       media.make_thumbnail(&model.hash, 128).await?;

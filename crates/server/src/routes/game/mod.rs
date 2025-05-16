@@ -1026,10 +1026,7 @@ async fn upload_image(
         "file name is required".to_owned(),
       ))?
       .to_owned();
-    let reader =
-      StreamReader::new(field.map_err(|multipart_error| {
-        std::io::Error::new(std::io::ErrorKind::Other, multipart_error)
-      }));
+    let reader = StreamReader::new(field.map_err(std::io::Error::other));
     registry
       .upload_image(
         &game.bucket.clone().unwrap_or("_".to_string()),
@@ -1276,11 +1273,7 @@ async fn game_repo_info_refs(
     )
     .await?;
 
-  let stream_reader = StreamReader::new(
-    body
-      .into_data_stream()
-      .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err)),
-  );
+  let stream_reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
 
   let stdout = match service.as_str() {
     "upload-pack" => {
@@ -1355,11 +1348,7 @@ async fn game_repo_git_rpc(
         ))?,
     )
     .await?;
-  let stream_reader = StreamReader::new(
-    body
-      .into_data_stream()
-      .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)),
-  );
+  let stream_reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
 
   let stdout = match service_name {
     "upload-pack" => game_bucket.git.upload_pack(protocol, stream_reader).await,

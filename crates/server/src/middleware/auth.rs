@@ -54,18 +54,24 @@ pub async fn decode_token(token: &str, key: &str) -> Token {
   token_data.claims
 }
 
-async fn distribute_token(token: &Token, key: &str, expires_time: i64) -> String {
+async fn distribute_token(
+  token: &Token, key: &str, expires_time: i64,
+) -> Result<String, ResponseError> {
   let new_token = Token {
     exp: Utc::now().timestamp() + expires_time,
     ..token.clone()
   };
-  let token = encode(
+  encode(
     &Header::default(),
     &new_token,
     &EncodingKey::from_secret(key.as_ref()),
   )
-  .expect("Failed to encode token");
-  token
+  .map_err(|err| {
+    ResponseError::InternalServerError(
+      "failed to encode token, please contact server admin".to_owned(),
+      format!("failed to encode token: {err:?}"),
+    )
+  })
 }
 
 async fn extract_bearer_token(
@@ -259,7 +265,7 @@ pub async fn extract_user_info(
       &auth_config.signing_key,
       auth_config.expires_time,
     )
-    .await;
+    .await?;
     cache
       .at("token")
       .set_ex(&token_str, token_stored.id, auth_config.expires_time)
