@@ -425,11 +425,11 @@ impl Cluster {
   }
 
   fn map_protocol(&self, service: &Option<ServiceType>) -> String {
-    match service {
-      &Some(ServiceType::Tcp) => "TCP".to_owned(),
-      &Some(ServiceType::Udp) => "UDP".to_owned(),
-      &Some(ServiceType::Http) => "TCP".to_owned(),
-      &None => "TCP".to_owned(),
+    match *service {
+      Some(ServiceType::Tcp) => "TCP".to_owned(),
+      Some(ServiceType::Udp) => "UDP".to_owned(),
+      Some(ServiceType::Http) => "TCP".to_owned(),
+      None => "TCP".to_owned(),
     }
   }
 
