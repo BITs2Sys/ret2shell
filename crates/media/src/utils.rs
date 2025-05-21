@@ -5,7 +5,21 @@ use tracing::{debug, info, warn};
 
 use crate::traits::MediaError;
 
-#[allow(dead_code)]
+pub fn get_media_type(path: impl AsRef<Path>) -> Result<String, MediaError> {
+  let path = path.as_ref();
+  match infer::get_from_path(path) {
+    Ok(Some(mime)) => {
+      if mime.mime_type() == "text/xml" {
+        Ok("image/svg+xml".to_string())
+      } else {
+        Ok(mime.mime_type().into())
+      }
+    }
+    Ok(None) => Err(MediaError::UnsupportedFileType("unknown".to_string())),
+    Err(err) => Err(MediaError::InferError(err.to_string())),
+  }
+}
+
 pub fn get_media_extension(content_type: &str) -> Result<String, MediaError> {
   let mime_type = content_type
     .parse::<mime::Mime>()
@@ -17,19 +31,19 @@ pub fn get_media_extension(content_type: &str) -> Result<String, MediaError> {
   }
 }
 
-#[allow(dead_code)]
 pub async fn make_thumbnail<PA, PB>(
   original: PA, dest: PB, longest_edge: u32,
 ) -> Result<(), MediaError>
 where
   PA: AsRef<Path>,
-  PB: AsRef<Path>, {
+  PB: AsRef<Path>,
+{
   // prevent generate thumbnail repeatedly
   if tokio::fs::metadata(&dest).await.is_ok() {
     return Ok(());
   }
   // prevent generate thumbnail for svg
-  if original.as_ref().extension().unwrap_or_default() == "svg" {
+  if get_media_extension(&get_media_type(&original)?)? == "svg" {
     let _ = tokio::fs::hard_link(original, dest).await;
     return Ok(());
   }

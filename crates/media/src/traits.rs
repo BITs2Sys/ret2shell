@@ -12,4 +12,6 @@ pub enum MediaError {
   UnsupportedFileType(String),
   #[error("media storage path is not configured")]
   MediaStoragePathNotConfigured,
+  #[error("failed to infer file type: {0}")]
+  InferError(String),
 }

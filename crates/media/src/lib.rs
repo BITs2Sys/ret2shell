@@ -70,7 +70,7 @@ impl Media {
     fs::create_dir_all(self.path.join(&hash[..2]).join(&hash[2..4])).await?;
     let dest = hashed_path!(self.path, &hash);
     fs::rename(&temp_path, &dest).await?;
-    if !self.get_mime_type(&hash).await?.starts_with("image/") {
+    if !self.is_image(self.get_mime_type(&hash)?) {
       fs::remove_file(&dest).await?;
       return Err(MediaError::UnsupportedFileType("not an image".to_string()));
     }
@@ -115,24 +115,15 @@ impl Media {
     Ok(())
   }
 
-  pub async fn get_mime_type(&self, hash: impl AsRef<str>) -> Result<String, MediaError> {
+  pub fn get_mime_type(&self, hash: impl AsRef<str>) -> Result<String, MediaError> {
     let hash = hash.as_ref();
     let path = hashed_path!(self.path, &hash);
-    match infer::get_from_path(path)? {
-      Some(mime) => {
-        if mime.mime_type() == "text/xml" {
-          Ok("image/svg+xml".to_string())
-        } else {
-          Ok(mime.mime_type().into())
-        }
-      }
-      None => Err(MediaError::UnsupportedFileType("unknown".to_string())),
-    }
+    let mime_type = utils::get_media_type(&path)?;
+    Ok(mime_type)
   }
 
-  pub async fn accepted(content_type: impl AsRef<str>) -> Result<bool, MediaError> {
-    get_media_extension(content_type.as_ref())?;
-    Ok(true)
+  pub fn is_image(&self, content_type: impl AsRef<str>) -> bool {
+    get_media_extension(content_type.as_ref()).is_ok()
   }
 }
 
