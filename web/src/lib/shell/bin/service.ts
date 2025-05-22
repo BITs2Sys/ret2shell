@@ -2,8 +2,8 @@ import { delayChallengeInstance, getChallengeEnv, startChallengeInstance, stopCh
 import { deunicode } from "@api/rpc";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
 import type { Instance } from "@models/instance";
-import { gameStore, inProgress } from "@storage/game";
 import { challengeStore } from "@storage/challenge";
+import { gameStore, inProgress } from "@storage/game";
 import { t } from "@storage/theme";
 import { WsrxState } from "@xdsec/wsrx";
 import ansiColors from "ansi-colors";
