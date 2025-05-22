@@ -134,7 +134,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/", patch(update_game).delete(delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
         .route("/solve", get(get_self_solves))
-        .route("/env", get(get_self_envs))
+        .route("/instance", get(get_self_instances))
         .nest("/challenge", challenge::router(state))
         .nest("/team", team::router(state))
         .nest("/notification", notification::router(state))
@@ -525,7 +525,7 @@ async fn get_self_solves(
   Ok(Json(solves))
 }
 
-async fn get_self_envs(
+async fn get_self_instances(
   State(cluster): State<Cluster>, State(cache): State<Cache>,
   Extension(config): Extension<config::Model>, Extension(game): Extension<game::Model>,
   Extension(token): Extension<Token>, team_ext: Extension<Option<team_db::Model>>,
