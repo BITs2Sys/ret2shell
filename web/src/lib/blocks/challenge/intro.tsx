@@ -74,7 +74,7 @@ export default function (props: { inGame?: boolean }) {
     return maintainInstancesWorker;
   }
   const instanceCountExceeded = createMemo(() => {
-    return wsrx.instances().length >= (inProgress() ? (gameStore.current?.team_size ?? 1) : 1);
+    return wsrx.instances().length >= (inProgress() && gameStore.team ? (gameStore.current?.team_size ?? 1) : 1);
   });
 
   const timer = setInterval(maintainInstancesWorker(), 1000);
