@@ -1,6 +1,6 @@
 import { handleHttpError } from "@api";
 import { getCaptcha } from "@api/account";
-import Spin from "@assets/animates/spin";
+import Working from "@assets/animates/working";
 import type { Captcha } from "@models/captcha";
 import { type FormStore, type Maybe, setValue } from "@modular-forms/solid";
 import { base64 } from "@scure/base";
@@ -73,10 +73,7 @@ export default function (
           return (
             <span class="inline-flex space-x-2 items-center">
               {calculating() ? (
-                <>
-                  <Spin width={20} height={20} />
-                  <span>{t("captcha.calculating")}</span>
-                </>
+                <Working width={20} height={20} />
               ) : (
                 <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />
               )}
@@ -122,8 +119,15 @@ export default function (
             onClick={reload}
             disabled={calculating() || loading()}
             type="button"
+            title={
+              loading()
+                ? t("captcha.fetching")!
+                : calculating()
+                  ? t("captcha.calculating")!
+                  : t("general.actions.refresh.title")!
+            }
           >
-            {loading() ? t("captcha.fetching") : captcha() ? getCaptchaContent() : t("captcha.errors.fetch.title")}
+            {loading() ? null : captcha() ? getCaptchaContent() : t("captcha.errors.fetch.title")}
           </Button>
         }
       />
