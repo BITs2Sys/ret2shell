@@ -111,7 +111,11 @@ export default function (props: { children?: JSX.Element }) {
   async function loadVersion() {
     try {
       const version = await getVersion();
-      setPlatformStore({ version, under_maintenance: false, backend_online: true });
+      setPlatformStore({
+        version,
+        under_maintenance: false,
+        backend_online: true,
+      });
       if (!version.startsWith(frontendCompatVersion)) {
         addToast({
           level: "warning",
@@ -122,7 +126,7 @@ export default function (props: { children?: JSX.Element }) {
         });
       }
       console.log(
-        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, All rights reserved.\n`,
+        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, All rights reserved.\n\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact <support@ret.sh.cn>.\n`,
         "color: #0078D6; font-weight: bold; font-size: 1.5rem;",
         "color: currentColor; font-weight: bold; font-size: 1.5rem;",
         "color: #808080; font-weight: bold; font-size: 1.5rem;",
@@ -132,14 +136,8 @@ export default function (props: { children?: JSX.Element }) {
         "color: #808080",
         "color: #808080",
         "color: #808080;text-decoration: underline;",
-        "color: #808080;"
-      );
-      console.log(
-        "\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n",
-        "color: currentColor;"
-      );
-      console.log(
-        "\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact <support@ret.sh.cn>.\n",
+        "color: #808080;",
+        "color: currentColor;",
         "color: currentColor;"
       );
 
