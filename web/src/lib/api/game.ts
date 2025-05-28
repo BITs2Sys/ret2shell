@@ -274,6 +274,10 @@ export async function updateTeamInfo(game_id: number, team_id: number, team: Tea
     .json<Team>();
 }
 
+export async function deleteTeam(game_id: number, team_id: number) {
+  return await api.delete(`${api_root}/game/${game_id}/team/${team_id}`).json<void>();
+}
+
 export async function getTeamMembers(game_id: number, team_id: number) {
   return await api.get(`${api_root}/game/${game_id}/team/${team_id}/member`).json<User[]>();
 }
@@ -291,6 +295,10 @@ export async function updateSelfteam(
   }
 ) {
   return await api.patch(`${api_root}/game/${game_id}/team/self`, { json: team }).json<Team>();
+}
+
+export async function leaveSelfTeam(game_id: number) {
+  return await api.delete(`${api_root}/game/${game_id}/team/self`).json<void>();
 }
 
 export async function getTeamExtras(game_id: number, team_id: number) {

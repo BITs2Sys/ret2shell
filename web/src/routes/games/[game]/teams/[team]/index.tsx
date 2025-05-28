@@ -1,10 +1,12 @@
 import { handleHttpError } from "@api";
 import {
   createTeamExtra,
+  deleteTeam,
   getTeamExtras,
   getTeamInfo,
   getTeamMembers,
   getTeamSolves,
+  leaveSelfTeam,
   updateSelfteam,
   updateTeamInfo,
 } from "@api/game";
@@ -40,6 +42,8 @@ import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
+import Popover from "@widgets/popover";
+import Card from "@widgets/card";
 
 type TeamAdminUpdateForm = {
   name: string;
@@ -53,6 +57,7 @@ function AdminManagement(props: {
   onDone?: (team: Team) => void;
 }) {
   const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>();
+  const navigate = useNavigate();
   createEffect(() => {
     if (props.team) {
       untrack(() => {
@@ -102,6 +107,22 @@ function AdminManagement(props: {
       handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setUpdating(false);
+  }
+
+  const [deleting, setDeleting] = createSignal(false);
+  async function handleDeleteTeam() {
+    setDeleting(true);
+    try {
+      await deleteTeam(gameStore.current!.id, props.team!.id);
+      navigate(`/games/${gameStore.current!.id}/scoreboard`);
+      addToast({
+        level: "success",
+        description: t("general.actions.delete.status.success")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
+    }
   }
   return (
     <>
@@ -195,9 +216,30 @@ function AdminManagement(props: {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={updating()} disabled={updating()}>
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="!mt-4 flex flex-row space-x-2">
+            <Button type="submit" level="primary" class="flex-1" loading={updating()} disabled={updating()}>
+              {t("general.actions.save.title")}
+            </Button>
+            <Popover
+              type="button"
+              level="error"
+              ghost
+              size="sm"
+              square
+              title={t("general.actions.delete.title")!}
+              btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+            >
+              <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
+                <span class="inline-block space-x-2">
+                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span>{t("general.actions.delete.message")}</span>
+                </span>
+                <Button level="primary" size="sm" class="self-end" onClick={handleDeleteTeam} loading={deleting()}>
+                  {t("general.actions.yes.title")}
+                </Button>
+              </Card>
+            </Popover>
+          </div>
         </Form>
       </section>
       <div class="h-16" />
@@ -265,6 +307,25 @@ function SelfManagement(props: { members: User[] }) {
     }
     setUpdating(false);
   }
+
+  const [leaving, setLeaving] = createSignal(false);
+
+  async function handleLeaveTeam() {
+    setLeaving(true);
+    try {
+      await leaveSelfTeam(gameStore.current!.id);
+      setGameStore({ team: null });
+      addToast({
+        level: "success",
+        description: t("general.actions.leave.status.success")!,
+        duration: 5000,
+      });
+    } catch (err) {
+      handleHttpError(err as Error, t("general.actions.leave.status.fail")!);
+    }
+    setLeaving(false);
+  }
+
   return (
     <>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
@@ -328,9 +389,30 @@ function SelfManagement(props: { members: User[] }) {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={updating()} disabled={updating()}>
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="!mt-4 flex flex-row space-x-2">
+            <Button type="submit" level="primary" class="flex-1" loading={updating()} disabled={updating()}>
+              {t("general.actions.save.title")}
+            </Button>
+            <Popover
+              type="button"
+              level="error"
+              ghost
+              size="sm"
+              title={t("general.actions.leave.title")!}
+              square
+              btnContent={<span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />}
+            >
+              <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
+                <span class="inline-block space-x-2">
+                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span>{t("general.actions.leave.message")}</span>
+                </span>
+                <Button level="primary" size="sm" class="self-end" onClick={handleLeaveTeam} loading={leaving()}>
+                  {t("general.actions.yes.title")}
+                </Button>
+              </Card>
+            </Popover>
+          </div>
         </Form>
       </section>
       <div class="h-16" />

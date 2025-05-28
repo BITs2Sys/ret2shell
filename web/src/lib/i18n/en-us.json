@@ -140,6 +140,14 @@
           "fail": "Failed to reset"
         }
       },
+      "leave": {
+        "title": "Leave",
+        "message": "Are you sure to leave?",
+        "status": {
+          "success": "Successfully left",
+          "fail": "Failed to leave"
+        }
+      },
       "search": {
         "title": "Search"
       },

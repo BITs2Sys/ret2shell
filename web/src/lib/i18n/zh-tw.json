@@ -150,6 +150,14 @@
           "fail": "刷新失敗"
         }
       },
+      "leave": {
+        "title": "離開",
+        "message": "你確定要離開嗎？",
+        "status": {
+          "success": "離開成功",
+          "fail": "離開失敗"
+        }
+      },
       "loadMore": {
         "title": "加載更多"
       },

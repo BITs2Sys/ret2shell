@@ -14,6 +14,7 @@ use r2s_database::{
   user2_team,
 };
 use r2s_migrator::Database;
+use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tracing::info;
 
@@ -136,11 +137,13 @@ async fn leave_self_team(
       "game is archived".to_owned(),
     ));
   }
-  user2_team::user_leave_team(&db.conn, token.id, team.id).await?;
-  let members = team::get_members(&db.conn, team.id).await?;
+  let txn = db.conn.begin().await?;
+  user2_team::user_leave_team(&txn, token.id, team.id).await?;
+  let members = team::get_members(&txn, team.id).await?;
   if members.is_empty() {
-    team::delete(&db.conn, team.id).await?;
+    team::delete(&txn, team.id).await?;
   }
+  txn.commit().await?;
   Ok(())
 }
 
