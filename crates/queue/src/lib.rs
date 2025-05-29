@@ -62,6 +62,7 @@ impl Queue {
         async_nats::jetstream::consumer::pull::Config {
           durable_name: Some(subject),
           max_deliver: 3,
+          ack_wait: Duration::from_secs(120),
           ..Default::default()
         },
       )

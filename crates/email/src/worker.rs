@@ -1,4 +1,4 @@
-use async_nats::jetstream::{self, AckKind, consumer::pull::Stream};
+use async_nats::jetstream::{self, consumer::pull::Stream};
 use futures::StreamExt;
 use lettre::{
   AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
@@ -73,20 +73,17 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
         "Successfully sent email: '{}' to <{}>",
         req.email.subject, req.email.email
       );
-      message
-        .ack_with(AckKind::Ack)
-        .await
-        .inspect_err(|e| error!("Failed to ack message: {:?}", e))
-        .ok();
-      return Ok(());
+      break;
     }
   }
-  error!(
-    "Failed to send email '{}' to <{}> after 3 retries, dropped.",
-    req.email.subject, req.email.email
-  );
+  if retry_count < 0 {
+    error!(
+      "Failed to send email '{}' to <{}> after 3 retries, dropped.",
+      req.email.subject, req.email.email
+    );
+  }
   message
-    .ack_with(AckKind::Term)
+    .ack()
     .await
     .inspect_err(|e| error!("Failed to drop message: {:?}", e))
     .ok();
