@@ -61,13 +61,14 @@ impl Queue {
         &subject.clone(),
         async_nats::jetstream::consumer::pull::Config {
           durable_name: Some(subject),
+          max_deliver: 3,
           ..Default::default()
         },
       )
       .await?;
     let messages = consumer
       .stream()
-      .max_messages_per_batch(3)
+      .max_messages_per_batch(1)
       .messages()
       .await?;
     Ok(messages)

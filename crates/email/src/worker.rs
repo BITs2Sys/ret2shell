@@ -85,7 +85,11 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
     "Failed to send email '{}' to <{}> after 3 retries, dropped.",
     req.email.subject, req.email.email
   );
-  message.ack_with(AckKind::Term).await.ok();
+  message
+    .ack_with(AckKind::Term)
+    .await
+    .inspect_err(|e| error!("Failed to drop message: {:?}", e))
+    .ok();
   Ok(())
 }
 
