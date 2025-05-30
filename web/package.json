@@ -14,12 +14,12 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^5.9.2",
+    "@ark-ui/solid": "^5.11.0",
     "@e965/xlsx": "^0.20.3",
     "@jsdevtools/rehype-toc": "^3.0.2",
     "@modular-forms/solid": "^0.25.1",
     "@rehype-pretty/transformers": "^0.13.2",
-    "@scure/base": "^1.2.5",
+    "@scure/base": "^1.2.6",
     "@solid-primitives/audio": "^1.4.1",
     "@solid-primitives/clipboard": "^1.6.1",
     "@solid-primitives/i18n": "^2.2.1",
@@ -81,7 +81,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.6.2",
-    "@types/node": "^22.15.23",
+    "@types/node": "^22.15.27",
     "@types/shell-quote": "^1.7.5",
     "kubernetes-types": "^1.30.0",
     "tailwindcss": "^4.1.8",

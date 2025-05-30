@@ -414,11 +414,17 @@ export async function getChallengeSolveStatus(game_id: number, challenge_id: num
   }>();
 }
 
-export async function getGameAdminChatSessions(game_id: number, page?: number, page_size?: number) {
+export async function getGameAdminChatSessions(
+  game_id: number,
+  challenge_id?: number,
+  page?: number,
+  page_size?: number
+) {
   return await api
     .get(`${api_root}/game/${game_id}/chat/admin`, {
       searchParams: JSON.parse(
         JSON.stringify({
+          challenge_id,
           page,
           page_size,
         })

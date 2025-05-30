@@ -66,6 +66,7 @@ struct SendChatRequest {
 struct GetChatListQuery {
   page: Option<u64>,
   page_size: Option<u64>,
+  challenge_id: Option<i64>,
 }
 
 async fn admin_get_chat_list(
@@ -75,6 +76,7 @@ async fn admin_get_chat_list(
   let chats = chat::get_sessions(
     &db.conn,
     game.id,
+    query.challenge_id,
     query.page.unwrap_or(1),
     query.page_size.unwrap_or(30),
   )

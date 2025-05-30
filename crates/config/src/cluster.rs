@@ -80,12 +80,30 @@ pub struct ChallengeImage {
   pub name: String,
   pub tag: String,
   pub cpu: f64,
+  #[serde(default = "default_cpu_req")]
+  pub cpu_req: f64,
   pub mem: String,
+  #[serde(default = "default_mem_req")]
+  pub mem_req: String,
   pub storage: Option<String>,
+  #[serde(default = "default_storage_req")]
+  pub storage_req: Option<String>,
   pub port: Option<u16>,
   pub service_type: Option<ServiceType>,
   pub description: Option<String>,
   pub restricted: Option<bool>,
+}
+
+fn default_cpu_req() -> f64 {
+  0.01
+}
+
+fn default_mem_req() -> String {
+  "32Mi".to_string()
+}
+
+fn default_storage_req() -> Option<String> {
+  Some("64Mi".to_string())
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -101,7 +119,11 @@ impl ChallengeImage {
     Self {
       tag: "ret.sh.cn/shadowed:latest".to_string(),
       cpu: 0.0,
+      cpu_req: 0.0,
       mem: "NaN".to_string(),
+      mem_req: "NaN".to_string(),
+      storage: None,
+      storage_req: None,
       ..self
     }
   }

@@ -19,8 +19,11 @@ export type ChallengeImage = {
   name: string;
   tag: string;
   cpu: number;
+  cpu_req: number;
   mem: string;
+  mem_req: string;
   storage: string | null;
+  storage_req: string | null;
   port: number | null;
   service_type: "http" | "tcp" | "udp" | null;
   description: string | null;

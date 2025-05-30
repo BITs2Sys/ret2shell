@@ -517,9 +517,12 @@ impl Cluster {
             resources: Some(ResourceRequirements {
               requests: Some(
                 [
-                  ("cpu", "10m".to_owned()),
-                  ("memory", "32Mi".to_owned()),
-                  ("ephemeral-storage", "64Mi".to_owned()),
+                  ("cpu", image.cpu_req.to_string()),
+                  ("memory", image.mem_req.clone()),
+                  (
+                    "ephemeral-storage",
+                    image.storage_req.clone().unwrap_or("64Mi".to_owned()),
+                  ),
                 ]
                 .iter()
                 .cloned()
@@ -676,6 +679,7 @@ impl Cluster {
     }
     Ok(pod.len())
   }
+
   pub async fn stop_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
   ) -> Result<usize, ClusterError> {

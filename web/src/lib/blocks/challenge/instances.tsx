@@ -28,7 +28,7 @@ import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import Slider from "@widgets/slider";
+import RangeSlider from "@widgets/range-slider";
 import type { Pod } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -56,7 +56,11 @@ function CreateForm(fnProps: {
   const [tags, setTags] = createSignal<string[]>([]);
   const [form, { Form, Field }] = createForm<ChallengeImage>();
   setValue(form, "cpu", 0.5);
+  setValue(form, "cpu_req", 0.01);
   setValue(form, "mem", "128Mi");
+  setValue(form, "mem_req", "32Mi");
+  setValue(form, "storage", "1024Mi");
+  setValue(form, "storage_req", "64Mi");
   const [searchedRepo, setSearchedRepo] = createSignal("");
   const [selected, setSelected] = createSignal(false);
   async function fetchTags(repo: string) {
@@ -99,7 +103,11 @@ function CreateForm(fnProps: {
         name: "",
         tag: "",
         cpu: 0.5,
+        cpu_req: 0.01,
         mem: "128Mi",
+        mem_req: "32Mi",
+        storage: "1024Mi",
+        storage_req: "64Mi",
         port: null,
         service_type: null,
         description: "",
@@ -399,58 +407,80 @@ function CreateForm(fnProps: {
       </Show>
       <div class="flex flex-row space-x-2">
         <Field name="cpu" type="number" validate={[required(t("challenge.instance.image.form.service.cpu.required")!)]}>
-          {(field, props) => (
-            <Slider
-              class="flex-1"
-              label={t("challenge.instance.image.form.service.cpu.label")}
-              max={4}
-              min={0.1}
-              step={0.1}
-              inputProps={props}
-              name={field.name}
-              value={[field.value || 0.1]}
-              onValueChange={(e: { value: [number] }) => {
-                setValue(form, "cpu", e.value[0]);
-              }}
-            />
+          {(field1) => (
+            <Field
+              name="cpu_req"
+              type="number"
+              validate={[required(t("challenge.instance.image.form.service.cpu.required")!)]}
+            >
+              {(field2) => (
+                <RangeSlider
+                  class="flex-1"
+                  label={t("challenge.instance.image.form.service.cpu.label")}
+                  max={4}
+                  min={0.01}
+                  step={0.01}
+                  name={field1.name}
+                  value={[field2.value || 0.01, field1.value || 0.5]}
+                  onValueChange={(details) => {
+                    const value = details.value;
+                    setValue(form, "cpu", value[1]);
+                    setValue(form, "cpu_req", value[0]);
+                  }}
+                />
+              )}
+            </Field>
           )}
         </Field>
         <Field name="mem" validate={[required(t("challenge.instance.image.form.service.mem.required")!)]}>
-          {(field, props) => (
-            <>
-              <Slider
-                class="flex-1"
-                label={`${t("challenge.instance.image.form.service.mem.label")} (MB)`}
-                max={4096}
-                min={32}
-                step={32}
-                name={field.name}
-                value={[Number.parseInt(field.value?.replace("Mi", "") || "32") || 32]}
-                onValueChange={(e: { value: [number] }) => {
-                  setValue(form, "mem", `${e.value[0]}Mi`);
-                }}
-              />
-              <input hidden {...props} value={field.value} class="hidden" />
-            </>
+          {(field1) => (
+            <Field name="mem_req" validate={[required(t("challenge.instance.image.form.service.mem.required")!)]}>
+              {(field2) => (
+                <RangeSlider
+                  class="flex-1"
+                  label={`${t("challenge.instance.image.form.service.mem.label")} (MB)`}
+                  max={4096}
+                  min={32}
+                  step={32}
+                  name={field1.name}
+                  value={[
+                    Number.parseInt(field2.value?.replace("Mi", "") || "32") || 32,
+                    Number.parseInt(field1.value?.replace("Mi", "") || "128") || 128,
+                  ]}
+                  onValueChange={(e) => {
+                    setValue(form, "mem", `${e.value[1]}Mi`);
+                    setValue(form, "mem_req", `${e.value[0]}Mi`);
+                  }}
+                />
+              )}
+            </Field>
           )}
         </Field>
         <Field name="storage" validate={[required(t("challenge.instance.image.form.service.storage.required")!)]}>
-          {(field, props) => (
-            <>
-              <Slider
-                class="flex-1"
-                label={`${t("challenge.instance.image.form.service.storage.label")} (GB)`}
-                max={20}
-                min={1}
-                step={1}
-                name={field.name}
-                value={[Number.parseInt(field.value?.replace("Gi", "") || "3") || 3]}
-                onValueChange={(e: { value: [number] }) => {
-                  setValue(form, "storage", `${e.value[0]}Gi`);
-                }}
-              />
-              <input hidden {...props} value={field.value || "3Gi"} class="hidden" />
-            </>
+          {(field1) => (
+            <Field
+              name="storage_req"
+              validate={[required(t("challenge.instance.image.form.service.storage.required")!)]}
+            >
+              {(field2) => (
+                <RangeSlider
+                  class="flex-1"
+                  label={`${t("challenge.instance.image.form.service.storage.label")} (GB)`}
+                  max={20}
+                  min={0.1}
+                  step={0.1}
+                  name={field1.name}
+                  value={[
+                    Number.parseInt(field2.value?.replace("Mi", "") || "64") || 64,
+                    Number.parseInt(field1.value?.replace("Mi", "") || "1024") || 1024,
+                  ]}
+                  onValueChange={(e) => {
+                    setValue(form, "storage", `${e.value[1]}Mi`);
+                    setValue(form, "storage_req", `${e.value[0]}Mi`);
+                  }}
+                />
+              )}
+            </Field>
           )}
         </Field>
       </div>
@@ -819,9 +849,17 @@ export default function (_props: {
               </Show>
               <span class="flex-1" />
               <span class="icon-[fluent--engine-20-regular] w-5 h-5" />
-              <span class="font-bold opacity-60">CPU: {image.cpu}</span>
+              <span class="font-bold opacity-60">
+                CPU: {image.cpu_req} - {image.cpu}
+              </span>
               <span class="icon-[fluent--box-20-regular] w-5 h-5" />
-              <span class="font-bold opacity-60">Memory: {image.mem}</span>
+              <span class="font-bold opacity-60">
+                Memory: {image.mem_req} - {image.mem}
+              </span>
+              <span class="icon-[fluent--archive-20-regular] w-5 h-5" />
+              <span class="font-bold opacity-60">
+                Storage: {image.storage_req} - {image.storage}
+              </span>
             </div>
           </div>
         )}
