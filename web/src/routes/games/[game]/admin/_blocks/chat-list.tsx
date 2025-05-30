@@ -69,7 +69,7 @@ export default function ChatList() {
   async function refreshChats() {
     if (gameStore.current) {
       try {
-        const resp = await getGameAdminChatSessions(gameStore.current!.id, 1, pageSize * page());
+        const resp = await getGameAdminChatSessions(gameStore.current!.id, undefined, 1, pageSize * page());
         const result = mergeChats(sessions(), resp[0]);
         setSessions([...result]);
       } catch (err) {
