@@ -32,9 +32,11 @@ import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
+import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Clipboard from "@widgets/clipboard";
 import Input from "@widgets/input";
+import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import clsx from "clsx";
 import { HTTPError } from "ky";
@@ -42,8 +44,6 @@ import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
-import Popover from "@widgets/popover";
-import Card from "@widgets/card";
 
 type TeamAdminUpdateForm = {
   name: string;

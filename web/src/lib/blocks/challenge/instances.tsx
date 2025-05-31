@@ -27,8 +27,8 @@ import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
-import Select from "@widgets/select";
 import RangeSlider from "@widgets/range-slider";
+import Select from "@widgets/select";
 import type { Pod } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -589,7 +589,7 @@ function InstanceList() {
   );
 }
 
-export default function(_props: {
+export default function (_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -735,9 +735,9 @@ export default function(_props: {
             onOpenChange={(details) => {
               setFormOpen(details.open);
             }}
-          // onClick={() => {
-          //   setFormOpen(true);
-          // }}
+            // onClick={() => {
+            //   setFormOpen(true);
+            // }}
           >
             <CreateForm
               repos={repos()}
@@ -858,7 +858,7 @@ export default function(_props: {
               </span>
               <span class="icon-[fluent--archive-20-regular] w-5 h-5" />
               <span class="font-bold opacity-60">
-                Storage: {image.storage_req} - {image.storage}
+                Storage: {image.storage_req} - {image.storage || "3Gi"}
               </span>
             </div>
           </div>
