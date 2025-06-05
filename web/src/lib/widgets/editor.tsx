@@ -183,7 +183,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       </Show>
       <Show when={dragging()}>
         <Card class="absolute bottom-2 left-2 right-2 top-2" contentClass="z-50 flex items-center justify-center">
-          <span class="icon-[fluent--image-20-regular] w-12 h-12" />
+          <span class="shrink-0 icon-[fluent--image-20-regular] w-12 h-12" />
         </Card>
       </Show>
     </div>

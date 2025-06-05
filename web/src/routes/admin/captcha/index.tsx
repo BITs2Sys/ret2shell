@@ -66,7 +66,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("captcha.title")}</span>
           </h3>
           <div class="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-2 lg:items-end">

@@ -55,7 +55,7 @@ export default function UserCodeDialog() {
       ghost
       btnContent={
         <>
-          <span class="icon-[fluent--person-link-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--person-link-20-regular] w-5 h-5" />
           <span>{t("account.code.title")}</span>
         </>
       }
@@ -64,17 +64,17 @@ export default function UserCodeDialog() {
         <div class="w-full min-h-36 flex flex-col items-center justify-center space-y-2">
           <Switch>
             <Match when={!verified()}>
-              <span class="icon-[fluent--person-link-20-regular] w-10 h-10 shrink-0 text-warning" />
+              <span class="shrink-0 icon-[fluent--person-link-20-regular] w-10 h-10 text-warning" />
               <span class="text-warning inline-block align-middle">
                 <span>{t("account.code.status.unverified.message")}</span>
               </span>
               <A href="/account/settings/info" class="flex items-center space-x-2">
-                <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
                 <span>{t("account.code.status.unverified.action")}</span>
               </A>
             </Match>
             <Match when={!accountStore.warnedCodeGeneration}>
-              <span class="icon-[fluent--warning-20-regular] w-10 h-10 shrink-0 text-warning" />
+              <span class="shrink-0 icon-[fluent--warning-20-regular] w-10 h-10 text-warning" />
               <span class="text-warning">{t("account.code.tip")}</span>
             </Match>
             <Match when={code()}>
@@ -84,7 +84,7 @@ export default function UserCodeDialog() {
               <Timer class="opacity-80 font-bold" end={code()!.generate_at.plus({ seconds: 300 })} hasHours />
             </Match>
             <Match when={true}>
-              <span class="icon-[fluent--person-link-20-regular] w-10 h-10 opacity-60" />
+              <span class="shrink-0 icon-[fluent--person-link-20-regular] w-10 h-10 opacity-60" />
               <span class="opacity-60">{t("account.code.empty")}</span>
             </Match>
           </Switch>
@@ -98,14 +98,14 @@ export default function UserCodeDialog() {
         >
           <Switch>
             <Match when={!accountStore.warnedCodeGeneration}>
-              <span class="icon-[fluent--emoji-hand-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--emoji-hand-20-regular] w-5 h-5" />
               <span class="truncate">{t("general.actions.confirm.title")}</span>
             </Match>
             <Match when={loadingCode()}>
               <span class="truncate">{t("general.loading.short")}</span>
             </Match>
             <Match when={true}>
-              <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
               <span class="truncate">
                 {t("general.actions.generate.title")} / {t("general.actions.refresh.title")}
               </span>

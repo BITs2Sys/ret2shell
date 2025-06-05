@@ -47,7 +47,7 @@ export default function () {
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.password.title")}</span>
           </h3>
           <input
@@ -61,7 +61,7 @@ export default function () {
           <Field name="old_password" validate={[required(t("account.form.oldPassword.required")!)]}>
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--password-20-regular] w-5 h-5" />}
                 title={t("account.form.oldPassword.label")}
                 placeholder={t("account.form.oldPassword.placeholder")}
                 {...props}
@@ -87,7 +87,7 @@ export default function () {
           >
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--password-20-regular] w-5 h-5" />}
                 title={t("account.form.password.label")}
                 placeholder={t("account.form.password.placeholder")}
                 {...props}
@@ -113,7 +113,7 @@ export default function () {
           >
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--password-20-regular] w-5 h-5" />}
                 title={t("account.form.password.confirmLabel")}
                 placeholder={t("account.form.password.confirmPlaceholder")}
                 {...props}

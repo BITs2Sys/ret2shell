@@ -78,7 +78,7 @@ export default function (props: {
       <Field name="title" validate={[required(t("wiki.form.title.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" />}
             placeholder={t("wiki.form.title.placeholder")!}
             title={t("wiki.form.title.label")!}
             {...props}
@@ -137,7 +137,7 @@ export default function (props: {
       <Field name="path" validate={[required(t("wiki.form.path.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />}
             placeholder={t("wiki.form.path.placeholder")!}
             title={t("wiki.form.path.label")!}
             {...props}

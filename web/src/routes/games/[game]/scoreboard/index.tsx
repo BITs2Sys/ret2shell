@@ -59,7 +59,7 @@ function ChartOperations(props: {
           ghost={props.ghost}
           onClick={() => props.onRefresh?.()}
         >
-          <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
         </Button>
         <Button
           square
@@ -67,7 +67,7 @@ function ChartOperations(props: {
           ghost={props.ghost}
           onClick={() => props.onExport?.()}
         >
-          <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
         </Button>
         <Button
           square
@@ -75,8 +75,8 @@ function ChartOperations(props: {
           ghost={props.ghost}
           onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
         >
-          <Show when={props.showHiddenTeams} fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5" />}>
-            <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
+          <Show when={props.showHiddenTeams} fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5" />}>
+            <span class="shrink-0 icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
           </Show>
         </Button>
       </div>
@@ -298,7 +298,7 @@ export default function () {
               />
               <Show when={teams().length === 0}>
                 <div class="absolute top-0 left-0 w-full h-full flex flex-col space-y-6 items-center justify-center">
-                  <span class="icon-[fluent--data-trending-48-regular] w-12 h-12 opacity-60" />
+                  <span class="shrink-0 icon-[fluent--data-trending-48-regular] w-12 h-12 opacity-60" />
                 </div>
               </Show>
               <div class="absolute left-2 top-2 flex flex-row space-x-2">
@@ -313,9 +313,9 @@ export default function () {
                   >
                     <Show
                       when={showLargePanel()}
-                      fallback={<span class="icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
+                      fallback={<span class="shrink-0 icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
                     >
-                      <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
                     </Show>
                   </Button>
                   <Button
@@ -326,8 +326,11 @@ export default function () {
                     class="hidden lg:flex"
                     size={showChallengeDetail() ? "sm" : "md"}
                   >
-                    <Show when={showPlane()} fallback={<span class="icon-[fluent--airplane-20-regular] w-5 h-5" />}>
-                      <span class="icon-[fluent--airplane-20-filled] w-5 h-5" />
+                    <Show
+                      when={showPlane()}
+                      fallback={<span class="shrink-0 icon-[fluent--airplane-20-regular] w-5 h-5" />}
+                    >
+                      <span class="shrink-0 icon-[fluent--airplane-20-filled] w-5 h-5" />
                     </Show>
                   </Button>
                   <Button
@@ -339,8 +342,11 @@ export default function () {
                     size={showChallengeDetail() ? "sm" : "md"}
                     disabled={!canAccessChallenges()[0]}
                   >
-                    <Show when={showReal()} fallback={<span class="icon-[fluent--group-20-regular] w-5 h-5" />}>
-                      <span class="icon-[fluent--group-20-filled] w-5 h-5" />
+                    <Show
+                      when={showReal()}
+                      fallback={<span class="shrink-0 icon-[fluent--group-20-regular] w-5 h-5" />}
+                    >
+                      <span class="shrink-0 icon-[fluent--group-20-filled] w-5 h-5" />
                     </Show>
                   </Button>
                 </Show>
@@ -353,8 +359,11 @@ export default function () {
                   class="hidden lg:flex"
                   disabled={!canAccessChallenges()[0] && !inArchived()}
                 >
-                  <Show when={showChallengeDetail()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
-                    <span class="icon-[fluent--flag-20-filled] w-5 h-5" />
+                  <Show
+                    when={showChallengeDetail()}
+                    fallback={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
+                  >
+                    <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5" />
                   </Show>
                 </Button>
               </div>

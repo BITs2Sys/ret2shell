@@ -23,9 +23,9 @@ export function ThemeBoxContent() {
           <span class="flex-1 text-start">{t("platform.theme.followSystem")}</span>
           <Show
             when={themeStore.colorSchemeFollowsSystem}
-            fallback={<span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
+            fallback={<span class="shrink-0 icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
           >
-            <span class="icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
+            <span class="shrink-0 icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
           </Show>
         </Button>
       </Card>
@@ -36,7 +36,7 @@ export function ThemeBoxContent() {
 export default function ThemeBox() {
   return (
     <Popover
-      btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
+      btnContent={<span class="shrink-0 icon-[fluent--wand-20-regular] w-5 h-5" />}
       square
       ghost
       popContentClass="pt-2"

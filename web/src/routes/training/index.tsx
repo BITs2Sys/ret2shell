@@ -15,7 +15,7 @@ export default function () {
         when={searchParams.create === "true"}
         fallback={
           <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-            <span class="icon-[fluent--dumbbell-20-regular] w-24 h-24" />
+            <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-24 h-24" />
             <span>{t("training.placeholder")}</span>
           </div>
         }

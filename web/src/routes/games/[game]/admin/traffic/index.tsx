@@ -132,7 +132,7 @@ export default function Traffic() {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 relative">
         <div class="flex-1 flex flex-col w-full">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("traffic.nodeSelector")}</span>
           </h2>
           <div class="flex flex-row space-x-2 py-2 items-center">
@@ -147,11 +147,11 @@ export default function Traffic() {
                 ghost
                 size="sm"
                 square
-                btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
               >
                 <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                   <span class="inline-block space-x-2">
-                    <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                    <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
                   <Button level="primary" size="sm" class="self-end" onClick={handleDeleteNodeSelector}>
@@ -163,7 +163,7 @@ export default function Traffic() {
           </div>
           <Divider />
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <span class="flex-1 flex items-center justify-start space-x-2">
               <span>{t("traffic.title")}</span>
               <span class="opacity-60">$GAME/traffic.rx</span>
@@ -197,11 +197,11 @@ export default function Traffic() {
                 ghost
                 size="sm"
                 square
-                btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
               >
                 <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                   <span class="inline-block space-x-2">
-                    <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                    <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
                   <Button level="primary" size="sm" class="self-end" onClick={handleDeleteTraffic}>
@@ -249,7 +249,7 @@ export default function Traffic() {
                   when={lint()}
                   fallback={
                     <p class="flex flex-row space-x-2 items-center text-success p-3 lg:p-6">
-                      <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
                       <span>0 warning(s), error(s).</span>
                     </p>
                   }

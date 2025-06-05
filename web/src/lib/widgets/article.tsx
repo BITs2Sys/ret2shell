@@ -125,7 +125,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
           class="fixed right-3 bottom-16 lg:bottom-3 print:hidden"
           square
           type="button"
-          btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
+          btnContent={<span class="shrink-0 icon-[fluent--navigation-20-regular] w-5 h-5" />}
         >
           <Card class="m-1">
             <OverlayScrollbarsComponent

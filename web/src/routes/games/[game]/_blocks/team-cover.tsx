@@ -54,7 +54,7 @@ export default function TeamCover(props: ComponentProps<"div">) {
                 expanded() ? "opacity-100" : "opacity-0 translate-x-[10rem]"
               )}
             >
-              <span class="icon-[fluent--flag-20-regular] w-16 h-16 text-error" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-16 h-16 text-error" />
               <span class="flex-1 text-start truncate">{gameStore.team?.name}</span>
               <span class="text-warning">{t("team.coming")}</span>
             </h2>

@@ -18,13 +18,13 @@ function TeamDetail(props: {
       <div class="w-16 h-16 flex items-center justify-center">
         <Switch>
           <Match when={props.index === 1}>
-            <span class="icon-[fluent-emoji-flat--1st-place-medal] w-8 h-8" />
+            <span class="shrink-0 icon-[fluent-emoji-flat--1st-place-medal] w-8 h-8" />
           </Match>
           <Match when={props.index === 2}>
-            <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-8 h-8" />
+            <span class="shrink-0 icon-[fluent-emoji-flat--2nd-place-medal] w-8 h-8" />
           </Match>
           <Match when={props.index === 3}>
-            <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-8 h-8" />
+            <span class="shrink-0 icon-[fluent-emoji-flat--3rd-place-medal] w-8 h-8" />
           </Match>
         </Switch>
       </div>

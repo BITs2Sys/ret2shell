@@ -86,7 +86,7 @@ export default function Tabs(props: {
                 inMonitor() === false
               }
             >
-              <span class="icon-[fluent--home-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--home-20-regular] w-5 h-5" />
               <Show when={challengeHistory().length === 0}>
                 <span>{t("game.welcome")}</span>
               </Show>
@@ -102,7 +102,7 @@ export default function Tabs(props: {
                   // href={`${props.baseUrl}?statistics=true`}
                   onClick={() => navigate(`${props.baseUrl}?statistics=true`)}
                 >
-                  <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
                     <span>{t("game.statistics.title")}</span>
                   </Show>
@@ -116,7 +116,7 @@ export default function Tabs(props: {
                   // href={`${props.baseUrl}?monitor=true`}
                   onClick={() => navigate(`${props.baseUrl}?monitor=true`)}
                 >
-                  <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
                     <span>{t("game.monitor.title")}</span>
                   </Show>
@@ -130,7 +130,7 @@ export default function Tabs(props: {
                   // href={`${props.baseUrl}?edit=true`}
                   onClick={() => navigate(`${props.baseUrl}?edit=true`)}
                 >
-                  <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
                     <span>{t("game.form.title")}</span>
                   </Show>
@@ -145,7 +145,7 @@ export default function Tabs(props: {
                 // href={`${props.baseUrl}?create=true`}
                 onClick={() => navigate(`${props.baseUrl}?create=true`)}
               >
-                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                 <Show when={challengeHistory().length === 0}>
                   <span>{t("general.actions.create.title")}</span>
                 </Show>
@@ -174,7 +174,7 @@ export default function Tabs(props: {
                   ghost
                   class={clsx("max-w-48", "pr-0")}
                 >
-                  <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
                   <span class="truncate flex-1 text-left">{challenge.name}</span>
                   <Button
                     class="!rounded-l-none"
@@ -185,7 +185,7 @@ export default function Tabs(props: {
                       closeChallengeTab(challenge.id);
                     }}
                   >
-                    <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                    <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
                   </Button>
                 </Button>
               </div>

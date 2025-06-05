@@ -71,7 +71,7 @@ export default function (props: {
     <div class="flex flex-col p-3 lg:p-6 w-full items-center">
       <header class="min-h-12 w-full max-w-5xl border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2 mb-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="font-bold inline-block whitespace-nowrap">{t("general.actions.edit.title")}</span>
         </span>
         <span class="flex-1" />
@@ -81,7 +81,7 @@ export default function (props: {
             square
             onClick={() => setChallengeSource((challengeStore.current && { ...challengeStore.current }) ?? null)}
           >
-            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
           </Button>
         </span>
       </header>

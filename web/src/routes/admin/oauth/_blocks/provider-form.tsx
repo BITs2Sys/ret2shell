@@ -113,7 +113,7 @@ export default function ProviderForm(props: {
           <Field name="name" validate={[required(t("oauth.form.name.required")!)]}>
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                 title={t("oauth.form.name.label")}
                 placeholder={t("oauth.form.name.placeholder")}
                 {...props}
@@ -135,7 +135,7 @@ export default function ProviderForm(props: {
           >
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                 title={t("oauth.form.provider.label")}
                 placeholder={t("oauth.form.provider.placeholder")}
                 {...props}
@@ -178,9 +178,9 @@ export default function ProviderForm(props: {
                 />
                 <Show
                   when={getValue(form, "avatar")}
-                  fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                  fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                 >
-                  <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                  <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
                 </Show>
               </Button>
             </Avatar>
@@ -190,7 +190,7 @@ export default function ProviderForm(props: {
       <Field name="portal" validate={[url(t("oauth.form.portal.invalid")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
             title={t("oauth.form.portal.label")}
             placeholder={t("oauth.form.portal.placeholder")}
             {...props}
@@ -265,7 +265,7 @@ export default function ProviderForm(props: {
             when={renderedLint()}
             fallback={
               <p class="flex flex-row space-x-2 items-center text-success">
-                <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
                 <span>0 warning(s), error(s).</span>
               </p>
             }

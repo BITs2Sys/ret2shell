@@ -39,12 +39,12 @@ export default function () {
         <div class="flex flex-col flex-1 w-full max-w-5xl">
           <div class="h-12 relative flex flex-row items-center px-4">
             <h1 class="space-x-2 flex flex-row items-center flex-1">
-              <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--megaphone-20-regular] w-5 h-5" />
               <span class="font-bold">{t("bulletin.title")}</span>
             </h1>
             <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
               <Link size="sm" level="primary" href="/bulletin/create">
-                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                 <span>{t("general.actions.create.title")}</span>
               </Link>
             </Show>
@@ -73,7 +73,7 @@ export default function () {
           <Switch>
             <Match when={articles().length === 0 && !loading()}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--megaphone-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--megaphone-20-regular] w-24 h-24" />
                 <span>{t("bulletin.empty")}</span>
               </div>
             </Match>

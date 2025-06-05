@@ -49,7 +49,7 @@ export default function () {
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
               <span>{t("user.description.title")}</span>
             </h3>
             <section>
@@ -63,7 +63,7 @@ export default function () {
               </Switch>
             </section>
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t("user.joinedGames")}</span>
             </h3>
             <section class="flex flex-col">
@@ -73,7 +73,7 @@ export default function () {
                     class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
                     href={`/games/${team.game_id}/teams/${team.id}`}
                   >
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
+                    <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
                     <span class="flex-1 text-start truncate">
                       {t("user.gameJournal", { team: team.name, game: team.game_name! })}
                     </span>
@@ -82,7 +82,7 @@ export default function () {
                 )}
               </For>
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-                <span class="icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
+                <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
                 <span>{t("user.moreJournal")}</span>
               </div>
             </section>

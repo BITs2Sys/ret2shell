@@ -66,7 +66,7 @@ export default function () {
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
           <div class="flex flex-row items-center space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("team.list.title")}</span>
           </div>
           <span class="flex-1" />
@@ -116,7 +116,7 @@ export default function () {
           <Input
             class="w-80"
             size="sm"
-            icon={<span class="icon-[fluent--filter-16-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--filter-16-regular] w-5 h-5" />}
             value={filter() ?? ""}
             placeholder={t("team.list.filter")}
             onChange={(e) => {
@@ -135,7 +135,7 @@ export default function () {
             each={teams()}
             fallback={
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-                <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                 <span>{t("team.empty")}</span>
               </div>
             }
@@ -145,7 +145,7 @@ export default function () {
                 class="h-12 flex flex-row items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2 hover:bg-layer-content/5 cursor-pointer"
                 href={`/games/${gameStore.current?.id}/teams/${team.id}`}
               >
-                <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                 <span class="flex truncate text-start">
                   <span class="flex-1 min-w-16 truncate">
                     <span>{team.name}</span>

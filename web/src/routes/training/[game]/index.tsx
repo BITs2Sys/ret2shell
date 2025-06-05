@@ -207,7 +207,7 @@ export default function () {
                 >
                   <div class="w-full flex flex-col p-3 lg:p-6">
                     <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
-                      <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                       <span class="flex-1 text-start">{t("game.monitor.title")}</span>
                       <Tag level="success">
                         <span>{t("game.monitor.autoRefreshEnabled")}</span>

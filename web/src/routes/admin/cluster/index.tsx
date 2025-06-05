@@ -59,10 +59,10 @@ export default function () {
                 <Spin width={24} height={24} />
               </Match>
               <Match when={available()}>
-                <span class="icon-[meteocons--compass] w-full h-full" />
+                <span class="shrink-0 icon-[meteocons--compass] w-full h-full" />
               </Match>
               <Match when={true}>
-                <span class="icon-[meteocons--code-red-fill] w-full h-full" />
+                <span class="shrink-0 icon-[meteocons--code-red-fill] w-full h-full" />
               </Match>
             </Switch>
           </div>
@@ -96,7 +96,7 @@ export default function () {
             </span>
             <span class="flex flex-row items-center space-x-4">
               <span>{clusterDomain()}</span>
-              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60" />
+              <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60" />
               <span class="text-warning">{clusterDNS()}</span>
             </span>
           </div>
@@ -131,13 +131,13 @@ export default function () {
             when={shownNode()}
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--organization-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--organization-20-regular] w-24 h-24" />
                 <span>{t("cluster.selectNode")}</span>
               </div>
             }
           >
             <div class="h-12 flex flex-row items-center space-x-2 px-3">
-              <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--organization-20-regular] w-5 h-5" />
               <span class="font-bold flex-1 text-start">{shownNode()?.metadata?.name}</span>
               <span class="opacity-60 hidden lg:inline">
                 <span>Online at: </span>
@@ -146,13 +146,13 @@ export default function () {
                 </span>
               </span>
               <Button size="sm" square title={t("cluster.actions.refreshNode.title")}>
-                <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
               </Button>
               <Button size="sm" square title={t("cluster.actions.updateNode.title")}>
-                <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
               </Button>
               <Button size="sm" square level="error" title={t("cluster.actions.disconnectNode.title")}>
-                <span class="icon-[fluent--stop-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--stop-20-regular] w-5 h-5" />
               </Button>
             </div>
             <Divider />

@@ -15,7 +15,7 @@ export default function () {
       <Switch>
         <Match when={isGameAdmin()}>
           <Button ghost disabled class="w-full" justify="start">
-            <span class="icon-[fluent--person-settings-20-filled] w-5 h-5 text-error" />
+            <span class="shrink-0 icon-[fluent--person-settings-20-filled] w-5 h-5 text-error" />
             <span>{t("game.adminMode")}</span>
           </Button>
         </Match>
@@ -26,7 +26,7 @@ export default function () {
             justify="start"
             href={`/games/${gameStore.current?.id}/teams/${gameStore.team?.id}`}
           >
-            <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
+            <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
             <span class="flex-1 text-start truncate">{gameStore.team?.name}</span>
             <span class="text-success">{gameStore.team?.score} pts</span>
             <span class="text-warning">#{gameStore.rank}</span>
@@ -41,13 +41,13 @@ export default function () {
         </Match>
         <Match when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
           <Button ghost disabled class="w-full" justify="start">
-            <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
+            <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
             <span>{t("game.ended")}</span>
           </Button>
         </Match>
         <Match when={true}>
           <Button ghost disabled class="w-full" justify="start">
-            <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
+            <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
             <span>{t("game.canNotParticipate")}</span>
           </Button>
         </Match>

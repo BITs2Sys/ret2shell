@@ -71,7 +71,7 @@ export default function () {
               {/*   when={platformStore.isOnline} */}
               {/*   fallback={ */}
               {/*     <Link href="/docs" ghost> */}
-              {/*       <span class="icon-[fluent--book-20-regular] w-5 h-5" /> */}
+              {/*       <span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" /> */}
               {/*       <span>{t("docs.title")}</span> */}
               {/*     </Link> */}
               {/*   } */}
@@ -83,12 +83,12 @@ export default function () {
               {/*     }} */}
               {/*   > */}
               {/*     <span>{t("calendar.scrollToView")}</span> */}
-              {/*     <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" /> */}
+              {/*     <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" /> */}
               {/*   </Button> */}
               {/* </Show> */}
               <Show when={!platformStore.config.hide_maker}>
                 {/* <Link square href="/magic/sakana" ghost name="gift"> */}
-                {/*   <span class="icon-[fluent--gift-20-regular] w-5 h-5" /> */}
+                {/*   <span class="shrink-0 icon-[fluent--gift-20-regular] w-5 h-5" /> */}
                 {/* </Link> */}
                 <div />
               </Show>
@@ -97,7 +97,7 @@ export default function () {
                 ghost
                 popContentClass="p-2"
                 square
-                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
+                btnContent={<span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />}
               >
                 <div class="w-max flex flex-col space-y-2">
                   <Card contentClass="p-2">
@@ -132,7 +132,7 @@ export default function () {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />
                       <span class="font-normal opacity-60">support@ret.sh.cn</span>
                     </a>
                     <Link
@@ -143,7 +143,7 @@ export default function () {
                       title={t("about.donate")}
                       target="_blank"
                     >
-                      <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
                     </Link>
                     <Link
                       href="https://github.com/ret2shell"
@@ -153,7 +153,7 @@ export default function () {
                       title={t("about.source")}
                       target="_blank"
                     >
-                      <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
                     </Link>
                   </Card>
                 </div>

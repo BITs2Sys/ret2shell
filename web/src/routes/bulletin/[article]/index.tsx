@@ -79,7 +79,7 @@ export default function () {
           title={article()?.publisher_name || t("bulletin.unknownPublisher")!}
           href={`/users/${article()?.publisher_id}`}
         >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
+          <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">By</span>
           <span>{article()?.publisher_name}</span>
         </A>
@@ -89,7 +89,7 @@ export default function () {
             time: article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
           })}
         >
-          <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
+          <span class="shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">at</span>
           <span>{article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
         </div>
@@ -100,7 +100,7 @@ export default function () {
               time: article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
             })}
           >
-            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
             <span>{article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
           </div>
         </Show>
@@ -109,7 +109,7 @@ export default function () {
             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
             href={`/bulletin/${article()?.id}?edit=true`}
           >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t("general.actions.edit.title")}</span>
           </A>
           <button
@@ -117,7 +117,7 @@ export default function () {
             onClick={onDelete}
             type="button"
           >
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
             <span>{t("general.actions.delete.title")}</span>
           </button>
         </Show>
@@ -126,7 +126,7 @@ export default function () {
           onClick={() => print()}
           type="button"
         >
-          <span class="icon-[fluent--print-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--print-20-regular] w-5 h-5" />
           <span>{t("general.actions.print.title")}</span>
         </button>
       </div>

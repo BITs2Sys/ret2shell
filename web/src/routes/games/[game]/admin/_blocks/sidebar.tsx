@@ -28,7 +28,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.monitor.title")}
           >
-            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.monitor.title")}</Show>
           </Link>
         </li>
@@ -42,7 +42,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.statistics.title")}
           >
-            <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--data-trending-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.statistics.title")}</Show>
           </Link>
         </li>
@@ -56,7 +56,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.form.title")}
           >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.form.title")}</Show>
           </Link>
         </li>
@@ -70,7 +70,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.policies.title")}
           >
-            <span class="icon-[fluent--document-multiple-prohibited-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--document-multiple-prohibited-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.policies.title")}</Show>
           </Link>
         </li>
@@ -84,7 +84,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.timeline.title")}
           >
-            <span class="icon-[fluent--filmstrip-split-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--filmstrip-split-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.timeline.title")}</Show>
           </Link>
         </li>
@@ -98,7 +98,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.hammer.title")}
           >
-            <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.hammer.title")}</Show>
           </Link>
         </li>
@@ -112,7 +112,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("team.title")}
           >
-            <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--people-team-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("team.title")}</Show>
           </Link>
         </li>
@@ -126,7 +126,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.organize.title")}
           >
-            <span class="icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.organize.title")}</Show>
           </Link>
         </li>
@@ -140,7 +140,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.events.title")}
           >
-            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.events.title")}</Show>
           </Link>
         </li>
@@ -154,7 +154,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("traffic.title")}
           >
-            <span class="icon-[fluent--airplane-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--airplane-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("traffic.title")}</Show>
           </Link>
         </li>
@@ -168,7 +168,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("captures.title")}
           >
-            <span class="icon-[fluent--slide-record-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--slide-record-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("captures.title")}</Show>
           </Link>
         </li>
@@ -182,7 +182,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.git.title")}
           >
-            <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.git.title")}</Show>
           </Link>
         </li>
@@ -196,7 +196,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
             title={t("game.delete.title")}
           >
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.delete.title")}</Show>
           </Link>
         </li>

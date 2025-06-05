@@ -65,7 +65,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
         <Field name="name" validate={[required(t("game.form.name.required")!)]}>
           {(field, props) => (
             <Input
-              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
               placeholder={t("game.form.name.placeholder")!}
               title={t("game.form.name.label")!}
               {...props}
@@ -79,7 +79,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
         <Field name="brief" validate={[required(t("game.form.brief.required")!)]}>
           {(field, props) => (
             <Input
-              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
               placeholder={t("game.form.brief.placeholder")!}
               title={t("game.form.brief.label")!}
               {...props}

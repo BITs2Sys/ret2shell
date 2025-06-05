@@ -95,7 +95,7 @@ export default function () {
           <Field name="name">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                 placeholder={t("platform.name")}
                 title={t("platform.form.name.label")}
                 {...props}
@@ -107,7 +107,7 @@ export default function () {
           <Field name="footer_info">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--phone-footer-arrow-down-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--phone-footer-arrow-down-20-regular] w-5 h-5" />}
                 placeholder={t("platform.form.footerInfo.placeholder")}
                 title={t("platform.form.footerInfo.label")}
                 {...props}
@@ -119,7 +119,7 @@ export default function () {
           <Field name="footer_url">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--link-20-regular] w-5 h-5" />}
                 placeholder={t("platform.form.footerUrl.placeholder")}
                 title={t("platform.form.footerUrl.label")}
                 {...props}
@@ -131,7 +131,7 @@ export default function () {
           <Field name="subject_info">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--subtitles-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--subtitles-20-regular] w-5 h-5" />}
                 placeholder={t("platform.subject")}
                 title={t("platform.form.subjectInfo.label")}
                 {...props}
@@ -143,7 +143,7 @@ export default function () {
           <Field name="subject_url">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--link-20-regular] w-5 h-5" />}
                 placeholder="https://github.com/ret2shell"
                 title={t("platform.form.subjectUrl.label")}
                 {...props}
@@ -155,7 +155,7 @@ export default function () {
           <Field name="highlight_banner">
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--image-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--image-20-regular] w-5 h-5" />}
                 placeholder={t("platform.form.highlightBanner.placeholder")}
                 title={t("platform.form.highlightBanner.label")}
                 {...props}
@@ -169,7 +169,7 @@ export default function () {
               {(field, props) => (
                 <Input
                   class="flex-1"
-                  icon={<span class="icon-[fluent--record-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--record-20-regular] w-5 h-5" />}
                   placeholder={t("platform.form.record.placeholder")}
                   title={t("platform.form.record.label")}
                   {...props}

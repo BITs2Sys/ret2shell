@@ -144,7 +144,7 @@ function CreateForm(fnProps: {
           {(field, props) => (
             <Input
               class="flex-1"
-              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
               title={t("challenge.instance.image.form.containerName.label")}
               placeholder={t("challenge.instance.image.form.containerName.placeholder")}
               {...props}
@@ -162,7 +162,7 @@ function CreateForm(fnProps: {
                 <div class="flex-1 flex flex-row space-x-2">
                   <Input
                     class="flex-1"
-                    icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                     title={t("challenge.instance.image.form.tag.label")}
                     placeholder={t("challenge.instance.image.form.tag.placeholder")}
                     error={field.error}
@@ -200,7 +200,7 @@ function CreateForm(fnProps: {
                     <ArkPopover.Anchor class="w-full">
                       <Input
                         class="w-full"
-                        icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                        icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                         title={t("challenge.instance.image.form.tag.label")}
                         placeholder={t("challenge.instance.image.form.tag.placeholder")}
                         error={field.error}
@@ -213,7 +213,7 @@ function CreateForm(fnProps: {
                         }}
                         extraBtn={
                           <Button square class="!rounded-l-none" onClick={onRefreshRegistry} type="button">
-                            <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
+                            <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
                           </Button>
                         }
                       />
@@ -247,7 +247,7 @@ function CreateForm(fnProps: {
                                     fetchTags(repo);
                                   }}
                                 >
-                                  <span class="icon-[fluent--beaker-20-regular] w-5 h-5" />
+                                  <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
                                   <span>{repo}</span>
                                 </Button>
                               )}
@@ -317,7 +317,7 @@ function CreateForm(fnProps: {
           {(field, props) => (
             <Input
               class="flex-1"
-              icon={<span class="icon-[fluent--text-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--text-20-regular] w-5 h-5" />}
               title={t("challenge.instance.image.form.service.description.label")}
               placeholder={t("challenge.instance.image.form.service.description.placeholder")}
               {...props}
@@ -387,7 +387,7 @@ function CreateForm(fnProps: {
             {(field, props) => (
               <Input
                 class="flex-1"
-                icon={<span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
                 title={t("challenge.instance.image.form.service.port.label")}
                 placeholder={t("challenge.instance.image.form.service.port.placeholder")}
                 type="number"
@@ -401,7 +401,7 @@ function CreateForm(fnProps: {
       </div>
       <Show when={getValue(form, "service_type") === "udp"}>
         <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
           <span>{t("challenge.instance.image.form.service.type.udpNotWorkingWithWsrx")}</span>
         </Card>
       </Show>
@@ -528,43 +528,48 @@ function InstanceList() {
         each={pods()}
         fallback={
           <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
-            <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
             <span>{t("challenge.instance.empty")}</span>
           </div>
         }
       >
         {(pod) => (
           <li class="h-12 flex flex-row space-x-2 items-center border-b border-b-layer-content/10">
-            <span class="icon-[fluent--cube-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5" />
             <span>{pod.metadata?.name}</span>
             <A
               class="hover:underline flex items-center space-x-2"
               href={`/users/${pod.metadata?.labels?.["ret.sh.cn/user"]}`}
             >
-              <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
               <span>{pod.metadata?.annotations?.["ret.sh.cn/user"]}</span>
             </A>
             <A
               class="hover:underline flex items-center space-x-2"
               href={`/games/${gameStore.current?.id}/teams/${pod.metadata?.labels?.["ret.sh.cn/team"]}`}
             >
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{pod.metadata?.annotations?.["ret.sh.cn/team"]}</span>
             </A>
             <span class="flex-1" />
             <span class="opacity-60">{pod.status?.phase}</span>
-            <Popover btnContent={<span class="icon-[fluent--production-20-regular] w-5 h-5" />} ghost square size="sm">
+            <Popover
+              btnContent={<span class="shrink-0 icon-[fluent--production-20-regular] w-5 h-5" />}
+              ghost
+              square
+              size="sm"
+            >
               <Card contentClass="py-2 px-4 flex flex-col max-w-xl">
                 <Show when={pod.metadata}>
                   <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
-                    <span class="icon-[fluent--clock-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5" />
                     <span>{DateTime.fromISO(pod.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                   </div>
                 </Show>
                 <For each={pod.status?.containerStatuses || []}>
                   {(container) => (
                     <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
-                      <span class="icon-[fluent--cube-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5" />
                       <span class="flex-1 truncate">{container.name}</span>
                       <div class="w-16" />
                       <Switch>
@@ -705,7 +710,7 @@ export default function (_props: {
     <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
       <header class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 font-bold py-2 gap-y-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 truncate text-start">{t("challenge.instance.image.label")}</span>
         </span>
         <span class="flex-1" />
@@ -752,7 +757,7 @@ export default function (_props: {
             <Popover level="error" size="sm" btnContent={<span>{t("general.actions.delete.title")}</span>}>
               <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("challenge.instance.delete")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={onDeleteEnv}>
@@ -782,7 +787,7 @@ export default function (_props: {
         </Checkbox>
         <Input
           class="flex-1"
-          icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+          icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
           placeholder={t("challenge.instance.registrySecret")}
           ref={pullSecretInput!}
           value={challengeStore.env?.pull_secret || ""}
@@ -800,7 +805,7 @@ export default function (_props: {
       </div>
       <Show when={challengeStore.env?.images.every((image) => !image.port)}>
         <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
-          <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
+          <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
           <p class="font-bold">{`${t("challenge.instance.errors.noExportedServices.title")}: ${t("challenge.instance.errors.noExportedServices.message")}`}</p>
         </Card>
       </Show>
@@ -808,7 +813,7 @@ export default function (_props: {
         each={challengeStore.env?.images || []}
         fallback={
           <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
-            <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
             <span>{t("challenge.instance.image.empty")}</span>
           </div>
         }
@@ -816,7 +821,7 @@ export default function (_props: {
         {(image) => (
           <div class="py-2 flex flex-col space-y-1 border-b border-b-layer-content/10">
             <div class="flex flex-row space-x-2 items-center">
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{image.name}</span>
               <span class="opacity-60 flex-1 text-end truncate" title={image.tag}>
                 {image.tag}
@@ -826,11 +831,11 @@ export default function (_props: {
                 ghost
                 size="sm"
                 square
-                btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
               >
                 <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                   <span class="inline-block space-x-2">
-                    <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                    <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
                   <Button level="primary" size="sm" class="self-end" onClick={() => onDeleteImage(image.name)}>
@@ -840,7 +845,7 @@ export default function (_props: {
               </Popover>
             </div>
             <div class="flex flex-row space-x-2 items-center opacity-80">
-              <span class="icon-[fluent--cloud-link-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--cloud-link-20-regular] w-5 h-5" />
               <Show when={image.port} fallback={<span class="font-bold opacity-60">N/A</span>}>
                 <span class="text-warning font-bold">
                   {image.service_type}:{image.port}
@@ -848,15 +853,15 @@ export default function (_props: {
                 <span>({image.description})</span>
               </Show>
               <span class="flex-1" />
-              <span class="icon-[fluent--engine-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--engine-20-regular] w-5 h-5" />
               <span class="font-bold opacity-60">
                 CPU: {image.cpu_req} - {image.cpu}
               </span>
-              <span class="icon-[fluent--box-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--box-20-regular] w-5 h-5" />
               <span class="font-bold opacity-60">
                 Memory: {image.mem_req} - {image.mem}
               </span>
-              <span class="icon-[fluent--archive-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--archive-20-regular] w-5 h-5" />
               <span class="font-bold opacity-60">
                 Storage: {image.storage_req} - {image.storage || "3Gi"}
               </span>
@@ -866,7 +871,7 @@ export default function (_props: {
       </For>
       <Show when={challengeStore.env}>
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("challenge.instance.runningContainers")}</span>
         </header>
         <InstanceList />

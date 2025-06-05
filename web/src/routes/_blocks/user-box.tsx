@@ -40,7 +40,7 @@ export default function UserBox() {
       when={accountStore.token}
       fallback={
         <Link href="/account/login" title={t("account.login.title")} ghost>
-          <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
           {t("account.login.title")}
         </Link>
       }
@@ -83,12 +83,12 @@ export default function UserBox() {
             <UserCodeDialog />
             <div class="flex flex-row space-x-2">
               <Link href="/account/settings" ghost size="sm" justify="start" class="flex-1">
-                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t("account.settings.title")}</span>
               </Link>
               <Button ghost size="sm" square title={t("account.logout")} onClick={handleLogout} loading={loading()}>
                 <Show when={!loading()}>
-                  <span class="icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
+                  <span class="shrink-0 icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
                 </Show>
               </Button>
             </div>

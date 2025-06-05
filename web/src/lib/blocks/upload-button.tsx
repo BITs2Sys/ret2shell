@@ -72,7 +72,7 @@ export default function UploadButton(
           </span>
         </Match>
         <Match when={selectedFile().length > 0}>
-          <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
           <span>{selectedFile()[0].name}</span>
           <Show when={props.multiple}>
             <Show when={selectedFile().length > 1}>
@@ -81,7 +81,7 @@ export default function UploadButton(
           </Show>
         </Match>
         <Match when={true}>
-          <span class="icon-[fluent--folder-open-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--folder-open-20-regular] w-5 h-5" />
           <span>{t("general.actions.select.title")}</span>
         </Match>
       </Switch>

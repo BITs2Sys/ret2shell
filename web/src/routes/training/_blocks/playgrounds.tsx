@@ -70,7 +70,7 @@ export default function Playgrounds() {
         <div class="flex flex-col space-y-2 p-3 lg:p-6">
           <Show when={accountStore.permissions.includes(Permission.Host)}>
             <Link level="primary" title={t("general.actions.create.title")} href={"/training?create=true"}>
-              <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
               <span>{t("general.actions.create.title")}</span>
             </Link>
             <Divider class="!mt-3 lg:!mt-6" />
@@ -86,7 +86,7 @@ export default function Playgrounds() {
               disabled={playgroundPage() <= 1}
               onClick={() => setPlaygroundPage(playgroundPage() - 1)}
             >
-              <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
             </Button>
             <Button ghost size="sm" class="min-w-8" loading={loadingPlaygrounds()}>
               <Show when={!loadingPlaygrounds()}>
@@ -100,14 +100,14 @@ export default function Playgrounds() {
               disabled={playgroundPage() >= playgroundTotalPages()}
               onClick={() => setPlaygroundPage(playgroundPage() + 1)}
             >
-              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
             </Button>
           </div>
           <For
             each={playgrounds()}
             fallback={
               <Button ghost disabled>
-                <span class="icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
                 <span>{t("training.empty")}</span>
               </Button>
             }
@@ -120,10 +120,10 @@ export default function Playgrounds() {
                 justify="start"
                 title={item.name}
               >
-                <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-5 h-5" />
                 <span class="flex-1 text-start truncate">{item.name}</span>
                 <Show when={item.hidden}>
-                  <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
+                  <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
                 </Show>
                 <div class="w-2 h-2 rounded-full bg-info" />
               </Link>
@@ -135,7 +135,7 @@ export default function Playgrounds() {
               <span>{t("game.title")}</span>
             </Button>
             <Button square ghost size="sm" disabled={gamePage() <= 1} onClick={() => setGamePage(gamePage() - 1)}>
-              <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
             </Button>
             <Button ghost size="sm" class="min-w-8" loading={loadingGames()}>
               <Show when={!loadingGames()}>
@@ -149,14 +149,14 @@ export default function Playgrounds() {
               disabled={gamePage() >= gameTotalPages()}
               onClick={() => setGamePage(gamePage() + 1)}
             >
-              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
             </Button>
           </div>
           <For
             each={games()}
             fallback={
               <Button ghost disabled>
-                <span class="icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
                 <span>{t("training.noArchives")}</span>
               </Button>
             }
@@ -170,10 +170,10 @@ export default function Playgrounds() {
                 disabled={item.archive_at > DateTime.now()}
                 title={item.archive_at > DateTime.now() ? t("training.errors.gameNotArchived.title") : item.name}
               >
-                <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                 <span class="flex-1 text-start truncate">{item.name}</span>
                 <Show when={item.hidden}>
-                  <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
+                  <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
                 </Show>
                 <div
                   class={clsx("w-2 h-2 rounded-full", item.archive_at > DateTime.now() ? "bg-error" : "bg-success")}

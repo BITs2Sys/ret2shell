@@ -166,14 +166,14 @@ export default function () {
           </div>
           <div class="flex flex-col space-y-4 dir-ltr">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">
                 {statistics()?.games.filter((g) => g.host_type === HostType.Training).length}
               </span>
               <span class="opacity-60">{t("training.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-error">
                 {statistics()?.games.filter((g) => g.host_type === HostType.Game).length}
               </span>
@@ -227,12 +227,12 @@ export default function () {
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <h3 class="font-bold flex items-center space-x-2">{t("user.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
               <span class="opacity-60">{t("user.status.valid.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.users.total}</span>
               <span class="opacity-60">{t("user.total")}</span>
             </div>
@@ -290,12 +290,12 @@ export default function () {
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <h3 class="font-bold flex items-center space-x-2">{t("challenge.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-warning">{statistics()?.challenges.in_game}</span>
               <span class="opacity-60">{t("challenge.inGame")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.challenges.total}</span>
               <span class="opacity-60">{t("challenge.total")}</span>
             </div>
@@ -353,12 +353,12 @@ export default function () {
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <h3 class="font-bold flex items-center space-x-2">{t("challenge.submission.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
               <span class="opacity-60">{t("challenge.submission.status.solved.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.submissions.total}</span>
               <span class="opacity-60">{t("challenge.submission.total")}</span>
             </div>

@@ -139,14 +139,14 @@ export default function (_props: {
         each={hints()}
         fallback={
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
+            <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
             <span class="font-bold opacity-60">{t("challenge.hint.empty")}</span>
           </div>
         }
       >
         {(hint) => (
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
+            <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
             <Show
               when={
                 !_props.inGame ||
@@ -218,7 +218,7 @@ export default function (_props: {
                   handleDeleteHint(hint.id);
                 }}
               >
-                <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
               </Button>
             </Show>
           </div>
@@ -226,7 +226,7 @@ export default function (_props: {
       </For>
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
+          <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
           <Field name="content" validate={[required(t("challenge.hint.form.content.required")!)]}>
             {(field, props) => (
               <Input
@@ -289,7 +289,7 @@ export default function (_props: {
           <span class="font-bold opacity-60">pts</span>
           <span class="w-2" />
           <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
-            <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("general.actions.add.title")}</span>
           </Button>
         </Form>

@@ -70,7 +70,7 @@ function InstituteManagement() {
     <>
       <Title page={t("game.organize.title")} route={`/games/${gameStore.current?.id}/admin/organize`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.organize.title")}</span>
       </h3>
       <Show when={loading()}>

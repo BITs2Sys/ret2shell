@@ -89,20 +89,20 @@ export default function () {
             }}
             href="/games?create=true"
           >
-            <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60" />
+            <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5 opacity-60" />
             <span>{t("general.actions.create.title")}</span>
           </Link>
         </Show>
         <Divider class="w-4/5" />
         <Button ghost class="w-4/5" disabled={page() <= 1} onClick={() => setPage(page() - 1)}>
-          <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60" />
+          <span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60" />
         </Button>
         <Divider class="w-4/5" />
         <For
           each={keyGames()}
           fallback={
             <Button ghost disabled class="w-4/5" justify="start">
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t("game.noGameHosted")}</span>
             </Button>
           }
@@ -132,10 +132,10 @@ export default function () {
                 {game.name}
               </span>
               <Show when={game.frozen}>
-                <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2" />
+                <span class="shrink-0 icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2" />
               </Show>
               <Show when={game.hidden}>
-                <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
+                <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
               </Show>
               <div
                 class={clsx(
@@ -152,7 +152,7 @@ export default function () {
         </For>
         <Divider class="w-4/5" />
         <Button ghost class="w-4/5" disabled={page() >= totalPages()} onClick={() => setPage(page() + 1)}>
-          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60" />
+          <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60" />
         </Button>
         <Divider class="w-4/5" />
         <div class="flex-1" />
@@ -165,7 +165,7 @@ export default function () {
             document.getElementById("other-games")?.scrollIntoView({ behavior: "smooth" });
           }}
         >
-          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           <span>{t("game.otherGames")}</span>
         </Button>
         <Divider class="w-4/5" />
@@ -173,7 +173,7 @@ export default function () {
       <div class="w-16 hidden lg:inline-block" />
       <Card class="block lg:hidden mx-3 mt-3" contentClass="p-2 flex flex-row space-x-2">
         <Button ghost square>
-          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
         </Button>
         <Popover
           popContentClass="pt-2 flex flex-col"
@@ -186,7 +186,7 @@ export default function () {
               each={keyGames()}
               fallback={
                 <Button ghost disabled justify="start">
-                  <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{t("game.noGameHosted")}</span>
                 </Button>
               }
@@ -229,7 +229,7 @@ export default function () {
           </Card>
         </Popover>
         <Button ghost square>
-          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
         </Button>
       </Card>
       <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">

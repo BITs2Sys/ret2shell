@@ -16,7 +16,7 @@ export default function () {
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 py-2 gap-y-2 flex flex-wrap justify-end items-center border-b border-b-layer-content/10 font-bold space-x-2 *:whitespace-nowrap">
           <span class="flex flex-row items-center space-x-2">
-            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("game.monitor.title")}</span>
           </span>
           <span class="flex-1" />
@@ -32,7 +32,7 @@ export default function () {
                 setSearchParams({ page: null });
               }}
             >
-              <span class="icon-[fluent--number-symbol-16-regular] w-4 h-4" />
+              <span class="shrink-0 icon-[fluent--number-symbol-16-regular] w-4 h-4" />
               <span>{t("game.monitor.submissions")}</span>
             </Button>
             <Button
@@ -43,7 +43,7 @@ export default function () {
                 setSearchParams({ page: null });
               }}
             >
-              <span class="icon-[fluent--alert-16-regular] w-4 h-4" />
+              <span class="shrink-0 icon-[fluent--alert-16-regular] w-4 h-4" />
               <span>{t("game.monitor.audits")}</span>
             </Button>
           </span>

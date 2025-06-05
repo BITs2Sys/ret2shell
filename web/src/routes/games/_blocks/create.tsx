@@ -73,14 +73,14 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
   return (
     <Form onSubmit={onSubmit} class="flex flex-col self-center w-full max-w-5xl space-y-2">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.form.title")}</span>
       </h3>
       <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
         <Field name="name" validate={[required(t("game.form.name.required")!)]}>
           {(field, props) => (
             <Input
-              icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
               placeholder={t("game.form.name.placeholder")!}
               title={t("game.form.name.label")!}
               {...props}
@@ -102,7 +102,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
         >
           {(field, props) => (
             <Input
-              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
               placeholder={t("game.form.teamSize.placeholder")!}
               title={t("game.form.teamSize.label")!}
               {...props}
@@ -209,7 +209,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       <Field name="brief" validate={[required(t("game.form.brief.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
             placeholder={t("game.form.brief.placeholder")!}
             title={t("game.form.brief.label")!}
             {...props}

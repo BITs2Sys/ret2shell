@@ -176,7 +176,7 @@ export default function (compProps: {
   return (
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1 space-y-2 items-center">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span class="flex-1 text-start">{t("user.management.title")}</span>
         <Link href={`/users/${compProps.editSource?.id}`} size="sm">
           {t("user.management.goToUserDetailPage")}
@@ -186,9 +186,9 @@ export default function (compProps: {
         </Link>
         <Popover size="sm" level="error" btnContent={<span>{t("general.actions.delete.title")}</span>}>
           <Card contentClass="p-4 flex flex-col space-y-2 items-stretch max-w-lg">
-            {/* <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-12 md:h-12" /> */}
+            {/* <span class="shrink-0 icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-12 md:h-12" /> */}
             <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
-              <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
+              <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
               <p class="font-bold">{t("general.actions.delete.message")}</p>
             </Card>
             <div class="flex flex-col space-x-2">
@@ -201,7 +201,7 @@ export default function (compProps: {
             <Input
               size="sm"
               value={deleteConfirmValue()}
-              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+              icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
               extraBtn={
                 <Button
                   size="sm"
@@ -227,7 +227,7 @@ export default function (compProps: {
                 {(field, props) => (
                   <Input
                     class="flex-1"
-                    icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                     title={t("account.form.account.label")}
                     placeholder={t("account.form.account.placeholder")}
                     {...props}
@@ -241,7 +241,7 @@ export default function (compProps: {
                 {(field, props) => (
                   <Input
                     class="flex-1"
-                    icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
                     title={t("account.form.nickname.label")}
                     placeholder={t("account.form.nickname.placeholder")}
                     {...props}
@@ -260,7 +260,7 @@ export default function (compProps: {
                 {(field, props) => (
                   <Input
                     class="flex-1 min-w-0"
-                    icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
                     title={t("account.form.email.label")}
                     placeholder={t("account.form.email.placeholder")}
                     {...props}
@@ -321,9 +321,9 @@ export default function (compProps: {
                   />
                   <Show
                     when={compProps.editSource?.avatar}
-                    fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                    fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                   >
-                    <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                    <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
                   </Show>
                 </Button>
               </Avatar>
@@ -437,7 +437,7 @@ export default function (compProps: {
       </Form>
       <div class="w-full flex flex-col">
         <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("account.form.oauths.label")}</span>
         </h3>
         <For each={oauths()}>
@@ -450,7 +450,7 @@ export default function (compProps: {
         </For>
       </div>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span class="flex-1 text-start">{t("account.form.ips.label")}</span>
       </h3>
       <div class="flex flex-row flex-wrap">

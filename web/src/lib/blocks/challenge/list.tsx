@@ -118,7 +118,7 @@ export default function ChallengeList(props: {
               <Input
                 class="bg-layer"
                 size="sm"
-                icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--filter-20-regular] w-5 h-5" />}
                 placeholder={t("challenge.search.placeholder")}
                 onInput={(e) => setSearch(e.currentTarget.value)}
               />
@@ -134,9 +134,9 @@ export default function ChallengeList(props: {
                   >
                     <Show
                       when={hideSolved()}
-                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                      fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
                     >
-                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                      <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
                     </Show>
                     <span>{t("challenge.search.solved")}</span>
                   </Button>
@@ -150,9 +150,9 @@ export default function ChallengeList(props: {
                   >
                     <Show
                       when={hideArchived()}
-                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                      fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
                     >
-                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                      <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
                     </Show>
                     <span>{t("challenge.search.archived")}</span>
                   </Button>
@@ -162,7 +162,7 @@ export default function ChallengeList(props: {
             <Switch
               fallback={
                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-                  <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                   <span>{t("challenge.empty")}</span>
                 </div>
               }

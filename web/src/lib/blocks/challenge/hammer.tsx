@@ -60,9 +60,9 @@ export function ChatBlock(props: {
             </span>
             <Show
               when={props.isChecked}
-              fallback={<span class="icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
+              fallback={<span class="shrink-0 icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
             >
-              <span class="icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
+              <span class="shrink-0 icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
             </Show>
           </footer>
         </div>
@@ -293,7 +293,7 @@ export default function (props: {
           </span>
           <div class="flex-1" />
           <Show when={loading()}>
-            <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
+            <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
           </Show>
           <Link
             href="https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
@@ -303,7 +303,7 @@ export default function (props: {
             target="_blank"
             rel="noreferrer"
           >
-            <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--question-circle-20-regular] w-5 h-5" />
             <span class="hidden lg:inline-block">{t("challenge.hammer.markdownHoto")}</span>
           </Link>
           <Button
@@ -314,8 +314,11 @@ export default function (props: {
               setEditorExpanded(!editorExpanded());
             }}
           >
-            <Show when={editorExpanded()} fallback={<span class="icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}>
-              <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
+            <Show
+              when={editorExpanded()}
+              fallback={<span class="shrink-0 icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
+            >
+              <span class="shrink-0 icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
             </Show>
           </Button>
           <Button
@@ -325,7 +328,7 @@ export default function (props: {
             disabled={sending() || availableMsg() <= 0 || isGameAdmin()}
             loading={sending()}
           >
-            <span class="icon-[fluent--send-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--send-20-regular] w-5 h-5" />
             <span>{t("general.actions.send.title")}</span>
           </Button>
         </div>

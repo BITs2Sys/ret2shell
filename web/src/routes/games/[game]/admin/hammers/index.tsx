@@ -128,7 +128,7 @@ export default function () {
       />
       <div class="flex-1 h-[calc(100vh-4rem)] overflow-hidden flex flex-col">
         <div class="h-16 flex flex-row px-4 space-x-2 items-center backdrop-blur-sm border-b border-b-layer-content/10">
-          <span class="icon-[fluent--chat-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
           <A
             class="flex-1 w-0 flex flex-row space-x-2 hover:underline items-center truncate"
             href={`/games/${gameStore.current?.id}/teams/${teamId()}`}
@@ -140,7 +140,7 @@ export default function () {
               class="flex-1 w-0 flex flex-row justify-end space-x-2 hover:underline items-center truncate"
               href={`/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}`}
             >
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5 shrink-0" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span class="truncate">{challenge()?.name}</span>
             </A>
           </Show>
@@ -159,7 +159,7 @@ export default function () {
             when={teamId() && challengeId()}
             fallback={
               <div class="min-h-full w-full flex flex-col opacity-60 items-center justify-center space-y-8">
-                <span class="icon-[fluent--chat-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--chat-20-regular] w-24 h-24" />
                 <span class="font-bold">{t("game.hammer.placeholder")}</span>
               </div>
             }
@@ -203,7 +203,7 @@ export default function () {
                 <div class="flex flex-row items-center h-8 space-x-2">
                   <div class="flex-1" />
                   <Show when={loading()}>
-                    <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
+                    <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
                   </Show>
                   <Link
                     href="https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
@@ -213,7 +213,7 @@ export default function () {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--question-circle-20-regular] w-5 h-5" />
                     <span class="hidden lg:inline-block">{t("challenge.hammer.markdownHoto")}</span>
                   </Link>
                   <Button
@@ -225,13 +225,13 @@ export default function () {
                   >
                     <Show
                       when={editorExpanded()}
-                      fallback={<span class="icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
+                      fallback={<span class="shrink-0 icon-[fluent--arrow-expand-20-regular] w-5 h-5" />}
                     >
-                      <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
                     </Show>
                   </Button>
                   <Button level="primary" size="sm" onClick={handleSendChat} disabled={sending()} loading={sending()}>
-                    <span class="icon-[fluent--send-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--send-20-regular] w-5 h-5" />
                     <span>{t("general.actions.send.title")}</span>
                   </Button>
                 </div>

@@ -92,7 +92,7 @@ export default function ChatList() {
   return (
     <div class="w-full h-full overflow-hidden flex flex-col">
       <div class="h-16 flex flex-row px-4 space-x-2 items-center backdrop-blur-sm border-b border-b-layer-content/10">
-        <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
         <span>
           <span class="font-bold">Rx</span>
           <span class="opacity-60">::</span>
@@ -113,7 +113,7 @@ export default function ChatList() {
           when={sessions().length > 0}
           fallback={
             <div class="w-full min-h-full flex flex-row space-x-2 p-3 lg:p-6 items-center justify-center">
-              <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
               <span class="font-bold">{t("game.hammer.empty")}</span>
             </div>
           }
@@ -161,7 +161,7 @@ export default function ChatList() {
                 refreshChats();
               }}
             >
-              <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60 hover:opacity-100" />
+              <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60 hover:opacity-100" />
               <span>{t("general.actions.loadMore.title")}</span>
             </Button>
           </div>

@@ -67,7 +67,7 @@ export default function () {
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <div class="flex flex-col w-full max-w-5xl relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.oauth.title")}</span>
           </h3>
           <For each={oauthServices()}>
@@ -93,7 +93,11 @@ export default function () {
                     </>
                   }
                 >
-                  <Popover size="sm" square btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}>
+                  <Popover
+                    size="sm"
+                    square
+                    btnContent={<span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />}
+                  >
                     <Card contentClass="max-w-lg p-2">
                       <table>
                         <For each={Object.entries(selfOAuthItems().find((v) => v.provider === service.provider)!.data)}>

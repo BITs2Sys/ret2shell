@@ -61,7 +61,7 @@ export function FormBare(props: {
       <Field name="name" validate={[required(t("challenge.form.name.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
             title={t("challenge.form.name.label")}
             placeholder={t("challenge.form.name.placeholder")}
             {...props}
@@ -74,7 +74,7 @@ export function FormBare(props: {
       <Field name="tag" validate={[required(t("challenge.form.tag.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
             title={t("challenge.form.tag.label")}
             placeholder={t("challenge.form.tag.placeholder")}
             {...props}
@@ -95,7 +95,7 @@ export function FormBare(props: {
                       <>
                         <div class="flex flex-col space-y-2 flex-1">
                           <Input
-                            icon={<span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />}
+                            icon={<span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />}
                             title={t("challenge.form.scoreRule.initial.label")}
                             placeholder={t("challenge.form.scoreRule.initial.placeholder")}
                             {...initialProps}
@@ -107,7 +107,7 @@ export function FormBare(props: {
                             required
                           />
                           <Input
-                            icon={<span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />}
+                            icon={<span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />}
                             title={t("challenge.form.scoreRule.minimum.label")}
                             placeholder={t("challenge.form.scoreRule.minimum.placeholder")}
                             {...minProps}
@@ -119,7 +119,7 @@ export function FormBare(props: {
                             required
                           />
                           <Input
-                            icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                            icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                             title={t("challenge.form.scoreRule.decay.label")}
                             placeholder={t("challenge.form.scoreRule.decay.placeholder")}
                             {...decayProps}
@@ -242,7 +242,7 @@ export default function (props: {
         >
           <div class="flex flex-col p-3 lg:p-6 w-full items-center">
             <h3 class="h-12 w-full max-w-5xl mb-2 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-              <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
               <span>{t("general.actions.create.title")}</span>
             </h3>
             <FormBare {...props} />

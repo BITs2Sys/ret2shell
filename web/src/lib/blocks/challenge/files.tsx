@@ -106,7 +106,7 @@ export default function (_props: {
       <Divider direction="vertical" />
       <div class="flex-1 flex flex-col w-0 space-y-2 p-3 lg:p-6">
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
-          <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--folder-zip-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("general.actions.upload.title")}</span>
           <UploadButton
             size="sm"
@@ -116,7 +116,7 @@ export default function (_props: {
           />
         </header>
         <Card level="info" contentClass="p-2 flex flex-row space-x-2 items-center">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
           <span>{folderTips()}</span>
         </Card>
         <Show when={loading()}>
@@ -128,7 +128,7 @@ export default function (_props: {
           <For each={challengeStore.adminFiles}>
             {(file) => (
               <div class="min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2 overflow-hidden">
-                <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 text-primary shrink-0" />
+                <span class="shrink-0 icon-[fluent--folder-zip-20-regular] w-5 h-5 text-primary" />
                 <span class="font-bold flex-1 text-start truncate">{file.file}</span>
                 <DownloadButton
                   class="m-1 shrink-0"
@@ -140,7 +140,7 @@ export default function (_props: {
                   searchParams={{ file: file.file, folder: file.folder }}
                 />
                 <Button size="sm" square onClick={() => handleDelete(file.file, file.folder)}>
-                  <span class="icon-[fluent--delete-16-regular] w-4 h-4" />
+                  <span class="shrink-0 icon-[fluent--delete-16-regular] w-4 h-4" />
                 </Button>
               </div>
             )}

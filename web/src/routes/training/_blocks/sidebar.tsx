@@ -34,20 +34,20 @@ export default function SideBar() {
           when={gameStore.current}
           fallback={
             <Link class="flex-1" ghost justify="start" href="/training">
-              <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
+              <span class="shrink-0 icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
               <span>{t("training.list")}</span>
             </Link>
           }
         >
           <Link class="flex-1" ghost justify="start" href={`/training/${gameStore.current?.id}`}>
-            <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
+            <span class="shrink-0 icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
             <span class="flex-1 text-start">{gameStore.current?.name}</span>
             <Show when={gameStore.current?.hidden}>
-              <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+              <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
             </Show>
           </Link>
           <Link square ghost href="/training" title={t("general.actions.back.title")}>
-            <span class="icon-[fluent--arrow-hook-up-left-20-regular] w-5 h-5 text-warning" />
+            <span class="shrink-0 icon-[fluent--arrow-hook-up-left-20-regular] w-5 h-5 text-warning" />
           </Link>
         </Show>
       </div>

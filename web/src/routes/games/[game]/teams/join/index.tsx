@@ -70,7 +70,7 @@ export default function () {
             <Field name="token" validate={[required(t("team.join.form.token.required")!)]}>
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                   title={t("team.join.form.token.label")}
                   placeholder={t("team.join.form.token.placeholder")}
                   {...props}
@@ -96,9 +96,9 @@ export default function () {
                       <>
                         <Show
                           when={field.value}
-                          fallback={<span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />}
+                          fallback={<span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />}
                         >
-                          <span class="icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
+                          <span class="shrink-0 icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
                         </Show>
                         <span>{t("team.form.acceptRules.label")}</span>
                       </>
@@ -146,7 +146,7 @@ export default function () {
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/create`}>
                   <span>{t("team.create.title")}</span>
-                  <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>
               </Show>
             </div>

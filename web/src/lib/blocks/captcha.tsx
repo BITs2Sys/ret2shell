@@ -75,7 +75,7 @@ export default function (
               {calculating() ? (
                 <Working width={20} height={20} />
               ) : (
-                <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />
+                <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />
               )}
             </span>
           );
@@ -105,7 +105,7 @@ export default function (
     <>
       <input class="hidden" name="captcha_id" value={fieldProps.idFieldValue} />
       <Input
-        icon={<span class="icon-[fluent--bot-20-regular] w-5 h-5" />}
+        icon={<span class="shrink-0 icon-[fluent--bot-20-regular] w-5 h-5" />}
         placeholder="0xDEADBEEF"
         title={t("captcha.title")}
         value={fieldProps.answerFieldValue}

@@ -16,7 +16,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.Statistics)}
         >
-          <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
           <span>{t("platform.statistics.title")}</span>
         </Link>
       </li>
@@ -32,7 +32,7 @@ export default function SideBar() {
             !accountStore.permissions.includes(Permission.DevOps)
           }
         >
-          <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t("platform.logs.title")}</span>
         </Link>
       </li>
@@ -46,7 +46,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
           <span>{t("platform.form.title")}</span>
         </Link>
       </li>
@@ -59,7 +59,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--bot-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--bot-20-regular] w-5 h-5" />
           <span>{t("captcha.title")}</span>
         </Link>
       </li>
@@ -72,7 +72,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--image-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--image-20-regular] w-5 h-5" />
           <span>{t("media.title")}</span>
         </Link>
       </li>
@@ -85,7 +85,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />
           <span>{t("platform.email.title")}</span>
         </Link>
       </li>
@@ -101,7 +101,7 @@ export default function SideBar() {
             !accountStore.permissions.includes(Permission.DevOps) && !accountStore.permissions.includes(Permission.User)
           }
         >
-          <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--lock-closed-key-20-regular] w-5 h-5" />
           <span>{t("oauth.title")}</span>
         </Link>
       </li>
@@ -114,7 +114,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.User)}
         >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
           <span>{t("user.list.title")}</span>
         </Link>
       </li>
@@ -128,7 +128,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--flowchart-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--flowchart-20-regular] w-5 h-5" />
           <span>{t("platform.sync.title")}</span>
         </Link>
       </li>
@@ -141,7 +141,7 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--hexagon-three-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--hexagon-three-20-regular] w-5 h-5" />
           <span>{t("cluster.title")}</span>
         </Link>
       </li>
@@ -154,14 +154,14 @@ export default function SideBar() {
           justify="start"
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
-          <span class="icon-[fluent--airplane-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--airplane-20-regular] w-5 h-5" />
           <span>{t("traffic.title")}</span>
         </Link>
       </li>
       <Divider />
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/magic/about" justify="start">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
           <span>{t("magic.about.title")}</span>
         </Link>
       </li>

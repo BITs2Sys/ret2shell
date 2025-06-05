@@ -114,13 +114,13 @@ export default function () {
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.info.title")}</span>
           </h3>
           <div class="flex flex-row space-x-4 items-center">
             <div class="flex flex-col space-y-2 flex-1">
               <Input
-                icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
                 title={t("account.form.account.label")}
                 placeholder={t("account.form.account.placeholder")}
                 value={accountStore.account!}
@@ -129,7 +129,7 @@ export default function () {
               <Field name="nickname" validate={[required(t("account.form.nickname.required")!)]}>
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
                     title={t("account.form.nickname.label")}
                     placeholder={t("account.form.nickname.placeholder")}
                     {...props}
@@ -178,9 +178,9 @@ export default function () {
                     />
                     <Show
                       when={accountStore.info?.avatar}
-                      fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                      fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                     >
-                      <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                      <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
                     </Show>
                   </Button>
                 </Avatar>
@@ -193,7 +193,7 @@ export default function () {
           >
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
                 title={t("account.form.email.label")}
                 placeholder={t("account.form.email.placeholder")}
                 autocomplete="email"
@@ -206,7 +206,7 @@ export default function () {
           </Field>
           <Show when={!accountStore.permissions.includes(Permission.Verified)}>
             <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
-              <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
+              <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
               <span class="flex-1 text-start">{t("account.status.unverified.message")}</span>
               <Button
                 size="sm"

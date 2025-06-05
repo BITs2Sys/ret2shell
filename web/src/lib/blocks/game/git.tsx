@@ -55,22 +55,22 @@ export default function () {
   return (
     <div class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
         <span>{t("game.git.title")}</span>
       </h3>
       <Card level="info" contentClass="p-2 flex flex-row space-x-2 items-center">
-        <span class="icon-[fluent--info-20-regular] w-5 h-5 shrink-0" />
+        <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
         <span>{t("game.git.cloneTip")}</span>
       </Card>
       <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
-        <span class="icon-[fluent--warning-20-regular] w-5 h-5 shrink-0" />
+        <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
         <Show when={gameStore.current?.hidden} fallback={<span>{t("game.git.status.readonly.message")}</span>}>
           <span>{t("game.git.status.writable.message")}</span>
         </Show>
       </Card>
       <Clipboard value={`${window.location.origin}/api/game/${gameStore.current?.id}/repo/${repoName()}.git`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
         <A class="font-bold" href={`/games/${gameStore.current?.id}/admin/git`}>
           {repoName()}
         </A>
@@ -95,7 +95,7 @@ export default function () {
         </Show>
       </h3>
       <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
-        <span class="icon-[fluent--warning-20-regular] w-5 h-5 shrink-0" />
+        <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
         <span>{t("game.git.listTip")}</span>
       </Card>
       <div class="flex flex-col">

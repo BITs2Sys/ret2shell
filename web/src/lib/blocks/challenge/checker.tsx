@@ -136,7 +136,7 @@ export default function (_props: {
     <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6">
       <header class="min-h-12 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
-          <span class="icon-[fluent--code-20-regular] w-5 h-5 shrink-0" />
+          <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
           <span class="font-bold inline-block whitespace-nowrap">{t("challenge.checker.script")}</span>
           <span class="opacity-60 truncate">checker/main.rx</span>
         </span>
@@ -174,7 +174,7 @@ export default function (_props: {
           />
           <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
             <Button size="sm" square onClick={restoreScript}>
-              <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
             </Button>
             <Button level="info" size="sm" onClick={handleUpdateScript}>
               {t("general.actions.save.title")}
@@ -218,7 +218,7 @@ export default function (_props: {
               when={lint()}
               fallback={
                 <p class="flex flex-row space-x-2 items-center text-success p-3 lg:p-6">
-                  <span class="icon-[fluent--thumb-like-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
                   <span>0 warning(s), error(s).</span>
                 </p>
               }

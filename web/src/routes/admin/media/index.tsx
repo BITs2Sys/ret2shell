@@ -62,7 +62,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("media.title")}</span>
           </h3>
           <Field name="path">
@@ -72,7 +72,7 @@ export default function () {
                 disabled
                 title={t("media.form.path.label")!}
                 placeholder={t("media.form.path.placeholder")!}
-                icon={<span class="icon-[fluent--server-link-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--server-link-20-regular] w-5 h-5" />}
                 value={field.value}
                 error={field.error}
                 {...props}

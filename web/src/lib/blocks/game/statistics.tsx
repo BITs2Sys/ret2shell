@@ -4,6 +4,7 @@ import Spin from "@assets/animates/spin";
 import logo from "@assets/logo.svg";
 import XLSX from "@e965/xlsx";
 import { mediaPath } from "@lib/utils/media";
+import type { User } from "@models/user";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
 import { gameStore } from "@storage/game";
@@ -159,9 +160,14 @@ export default function GameStatistics(props: { inGame?: boolean }) {
       }
     }
     for (const [index, [team, members]] of data.scoreboard.entries()) {
-      const paddedMembers = JSON.parse(JSON.stringify(members));
-      while (paddedMembers.length < gameStore.current?.team_size ?? 0) {
-        paddedMembers.push({ id: "", account: "", nickname: "", email: "" });
+      const paddedMembers: User[] = JSON.parse(JSON.stringify(members));
+      while (paddedMembers.length < (gameStore.current?.team_size ?? 0)) {
+        paddedMembers.push({
+          id: 0,
+          account: "",
+          nickname: "",
+          email: "",
+        } as User);
       }
       const row = [
         index + 1,
@@ -171,7 +177,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         accountStore.institutes.find((i) => i.id === team.institute_id)?.name ?? "",
         convertTeamState(team.state),
         team.score,
-        ...paddedMembers.map((m) => `${m.id}:${m.account} (${m.nickname}) <${m.email}>`),
+        ...paddedMembers.map((m) => (m.id ? `${m.id}:${m.account} (${m.nickname}) <${m.email}>` : "")),
         ...challenges().map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")),
       ];
       scoreboardArr.push(row);
@@ -237,13 +243,13 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           <div class="flex-1" />
           <Button size="sm" onClick={exportStatisticsJson} loading={exporting()} disabled={exporting()}>
             <Show when={!exporting()}>
-              <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
             </Show>
             <span>JSON</span>
           </Button>
           <Button size="sm" onClick={exportStatisticsXlsx} loading={exporting()} disabled={exporting()}>
             <Show when={!exporting()}>
-              <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
             </Show>
             <span>XLSX</span>
           </Button>
@@ -252,14 +258,14 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         <div class="flex flex-col lg:flex-row space-x-2 p-3">
           <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-info">{stats()?.total_players}</span>
               </Show>
               <span class="opacity-60">PLAYERS</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--people-team-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--people-team-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-success">{stats()?.total_teams}</span>
               </Show>
@@ -268,14 +274,14 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           </div>
           <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-success">{stats()?.total_solves}</span>
               </Show>
               <span class="opacity-60">SOLVES</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-warning">{stats()?.total_submissions}</span>
               </Show>
@@ -284,14 +290,14 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           </div>
           <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-info">{challenges().filter((c) => !c.hidden).length}</span>
               </Show>
               <span class="opacity-60">PLUBLISHED CHALLS</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
+              <span class="shrink-0 icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-info">{challenges().length}</span>
               </Show>

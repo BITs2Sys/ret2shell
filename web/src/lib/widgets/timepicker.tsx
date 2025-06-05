@@ -96,7 +96,7 @@ function TimePickerButton(props: {
                       setHour((hour() - 1 + 24) % 24);
                     }}
                   >
-                    <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--chevron-up-20-regular] w-5 h-5" />
                   </Button>
                   <Button square ghost type="button" size="sm">
                     {hour().toString().padStart(2, "0")}
@@ -110,7 +110,7 @@ function TimePickerButton(props: {
                       setHour((hour() + 1) % 24);
                     }}
                   >
-                    <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--chevron-down-20-regular] w-5 h-5" />
                   </Button>
                 </div>
                 <div class="flex flex-col space-y-2">
@@ -126,7 +126,7 @@ function TimePickerButton(props: {
                       setMinute((minute() - 10 + 60) % 60);
                     }}
                   >
-                    <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--chevron-up-20-regular] w-5 h-5" />
                   </Button>
                   <Button square ghost type="button" size="sm">
                     {minute().toString().padStart(2, "0")}
@@ -143,7 +143,7 @@ function TimePickerButton(props: {
                       setMinute((minute() + 10) % 60);
                     }}
                   >
-                    <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--chevron-down-20-regular] w-5 h-5" />
                   </Button>
                 </div>
               </div>
@@ -289,7 +289,7 @@ function PickerCalendar(props: {
           onClick={() => setYear(year() - 1)}
           title={t("calendar.actions.prevYear.title")}
         >
-          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
         </Button>
         <Button
           ghost
@@ -305,7 +305,7 @@ function PickerCalendar(props: {
           }}
           title={t("calendar.actions.prevMonth.title")}
         >
-          <span class="icon-[fluent--chevron-left-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-left-20-regular] w-5 h-5" />
         </Button>
         <Button
           ghost
@@ -335,7 +335,7 @@ function PickerCalendar(props: {
           }}
           title={t("calendar.actions.nextMonth.title")}
         >
-          <span class="icon-[fluent--chevron-right-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-right-20-regular] w-5 h-5" />
         </Button>
         <Button
           class="hidden md:inline-flex"
@@ -345,7 +345,7 @@ function PickerCalendar(props: {
           onClick={() => setYear(year() + 1)}
           title={t("calendar.actions.nextYear.title")}
         >
-          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
         </Button>
       </div>
       <Divider class="hidden lg:inline-block" />
@@ -427,7 +427,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
         />
       </Show>
       <Input
-        icon={<span class="icon-[fluent--calendar-20-regular] w-5 h-5" />}
+        icon={<span class="shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5" />}
         readOnly
         title={props.title}
         placeholder={props.placeholder}
@@ -449,7 +449,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
               setTimeNext(null);
             }}
           >
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
           </Button>
         }
       />

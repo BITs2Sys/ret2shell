@@ -127,7 +127,7 @@ function AdminManagement(props: {
   return (
     <>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("team.selfManagement")}</span>
       </h3>
       <section class="flex flex-col space-y-2 mt-2">
@@ -144,7 +144,7 @@ function AdminManagement(props: {
               {(field, props) => (
                 <Input
                   class="flex-1"
-                  icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                   title={t("team.form.name.label")!}
                   placeholder={t("team.form.name.placeholder")!}
                   {...props}
@@ -207,7 +207,7 @@ function AdminManagement(props: {
             {(field, props) => (
               <Input
                 class="flex-1"
-                icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
                 title={t("team.form.tag.label")!}
                 placeholder={t("team.form.tag.placeholder")!}
                 {...props}
@@ -227,11 +227,11 @@ function AdminManagement(props: {
               size="sm"
               square
               title={t("general.actions.delete.title")!}
-              btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+              btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
             >
               <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("general.actions.delete.message")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={handleDeleteTeam} loading={deleting()}>
@@ -329,7 +329,7 @@ function SelfManagement(props: { members: User[] }) {
   return (
     <>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("team.selfManagement")}</span>
       </h3>
       <section class="flex flex-col space-y-2 mt-2">
@@ -346,7 +346,7 @@ function SelfManagement(props: { members: User[] }) {
               {(field, props) => (
                 <Input
                   class="flex-1"
-                  icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                   title={t("team.form.name.label")!}
                   placeholder={t("team.form.name.placeholder")!}
                   {...props}
@@ -379,7 +379,7 @@ function SelfManagement(props: { members: User[] }) {
             {(field, props) => (
               <Input
                 class="flex-1"
-                icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
                 title={t("team.form.tag.label")!}
                 placeholder={t("team.form.tag.placeholder")!}
                 {...props}
@@ -400,11 +400,11 @@ function SelfManagement(props: { members: User[] }) {
               size="sm"
               title={t("general.actions.leave.title")!}
               square
-              btnContent={<span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />}
+              btnContent={<span class="shrink-0 icon-[fluent--arrow-exit-20-regular] w-5 h-5" />}
             >
               <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("general.actions.leave.message")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={handleLeaveTeam} loading={leaving()}>
@@ -459,7 +459,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
 
   return (
     <Form onSubmit={onSubmit} class="min-h-12 border-b border-b-layer-content/10 flex flex-1 items-center space-x-2">
-      <span class="icon-[fluent--add-circle-20-regular] w-5 h-5 text-info" />
+      <span class="shrink-0 icon-[fluent--add-circle-20-regular] w-5 h-5 text-info" />
       <Field name="reason" validate={[required(t("team.form.extraReason.required")!)]}>
         {(field, props) => (
           <Input
@@ -523,7 +523,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
       <span class="font-bold opacity-60">pts</span>
       <span class="w-8" />
       <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
-        <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
         <span>{t("general.actions.create.title")}</span>
       </Button>
     </Form>
@@ -622,7 +622,7 @@ export default function () {
               />
             </Show>
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--data-trending-20-regular] w-5 h-5" />
               <span>{t("team.scoreChart")}</span>
             </h3>
             <section class="w-full h-64 lg:h-96">
@@ -672,7 +672,7 @@ export default function () {
               />
             </section>
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t("team.solves")}</span>
             </h3>
             <section class="flex flex-col">
@@ -680,7 +680,7 @@ export default function () {
                 each={solves()}
                 fallback={
                   <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                     <span>{t("team.noSolves")}</span>
                   </div>
                 }
@@ -690,7 +690,7 @@ export default function () {
                     class="h-12 flex items-center border-b border-b-layer-content/10 hover:bg-layer-content/5 space-x-2"
                     href={`/games/${gameStore.current?.id}/challenges?challenge=${submission.challenge_id}`}
                   >
-                    <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
+                    <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
                     <span class="flex-1 text-start truncate">
                       {t("team.solvesJournal", {
                         challenge: submission.challenge_name!,
@@ -705,7 +705,7 @@ export default function () {
             </section>
             <div class="h-16" />
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="icon-[fluent--trophy-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--trophy-20-regular] w-5 h-5" />
               <span>{t("team.extras")}</span>
             </h3>
             <section class="flex flex-col">
@@ -713,7 +713,7 @@ export default function () {
                 each={extras()}
                 fallback={
                   <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                     <span>{t("team.noExtras")}</span>
                   </div>
                 }
@@ -723,10 +723,10 @@ export default function () {
                     <Show
                       when={extra.score > 0}
                       fallback={
-                        <span class="icon-[fluent--arrow-circle-down-double-20-regular] w-5 h-5 text-warning" />
+                        <span class="shrink-0 icon-[fluent--arrow-circle-down-double-20-regular] w-5 h-5 text-warning" />
                       }
                     >
-                      <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
+                      <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
                     </Show>
                     <span class="flex-1 text-start truncate">{extra.reason}</span>
                     <span class={clsx("font-bold", extra.score > 0 ? "text-success" : "text-warning")}>

@@ -46,7 +46,7 @@ export default function TeamRanks(props: {
           </Match>
           <Match when={props.teams.length === 0}>
             <div class="flex-1 flex flex-col space-y-6 items-center justify-center opacity-60">
-              <span class="icon-[fluent--data-trending-48-regular] w-12 h-12" />
+              <span class="shrink-0 icon-[fluent--data-trending-48-regular] w-12 h-12" />
               <span>{t("team.empty")}</span>
             </div>
           </Match>
@@ -57,13 +57,13 @@ export default function TeamRanks(props: {
               <span class="w-12 text-center">
                 <Switch>
                   <Match when={realIndex(index()) === 1}>
-                    <span class="icon-[fluent-emoji-flat--1st-place-medal] w-6 h-6" />
+                    <span class="shrink-0 icon-[fluent-emoji-flat--1st-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) === 2}>
-                    <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-6 h-6" />
+                    <span class="shrink-0 icon-[fluent-emoji-flat--2nd-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) === 3}>
-                    <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-6 h-6" />
+                    <span class="shrink-0 icon-[fluent-emoji-flat--3rd-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) > 3}>
                     <span class="font-bold opacity-60">{realIndex(index())}</span>

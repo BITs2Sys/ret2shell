@@ -41,10 +41,11 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 relative">
         <div class="flex-1 flex flex-col w-full max-w-5xl">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <span>{t("game.events.title")} API</span>
           </h2>
-          <Card level="info" class="mt-2" contentClass="py-2 px-4">
+          <Card level="info" class="mt-2" contentClass="p-2 flex flex-row space-x-2 items-center">
+            <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
             <p class="opacity-60 inline">
               <span>{t("game.events.howto")}</span>
               <span>&nbsp;</span>
@@ -55,7 +56,7 @@ export default function () {
                 rel="noreferrer"
               >
                 <span>{t("docs.title")}</span>
-                <span class="icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
+                <span class="shrink-0 icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
               </a>
               <span>.&nbsp;</span>
               <span>{t("game.events.tokenWarning")}</span>
@@ -66,10 +67,13 @@ export default function () {
               class="flex-1"
               value={`${window.origin.replace("http", "ws")}/api/event/connect?game_id=${gameStore.current?.id}&token=${gameStore.current?.token || undefined}`}
             />
-            <Popover square btnContent={<span class="icon-[fluent--arrow-sync-20-regular] text-error w-5 h-5" />}>
+            <Popover
+              square
+              btnContent={<span class="shrink-0 icon-[fluent--arrow-sync-20-regular] text-error w-5 h-5" />}
+            >
               <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("game.events.regenerateTokenWarning")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={handleRefreshToken}>
@@ -80,14 +84,14 @@ export default function () {
           </div>
           <div class="h-4" />
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--developer-board-lightning-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--developer-board-lightning-20-regular] w-5 h-5" />
             <span>{t("game.events.linkedDevices")}</span>
           </h2>
           <For
             each={linkedDevices()}
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--desktop-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--desktop-20-regular] w-24 h-24" />
                 <span>{t("game.events.emptyDevices")}</span>
               </div>
             }

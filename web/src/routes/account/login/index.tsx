@@ -104,7 +104,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.account.placeholder")}
                   title={t("account.form.account.label")}
                   autocomplete="username"
@@ -135,13 +135,13 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
                   type="password"
                   placeholder={t("account.form.password.placeholder")}
                   title={t("account.form.password.label")}
                   extraLabel={
                     <A href="/account/forgot" class="hover:underline flex items-center space-x-1">
-                      <span class="icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />
+                      <span class="shrink-0 icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />
                       <span>{t("account.forgot.title")}</span>
                     </A>
                   }
@@ -211,7 +211,7 @@ export default function () {
                   class="w-full !mt-4"
                   btnContent={
                     <>
-                      <span class="icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
                       <span>{t("account.oauth.select")}</span>
                     </>
                   }

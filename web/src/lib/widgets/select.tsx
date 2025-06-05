@@ -107,7 +107,7 @@ export default function (
               selectProps.size === "sm" ? "btn-xs" : "btn-sm"
             )}
           >
-            <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           </Select.Indicator>
           <Select.ClearTrigger
             class={clsx(
@@ -115,7 +115,7 @@ export default function (
               selectProps.size === "sm" ? "btn-xs" : "btn-sm"
             )}
           >
-            <span class="icon-[fluent--dismiss-circle-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--dismiss-circle-20-regular] w-5 h-5" />
           </Select.ClearTrigger>
         </Select.Trigger>
       </Select.Control>
@@ -148,7 +148,7 @@ export default function (
                           <span class="truncate">{item().label}</span>
                         </Select.ItemText>
                         <Select.ItemIndicator class="flex items-center">
-                          <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success shrink-0" />
+                          <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />
                         </Select.ItemIndicator>
                       </Select.Item>
                     )}

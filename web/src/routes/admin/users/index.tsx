@@ -67,7 +67,7 @@ function UserList() {
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1">
       <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <div class="flex flex-row items-center space-x-2">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("user.list.title")}</span>
         </div>
         <span class="flex-1" />
@@ -117,7 +117,7 @@ function UserList() {
         <Input
           class="w-80"
           size="sm"
-          icon={<span class="icon-[fluent--filter-16-regular] w-5 h-5" />}
+          icon={<span class="shrink-0 icon-[fluent--filter-16-regular] w-5 h-5" />}
           value={filter() ?? ""}
           placeholder={t("user.filter")}
           onChange={(e) => {

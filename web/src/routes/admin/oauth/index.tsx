@@ -154,7 +154,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <div class="w-full max-w-5xl flex flex-col">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("oauth.title")}</span>
             <Dialog
               level="primary"
@@ -162,7 +162,7 @@ export default function () {
               title={t("general.actions.create.title")}
               btnContent={
                 <>
-                  <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                   <span>{t("general.actions.create.title")}</span>
                 </>
               }
@@ -186,7 +186,7 @@ export default function () {
                   size="sm"
                   square
                   title={t("general.actions.edit.title")}
-                  btnContent={<span class="icon-[fluent--edit-20-regular] w-5 h-5" />}
+                  btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}
                 >
                   <ProviderForm editSource={service} onDone={handleUpdateProvider} loading={loading()} />
                 </Dialog>
@@ -195,10 +195,10 @@ export default function () {
                   ghost
                   square
                   title={t("general.actions.delete.title")}
-                  btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                  btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">
-                    <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
+                    <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
                     <span>{t("general.actions.delete.message")}</span>
                     <Button
                       level="error"
@@ -216,7 +216,7 @@ export default function () {
           </For>
           <div class="h-36" />
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
             <span class="flex-1 text-start">{t("institute.title")}</span>
             <Dialog
               level="primary"
@@ -224,7 +224,7 @@ export default function () {
               title={t("general.actions.create.title")}
               btnContent={
                 <>
-                  <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                   <span>{t("general.actions.create.title")}</span>
                 </>
               }
@@ -238,7 +238,7 @@ export default function () {
           <For each={accountStore.institutes}>
             {(institute) => (
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
-                <span class="icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
                 <span class="flex-1 text-start">{institute.name}</span>
                 <Show
                   when={institute.provider}
@@ -253,7 +253,7 @@ export default function () {
                   size="sm"
                   square
                   title={t("general.actions.edit.title")}
-                  btnContent={<span class="icon-[fluent--edit-20-regular] w-5 h-5" />}
+                  btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}
                 >
                   <InstituteForm
                     editSource={institute}
@@ -267,10 +267,10 @@ export default function () {
                   ghost
                   square
                   title={t("general.actions.delete.title")}
-                  btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                  btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">
-                    <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
+                    <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
                     <span>{t("general.actions.delete.message")}</span>
                     <Button
                       level="error"

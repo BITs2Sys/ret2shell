@@ -88,7 +88,7 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
         square
         onClick={() => toastMsgProps.toast.id && removeToast(toastMsgProps.toast.id)}
       >
-        <span class="icon-[fluent--dismiss-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
       </Button>
       <Show when={props.selfDestroy && toastMsgProps.toast.duration}>
         {/* bg-info bg-success bg-warning bg-error */}

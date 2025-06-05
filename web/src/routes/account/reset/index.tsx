@@ -82,7 +82,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.email.placeholder")}
                   disabled
                   title={t("account.form.email.label")}
@@ -98,7 +98,7 @@ export default function () {
             <Field name="token" validate={[required(t("account.reset.form.token.required")!)]}>
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--key-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--key-20-regular] w-5 h-5" />}
                   placeholder={t("account.reset.form.token.placeholder")}
                   disabled
                   title={t("account.reset.form.token.label")}
@@ -125,7 +125,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.password.placeholder")}
                   title={t("account.form.password.label")}
                   autocomplete="new-password"

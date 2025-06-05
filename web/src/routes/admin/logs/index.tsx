@@ -126,7 +126,7 @@ export default function () {
       <div class="flex-1 flex flex-col">
         <div class="sticky top-16 h-16 z-20 backdrop-blur-sm border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">
-            <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("platform.logs.title")}</span>
           </h1>
           <Show when={enableStreamLogs()}>
@@ -209,7 +209,7 @@ export default function () {
           </Show>
           <Show when={logs().length === 0}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-              <span class="icon-[fluent--code-20-regular] w-24 h-24" />
+              <span class="shrink-0 icon-[fluent--code-20-regular] w-24 h-24" />
               <span>{t("platform.logs.notStreaming")}</span>
               <span>{t("platform.logs.enableStreamWarning")}</span>
             </div>

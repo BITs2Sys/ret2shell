@@ -57,7 +57,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-            <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />
             <span>{t("platform.email.title")}</span>
           </h3>
           <Field name="enabled" type="boolean">
@@ -131,7 +131,7 @@ export default function () {
                   disabled={getValue(form, "enabled") === false}
                   title={t("platform.email.form.host.label")}
                   placeholder={t("platform.email.form.host.placeholder")!}
-                  icon={<span class="icon-[fluent--server-link-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--server-link-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
                   {...props}
@@ -163,7 +163,7 @@ export default function () {
                   title={t("platform.email.form.port.label")}
                   placeholder={t("platform.email.form.port.placeholder")!}
                   class="w-36"
-                  icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
                   {...props}
@@ -188,7 +188,7 @@ export default function () {
                 disabled={getValue(form, "enabled") === false}
                 title={t("platform.email.form.sender.label")}
                 placeholder={t("platform.email.form.sender.placeholder")!}
-                icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value}
                 error={field.error}
                 {...props}
@@ -213,7 +213,7 @@ export default function () {
                   disabled={getValue(form, "enabled") === false}
                   title={t("platform.email.form.username.label")}
                   placeholder={t("platform.email.form.username.placeholder")!}
-                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
                   {...props}
@@ -238,7 +238,7 @@ export default function () {
                   type="password"
                   title={t("platform.email.form.password.label")}
                   placeholder={t("platform.email.form.password.placeholder")!}
-                  icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
                   {...props}
@@ -264,7 +264,7 @@ export default function () {
                 disabled={getValue(form, "enabled") === false}
                 title={t("platform.email.form.verifyEmailSubject.label")}
                 placeholder={t("platform.email.form.verifyEmailSubject.placeholder")!}
-                icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value ?? undefined}
                 error={field.error}
                 {...props}
@@ -314,7 +314,7 @@ export default function () {
                 disabled={getValue(form, "enabled") === false}
                 title={t("platform.email.form.resetPasswordEmailSubject.label")}
                 placeholder={t("platform.email.form.resetPasswordEmailSubject.placeholder")!}
-                icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value ?? undefined}
                 error={field.error}
                 {...props}

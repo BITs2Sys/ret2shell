@@ -75,7 +75,7 @@ export default function (props: {
       <Field name="title" validate={[required(t("bulletin.form.title.required")!)]}>
         {(field, props) => (
           <Input
-            icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--megaphone-20-regular] w-5 h-5" />}
             placeholder={t("bulletin.form.title.placeholder")!}
             title={t("bulletin.form.title.label")!}
             {...props}

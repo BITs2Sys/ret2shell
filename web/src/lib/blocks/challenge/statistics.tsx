@@ -52,7 +52,7 @@ function StatisticsPanel() {
   return (
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-        <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
+        <span class="shrink-0 icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
         <span class="flex-1">{t("challenge.statistics.title")}</span>
         <Button
           size="sm"
@@ -78,7 +78,7 @@ function StatisticsPanel() {
         {(item) => (
           <div class="min-h-12 w-full flex flex-row py-2 gap-y-2 px-2 flex-wrap justify-end space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
             <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
-              <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success shrink-0" />
+              <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
               <a class="truncate hover:underline" href={`/users/${item.user_id}`}>
                 {item.user_name}
               </a>
@@ -142,7 +142,7 @@ function HistoryPanel() {
   return (
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-        <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
+        <span class="shrink-0 icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
         <span>{t("challenge.statistics.commits.title")}</span>
       </h3>
       <Show when={loading()}>
@@ -153,7 +153,7 @@ function HistoryPanel() {
       <For each={history()}>
         {(item) => (
           <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-            <span class="icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary shrink-0" />
+            <span class="shrink-0 icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary" />
             <span class="truncate" title={item.subject}>
               {item.subject}
             </span>

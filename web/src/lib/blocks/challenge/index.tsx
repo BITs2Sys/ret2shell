@@ -124,11 +124,11 @@ function BottomPanel(props: {
           </Button>
           <Divider direction="vertical" class="h-8" />
           <Button onClick={() => setSearchParams({ tab: "terminal" })} ghost={page() !== "terminal"}>
-            <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("challenge.terminal.title")}</span>
           </Button>
           <Button onClick={() => setSearchParams({ tab: "hints" })} ghost={page() !== "hints"}>
-            <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
             <span>{t("challenge.hint.title")}</span>
           </Button>
           <Button
@@ -136,7 +136,7 @@ function BottomPanel(props: {
             ghost={page() !== "hammer"}
             disabled={!props.inGame}
           >
-            <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent-emoji-flat--hammer] w-5 h-5" />
             <span>{t("challenge.hammer.title")}</span>
           </Button>
           <Button
@@ -144,29 +144,29 @@ function BottomPanel(props: {
             ghost={page() !== "answer"}
             disabled={!props.archived && !isGameAdmin()}
           >
-            <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("challenge.answer.title")}</span>
           </Button>
           <Show when={isGameAdmin()}>
             <Divider direction="vertical" class="h-8" />
             <Button onClick={() => setSearchParams({ tab: "statistics" })} ghost={page() !== "statistics"}>
-              <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
               <span>{t("challenge.statistics.title")}</span>
             </Button>
             <Button onClick={() => setSearchParams({ tab: "files" })} ghost={page() !== "files"}>
-              <span class="icon-[fluent--save-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--save-20-regular] w-5 h-5" />
               <span>{t("challenge.file.title")}</span>
             </Button>
             <Button onClick={() => setSearchParams({ tab: "instances" })} ghost={page() !== "instances"}>
-              <span class="icon-[fluent--production-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--production-20-regular] w-5 h-5" />
               <span>{t("challenge.instance.title")}</span>
             </Button>
             <Button onClick={() => setSearchParams({ tab: "checker" })} ghost={page() !== "checker"}>
-              <span class="icon-[fluent--flash-play-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--flash-play-20-regular] w-5 h-5" />
               <span>{t("challenge.checker.title")}</span>
             </Button>
             <Button onClick={() => setSearchParams({ tab: "settings" })} ghost={page() !== "settings"}>
-              <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
               <span>{t("challenge.settings.title")}</span>
             </Button>
             <Popover
@@ -182,19 +182,19 @@ function BottomPanel(props: {
                   when={challengeStore.current?.hidden === true}
                   fallback={
                     <>
-                      <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 text-warning" />
+                      <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5 text-warning" />
                       <span class="text-warning">{t("challenge.actions.down.title")}</span>
                     </>
                   }
                 >
-                  <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 text-success" />
+                  <span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5 text-success" />
                   <span class="text-success">{t("challenge.actions.up.title")}</span>
                 </Show>
               }
             >
               <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary align-middle" />
+                  <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary align-middle" />
                   <Show
                     when={challengeStore.current?.hidden === true}
                     fallback={<span>{t("challenge.actions.down.message")}</span>}
@@ -220,14 +220,14 @@ function BottomPanel(props: {
               ghost
               btnContent={
                 <>
-                  <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                  <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
                   <span class="text-error">{t("general.actions.delete.title")}</span>
                 </>
               }
             >
               <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                 <span class="inline-block space-x-2">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("general.actions.delete.message")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={handleDeleteChallenge} loading={deleting()}>

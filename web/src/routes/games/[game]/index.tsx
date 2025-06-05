@@ -40,11 +40,11 @@ function BannedWarning() {
   return (
     <Show when={!close()}>
       <div class="bg-error/60 backdrop-blur-sm fixed top-16 left-0 right-0 bottom-0 flex flex-col space-y-8 items-center justify-center">
-        <span class="icon-[fluent--warning-20-filled] w-12 h-12" />
+        <span class="shrink-0 icon-[fluent--warning-20-filled] w-12 h-12" />
         <span class="font-bold text-2xl">{t("team.status.banned.title")}</span>
         <span>{t("team.status.banned.message")}</span>
         <Button level="error" onClick={() => setClose(true)}>
-          <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
           <span>{t("general.actions.back.title")}</span>
         </Button>
       </div>
@@ -242,8 +242,11 @@ export default function () {
                     disabled={logoSet()}
                   >
                     <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
-                    <Show when={coverSet()} fallback={<span class="icon-[fluent--draw-image-20-regular] w-5 h-5" />}>
-                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
+                    <Show
+                      when={coverSet()}
+                      fallback={<span class="shrink-0 icon-[fluent--draw-image-20-regular] w-5 h-5" />}
+                    >
+                      <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
                   <Button
@@ -256,7 +259,7 @@ export default function () {
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
                     <Show when={logoSet()} fallback={<EditFlag class="w-5 h-5" />}>
-                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
+                      <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
                 </div>
@@ -334,7 +337,7 @@ export default function () {
           <Show when={gameStore.team}>
             <Card contentClass="p-3 lg:px-6 flex flex-row space-x-2 lg:space-x-4 print:hidden relative">
               <div class="flex items-center justify-center">
-                <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60" />
+                <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60" />
               </div>
               <div class="flex flex-col justify-center flex-1">
                 <h3 class="font-bold px-2">
@@ -366,12 +369,12 @@ export default function () {
           <div class="flex flex-row space-x-2 print:hidden">
             <Show when={isGameAdmin()}>
               <Link href={`/games/${gameStore.current?.id}?edit=true`} square level="primary">
-                <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
               </Link>
             </Show>
             <Show when={isGameAdmin()}>
               <Link href={`/games/${gameStore.current?.id}/admin`} square level="primary">
-                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
               </Link>
             </Show>
             <Switch>
@@ -388,7 +391,7 @@ export default function () {
                     gameStore.team?.state === TeamState.Banned
                   }
                 >
-                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Switch>
                     <Match when={inArchived()}>
                       <span class="flex-1 text-start">{t("game.gotoTraining")}</span>
@@ -406,7 +409,7 @@ export default function () {
                       <span class="flex-1 text-start">{t("game.enterChallenge")}</span>
                     </Match>
                   </Switch>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match when={isGameAdmin()}>
@@ -418,9 +421,9 @@ export default function () {
                   }
                   justify="start"
                 >
-                  <span class="icon-[fluent--code-20-filled] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--code-20-filled] w-5 h-5" />
                   <span class="flex-1 text-start">{t("game.manageChallenges")}</span>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match when={accountStore.id && !gameStore.team}>
@@ -430,14 +433,14 @@ export default function () {
                   level="info"
                   disabled={!canParticipate()}
                 >
-                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Show
                     when={canParticipate()}
                     fallback={<span class="flex-1 text-start">{t("game.canNotParticipate")}</span>}
                   >
                     <span class="flex-1 text-start">{t("team.create.title")}</span>
                   </Show>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match when={!accountStore.id}>
@@ -446,9 +449,9 @@ export default function () {
                   class="flex-1"
                   level="warning"
                 >
-                  <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
                   <span class="flex-1 text-start">{t("game.loginThenBack")}</span>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
             </Switch>
@@ -471,7 +474,7 @@ export default function () {
             </Match>
             <Match when={true}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--thumb-dislike-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--thumb-dislike-20-regular] w-24 h-24" />
                 <span>{t("game.introduction.empty")}</span>
               </div>
             </Match>

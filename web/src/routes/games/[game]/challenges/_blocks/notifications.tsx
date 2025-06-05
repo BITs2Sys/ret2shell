@@ -136,7 +136,7 @@ export default function () {
               <div class="flex flex-row space-x-2">
                 <Show when={createFormExpanded()}>
                   <Button class="flex-1" type="submit">
-                    <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                     <span>{t("general.actions.create.title")}</span>
                   </Button>
                 </Show>
@@ -148,8 +148,11 @@ export default function () {
                     setCreateFormExpanded(!createFormExpanded());
                   }}
                 >
-                  <Show when={createFormExpanded()} fallback={<span class="icon-[fluent--add-20-regular] w-5 h-5" />}>
-                    <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
+                  <Show
+                    when={createFormExpanded()}
+                    fallback={<span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />}
+                  >
+                    <span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
                   </Show>
                   <Show when={!createFormExpanded()}>
                     <span>{t("general.actions.create.title")}</span>
@@ -166,7 +169,7 @@ export default function () {
                   when={loading()}
                   fallback={
                     <>
-                      <span class="icon-[fluent--chat-empty-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--chat-empty-20-regular] w-5 h-5" />
                       <span>{t("game.notification.empty")}</span>
                     </>
                   }
@@ -191,7 +194,7 @@ export default function () {
                       )}`}
                     />
                     <A class="shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
-                      <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
                     </A>
                     <Show when={isGameAdmin()}>
                       <button
@@ -200,7 +203,7 @@ export default function () {
                         title={t("general.actions.delete.title")}
                         onClick={() => onDelete(notification.id)}
                       >
-                        <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
                       </button>
                     </Show>
                   </h2>

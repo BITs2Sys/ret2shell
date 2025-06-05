@@ -42,7 +42,7 @@ export default function (props: { user: User | null; loading?: boolean }) {
           </div>
           <Divider />
           <div class="flex flex-row space-x-2 items-center px-2 py-2">
-            <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />
             <a
               class={clsx(
                 "font-bold truncate flex-1",
@@ -55,7 +55,7 @@ export default function (props: { user: User | null; loading?: boolean }) {
           </div>
           <Divider />
           <div class="flex flex-row space-x-2 items-center px-2 py-2">
-            <span class="icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
             <span class="font-bold">{props.user?.institute_name ?? t("institute.empty")}</span>
           </div>
           <Divider />

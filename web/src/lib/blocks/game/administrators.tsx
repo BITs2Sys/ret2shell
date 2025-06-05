@@ -85,7 +85,7 @@ export default function AdministratorsManagement() {
   return (
     <>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--person-key-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--person-key-20-regular] w-5 h-5" />
         <span>{t("game.administrator.title")}</span>
       </h3>
       <Show when={loading()}>
@@ -98,7 +98,7 @@ export default function AdministratorsManagement() {
           <Input
             placeholder={t("game.administrator.form.search.placeholder")}
             title={t("game.administrator.form.search.title")}
-            icon={<span class="icon-[fluent--person-key-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--person-key-20-regular] w-5 h-5" />}
             onChange={(e) => setAdminSearch(e.currentTarget.value)}
           />
         </ArkPopover.Anchor>
@@ -123,7 +123,7 @@ export default function AdministratorsManagement() {
                   fallback={
                     <Show when={!searching() && adminSearch()}>
                       <div class="h-12 flex items-center font-bold space-x-4 px-2">
-                        <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                         <span class="font-bold opacity-60">{t("game.administrator.empty")}</span>
                       </div>
                     </Show>
@@ -234,10 +234,10 @@ export default function AdministratorsManagement() {
                 ghost
                 square
                 level="error"
-                btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
+                btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
               >
                 <Card contentClass="p-2 flex flex-row space-x-2 items-center">
-                  <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
+                  <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
                   <span>{t("general.actions.delete.message")}</span>
                   <Button
                     level="error"

@@ -134,7 +134,7 @@ export function InstanceBoxContent() {
           title={t("wsrx.downloadClient")}
           size="sm"
         >
-          <span class="icon-[fluent--arrow-download-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--arrow-download-20-regular] w-5 h-5" />
         </Link>
       </Card>
       <Show when={showSettings()}>
@@ -158,10 +158,10 @@ export function InstanceBoxContent() {
                 wsrx.setApiAddr("http://127.0.0.1:3307");
               }}
             >
-              <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
             </Button>
             <Button size="sm" square title={t("general.actions.save.title")} ghost onClick={retryConnect}>
-              <span class="icon-[fluent--checkmark-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5" />
             </Button>
           </div>
           <div class="flex flex-row items-center space-x-2">
@@ -180,7 +180,7 @@ export function InstanceBoxContent() {
             >
               <Show
                 when={refreshingTraffic()}
-                fallback={<span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />}
+                fallback={<span class="shrink-0 icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />}
               >
                 <Spin width={16} height={16} />
               </Show>
@@ -200,7 +200,10 @@ export function InstanceBoxContent() {
               }}
               disabled={openingAllTraffic()}
             >
-              <Show when={openingAllTraffic()} fallback={<span class="icon-[fluent--connector-20-regular] w-5 h-5" />}>
+              <Show
+                when={openingAllTraffic()}
+                fallback={<span class="shrink-0 icon-[fluent--connector-20-regular] w-5 h-5" />}
+              >
                 <Spin width={16} height={16} />
               </Show>
             </Button>
@@ -221,7 +224,7 @@ export function InstanceBoxContent() {
             >
               <Show
                 when={deletingOutdatedTraffic()}
-                fallback={<span class="icon-[fluent--uninstall-app-20-regular] w-5 h-5" />}
+                fallback={<span class="shrink-0 icon-[fluent--uninstall-app-20-regular] w-5 h-5" />}
               >
                 <Spin width={16} height={16} />
               </Show>
@@ -243,7 +246,7 @@ export function InstanceBoxContent() {
             >
               <Show
                 when={deletingAllTraffic()}
-                fallback={<span class="icon-[fluent--uninstall-app-20-regular] text-warning w-5 h-5" />}
+                fallback={<span class="shrink-0 icon-[fluent--uninstall-app-20-regular] text-warning w-5 h-5" />}
               >
                 <Spin width={16} height={16} />
               </Show>
@@ -255,7 +258,7 @@ export function InstanceBoxContent() {
         {(instance) => (
           <Card contentClass="p-2">
             <Link size="sm" ghost class="relative w-full" href={challengeLink(instance)}>
-              <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success" />
+              <span class="shrink-0 icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success" />
               <span class="flex-1 truncate text-start">{instance.challenge_name}</span>
               <Timer
                 class="opacity-60"
@@ -282,7 +285,7 @@ export function InstanceBoxContent() {
 export default function InstanceBox() {
   return (
     <Popover
-      btnContent={<span class="icon-[fluent--fluid-20-regular] w-5 h-5" />}
+      btnContent={<span class="shrink-0 icon-[fluent--fluid-20-regular] w-5 h-5" />}
       ghost
       square
       popContentClass="pt-2"

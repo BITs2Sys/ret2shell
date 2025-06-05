@@ -53,7 +53,7 @@ export default function (props: { status: number | null }) {
           <span class="opacity-60">{t("general.network.gotoDocs")}</span>
           <a href="/docs" class="flex flex-row space-x-2 items-center hover:underline" target="_blank" rel="noreferrer">
             <span class="opacity-60">{t("docs.title")}</span>
-            <span class="icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
+            <span class="shrink-0 icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
           </a>
         </p>
       </Show>

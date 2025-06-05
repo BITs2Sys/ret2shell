@@ -167,7 +167,7 @@ export default function (props: { inGame?: boolean }) {
           <div class="flex flex-col w-full max-w-5xl">
             <header class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 font-bold py-2 gap-y-2">
               <span class="flex flex-row space-x-2 items-center overflow-hidden">
-                <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
                 <span class="flex-1 truncate">{challengeStore.current?.name}</span>
               </span>
               <span class="flex-1" />
@@ -198,7 +198,7 @@ export default function (props: { inGame?: boolean }) {
                   </span>
                 </Show>
                 <span class="font-bold flex flex-row space-x-2 items-center">
-                  <span class="icon-[fluent--data-bar-vertical-24-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--data-bar-vertical-24-regular] w-5 h-5" />
                   <span>
                     {challengeStore.status?.solves ?? 0} solve
                     {challengeStore.status?.solves && challengeStore.status.solves > 1 ? "s" : ""}
@@ -210,7 +210,7 @@ export default function (props: { inGame?: boolean }) {
               <Match when={challengeStore.current?.release_at && challengeStore.current.release_at > DateTime.now()}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-info" />
+                    <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-info" />
                     <span class="text-info flex-1 truncate text-start">{t("challenge.status.unreleased.message")}</span>
                   </span>
                   <span class="flex-1" />
@@ -223,7 +223,7 @@ export default function (props: { inGame?: boolean }) {
               <Match when={challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
-                    <span class="icon-[fluent--archive-20-regular] w-5 h-5 text-warning" />
+                    <span class="shrink-0 icon-[fluent--archive-20-regular] w-5 h-5 text-warning" />
                     <span class="text-warning flex-1 truncate text-start">
                       {t("challenge.status.archived.message")}
                     </span>
@@ -243,7 +243,7 @@ export default function (props: { inGame?: boolean }) {
               <Match when={challengeStore.current?.archive_at}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
-                    <span class="icon-[fluent--clock-20-regular] w-5 h-5 text-info" />
+                    <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5 text-info" />
                     <span class="text-info flex-1 truncate text-start">{t("challenge.status.inPeriod.message")}</span>
                   </span>
                   <span class="flex-1" />
@@ -257,7 +257,7 @@ export default function (props: { inGame?: boolean }) {
             <Show when={challengeStore.files.length > 0}>
               <section class="inline-flex flex-row items-center flex-wrap min-h-12 border-b border-b-layer-content/15">
                 <h3 class="font-bold flex space-x-2 items-center">
-                  <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--folder-zip-20-regular] w-5 h-5" />
                   <span>{t("challenge.file.title")}:</span>
                 </h3>
                 <div class="w-4" />
@@ -328,12 +328,12 @@ export default function (props: { inGame?: boolean }) {
                         when={calmdownStart()}
                         fallback={
                           <>
-                            <span class="icon-[fluent--play-20-regular] w-5 h-5 text-success" />
+                            <span class="shrink-0 icon-[fluent--play-20-regular] w-5 h-5 text-success" />
                             <span>{t("challenge.instance.actions.start.title")}</span>
                           </>
                         }
                       >
-                        <span class="icon-[fluent--history-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--history-20-regular] w-5 h-5" />
                         <span class="opacity-60">{t("challenge.instance.errors.calmdown.title")}</span>
                         <Timer
                           end={calmdownStart()!.plus({ minutes: 1 })}
@@ -379,7 +379,7 @@ export default function (props: { inGame?: boolean }) {
                       disabled={delaying()}
                     >
                       <Show when={!delaying()}>
-                        <span class="icon-[fluent--clock-alarm-20-regular] w-5 h-5 text-primary" />
+                        <span class="shrink-0 icon-[fluent--clock-alarm-20-regular] w-5 h-5 text-primary" />
                       </Show>
                     </Button>
                     <Button
@@ -392,7 +392,7 @@ export default function (props: { inGame?: boolean }) {
                       disabled={stopping()}
                     >
                       <Show when={!stopping()}>
-                        <span class="icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
+                        <span class="shrink-0 icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
                       </Show>
                     </Button>
                   </Match>
@@ -408,7 +408,7 @@ export default function (props: { inGame?: boolean }) {
                           onClick={() => handleStopChallengeInstanceExplicit(inst.game_id, inst.challenge_id)}
                         >
                           <Show when={stoppingExplicit() !== inst.challenge_id}>
-                            <span class="icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
+                            <span class="shrink-0 icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
                           </Show>
                           <span>{inst.challenge_name}</span>
                         </Button>
@@ -428,7 +428,7 @@ export default function (props: { inGame?: boolean }) {
                         )}
                       >
                         <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
-                          <span class="icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
+                          <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
                           <span class="text-start space-x-2">
                             <span>{image.name}.service</span>
                             <span>-</span>

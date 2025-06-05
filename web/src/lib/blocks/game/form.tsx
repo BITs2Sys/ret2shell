@@ -54,7 +54,7 @@ export default function GameEdit(props: {
   return (
     <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.form.title")}</span>
       </h3>
       <Field name="name" validate={[required(t("game.form.name.required")!)]}>
@@ -62,7 +62,7 @@ export default function GameEdit(props: {
           <Input
             title={t("game.form.name.label")}
             placeholder={t("game.form.name.placeholder")}
-            icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
             value={field.value}
             error={field.error}
             {...props}
@@ -74,7 +74,7 @@ export default function GameEdit(props: {
           <Input
             title={t("game.form.brief.label")}
             placeholder={t("game.form.brief.placeholder")}
-            icon={<span class="icon-[fluent--list-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--list-20-regular] w-5 h-5" />}
             value={field.value}
             error={field.error}
             {...props}

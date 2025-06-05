@@ -55,25 +55,25 @@ function GlobalNav(props: { size: "sm" | "md" }) {
     <>
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
-          <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--book-number-20-regular] w-5 h-5" />
           <span>{t("wiki.title")}</span>
         </Link>
       </li>
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
-          <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-5 h-5" />
           <span>{t("training.title")}</span>
         </Link>
       </li>
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
-          <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
           <span>{t("game.title")}</span>
         </Link>
       </li>
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
-          <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--megaphone-20-regular] w-5 h-5" />
           <span>{t("bulletin.title")}</span>
         </Link>
       </li>
@@ -88,7 +88,7 @@ function GlobalNav(props: { size: "sm" | "md" }) {
       >
         <li class="nav whitespace-nowrap">
           <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("admin.title")}</span>
           </Link>
         </li>
@@ -111,7 +111,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           disabled={!canAccessChallenges()[0]}
           title={canAccessChallenges()[1]}
         >
-          <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t("challenge.title")}</span>
         </Link>
       </li>
@@ -124,7 +124,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           justify="start"
           size={props.size}
         >
-          <span class="icon-[fluent--trophy-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--trophy-20-regular] w-5 h-5" />
           <span>{t("game.scoreboard.title")}</span>
         </Link>
       </li>
@@ -138,14 +138,14 @@ function GameNav(props: { size: "sm" | "md" }) {
             justify="start"
             size={props.size}
           >
-            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("game.admin.title")}</span>
           </Link>
         </li>
       </Show>
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
-          <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
+          <span class="shrink-0 icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
           <span>{t("general.actions.exit.title")}</span>
         </Link>
       </li>
@@ -181,7 +181,7 @@ export default function TitleBar() {
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
           <div class="lg:hidden">
             <Popover
-              btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
+              btnContent={<span class="shrink-0 icon-[fluent--navigation-20-regular] w-5 h-5" />}
               square
               ghost
               popContentClass="pt-2"
@@ -232,7 +232,7 @@ export default function TitleBar() {
                         ghost={additionalMobileBox() !== "theme"}
                         onClick={() => setAdditionalMobileBox("theme")}
                       >
-                        <span class="icon-[fluent--wand-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--wand-20-regular] w-5 h-5" />
                         <span>{t("platform.theme.title")}</span>
                       </Button>
                     </li>
@@ -244,12 +244,12 @@ export default function TitleBar() {
                         ghost={additionalMobileBox() !== "i18n"}
                         onClick={() => setAdditionalMobileBox("i18n")}
                       >
-                        <span class="icon-[fluent--local-language-20-regular] w-5 h-5" />
-                        <span class="icon-[fluent-emoji-flat--construction-worker] w-5 h-5" />
-                        <span class="icon-[fluent-emoji-flat--construction-worker-dark] w-5 h-5" />
-                        <span class="icon-[fluent-emoji-flat--construction-worker-light] w-5 h-5" />
-                        <span class="icon-[fluent-emoji-flat--construction-worker-medium] w-5 h-5" />
-                        <span class="icon-[fluent-emoji-flat--construction-worker-medium-dark] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--local-language-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent-emoji-flat--construction-worker] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent-emoji-flat--construction-worker-dark] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent-emoji-flat--construction-worker-light] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent-emoji-flat--construction-worker-medium] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent-emoji-flat--construction-worker-medium-dark] w-5 h-5" />
                       </Button>
                     </li>
                   </ul>
@@ -356,7 +356,7 @@ export default function TitleBar() {
               fallback={
                 <Button level="error" loading={offlineLoading()} onClick={reloadPage}>
                   <Show when={!offlineLoading()}>
-                    <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
                   </Show>
                   <span>{t("platform.errors.offline.title")}</span>
                 </Button>
@@ -368,7 +368,7 @@ export default function TitleBar() {
               <Match when={platformStore.under_maintenance}>
                 <Button level="warning" loading={offlineLoading()} onClick={reloadPage}>
                   <Show when={!offlineLoading()}>
-                    <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5" />
                   </Show>
                   <span>{t("platform.errors.maintaining.title")}</span>
                 </Button>
@@ -377,10 +377,10 @@ export default function TitleBar() {
           </div>
           <Show when={platformStore.config.highlight_banner && !bannerRead()}>
             <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2 backdrop-blur-lg">
-              <span class="icon-[fluent--warning-20-filled] mx-2" />
+              <span class="shrink-0 icon-[fluent--warning-20-filled] mx-2" />
               <span class="font-bold flex-1 truncate">{platformStore.config.highlight_banner}</span>
               <Button ghost size="sm" onClick={() => setBannerRead(true)}>
-                <span class="icon-[fluent--dismiss-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
               </Button>
             </div>
           </Show>

@@ -89,7 +89,7 @@ export default function Timeline() {
           <Field name="label" validate={[required(t("game.timeline.form.label.required")!)]}>
             {(field, props) => (
               <Input
-                icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                 placeholder={t("game.timeline.form.label.placeholder")!}
                 title={t("game.timeline.form.label.label")!}
                 {...props}
@@ -130,7 +130,7 @@ export default function Timeline() {
             each={presets()}
             fallback={
               <div class="h-full flex flex-col opacity-60 items-center justify-center space-y-8">
-                <span class="icon-[fluent--archive-20-regular] w-24 h-24" />
+                <span class="shrink-0 icon-[fluent--archive-20-regular] w-24 h-24" />
                 <span>{t("game.timeline.empty")}</span>
               </div>
             }
@@ -141,7 +141,7 @@ export default function Timeline() {
                   <div class="w-1 h-1 rounded-full bg-primary" />
                 </div>
                 <Card class="flex-1 m-2" contentClass="p-2 flex flex-row items-center space-x-2">
-                  <span class="icon-[fluent--clock-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5" />
                   <span class="flex-1 text-start truncate">{preset.label}</span>
                   <span class="opacity-60">
                     {preset.start_at.toFormat("yyyy-MM-dd HH:mm")} - {preset.end_at.toFormat("yyyy-MM-dd HH:mm")}
@@ -150,11 +150,11 @@ export default function Timeline() {
                     ghost
                     size="sm"
                     square
-                    btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />}
+                    btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />}
                   >
                     <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                       <span class="inline-block space-x-2">
-                        <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
+                        <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                         <span>{t("game.timeline.deleteWarning")}</span>
                       </span>
                       <Button

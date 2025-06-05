@@ -23,7 +23,7 @@ export function NotificationBoxContent() {
       <div class="flex flex-col space-y-2 max-w-96 w-[calc(100vw-1rem)]">
         <Card contentClass="p-2 h-12 flex flex-row items-center space-x-2">
           <h2 class="px-2 flex-1 flex items-center space-x-2 font-bold">
-            <span class="icon-[fluent--alert-20-regular] w-5 h-5" />
+            <span class="shrink-0 icon-[fluent--alert-20-regular] w-5 h-5" />
             <Show
               when={toastStore.toasts.length > 0}
               fallback={<span class="opacity-60">{t("notification.empty")}</span>}

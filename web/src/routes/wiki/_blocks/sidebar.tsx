@@ -32,7 +32,7 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
       link: `/wiki/${article.id}`,
       extraPart: (
         <Show when={!article.published}>
-          <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+          <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
         </Show>
       ),
       children: [],
@@ -67,7 +67,7 @@ export default function SideBar() {
         <Show when={accountStore.permissions.includes(Permission.Wiki)}>
           <>
             <Link href={"/wiki/create"} level="primary">
-              <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+              <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
               <span>{t("general.actions.create.title")}</span>
             </Link>
             <Divider class="!mt-6 !mb-4" />
@@ -81,9 +81,9 @@ export default function SideBar() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span class="icon-[fluent--book-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" />
         <span>{t("docs.title")}</span>
-        <span class="icon-[fluent--open-20-regular] w-5 h-5 text-primary" />
+        <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5 text-primary" />
       </a>
     </OverlayScrollbarsComponent>
   );

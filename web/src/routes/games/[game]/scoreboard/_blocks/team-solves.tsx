@@ -83,16 +83,16 @@ export default function TeamSolves(props: {
                     >
                       <Switch>
                         <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 1}>
-                          <span class="icon-[fluent--number-circle-1-20-filled] w-5 h-5 text-yellow-500 -z-10" />
+                          <span class="shrink-0 icon-[fluent--number-circle-1-20-filled] w-5 h-5 text-yellow-500 -z-10" />
                         </Match>
                         <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 2}>
-                          <span class="icon-[fluent--number-circle-2-20-filled] w-5 h-5 text-gray-500 -z-10" />
+                          <span class="shrink-0 icon-[fluent--number-circle-2-20-filled] w-5 h-5 text-gray-500 -z-10" />
                         </Match>
                         <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 3}>
-                          <span class="icon-[fluent--number-circle-3-20-filled] w-5 h-5 text-orange-500 -z-10" />
+                          <span class="shrink-0 icon-[fluent--number-circle-3-20-filled] w-5 h-5 text-orange-500 -z-10" />
                         </Match>
                         <Match when={team.history.find((h) => h.challenge_id === challenge.id)}>
-                          <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-success -z-10" />
+                          <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5 text-success -z-10" />
                         </Match>
                       </Switch>
                     </div>

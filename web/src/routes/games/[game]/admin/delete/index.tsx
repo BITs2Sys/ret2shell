@@ -37,7 +37,7 @@ export default function () {
       <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
         <div class="flex-1 flex flex-col max-w-5xl space-y-2">
           <div class="pt-4 md:p-12 md:pb-4 flex flex-row md:flex-col items-center justify-center">
-            <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-24 md:h-24" />
+            <span class="shrink-0 icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-24 md:h-24" />
             <h1 class="text-center text-lg font-bold text-error ml-4 md:ml-0 md:mt-4">{t("game.delete.title")}</h1>
           </div>
           <Divider class="w-full" />
@@ -52,7 +52,7 @@ export default function () {
           </article>
           <Divider class="w-full" />
           <Input
-            icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+            icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
             extraBtn={
               <Button
                 class="rounded-l-none text-error"
@@ -60,7 +60,7 @@ export default function () {
                 onClick={handleDeleteGame}
                 loading={loading()}
               >
-                <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+                <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
                 <span class="hidden md:inline">{t("general.actions.delete.title")}</span>
               </Button>
             }

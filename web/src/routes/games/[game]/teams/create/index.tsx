@@ -88,7 +88,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
                   title={customDisabled() ? t("team.form.name.customDisabled") : t("team.form.name.label")}
                   placeholder={t("team.form.name.placeholder")}
                   {...props}
@@ -108,14 +108,14 @@ export default function () {
                           setValue(form, "name", name);
                         }}
                       >
-                        <span class="icon-[fluent--diversity-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--diversity-20-regular] w-5 h-5" />
                       </Button>
                       <Popover
                         class="!rounded-l-none"
                         square
                         type="button"
                         disabled={customDisabled()}
-                        btnContent={<span class="icon-[fluent--settings-20-regular] w-5 h-5" />}
+                        btnContent={<span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />}
                       >
                         <Card contentClass="p-2 flex flex-col space-y-2">
                           <Button ghost size="sm" justify="start" type="button" onClick={() => setGenerator("hacker")}>
@@ -152,7 +152,7 @@ export default function () {
             <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength")!)]}>
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
                   title={t("team.form.tag.label")}
                   placeholder={t("team.form.tag.placeholder")}
                   {...props}
@@ -177,9 +177,9 @@ export default function () {
                       <>
                         <Show
                           when={field.value}
-                          fallback={<span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />}
+                          fallback={<span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />}
                         >
-                          <span class="icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
+                          <span class="shrink-0 icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
                         </Show>
                         <span>{t("team.form.acceptRules.label")}</span>
                       </>
@@ -227,7 +227,7 @@ export default function () {
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/join`}>
                   <span>{t("team.join.title")}</span>
-                  <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>
               </Show>
             </div>

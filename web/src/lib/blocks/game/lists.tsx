@@ -87,7 +87,7 @@ export function AuditList() {
                 when={loading()}
                 fallback={
                   <>
-                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                     <span>{t("game.monitor.empty")}</span>
                   </>
                 }
@@ -117,7 +117,7 @@ export function AuditList() {
                   class="hover:underline flex space-x-2 items-center"
                   href={`/games/${gameStore.current?.id}/challenges?challenge=${audit.challenge_id}`}
                 >
-                  <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{audit.challenge_name}</span>
                 </A>
                 <Tag
@@ -147,7 +147,7 @@ export function AuditList() {
                   level="success"
                   onClick={() => handleMisjudged(audit)}
                 >
-                  <span class="icon-[fluent--alert-snooze-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--alert-snooze-20-regular] w-5 h-5" />
                 </Button>
                 <Button
                   size="sm"
@@ -157,7 +157,7 @@ export function AuditList() {
                   level="error"
                   onClick={() => handleConfirmed(audit)}
                 >
-                  <span class="icon-[fluent--emoji-angry-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--emoji-angry-20-regular] w-5 h-5" />
                 </Button>
                 <span>
                   <Switch fallback={audit.created_at.toFormat("MM-dd HH:mm:ss")}>
@@ -224,7 +224,7 @@ export function SubmissionList(props: {
                 when={loading()}
                 fallback={
                   <>
-                    <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                     <span>{t("game.monitor.empty")}</span>
                   </>
                 }
@@ -261,7 +261,7 @@ export function SubmissionList(props: {
                       : `/games/${gameStore.current?.id}/challenges?challenge=${submission.challenge_id}`
                   }
                 >
-                  <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
+                  <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{submission.challenge_name}</span>
                 </A>
                 <Tag level={submission.solved === null ? "info" : submission.solved ? "success" : "warning"}>

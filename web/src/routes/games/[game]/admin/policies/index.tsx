@@ -31,7 +31,7 @@ export function PoliciesEdit(props: {
   return (
     <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+        <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.policies.title")}</span>
       </h3>
       <div class="grid grid-cols-fit-xs max-w-full gap-2">

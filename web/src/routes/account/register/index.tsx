@@ -90,7 +90,7 @@ export default function () {
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--wand-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.nickname.placeholder")}
                     title={t("account.form.nickname.label")}
                     autocomplete="nickname"
@@ -121,7 +121,7 @@ export default function () {
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.account.placeholder")}
                     title={t("account.form.account.label")}
                     autocomplete="username"
@@ -143,7 +143,7 @@ export default function () {
                           }
                         }}
                       >
-                        <span class="icon-[fluent--diversity-20-regular] w-5 h-5" />
+                        <span class="shrink-0 icon-[fluent--diversity-20-regular] w-5 h-5" />
                       </Button>
                     }
                   />
@@ -156,7 +156,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                  icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.email.placeholder")}
                   title={t("account.form.email.label")}
                   autocomplete="email"
@@ -183,7 +183,7 @@ export default function () {
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
+                    icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.password.placeholder")}
                     title={t("account.form.password.label")}
                     autocomplete="new-password"
