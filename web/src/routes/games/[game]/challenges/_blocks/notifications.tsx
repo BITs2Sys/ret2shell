@@ -198,7 +198,7 @@ export default function () {
                     </A>
                     <Show when={isGameAdmin()}>
                       <button
-                        class="shrink-0 flex items-center"
+                        class="shrink-0 flex items-center cursor-pointer hover:text-error"
                         type="button"
                         title={t("general.actions.delete.title")}
                         onClick={() => onDelete(notification.id)}

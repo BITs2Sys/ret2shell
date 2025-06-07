@@ -2,7 +2,7 @@ import LogoAnimate from "@assets/animates/logo-animate";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { mediaPath } from "@lib/utils/media";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { gameStore } from "@storage/game";
+import { gameStore, setGameStore } from "@storage/game";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
 import { type ComponentProps, Show, createEffect, createSignal, untrack } from "solid-js";
@@ -16,12 +16,15 @@ export default function (props: ComponentProps<"div">) {
   createEffect(() => {
     if (gameStore.current && (location.pathname === "/games" || location.pathname === "/games/")) {
       untrack(() => {
-        if (gameStore.visited.has(gameStore.current!.id)) {
+        if (gameStore.visited.find((v) => v === gameStore.current?.id)) {
           navigate(`/games/${gameStore.current?.id}`);
           return;
         }
         setExpanded(true);
-        gameStore.visited.add(gameStore.current!.id);
+        // gameStore.visited.push(gameStore.current!.id);
+        setGameStore({
+          visited: [...gameStore.visited, gameStore.current!.id],
+        });
       });
     }
   });

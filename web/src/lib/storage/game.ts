@@ -17,7 +17,7 @@ export const [gameStore, setGameStore] = createStore({
   score: null as number | null,
   members: [] as User[],
   showTeamCover: false,
-  visited: new Set<number>(),
+  visited: [] as number[],
 });
 
 export type GameStoreType = typeof gameStore;
@@ -194,6 +194,6 @@ export function resetGameStore() {
     score: null,
     members: [],
     showTeamCover: false,
-    visited: new Set<number>(),
+    visited: [],
   });
 }
