@@ -24,6 +24,7 @@ import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
 import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import UserBox from "./user-box";
+
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
@@ -146,7 +147,7 @@ function GameNav(props: { size: "sm" | "md" }) {
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
           <span class="shrink-0 icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
-          <span>{t("general.actions.exit.title")}</span>
+          <span>{t("general.actions.back.title")}</span>
         </Link>
       </li>
     </>

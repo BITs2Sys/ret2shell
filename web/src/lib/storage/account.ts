@@ -5,6 +5,7 @@ import { base64urlnopad } from "@scure/base";
 import { makePersisted } from "@solid-primitives/storage";
 import { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
+import { resetGameStore } from "./game";
 
 export const [accountStore, setAccountStore] = makePersisted(
   createStore({
@@ -51,6 +52,7 @@ export async function refreshUser() {
   } catch (e) {
     if (e instanceof HTTPError && e.response.status >= 400 && e.response.status < 500) {
       resetUser();
+      resetGameStore();
     }
   }
 }

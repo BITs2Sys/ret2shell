@@ -1,6 +1,7 @@
 import { luxonReplacer, luxonReviver } from "@models/utils";
 import { base64 } from "@scure/base";
 import { accountStore, resetUser, storeToken } from "@storage/account";
+import { resetGameStore } from "@storage/game";
 import { platformStore } from "@storage/platform";
 import ky from "ky";
 
@@ -45,6 +46,7 @@ const api = ky.extend({
       (_request, _options, response) => {
         if (response.status === 401) {
           resetUser();
+          resetGameStore();
         }
         if (response.headers.has("Set-Token")) {
           const token = response.headers.get("Set-Token");

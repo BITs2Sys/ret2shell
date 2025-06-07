@@ -4,6 +4,7 @@ import Captcha from "@blocks/captcha";
 import { createForm, minLength, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, resetUser } from "@storage/account";
+import { resetGameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -30,6 +31,7 @@ export default function () {
     try {
       await deleteSelf(result);
       resetUser();
+      resetGameStore();
       navigate("/");
     } catch (err) {
       handleHttpError(err as Error, t("account.delete.errors.delete.title")!);

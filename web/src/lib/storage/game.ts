@@ -17,6 +17,7 @@ export const [gameStore, setGameStore] = createStore({
   score: null as number | null,
   members: [] as User[],
   showTeamCover: false,
+  visited: new Set<number>(),
 });
 
 export type GameStoreType = typeof gameStore;
@@ -181,4 +182,18 @@ export function currentTimelinePeriod() {
       return period;
     }
   }
+}
+
+export function resetGameStore() {
+  setGameStore({
+    games: [],
+    current: null,
+    preload: null,
+    team: null,
+    rank: null,
+    score: null,
+    members: [],
+    showTeamCover: false,
+    visited: new Set<number>(),
+  });
 }

@@ -15,7 +15,14 @@ export default function (props: ComponentProps<"div">) {
   _preloadImage.src = bgGameDefault;
   createEffect(() => {
     if (gameStore.current && (location.pathname === "/games" || location.pathname === "/games/")) {
-      setExpanded(true);
+      untrack(() => {
+        if (gameStore.visited.has(gameStore.current!.id)) {
+          navigate(`/games/${gameStore.current?.id}`);
+          return;
+        }
+        setExpanded(true);
+        gameStore.visited.add(gameStore.current!.id);
+      });
     }
   });
   let cachedId = 0;
