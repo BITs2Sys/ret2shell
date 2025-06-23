@@ -20,7 +20,7 @@ export const [themeStore, setThemeStore] = makePersisted(
     theme: "cyber",
     locale: systemPrefersLocale,
     colorScheme: "dark",
-    colorSchemeFollowsSystem: true,
+    colorSchemeFollowsSystem: false,
     showBackgroundImg: true,
   }),
   { name: "theme" }
