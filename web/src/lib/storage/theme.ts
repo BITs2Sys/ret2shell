@@ -30,8 +30,10 @@ export function setTheme(theme: string) {
   setThemeStore({ theme });
 }
 
-export function setColorScheme(colorScheme: "dark" | "light") {
-  setThemeStore({ colorScheme });
+export function setColorScheme(_colorScheme: "dark" | "light") {
+  // always be dark
+  // setThemeStore({ colorScheme });
+  setThemeStore({ colorScheme: "dark" });
 }
 
 export function setLocale(locale: Locale) {
@@ -48,6 +50,7 @@ export function fullTheme() {
 }
 
 export function initTheme() {
+  setColorScheme("dark");
   createEffect(() => {
     document.documentElement.setAttribute("data-theme", fullTheme());
     document.documentElement.setAttribute("data-style", themeStore.colorScheme);
