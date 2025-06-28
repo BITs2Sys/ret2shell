@@ -603,27 +603,20 @@ async fn get_self_instances(
     }
 
     let traffic_script = traffic_script.clone().unwrap();
+    let env_name = env
+      .metadata
+      .name
+      .clone()
+      .ok_or(ResponseError::PreconditionFailed(
+        "the env has no name".to_string(),
+      ))?;
 
-    let service = match cluster
-      .at(CHALLENGE_NS)
-      .get_service(
-        &env
-          .metadata
-          .name
-          .clone()
-          .ok_or(ResponseError::PreconditionFailed(
-            "the env has no name".to_string(),
-          ))?,
-      )
-      .await
-    {
+    let service = match cluster.at(CHALLENGE_NS).get_service(&env_name).await {
       Ok(service) => service,
       Err(ClusterError::KubeError(e)) => {
         warn!(
-          "service not found for env {} in game {}:{}, maybe not initialized? original error is {e:?}",
-          env.metadata.name.clone().unwrap_or_default(),
-          game.id,
-          game.name
+          "service not found for env {env_name} in game {}:{}, maybe not initialized? original error is {e:?}",
+          game.id, game.name
         );
         result.push(i);
         continue;
@@ -635,7 +628,20 @@ async fn get_self_instances(
     traffic_mapper
       .preload(&traffic_key, &traffic_script)
       .await?;
-    let exposed_ports = traffic_mapper.expose(&traffic_key, env, service).await?;
+    let exposed_ports = match traffic_mapper.expose(&traffic_key, env, service).await {
+      Ok(ports) => ports,
+      Err(ClusterError::MissingField(e)) => {
+        warn!(
+          "traffic mapper missing field '{e}' for env {env_name}, maybe the cluster is maintaining?",
+        );
+        result.push(i);
+        continue;
+      }
+      Err(e) => {
+        error!("failed to expose traffic for env {env_name}: {e:?}");
+        return Err(e.into());
+      }
+    };
     cache
       .at("traffic")
       .set_ex(&traffic_id, &exposed_ports, 3600)
