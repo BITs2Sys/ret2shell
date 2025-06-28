@@ -106,7 +106,7 @@ impl OAuth {
   ) -> Result<HashMap<String, String>, OAuthError> {
     let contexts = self.contexts.read().await;
     let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
-      OAuthError::MissingField(format!("oauth provider not found for key: {}", key))
+      OAuthError::MissingField(format!("oauth provider not found for key: {key}"))
     })?;
     let vm = Vm::new(runtime.clone(), unit.clone());
     let params_object = RuneMap(params.clone());
@@ -134,7 +134,7 @@ impl OAuth {
   ) -> Result<HashMap<String, String>, OAuthError> {
     let contexts = self.contexts.read().await;
     let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
-      OAuthError::MissingField(format!("oauth provider not found for key: {}", key))
+      OAuthError::MissingField(format!("oauth provider not found for key: {key}"))
     })?;
     let vm = Vm::new(runtime.clone(), unit.clone());
     let params_object = RuneMap(params.clone());

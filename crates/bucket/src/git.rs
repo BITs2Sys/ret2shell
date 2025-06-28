@@ -416,7 +416,8 @@ impl Git {
   ) -> Result<ChildStdout, BucketError>
   where
     T: IntoIterator<Item = S>,
-    S: AsRef<OsStr>, {
+    S: AsRef<OsStr>,
+  {
     let mut cmd = Command::new("git");
     cmd
       .stdin(Stdio::piped())

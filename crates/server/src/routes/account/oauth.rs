@@ -210,7 +210,7 @@ async fn login_with_oauth_account(
     }
   };
   info!(
-    "User logged in via oauth {provider_str}: {}:'{}' ({}) <{}>",
+    "User logged in via oauth {provider_str}: {}:{} ({}) <{}>",
     user.id,
     user.account,
     user.nickname,
@@ -494,7 +494,7 @@ async fn unbind_oauth_account(
         return Err(ResponseError::Forbidden(
           "you can not unbind oauth account before game archived".to_owned(),
           format!(
-            "user {}:'{}' ({}) want to unbind oauth account {}:'{}' before game {}:'{}' archived",
+            "user {}:{} ({}) want to unbind oauth account {}:{} before game {}:{} archived",
             token.id,
             token.account,
             token.nickname,
@@ -511,7 +511,7 @@ async fn unbind_oauth_account(
     return Err(ResponseError::Forbidden(
       "you can only unbind your own oauth account".to_owned(),
       format!(
-        "user {}:'{}' ({}) want to unbind oauth account {}:'{}' which is not belong to him",
+        "user {}:{} ({}) want to unbind oauth account {}:{} which is not belong to him",
         token.id, token.account, token.nickname, oauth_item.provider, oauth_item.auth_key
       ),
     ));

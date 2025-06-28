@@ -174,7 +174,7 @@ async fn platform_stream_logs(
   Query(req): Query<LogRequest>, ws: WebSocketUpgrade,
 ) -> Result<impl IntoResponse, ResponseError> {
   // info!(
-  //     "user {}:'{}' ({}) requested to stream platform logs.",
+  //     "user {}:{} ({}) requested to stream platform logs.",
   //     token.id, token.account, token.nickname
   // );
   let valid = cache.at("token").exists(&req.token).await?;
@@ -189,10 +189,7 @@ async fn platform_stream_logs(
   {
     return Err(ResponseError::Forbidden(
       "permission denied".to_owned(),
-      format!(
-        "somebody try to access platform logs with bad token {:?}.",
-        token
-      ),
+      format!("somebody try to access platform logs with bad token {token:?}."),
     ));
   }
   let resp = ws.on_upgrade(|ws| stream_logs_worker(ws, config));

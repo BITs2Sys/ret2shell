@@ -103,7 +103,7 @@ async fn player_get_chat_session(
     ResponseError::Forbidden(
       "team not found".into(),
       format!(
-        "user {}:'{}' ({}) want to access chat session without participate game",
+        "user {}:{} ({}) want to access chat session without participate game",
         token.id, token.account, token.nickname
       ),
     )
@@ -144,7 +144,7 @@ async fn player_send_chat(
     return Err(ResponseError::TooManyRequests(
       "please wait for administrator's reply".into(),
       format!(
-        "user {}:'{}' ({}) try to send multiple chats to challenge {}:{} in game {}:{}",
+        "user {}:{} ({}) try to send multiple chats to challenge {}:{} in game {}:{}",
         token.id, token.account, token.nickname, challenge.id, challenge.name, game.id, game.name
       ),
     ));

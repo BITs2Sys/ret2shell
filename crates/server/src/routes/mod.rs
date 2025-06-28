@@ -144,7 +144,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
       .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
         (
           StatusCode::INTERNAL_SERVER_ERROR,
-          format!("unhandled error: {}", err),
+          format!("unhandled error: {err}"),
         )
       }))
       .layer(BufferLayer::new(1024)),

@@ -10,6 +10,7 @@ use r2s_database::game;
 use r2s_event::EventManager;
 use r2s_migrator::Database;
 use serde::Deserialize;
+use tracing::info;
 
 use crate::traits::{GlobalState, ResponseError};
 
@@ -37,6 +38,12 @@ async fn connect_game(
   let game = game::get(&db.conn, game_id).await?;
   if let Some(game) = game {
     if game.token.is_some_and(|t| t == token) {
+      info!(
+        "game event pusher connection established for game {} by {} ({})",
+        game_id,
+        ip,
+        client.as_deref().unwrap_or("Unspecified v0.0.0")
+      );
       return Ok(ws.on_upgrade(move |ws| async move {
         event
           .subscribe(
@@ -51,9 +58,6 @@ async fn connect_game(
   }
   Err(ResponseError::Forbidden(
     "permission denied".to_owned(),
-    format!(
-      "event api was called with invalid token for game {}",
-      game_id
-    ),
+    format!("event api was called with invalid token for game {game_id}"),
   ))
 }

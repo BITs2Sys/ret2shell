@@ -82,7 +82,7 @@ mod tests {
     for m in matches {
       matches_vec.push(m);
     }
-    println!("{:?}", matches_vec);
+    println!("{matches_vec:?}");
   }
 
   #[test]

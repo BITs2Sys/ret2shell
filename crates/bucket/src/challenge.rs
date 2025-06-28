@@ -394,7 +394,7 @@ impl ChallengeBucket {
       .as_ref()
       .iter()
       .fold(String::new(), |mut acc, b| {
-        acc.push_str(&format!("{:02x}", b));
+        acc.push_str(&format!("{b:02x}"));
         acc
       })
     // .map(|b| format!("{:02x}", b))

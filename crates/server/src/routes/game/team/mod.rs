@@ -353,7 +353,7 @@ async fn create_team(
   .await?;
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
-    "team created: {}:'{}' by {}:'{}' ({}) in game {}:'{}'",
+    "team created: {}:{} by user {}:{} ({}) in game {}:{}",
     team.id, team.name, token.id, token.account, token.nickname, game.id, game.name
   );
   Ok(Json(team))
@@ -416,7 +416,7 @@ async fn join_team(
   }
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
-    "{}:'{}' ({}) joined team {}:'{}' in game {}:'{}'",
+    "user {}:{} ({}) joined team {}:{} in game {}:{}",
     token.id, token.account, token.nickname, team.id, team.name, game.id, game.name
   );
   Ok(Json(team))

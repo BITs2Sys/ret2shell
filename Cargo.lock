@@ -325,9 +325,9 @@ dependencies = [
 
 [[package]]
 name = "avif-serialize"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98922d6a4cfbcb08820c69d8eeccc05bb1f29bfa06b4f5b1dbfe9a868bd7608e"
+checksum = "19135c0c7a60bfee564dbe44ab5ce0557c6bf3884e5291a50be76a15640c4fbd"
 dependencies = [
  "arrayvec",
 ]
@@ -661,9 +661,9 @@ checksum = "56ed6191a7e78c36abdb16ab65341eefd73d64d303fffccdbb00d51e4205967b"
 
 [[package]]
 name = "bumpalo"
-version = "3.18.1"
+version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db76d6187cd04dff33004d8e6c9cc4e05cd330500379d2394209271b4aeee"
+checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "bytecheck"
@@ -1040,9 +1040,9 @@ checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "crunchy"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43da5946c66ffcc7745f48db692ffbb10a83bfe0afd96235c5c2a4fb23994929"
+checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
 
 [[package]]
 name = "crypto-common"
@@ -2306,9 +2306,9 @@ checksum = "d0263a3d970d5c054ed9312c0057b4f3bde9c0b33836d3637361d4a9e6e7a408"
 
 [[package]]
 name = "indexmap"
-version = "2.9.0"
+version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e"
+checksum = "fe4cd85333e22411419a0bcae1297d25e58c9443848b11dc6a86fefe8c78a661"
 dependencies = [
  "equivalent",
  "hashbrown 0.15.4",
@@ -3631,7 +3631,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 
 [[package]]
 name = "r2s-auditor"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "aho-corasick",
  "r2s-config",
@@ -3642,7 +3642,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-bucket"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "chrono",
  "deunicode",
@@ -3661,7 +3661,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cache"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "fred",
  "r2s-config",
@@ -3673,7 +3673,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-captcha"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "async-trait",
  "biosvg",
@@ -3689,7 +3689,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-checker"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "chrono",
  "r2s-bucket",
@@ -3705,7 +3705,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cluster"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "axum",
  "chrono",
@@ -3729,7 +3729,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-config"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "sea-orm",
  "serde",
@@ -3740,7 +3740,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-database"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "chrono",
  "num-derive",
@@ -3756,7 +3756,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-email"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "async-nats",
  "futures",
@@ -3771,7 +3771,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-event"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "async-nats",
  "axum",
@@ -3787,7 +3787,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-license"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "chrono",
  "clap",
@@ -3799,7 +3799,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-media"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "hex",
  "image",
@@ -3816,7 +3816,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-migrator"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "r2s-config",
  "sea-orm",
@@ -3828,7 +3828,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-oauth"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3846,7 +3846,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-queue"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "async-nats",
  "r2s-config",
@@ -3858,7 +3858,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-server"
-version = "3.8.0"
+version = "3.8.1"
 dependencies = [
  "anyhow",
  "argon2",
@@ -4194,9 +4194,9 @@ checksum = "95325155c684b1c89f7765e30bc1c42e4a6da51ca513615660cb8a62ef9a88e3"
 
 [[package]]
 name = "ret2script"
-version = "1.8.1"
+version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7244b10a03e46b31d919590cea140f51534cb25dbfe2f85bb78fcbe0d38c1f9"
+checksum = "8a2b084782d2beae997d969674c95ecd6d4e898d91a22fb3a460b7aa4e262a8e"
 dependencies = [
  "aes",
  "async-trait",
@@ -5876,11 +5876,10 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tryhard"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c9f0a709784e86923586cff0d872dba54cd2d2e116b3bc57587d15737cfce9d"
+checksum = "9fe58ebd5edd976e0fe0f8a14d2a04b7c81ef153ea9a54eebc42e67c2c23b4e5"
 dependencies = [
- "futures",
  "pin-project-lite",
  "tokio",
 ]
@@ -6626,9 +6625,9 @@ checksum = "ea2f10b9bb0928dfb1b42b65e1f9e36f7f54dbdf08457afefb38afcdec4fa2bb"
 
 [[package]]
 name = "wsrx"
-version = "0.5.3"
+version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35b2eb2a13389a81eec2533fd69e4330b8cf59eae03a220df340b5c1b92d506d"
+checksum = "50618989ae78d8c8325b07fc2f496c11a73bd39b97c87e7664f7e0ec9ac3371e"
 dependencies = [
  "axum",
  "futures-util",

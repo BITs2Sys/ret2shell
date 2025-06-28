@@ -163,7 +163,7 @@ impl TrafficMapper {
     let contexts = self.contexts.read().await;
     debug!("Exposing traffic mapper for pod: {pod:?}, service: {service:?}");
     let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
-      ClusterError::MissingField(format!("traffic mapper not found for key: {}", key))
+      ClusterError::MissingField(format!("traffic mapper not found for key: {key}"))
     })?;
     let vm = Vm::new(runtime.clone(), unit.clone());
     let service_info = RuneServiceInfo::try_from_service(&service, &pod)?;

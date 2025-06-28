@@ -76,8 +76,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
               running: Some(running as i64),
               pending: Some(pending as i64),
               message: Some(format!(
-                "Cluster is overloaded: running={}, pending={}",
-                running, pending
+                "Cluster is overloaded: running={running}, pending={pending}"
               )),
             })),
           };
@@ -94,8 +93,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
               running: Some(running as i64),
               pending: Some(pending as i64),
               message: Some(format!(
-                "Cluster is recovered: running={}, pending={}",
-                running, pending
+                "Cluster is recovered: running={running}, pending={pending}"
               )),
             })),
           };
@@ -135,9 +133,13 @@ struct NodeSelector {
 
 async fn update_default_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(config): Extension<config::Model>,
+  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
   Json(NodeSelector { node_selector }): Json<NodeSelector>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  info!(
+    "default node selector updated to {node_selector} by user {}:{} ({})",
+    token.id, token.account, token.nickname
+  );
   config::update(
     &db.conn,
     config::Model {
@@ -156,7 +158,7 @@ async fn update_default_node_selector(
 
 async fn delete_default_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(config): Extension<config::Model>,
+  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
   config::update(
     &db.conn,
@@ -170,6 +172,11 @@ async fn delete_default_node_selector(
   )
   .await?;
   cache.at("platform").del("config").await?;
+  info!(
+    "default node selector deleted by user {}:{} ({})",
+    token.id, token.account, token.nickname
+  );
+
   Ok(())
 }
 
@@ -185,7 +192,8 @@ struct TrafficScriptResponse {
 
 async fn update_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>, Json(req): Json<TrafficScriptRequest>,
+  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
+  Json(req): Json<TrafficScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -216,12 +224,16 @@ async fn update_traffic_script(
   .await?;
   traffic_mapper.expire("default").await;
   cache.at("platform").del("config").await?;
+  info!(
+    "default traffic script updated by user {}:{} ({})",
+    token.id, token.account, token.nickname
+  );
   Ok(Json(TrafficScriptResponse { lint }))
 }
 
 async fn delete_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>,
+  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -240,5 +252,11 @@ async fn delete_traffic_script(
   .await?;
   traffic_mapper.expire("default").await;
   cache.at("platform").del("config").await?;
+
+  info!(
+    "default traffic script deleted by user {}:{} ({})",
+    token.id, token.account, token.nickname
+  );
+
   Ok(())
 }

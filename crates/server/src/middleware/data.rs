@@ -153,7 +153,7 @@ macro_rules! extract_team {
           return Err(crate::traits::ResponseError::Forbidden(
             "you are banned in this game".to_owned(),
             format!(
-              "user {}:'{}' ({}) with banned team {}:'{}' want to access in-progress game {}:'{}'",
+              "user {}:{} ({}) with banned team {}:{} want to access in-progress game {}:{}",
               $token.id, $token.account, $token.nickname, team.id, team.name, $game.id, $game.name
             ),
           ));
@@ -161,7 +161,7 @@ macro_rules! extract_team {
           return Err(crate::traits::ResponseError::Forbidden(
             "your team is pending, please contact admin".to_owned(),
             format!(
-              "user {}:'{}' ({}) with pending team {}:'{}' want to access in-progress game {}:'{}'",
+              "user {}:{} ({}) with pending team {}:{} want to access in-progress game {}:{}",
               $token.id, $token.account, $token.nickname, team.id, team.name, $game.id, $game.name
             ),
           ));
@@ -171,7 +171,7 @@ macro_rules! extract_team {
         return Err(crate::traits::ResponseError::Forbidden(
           "please take part in first".to_owned(),
           format!(
-            "user {}:'{}' ({}) wants to access in-progress game {}:'{}' without take part in it",
+            "user {}:{} ({}) wants to access in-progress game {}:{} without take part in it",
             $token.id, $token.account, $token.nickname, $game.id, $game.name
           ),
         ));

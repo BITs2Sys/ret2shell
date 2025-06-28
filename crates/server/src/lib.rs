@@ -224,7 +224,7 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
           event_type: DevopsEventType::ServerPanic,
           running: None,
           pending: None,
-          message: Some(format!("Panic at: {}", panic)),
+          message: Some(format!("Panic at: {panic}")),
         })),
       };
       let queue = queue.clone();

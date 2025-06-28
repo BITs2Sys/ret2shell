@@ -53,14 +53,14 @@ async fn proxy_to_frontend_server(
     .path_and_query()
     .map(|pq| pq.as_str())
     .unwrap_or(path);
-  let uri = format!("{}{}", frontend_path, path_query);
+  let uri = format!("{frontend_path}{path_query}");
   *req.uri_mut() = Uri::try_from(uri).unwrap();
   req.headers_mut().remove("host");
 
   let resp = client
     .request(req)
     .await
-    .map_err(|err| ResponseError::BadRequest(format!("frontend proxy failed: {}", err)))?
+    .map_err(|err| ResponseError::BadRequest(format!("frontend proxy failed: {err}")))?
     .into_response();
   debug!("Proxying frontend request: {:?}", resp);
   Ok(resp)

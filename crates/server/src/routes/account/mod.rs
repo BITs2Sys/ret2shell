@@ -337,7 +337,7 @@ async fn login(
     return Err(ResponseError::Forbidden(
       "account is banned".to_owned(),
       format!(
-        "user {}:'{}' ({}) is banned",
+        "user {}:{} ({}) is banned",
         user.id, user.account, user.nickname
       ),
     ));
@@ -348,7 +348,7 @@ async fn login(
   match verify_password(&body.password, &password_hash)? {
     true => {
       info!(
-        "User logged in: {}:'{}' ({}) <{}>",
+        "User logged in: {}:{} ({}) <{}>",
         user.id,
         user.account,
         user.nickname,
@@ -543,9 +543,10 @@ async fn register(
   .await
   .ok();
   info!(
-    "User registered: {} ({}) <{}>",
-    user.nickname,
+    "User registered: {}:{} ({}) <{}>",
+    user.id,
     user.account,
+    user.nickname,
     user.email.unwrap_or_default()
   );
   *(token_tracker.token.lock().await) = Token {
@@ -584,7 +585,8 @@ async fn verify_email(
   user::update(&db.conn, user.clone()).await?;
 
   info!(
-    "User verified: {} ({}) <{}>",
+    "User verified: {}:{} ({}) <{}>",
+    user.id,
     user.account,
     user.nickname,
     user.email.unwrap_or_default()
@@ -759,7 +761,10 @@ async fn change_password(
     }
     false => Err(ResponseError::Forbidden(
       "old password is wrong".to_owned(),
-      format!("user {} password is wrong", user.id),
+      format!(
+        "user {}:{} ({}) password is wrong",
+        user.id, user.account, user.nickname
+      ),
     )),
   }
 }
@@ -880,7 +885,7 @@ async fn delete_self(
     return Err(ResponseError::Forbidden(
       "you are the only user, can't delete yourself".to_owned(),
       format!(
-        "user {}:'{}' ({}) want to delete itself but no user left.",
+        "user {}:{} ({}) want to delete itself but no user left.",
         user.id, user.account, user.nickname
       ),
     ));
@@ -896,7 +901,7 @@ async fn delete_self(
       return Err(ResponseError::Forbidden(
         "you can not delete account before game archived".to_owned(),
         format!(
-          "user {}:'{}' ({}) want to delete itself before game {}:'{}' archived",
+          "user {}:{} ({}) want to delete itself before game {}:{} archived",
           user.id, user.account, user.nickname, game.id, game.name
         ),
       ));

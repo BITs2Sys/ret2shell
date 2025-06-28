@@ -257,7 +257,7 @@ async fn submission_worker_exec(
         .bucket
         .clone()
         .ok_or(ResponseError::PreconditionFailed(format!(
-          "game {}:'{}' does not have a valid bucket",
+          "game {}:{} does not have a valid bucket",
           game.id, game.name
         )))?,
     )
@@ -267,7 +267,7 @@ async fn submission_worker_exec(
         .bucket
         .clone()
         .ok_or(ResponseError::PreconditionFailed(format!(
-          "challenge {}:'{}' in game {}:'{}' does not have a valid bucket",
+          "challenge {}:{} in game {}:{} does not have a valid bucket",
           challenge.id, challenge.name, game.id, game.name
         )))?,
     )
@@ -299,7 +299,7 @@ async fn submission_worker_exec(
   // stage 3: update team score and create extra or audit if necessary
   if submission.solved.unwrap_or(false) {
     info!(
-      "Submission {}:'{:?}' by {}:'{}' ({}) for challenge {}:{} in game {}:{} is correct",
+      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is correct",
       submission.id,
       submission.content,
       user.id,
@@ -379,7 +379,7 @@ async fn submission_worker_exec(
     }
   } else {
     info!(
-      "Submission {}:'{:?}' by {}:'{}' ({}) for challenge {}:{} in game {}:{} is incorrect",
+      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is incorrect",
       submission.id,
       submission.content,
       user.id,

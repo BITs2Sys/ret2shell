@@ -48,7 +48,7 @@ async fn main() {
           .red()
           .bold()
       );
-      eprintln!("Version: {}", R2S_VERSION);
+      eprintln!("Version: {R2S_VERSION}");
       eprintln!("{}: {e}", "Failed to load server config".red().bold());
       eprintln!("Please check your configuration file and try again.");
       eprintln!(
@@ -73,7 +73,7 @@ async fn main() {
           .red()
           .bold()
       );
-      eprintln!("Version: {}", R2S_VERSION);
+      eprintln!("Version: {R2S_VERSION}");
       eprintln!("{}: {e}", "Failed to start server".red().bold());
       eprintln!("Please check your configuration file and try again.");
       eprintln!(

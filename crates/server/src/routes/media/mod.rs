@@ -95,7 +95,7 @@ async fn upload_media(
     return Err(ResponseError::TooManyRequests(
       "too many uploads".to_owned(),
       format!(
-        "User {}:'{}' ({}) has reached the upload limit",
+        "User {}:{} ({}) has reached the upload limit",
         token.id, token.account, token.nickname
       ),
     ));

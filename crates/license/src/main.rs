@@ -8,10 +8,10 @@ use ring::{
 fn generate_keypair(output_path: &str) {
   let rng = rand::SystemRandom::new();
   let pks8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
-  std::fs::write(format!("{}/priv.bin", output_path), pks8_bytes.as_ref()).unwrap();
+  std::fs::write(format!("{output_path}/priv.bin"), pks8_bytes.as_ref()).unwrap();
   let keypair = signature::Ed25519KeyPair::from_pkcs8(pks8_bytes.as_ref()).unwrap();
   std::fs::write(
-    format!("{}/pub.bin", output_path),
+    format!("{output_path}/pub.bin"),
     keypair.public_key().as_ref(),
   )
   .unwrap();
@@ -30,7 +30,7 @@ fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &st
   let cert = serde_json::to_string(&cert).unwrap();
   let sig = ca_keypair.sign(cert.as_bytes());
   let cert = format!("{}\n{}", encode(cert.as_bytes()), encode(sig.as_ref()));
-  std::fs::write(format!("{}/license", path), cert).unwrap();
+  std::fs::write(format!("{path}/license"), cert).unwrap();
 }
 
 /// Clap arg definition.

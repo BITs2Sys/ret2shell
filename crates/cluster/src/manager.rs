@@ -712,8 +712,7 @@ impl Cluster {
       })
     }) {
       return Err(ClusterError::TrafficMapperNotFound(format!(
-        "port: {}",
-        port
+        "port: {port}"
       )));
     }
     let client = check_enabled!(self.client)?;

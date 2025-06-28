@@ -75,8 +75,8 @@ impl Registry {
     let mut orgs: HashMap<String, Vec<String>> = HashMap::new();
     loop {
       let res = match last {
-        ref s if s.is_empty() => reqwest::get(&format!("{}/_catalog?n=1000", api_base)).await?,
-        ref s => reqwest::get(&format!("{}/_catalog?n=1000&last={}", api_base, s)).await?,
+        ref s if s.is_empty() => reqwest::get(&format!("{api_base}/_catalog?n=1000")).await?,
+        ref s => reqwest::get(&format!("{api_base}/_catalog?n=1000&last={s}")).await?,
       };
       let body: Repository = res.json().await?;
       let repositories = body.repositories;

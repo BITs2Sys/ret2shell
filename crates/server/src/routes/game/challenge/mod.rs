@@ -139,7 +139,7 @@ macro_rules! get_challenge_bucket {
         $game
           .bucket
           .ok_or(ResponseError::PreconditionFailed(format!(
-            "game {}:'{}' does not have a valid bucket",
+            "game {}:{} does not have a valid bucket",
             $game.id, $game.name
           )))?,
       )
@@ -148,7 +148,7 @@ macro_rules! get_challenge_bucket {
         $challenge
           .bucket
           .ok_or(ResponseError::PreconditionFailed(format!(
-            "challenge {}:'{}' in game {}:'{}' does not have a valid bucket",
+            "challenge {}:{} in game {}:{} does not have a valid bucket",
             $challenge.id, $challenge.name, $game.id, $game.name
           )))?,
       )
@@ -163,7 +163,7 @@ macro_rules! get_challenge_bucket_mut {
         $game
           .bucket
           .ok_or(ResponseError::PreconditionFailed(format!(
-            "game {}:'{}' does not have a valid bucket",
+            "game {}:{} does not have a valid bucket",
             $game.id, $game.name
           )))?,
       )
@@ -174,7 +174,7 @@ macro_rules! get_challenge_bucket_mut {
           .bucket
           .clone()
           .ok_or(ResponseError::PreconditionFailed(format!(
-            "challenge {}:'{}' in game {}:'{}' does not have a valid bucket",
+            "challenge {}:{} in game {}:{} does not have a valid bucket",
             $challenge.id, $challenge.name, $game.id, $game.name
           )))?,
       )
@@ -271,7 +271,7 @@ async fn create_challenge(
       game
         .bucket
         .ok_or(ResponseError::PreconditionFailed(format!(
-          "game {}:'{}' does not have a valid bucket",
+          "game {}:{} does not have a valid bucket",
           game.id, game.name
         )))?,
     )
@@ -342,7 +342,7 @@ async fn update_challenge(
       challenge::maintain_score(&txn, challenge.clone()).await?;
     if actually_changed {
       info!(
-        "challenge {}:'{}' score changed from {} to {} by user {}:'{}' ({}), will trigger scoreboard update",
+        "challenge {}:{} score changed from {} to {} by user {}:{} ({}), will trigger scoreboard update",
         challenge.id,
         challenge.name,
         prev_challenge.score,
@@ -401,7 +401,7 @@ async fn up_challenge(
   checker.lint(&challenge_bucket).await?;
   txn.commit().await?;
   info!(
-    "challenge {}:'{}' is maken public (up) by user {}:'{}' ({})",
+    "challenge {}:{} is maken public (up) by user {}:{} ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
 
@@ -438,7 +438,7 @@ async fn down_challenge(
   .await?;
   txn.commit().await?;
   info!(
-    "challenge {}:'{}' is maken invisible (down) by user {}:'{}' ({})",
+    "challenge {}:{} is maken invisible (down) by user {}:{} ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   cache.at("challenge").del(challenge.id).await.ok();
@@ -472,7 +472,7 @@ async fn delete_challenge(
       game
         .bucket
         .ok_or(ResponseError::PreconditionFailed(format!(
-          "game {}:'{}' does not have a valid bucket",
+          "game {}:{} does not have a valid bucket",
           game.id, game.name
         )))?,
     )
@@ -483,7 +483,7 @@ async fn delete_challenge(
         .bucket
         .clone()
         .ok_or(ResponseError::PreconditionFailed(format!(
-          "challenge {}:'{}' in game {}:'{}' does not have a valid bucket",
+          "challenge {}:{} in game {}:{} does not have a valid bucket",
           game.id, game.name, challenge.id, challenge.name
         )))?,
     )
@@ -609,7 +609,7 @@ async fn submit_flag(
     let limit: Option<i32> = cache.at("submission").get(token.id).await?;
     if limit.is_some_and(|v| v > 10) {
       warn!(
-        "user {}:'{}' ({}) submission frequency limit exceeded",
+        "user {}:{} ({}) submission frequency limit exceeded",
         token.id, token.account, token.nickname
       );
       let event = EventContainer {
@@ -634,7 +634,7 @@ async fn submit_flag(
       return Err(ResponseError::TooManyRequests(
         "too many submissions, please calmdown and try again 5 miniutes later".to_owned(),
         format!(
-          "user {}:'{}' ({}) submission frequency limit exceeded",
+          "user {}:{} ({}) submission frequency limit exceeded",
           token.id, token.account, token.nickname
         ),
       ));
@@ -682,7 +682,7 @@ async fn get_player_attachment(
     return Err(ResponseError::Forbidden(
       "permission denied".to_owned(),
       format!(
-        "user {}:'{}' ({}) want to access checker files",
+        "user {}:{} ({}) want to access checker files",
         token.id, token.account, token.nickname
       ),
     ));
@@ -803,6 +803,10 @@ async fn upload_challenge_attachment(
       format!("{}@private.ret.sh.cn", token.account),
     )
     .await?;
+  info!(
+    "user {}:{} ({}) uploaded files for challenge {}:{}",
+    token.id, token.account, token.nickname, challenge.id, challenge.name
+  );
   Ok(())
 }
 
@@ -948,6 +952,10 @@ async fn unlock_hint(
     )
     .await?;
     txn.commit().await?;
+    info!(
+      "team {}:{} unlocked hint {} for challenge {}:{} (cost: {})",
+      team.id, team.name, hint.id, challenge.id, challenge.name, hint.cost
+    );
     tokio::spawn(async move {
       worker::update_team_state(&db, team).await.ok();
     });
@@ -979,7 +987,7 @@ async fn create_challenge_hint(
   )
   .await?;
   info!(
-    "new hint {} for challenge {}:'{}' by user {}:'{}' ({})",
+    "new hint {} for challenge {}:{} by user {}:{} ({})",
     hint.id, challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   let event = EventContainer {
@@ -1146,12 +1154,12 @@ async fn start_challenge_instance(
     if team.is_some() {
       let team = team.clone().unwrap();
       info!(
-        "starting challenge env {}:'{}' for user {}:'{}' ({}) in team {}:'{}'",
+        "starting challenge env {}:{} for user {}:{} ({}) in team {}:{}",
         challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
       );
     } else {
       info!(
-        "starting challenge env {}:'{}' for user {}:'{}' ({})",
+        "starting challenge env {}:{} for user {}:{} ({})",
         challenge.id, challenge.name, token.id, token.account, token.nickname
       );
     }
@@ -1261,7 +1269,7 @@ async fn delay_challenge_instance(
 
   let count = if let Some(team) = team {
     info!(
-      "delaying challenge env {}:'{}' for user {}:'{}' ({}) in team {}:'{}'",
+      "delaying challenge env {}:{} for user {}:{} ({}) in team {}:{}",
       challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
     );
     cluster
@@ -1276,7 +1284,7 @@ async fn delay_challenge_instance(
   }
 
   info!(
-    "delaying challenge env {} :'{}' for user {}:'{}' ({})",
+    "delaying challenge env {}:{} for user {}:{} ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   cluster
@@ -1295,7 +1303,7 @@ async fn stop_challenge_instance(
 
   let count = if let Some(team) = team {
     info!(
-      "stop challenge env {}:'{}' for user {}:'{}' ({}) in team {}:'{}'",
+      "stop challenge env {}:{} for user {}:{} ({}) in team {}:{}",
       challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
     );
     cluster
@@ -1310,7 +1318,7 @@ async fn stop_challenge_instance(
   }
 
   info!(
-    "stop challenge env {} :'{}' for user {}:'{}' ({})",
+    "stop challenge env {}:{} for user {}:{} ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   cluster
@@ -1526,7 +1534,7 @@ async fn get_answer(
         }
       ),
       format!(
-        "user {}:'{}' ({}) want to get the answer for challenge {}:'{}'",
+        "user {}:{} ({}) want to get the answer for challenge {}:'{}'",
         token.id, token.account, token.nickname, challenge.id, challenge.name
       ),
     ));

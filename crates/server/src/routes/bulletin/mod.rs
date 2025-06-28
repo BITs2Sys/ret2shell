@@ -8,6 +8,7 @@ use axum::{
 use r2s_database::{article, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
   middleware::auth::{self, Token},
@@ -73,6 +74,10 @@ async fn create_bulletin(
     },
   )
   .await?;
+  info!(
+    "bulletin {} created by user {}:{} ({})",
+    result.title, token.id, token.account, token.nickname
+  );
   Ok(Json(result))
 }
 
@@ -90,12 +95,20 @@ async fn update_bulletin(
     },
   )
   .await?;
+  info!(
+    "bulletin {} updated by user {}:{} ({})",
+    result.title, token.id, token.account, token.nickname
+  );
   Ok(Json(result))
 }
 
 async fn delete_bulletin(
-  State(ref db): State<Database>, Path(article_id): Path<i64>,
+  State(ref db): State<Database>, Extension(token): Extension<Token>, Path(article_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
   article::delete(&db.conn, article_id).await?;
+  info!(
+    "bulletin {} deleted by user {}:{} ({})",
+    article_id, token.id, token.account, token.nickname
+  );
   Ok(())
 }
