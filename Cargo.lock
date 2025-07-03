@@ -4205,9 +4205,9 @@ checksum = "95325155c684b1c89f7765e30bc1c42e4a6da51ca513615660cb8a62ef9a88e3"
 
 [[package]]
 name = "ret2script"
-version = "1.8.3"
+version = "1.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdb05493a40449afacef3229702e40c1cdd5528641441b85e018a15852872c0c"
+checksum = "f1781344b1533be685b9552b921038342d00b6e18b9d508c2dd8a307de87f4a3"
 dependencies = [
  "aes",
  "async-trait",
@@ -6638,9 +6638,9 @@ checksum = "ea2f10b9bb0928dfb1b42b65e1f9e36f7f54dbdf08457afefb38afcdec4fa2bb"
 
 [[package]]
 name = "wsrx"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50618989ae78d8c8325b07fc2f496c11a73bd39b97c87e7664f7e0ec9ac3371e"
+checksum = "1c7fb4d03ec9f3428b29da89cd60f8b3a739653f5d2a71ae5e1107db360b1c44"
 dependencies = [
  "axum",
  "futures-util",
