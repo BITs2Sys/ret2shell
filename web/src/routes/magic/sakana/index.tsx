@@ -39,7 +39,7 @@ export default function () {
           >
             <img
               src={r3kapig}
-              class="w-16 h-16"
+              class="w-16 h-16 object-contain"
               width={64}
               height={64}
               alt="R3kapig"
