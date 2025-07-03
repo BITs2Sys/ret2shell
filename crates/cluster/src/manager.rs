@@ -711,9 +711,7 @@ impl Cluster {
           .any(|p| p.iter().any(|p| p.container_port == (port as i32)))
       })
     }) {
-      return Err(ClusterError::TrafficMapperNotFound(format!(
-        "port: {port}"
-      )));
+      return Err(ClusterError::TrafficMapperNotFound(format!("port: {port}")));
     }
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "wsrx link")?);

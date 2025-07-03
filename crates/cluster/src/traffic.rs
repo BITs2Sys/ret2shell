@@ -167,13 +167,13 @@ impl TrafficMapper {
     })?;
     let vm = Vm::new(runtime.clone(), unit.clone());
     let service_info = RuneServiceInfo::try_from_service(&service, &pod)?;
-    let pod_name = pod
+    let node_name = pod
       .spec
       .ok_or(ClusterError::MissingField("pod spec".to_owned()))?
       .node_name
       .ok_or(ClusterError::MissingField("node_name".to_owned()))?;
 
-    let output = vm.send_execute(["expose"], (pod_name, service_info))?;
+    let output = vm.send_execute(["expose"], (node_name, service_info))?;
     let output = output.async_complete().await.into_result()?;
 
     let output: Result<Object, Value> = rune::from_value(output)?;

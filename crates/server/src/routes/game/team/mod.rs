@@ -42,6 +42,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       Permission::Verified
     )))
     .route("/", get(get_team_list))
+    .route("/query", get(query_team_by_token))
     .nest(
       "/{team}",
       Router::new()
@@ -483,4 +484,19 @@ async fn delete_team_extra(
     worker::update_team_state(&db, team).await.ok();
   });
   Ok(())
+}
+
+#[derive(Deserialize)]
+struct TeamTokenQuery {
+  pub token: String,
+}
+
+async fn query_team_by_token(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Query(query): Query<TeamTokenQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let team = team::get_by_token(&db.conn, game.id, &query.token)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
+  Ok(Json(team))
 }

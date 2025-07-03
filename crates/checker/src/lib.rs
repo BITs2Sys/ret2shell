@@ -58,6 +58,8 @@ pub struct RuneTeam {
   pub name: Option<String>,
   #[rune(get)]
   pub institute_id: Option<i64>,
+  #[rune(get)]
+  pub token: Option<String>,
 }
 
 impl From<&team::Model> for RuneTeam {
@@ -66,6 +68,7 @@ impl From<&team::Model> for RuneTeam {
       id: Some(team.id),
       name: Some(team.name.clone()),
       institute_id: team.institute_id,
+      token: team.token.clone(),
     }
   }
 }
