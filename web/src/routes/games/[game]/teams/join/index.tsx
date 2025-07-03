@@ -2,7 +2,13 @@ import { handleHttpError } from "@api";
 import { joinTeam } from "@api/game";
 import { createForm, required, setValue } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
-import { canParticipate, gameParticipateState, gameStore, setGameStore } from "@storage/game";
+import { accountStore } from "@storage/account";
+import {
+  canParticipate,
+  gameParticipateState,
+  gameStore,
+  setGameStore,
+} from "@storage/game";
 import { Title } from "@storage/header";
 import { t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -21,6 +27,14 @@ type TeamJoinForm = {
 
 export default function () {
   const navigate = useNavigate();
+  createEffect(() => {
+    if (!accountStore.token) {
+      navigate(
+        `/account/login?next=/games/${gameStore.current?.id}/teams/join`,
+        { replace: true },
+      );
+    }
+  });
   const [form, { Form, Field }] = createForm<TeamJoinForm>();
   createEffect(() => {
     if (gameStore.current && !canParticipate()) {
@@ -51,7 +65,8 @@ export default function () {
   createEffect(() => {
     if (themeStore.locale) {
       untrack(async () => {
-        const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
+        const match =
+          comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
         setContent(((await match()) as { default: string }).default);
       });
     }
@@ -59,18 +74,29 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("team.join.title")} route={`/games/${gameStore.current?.id}/teams/join`} />
+      <Title
+        page={t("team.join.title")}
+        route={`/games/${gameStore.current?.id}/teams/join`}
+      />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
+          <Form
+            onSubmit={onSubmit}
+            class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2"
+          >
             <h2 class="font-bold text-center">{t("team.join.title")}</h2>
-            <Field name="token" validate={[required(t("team.join.form.token.required")!)]}>
+            <Field
+              name="token"
+              validate={[required(t("team.join.form.token.required")!)]}
+            >
               {(field, props) => (
                 <Input
-                  icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
+                  icon={
+                    <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
+                  }
                   title={t("team.join.form.token.label")}
                   placeholder={t("team.join.form.token.placeholder")}
                   {...props}
@@ -80,10 +106,19 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required")!)]}>
+            <Field
+              name="accepted"
+              type="boolean"
+              validate={[required(t("team.form.acceptRules.required")!)]}
+            >
               {(field, props) => (
                 <>
-                  <input type="checkbox" class="hidden" {...props} checked={field.value} />
+                  <input
+                    type="checkbox"
+                    class="hidden"
+                    {...props}
+                    checked={field.value}
+                  />
                   <Dialog
                     justify="start"
                     ghost
@@ -96,7 +131,9 @@ export default function () {
                       <>
                         <Show
                           when={field.value}
-                          fallback={<span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />}
+                          fallback={
+                            <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
+                          }
                         >
                           <span class="shrink-0 icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
                         </Show>
@@ -105,8 +142,14 @@ export default function () {
                     }
                   >
                     <div class="w-full">
-                      <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("team.form.acceptRules.title")}</h2>
-                      <Article class="self-center" content={content() || ""} noExtraPaddings />
+                      <h2 class="text-center text-3xl font-bold p-4 pb-0">
+                        {t("team.form.acceptRules.title")}
+                      </h2>
+                      <Article
+                        class="self-center"
+                        content={content() || ""}
+                        noExtraPaddings
+                      />
                     </div>
                     <div class="flex space-x-2">
                       <Button
@@ -119,12 +162,19 @@ export default function () {
                         disabled={field.value}
                       >
                         <span>
-                          <Show when={field.value}>{t("team.form.acceptRules.ok")}</Show>
-                          <Show when={!field.value}>{t("general.actions.accept.title")}</Show>
+                          <Show when={field.value}>
+                            {t("team.form.acceptRules.ok")}
+                          </Show>
+                          <Show when={!field.value}>
+                            {t("general.actions.accept.title")}
+                          </Show>
                         </span>
                       </Button>
                       <Show when={field.value}>
-                        <Button level="error" onClick={() => setValue(form, "accepted", false)}>
+                        <Button
+                          level="error"
+                          onClick={() => setValue(form, "accepted", false)}
+                        >
                           <span>{t("general.actions.no.title")}</span>
                         </Button>
                       </Show>
@@ -141,7 +191,9 @@ export default function () {
                 loading={loading()}
                 disabled={loading() || !gameParticipateState()[0]}
               >
-                {gameParticipateState()[0] ? t("team.join.title") : gameParticipateState()[1]}
+                {gameParticipateState()[0]
+                  ? t("team.join.title")
+                  : gameParticipateState()[1]}
               </Button>
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/create`}>

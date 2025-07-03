@@ -26,6 +26,11 @@ type TeamCreateForm = {
 
 export default function () {
   const navigate = useNavigate();
+  createEffect(() => {
+    if (!accountStore.token) {
+      navigate(`/account/login?next=/games/${gameStore.current?.id}/teams/create`, { replace: true });
+    }
+  });
   const [customDisabled, setCustomDisabled] = createSignal(false);
   const [form, { Form, Field }] = createForm<TeamCreateForm>();
   createEffect(() => {
