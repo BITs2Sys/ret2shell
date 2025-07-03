@@ -37,34 +37,18 @@ export default function () {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img
-              src={r3kapig}
-              class="w-16 h-16 object-contain"
-              width={64}
-              height={64}
-              alt="R3kapig"
-            />
+            <img src={r3kapig} class="w-16 h-16 object-contain" width={64} height={64} alt="R3kapig" />
           </Link>
         </div>
       </div>
       <div class="h-24 self-center text-zinc-500 text-center space-x-2">
         <span>{t("magic.sakana.illustration")} By</span>
-        <a
-          class="hover:underline"
-          href="https://xyy9233.github.io/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="hover:underline" href="https://xyy9233.github.io/" target="_blank" rel="noopener noreferrer">
           W3nL0u
         </a>
         <br />
         <span>{t("magic.sakana.source")}</span>
-        <a
-          class="hover:underline"
-          href="https://lab.magiconch.com/sakana/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="hover:underline" href="https://lab.magiconch.com/sakana/" target="_blank" rel="noopener noreferrer">
           https://lab.magiconch.com/sakana
         </a>
       </div>
