@@ -5,7 +5,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
+import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Link from "@widgets/link";
@@ -34,16 +34,6 @@ export default function () {
     navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ""}`);
     return null;
   }
-  const access = canAccessChallenges();
-  if (!access[0]) {
-    addToast({
-      level: "warning",
-      description: access[1],
-      duration: 5000,
-    });
-    navigate(`/games/${gameStore.current?.id}`);
-    return null;
-  }
   const [loadingChallenge, setLoadingChallenge] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "NaN") || null);
@@ -62,16 +52,19 @@ export default function () {
   });
 
   createEffect(() => {
+    if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
+      addToast({
+        level: "warning",
+        description: t("game.notStarted")!,
+        duration: 5000,
+      });
+      navigate(`/games/${gameStore.current.id}`);
+      return;
+    }
+  });
+
+  createEffect(() => {
     if (selectedChallengeId() && gameStore.current) {
-      if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
-        addToast({
-          level: "warning",
-          description: t("game.notStarted")!,
-          duration: 5000,
-        });
-        navigate(`/games/${gameStore.current.id}`);
-        return;
-      }
       untrack(async () => {
         setLoadingChallenge(true);
         try {
