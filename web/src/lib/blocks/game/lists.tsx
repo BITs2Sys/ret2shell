@@ -251,6 +251,12 @@ export function SubmissionList(props: {
                   {submission.content}
                 </span>
               </div>
+              <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
+                <span>=&gt;</span>
+                <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={submission.result || ""}>
+                  {submission.result}
+                </span>
+              </div>
               <span class="flex-1 mx-0" />
               <div class="gap-y-2 flex flex-row space-x-2 items-center flex-wrap justify-end">
                 <A
