@@ -34,10 +34,11 @@ export default function () {
     navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ""}`);
     return null;
   }
-  if (!canAccessChallenges()) {
+  const access = canAccessChallenges();
+  if (!access[0]) {
     addToast({
       level: "warning",
-      description: t("challenge.errors.fetchList.title")!,
+      description: access[1],
       duration: 5000,
     });
     navigate(`/games/${gameStore.current?.id}`);
