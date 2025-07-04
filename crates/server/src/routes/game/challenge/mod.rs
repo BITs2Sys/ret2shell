@@ -216,11 +216,22 @@ async fn get_challenge_list(
   State(ref db): State<Database>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Query(query): Query<ChallengeQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let with_hidden = is_game_admin!(token, game);
+  let is_admin = is_game_admin!(token, game);
+
+  if !game.in_progress() && !is_admin {
+    return Err(ResponseError::Forbidden(
+      "game has not started".to_owned(),
+      format!(
+        "user {}:{} ({}) tried to access challenges in game {}:{}",
+        token.id, token.account, token.nickname, game.id, game.name
+      ),
+    ));
+  }
+
   if query.page.is_none() || query.page_size.is_none() {
-    let challenges = challenge::get_list(&db.conn, game.id, with_hidden).await?;
+    let challenges = challenge::get_list(&db.conn, game.id, is_admin).await?;
     return Ok(Json((
-      if with_hidden {
+      if is_admin {
         challenges
       } else {
         challenges
@@ -234,9 +245,9 @@ async fn get_challenge_list(
   }
   let page = query.page.unwrap_or(1);
   let page_size = query.page_size.unwrap_or(15);
-  let result = challenge::get_page(&db.conn, page, page_size, game.id, with_hidden).await?;
+  let result = challenge::get_page(&db.conn, page, page_size, game.id, is_admin).await?;
   Ok(Json((
-    if with_hidden {
+    if is_admin {
       result.0
     } else {
       result
