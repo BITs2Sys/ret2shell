@@ -104,6 +104,7 @@ impl TrafficMapper {
     context.install(rune_modules::http::module(true)?)?;
     context.install(rune_modules::json::module(true)?)?;
     context.install(rune_modules::toml::module(true)?)?;
+    context.install(rune_modules::rand::module(true)?)?;
     context.install(rune_modules::process::module(true)?)?;
     context.install(module(true)?)?;
     Ok(context)
