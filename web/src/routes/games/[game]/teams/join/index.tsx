@@ -22,11 +22,11 @@ type TeamJoinForm = {
 
 export default function () {
   const navigate = useNavigate();
-  createEffect(() => {
-    if (!accountStore.token) {
-      navigate(`/account/login?next=/games/${gameStore.current?.id}/teams/join`, { replace: true });
-    }
-  });
+  if (!accountStore.token) {
+    navigate(`/account/login?next=/games/${gameStore.current?.id}/teams/join`, {
+      replace: true,
+    });
+  }
   const [form, { Form, Field }] = createForm<TeamJoinForm>();
   createEffect(() => {
     if (gameStore.current && !canParticipate()) {

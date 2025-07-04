@@ -5,7 +5,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore, isGameAdmin } from "@storage/game";
+import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Link from "@widgets/link";
@@ -30,8 +30,18 @@ import { Transition } from "solid-transition-group";
 
 export default function () {
   const navigate = useNavigate();
-  if (accountStore.token === null) {
+  if (!accountStore.token) {
     navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ""}`);
+    return null;
+  }
+  const access = canAccessChallenges();
+  if (!access[0]) {
+    addToast({
+      level: "warning",
+      description: access[1],
+      duration: 5000,
+    });
+    navigate(`/games/${gameStore.current?.id}`);
     return null;
   }
   const [loadingChallenge, setLoadingChallenge] = createSignal(false);
