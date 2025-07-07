@@ -218,7 +218,7 @@ async fn get_challenge_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let is_admin = is_game_admin!(token, game);
 
-  if !game.in_progress() && !is_admin {
+  if game.start_at > Utc::now() && !is_admin {
     return Err(ResponseError::Forbidden(
       "game has not started".to_owned(),
       format!(
