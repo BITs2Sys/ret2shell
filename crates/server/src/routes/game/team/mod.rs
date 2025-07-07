@@ -9,14 +9,15 @@ use chrono::Utc;
 use nanoid::nanoid;
 use r2s_auditor::Auditor;
 use r2s_database::{
-  extra, game, submission, team,
+  challenge, extra, game, submission, team,
   user::{self, Permission},
   user2_team,
 };
 use r2s_migrator::Database;
+use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::Deserialize;
-use tracing::info;
+use tracing::{error, info};
 
 use super::{is_game_admin, worker};
 use crate::{
@@ -424,19 +425,63 @@ async fn join_team(
 }
 
 async fn update_team_info(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  State(queue): State<Queue>, State(ref db): State<Database>,
+  Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
   Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  // TODO: update scoreboard when team state changed
   let result = team::update(
     &db.conn,
     team::Model {
       id: team.id,
       game_id: team.game_id,
-      ..req
+      ..req.clone()
     },
   )
   .await?;
+  if (team.state >= team::State::Hidden && req.state < team::State::Hidden)
+    || (team.state < team::State::Hidden && req.state >= team::State::Hidden)
+  {
+    let db = db.clone();
+    let queue = queue.clone();
+    let team = team.clone();
+    let game = game.clone();
+    tokio::spawn(async move {
+      // update scoreboard
+      let challenges = match challenge::get_list(&db.conn, game.id, true).await {
+        Ok(challenges) => challenges,
+        Err(e) => {
+          error!("Failed to get challenges: {e:?}");
+          return;
+        }
+      };
+      let submissions = match submission::get_list(
+        &db.conn,
+        true,
+        false,
+        Some(game.id),
+        None,
+        Some(team.id),
+        None,
+        true,
+      )
+      .await
+      {
+        Ok(submissions) => submissions,
+        Err(e) => {
+          error!("Failed to get submissions: {e:?}");
+          return;
+        }
+      };
+      for submission in submissions {
+        let challenge = match challenges.iter().find(|c| c.id == submission.challenge_id) {
+          Some(c) => c,
+          None => continue,
+        };
+        queue.publish("scoreboard", challenge.clone()).await.ok();
+      }
+    });
+  }
+
   Ok(Json(result))
 }
 
