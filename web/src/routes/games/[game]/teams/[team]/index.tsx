@@ -41,7 +41,7 @@ import Select from "@widgets/select";
 import clsx from "clsx";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
@@ -52,10 +52,7 @@ type TeamAdminUpdateForm = {
   institute_id: string;
 };
 
-function AdminManagement(props: {
-  team: Team | null;
-  onDone?: (team: Team) => void;
-}) {
+function AdminManagement(props: { team: Team | null; onDone?: (team: Team) => void }) {
   const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>();
   const navigate = useNavigate();
   createEffect(() => {

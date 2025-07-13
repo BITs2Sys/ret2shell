@@ -5,7 +5,7 @@ import { gameStore, isGameAdmin } from "@storage/game";
 import { breakpoints } from "@storage/theme";
 import Button from "@widgets/button";
 import clsx from "clsx";
-import { type JSX, Show, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 

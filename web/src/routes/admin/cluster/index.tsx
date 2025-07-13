@@ -9,7 +9,7 @@ import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
 import type { Node } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import { For, Match, Show, Switch, createSignal, onMount } from "solid-js";
+import { createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 
 export default function () {
   const [available, setAvailable] = createSignal(false);

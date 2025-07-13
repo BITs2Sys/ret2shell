@@ -41,7 +41,9 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-transition: color 1919810s ease-out, background-color 1919810s ease-out;
+    -webkit-transition:
+      color 1919810s ease-out,
+      background-color 1919810s ease-out;
     -webkit-box-shadow: none;
   }
 

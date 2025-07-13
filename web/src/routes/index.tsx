@@ -7,7 +7,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { Show, createEffect, onMount } from "solid-js";
+import { createEffect, onMount, Show } from "solid-js";
 // import Calendar from "./calendar";
 
 export default function () {
@@ -36,8 +36,7 @@ export default function () {
   });
 
   return (
-    <>
-      <div class="flex-1 relative">
+    <div class="flex-1 relative">
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
             <div class="flex-1" />
@@ -180,6 +179,5 @@ export default function () {
           {/* </Show> */}
         </div>
       </div>
-    </>
   );
 }

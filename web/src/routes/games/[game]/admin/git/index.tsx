@@ -1,8 +1,7 @@
+import GitBlock from "@blocks/game/git";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-
-import GitBlock from "@blocks/game/git";
 
 export default function () {
   return (

@@ -10,7 +10,7 @@ import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import TimePicker from "@widgets/timepicker";
 import { DateTime } from "luxon";
-import { For, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, For } from "solid-js";
 
 type TimelinePresetFormType = {
   label: string;

@@ -4,7 +4,7 @@ import { t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import clsx from "clsx";
-import { Show, createMemo } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import ChatList from "./chat-list";
 
 export default function SideBar() {

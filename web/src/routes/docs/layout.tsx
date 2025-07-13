@@ -4,7 +4,7 @@ import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import clsx from "clsx";
-import { type JSX, Show, createSignal } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 

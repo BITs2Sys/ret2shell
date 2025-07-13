@@ -1,8 +1,8 @@
 import { t } from "@storage/theme";
 import ansiColors from "ansi-colors";
-import * as commands from ".";
 import { link } from "../escapes";
 import type { Stdio } from "../stdio";
+import * as commands from ".";
 import type { Command } from "./interface";
 
 export class Help implements Command {

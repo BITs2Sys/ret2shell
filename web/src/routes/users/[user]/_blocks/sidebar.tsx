@@ -1,5 +1,5 @@
 import { mediaPath } from "@lib/utils/media";
-import { Permission, type User, permissionToString } from "@models/user";
+import { Permission, permissionToString, type User } from "@models/user";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";

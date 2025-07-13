@@ -9,12 +9,9 @@ import Article from "@widgets/article";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import LoadingTips from "@widgets/loading-tips";
-import { Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 
-export default function (props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [answer, setAnswer] = createSignal<string>("");
   const [loading, setLoading] = createSignal(false);
   const [submitting, setSubmitting] = createSignal(false);

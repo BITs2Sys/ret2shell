@@ -20,10 +20,7 @@ type WikiForm = {
   published: boolean;
 };
 
-export default function (props: {
-  onDone: (article: Article) => void;
-  editSource?: Article;
-}) {
+export default function (props: { onDone: (article: Article) => void; editSource?: Article }) {
   const [form, { Form, Field }] = createForm<WikiForm>();
   const [loading, setLoading] = createSignal(false);
   createEffect(() => {

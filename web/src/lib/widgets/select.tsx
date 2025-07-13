@@ -1,9 +1,9 @@
-import { type CollectionItem, Select, type SelectRootProps, createListCollection } from "@ark-ui/solid";
+import { type CollectionItem, createListCollection, Select, type SelectRootProps } from "@ark-ui/solid";
 import { createBreakpoints } from "@solid-primitives/media";
 import { breakpoints, fullTheme } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { type ComponentProps, Index, Show, createMemo, splitProps } from "solid-js";
+import { type ComponentProps, createMemo, Index, Show, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 export type SelectProps = {

@@ -8,14 +8,10 @@ import Divider from "@widgets/divider";
 // import Link from "@widgets/link";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-export default function Tabs(props: {
-  baseUrl: string;
-  loading?: boolean;
-  inGame?: boolean;
-}) {
+export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame?: boolean }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "NaN") || null);

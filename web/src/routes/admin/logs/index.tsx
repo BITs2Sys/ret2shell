@@ -11,7 +11,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { For, Match, Show, Switch, createSignal, onCleanup, onMount } from "solid-js";
+import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 
 type Log = {
   timestamp: string;

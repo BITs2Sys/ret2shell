@@ -1,12 +1,15 @@
+import { handleHttpError } from "@api";
 import { getGameIntroduction, updateGame, updateGameIntroduction } from "@api/game";
 import { uploadMedia } from "@api/media";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import EditFlag from "@assets/icons/edit-flag";
+import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
 import type { Article as ArticleModel } from "@models/article";
-import { TeamState, stringifyState } from "@models/team";
+import { stringifyState, TeamState } from "@models/team";
+import { A, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import {
   canParticipate,
@@ -27,12 +30,8 @@ import Link from "@widgets/link";
 import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
-
-import { handleHttpError } from "@api";
-import bgGameDefault from "@assets/imgs/bg-game-default.webp";
-import { A, useSearchParams } from "@solidjs/router";
 import { DateTime } from "luxon";
-import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import IntroForm from "./_blocks/intro-form";
 
 function BannedWarning() {

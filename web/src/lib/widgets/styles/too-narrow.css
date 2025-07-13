@@ -43,8 +43,12 @@
 }
 
 .narrow-elem-1 {
-  -webkit-animation: narrow-animate-stroke-1 1s ease-in-out 0s both, narrow-animate-fill-1 0.5s ease-in-out 0.8s both;
-  animation: narrow-animate-stroke-1 1s ease-in-out 0s both, narrow-animate-fill-1 0.5s ease-in-out 0.8s both;
+  -webkit-animation:
+    narrow-animate-stroke-1 1s ease-in-out 0s both,
+    narrow-animate-fill-1 0.5s ease-in-out 0.8s both;
+  animation:
+    narrow-animate-stroke-1 1s ease-in-out 0s both,
+    narrow-animate-fill-1 0.5s ease-in-out 0.8s both;
 }
 
 @-webkit-keyframes narrow-animate-stroke-2 {
@@ -92,8 +96,12 @@
 }
 
 .narrow-elem-2 {
-  -webkit-animation: narrow-animate-stroke-2 1s ease-in-out 0.12s both, narrow-animate-fill-2 0.5s ease-in-out 0.9s both;
-  animation: narrow-animate-stroke-2 1s ease-in-out 0.12s both, narrow-animate-fill-2 0.5s ease-in-out 0.9s both;
+  -webkit-animation:
+    narrow-animate-stroke-2 1s ease-in-out 0.12s both,
+    narrow-animate-fill-2 0.5s ease-in-out 0.9s both;
+  animation:
+    narrow-animate-stroke-2 1s ease-in-out 0.12s both,
+    narrow-animate-fill-2 0.5s ease-in-out 0.9s both;
 }
 
 @-webkit-keyframes narrow-animate-stroke-3 {
@@ -141,8 +149,12 @@
 }
 
 .narrow-elem-3 {
-  -webkit-animation: narrow-animate-stroke-3 1s ease-in-out 0.24s both, narrow-animate-fill-3 0.5s ease-in-out 1s both;
-  animation: narrow-animate-stroke-3 1s ease-in-out 0.24s both, narrow-animate-fill-3 0.5s ease-in-out 1s both;
+  -webkit-animation:
+    narrow-animate-stroke-3 1s ease-in-out 0.24s both,
+    narrow-animate-fill-3 0.5s ease-in-out 1s both;
+  animation:
+    narrow-animate-stroke-3 1s ease-in-out 0.24s both,
+    narrow-animate-fill-3 0.5s ease-in-out 1s both;
 }
 
 @-webkit-keyframes narrow-animate-stroke-4 {
@@ -190,6 +202,10 @@
 }
 
 .narrow-elem-4 {
-  -webkit-animation: narrow-animate-stroke-4 1s ease-in-out 0.36s both, narrow-animate-fill-4 0.5s ease-in-out 1.1s both;
-  animation: narrow-animate-stroke-4 1s ease-in-out 0.36s both, narrow-animate-fill-4 0.5s ease-in-out 1.1s both;
+  -webkit-animation:
+    narrow-animate-stroke-4 1s ease-in-out 0.36s both,
+    narrow-animate-fill-4 0.5s ease-in-out 1.1s both;
+  animation:
+    narrow-animate-stroke-4 1s ease-in-out 0.36s both,
+    narrow-animate-fill-4 0.5s ease-in-out 1.1s both;
 }

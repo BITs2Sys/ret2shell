@@ -21,17 +21,14 @@ import Popover from "@widgets/popover";
 import clsx from "clsx";
 import { LoremIpsum } from "lorem-ipsum";
 import { DateTime } from "luxon";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 type CreateHintForm = {
   content: string;
   cost: number;
 };
 
-export default function (_props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [hints, setHints] = createSignal([] as Hint[]);
   const [extras, setExtras] = createSignal([] as Extra[]);
   const [unlocking, setUnlocking] = createSignal(false);

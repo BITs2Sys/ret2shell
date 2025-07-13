@@ -3,12 +3,9 @@ import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Team } from "@models/team";
 import { gameStore } from "@storage/game";
-import { For, Match, Show, Switch, createMemo } from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 
-export default function TeamSolves(props: {
-  teams: Team[];
-  challenges: Challenge[];
-}) {
+export default function TeamSolves(props: { teams: Team[]; challenges: Challenge[] }) {
   const tags = createMemo(() => {
     const tags = new Set(
       props.challenges.filter((c) => c.hidden === false).flatMap((c) => c.tag.find((t) => t.primary)?.name ?? "UNKNOWN")

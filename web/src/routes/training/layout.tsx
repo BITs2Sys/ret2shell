@@ -4,7 +4,7 @@ import { setGameStore } from "@storage/game";
 import { breakpoints } from "@storage/theme";
 import Button from "@widgets/button";
 import clsx from "clsx";
-import { type JSX, Show, createSignal, onCleanup } from "solid-js";
+import { createSignal, type JSX, onCleanup, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 

@@ -11,7 +11,7 @@ import Pagination from "@widgets/pagination";
 import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 
 export default function () {
   const [page, setPage] = createSignal(1);

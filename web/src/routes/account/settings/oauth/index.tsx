@@ -12,7 +12,7 @@ import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
-import { For, Show, createEffect, createSignal, onMount, untrack } from "solid-js";
+import { createEffect, createSignal, For, onMount, Show, untrack } from "solid-js";
 
 function getOAuthLink(service: OAuthProvider) {
   if (!service.portal) {

@@ -1,6 +1,6 @@
 import { useSearchParams } from "@solidjs/router";
 import clsx from "clsx";
-import { For, type JSX, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, type JSX, Show, untrack } from "solid-js";
 import Button from "./button";
 import Link from "./link";
 

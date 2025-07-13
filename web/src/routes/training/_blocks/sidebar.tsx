@@ -6,7 +6,7 @@ import { gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import { HTTPError } from "ky";
-import { Show, createEffect, untrack } from "solid-js";
+import { createEffect, Show, untrack } from "solid-js";
 import Playgrounds from "./playgrounds";
 
 export default function SideBar() {

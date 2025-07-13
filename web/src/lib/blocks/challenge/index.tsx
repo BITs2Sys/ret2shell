@@ -14,7 +14,7 @@ import Splitter from "@widgets/splitter";
 import clsx from "clsx";
 import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createMemo, createSignal, onCleanup } from "solid-js";
+import { createMemo, createSignal, onCleanup, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
 import Checker from "./checker";

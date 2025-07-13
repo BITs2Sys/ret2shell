@@ -8,7 +8,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
 import Popover from "@widgets/popover";
-import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, Switch, untrack } from "solid-js";
 
 export default function () {
   const [linkedDevices, setLinkedDevices] = createSignal([] as EventDeviceInfo[]);

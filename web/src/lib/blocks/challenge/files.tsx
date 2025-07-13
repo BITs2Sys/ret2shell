@@ -10,14 +10,11 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 type FileType = "static" | "mapped" | "checker";
 
-export default function (_props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [folder, setFolder] = createSignal<FileType>("static");
   const [loading, setLoading] = createSignal(false);
   async function fetchAttachments() {

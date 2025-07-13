@@ -19,10 +19,7 @@ type BulletinForm = {
   weight: boolean;
 };
 
-export default function (props: {
-  onDone: (calendar: Article) => void;
-  editSource?: Article;
-}) {
+export default function (props: { onDone: (calendar: Article) => void; editSource?: Article }) {
   const [form, { Form, Field }] = createForm<BulletinForm>();
   const [loading, setLoading] = createSignal(false);
   createEffect(() => {

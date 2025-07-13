@@ -14,7 +14,7 @@ import {
   eraseDown,
   home,
 } from "./escapes";
-import { TerminalCursor, offsetToColRow, unicodeStrDisplayLength } from "./pty";
+import { offsetToColRow, TerminalCursor, unicodeStrDisplayLength } from "./pty";
 
 export class Stdio {
   private userBuffer = "";

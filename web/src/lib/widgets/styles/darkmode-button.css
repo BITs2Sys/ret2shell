@@ -33,8 +33,11 @@
     height: var(--darkmode-button-width);
     background: radial-gradient(var(--darkmode-clr-sun-lgt), transparent);
     background-color: var(--darkmode-clr-sun);
-    box-shadow: 0px 0px 0em 1em rgb(255 255 255 / 0.2), 0px 0px 0em 2em rgb(255 255 255 / 0.2), 0px 0px 0.5em 3em
-      rgb(255 255 255 / 0.2), 0 0 0.5em 0 #fff;
+    box-shadow:
+      0px 0px 0em 1em rgb(255 255 255 / 0.2),
+      0px 0px 0em 2em rgb(255 255 255 / 0.2),
+      0px 0px 0.5em 3em rgb(255 255 255 / 0.2),
+      0 0 0.5em 0 #fff;
     transition: all 0.75s var(--darkmode-ease);
     &::after {
       content: "";
@@ -47,7 +50,9 @@
       border-radius: 50%;
       overflow: hidden;
       transition: all 0.3s ease;
-      box-shadow: -0.95em -0.75em 0 0.1em #d5d5d500, 0.1em -1em 0 -0.1em #d5d5d500;
+      box-shadow:
+        -0.95em -0.75em 0 0.1em #d5d5d500,
+        0.1em -1em 0 -0.1em #d5d5d500;
     }
   }
   &::before {
@@ -59,7 +64,11 @@
     border-radius: 50%;
     right: -0.25em;
     bottom: 0.4em;
-    box-shadow: -1em 1em 0 -0.25em #fff, -2em 1.25em 0 -0.5em #fff, -3em 1.5em 0 -0.25em #fff, -4em 1.5em 0 -0.6em #fff,
+    box-shadow:
+      -1em 1em 0 -0.25em #fff,
+      -2em 1.25em 0 -0.5em #fff,
+      -3em 1.5em 0 -0.25em #fff,
+      -4em 1.5em 0 -0.6em #fff,
       -5em 1.75em 0 -0.5em #fff;
     opacity: 0.5;
     transition: all 0.75s ease;
@@ -73,7 +82,11 @@
     border-radius: 50%;
     right: -1em;
     bottom: 0em;
-    box-shadow: -1em 1em 0 -0.25em #fff, -2em 1.25em 0 -0.5em #fff, -3em 1.5em 0 -0.25em #fff, -4em 1.5em 0 -0.6em #fff,
+    box-shadow:
+      -1em 1em 0 -0.25em #fff,
+      -2em 1.25em 0 -0.5em #fff,
+      -3em 1.5em 0 -0.25em #fff,
+      -4em 1.5em 0 -0.6em #fff,
       -5em 1.75em 0 -0.5em #fff;
     transition: all 0.75s ease;
   }
@@ -87,12 +100,17 @@
       background: radial-gradient(#eee, transparent);
       background-color: var(--darkmode-clr-moon);
       left: calc(100% - 0.25em - var(--darkmode-button-width));
-      box-shadow: 0px 0px 0em 1em rgb(255 255 255 / 0.1), 0px 0px 0em 2em rgb(255 255 255 / 0.1), 0px 0px 0.5em 3em
-        rgb(255 255 255 / 0.1), 0 0 0.5em 0 #fff;
+      box-shadow:
+        0px 0px 0em 1em rgb(255 255 255 / 0.1),
+        0px 0px 0em 2em rgb(255 255 255 / 0.1),
+        0px 0px 0.5em 3em rgb(255 255 255 / 0.1),
+        0 0 0.5em 0 #fff;
       &::after {
         transition-delay: 0.5s;
         background-color: #c5c5c5ff;
-        box-shadow: -0.95em -0.75em 0 0.1em #d5d5d5ff, 0.1em -1em 0 -0.1em #d5d5d5ff;
+        box-shadow:
+          -0.95em -0.75em 0 0.1em #d5d5d5ff,
+          0.1em -1em 0 -0.1em #d5d5d5ff;
       }
     }
     &::before {

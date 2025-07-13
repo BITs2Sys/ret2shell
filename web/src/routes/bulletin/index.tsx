@@ -11,7 +11,7 @@ import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import Pagination from "@widgets/pagination";
 import clsx from "clsx";
-import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 
 export default function () {
   const [articles, setArticles] = createSignal<Article[]>([]);

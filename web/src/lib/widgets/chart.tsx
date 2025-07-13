@@ -1,25 +1,25 @@
 import { isMobile } from "@solid-primitives/platform";
 import { mergeRefs } from "@solid-primitives/refs";
-import { type Size, createElementSize } from "@solid-primitives/resize-observer";
+import { createElementSize, type Size } from "@solid-primitives/resize-observer";
 import { fullTheme } from "@storage/theme";
 import clsx from "clsx";
 import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from "echarts/charts";
 import {
-  DataZoomComponent,
   DatasetComponent,
+  DataZoomComponent,
   GridComponent,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
   TransformComponent,
 } from "echarts/components";
-import { init, registerTheme, use } from "echarts/core";
 import type { EChartsCoreOption, EChartsType, ResizeOpts } from "echarts/core";
+import { init, registerTheme, use } from "echarts/core";
 import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import { nanoid } from "nanoid";
 import { passiveSupport } from "passive-events-support/src/utils";
-import { type JSX, type Ref, createEffect, on, onCleanup, onMount } from "solid-js";
+import { createEffect, type JSX, on, onCleanup, onMount, type Ref } from "solid-js";
 import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
 

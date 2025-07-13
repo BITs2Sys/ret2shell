@@ -22,7 +22,7 @@ import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import CreateGame from "./create";
 
 export default function () {
@@ -234,7 +234,7 @@ export default function () {
       </Card>
       <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">
         <Show when={!showCreate()} fallback={<CreateGame onDone={onCreated} />}>
-          <>
+          
             <Card
               class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden relative"
               contentClass="relative"
@@ -334,7 +334,7 @@ export default function () {
                 type="button"
               />
             </Card>
-          </>
+          
         </Show>
       </div>
     </section>

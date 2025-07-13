@@ -4,7 +4,7 @@ import { deleteUser, getUserIpList, getUserOAuthList } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import type { Ip } from "@models/ip";
 import type { OAuth } from "@models/oauth";
-import { Permission, type User, permissionToString } from "@models/user";
+import { Permission, permissionToString, type User } from "@models/user";
 import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -20,7 +20,7 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 
 export type UserForm = {
   account: string;
@@ -43,11 +43,7 @@ export type UserForm = {
   permDevOps: boolean;
 };
 
-export default function (compProps: {
-  onDone?: (result: User) => void;
-  editSource?: User;
-  loading: boolean;
-}) {
+export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
   const [deletLoading, setDeleteLoading] = createSignal(false);
   const [form, { Form, Field }] = createForm<UserForm>();

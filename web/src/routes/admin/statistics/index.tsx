@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { type PlatformStatistics, getPlatformStatistics } from "@api/platform";
+import { getPlatformStatistics, type PlatformStatistics } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import { HostType } from "@models/game";
@@ -9,7 +9,7 @@ import { t } from "@storage/theme";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
 import { DateTime } from "luxon";
-import { Show, createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 
 export default function () {
   const [loading, setLoading] = createSignal(true);

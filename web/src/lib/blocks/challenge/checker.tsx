@@ -10,7 +10,7 @@ import Select from "@widgets/select";
 import Splitter from "@widgets/splitter";
 import { AnsiUp } from "ansi_up";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
@@ -40,7 +40,7 @@ class Tmpl {
   // from expression to value
   // biome-ignore lint/suspicious/noExplicitAny: arguments can be any type
   protected handleToken(token: string, callable: boolean, args: any[]) {
-    if (!Object.prototype.hasOwnProperty.call(checkerCtx, token)) {
+    if (!Object.hasOwn(checkerCtx, token)) {
       throw new Error(`Cannot find token in context: ${token}`);
     }
     if (callable) return this.context[token].apply(checkerCtx, args);
@@ -50,8 +50,8 @@ class Tmpl {
   // biome-ignore lint/suspicious/noExplicitAny: everything can income and outcome as string
   private result2str(result: any) {
     if (result === null || typeof result === "undefined") return String(result);
-    if (Object.prototype.hasOwnProperty.call(result, "toString")) return result.toString();
-    if (Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(result), "toString")) return result.toString();
+    if (Object.hasOwn(result, "toString")) return result.toString();
+    if (Object.hasOwn(Object.getPrototypeOf(result), "toString")) return result.toString();
     return String(result);
   }
 
@@ -76,10 +76,7 @@ const checkerCtx = {
   },
 } as const;
 
-export default function (_props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [preset, setPreset] = createSignal(null as PresetChecker | null);
   const presetChecker = createMemo(() => {
     if (!preset()) return null;

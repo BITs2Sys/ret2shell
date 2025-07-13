@@ -12,10 +12,7 @@ type ArticleForm = {
   content: string;
 };
 
-export default function IntroForm(props: {
-  onDone: (article: Article) => Promise<void>;
-  editSource?: Article;
-}) {
+export default function IntroForm(props: { onDone: (article: Article) => Promise<void>; editSource?: Article }) {
   const [form, { Form, Field }] = createForm<ArticleForm>();
   const [loading, setLoading] = createSignal(false);
   createEffect(() => {

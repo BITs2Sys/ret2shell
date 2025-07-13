@@ -9,7 +9,7 @@ import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage
 import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
-import { type JSX, Show, createEffect, createSignal, onMount, untrack } from "solid-js";
+import { createEffect, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import TitleBar from "./_blocks/title-bar";
 import Toasts from "./_blocks/toasts";

@@ -12,9 +12,9 @@ import type { User } from "@models/user";
 import type { Pod } from "kubernetes-types/core/v1";
 import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
-import api, { api_root } from ".";
 import type { Extra } from "../models/extra";
 import type { Hint } from "../models/hint";
+import api, { api_root } from ".";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
