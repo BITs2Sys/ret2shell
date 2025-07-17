@@ -234,107 +234,105 @@ export default function () {
       </Card>
       <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">
         <Show when={!showCreate()} fallback={<CreateGame onDone={onCreated} />}>
-          
-            <Card
-              class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden relative"
-              contentClass="relative"
-            >
-              <Show
-                when={selectedGameId() && selectedGame()}
-                fallback={
-                  <>
-                    <Show
-                      when={themeStore.colorScheme === "dark"}
-                      fallback={<Picture src={blurredBgLight} class="w-full h-full" />}
-                    >
-                      <Picture src={blurredBgDark} class="w-full h-full" />
-                    </Show>
-                    <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur-sm flex items-center justify-center">
-                      <LogoAnimate height="h-1/3" class="grayscale" />
-                    </div>
-                  </>
-                }
-              >
-                <Picture
-                  class="aspect-video"
-                  src={(selectedGame()?.cover && mediaPath(selectedGame()!.cover!)) || bgGameDefault}
-                />
-              </Show>
-              <Tag
-                class="absolute top-2 right-2"
-                level={
-                  selectedGame()
-                    ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
-                      ? "info"
-                      : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
-                        ? "warning"
-                        : "success"
-                    : "error"
-                }
-              >
-                <span>
-                  {selectedGame()
-                    ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
-                      ? t("game.pending")
-                      : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
-                        ? t("game.ended")
-                        : t("game.started")
-                    : "UNKNOWN"}
-                </span>
-              </Tag>
-              <button
-                class="absolute w-full h-full top-0 left-0 !m-0 cursor-pointer"
-                onClick={() => {
-                  if (selectedGame()) setGameStore({ current: selectedGame() || null });
-                  return false;
-                }}
-                type="button"
-              />
-            </Card>
-            <Card
-              class="w-full lg:w-3/5 relative transform transition-all lg:-translate-y-[2rem] lg:translate-x-1/2 rounded-t-none lg:rounded-t-lg border-t-0 lg:border-t-[1px] flex"
-              contentClass="flex-1 flex flex-col md:flex-row space-y-4 lg:space-y-0 lg:space-x-8 p-6 px-9 items-center"
-            >
-              <Show
-                when={selectedGame()?.logo}
-                fallback={
-                  <Show when={loading()} fallback={<LogoAnimate class="hidden lg:block" width={64} height={64} />}>
-                    <Spin width={64} height={64} />
+          <Card
+            class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden relative"
+            contentClass="relative"
+          >
+            <Show
+              when={selectedGameId() && selectedGame()}
+              fallback={
+                <>
+                  <Show
+                    when={themeStore.colorScheme === "dark"}
+                    fallback={<Picture src={blurredBgLight} class="w-full h-full" />}
+                  >
+                    <Picture src={blurredBgDark} class="w-full h-full" />
                   </Show>
-                }
-              >
-                <img
-                  class="hidden lg:block"
-                  src={mediaPath(selectedGame()!.logo!)}
-                  width={64}
-                  height={64}
-                  alt={selectedGame()?.name}
-                />
-              </Show>
-              <div class="flex flex-col space-y-2 flex-1 w-full lg:w-auto">
-                <h2 class="text-xl font-bold flex flex-row space-x-4">
-                  {loading() ? randomTips() : selectedGame()?.name || t("game.noGameHosted")}
-                </h2>
-                <p class="opacity-60">{selectedGame()?.brief || t("game.seeOtherInteresting")}</p>
-              </div>
-              <div class="flex flex-col space-y-2">
-                <Tag level="success">
-                  <span>{selectedGame()?.start_at.toFormat("yyyy-MM-dd HH:mm:ss") || "None"}</span>
-                </Tag>
-                <Tag level="warning">
-                  <span>{selectedGame()?.end_at.toFormat("yyyy-MM-dd HH:mm:ss") || "None"}</span>
-                </Tag>
-              </div>
-              <button
-                class="absolute w-full h-full top-0 left-0 !m-0 cursor-pointer"
-                onClick={() => {
-                  if (selectedGame()) setGameStore({ current: selectedGame() || null });
-                  return false;
-                }}
-                type="button"
+                  <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur-sm flex items-center justify-center">
+                    <LogoAnimate height="h-1/3" class="grayscale" />
+                  </div>
+                </>
+              }
+            >
+              <Picture
+                class="aspect-video"
+                src={(selectedGame()?.cover && mediaPath(selectedGame()!.cover!)) || bgGameDefault}
               />
-            </Card>
-          
+            </Show>
+            <Tag
+              class="absolute top-2 right-2"
+              level={
+                selectedGame()
+                  ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
+                    ? "info"
+                    : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
+                      ? "warning"
+                      : "success"
+                  : "error"
+              }
+            >
+              <span>
+                {selectedGame()
+                  ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
+                    ? t("game.pending")
+                    : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
+                      ? t("game.ended")
+                      : t("game.started")
+                  : "UNKNOWN"}
+              </span>
+            </Tag>
+            <button
+              class="absolute w-full h-full top-0 left-0 !m-0 cursor-pointer"
+              onClick={() => {
+                if (selectedGame()) setGameStore({ current: selectedGame() || null });
+                return false;
+              }}
+              type="button"
+            />
+          </Card>
+          <Card
+            class="w-full lg:w-3/5 relative transform transition-all lg:-translate-y-[2rem] lg:translate-x-1/2 rounded-t-none lg:rounded-t-lg border-t-0 lg:border-t-[1px] flex"
+            contentClass="flex-1 flex flex-col md:flex-row space-y-4 lg:space-y-0 lg:space-x-8 p-6 px-9 items-center"
+          >
+            <Show
+              when={selectedGame()?.logo}
+              fallback={
+                <Show when={loading()} fallback={<LogoAnimate class="hidden lg:block" width={64} height={64} />}>
+                  <Spin width={64} height={64} />
+                </Show>
+              }
+            >
+              <img
+                class="hidden lg:block"
+                src={mediaPath(selectedGame()!.logo!)}
+                width={64}
+                height={64}
+                alt={selectedGame()?.name}
+              />
+            </Show>
+            <div class="flex flex-col space-y-2 flex-1 w-full lg:w-auto">
+              <h2 class="text-xl font-bold flex flex-row space-x-4">
+                {loading() ? randomTips() : selectedGame()?.name || t("game.noGameHosted")}
+              </h2>
+              <p class="opacity-60">{selectedGame()?.brief || t("game.seeOtherInteresting")}</p>
+            </div>
+            <div class="flex flex-col space-y-2">
+              <Tag level="success">
+                <span>{selectedGame()?.start_at.toFormat("yyyy-MM-dd HH:mm:ss") || "None"}</span>
+              </Tag>
+              <Tag level="warning">
+                <span>{selectedGame()?.end_at.toFormat("yyyy-MM-dd HH:mm:ss") || "None"}</span>
+              </Tag>
+            </div>
+            <button
+              class="absolute w-full h-full top-0 left-0 !m-0 cursor-pointer"
+              onClick={() => {
+                if (selectedGame()) setGameStore({ current: selectedGame() || null });
+                return false;
+              }}
+              type="button"
+            />
+          </Card>
         </Show>
       </div>
     </section>
