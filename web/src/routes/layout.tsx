@@ -1,4 +1,5 @@
 import { handleHttpError } from "@api";
+import { getProfile } from "@api/account";
 import { getPlatformInfo, getPlatformLicense, getVersion } from "@api/platform";
 import Background from "@blocks/background";
 import { Permission } from "@models/user";
@@ -6,7 +7,7 @@ import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { ssoLoginUrl, t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
 import { createEffect, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
@@ -37,6 +38,16 @@ function checkCookiePolicy() {
   }
 }
 
+function forceLogin() {
+  if (!accountStore.token) {
+    window.location.replace(ssoLoginUrl);
+    return;
+  }
+  getProfile().catch((_) => {
+    window.location.replace(ssoLoginUrl);
+  });
+}
+
 export default function (props: { children?: JSX.Element }) {
   let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
   const [platformTyped, setPlatformTyped] = createSignal("");
@@ -59,6 +70,7 @@ export default function (props: { children?: JSX.Element }) {
   }
 
   onMount(async () => {
+    forceLogin(); // force login, forbid access to the platform without login
     try {
       const res = await getPlatformInfo();
       setPlatformStore({
