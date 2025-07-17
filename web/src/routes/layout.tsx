@@ -71,7 +71,7 @@ export default function (props: { children?: JSX.Element }) {
   }
 
   onMount(async () => {
-    forceLogin(); // force login, forbid access to the platform without login
+    if (JSON.parse(import.meta.env.VITE_FORCE_LOGIN as string)) forceLogin(); // force login, forbid access to the platform without login
     try {
       const res = await getPlatformInfo();
       setPlatformStore({
