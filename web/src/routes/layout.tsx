@@ -39,6 +39,7 @@ function checkCookiePolicy() {
 }
 
 function forceLogin() {
+  if (window.location.pathname.startsWith("/account/")) return;
   if (!accountStore.token) {
     window.location.replace(ssoLoginUrl);
     return;
