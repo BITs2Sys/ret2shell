@@ -92,3 +92,6 @@ export const breakpoints = {
   xs: "480px",
   "2xs": "320px",
 } as const;
+
+export const ssoLoginUrl =
+  "https://authserver.cumt.edu.cn/authserver/login?service=https://ctf.cumt.edu.cn/account/oauth%3Fservice=cumt_cas";

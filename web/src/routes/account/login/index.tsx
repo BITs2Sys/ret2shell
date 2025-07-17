@@ -12,7 +12,7 @@ import { createForm, minLength, pattern, required, setValue } from "@modular-for
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { ssoLoginUrl, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -191,7 +191,7 @@ export default function () {
             <div class="flex-1 flex flex-col items-center justify-center">
               <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
             </div>
-            <Link class="w-full" href="/account/register">
+            <Link class="w-full" href={ssoLoginUrl /* "/account/register" */}>
               {t("account.register.tips")}
             </Link>
             <Switch>
