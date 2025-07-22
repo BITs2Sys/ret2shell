@@ -1,13 +1,35 @@
-## Welcome to the Training Ground!
+## 🌟 Welcome to the Practice Arena!
 
-The challenges in the training ground have no time limits, and you can retry them infinitely—feel free to practice!
+The problems in the Practice Arena have **no time limits**, allow unlimited retries, with **all hints unlocked** and **all writeups available**. However, your submissions here will not earn any points, and your progress is only for your own reference.
 
-Some games will also migrate their challenges here for practice after they end. Your submissions here will not earn any points, and records are only for your personal reference. Practicing any challenges from archived games will not affect your original game scores. Once a game is archived, teams will only remain on the leaderboard, and only the challenges you personally solved during the game will be marked as `Solved` in the training ground. Challenges solved by your teammates will still appear as `Unsolved` for you.
+Some contests will also be archived to the Practice Arena after they end, preserving your individual (excluding teammates') problem-solving status. Once archived, teams will only remain on the contest leaderboard, and actions in the Practice Arena will not affect contest rankings or other related content.
 
-Also, note that hints that required points to unlock during the game are automatically available in the training ground—no need to spend points! Similarly, your submissions won’t earn any points. Solutions are open for reference if you’re truly stuck, but please don’t copy them directly! The platform does not reward solving challenges in the training ground in any way, so copying answers is pointless—take responsibility for your own learning!
+> Although writeups are already available, please **do not copy them directly**! Your problem-solving progress in the Practice Arena is only visible to yourself and offers no rewards of any kind, so copying writeups here is meaningless. Please take responsibility for your own learning!
 
-The built-in challenge feedback feature (the `🔨 Hammer`) is not available in the training ground. If you encounter issues, please use other feedback channels provided by the platform owner.
+## 💬 Issue Feedback
 
-## Good luck!
+The built-in issue feedback `🔨 Hammer` is not available in the practice area. Please use other feedback channels to submit your problem.
 
-May this training ground help you advance your skills! :)
+Sometimes you might encounter the following issues:
+
+- The steps to solve the problem are correct, and the answer is obtained, but it shows as incorrect;
+- The environment is up, network issues and connection methods have been checked, but still can't connect;
+- The problem description or writeup is incorrect.
+
+> Problem setters/authors can also make mistakes. If you find any issues, please confidently report them and 🔨 give the problem setter a little nudge.
+
+| Email | QQ Group |
+|-----|-----|
+| Team [bxsteam@cumt.edu.cn](mailto:ctf@cumt.edu.cn) | Team [855653009](https://qm.qq.com/q/Aa5pOVtL1u)
+| Platform [ctf@cumt.edu.cn](mailto:ctf@cumt.edu.cn) | |
+
+```plaintext
+  _____   _          __   __
+ / ___/  (_) ___ _  / /  / / ___
+/ /__   / / / _ `/ / /  / / / _ \
+\___/  /_/  \_,_/ /_/  /_/  \___/
+```
+
+## 🍀 Ciallo～ (∠・ω< )⌒☆
+
+May this practice field bring you technical progress! :)
