@@ -1,12 +1,13 @@
 use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
 
-use super::m_20240104_000001_create_game::Game;
+use super::m_20240101_000005_link_ip_user::User2Ip;
 
 pub struct Migration;
 
 impl MigrationName for Migration {
   fn name(&self) -> &str {
-    "m_20250622_000001_create_game_hammer_policy"
+    "m_20250721_000001_create_ip_time_info"
   }
 }
 
@@ -16,12 +17,11 @@ impl MigrationTrait for Migration {
     manager
       .alter_table(
         Table::alter()
-          .table(Game::Table)
+          .table(User2Ip::Table)
           .add_column_if_not_exists(
-            ColumnDef::new(Game::HammerPolicy)
-              .json_binary()
-              .not_null()
-              .default("{}"),
+            ColumnDef::new(User2Ip::LastActiveAt)
+              .timestamp_with_time_zone()
+              .default(CurrentTimestamp),
           )
           .to_owned(),
       )
@@ -33,8 +33,8 @@ impl MigrationTrait for Migration {
     manager
       .alter_table(
         Table::alter()
-          .table(Game::Table)
-          .drop_column(Game::HammerPolicy)
+          .table(User2Ip::Table)
+          .drop_column(User2Ip::LastActiveAt)
           .to_owned(),
       )
       .await?;
