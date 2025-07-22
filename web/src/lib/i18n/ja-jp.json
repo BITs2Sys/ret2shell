@@ -1869,9 +1869,10 @@
     "commandNotFound": "未知のコマンド: {{command}}"
   },
   "about": {
-    "contact": "プラットフォームソフトウェアサポート",
+    "contact": "お問い合わせ",
+    "support": "プラットフォームソフトウェアサポート",
     "donate": "寄付",
-    "source": "サポート"
+    "source": "ソースコード"
   },
   "docs": {
     "title": "開発者ドキュメント",

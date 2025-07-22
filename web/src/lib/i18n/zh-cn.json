@@ -1869,9 +1869,10 @@
     "commandNotFound": "未知命令：{{command}}"
   },
   "about": {
-    "contact": "平台软件支持",
+    "contact": "联系我们",
+    "support": "平台软件支持",
     "donate": "捐助",
-    "source": "支持"
+    "source": "源代码"
   },
   "docs": {
     "title": "开发者文档",
