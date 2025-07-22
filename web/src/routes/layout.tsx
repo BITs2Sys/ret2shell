@@ -38,8 +38,10 @@ function checkCookiePolicy() {
   }
 }
 
+const forceLoginWhiteList = [/^\/account(\/|$)/, /^\/wiki(\/|$)/];
+
 function forceLogin() {
-  if (window.location.pathname.startsWith("/account/")) return;
+  if (forceLoginWhiteList.some((regex) => regex.test(window.location.pathname))) return;
   if (!accountStore.token) {
     window.location.replace(ssoLoginUrl);
     return;
