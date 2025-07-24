@@ -12,7 +12,7 @@ import { refreshWikiToc, setWikiStore, wikiStore } from "@storage/wiki";
 import Article from "@widgets/article";
 import Divider from "@widgets/divider";
 import { HTTPError } from "ky";
-import { Show, createEffect, onCleanup, untrack } from "solid-js";
+import { createEffect, onCleanup, Show, untrack } from "solid-js";
 import EditForm from "../_blocks/form";
 
 export default function () {

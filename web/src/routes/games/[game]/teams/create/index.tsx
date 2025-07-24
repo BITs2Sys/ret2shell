@@ -16,7 +16,7 @@ import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import clsx from "clsx";
-import { Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 
 type TeamCreateForm = {
   name: string;

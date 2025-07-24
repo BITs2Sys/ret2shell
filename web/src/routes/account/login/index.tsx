@@ -21,7 +21,7 @@ import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import { DateTime } from "luxon";
-import { For, Match, Switch, createSignal, onMount } from "solid-js";
+import { createSignal, For, Match, onMount, Switch } from "solid-js";
 
 type LoginForm = {
   account: string;

@@ -7,7 +7,7 @@ import Input from "@widgets/input";
 import Slider from "@widgets/slider";
 import TimePicker from "@widgets/timepicker";
 import { DateTime } from "luxon";
-import { Show, createEffect, untrack } from "solid-js";
+import { createEffect, Show, untrack } from "solid-js";
 
 export type GameForm = {
   name: string;

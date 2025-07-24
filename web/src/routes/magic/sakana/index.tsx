@@ -1,6 +1,6 @@
 import "sakana-widget/lib/index.css";
-import LTeam from "@assets/brands/L-team";
 import cnssTeam from "@assets/brands/cnss.svg";
+import LTeam from "@assets/brands/L-team";
 import vidarTeam from "@assets/brands/vidar.svg";
 import cnssMascot from "@assets/imgs/cnss-mascot.webp";
 import vidarMascot from "@assets/imgs/vidar-mascot.webp";

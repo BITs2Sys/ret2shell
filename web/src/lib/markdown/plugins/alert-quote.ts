@@ -25,7 +25,7 @@ export function remarkAlertQuote(options: Readonly<AlertBlockquoteOptions>) {
           if (!match) return;
           const identifier = match[1];
           // if the identifier is not in the classMap, treat it as normal blockquote
-          if (!Object.prototype.hasOwnProperty.call(options.classMap, identifier)) return;
+          if (!Object.hasOwn(options.classMap, identifier)) return;
           // strip the identifier
           textNode.value = textNode.value.slice(match[0].length).trimStart();
           if (textNode.value.length === 0) {

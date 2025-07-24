@@ -13,7 +13,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
-import { Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 
 export type UserForm = {
   nickname: string;

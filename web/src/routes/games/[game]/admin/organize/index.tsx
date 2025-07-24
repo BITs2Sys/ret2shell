@@ -9,7 +9,7 @@ import { addToast } from "@storage/toast";
 import Checkbox from "@widgets/checkbox";
 import LoadingTips from "@widgets/loading-tips";
 import type { HTTPError } from "ky";
-import { For, Show, createSignal } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
 function InstituteManagement() {
   const [loading, setLoading] = createSignal(false);

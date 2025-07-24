@@ -8,7 +8,7 @@ import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Link from "@widgets/link";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 
 function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
   const result = oldSessions;

@@ -6,5 +6,5 @@ export default function () {
   const game_id = Number.parseInt(params.game);
 
   navigate(`/games/${game_id}/admin/monitor`, { replace: true });
-  return <></>;
+  return null;
 }

@@ -13,7 +13,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
-import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 
 function StatisticsPanel() {
   const [solves, setSolves] = createSignal([] as Submission[]);
@@ -183,10 +183,7 @@ function HistoryPanel() {
   );
 }
 
-export default function (_props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [tab, setTab] = createSignal("statistics" as "statistics" | "history");
   return (
     <div class="flex flex-row min-h-full">

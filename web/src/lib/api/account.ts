@@ -21,12 +21,7 @@ export async function register(req: {
   return await api.post(`${api_root}/account/register`, { json: req }).json();
 }
 
-export async function login(req: {
-  account: string;
-  password: string;
-  captcha_id: string;
-  captcha_answer: string;
-}) {
+export async function login(req: { account: string; password: string; captcha_id: string; captcha_answer: string }) {
   return await api.post(`${api_root}/account/login`, { json: req }).json();
 }
 
@@ -34,11 +29,7 @@ export async function logout() {
   return await api.post(`${api_root}/account/logout`).json();
 }
 
-export async function forgotPassword(req: {
-  email: string;
-  captcha_id: string;
-  captcha_answer: string;
-}) {
+export async function forgotPassword(req: { email: string; captcha_id: string; captcha_answer: string }) {
   return await api.post(`${api_root}/account/forgot`, { json: req }).json();
 }
 
@@ -68,10 +59,7 @@ export async function changeProfile(req: User) {
   return await api.patch(`${api_root}/account/profile`, { json: req }).json();
 }
 
-export async function deleteSelf(captcha: {
-  captcha_id: string;
-  captcha_answer: string;
-}) {
+export async function deleteSelf(captcha: { captcha_id: string; captcha_answer: string }) {
   return await api
     .delete(`${api_root}/account/profile`, {
       json: captcha,

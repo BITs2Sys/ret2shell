@@ -3,7 +3,7 @@ import { getGameAdmins, updateGameAdmins } from "@api/game";
 import { getUserList } from "@api/user";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import { mediaPath } from "@lib/utils/media";
-import { Permission, type User, permissionToIcon } from "@models/user";
+import { Permission, permissionToIcon, type User } from "@models/user";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore, setGameStore } from "@storage/game";
@@ -19,7 +19,7 @@ import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 export default function AdministratorsManagement() {
   const [loading, setLoading] = createSignal(false);

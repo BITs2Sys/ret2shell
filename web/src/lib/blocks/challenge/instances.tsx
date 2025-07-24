@@ -33,15 +33,15 @@ import type { Pod } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import {
-  For,
-  Match,
-  Show,
-  Switch,
   createEffect,
   createMemo,
   createSignal,
+  For,
+  Match,
   onCleanup,
   onMount,
+  Show,
+  Switch,
   untrack,
 } from "solid-js";
 
@@ -138,7 +138,7 @@ function CreateForm(fnProps: {
           name="name"
           validate={[
             required(t("challenge.instance.image.form.containerName.required")!),
-            pattern(/^[a-z0-9\-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")!),
+            pattern(/^[a-z0-9-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")!),
           ]}
         >
           {(field, props) => (
@@ -189,115 +189,113 @@ function CreateForm(fnProps: {
                 </div>
               }
             >
-              <>
-                <input hidden {...props} value={field.value} class="hidden" />
-                <div class="flex-1 relative">
-                  <ArkPopover.Root
-                    autoFocus={false}
-                    open={!!searchedRepo() && !selected()}
-                    closeOnInteractOutside={false}
-                  >
-                    <ArkPopover.Anchor class="w-full">
-                      <Input
-                        class="w-full"
-                        icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
-                        title={t("challenge.instance.image.form.tag.label")}
-                        placeholder={t("challenge.instance.image.form.tag.placeholder")}
-                        error={field.error}
-                        required
-                        value={searchedRepo()}
-                        onInput={(e) => {
-                          setSearchedRepo(e.target.value);
-                          setSelected(false);
-                          setValue(form, "tag", "");
+              <input hidden {...props} value={field.value} class="hidden" />
+              <div class="flex-1 relative">
+                <ArkPopover.Root
+                  autoFocus={false}
+                  open={!!searchedRepo() && !selected()}
+                  closeOnInteractOutside={false}
+                >
+                  <ArkPopover.Anchor class="w-full">
+                    <Input
+                      class="w-full"
+                      icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
+                      title={t("challenge.instance.image.form.tag.label")}
+                      placeholder={t("challenge.instance.image.form.tag.placeholder")}
+                      error={field.error}
+                      required
+                      value={searchedRepo()}
+                      onInput={(e) => {
+                        setSearchedRepo(e.target.value);
+                        setSelected(false);
+                        setValue(form, "tag", "");
+                      }}
+                      extraBtn={
+                        <Button square class="!rounded-l-none" onClick={onRefreshRegistry} type="button">
+                          <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
+                        </Button>
+                      }
+                    />
+                  </ArkPopover.Anchor>
+                  <ArkPopover.Positioner class="w-full">
+                    <ArkPopover.Content class="popover card w-full z-50">
+                      <OverlayScrollbarsComponent
+                        options={{
+                          scrollbars: {
+                            theme: `os-theme-${fullTheme()}`,
+                            autoHide: "scroll",
+                          },
                         }}
-                        extraBtn={
-                          <Button square class="!rounded-l-none" onClick={onRefreshRegistry} type="button">
-                            <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
-                          </Button>
-                        }
+                        class="relative w-full print:h-auto print:overflow-auto max-h-48"
+                        defer
+                      >
+                        <div class="card-content p-2 flex flex-col space-y-2">
+                          <Show when={loading()}>
+                            <LoadingTips />
+                          </Show>
+                          <For each={fnProps.repos.filter((repo) => repo.includes(searchedRepo()))}>
+                            {(repo) => (
+                              <Button
+                                class="btn-sm"
+                                ghost
+                                justify="start"
+                                type="button"
+                                onClick={() => {
+                                  setSearchedRepo(repo);
+                                  setSelected(true);
+                                  fetchTags(repo);
+                                }}
+                              >
+                                <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
+                                <span>{repo}</span>
+                              </Button>
+                            )}
+                          </For>
+                        </div>
+                      </OverlayScrollbarsComponent>
+                    </ArkPopover.Content>
+                  </ArkPopover.Positioner>
+                </ArkPopover.Root>
+              </div>
+              <div class="flex-1 flex flex-row space-x-2">
+                <Select
+                  label={t("challenge.instance.image.form.version.label")!}
+                  error={field.error}
+                  class="flex-1"
+                  placeholder={t("challenge.instance.image.form.version.placeholder")}
+                  items={
+                    tags().map((tag) => ({
+                      value: tag,
+                      label: tag,
+                      icon: "icon-[fluent--tag-20-regular]",
+                    })) || []
+                  }
+                  // inputProps={props}
+                  onValueChange={(e) => {
+                    setValue(
+                      form,
+                      "tag",
+                      `${fnProps.registryConfig?.external}/${gameStore.current!.bucket}/${searchedRepo()}:${e.value.at(0)}`
+                    );
+                  }}
+                />
+                <Field name="restricted" type="boolean">
+                  {(field, props) => (
+                    <div class="flex flex-col space-y-1">
+                      <header class="label">CAP</header>
+                      <IconCheckbox
+                        inputProps={props}
+                        title={t("challenge.instance.image.form.restrict.message")}
+                        checked={field.value ?? false}
+                        uncheckedIcon="icon-[fluent--live-20-regular]"
+                        checkedIcon="icon-[fluent--live-off-20-filled]"
+                        error={field.error}
+                        name="restricted"
                       />
-                    </ArkPopover.Anchor>
-                    <ArkPopover.Positioner class="w-full">
-                      <ArkPopover.Content class="popover card w-full z-50">
-                        <OverlayScrollbarsComponent
-                          options={{
-                            scrollbars: {
-                              theme: `os-theme-${fullTheme()}`,
-                              autoHide: "scroll",
-                            },
-                          }}
-                          class="relative w-full print:h-auto print:overflow-auto max-h-48"
-                          defer
-                        >
-                          <div class="card-content p-2 flex flex-col space-y-2">
-                            <Show when={loading()}>
-                              <LoadingTips />
-                            </Show>
-                            <For each={fnProps.repos.filter((repo) => repo.includes(searchedRepo()))}>
-                              {(repo) => (
-                                <Button
-                                  class="btn-sm"
-                                  ghost
-                                  justify="start"
-                                  type="button"
-                                  onClick={() => {
-                                    setSearchedRepo(repo);
-                                    setSelected(true);
-                                    fetchTags(repo);
-                                  }}
-                                >
-                                  <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
-                                  <span>{repo}</span>
-                                </Button>
-                              )}
-                            </For>
-                          </div>
-                        </OverlayScrollbarsComponent>
-                      </ArkPopover.Content>
-                    </ArkPopover.Positioner>
-                  </ArkPopover.Root>
-                </div>
-                <div class="flex-1 flex flex-row space-x-2">
-                  <Select
-                    label={t("challenge.instance.image.form.version.label")!}
-                    error={field.error}
-                    class="flex-1"
-                    placeholder={t("challenge.instance.image.form.version.placeholder")}
-                    items={
-                      tags().map((tag) => ({
-                        value: tag,
-                        label: tag,
-                        icon: "icon-[fluent--tag-20-regular]",
-                      })) || []
-                    }
-                    // inputProps={props}
-                    onValueChange={(e) => {
-                      setValue(
-                        form,
-                        "tag",
-                        `${fnProps.registryConfig?.external}/${gameStore.current!.bucket}/${searchedRepo()}:${e.value.at(0)}`
-                      );
-                    }}
-                  />
-                  <Field name="restricted" type="boolean">
-                    {(field, props) => (
-                      <div class="flex flex-col space-y-1">
-                        <header class="label">CAP</header>
-                        <IconCheckbox
-                          inputProps={props}
-                          title={t("challenge.instance.image.form.restrict.message")}
-                          checked={field.value ?? false}
-                          uncheckedIcon="icon-[fluent--live-20-regular]"
-                          checkedIcon="icon-[fluent--live-off-20-filled]"
-                          error={field.error}
-                          name="restricted"
-                        />
-                      </div>
-                    )}
-                  </Field>
-                </div>
-              </>
+                    </div>
+                  )}
+                </Field>
+              </div>
             </Show>
           )}
         </Field>
@@ -594,10 +592,7 @@ function InstanceList() {
   );
 }
 
-export default function (_props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-}) {
+export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
   const [registryConfig, setRegistryConfig] = createSignal<RegistryConfig | null>(null);
   let pullSecretInput: HTMLInputElement;
   onMount(async () => {

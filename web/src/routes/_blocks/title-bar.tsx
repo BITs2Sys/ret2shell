@@ -25,7 +25,7 @@ import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import I18nBox, { I18nBoxContent } from "./i18n-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";

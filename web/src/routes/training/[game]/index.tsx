@@ -21,7 +21,7 @@ import Tag from "@widgets/tag";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Match, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, onCleanup, Switch, untrack } from "solid-js";
 import Intro from "../_blocks/intro";
 
 export default function () {

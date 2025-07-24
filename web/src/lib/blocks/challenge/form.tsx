@@ -7,7 +7,7 @@ import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createEffect, untrack } from "solid-js";
+import { createEffect, Show, untrack } from "solid-js";
 import ScorePicker from "./score-picker";
 
 export type ChallengeForm = {

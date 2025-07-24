@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { gameStore, setGameStore } from "@storage/game";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
-import { type ComponentProps, Show, createEffect, createSignal, untrack } from "solid-js";
+import { type ComponentProps, createEffect, createSignal, Show, untrack } from "solid-js";
 
 export default function (props: ComponentProps<"div">) {
   const location = useLocation();

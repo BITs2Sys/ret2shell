@@ -8,7 +8,7 @@ import Button from "@widgets/button";
 import Dialog from "@widgets/dialog";
 import Timer from "@widgets/timer";
 import type { DateTime } from "luxon";
-import { Match, Switch, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Match, Switch, untrack } from "solid-js";
 
 export default function UserCodeDialog() {
   const [code, setCode] = createSignal(null as { code: number; generate_at: DateTime } | null);

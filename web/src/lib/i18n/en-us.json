@@ -1569,7 +1569,8 @@
         "label": "3rd auth information"
       },
       "ips": {
-        "label": "IP addresses"
+        "label": "IP addresses",
+        "tips": "This only shows IP addresses used in the last 30 days, IP addresses older than 30 days will no longer be displayed."
       },
       "registeredAt": {
         "label": "Registration time"

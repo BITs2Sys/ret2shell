@@ -1,4 +1,4 @@
-import { type Locale, fetchDictionary, hasLocale } from "@lib/i18n";
+import { fetchDictionary, hasLocale, type Locale } from "@lib/i18n";
 import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { createPrefersDark } from "@solid-primitives/media";
 import { makePersisted } from "@solid-primitives/storage";

@@ -16,6 +16,7 @@ pub enum User2Ip {
   Id,
   UserId,
   IpAddressId,
+  LastActiveAt,
 }
 
 #[async_trait::async_trait]

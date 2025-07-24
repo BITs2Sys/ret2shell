@@ -6,11 +6,7 @@ import { t } from "@storage/theme";
 import Progress from "@widgets/progress";
 import { For, Match, Switch } from "solid-js";
 
-function TeamDetail(props: {
-  team: Team;
-  challenges: Challenge[];
-  index: number;
-}) {
+function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number }) {
   const solvedChallenges = () => props.team.history.filter((h) => !!h.challenge_id).length;
   const totalChallenges = () => props.challenges.length;
   return (
@@ -49,10 +45,7 @@ function TeamDetail(props: {
   );
 }
 
-export default function TeamDetails(props: {
-  topTeams: Team[];
-  challenges: Challenge[];
-}) {
+export default function TeamDetails(props: { topTeams: Team[]; challenges: Challenge[] }) {
   return (
     <ul class="lg:flex flex-col space-y-2 w-full max-w-5xl self-center py-6 hidden">
       <For each={props.topTeams}>

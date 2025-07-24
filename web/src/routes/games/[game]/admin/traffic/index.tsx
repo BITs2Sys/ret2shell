@@ -14,7 +14,7 @@ import Select from "@widgets/select";
 import Splitter from "@widgets/splitter";
 import { AnsiUp } from "ansi_up";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
 

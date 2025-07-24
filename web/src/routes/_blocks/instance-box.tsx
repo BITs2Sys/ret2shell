@@ -15,7 +15,7 @@ import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import { WsrxError, WsrxErrorKind, WsrxState } from "@xdsec/wsrx";
 import clsx from "clsx";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 export function InstanceBoxContent() {
   const [connecting, setConnecting] = createSignal(false);

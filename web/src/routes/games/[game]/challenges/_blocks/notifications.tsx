@@ -14,7 +14,7 @@ import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 
 type NotificationForm = {
   title: string;

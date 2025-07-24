@@ -6,7 +6,7 @@ import { gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import clsx from "clsx";
-import { type ComponentProps, Show, createEffect, untrack } from "solid-js";
+import { type ComponentProps, createEffect, Show, untrack } from "solid-js";
 
 export default function TeamCover(props: ComponentProps<"div">) {
   const expanded = () => !!gameStore.showTeamCover;

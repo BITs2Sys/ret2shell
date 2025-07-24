@@ -11,7 +11,7 @@ import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 import UserCodeDialog from "./user-code-dialog";
 
 export default function UserBox() {

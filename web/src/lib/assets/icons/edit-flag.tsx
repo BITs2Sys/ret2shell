@@ -1,6 +1,4 @@
-export default function (props: {
-  class?: string;
-}) {
+export default function (props: { class?: string }) {
   return (
     <svg version="1.1" viewBox="0 0 20 20" width="20" height="20" {...props} xmlns="http://www.w3.org/2000/svg">
       <g>

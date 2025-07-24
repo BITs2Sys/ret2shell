@@ -1,10 +1,9 @@
-import { type ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from "solid-js";
-
 import type { Markdown } from "@lib/markdown";
 import { fullTheme } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { type ComponentProps, createEffect, createSignal, Show, splitProps, untrack } from "solid-js";
 import Card from "./card";
 import LoadingTips from "./loading-tips";
 import Popover from "./popover";

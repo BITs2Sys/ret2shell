@@ -5,7 +5,7 @@ import Button from "@widgets/button";
 import Link from "@widgets/link";
 import Progress from "@widgets/progress";
 import { DateTime } from "luxon";
-import { Match, Switch, createMemo } from "solid-js";
+import { createMemo, Match, Switch } from "solid-js";
 
 export default function () {
   const solvedChallenges = createMemo(() => gameStore.team?.history.filter((h) => !!h.challenge_id).length);

@@ -13,7 +13,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 type RegisterForm = {
   account: string;

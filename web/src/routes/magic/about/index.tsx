@@ -1,5 +1,5 @@
-import { Reverier } from "@assets/animates/Reverier";
 import LogoAnimate from "@assets/animates/logo-animate";
+import { Reverier } from "@assets/animates/Reverier";
 import thanksForUsingMySoftware from "@assets/imgs/thanks-for-using-my-software.svg";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";

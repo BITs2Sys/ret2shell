@@ -4,7 +4,6 @@ import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
 import {
-  url,
   createForm,
   getValue,
   maxLength,
@@ -13,6 +12,7 @@ import {
   required,
   setValue,
   setValues,
+  url,
 } from "@modular-forms/solid";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
@@ -22,7 +22,7 @@ import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { AnsiUp } from "ansi_up";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 import emailScript from "../scripts/email.rx";
 import oauth2AuthCodeScript from "../scripts/oauth2_auth_code.rx";
 import yaleCasScript from "../scripts/yale_cas.rx";

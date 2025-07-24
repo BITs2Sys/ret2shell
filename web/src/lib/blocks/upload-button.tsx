@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import Button, { type ButtonProps } from "@widgets/button";
 import Progress from "@widgets/progress";
 import type { Progress as DownloadProgress } from "ky";
-import { Match, Show, Switch, createEffect, createSignal, splitProps, untrack } from "solid-js";
+import { createEffect, createSignal, Match, Show, Switch, splitProps, untrack } from "solid-js";
 
 export default function UploadButton(
   props: ButtonProps & {

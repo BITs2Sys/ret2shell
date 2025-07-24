@@ -8,7 +8,7 @@ import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import clsx from "clsx";
-import { type JSX, Show, createSignal } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 

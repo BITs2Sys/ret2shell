@@ -12,14 +12,14 @@ import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { For, Show, createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 export default function () {
   const [repoName, setRepoName] = createSignal<string>(gameStore.current?.name || "");
   const [loading, setLoading] = createSignal(false);
 
   const [searchParams] = useSearchParams();
-  const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[\/]+|[\/]+$/g, "") || ".";
+  const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[/]+|[/]+$/g, "") || ".";
   const [objects, setObjects] = createSignal<ObjectInfo[]>([]);
 
   createEffect(() => {

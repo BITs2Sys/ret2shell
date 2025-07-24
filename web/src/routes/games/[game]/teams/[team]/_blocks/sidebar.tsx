@@ -9,11 +9,7 @@ import LoadingTips from "@widgets/loading-tips";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
-export default function (props: {
-  team: Team | null;
-  members: User[];
-  loading?: boolean;
-}) {
+export default function (props: { team: Team | null; members: User[]; loading?: boolean }) {
   return (
     <div class="w-full h-full overflow-hidden">
       <OverlayScrollbarsComponent

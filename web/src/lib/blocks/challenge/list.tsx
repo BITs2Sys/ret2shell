@@ -9,13 +9,9 @@ import TreeView, { type TreeNode } from "@widgets/treeview";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, Show, Switch, untrack } from "solid-js";
 
-export default function ChallengeList(props: {
-  showScore?: boolean;
-  paginated?: boolean;
-  inGame?: boolean;
-}) {
+export default function ChallengeList(props: { showScore?: boolean; paginated?: boolean; inGame?: boolean }) {
   const [searchParams, _] = useSearchParams();
   const selectedChallengeId = createMemo(() => {
     return Number.parseInt((searchParams.challenge as string) || "") ?? null;
@@ -101,96 +97,94 @@ export default function ChallengeList(props: {
     }
   });
   return (
-    <>
-      <div class="flex-1 overflow-hidden">
-        <OverlayScrollbarsComponent
-          options={{
-            scrollbars: {
-              theme: `os-theme-${fullTheme()}`,
-              autoHide: "scroll",
-            },
-          }}
-          class="relative w-full h-full print:h-auto print:overflow-auto"
-          defer
-        >
-          <div class="flex flex-col space-y-2 p-3 lg:p-6">
-            <div class="sticky top-3 lg:top-6 z-20 flex flex-col">
-              <Input
-                class="bg-layer"
-                size="sm"
-                icon={<span class="shrink-0 icon-[fluent--filter-20-regular] w-5 h-5" />}
-                placeholder={t("challenge.search.placeholder")}
-                onInput={(e) => setSearch(e.currentTarget.value)}
-              />
-              <Show when={props.inGame}>
-                <div class="flex flex-row space-x-1">
-                  <Button
-                    class="my-1 bg-layer"
-                    size="sm"
-                    title={t("challenge.search.hideSolved")}
-                    onClick={() => {
-                      setHideSolved(!hideSolved());
-                    }}
+    <div class="flex-1 overflow-hidden">
+      <OverlayScrollbarsComponent
+        options={{
+          scrollbars: {
+            theme: `os-theme-${fullTheme()}`,
+            autoHide: "scroll",
+          },
+        }}
+        class="relative w-full h-full print:h-auto print:overflow-auto"
+        defer
+      >
+        <div class="flex flex-col space-y-2 p-3 lg:p-6">
+          <div class="sticky top-3 lg:top-6 z-20 flex flex-col">
+            <Input
+              class="bg-layer"
+              size="sm"
+              icon={<span class="shrink-0 icon-[fluent--filter-20-regular] w-5 h-5" />}
+              placeholder={t("challenge.search.placeholder")}
+              onInput={(e) => setSearch(e.currentTarget.value)}
+            />
+            <Show when={props.inGame}>
+              <div class="flex flex-row space-x-1">
+                <Button
+                  class="my-1 bg-layer"
+                  size="sm"
+                  title={t("challenge.search.hideSolved")}
+                  onClick={() => {
+                    setHideSolved(!hideSolved());
+                  }}
+                >
+                  <Show
+                    when={hideSolved()}
+                    fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
                   >
-                    <Show
-                      when={hideSolved()}
-                      fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
-                    >
-                      <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
-                    </Show>
-                    <span>{t("challenge.search.solved")}</span>
-                  </Button>
-                  <Button
-                    class="my-1 bg-layer"
-                    size="sm"
-                    title={t("challenge.search.hideArchived")}
-                    onClick={() => {
-                      setHideArchived(!hideArchived());
-                    }}
+                    <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                  </Show>
+                  <span>{t("challenge.search.solved")}</span>
+                </Button>
+                <Button
+                  class="my-1 bg-layer"
+                  size="sm"
+                  title={t("challenge.search.hideArchived")}
+                  onClick={() => {
+                    setHideArchived(!hideArchived());
+                  }}
+                >
+                  <Show
+                    when={hideArchived()}
+                    fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
                   >
-                    <Show
-                      when={hideArchived()}
-                      fallback={<span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
-                    >
-                      <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
-                    </Show>
-                    <span>{t("challenge.search.archived")}</span>
-                  </Button>
-                </div>
-              </Show>
-            </div>
-            <Switch
-              fallback={
-                <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-                  <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                  <span>{t("challenge.empty")}</span>
-                </div>
-              }
-            >
-              <Match when={loading()}>
-                <div class="flex flex-row items-center justify-center p-3">
-                  <LoadingTips />
-                </div>
-              </Match>
-
-              <Match when={challengeStore.challenges.length > 0}>
-                <TreeView
-                  tree={challengesEx()}
-                  activeSearchParams="challenge"
-                  highlightPaths={
-                    selectedChallengeId()
-                      ? [
-                          selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!,
-                          selectedChallengeId().toString(),
-                        ]
-                      : undefined
-                  }
-                />
-              </Match>
-            </Switch>
+                    <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                  </Show>
+                  <span>{t("challenge.search.archived")}</span>
+                </Button>
+              </div>
+            </Show>
           </div>
-        </OverlayScrollbarsComponent>
-      </div>
-    </>
+          <Switch
+            fallback={
+              <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
+                <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
+                <span>{t("challenge.empty")}</span>
+              </div>
+            }
+          >
+            <Match when={loading()}>
+              <div class="flex flex-row items-center justify-center p-3">
+                <LoadingTips />
+              </div>
+            </Match>
+
+            <Match when={challengeStore.challenges.length > 0}>
+              <TreeView
+                tree={challengesEx()}
+                activeSearchParams="challenge"
+                highlightPaths={
+                  selectedChallengeId()
+                    ? [
+                        selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!,
+                        selectedChallengeId().toString(),
+                      ]
+                    : undefined
+                }
+              />
+            </Match>
+          </Switch>
+        </div>
+      </OverlayScrollbarsComponent>
+    </div>
   );
 }

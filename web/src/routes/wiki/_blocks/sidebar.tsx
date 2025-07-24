@@ -65,13 +65,11 @@ export default function SideBar() {
     >
       <div class="p-3 lg:p-6 flex flex-col space-y-2 flex-1 min-h-[calc(100%-4rem)]">
         <Show when={accountStore.permissions.includes(Permission.Wiki)}>
-          <>
-            <Link href={"/wiki/create"} level="primary">
-              <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
-              <span>{t("general.actions.create.title")}</span>
-            </Link>
-            <Divider class="!mt-6 !mb-4" />
-          </>
+          <Link href={"/wiki/create"} level="primary">
+            <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
+            <span>{t("general.actions.create.title")}</span>
+          </Link>
+          <Divider class="!mt-6 !mb-4" />
         </Show>
         <TreeView tree={toc()} activeMatch="exact" size="sm" highlightPaths={wikiStore.current?.path} />
       </div>

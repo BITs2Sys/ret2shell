@@ -1,9 +1,9 @@
-export { Ls as ls } from "./ls";
+export { Cat as cat } from "./cat";
+export { Clear as clear } from "./clear";
 export { Echo as echo } from "./echo";
 export { Help as help } from "./help";
-export { Clear as clear } from "./clear";
-export { Wget as wget } from "./wget";
-export { Cat as cat } from "./cat";
-export { Whoami as whoami } from "./whoami";
+export { Ls as ls } from "./ls";
 export { Service as service } from "./service";
 export { Submit as submit } from "./submit";
+export { Wget as wget } from "./wget";
+export { Whoami as whoami } from "./whoami";

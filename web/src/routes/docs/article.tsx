@@ -4,7 +4,7 @@ import { Title } from "@storage/header";
 import { t, themeStore } from "@storage/theme";
 import Article from "@widgets/article";
 import Divider from "@widgets/divider";
-import { Show, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import tocJson from "./contents/toc.json";
 
 type DocNode = {

@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { getUser, getUserList, updateUser } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
-import { type User, permissionToIcon } from "@models/user";
+import { permissionToIcon, type User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
@@ -15,7 +15,7 @@ import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch, untrack } from "solid-js";
 import Form from "./_blocks/form";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";

@@ -11,7 +11,7 @@ import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 
 export function AuditList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -180,10 +180,7 @@ export function AuditList() {
   );
 }
 
-export function SubmissionList(props: {
-  inGame?: boolean;
-  archived?: boolean;
-}) {
+export function SubmissionList(props: { inGame?: boolean; archived?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
   const pageSize = 15;

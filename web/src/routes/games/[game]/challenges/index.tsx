@@ -1,32 +1,30 @@
+import { handleHttpError } from "@api";
+import { checkUnreadMessages, createChallenge, getChallenge } from "@api/game";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import ChallengeList from "@blocks/challenge/list";
+import Tabs from "@blocks/challenge/tabs";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
+import type { Chat } from "@models/chat";
+import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
+import { addToast, removeToast } from "@storage/toast";
+import Button from "@widgets/button";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
-
-import { checkUnreadMessages, createChallenge, getChallenge } from "@api/game";
-import { addToast, removeToast } from "@storage/toast";
+import clsx from "clsx";
 import { DateTime } from "luxon";
-import { Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { Transition } from "solid-transition-group";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
-
-import { handleHttpError } from "@api";
-import Tabs from "@blocks/challenge/tabs";
-import type { Chat } from "@models/chat";
-import { createBreakpoints } from "@solid-primitives/media";
-import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
-import Button from "@widgets/button";
-import clsx from "clsx";
-import { Transition } from "solid-transition-group";
 
 export default function () {
   const navigate = useNavigate();

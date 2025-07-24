@@ -114,16 +114,16 @@ nav.toc a {
   @apply text-layer-content/80 no-underline hover:underline;
 }
 
-article pre,
-article pre * {
+article.article pre,
+article.article pre * {
   @apply text-base break-words;
 }
 
-article pre {
+article.article pre {
   @apply bg-layer-content/5 text-layer-content backdrop-blur-sm rounded-md !mx-0 !min-w-0 !text-wrap;
 }
 
-article pre > code {
+article.article pre > code {
   @apply flex flex-col break-all;
 }
 

@@ -5,7 +5,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Tag from "@widgets/tag";
-import { Match, Switch, createSignal } from "solid-js";
+import { createSignal, Match, Switch } from "solid-js";
 
 export default function () {
   const [tab, setTab] = createSignal("submissions" as "submissions" | "audits");
