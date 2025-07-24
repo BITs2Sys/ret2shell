@@ -17,11 +17,11 @@ export default function ScorePicker(props: {
     if (d < 1) return props.max;
     if (d >= props.decay) return props.min;
     // return Math.round(props.max + ((props.min - props.max) * (d * d - 1)) / (props.decay * props.decay));
-    return Math.round((props.max * (props.decay + 1)) / (d + props.decay));
+    return Math.round((props.max * 20) / (d + 19));
   }
   function getFunctionPlots() {
     const data = [];
-    for (let i = 0; i <= 50; i += 1) {
+    for (let i = 0; i <= 100; i += 1) {
       data.push([i, getScore(i)]);
     }
     return data;
@@ -73,7 +73,7 @@ export default function ScorePicker(props: {
               xAxis: {
                 name: "",
                 min: 0,
-                max: 50,
+                max: 100,
                 minorTick: {
                   show: false,
                 },
@@ -135,7 +135,7 @@ export default function ScorePicker(props: {
           <Slider
             class="flex-1 flex-col-reverse pl-1"
             label={t("challenge.form.scoreRule.decay.label")}
-            max={50}
+            max={100}
             min={1}
             step={1}
             value={[props.decay]}

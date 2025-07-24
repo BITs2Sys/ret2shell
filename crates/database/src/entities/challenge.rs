@@ -256,8 +256,7 @@ where
   } else if decay >= challenge.score_rule.decay as u64 {
     challenge.score_rule.minimum
   } else {
-    challenge.score_rule.initial * (challenge.score_rule.decay + 1)
-      / (challenge.score_rule.decay as u64 + (decay as u64)) as i32
+    challenge.score_rule.initial * 20 / (19 + (decay as u64)) as i32
   };
   let challenge_score_changed = challenge.score != score;
   if challenge_score_changed {
