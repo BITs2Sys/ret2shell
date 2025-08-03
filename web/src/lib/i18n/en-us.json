@@ -1521,7 +1521,8 @@
         "placeholder": "Please enter an account",
         "label": "Account",
         "maximumLength": "Account can be at most 32 characters",
-        "invalid": "Account can only contain uppercase and lowercase letters, numbers, and underscores"
+        "invalid": "Account can only contain uppercase and lowercase letters, numbers, and underscores",
+        "tip": "To change your username, please contact the platform administrator."
       },
       "password": {
         "required": "Password cannot be empty",
