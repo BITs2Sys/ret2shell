@@ -7,7 +7,7 @@ import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
-import { ssoLoginUrl, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
 import { createEffect, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
@@ -43,11 +43,11 @@ const forceLoginWhiteList = [/^\/account(\/|$)/, /^\/wiki(\/|$)/];
 function forceLogin() {
   if (forceLoginWhiteList.some((regex) => regex.test(window.location.pathname))) return;
   if (!accountStore.token) {
-    window.location.replace(ssoLoginUrl);
+    window.location.replace(import.meta.env.VITE_FORCE_LOGIN_URL);
     return;
   }
   getProfile().catch((_) => {
-    window.location.replace(ssoLoginUrl);
+    window.location.replace(import.meta.env.VITE_FORCE_LOGIN_URL);
   });
 }
 
