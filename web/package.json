@@ -14,7 +14,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^5.18.2",
+    "@ark-ui/solid": "^5.18.3",
     "@e965/xlsx": "^0.20.3",
     "@jsdevtools/rehype-toc": "^3.0.2",
     "@modular-forms/solid": "^0.25.1",
@@ -64,7 +64,7 @@
     "remark-rehype": "^11.1.2",
     "sakana-widget": "^2.7.1",
     "shell-quote": "^1.8.3",
-    "shiki": "^3.8.1",
+    "shiki": "^3.9.2",
     "solid-js": "^1.9.7",
     "solid-transition-group": "^0.3.0",
     "strip-ansi": "^7.1.0",
@@ -81,7 +81,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.7.1",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.2.0",
     "@types/shell-quote": "^1.7.5",
     "kubernetes-types": "^1.30.0",
     "tailwindcss": "^4.1.11",

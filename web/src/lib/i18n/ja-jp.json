@@ -292,7 +292,7 @@
       "empty": "テーマ"
     },
     "theme": {
-      "title": "あまりにも狭いです、もう少し広くしてください",
+      "title": "テーマ",
       "followSystem": "システムに従う"
     },
     "ret2codec": {
@@ -461,11 +461,11 @@
     "unknownPublisher": "匿名"
   },
   "training": {
-    "title": "トレーニング",
+    "title": "訓練",
     "list": "練習場一覧",
     "empty": "練習場はありません",
     "noArchives": "アーカイブされた過去の大会はありません",
-    "placeholder": "今日分のトレーニングを始めましょう！",
+    "placeholder": "今日分の訓練を始めましょう！",
     "openForever": "常にオープン",
     "errors": {
       "fetchList": {
@@ -475,7 +475,7 @@
         "title": "過去の大会の取得に失敗しました"
       },
       "fetchTraining": {
-        "title": "トレーニング場の取得に失敗しました"
+        "title": "訓練場の取得に失敗しました"
       },
       "gameNotArchived": {
         "title": "大会はまだアーカイブされていません",
@@ -1606,7 +1606,7 @@
       }
     },
     "code": {
-      "title": "一時的なユーザー識別コード",
+      "title": "仮認証コード",
       "status": {
         "unverified": {
           "message": "あなたのユーザー アカウントはまだメールアドレスで確認されていません。認証後に認識コードを生成してください。",
