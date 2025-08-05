@@ -109,10 +109,6 @@ Run the following command to start the backend server:
 cargo run --bin r2s-server
 ```
 
-> [!CAUTION]
->
-> To run or build `r2s-server`, please make sure that the CMake version is below 4. As compatibility with CMake < 3.5 has been removed from CMake 4, while some dependencies declared `cmake_minimum_required` version not compatible.
-
 ## Build
 
 Make sure you have installed the toolchains.
@@ -128,10 +124,6 @@ The built files will be produced in `web/dist`.
 To build backend server binary:
 
 ```bash
-# Recommended
-./release-image.fish
-# Or you do not use fish
-./release-image.sh
 # if you want to host it with systemd
 cargo build --release --bin r2s-server
 # or you want to host it in an older linux distro
@@ -140,6 +132,15 @@ cargo build --release --bin r2s-server --target x86_64-unknown-linux-musl
 
 The built binary will be produced in `target/release/`,
 musl binaries will be produced in `target/x86_64-unknown-linux-musl/release/`.
+
+You can also build the docker image:
+
+```bash
+# if you use fish
+./release-image.fish
+# or run with bash
+./release-image.sh
+```
 
 ## License
 

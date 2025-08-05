@@ -10,7 +10,6 @@ import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
-import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Select from "@widgets/select";
 import clsx from "clsx";
@@ -251,7 +250,7 @@ export default function () {
               "transition-[height,width] duration-500 p-3 lg:p-6 flex flex-col space-y-2 shrink-0"
             )}
           >
-            <Card class="relative" contentClass={clsx("p-2", showChallengeDetail() ? "h-48" : "aspect-video")}>
+            <div class={clsx("p-2", "relative", showChallengeDetail() ? "h-48" : "aspect-video")}>
               <Chart
                 option={{
                   grid: {
@@ -379,7 +378,7 @@ export default function () {
                   />
                 </div>
               </Show>
-            </Card>
+            </div>
             <Show when={!showChallengeDetail()}>
               <ChartOperations
                 size="md"
