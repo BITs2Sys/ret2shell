@@ -598,11 +598,10 @@ impl Cluster {
       }),
       ..Default::default()
     };
-    if let Some(svc_spec) = service.spec.clone() {
-      if svc_spec.ports.is_none_or(|p| p.is_empty()) {
+    if let Some(svc_spec) = service.spec.clone()
+      && svc_spec.ports.is_none_or(|p| p.is_empty()) {
         return Err(ClusterError::MissingField("service ports".to_string()));
       }
-    }
     self.create_pod(pod).await?;
     debug!("service: {:?}", service);
     match self.create_service(service).await {

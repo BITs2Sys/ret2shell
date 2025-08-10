@@ -289,7 +289,7 @@
     "notifications": {
       "title": "通知メッセージ",
       "clear": "すべての通知をクリア",
-      "empty": "テーマ"
+      "empty": "未読メッセージはありません"
     },
     "theme": {
       "title": "テーマ",

@@ -77,13 +77,13 @@
 ### BREAKING CHANGES
 
 - No longer support to configure `cluster.cleanup_interval`, fixed to 30 seconds.
-- Add archive policy for games and related configuration page. Now we can control the performance about archived challenges, whether to show hints or anwers for example. (#149)
+- Add archive policy for games and related configuration page. Now we can control the performance about archived challenges, whether to show hints or answers for example. (#149)
 
 ### Fixed
 
 - Fixes blockquote title highlight error in specific formats. (#104)
 - Only display error tips when focusing, which avoid always hanging on and hiding other fields. (#150)
-- Fixes where there is a probability taht unlocked tips cannot be loaded if refreshing at hint page directly. (#153)
+- Fixes where there is a probability that unlocked tips cannot be loaded if refreshing at hint page directly. (#153)
 - Fixes incorrect blood score calculation.
 
 ### Common Developing Changes

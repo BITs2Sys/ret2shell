@@ -382,7 +382,6 @@ function SelfManagement(props: { members: User[] }) {
                 {...props}
                 value={field.value}
                 error={field.error}
-                disabled={gameStore.current?.team_size === 1}
               />
             )}
           </Field>

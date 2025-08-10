@@ -16,7 +16,6 @@ pub mod media;
 pub mod notification;
 pub mod oauth;
 pub mod oauth_provider;
-pub mod policy;
 pub mod submission;
 pub mod team;
 pub mod user;

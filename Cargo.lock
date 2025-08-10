@@ -88,9 +88,9 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.6.19"
+version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "301af1932e46185686725e0fad2f8f2aa7da69dd70bf6ecc44d6b703844a3933"
+checksum = "3ae563653d1938f79b1ab1b5e668c87c76a9930414574a6583a7b7e11a8e6192"
 dependencies = [
  "anstyle",
  "anstyle-parse",
@@ -118,22 +118,22 @@ dependencies = [
 
 [[package]]
 name = "anstyle-query"
-version = "1.1.3"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8bdeb6047d8983be085bab0ba1472e6dc604e7041dbf6fcd5e71523014fae9"
+checksum = "9e231f6134f61b71076a3eab506c379d4f36122f2af15a9ff04415ea4c3339e2"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
 name = "anstyle-wincon"
-version = "3.0.9"
+version = "3.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "403f75924867bb1033c59fbf0797484329750cfbe3c4325cd33127941fabc882"
+checksum = "3e0633414522a32ffaac8ac6cc8f748e090c5717661fddeea04219e2344f5f2a"
 dependencies = [
  "anstyle",
  "once_cell_polyfill",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -678,9 +678,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.23.1"
+version = "1.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c76a5792e44e4abe34d3abf15636779261d45a7450612059293d1d2cfc63422"
+checksum = "3995eaeebcdf32f91f980d360f78732ddc061097ab4e39991ae7a6ace9194677"
 
 [[package]]
 name = "byteorder"
@@ -715,9 +715,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.31"
+version = "1.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3a42d84bb6b69d3a8b3eaacf0d88f179e1929695e1ad012b6cf64d9caaa5fd2"
+checksum = "2352e5597e9c544d5e6d9c95190d5d27738ade584fa8db0a16e130e5c2b5296e"
 dependencies = [
  "jobserver",
  "libc",
@@ -814,9 +814,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.42"
+version = "4.5.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed87a9d530bb41a67537289bafcac159cb3ee28460e0a4571123d2a778a6a882"
+checksum = "50fd97c9dc2399518aa331917ac6f274280ec5eb34e555dd291899745c48ec6f"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -824,9 +824,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.42"
+version = "4.5.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64f4f3f3c77c94aff3c7e9aac9a2ca1974a5adf392a8bb751e827d6d127ab966"
+checksum = "c35b5830294e1fa0462034af85cc95225a4cb07092c088c55bda3147cfcd8f65"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1777,9 +1777,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.4.11"
+version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17da50a276f1e01e0ba6c029e47b7100754904ee8a278f886546e98575380785"
+checksum = "f3c0b69cfcb4e1b9f1bf2f53f95f766e4661169728ec61cd3fe5a0166f2d1386"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -1825,9 +1825,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.15.4"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
+checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
 dependencies = [
  "allocator-api2",
  "equivalent",
@@ -1840,7 +1840,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7382cf6263419f2d8df38c55d7da83da5c18aef87fc7a7fc1fb1e344edfe14c1"
 dependencies = [
- "hashbrown 0.15.4",
+ "hashbrown 0.15.5",
 ]
 
 [[package]]
@@ -2300,7 +2300,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe4cd85333e22411419a0bcae1297d25e58c9443848b11dc6a86fefe8c78a661"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.4",
+ "hashbrown 0.15.5",
 ]
 
 [[package]]
@@ -2585,7 +2585,7 @@ dependencies = [
  "backon",
  "educe",
  "futures",
- "hashbrown 0.15.4",
+ "hashbrown 0.15.5",
  "hostname",
  "json-patch",
  "k8s-openapi",
@@ -3631,7 +3631,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 
 [[package]]
 name = "r2s-auditor"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "aho-corasick",
  "r2s-config",
@@ -3642,7 +3642,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-bucket"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "chrono",
  "deunicode",
@@ -3661,7 +3661,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cache"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "fred",
  "r2s-config",
@@ -3673,7 +3673,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-captcha"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "async-trait",
  "biosvg",
@@ -3689,7 +3689,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-checker"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "chrono",
  "r2s-bucket",
@@ -3705,7 +3705,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cluster"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "axum",
  "chrono",
@@ -3729,7 +3729,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-config"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "sea-orm",
  "serde",
@@ -3740,7 +3740,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-database"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "chrono",
  "num-derive",
@@ -3756,7 +3756,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-email"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "async-nats",
  "futures",
@@ -3771,7 +3771,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-event"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "async-nats",
  "axum",
@@ -3787,7 +3787,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-license"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "chrono",
  "clap",
@@ -3799,7 +3799,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-media"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "hex",
  "image",
@@ -3816,7 +3816,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-migrator"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "r2s-config",
  "sea-orm",
@@ -3828,7 +3828,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-oauth"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3846,7 +3846,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-queue"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "async-nats",
  "r2s-config",
@@ -3858,7 +3858,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-server"
-version = "3.8.1"
+version = "3.8.2"
 dependencies = [
  "anyhow",
  "argon2",
@@ -4497,7 +4497,7 @@ dependencies = [
  "openssl-probe",
  "rustls-pki-types",
  "schannel",
- "security-framework 3.2.0",
+ "security-framework 3.3.0",
 ]
 
 [[package]]
@@ -4543,9 +4543,9 @@ dependencies = [
 
 [[package]]
 name = "rustversion"
-version = "1.0.21"
+version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a0d197bd2c9dc6e53b84da9556a69ba4cdfab8619eb41a8bd1cc2027a0f6b1d"
+checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 name = "ryu"
@@ -4688,9 +4688,9 @@ dependencies = [
 
 [[package]]
 name = "sea-query"
-version = "0.32.6"
+version = "0.32.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64c91783d1514b99754fc6a4079081dcc2c587dadbff65c48c7f62297443536a"
+checksum = "8a5d1c518eaf5eda38e5773f902b26ab6d5e9e9e2bb2349ca6c64cf96f80448c"
 dependencies = [
  "bigdecimal",
  "chrono",
@@ -4786,9 +4786,9 @@ dependencies = [
 
 [[package]]
 name = "security-framework"
-version = "3.2.0"
+version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "271720403f46ca04f7ba6f55d438f8bd878d6b8ca0a1046e8228c4145bcbb316"
+checksum = "80fb1d92c5028aa318b4b8bd7302a5bfcf48be96a37fc6fc790f806b0004ee0c"
 dependencies = [
  "bitflags 2.9.1",
  "core-foundation 0.10.1",
@@ -5055,9 +5055,9 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 
 [[package]]
 name = "slab"
-version = "0.4.10"
+version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04dc19736151f35336d325007ac991178d504a119863a2fcb3758cdb5e52c50d"
+checksum = "7a2ae44ef20feb57a68b23d846850f861394c2e02dc425a50098ae8c90267589"
 
 [[package]]
 name = "smallvec"
@@ -5147,7 +5147,7 @@ dependencies = [
  "futures-intrusive",
  "futures-io",
  "futures-util",
- "hashbrown 0.15.4",
+ "hashbrown 0.15.5",
  "hashlink",
  "indexmap",
  "log",
@@ -6797,9 +6797,9 @@ dependencies = [
 
 [[package]]
 name = "zerovec"
-version = "0.11.3"
+version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdbb9122ea75b11bf96e7492afb723e8a7fbe12c67417aa95e7e3d18144d37cd"
+checksum = "e7aa2bd55086f1ab526693ecbe444205da57e25f4489879da80635a46d90e73b"
 dependencies = [
  "yoke",
  "zerofrom",

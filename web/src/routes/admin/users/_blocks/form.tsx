@@ -45,7 +45,7 @@ export type UserForm = {
 
 export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
-  const [deletLoading, setDeleteLoading] = createSignal(false);
+  const [deleteLoading, setDeleteLoading] = createSignal(false);
   const [form, { Form, Field }] = createForm<UserForm>();
   createEffect(() => {
     if (compProps.editSource) {
@@ -203,8 +203,8 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                   size="sm"
                   level="warning"
                   class="rounded-l-none"
-                  disabled={deleteConfirmValue() !== compProps.editSource?.account || deletLoading()}
-                  loading={deletLoading()}
+                  disabled={deleteConfirmValue() !== compProps.editSource?.account || deleteLoading()}
+                  loading={deleteLoading()}
                   onClick={handleDeleteUser}
                 >
                   <span>{t("general.actions.delete.title")}</span>

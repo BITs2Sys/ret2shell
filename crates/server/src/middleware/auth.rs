@@ -177,7 +177,7 @@ async fn extract_basic_token(
         account: user.account,
         nickname: user.nickname,
         permissions: user.permissions,
-        // NOTE: expires immidiately here, only oneshot
+        // NOTE: expires immediately here, only oneshot
         exp: Utc::now().timestamp(),
       };
       let token_tracker = TokenTracker {

@@ -36,8 +36,8 @@ async fn connect_game(
   ws: WebSocketUpgrade,
 ) -> Result<impl IntoResponse, ResponseError> {
   let game = game::get(&db.conn, game_id).await?;
-  if let Some(game) = game {
-    if game.token.is_some_and(|t| t == token) {
+  if let Some(game) = game
+    && game.token.is_some_and(|t| t == token) {
       info!(
         "game event pusher connection established for game {} by {} ({})",
         game_id,
@@ -55,7 +55,6 @@ async fn connect_game(
           .await;
       }));
     }
-  }
   Err(ResponseError::Forbidden(
     "permission denied".to_owned(),
     format!("event api was called with invalid token for game {game_id}"),

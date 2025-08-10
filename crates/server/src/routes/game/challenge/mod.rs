@@ -1354,11 +1354,10 @@ async fn update_challenge_env_config(
   // check port conflict
   let mut ports = HashSet::new();
   for image in &env.images {
-    if let Some(port) = image.port {
-      if !ports.insert(port) {
+    if let Some(port) = image.port
+      && !ports.insert(port) {
         return Err(ResponseError::BadRequest("port conflict".to_owned()));
       }
-    }
   }
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket

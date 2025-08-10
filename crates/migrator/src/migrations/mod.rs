@@ -4,7 +4,6 @@ pub mod m_20240101_000002_create_user;
 pub mod m_20240101_000003_create_oauth;
 pub mod m_20240101_000004_create_ip;
 pub mod m_20240101_000005_link_ip_user;
-pub mod m_20240101_000006_create_policy;
 pub mod m_20240102_000001_create_article;
 pub mod m_20240102_000002_create_comment;
 pub mod m_20240102_000003_create_calendar;
