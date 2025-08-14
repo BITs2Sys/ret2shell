@@ -493,7 +493,8 @@
         "placeholder": "Please enter a brief",
         "required": "Brief cannot be empty"
       }
-    }
+    },
+    "gotoGamePage": "View game information"
   },
   "calendar": {
     "day": {
