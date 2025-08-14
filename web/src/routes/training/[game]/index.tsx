@@ -148,6 +148,7 @@ export default function () {
       <div class="flex-1 flex flex-col w-0">
         <Tabs baseUrl={`/training/${gameStore.current?.id}`} loading={loadingChallenge()} />
         <Switch fallback={<Intro />}>
+          <div></div>
           <Match when={inEdit()}>
             <div class="flex-1 w-full relative">
               <div class="absolute top-0 left-0 w-full h-full overflow-hidden">

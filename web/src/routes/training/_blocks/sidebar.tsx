@@ -46,6 +46,11 @@ export default function SideBar() {
               <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
             </Show>
           </Link>
+          <Show when={gameStore.current?.host_type === 1}>
+            <Link square ghost href={`/games/${gameStore.current?.id}`} title={t("training.gotoGamePage")}>
+              <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-" />
+            </Link>
+          </Show>
           <Link square ghost href="/training" title={t("general.actions.back.title")}>
             <span class="shrink-0 icon-[fluent--arrow-hook-up-left-20-regular] w-5 h-5 text-warning" />
           </Link>

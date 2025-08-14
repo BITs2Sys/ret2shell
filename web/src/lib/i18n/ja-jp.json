@@ -493,7 +493,8 @@
         "placeholder": "概要を入力してください",
         "required": "概要は必須です"
       }
-    }
+    },
+    "gotoGamePage": "大会情報を見る"
   },
   "calendar": {
     "day": {

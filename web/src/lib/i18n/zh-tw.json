@@ -493,7 +493,8 @@
         "placeholder": "請輸入簡介",
         "required": "簡介不能為空"
       }
-    }
+    },
+    "gotoGamePage": "查看比賽資訊"
   },
   "calendar": {
     "day": {

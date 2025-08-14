@@ -1,7 +1,7 @@
 use std::process::exit;
 
 use clap::{Parser, Subcommand};
-use colored::Colorize;
+use owo_colors::OwoColorize;
 use r2s_config::GlobalConfig;
 use r2s_server::{R2S_VERSION, down, greet, up};
 

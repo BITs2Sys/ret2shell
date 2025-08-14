@@ -20,7 +20,6 @@ base64         = { workspace = true }
 bcrypt         = { workspace = true }
 chrono         = { workspace = true }
 clap           = { workspace = true }
-colored        = { workspace = true }
 deunicode      = { workspace = true }
 futures        = { workspace = true }
 heck           = { workspace = true }
@@ -28,6 +27,7 @@ hyper-util     = { workspace = true }
 jsonwebtoken   = { workspace = true }
 nanoid         = { workspace = true }
 once_cell      = { workspace = true }
+owo-colors     = { workspace = true }
 rand           = { workspace = true }
 regex          = { workspace = true }
 rustls         = { workspace = true }

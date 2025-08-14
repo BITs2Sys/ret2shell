@@ -467,6 +467,7 @@
     "noArchives": "没有归档的往期赛事",
     "placeholder": "开始今日份的训练！",
     "openForever": "永久开放",
+    "gotoGamePage": "查看比赛信息",
     "errors": {
       "fetchList": {
         "title": "获取练习场列表失败"
