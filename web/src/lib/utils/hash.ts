@@ -259,3 +259,9 @@ export async function hashToHex(data: Uint8Array) {
     return memo + i2hex(i);
   }, "");
 }
+
+export function hashToHexSync(data: Uint8Array) {
+  return hash(data).reduce((memo, i) => {
+    return memo + i2hex(i);
+  }, "");
+}
