@@ -157,16 +157,15 @@ export default function () {
                       </svg>
                     </span>
                   </Link>
-                  <Link
+                  <a
                     href="mailto:support@ret.sh.cn"
-                    ghost
-                    size="sm"
-                    square
+                    class="btn btn-sm btn-ghost justify-center btn-square"
                     title={t("about.support")}
                     target="_blank"
+                    rel="noopener"
                   >
                     <span class="shrink-0 icon-[fluent--person-support-20-regular] w-5 h-5" />
-                  </Link>
+                  </a>
                   <Link
                     href="https://github.com/ret2shell"
                     ghost
