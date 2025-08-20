@@ -1,7 +1,47 @@
+FROM golang:alpine AS inspector
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+
+WORKDIR /build
+
+COPY ./cloud/node-inspecter/go.mod ./cloud/node-inspecter/go.sum ./
+
+RUN go mod download
+
+COPY ./cloud/node-inspecter/main.go ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -a -installsuffix cgo \
+    -ldflags='-w -s -extldflags "-static"' \
+    -o node-inspecter ./main.go && \
+    cp node-inspecter /usr/local/bin/node-inspecter && \
+    chmod +x /usr/local/bin/node-inspecter
+
+# --------------------------------------------------------------------------------------------------------
+
+FROM debian:bookworm-slim AS gke-bin
+
+RUN apt-get update && \
+    apt-get install -y apt-transport-https ca-certificates gnupg curl && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    apt-get update && \
+    apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /gke-auth && \
+    cp "$(realpath $(which gke-gcloud-auth-plugin))" -t /gke-auth/
+
+# --------------------------------------------------------------------------------------------------------
+
 FROM rust:1.89-alpine AS builder
 
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache musl-dev clang lld
+RUN apk add --update --no-cache musl-dev clang lld ca-certificates
+
+RUN update-ca-certificates
 
 COPY ./.cargo /var/lib/ret2shell/.cargo
 COPY ./config /var/lib/ret2shell/config
@@ -25,7 +65,20 @@ RUN apk add --update --no-cache curl git skopeo && \
     git config --global user.email platform@ret.sh.cn && \
     git config --global user.name Ret2Shell
 
+COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
+
+COPY --from=gke-bin /gke-auth/gke-gcloud-auth-plugin /bin/gke-gcloud-auth-plugin
+COPY ./cloud/gke-gcloud-auth-plugin-proxy /bin/gke-gcloud-auth-plugin-proxy
+RUN chmod +x /bin/gke-gcloud-auth-plugin /bin/gke-gcloud-auth-plugin-proxy
+
+COPY --from=inspector /usr/local/bin/node-inspecter /bin/node-inspecter
+
 COPY --from=builder /usr/local/bin/r2s-server /bin/r2s-server
+
+RUN echo '#!/bin/sh' >> /bin/r2s-entrypoint && \
+    echo '/bin/node-inspecter &' >> /bin/r2s-entrypoint && \
+    echo 'exec /bin/r2s-server "$@"' >> /bin/r2s-entrypoint && \
+    chmod +x /bin/r2s-entrypoint
 
 RUN mkdir -p \
     /var/www/html \
@@ -37,4 +90,4 @@ RUN mkdir -p \
 HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=1 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/ping || exit 1
 
-ENTRYPOINT ["/bin/r2s-server"]
+ENTRYPOINT ["/bin/r2s-entrypoint"]

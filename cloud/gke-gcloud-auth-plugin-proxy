@@ -1,0 +1,27 @@
+#!/bin/sh
+
+opt_proxy=""
+
+args=""
+for arg in "$@"; do
+    case $arg in
+        --proxy=*)
+            opt_proxy="${arg#*=}"
+            ;;
+        *)
+            if [ -z "$args" ]; then
+                args="$arg"
+            else
+                args="$args $arg"
+            fi
+            ;;
+    esac
+done
+
+if [ -n "$opt_proxy" ]; then
+    export HTTPS_PROXY="$opt_proxy"
+    export HTTP_PROXY="$opt_proxy"
+    export NO_PROXY="localhost,127.0.0.1"
+fi
+
+gke-gcloud-auth-plugin $args
