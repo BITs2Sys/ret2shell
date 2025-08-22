@@ -34,7 +34,9 @@ export default function () {
   }
   const [loadingChallenge, setLoadingChallenge] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null);
+  const selectedChallengeId = createMemo(
+    () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
+  );
   const inCreate = createMemo(() => searchParams.create === "true");
   const [creating, setCreating] = createSignal(false);
 

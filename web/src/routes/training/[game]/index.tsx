@@ -80,7 +80,9 @@ export default function () {
     }
     setCreating(false);
   }
-  const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null);
+  const selectedChallengeId = createMemo(
+    () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
+  );
   const inEdit = createMemo(() => searchParams.edit === "true");
   const inStatistics = createMemo(() => searchParams.statistics === "true");
   const inMonitor = createMemo(() => searchParams.monitor === "true");

@@ -105,7 +105,9 @@ export default function () {
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(null as number | null);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
-  const selectedInstituteId = createMemo(() => Number.parseInt((searchParams.institute as string) || "NaN", 10) || null);
+  const selectedInstituteId = createMemo(
+    () => Number.parseInt((searchParams.institute as string) || "NaN", 10) || null
+  );
   const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
   const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);

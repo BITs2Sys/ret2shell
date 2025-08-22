@@ -14,7 +14,9 @@ import { TransitionGroup } from "solid-transition-group";
 export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame?: boolean }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null);
+  const selectedChallengeId = createMemo(
+    () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
+  );
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
   const inCreate = createMemo(() => searchParams.create === "true");
   const inEditGame = createMemo(() => searchParams.edit === "true");
