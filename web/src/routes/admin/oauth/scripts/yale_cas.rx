@@ -1,14 +1,14 @@
 //! * yale_cas.rx
-//! * Most universities take this as its CAS
+//! * 耶鲁 CAS 统一身份认证
 
 use ret2shell::oauth::cas;
 
-/// CAS login URL
+/// 根据 Ticket 的 CAS 登录 URL
 const AUTH_SERVER_URL = "https://ids.example.edu/authserver/serviceValidate";
-/// CAS callback URL, please replace the origin with your own
-const ORIGINAL_SERVER_URL = "https://ctf.ret.sh.cn/account/oauth/";
+/// CAS 回调地址（Callback URL），替换为实际的平台地址
+const ORIGINAL_SERVER_URL = "https://ctf.cumt.edu.cn/account/oauth/";
 
-/// Login with CAS ticket
+/// 使用 CAS Ticket 登录
 ///
 /// [endpoint] ${API}/account/oauth/login
 ///
@@ -28,7 +28,7 @@ pub async fn login(params) {
     })
 }
 
-/// Bind the organization account with the user
+/// 将用户与组织绑定
 ///
 /// [endpoint] ${API}/account/oauth/bind
 ///

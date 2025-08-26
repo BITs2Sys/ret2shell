@@ -1,12 +1,12 @@
 //! * email.rx
-//! * Verify the user organization with email suffix(es)
+//! * 根据邮箱后缀提供认证
 
 /// The list of valid email suffixes.
 const DOMAIN_LIST = [
-    "user.ret.sh.cn"
+    "opencumt.org"
 ];
 
-/// Email login
+/// 邮件登录
 ///
 /// [endpoint] ${API}/account/oauth/login
 /// * params: the request parameters
@@ -16,7 +16,7 @@ pub async fn login(params) {
     Err("DISABLED")
 }
 
-/// Bind the organization account with the user
+/// 将用户与组织绑定
 ///
 /// [endpoint] ${API}/account/oauth/bind
 ///

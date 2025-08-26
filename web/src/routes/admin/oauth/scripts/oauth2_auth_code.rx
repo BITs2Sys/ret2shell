@@ -1,16 +1,16 @@
 //! * oauth2_auth_code.rx
-//! * Verify the user organization with OAuth2 authorization code
+//! * OAuth2 授权码模式认证
 //  * reference: https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow#how-authorization-code-flow-works
 
-/// OAuth2 server URL to get access token
+/// 获取 access token 的 URL
 const AUTH_SERVER_URL = "https://example.com/login/oauth/access_token";
-/// URL to get user data with access token
+/// 通过 access token 获取用户信息的 URL
 const DATA_SERVER_URL = "https://api.example.com/user";
-/// OAuth2 client ID and secret
+/// OAuth2 client ID 和 secret
 const CLIENT_ID = "";
 const CLIENT_SECRET = "";
 
-/// Login with OAuth2 authorization code
+/// 使用 OAuth2 授权码模式登录
 ///
 /// [endpoint] ${API}/account/oauth/login
 ///
@@ -43,7 +43,7 @@ pub async fn login(params) {
     })
 }
 
-/// Bind the organization account with the user
+/// 将用户与组织绑定
 ///
 /// [endpoint] ${API}/account/oauth/bind
 ///
