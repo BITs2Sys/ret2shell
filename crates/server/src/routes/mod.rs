@@ -84,7 +84,7 @@ pub async fn initialize(
         })
         .on_request(())
         .on_response(|response: &Response, latency: Duration, _span: &Span| {
-          debug!("[{}] in {}ms", response.status(), latency.as_millis());
+          debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
         }),
     )
     .with_state::<()>(state);
@@ -127,7 +127,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     tokio::spawn(async move {
       loop {
         tokio::time::sleep(interval).await;
-        debug!("rate limiting storage size: {}", governor_limiter.len());
+        debug!(size = ?governor_limiter.len(), "rate limiting storage");
         governor_limiter.retain_recent();
       }
     });

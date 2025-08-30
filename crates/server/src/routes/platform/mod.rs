@@ -274,12 +274,11 @@ async fn get_logs_list(
   .ok();
   if let Some(log_dir) = log_dir {
     if let Some(file_name) = req.file {
-      let file_path = log_dir.join(file_name).canonicalize()?;
-      debug!("get_logs_list: {:?}", file_path);
-      debug!("log_dir: {:?}", log_dir);
+      let log_path = log_dir.join(file_name).canonicalize()?;
+      debug!(?log_path, ?log_dir, "got log file");
       // avoid path traversal
-      if file_path.starts_with(log_dir.canonicalize()?) {
-        send_file(file_path).await
+      if log_path.starts_with(log_dir.canonicalize()?) {
+        send_file(log_path).await
       } else {
         Err(ResponseError::NotFound("file not found".to_owned()))
       }

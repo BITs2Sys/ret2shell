@@ -43,7 +43,7 @@ async fn proxy_to_frontend_server(
     Some(frontend_config) => frontend_config.path,
     None => {
       return Err(ResponseError::PreconditionFailed(String::from(
-        "Frontend proxy not set for ret2shell, please contact the website devops",
+        "frontend proxy not set for ret2shell, please contact the website devops",
       )));
     }
   };
@@ -62,12 +62,12 @@ async fn proxy_to_frontend_server(
     .await
     .map_err(|err| ResponseError::BadRequest(format!("frontend proxy failed: {err}")))?
     .into_response();
-  debug!("Proxying frontend request: {:?}", resp);
+  debug!(?resp, "proxying frontend request");
   Ok(resp)
 }
 
 async fn no_frontend_proxy() -> Result<(), ResponseError> {
   Err(ResponseError::PreconditionFailed(String::from(
-    "Frontend proxy not set for ret2shell, please contact the website devops",
+    "frontend proxy not set for ret2shell, please contact the website devops",
   )))
 }

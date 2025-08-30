@@ -758,7 +758,7 @@ async fn get_player_attachment(
 
 async fn get_files(bucket: &ChallengeBucket, id: i64) -> Result<Vec<FileResponse>, ResponseError> {
   let static_files = bucket.get_static_files().await?;
-  debug!("files: {:?}", static_files);
+  debug!(?static_files);
 
   let mapped_file = bucket.get_mapped_file(id).await?;
   let mut files: Vec<FileResponse> = static_files
@@ -1175,7 +1175,7 @@ async fn start_challenge_instance(
       );
     }
 
-    debug!("env_config: {:?}", env_config);
+    debug!(?env_config);
     let ports = env_config
       .clone()
       .images
@@ -1186,7 +1186,7 @@ async fn start_challenge_instance(
       .collect::<Vec<_>>()
       .join(",");
     checker.preload(&challenge, &challenge_bucket).await?;
-    debug!("checker preloaded.");
+    debug!("checker preloaded");
     let env_map = checker
       .environ(
         &challenge_bucket,
@@ -1199,8 +1199,8 @@ async fn start_challenge_instance(
         &team,
       )
       .await?;
-    debug!("env_map: {:?}", env_map);
-    debug!("game: {:?}", game);
+    debug!(?env_map);
+    debug!(?game);
     let node_selector = if game.archive_at > Utc::now() {
       game.node_selector.clone().or(config.node_selector.clone())
     } else {
@@ -1213,8 +1213,8 @@ async fn start_challenge_instance(
     } else {
       config.traffic.is_some()
     };
-    debug!("node_selector: {:?}", node_selector);
-    debug!("need_expose: {:?}", need_expose);
+    debug!(?node_selector);
+    debug!(?need_expose);
     cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
@@ -1355,9 +1355,10 @@ async fn update_challenge_env_config(
   let mut ports = HashSet::new();
   for image in &env.images {
     if let Some(port) = image.port
-      && !ports.insert(port) {
-        return Err(ResponseError::BadRequest("port conflict".to_owned()));
-      }
+      && !ports.insert(port)
+    {
+      return Err(ResponseError::BadRequest("port conflict".to_owned()));
+    }
   }
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket
