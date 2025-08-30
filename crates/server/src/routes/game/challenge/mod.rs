@@ -654,6 +654,7 @@ async fn submit_flag(
       cache.at("submission").expire(token.id, 5 * 60).await?;
     }
   }
+  info!(content = ?req.content, "submit flag");
   let submission = submission::create(&db.conn, submission).await?;
   queue.publish("check", submission.clone()).await?;
   Ok(Json(submission))

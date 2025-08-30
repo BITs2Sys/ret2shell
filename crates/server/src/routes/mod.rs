@@ -1,10 +1,9 @@
-use std::{net::IpAddr, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use axum::{
   Router,
-  body::Body,
   error_handling::HandleErrorLayer,
-  http::{HeaderValue, Request, StatusCode},
+  http::{HeaderValue, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
   routing::get,
@@ -16,7 +15,7 @@ use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
 };
-use tracing::{Span, debug, debug_span};
+use tracing::{Span, debug};
 
 use crate::{
   middleware::{
@@ -71,22 +70,11 @@ pub async fn initialize(
         ),
     )
     .merge(web::router(&state))
-    .layer(
-      TraceLayer::new_for_http()
-        .make_span_with(|request: &Request<Body>| {
-          let ip = middleware::forwarded::get_client_ip(request)
-            .unwrap_or(IpAddr::V4("0.0.0.0".parse().unwrap()));
-          debug_span!("http",
-              from = %ip.to_string(),
-              method = %request.method(),
-              uri = %request.uri().path(),
-          )
-        })
-        .on_request(())
-        .on_response(|response: &Response, latency: Duration, _span: &Span| {
-          debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
-        }),
-    )
+    .layer(TraceLayer::new_for_http().on_request(()).on_response(
+      |response: &Response, latency: Duration, _span: &Span| {
+        debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
+      },
+    ))
     .with_state::<()>(state);
   Ok(router)
 }

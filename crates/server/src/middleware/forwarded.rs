@@ -18,7 +18,7 @@ use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
-use tracing::{Instrument, debug, error, info_span, warn};
+use tracing::{Instrument, debug, error, error_span, warn};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -319,7 +319,7 @@ pub async fn ip_record(
       return Ok(next.run(req).await);
     }
   };
-  debug!("Client IP address: {ip}");
+  debug!(?ip, "got client IP address");
   if token.id != 0 {
     queue
       .publish(
@@ -332,16 +332,12 @@ pub async fn ip_record(
       .await?;
     debug!("IP record message published");
   } else {
-    debug!("Token ID is 0, skipping IP record");
+    debug!("token ID is 0, skipping IP record");
   }
-  let span =
-    info_span!("http",from = %ip.to_string(), method = %req.method(), uri = %req.uri().path());
-  async move {
-    let res = next.run(req).await;
-    Ok(res)
-  }
-  .instrument(span)
-  .await
+  let span = error_span!("http", from=%ip, method=%req.method(), uri=%req.uri().path());
+  async move { Ok(next.run(req).await) }
+    .instrument(span)
+    .await
 }
 
 async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
@@ -358,10 +354,10 @@ pub async fn ip_record_worker(mut messages: Stream, db: Database) {
       message.ack().await.ok();
       ip_record_worker_exec(message.clone(), &db)
         .await
-        .map_err(|e| error!("Failed to process message: {:?}", e))
+        .map_err(|e| error!(error = ?e, "failed to process message"))
         .ok();
     } else {
-      error!("Failed to receive message from nats: {:?}", message);
+      error!(?message, "failed to receive message from nats");
     }
   }
 }

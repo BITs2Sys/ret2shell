@@ -2,6 +2,7 @@ import { api_root, handleHttpError } from "@api";
 import { getPlatformLogs } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
 import { createBreakpoints } from "@solid-primitives/media";
+import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
@@ -13,20 +14,56 @@ import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 
+type LogSpan = {
+  name: string;
+  [key: string]: unknown;
+};
+
 type Log = {
   timestamp: string;
   level: string;
   target: string;
-  fields: {
-    message: string;
-  };
-  span?: {
-    from?: string;
-    method?: string;
-    name?: string;
-    uri?: string;
-  };
+  fields: Record<string, unknown>;
+  span?: LogSpan;
+  spans?: LogSpan[];
 };
+
+function SpanHttp(log: Log) {
+  if (!log.spans) return null;
+  for (const span of log.spans) {
+    if (span.name === "http") {
+      return span;
+    }
+  }
+}
+
+function SpanUser(log: Log) {
+  if (!log.spans) return null;
+  for (const span of log.spans) {
+    if (span.name === "user") {
+      return (
+        <A class="hover:underline" target="_blank" rel="noreferrer" href={`/admin/users?user=${span.id}`}>
+          {span.account as string}
+        </A>
+      );
+    }
+  }
+}
+
+function LogField(log: Log) {
+  if (!log.fields) return null;
+  return (
+    <For each={Object.entries(log.fields)}>
+      {([key, value]) => (
+        <>
+          <span class="italic opacity-60">{key}</span>
+          <span class="opacity-60">=</span>
+          <span>{String(value)}&nbsp;</span>
+        </>
+      )}
+    </For>
+  );
+}
 
 export default function () {
   const [loading, setLoading] = createSignal(false);
@@ -168,21 +205,36 @@ export default function () {
               >
                 <span class="w-full grid grid-cols-[repeat(3,auto)_1fr]">
                   <span class={clsx("w-16 mr-2 inline-block", getColor(log.level))}>{log.level}</span>
-                  <span class="opacity-40 mr-2" title={log.target}>
-                    [{log.target}]
+                  <span class="mr-2 text-success font-bold" title={log.target}>
+                    {log.target}
                   </span>
-                  <span
-                    class="opacity-60 truncate"
-                    title={[log.span?.name, [log.span?.method, log.span?.uri].filter(Boolean).join(" "), log.span?.from]
-                      .filter(Boolean)
-                      .join(" - ")}
-                  >
-                    {log.span?.name && <span>[{log.span.name}]</span>}
-                    {log.span?.from && <span>[{log.span.from}]</span>}
-                    {log.span?.method && <span>[{log.span.method}]</span>}
-                    {log.span?.uri && <span>[{log.span.uri}]</span>}
+                  <span class="truncate">
+                    {(SpanHttp(log)?.method as string) && (
+                      <span class="opacity-60">{SpanHttp(log)?.method as string}&nbsp;</span>
+                    )}
+                    {(SpanHttp(log)?.uri as string) && (
+                      <span class="opacity-60">{SpanHttp(log)?.uri as string}&nbsp;</span>
+                    )}
                   </span>
-                  <span class="opacity-60 text-right font-bold ml-2 whitespace-nowrap">
+                  <span class="text-right font-bold ml-2 whitespace-nowrap">
+                    <span class="font-bold mr-2">
+                      <span class="icon-[fluent--person-16-filled] text-primary align-middle w-4 h-4 mr-1" />
+                      {SpanUser(log) ?? "GLOBAL"}
+                    </span>
+                    {(SpanHttp(log)?.from as string) && (
+                      <>
+                        <span class="icon-[fluent--location-16-filled] text-primary align-middle w-4 h-4 mr-1" />
+                        <A
+                          href={`/admin/users?filter=${SpanHttp(log)?.from as string}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          class="hover:underline mr-2"
+                        >
+                          {SpanHttp(log)?.from as string}
+                        </A>
+                      </>
+                    )}
+                    <span class="icon-[fluent--clock-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                     <Switch fallback={time(log.timestamp, "HH:mm:ss")}>
                       <Match when={matches.xl}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
                       <Match when={matches.lg}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
@@ -192,11 +244,8 @@ export default function () {
                   </span>
                 </span>
                 <div class="grid grid-cols-[1fr] group-hover:block w-full">
-                  <span
-                    class={clsx("truncate group-hover:whitespace-normal", getContentColor(log.level))}
-                    // title={log.fields.message}
-                  >
-                    {log.fields.message}
+                  <span class={clsx("truncate break-words group-hover:whitespace-normal", getContentColor(log.level))}>
+                    {LogField(log)}
                   </span>
                 </div>
               </div>

@@ -19,7 +19,7 @@ use r2s_database::{
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
-use tracing::{debug, error, info};
+use tracing::{Instrument, debug, error, error_span, info};
 
 use crate::{traits::ResponseError, utility::password::verify_password};
 
@@ -242,7 +242,10 @@ pub async fn extract_user_info(
   req.extensions_mut().insert(token_tracker.clone());
   req.extensions_mut().insert(token.clone());
 
-  let mut resp = next.run(req).await;
+  let user_span = error_span!("user", id = token.id, account = %token.account);
+  let mut resp = async move { next.run(req).await }
+    .instrument(user_span)
+    .await;
 
   if token_tracker
     .renew_requested

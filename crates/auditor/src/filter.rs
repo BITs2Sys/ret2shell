@@ -34,8 +34,8 @@ pub async fn initialize(
   sensitive_word_list: &Option<String>,
 ) -> Result<Option<AhoCorasick>, WordFilterError> {
   debug!(
-    "initializing word filter with file: {:?}",
-    sensitive_word_list
+    file = ?sensitive_word_list,
+    "initializing word filter",
   );
   if let Some(sensitive_word_list) = sensitive_word_list {
     let sensitive_words = read_sensitive_word_file(sensitive_word_list).await?;
@@ -64,7 +64,7 @@ pub fn check_text(ac: &AhoCorasick, src: &str) -> bool {
         .collect::<String>(),
     )
     .is_some();
-  debug!("checking text: {}, result: {}", src, result);
+  debug!(?src, ?result, "checking sensitive words");
   result
 }
 
@@ -76,7 +76,7 @@ mod tests {
   fn test_aho_corasick_cjk() {
     use aho_corasick::AhoCorasick;
     let ac = AhoCorasick::new(vec!["你好", "你们", "世界", "世家"])
-      .expect("Failed to create Aho-Corasick automaton");
+      .expect("failed to create Aho-Corasick automaton");
     let matches = ac.find_iter("对这个世界说声你好");
     let mut matches_vec = Vec::new();
     for m in matches {
