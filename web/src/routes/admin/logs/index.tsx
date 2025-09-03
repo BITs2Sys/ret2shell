@@ -12,15 +12,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import {
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  onMount,
-  Show,
-  Switch,
-} from "solid-js";
+import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 
 type LogSpan = {
   name: string;
@@ -50,12 +42,7 @@ function SpanUser(log: Log) {
   for (const span of log.spans) {
     if (span.name === "user") {
       return (
-        <A
-          class="hover:underline"
-          target="_blank"
-          rel="noreferrer"
-          href={`/admin/users?user=${span.id}`}
-        >
+        <A class="hover:underline" target="_blank" rel="noreferrer" href={`/admin/users?user=${span.id}`}>
           {span.account as string}
         </A>
       );
@@ -110,9 +97,7 @@ export default function () {
   }
 
   function connect() {
-    ws = new WebSocket(
-      `${api_root}/platform/logs/stream?token=${accountStore.token}`,
-    );
+    ws = new WebSocket(`${api_root}/platform/logs/stream?token=${accountStore.token}`);
     setLoading(true);
     ws.onopen = () => {
       setLoading(false);
@@ -170,8 +155,7 @@ export default function () {
         return "text-layer-content";
     }
   }
-  const time = (ts: string, format: string) =>
-    DateTime.fromISO(ts).toFormat(format);
+  const time = (ts: string, format: string) => DateTime.fromISO(ts).toFormat(format);
   const matches = createBreakpoints(breakpoints);
   let bottomDiv: HTMLDivElement;
   return (
@@ -184,10 +168,7 @@ export default function () {
             <span>{t("platform.logs.title")}</span>
           </h1>
           <Show when={searchParams.filter}>
-            <Button
-              size="sm"
-              onClick={() => setSearchParams({ filter: undefined })}
-            >
+            <Button size="sm" onClick={() => setSearchParams({ filter: undefined })}>
               <span class="icon-[fluent--dismiss-16-regular]" />
               <span class="text-error">TRACE: {searchParams.filter}</span>
             </Button>
@@ -227,30 +208,20 @@ export default function () {
                 class={clsx(
                   "group min-h-8 flex flex-col h-auto hover:bg-layer-content/15",
                   "px-2 py-1 items-center border-b border-b-layer-content/10 overflow-hidden min-w-0",
-                  searchParams.filter &&
-                    searchParams.filter !== SpanHttp(log)?.event_id &&
-                    "hidden",
+                  searchParams.filter && searchParams.filter !== SpanHttp(log)?.event_id && "hidden"
                 )}
               >
                 <span class="w-full grid grid-cols-[repeat(3,auto)_1fr]">
-                  <span
-                    class={clsx("w-16 mr-2 inline-block", getColor(log.level))}
-                  >
-                    {log.level}
-                  </span>
+                  <span class={clsx("w-16 mr-2 inline-block", getColor(log.level))}>{log.level}</span>
                   <span class="mr-2 text-success font-bold" title={log.target}>
                     {log.target}
                   </span>
                   <span class="truncate">
                     {(SpanHttp(log)?.method as string) && (
-                      <span class="opacity-60">
-                        {SpanHttp(log)?.method as string}&nbsp;
-                      </span>
+                      <span class="opacity-60">{SpanHttp(log)?.method as string}&nbsp;</span>
                     )}
                     {(SpanHttp(log)?.uri as string) && (
-                      <span class="opacity-60">
-                        {SpanHttp(log)?.uri as string}&nbsp;
-                      </span>
+                      <span class="opacity-60">{SpanHttp(log)?.uri as string}&nbsp;</span>
                     )}
                   </span>
                   <span class="text-right font-bold ml-2 whitespace-nowrap">
@@ -284,28 +255,15 @@ export default function () {
                     )}
                     <span class="icon-[fluent--clock-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                     <Switch fallback={time(log.timestamp, "HH:mm:ss")}>
-                      <Match when={matches.xl}>
-                        {time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}
-                      </Match>
-                      <Match when={matches.lg}>
-                        {time(log.timestamp, "MM-dd HH:mm:ss")}
-                      </Match>
-                      <Match when={matches.md}>
-                        {time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}
-                      </Match>
-                      <Match when={matches.sm}>
-                        {time(log.timestamp, "MM-dd HH:mm:ss")}
-                      </Match>
+                      <Match when={matches.xl}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.lg}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.md}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.sm}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
                     </Switch>
                   </span>
                 </span>
                 <div class="grid grid-cols-[1fr] group-hover:block w-full">
-                  <span
-                    class={clsx(
-                      "truncate break-words group-hover:whitespace-normal",
-                      getContentColor(log.level),
-                    )}
-                  >
+                  <span class={clsx("truncate break-words group-hover:whitespace-normal", getContentColor(log.level))}>
                     {LogField(log)}
                   </span>
                 </div>
