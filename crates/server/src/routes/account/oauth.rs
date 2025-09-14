@@ -20,7 +20,7 @@ use r2s_oauth::OAuth;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::{
   middleware::{
@@ -159,9 +159,10 @@ async fn login_with_oauth_account(
   State(db): State<Database>, State(oauth): State<OAuth>, State(cache): State<Cache>,
   Extension(token_tracker): Extension<TokenTracker>, Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let provider = params.get("service").ok_or(ResponseError::BadRequest(
-    "oauth service params required".to_owned(),
-  ))?;
+  let provider = params.get("service").ok_or_else(|| {
+    warn!(?params, "oauth login request missing service");
+    ResponseError::BadRequest("oauth service params required".to_owned())
+  })?;
 
   let provider_str = provider.as_str();
   let provider = match r2s_database::oauth_provider::get_by_provider(&db.conn, provider_str).await?
@@ -192,7 +193,13 @@ async fn login_with_oauth_account(
           .at("oauth")
           .set_ex(&temp_token, cached_token, 30 * 60)
           .await?;
-        info!("OAuth user {auth_key} not found, temp token {temp_token} generated for register");
+        // info!("OAuth user {auth_key} not found, temp token {temp_token} generated for
+        // register");
+        info!(
+          ?auth_key,
+          ?temp_token,
+          "oauth user not found, temp token generated for register"
+        );
         return Ok((
           StatusCode::CREATED,
           Json(OAuthLoginResponse {
@@ -210,12 +217,14 @@ async fn login_with_oauth_account(
     }
   };
   info!(
-    "User logged in via oauth {provider_str}: {}:{} ({}) <{}>",
-    user.id,
-    user.account,
-    user.nickname,
-    user.email.unwrap_or_default()
+    provider=%provider_str,
+    id = user.id,
+    account = %user.account,
+    nickname = %user.nickname,
+    email = %user.email.clone().unwrap_or_default(),
+    "user logged in via oauth"
   );
+
   *(token_tracker.token.lock().await) = Token {
     id: user.id,
     account: user.account.clone(),
@@ -338,10 +347,12 @@ async fn register_with_oauth_account(
   .await
   .ok();
   info!(
-    "User registered: {} ({}) <{}>",
-    user.nickname,
-    user.account,
-    user.email.unwrap_or_default()
+    provider=%cached_token.provider,
+    id = user.id,
+    account = %user.account,
+    nickname = %user.nickname,
+    email = %user.email.clone().unwrap_or_default(),
+    "new user registered via oauth"
   );
   *(token_tracker.token.lock().await) = Token {
     id: user.id,
@@ -372,12 +383,9 @@ async fn bind_oauth_account(
   let txn = db.conn.begin().await?;
   let action_times = cache.at("oauth").get::<i64>(user.id).await?;
   if action_times.is_some() && action_times.unwrap() > 5 {
+    warn!("user has requested change oauth account too many times");
     return Err(ResponseError::TooManyRequests(
       "too many requests, please try again 15 mins later".to_owned(),
-      format!(
-        "user {} has requested change oauth account too many times",
-        user.id
-      ),
     ));
   }
   cache.at("oauth").incr(user.id).await?;
@@ -422,6 +430,11 @@ async fn bind_oauth_account(
   let check_prev_oauth =
     r2s_database::oauth::get_by_auth_key(&txn, provider_str, &auth_key).await?;
   if check_prev_oauth.is_some() {
+    warn!(
+      provider = %provider_str,
+      auth_key = %auth_key,
+      "oauth account already binded to another user"
+    );
     return Err(ResponseError::Conflict(
       "oauth account already binded".to_owned(),
     ));
@@ -463,12 +476,9 @@ async fn unbind_oauth_account(
 ) -> Result<impl IntoResponse, ResponseError> {
   let action_times = cache.at("oauth").get::<i64>(token.id).await?;
   if action_times.is_some() && action_times.unwrap() > 5 {
+    warn!("user has requested change oauth account too many times");
     return Err(ResponseError::TooManyRequests(
       "too many requests, please try again 15 mins later".to_owned(),
-      format!(
-        "user {} has requested change oauth account too many times",
-        token.id
-      ),
     ));
   }
   cache.at("oauth").incr(token.id).await?;
@@ -491,29 +501,28 @@ async fn unbind_oauth_account(
         .await?
         .is_some()
       {
+        warn!(
+          provider = %oauth_item.provider,
+          auth_key = %oauth_item.auth_key,
+          game_id = game.id,
+          game_name = %game.name,
+          "user try to unbind oauth account before game archived"
+        );
         return Err(ResponseError::Forbidden(
           "you can not unbind oauth account before game archived".to_owned(),
-          format!(
-            "user {}:{} ({}) want to unbind oauth account {}:{} before game {}:{} archived",
-            token.id,
-            token.account,
-            token.nickname,
-            oauth_item.provider,
-            oauth_item.auth_key,
-            game.id,
-            game.name
-          ),
         ));
       }
     }
   }
   if oauth_item.user_id != token.id {
+    warn!(
+      provider = %oauth_item.provider,
+      auth_key = %oauth_item.auth_key,
+      peer_user_id = oauth_item.user_id,
+      "user try to unbind oauth account which is not belong to him"
+    );
     return Err(ResponseError::Forbidden(
       "you can only unbind your own oauth account".to_owned(),
-      format!(
-        "user {}:{} ({}) want to unbind oauth account {}:{} which is not belong to him",
-        token.id, token.account, token.nickname, oauth_item.provider, oauth_item.auth_key
-      ),
     ));
   };
   r2s_database::oauth::delete(&db.conn, oauth_item.id).await?;

@@ -8,7 +8,7 @@ use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_database::game;
 use r2s_migrator::Database;
-use tracing::debug;
+use tracing::{Instrument, debug, error_span};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -25,8 +25,11 @@ pub async fn prepare_config(
     }
     None => {
       let dynamic_config = r2s_database::config::get(&db.conn).await?;
-      debug!("dynamic_config: {:?}", dynamic_config);
-      debug!("static_config: {:?}", config);
+      debug!(
+        ?dynamic_config,
+        static_config=?config,
+        "merging static and dynamic config"
+      );
       let dynamic_config = dynamic_config.unwrap_or_default().merge(config);
       cache.at("platform").set("config", &dynamic_config).await?;
       req
@@ -57,17 +60,19 @@ pub async fn prepare_team_info(
   Extension(game): Extension<game::Model>, mut req: Request, next: Next,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = r2s_database::team::get_by_user_id(&db.conn, game.id, token.id).await?;
-  if let Some(team) = team {
+  let resp = if let Some(team) = team.clone() {
     req
       .extensions_mut()
-      .insert::<Option<r2s_database::team::Model>>(Some(team));
+      .insert::<Option<r2s_database::team::Model>>(Some(team.clone()));
+    let team_span = error_span!("team", id=%team.id, name=%team.name);
+    next.run(req).instrument(team_span).await
   } else {
     req
       .extensions_mut()
       .insert::<Option<r2s_database::team::Model>>(None);
-  }
-
-  Ok(next.run(req).await)
+    next.run(req).await
+  };
+  Ok(resp)
 }
 
 macro_rules! get_path_param_i64 {
@@ -94,12 +99,14 @@ pub(crate) use get_path_param_i64;
 ///
 /// Remember to refresh cache when update the data!
 macro_rules! prepare_data {
-  ($model:tt, $cached: expr) => {
-    |axum::extract::State(db): axum::extract::State<r2s_migrator::Database>,
-     axum::extract::State(cache): axum::extract::State<r2s_cache::Cache>,
-     axum::extract::Path(params): axum::extract::Path<std::collections::HashMap<String, String>>,
-     mut req: axum::extract::Request,
-     next: axum::middleware::Next| async move {
+  ($model:ident, $cached: expr, $($trace:tt),*) => {
+    |
+      axum::extract::State(db): axum::extract::State<r2s_migrator::Database>,
+      axum::extract::State(cache): axum::extract::State<r2s_cache::Cache>,
+      axum::extract::Path(params): axum::extract::Path<std::collections::HashMap<String, String>>,
+      mut req: axum::extract::Request,
+      next: axum::middleware::Next
+    | async move {
       let id = crate::middleware::data::get_path_param_i64!(stringify!($model), &params);
       let data = if $cached {
         match cache.at(stringify!($model)).get(id).await? {
@@ -123,6 +130,20 @@ macro_rules! prepare_data {
       };
       match data {
         Some(data) => {
+          use tracing::Instrument;
+          // if trace is enabled, add trace
+          let traced: Vec<&str> = vec![$(stringify!($trace)),*];
+          let traced = traced.len() > 0;
+          if traced {
+          let data_span = tracing::error_span!(
+              stringify!(data-$model),
+              id=%data.id,
+              $(
+                $trace=%data.$trace,
+              )*
+            );
+            return Ok(next.run(req).instrument(data_span).await);
+          }
           req
             .extensions_mut()
             .insert::<r2s_database::$model::Model>(data);
@@ -150,30 +171,21 @@ macro_rules! extract_team {
     {
       if let axum::Extension(Some(team)) = $team_ext {
         if team.state == r2s_database::team::State::Banned {
+          tracing::warn!("banned user try to access in-progress game");
           return Err(crate::traits::ResponseError::Forbidden(
             "you are banned in this game".to_owned(),
-            format!(
-              "user {}:{} ({}) with banned team {}:{} want to access in-progress game {}:{}",
-              $token.id, $token.account, $token.nickname, team.id, team.name, $game.id, $game.name
-            ),
           ));
         } else if team.state == r2s_database::team::State::Pending {
+          tracing::warn!("pending user try to access in-progress game");
           return Err(crate::traits::ResponseError::Forbidden(
             "your team is pending, please contact admin".to_owned(),
-            format!(
-              "user {}:{} ({}) with pending team {}:{} want to access in-progress game {}:{}",
-              $token.id, $token.account, $token.nickname, team.id, team.name, $game.id, $game.name
-            ),
           ));
         }
         Some(team)
       } else {
+        tracing::warn!("user try to access in-progress game without take part in it");
         return Err(crate::traits::ResponseError::Forbidden(
           "please take part in first".to_owned(),
-          format!(
-            "user {}:{} ({}) wants to access in-progress game {}:{} without take part in it",
-            $token.id, $token.account, $token.nickname, $game.id, $game.name
-          ),
         ));
       }
     } else {

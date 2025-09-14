@@ -1,5 +1,3 @@
-use std::net::IpAddr;
-
 use axum::{
   Extension, Json, Router,
   extract::{Query, State},
@@ -79,9 +77,9 @@ macro_rules! get_user_by_account {
     let user = match user {
       Some(user) => user,
       None => {
+        tracing::warn!(account=%$account, "account or email not found");
         return Err(ResponseError::Forbidden(
           "account or password is wrong".to_owned(),
-          format!("user requested account {} does not exist", $account),
         ));
       }
     };
@@ -95,9 +93,9 @@ macro_rules! check_email_freq {
 
     if let Some(freq) = freq {
       if freq > 3 {
+        tracing::warn!(email=%$email, "too many email requests");
         return Err(ResponseError::TooManyRequests(
           "too many requests, please try again later".to_owned(),
-          format!("email {} has been requested too many times", $email),
         ));
       }
     }
@@ -208,25 +206,20 @@ async fn query_code_for_account(
 
 async fn bind_account_by_code(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(token_tracker): Extension<TokenTracker>, Extension(ip): Extension<IpAddr>,
-  Query(CodeQuery { code }): Query<CodeQuery>,
+  Extension(token_tracker): Extension<TokenTracker>, Query(CodeQuery { code }): Query<CodeQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let original = match token_tracker.original.clone() {
     Some(token) => token,
     None => {
-      return Err(ResponseError::Forbidden(
-        "permission denied".to_owned(),
-        format!("client {ip} has no permission to bind account"),
-      ));
+      warn!("no original token found for binding account");
+      return Err(ResponseError::Forbidden("permission denied".to_owned()));
     }
   };
   let institute = match institute_db::get_by_token(&db.conn, &original).await? {
     Some(institute) => institute,
     None => {
-      return Err(ResponseError::Forbidden(
-        "permission denied".to_owned(),
-        format!("client {ip} has no permission to bind account"),
-      ));
+      warn!("no institute found for binding account");
+      return Err(ResponseError::Forbidden("permission denied".to_owned()));
     }
   };
   let user_id: Option<i64> = cache.at("account-code-rev").getdel(code).await?;
@@ -236,6 +229,7 @@ async fn bind_account_by_code(
       if user.institute_id.is_some_and(|v| v == institute.id) {
         return Ok((StatusCode::ALREADY_REPORTED, Json(user)));
       } else if user.institute_id.is_some() {
+        warn!(institute_id=?user.institute_id, "account already bound to another institute");
         return Err(ResponseError::Conflict("account already bound".to_owned()));
       }
       let user = user::Model {
@@ -255,25 +249,20 @@ async fn bind_account_by_code(
 
 async fn unbind_account_by_code(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(token_tracker): Extension<TokenTracker>, Extension(ip): Extension<IpAddr>,
-  Query(CodeQuery { code }): Query<CodeQuery>,
+  Extension(token_tracker): Extension<TokenTracker>, Query(CodeQuery { code }): Query<CodeQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let original = match token_tracker.original.clone() {
     Some(token) => token,
     None => {
-      return Err(ResponseError::Forbidden(
-        "permission denied".to_owned(),
-        format!("client {ip} has no permission to bind account"),
-      ));
+      warn!("no original token found for unbinding account");
+      return Err(ResponseError::Forbidden("permission denied".to_owned()));
     }
   };
   let institute = match institute_db::get_by_token(&db.conn, &original).await? {
     Some(institute) => institute,
     None => {
-      return Err(ResponseError::Forbidden(
-        "permission denied".to_owned(),
-        format!("client {ip} has no permission to bind account"),
-      ));
+      warn!("no institute found for unbinding account");
+      return Err(ResponseError::Forbidden("permission denied".to_owned()));
     }
   };
   let user_id: Option<i64> = cache.at("account-code-rev").getdel(code).await?;
@@ -281,10 +270,8 @@ async fn unbind_account_by_code(
     cache.at("account-code").del(user_id).await.ok();
     if let Some(mut user) = user::get_ex(&db.conn, user_id).await? {
       if user.institute_id.is_some_and(|v| v != institute.id) {
-        return Err(ResponseError::Forbidden(
-          "permission denied".to_owned(),
-          format!("client {ip} has no permission to unbind account"),
-        ));
+        warn!("user's institute does not match for unbinding account");
+        return Err(ResponseError::Forbidden("permission denied".to_owned()));
       }
       user.institute_id = None;
       let user: user::ExModel = user::update(&db.conn, user.into()).await?.into();
@@ -310,7 +297,7 @@ async fn login(
   Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  debug!("login request: {:?}", body);
+  debug!(?body, "login request");
   if token.id > 0 {
     return Err(ResponseError::Conflict(
       "you have already logged in".to_owned(),
@@ -325,22 +312,17 @@ async fn login(
 
   let attempts = cache.at("login").get::<i64>(&body.account).await?;
   if attempts.is_some_and(|attempts| attempts > 5) {
+    warn!(account=%body.account, "account is frozen due to too many login attempts");
     return Err(ResponseError::TooManyRequests(
       "this account is frozen in 30 mins".to_owned(),
-      format!("account {} has too many login attempts", &body.account),
     ));
   }
 
   let user = get_user_by_account!(db, &body.account);
 
   if user.banned || !user.permissions.0.contains(&Permission::Basic) {
-    return Err(ResponseError::Forbidden(
-      "account is banned".to_owned(),
-      format!(
-        "user {}:{} ({}) is banned",
-        user.id, user.account, user.nickname
-      ),
-    ));
+    warn!(id=%user.id, account=%user.account, nickname=%user.nickname, "account is banned");
+    return Err(ResponseError::Forbidden("account is banned".to_owned()));
   }
 
   let password_hash = user.password.unwrap_or(String::new());
@@ -348,11 +330,11 @@ async fn login(
   match verify_password(&body.password, &password_hash)? {
     true => {
       info!(
-        "User logged in: {}:{} ({}) <{}>",
-        user.id,
-        user.account,
-        user.nickname,
-        user.email.unwrap_or_default()
+        id=%user.id,
+        account=%user.account,
+        nickname=%user.nickname,
+        email=%user.email.clone().unwrap_or_default(),
+        "user logged in"
       );
       *(token_tracker.token.lock().await) = Token {
         id: user.id,
@@ -368,17 +350,21 @@ async fn login(
       // NOTE: update user's password hash if it's not argon2
       if !password_hash.starts_with("$argon2")
         && let Ok(password) = hash_password(&body.password).map_err(|err| {
-          warn!("failed to hash password: {:?}", err);
-        }) {
-          user::update_password(&db.conn, user.id, password).await?;
-        }
+          // warn!("failed to hash password: {:?}", err);
+          warn!(id=%user.id, account=%user.account, nickname=%user.nickname, error=?err, "failed to hash password");
+        })
+      {
+        user::update_password(&db.conn, user.id, password).await?;
+      }
 
       Ok(StatusCode::OK)
     }
-    false => Err(ResponseError::Forbidden(
-      "account or password is wrong".to_owned(),
-      format!("user {} password is wrong", user.id),
-    )),
+    false => {
+      warn!(id=%user.id, account=%user.account, nickname=%user.nickname, "password is wrong");
+      Err(ResponseError::Forbidden(
+        "account or password is wrong".to_owned(),
+      ))
+    }
   }
 }
 
@@ -471,7 +457,7 @@ async fn register(
   Extension(config): Extension<config::Model>, Extension(token_tracker): Extension<TokenTracker>,
   Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  debug!("register request: {:?}", body);
+  debug!(?body, "register request");
   let txn = db.conn.begin().await?;
   if config
     .captcha
@@ -542,11 +528,11 @@ async fn register(
   .await
   .ok();
   info!(
-    "User registered: {}:{} ({}) <{}>",
-    user.id,
-    user.account,
-    user.nickname,
-    user.email.unwrap_or_default()
+    id=%user.id,
+    account=%user.account,
+    nickname=%user.nickname,
+    email=%user.email.clone().unwrap_or_default(),
+    "new user registered"
   );
   *(token_tracker.token.lock().await) = Token {
     id: user.id,
@@ -584,12 +570,13 @@ async fn verify_email(
   user::update(&db.conn, user.clone()).await?;
 
   info!(
-    "User verified: {}:{} ({}) <{}>",
-    user.id,
-    user.account,
-    user.nickname,
-    user.email.unwrap_or_default()
+    id=%user.id,
+    account=%user.account,
+    nickname=%user.nickname,
+    email=%user.email.clone().unwrap_or_default(),
+    "user verified"
   );
+
   logout_user(&cache, user.id).await?;
   // renew token
   *(token_tracker.token.lock().await) = Token {
@@ -659,7 +646,8 @@ async fn forgot_password(
   let user = match user {
     Some(u) => u,
     None => {
-      warn!("user not found: {}", body.email);
+      // warn!("user not found: {}", body.email);
+      warn!(email=%body.email, "user not found");
       // shadowing the error to prevent leaking user information
       //return Err(ResponseError::NotFound("user not found".to_owned()));
       return Ok(StatusCode::OK);
@@ -758,13 +746,10 @@ async fn change_password(
       cache.at("token").del(format!("user-{}", user.id)).await?;
       Ok(StatusCode::OK)
     }
-    false => Err(ResponseError::Forbidden(
-      "old password is wrong".to_owned(),
-      format!(
-        "user {}:{} ({}) password is wrong",
-        user.id, user.account, user.nickname
-      ),
-    )),
+    false => {
+      warn!("old password is wrong when changing password");
+      Err(ResponseError::Forbidden("old password is wrong".to_owned()))
+    }
   }
 }
 
@@ -772,7 +757,7 @@ async fn logout(
   State(cache): State<Cache>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  debug!("logout request");
+  debug!(?token, "logout request");
   if token.id < 0 {
     return Err(ResponseError::Conflict("you have not logged in".to_owned()));
   }
@@ -784,6 +769,7 @@ async fn logout(
       .await
       .ok();
   }
+  info!("user logged out");
 
   Ok(StatusCode::OK)
 }
@@ -881,12 +867,9 @@ async fn delete_self(
   // Check if user is the only user
   let user_count = user::count(&txn, false, None, None, false).await?;
   if user_count == 1 {
+    warn!("the only user cannot delete itself");
     return Err(ResponseError::Forbidden(
       "you are the only user, can't delete yourself".to_owned(),
-      format!(
-        "user {}:{} ({}) want to delete itself but no user left.",
-        user.id, user.account, user.nickname
-      ),
     ));
   }
 
@@ -897,12 +880,9 @@ async fn delete_self(
       .await?
       .is_some()
     {
+      warn!(?game, "user want to delete itself before game archived");
       return Err(ResponseError::Forbidden(
         "you can not delete account before game archived".to_owned(),
-        format!(
-          "user {}:{} ({}) want to delete itself before game {}:{} archived",
-          user.id, user.account, user.nickname, game.id, game.name
-        ),
       ));
     }
   }

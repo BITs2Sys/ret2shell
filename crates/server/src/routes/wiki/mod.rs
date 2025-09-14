@@ -8,6 +8,7 @@ use axum::{
 use r2s_cache::Cache;
 use r2s_database::{article, user::Permission};
 use r2s_migrator::Database;
+use tracing::info;
 
 use crate::{
   middleware::auth::{self, Token},
@@ -64,6 +65,7 @@ async fn create_wiki(
   )
   .await?;
   cache.at("wiki").del("toc").await?; // remove cache
+  info!(title=%result.title, "wiki article created");
 
   Ok(Json(result))
 }

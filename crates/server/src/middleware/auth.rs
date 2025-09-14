@@ -19,7 +19,7 @@ use r2s_database::{
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
-use tracing::{Instrument, debug, error, error_span, info};
+use tracing::{Instrument, debug, error, error_span, info, warn};
 
 use crate::{traits::ResponseError, utility::password::verify_password};
 
@@ -67,9 +67,9 @@ async fn distribute_token(
     &EncodingKey::from_secret(key.as_ref()),
   )
   .map_err(|err| {
+    error!(error=?err, "failed to encode token");
     ResponseError::InternalServerError(
       "failed to encode token, please contact server admin".to_owned(),
-      format!("failed to encode token: {err:?}"),
     )
   })
 }
@@ -121,9 +121,9 @@ async fn extract_basic_token(
 
   let attempts = cache.at("login").get::<i64>(&account).await?;
   if attempts.is_some_and(|attempts| attempts > 5) {
+    warn!(%account, attempts, "too many login attempts");
     return Err(ResponseError::TooManyRequests(
       "this account is frozen in 30 mins".to_owned(),
-      format!("account {account} has too many login attempts"),
     ));
   }
 
@@ -131,21 +131,16 @@ async fn extract_basic_token(
   let user = match user {
     Some(user) => user,
     None => {
+      warn!(%account, "account not found");
       return Err(ResponseError::Forbidden(
         "account or password is wrong".to_owned(),
-        format!("user requested account {account} does not exist"),
       ));
     }
   };
 
   if user.banned || !user.permissions.0.contains(&Permission::Basic) {
-    return Err(ResponseError::Forbidden(
-      "account is banned".to_owned(),
-      format!(
-        "user {}:{} ({}) is banned",
-        user.id, user.account, user.nickname
-      ),
-    ));
+    warn!(id=%user.id, account=%user.account, nickname=%user.nickname, "account is banned");
+    return Err(ResponseError::Forbidden("account is banned".to_owned()));
   }
 
   let password_hash = user.password.unwrap_or(String::new());
@@ -181,12 +176,9 @@ async fn extract_basic_token(
       // NOTE: record login attempts on failed login
       cache.at("login").incr(&account).await.ok();
       cache.at("login").expire(&account, 60 * 30).await.ok();
+      warn!(id=%user.id, account=%user.account, nickname=%user.nickname, "wrong password");
       Err(ResponseError::Forbidden(
         "account or password is wrong".to_owned(),
-        format!(
-          "user {}:{} ({}) requested with wrong password",
-          user.id, user.account, user.nickname
-        ),
       ))
     }
   }
@@ -201,8 +193,8 @@ pub async fn extract_user_info(
     .clone()
     .ok_or(ResponseError::InternalServerError(
       "auth config missing".into(),
-      "auth section is not configured.".into(),
-    ))?;
+    ))
+    .inspect_err(|err| error!(error=?err, "auth config missing"))?;
   let auth_header = req
     .headers()
     .get(header::AUTHORIZATION)
@@ -236,7 +228,7 @@ pub async fn extract_user_info(
   req.extensions_mut().insert(token_tracker.clone());
   req.extensions_mut().insert(token.clone());
 
-  let user_span = error_span!("user", id = token.id, account = %token.account);
+  let user_span = error_span!("user", id=%token.id, account=%token.account);
   let mut resp = async move { next.run(req).await }
     .instrument(user_span)
     .await;
@@ -342,10 +334,8 @@ macro_rules! captcha_protected {
     }
     let captcha = captcha.unwrap();
     if !r2s_captcha::check(&captcha.validator, &captcha, captcha_answer).await? {
-      return Err(ResponseError::Forbidden(
-        "hey robot".to_owned(),
-        "".to_owned(),
-      ));
+      tracing::warn!(?captcha_id, "invalid captcha answer");
+      return Err(ResponseError::Forbidden("hey robot".to_owned()));
     }
   };
 }
@@ -376,14 +366,14 @@ macro_rules! permission_required_all {
                 return Err(crate::traits::ResponseError::Unauthorized("please login first".to_owned()));
             }
             let required_perms = [$($perm),*];
-            tracing::debug!("user permissions: {:?}", token.permissions.0);
-            tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().all(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
-                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), format!(
-                    "user {}:{} ({}) want to access api '{}' without permission",
-                    token.id, token.account, token.nickname, req.uri().path()
-                )))
+                false => {
+                  tracing::warn!(
+                    "user wants to access api without permission",
+                  );
+                  Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(),))
+                }
             }
         }
     };
@@ -413,14 +403,14 @@ macro_rules! permission_required_any {
                 return Err(crate::traits::ResponseError::Unauthorized("please login first".to_owned()));
             }
             let required_perms = [$($perm),*];
-            tracing::debug!("user permissions: {:?}", token.permissions.0);
-            tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
-                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), format!(
-                    "user {}:{} ({}) want to access api '{}' without permission",
-                    token.id, token.account, token.nickname, req.uri().path()
-                )))
+                false => {
+                  tracing::warn!(
+                    "user wants to access api without permission",
+                  );
+                  Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(),))
+                }
             }
         }
     };
@@ -449,13 +439,8 @@ pub async fn game_admin_required(
   if is_game_admin!(token, game) {
     Ok(next.run(req).await)
   } else {
-    Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access game {}:{} admin api with out permission",
-        token.id, token.account, token.nickname, game.id, game.name
-      ),
-    ))
+    warn!("user wants to access game admin api without permission",);
+    Err(ResponseError::Forbidden("permission denied".to_owned()))
   }
 }
 
@@ -470,13 +455,8 @@ pub async fn game_access_required(
     return Ok(next.run(req).await);
   }
   if game.hidden {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access hidden game {}:{}",
-        token.id, token.account, token.nickname, game.id, game.name
-      ),
-    ));
+    warn!("user wants to access hidden game api",);
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   if game.host_type == game::HostType::Training {
     return Ok(next.run(req).await);
@@ -492,13 +472,8 @@ pub async fn game_access_required(
   };
 
   if team.is_none() || team.is_some_and(|team| team.state == team::State::Banned) {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access game {}:{} api with out participation or banned",
-        token.id, token.account, token.nickname, game.id, game.name
-      ),
-    ));
+    warn!("user wants to access game api without participation or banned",);
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   Ok(next.run(req).await)
 }
@@ -512,13 +487,8 @@ pub async fn challenge_access_required(
     return Err(ResponseError::Unauthorized("please login first".to_owned()));
   }
   if game.id != challenge.game_id {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access cross-game challenge {}:{} in game {}:{}",
-        token.id, token.account, token.nickname, challenge.id, challenge.name, game.id, game.name
-      ),
-    ));
+    warn!("user wants to access cross-game challenge");
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   if is_game_admin!(token, game) {
     return Ok(next.run(req).await);
@@ -528,13 +498,8 @@ pub async fn challenge_access_required(
     || game.frozen
     || challenge.release_at.is_some_and(|c| c > Utc::now())
   {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access game {}:{} challenge {}:{} which is hidden or not released",
-        token.id, token.account, token.nickname, game.id, game.name, challenge.id, challenge.name
-      ),
-    ));
+    warn!("user wants to access hidden or unreleased challenge",);
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   if game.start_at > Utc::now() {
     return Err(ResponseError::PreconditionFailed(

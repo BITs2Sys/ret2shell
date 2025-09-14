@@ -40,7 +40,7 @@ hyper-util         = "0.1"
 image              = "0.25"
 infer              = "0.19"
 jsonwebtoken       = { version = "9.3", default-features = false }
-k8s-openapi        = { version = "0.25", features = ["latest"] }
+k8s-openapi        = { version = "0.26", features = ["latest"] }
 mime               = "0.3"
 nanoid             = "0.4"
 num-derive         = "0.4"
@@ -150,7 +150,7 @@ version = "10.1"
 
 [workspace.dependencies.kube]
 features = ["config", "client", "rustls-tls", "runtime", "derive", "ws"]
-version  = "1.1"
+version  = "2.0"
 
 [workspace.dependencies.wsrx]
 default-features = false

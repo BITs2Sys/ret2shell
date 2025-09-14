@@ -349,7 +349,7 @@ impl Cluster {
         }
         Err(err) => {
           error!(
-            pod=?pod.name(), 
+            pod=?pod.name(),
             error=?err,
             "failed to check outdated pod");
         }

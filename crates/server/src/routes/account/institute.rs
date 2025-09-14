@@ -23,7 +23,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     )
     .route_layer(middleware::from_fn_with_state(
       state.clone(),
-      data::prepare_data!(institute, false),
+      data::prepare_data!(institute, false, id, name),
     ))
     .route("/", post(create_institute))
     .route_layer(middleware::from_fn(auth::permission_required_all!(

@@ -15,7 +15,7 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
-use tracing::{error, info, warn};
+use tracing::{error, error_span, info, warn};
 
 use crate::traits::{GlobalState, ResponseError};
 
@@ -214,6 +214,9 @@ async fn submission_worker_exec(
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
   let txn = db.conn.begin().await?;
+  let submission_span =
+    error_span!("submission", id = submission.id, content = ?submission.content);
+  let submission_entered = submission_span.enter();
 
   let challenge = challenge::get(&txn, submission.challenge_id).await?;
   let challenge = if let Some(challenge) = challenge {
@@ -221,6 +224,8 @@ async fn submission_worker_exec(
   } else {
     return Err(ResponseError::BadRequest("challenge not found".to_owned()));
   };
+  let challenge_span = error_span!("data-challenge", id = challenge.id, name = %challenge.name);
+  let challenge_entered = challenge_span.enter();
   let prev_submitted = submission::count(
     &txn,
     true,
@@ -240,17 +245,22 @@ async fn submission_worker_exec(
     None
   };
   let user = user::get(&txn, submission.user_id).await?;
+
   let game = game::get(&txn, challenge.game_id).await?;
   let game = if let Some(game) = game {
     game
   } else {
     return Err(ResponseError::BadRequest("game not found".to_owned()));
   };
+  let game_span = error_span!("data-game", id=%game.id, name=%game.name);
+  let game_entered = game_span.enter();
   let user = if let Some(user) = user {
     user
   } else {
     return Err(ResponseError::BadRequest("user not found".to_owned()));
   };
+  let user_span = error_span!("user", id=%user.id, account=%user.account, nickname=%user.nickname);
+  let user_entered = user_span.enter();
   let challenge_bucket = bucket
     .at(
       game
@@ -298,25 +308,8 @@ async fn submission_worker_exec(
 
   // stage 3: update team score and create extra or audit if necessary
   if submission.solved.unwrap_or(false) {
-    info!(
-      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is correct",
-      submission.id,
-      submission.content,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
-    );
-    // tokio::spawn(async move {
-    //   cluster
-    //     .at(CHALLENGE_NS)
-    //     .stop_challenge_env_by_user(user.id)
-    //     .await
-    //     .ok();
-    // });
+    info!(correct = true, "submission is corrent");
+
     // stage 3.1: update challenge score
     let (changed, decay, challenge) = challenge::maintain_score(&txn, challenge.clone()).await?;
 
@@ -378,18 +371,7 @@ async fn submission_worker_exec(
       cache.at("challenge").del(challenge.id).await.ok();
     }
   } else {
-    info!(
-      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is incorrect",
-      submission.id,
-      submission.content,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
-    );
+    info!(correct = false, "submission is incorrect");
     txn.commit().await?;
   }
 
@@ -419,16 +401,8 @@ async fn submission_worker_exec(
     };
     let audit = audit::create(&txn, audit).await?;
     warn!(
-      "Audit {} for submission {} by {}:{} ({}) for challenge {}:{} in game {}:{}",
-      audit.id,
-      submission.id,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
+      reason=%audit.reason,
+      "cheated submission detected, created audit",
     );
     let event = EventContainer {
       game_id: challenge.game_id,
@@ -447,6 +421,10 @@ async fn submission_worker_exec(
   }
 
   txn.commit().await?;
+  drop(challenge_entered);
+  drop(user_entered);
+  drop(game_entered);
+  drop(submission_entered);
   Ok(submission)
 }
 
@@ -454,7 +432,7 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
   let txn = db.conn.begin().await?;
   let score = team::calc_score(&txn, team.id).await;
   if let Err(err) = score {
-    warn!("calc team score failed: {:?}", err);
+    warn!(error=?err, "calc team score failed");
     return Err(ResponseError::DatabaseError(err));
   }
   let score = score.unwrap();
@@ -477,7 +455,7 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
     )
     .await;
     if let Err(e) = result {
-      warn!("update team score failed: {:?}", e);
+      warn!(error=?e, "update team score failed");
     }
   }
   txn.commit().await?;

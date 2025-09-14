@@ -9,7 +9,7 @@ use axum::{
 use r2s_config::GlobalConfig;
 use r2s_database::{game, user::Permission};
 use r2s_migrator::Database;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::{
   middleware::auth::{self, Token},
@@ -29,7 +29,7 @@ async fn proxy_to_registry(
   State(config): State<GlobalConfig>, State(ref db): State<Database>,
   State(client): State<HTTPClient>, Extension(token): Extension<Token>, mut req: Request,
 ) -> Result<impl IntoResponse, ResponseError> {
-  debug!("Proxying frontend request: {:?}", req);
+  debug!(?req, "proxying frontend request");
   let registry_config = config.cluster.clone().and_then(|v| v.registry);
   let (protocol, registry_url) = match registry_config {
     Some(c) => {
@@ -93,27 +93,18 @@ async fn proxy_to_registry(
     };
 
     if !game.admins.0.contains(&token.id) {
-      return Err(ResponseError::Forbidden(
-        "access denied".to_string(),
-        format!(
-          "user {}:{} ({}) is not allowed to access game scope {}",
-          token.id, token.account, token.nickname, repo
-        ),
-      ));
+      warn!(?repo, "user is not allowed to access this game scope");
+      return Err(ResponseError::Forbidden("access denied".to_string()));
     }
-
     info!(
-      "game admin {}:{} ({}) pushed {} to game scope {}",
-      token.id,
-      token.account,
-      token.nickname,
-      path_query.strip_prefix(repo).unwrap_or(path_query),
-      repo
+      %repo,
+      image=%path_query.strip_prefix(repo).unwrap_or(path_query),
+      "game admin pushed to game scope",
     );
   } else {
     info!(
-      "devops {}:{} ({}) operate registry with path {}",
-      token.id, token.account, token.nickname, path_query
+      image=%path_query,
+      "devops operate registry",
     );
   }
 
@@ -123,7 +114,7 @@ async fn proxy_to_registry(
     registry_url.trim_matches('/'),
     path_query
   );
-  debug!("Proxying to registry url: {}", uri);
+  debug!(?uri, "proxying to registry url");
   *req.uri_mut() = Uri::try_from(uri)
     .map_err(|err| ResponseError::BadRequest(format!("invalid registry uri: {err}")))?;
   //req.headers_mut().remove("host");
@@ -132,6 +123,6 @@ async fn proxy_to_registry(
     .request(req)
     .await
     .map_err(|err| ResponseError::BadRequest(format!("registry proxy failed: {err}")))?;
-  debug!("Proxying registry request: {:?}", resp);
+  debug!(?resp, "proxying registry response");
   Ok(resp.into_response())
 }

@@ -30,7 +30,6 @@ async fn get_captcha(
 ) -> Result<impl IntoResponse, ResponseError> {
   let captcha_config = config.captcha.ok_or(ResponseError::InternalServerError(
     "missing captcha config".to_owned(),
-    "".to_owned(),
   ))?;
   if !captcha_config.enabled {
     return Ok(Json(r2s_captcha::generate(&ValidatorType::None, 0).await?));

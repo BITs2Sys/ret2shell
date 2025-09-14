@@ -24,7 +24,7 @@ use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
 use tokio::{fs, io::AsyncBufReadExt, time::timeout};
-use tracing::{debug, error};
+use tracing::{debug, error, warn};
 
 use crate::{
   middleware::auth,
@@ -86,7 +86,6 @@ async fn get_auth_config(
 ) -> Result<impl IntoResponse, ResponseError> {
   let auth_config = config.auth.ok_or(ResponseError::InternalServerError(
     "missing auth config".to_owned(),
-    "".to_owned(),
   ))?;
   Ok(Json(auth_config.desensitize()))
 }
@@ -187,10 +186,8 @@ async fn platform_stream_logs(
   if !token.permissions.0.contains(&Permission::DevOps)
     && !token.permissions.0.contains(&Permission::Statistics)
   {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!("somebody try to access platform logs with bad token {token:?}."),
-    ));
+    warn!(?token, "permission denied to stream platform logs");
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   let resp = ws.on_upgrade(|ws| stream_logs_worker(ws, config));
   Ok(resp)
@@ -199,7 +196,7 @@ async fn platform_stream_logs(
 async fn stream_logs_worker(ws: WebSocket, config: GlobalConfig) {
   let result = _stream_logs_worker(ws, config).await;
   if let Err(e) = result {
-    error!("stream_logs_worker error: {:?}", e);
+    error!(error=?e, "stream_logs_worker failed");
   }
 }
 
@@ -208,7 +205,6 @@ async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<
     &config
       .logging
       .ok_or(ResponseError::InternalServerError(
-        "missing log config".to_owned(),
         "missing log config".to_owned(),
       ))?
       .directory,
@@ -231,7 +227,7 @@ async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<
           Ok(Some(log)) => log,
           Ok(None) => break,
           Err(e) => {
-            error!("failed to read log: {:?}", e);
+            error!(error=?e, "failed to read log");
             break;
           }
         };
@@ -267,7 +263,6 @@ async fn get_logs_list(
       .logging
       .ok_or(ResponseError::InternalServerError(
         "missing log config".to_owned(),
-        "missing log config".to_owned(),
       ))?
       .directory,
   )
@@ -294,7 +289,6 @@ async fn get_logs_list(
     }
   } else {
     Err(ResponseError::InternalServerError(
-      "missing log config".to_owned(),
       "missing log config".to_owned(),
     ))
   }

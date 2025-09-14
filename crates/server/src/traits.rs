@@ -43,14 +43,14 @@ pub struct GlobalState {
 
 #[derive(Debug, Error)]
 pub enum ResponseError {
-  #[error("internal server error: {0}, {1}")]
-  InternalServerError(String, String),
+  #[error("internal server error: {0}")]
+  InternalServerError(String),
   #[error("unauthorized: {0}")]
   Unauthorized(String),
   #[error("bad request: {0}")]
   BadRequest(String),
-  #[error("forbidden: {0}, {1}")]
-  Forbidden(String, String),
+  #[error("forbidden: {0}")]
+  Forbidden(String),
   #[error("not found: {0}")]
   NotFound(String),
   #[error("resource is outdated: {0}")]
@@ -59,8 +59,8 @@ pub enum ResponseError {
   Conflict(String),
   #[error("precondition failed: {0}")]
   PreconditionFailed(String),
-  #[error("too many requests: {0}, {1}")]
-  TooManyRequests(String, String),
+  #[error("too many requests: {0}")]
+  TooManyRequests(String),
   #[error("database error: {0}")]
   DatabaseError(#[from] r2s_database::DbErr),
   #[error("cache error: {0}")]
@@ -103,19 +103,14 @@ macro_rules! log_with_resp {
 impl IntoResponse for ResponseError {
   fn into_response(self) -> Response<Body> {
     let (status, message) = match self {
-      ResponseError::InternalServerError(summary, detail) => {
-        log_with_resp!(StatusCode::INTERNAL_SERVER_ERROR, summary, detail)
-      }
+      ResponseError::InternalServerError(summary) => (StatusCode::INTERNAL_SERVER_ERROR, summary),
       ResponseError::Unauthorized(summary) => (StatusCode::UNAUTHORIZED, summary),
       ResponseError::BadRequest(summary) => (StatusCode::BAD_REQUEST, summary),
-      ResponseError::Forbidden(summary, detail) => {
-        log_with_resp!(StatusCode::FORBIDDEN, summary, detail)
-      }
+      ResponseError::Forbidden(summary) => (StatusCode::FORBIDDEN, summary),
+
       ResponseError::NotFound(summary) => (StatusCode::NOT_FOUND, summary),
       ResponseError::Conflict(summary) => (StatusCode::CONFLICT, summary),
-      ResponseError::TooManyRequests(summary, detail) => {
-        log_with_resp!(StatusCode::TOO_MANY_REQUESTS, summary, detail)
-      }
+      ResponseError::TooManyRequests(summary) => (StatusCode::TOO_MANY_REQUESTS, summary),
       ResponseError::PreconditionFailed(summary) => (StatusCode::PRECONDITION_FAILED, summary),
       ResponseError::DatabaseError(e) => match e {
         DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),

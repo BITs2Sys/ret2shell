@@ -100,7 +100,7 @@ async fn check_network_policy(client: &Cluster) -> Result<(), ClusterError> {
           ..Default::default()
         },
         spec: Some(NetworkPolicySpec {
-          pod_selector: LabelSelector {
+          pod_selector: Some(LabelSelector {
             match_labels: Some(
               [("ret.sh.cn/internet".to_owned(), "false".to_owned())]
                 .iter()
@@ -108,7 +108,7 @@ async fn check_network_policy(client: &Cluster) -> Result<(), ClusterError> {
                 .collect(),
             ),
             ..Default::default()
-          },
+          }),
           policy_types: Some(vec!["Egress".to_owned()]),
           ..Default::default()
         }),

@@ -252,17 +252,17 @@ impl IntoIterator for ForwardedHeaderValue {
 
 #[derive(Debug, Error)]
 pub enum ForwardedHeaderValueParseError {
-  #[error("Header is empty")]
+  #[error("header is empty")]
   HeaderIsEmpty,
-  #[error("Stanza contained illegal part {0}")]
+  #[error("stanza contained illegal part {0}")]
   InvalidPart(String),
-  #[error("Stanza specified an invalid protocol")]
+  #[error("stanza specified an invalid protocol")]
   InvalidProtocol,
-  #[error("Identifier specified an invalid or malformed IP address")]
+  #[error("identifier specified an invalid or malformed IP address")]
   InvalidAddress,
   #[error("Identifier specified uses an obfuscated node ({0:?}) that is invalid")]
   InvalidObfuscatedNode(String),
-  #[error("Identifier specified an invalid or malformed IP address")]
+  #[error("identifier specified an invalid or malformed IP address")]
   IpParseErr(#[from] std::net::AddrParseError),
 }
 
@@ -315,7 +315,7 @@ pub async fn ip_record(
       ip.to_string()
     }
     None => {
-      warn!("Unable to get client IP address from request {req:?}");
+      warn!(request=?req, "unable to get client IP address from request");
       return Ok(next.run(req).await);
     }
   };

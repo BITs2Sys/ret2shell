@@ -58,17 +58,14 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Queue) {
-  info!("Cluster maintain worker started");
+  info!("cluster maintain worker started");
   let mut overloaded = false;
   loop {
     tokio::time::sleep(std::time::Duration::from_secs(30)).await;
     match cluster.at(CHALLENGE_NS).delete_outdated_envs().await {
       Ok((o, running, pending)) => {
         if o {
-          warn!(
-            "Cluster is overloaded: running={}, pending={}",
-            running, pending
-          );
+          warn!(?running, ?pending, "cluster is overloaded");
           let event = EventContainer {
             game_id: 0,
             event: Event::Devops(Box::new(DevopsEvent {
@@ -82,10 +79,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
           };
           queue.publish("event", event).await.ok();
         } else if !o && overloaded != o {
-          info!(
-            "Cluster is recovered: running={}, pending={}",
-            running, pending
-          );
+          info!(?running, ?pending, "cluster is recovered");
           let event = EventContainer {
             game_id: 0,
             event: Event::Devops(Box::new(DevopsEvent {
@@ -101,7 +95,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
         }
         overloaded = o;
       }
-      Err(err) => error!("Failed to delete outdated pods: {:?}", err),
+      Err(err) => error!(error=?err, "failed to delete outdated pods"),
     }
   }
 }
@@ -133,13 +127,10 @@ struct NodeSelector {
 
 async fn update_default_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
+  Extension(config): Extension<config::Model>,
   Json(NodeSelector { node_selector }): Json<NodeSelector>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  info!(
-    "default node selector updated to {node_selector} by user {}:{} ({})",
-    token.id, token.account, token.nickname
-  );
+  info!(%node_selector, "default node selector updated");
   config::update(
     &db.conn,
     config::Model {
@@ -158,7 +149,7 @@ async fn update_default_node_selector(
 
 async fn delete_default_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
-  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
+  Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   config::update(
     &db.conn,
@@ -172,10 +163,8 @@ async fn delete_default_node_selector(
   )
   .await?;
   cache.at("platform").del("config").await?;
-  info!(
-    "default node selector deleted by user {}:{} ({})",
-    token.id, token.account, token.nickname
-  );
+
+  info!("default node selector deleted");
 
   Ok(())
 }
@@ -192,8 +181,7 @@ struct TrafficScriptResponse {
 
 async fn update_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
-  Json(req): Json<TrafficScriptRequest>,
+  Extension(config): Extension<config::Model>, Json(req): Json<TrafficScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -204,7 +192,7 @@ async fn update_traffic_script(
     match lint {
       ClusterError::CompileError(diagnostics) => Some(diagnostics),
       err => {
-        warn!("failed to lint script: {:?}", err);
+        warn!(error=?err, "failed to lint script");
         Some(err.to_string())
       }
     }
@@ -224,16 +212,13 @@ async fn update_traffic_script(
   .await?;
   traffic_mapper.expire("default").await;
   cache.at("platform").del("config").await?;
-  info!(
-    "default traffic script updated by user {}:{} ({})",
-    token.id, token.account, token.nickname
-  );
+  info!("default traffic script updated");
   Ok(Json(TrafficScriptResponse { lint }))
 }
 
 async fn delete_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
+  Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -253,10 +238,7 @@ async fn delete_traffic_script(
   traffic_mapper.expire("default").await;
   cache.at("platform").del("config").await?;
 
-  info!(
-    "default traffic script deleted by user {}:{} ({})",
-    token.id, token.account, token.nickname
-  );
+  info!("default traffic script deleted");
 
   Ok(())
 }

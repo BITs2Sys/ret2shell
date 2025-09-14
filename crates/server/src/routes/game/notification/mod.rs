@@ -30,7 +30,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/", delete(delete_notification))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(notification, false),
+          data::prepare_data!(notification, false, id, title),
         )),
     )
     .route("/", post(create_notification))
