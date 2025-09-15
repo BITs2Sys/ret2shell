@@ -69,29 +69,7 @@ export default function () {
                 </a>
               </Show>
             </Button>
-            {/* <Show */}
-            {/*   when={platformStore.isOnline} */}
-            {/*   fallback={ */}
-            {/*     <Link href="/docs" ghost> */}
-            {/*       <span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" /> */}
-            {/*       <span>{t("docs.title")}</span> */}
-            {/*     </Link> */}
-            {/*   } */}
-            {/* > */}
-            {/*   <Button */}
-            {/*     ghost */}
-            {/*     onClick={() => { */}
-            {/*       document.getElementById("index-calendar")?.scrollIntoView({ behavior: "smooth" }); */}
-            {/*     }} */}
-            {/*   > */}
-            {/*     <span>{t("calendar.scrollToView")}</span> */}
-            {/*     <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" /> */}
-            {/*   </Button> */}
-            {/* </Show> */}
             <Show when={!platformStore.config.hide_maker}>
-              {/* <Link square href="/magic/sakana" ghost name="gift"> */}
-              {/*   <span class="shrink-0 icon-[fluent--gift-20-regular] w-5 h-5" /> */}
-              {/* </Link> */}
               <div />
             </Show>
             <Popover
@@ -162,16 +140,6 @@ export default function () {
             </Popover>
           </div>
         </section>
-        {/* <Show when={platformStore.isOnline}> */}
-        {/*   <section */}
-        {/*     id="index-calendar" */}
-        {/*     ref={calendarSection!} */}
-        {/*     class="h-full min-h-full snap-center relative overflow-scroll" */}
-        {/*   > */}
-        {/*     <Calendar /> */}
-        {/*     <NarrowTips breakpoint="md" /> */}
-        {/*   </section> */}
-        {/* </Show> */}
       </div>
     </div>
   );

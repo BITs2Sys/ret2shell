@@ -142,6 +142,9 @@ macro_rules! prepare_data {
                 $trace=%data.$trace,
               )*
             );
+            req
+              .extensions_mut()
+              .insert::<r2s_database::$model::Model>(data);
             return Ok(next.run(req).instrument(data_span).await);
           }
           req

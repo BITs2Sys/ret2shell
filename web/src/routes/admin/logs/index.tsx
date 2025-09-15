@@ -65,6 +65,30 @@ function LogField(log: Log) {
   );
 }
 
+function DataSpanField(log: Log) {
+  if (!log.spans) return null;
+  return (
+    <For each={log.spans.filter((span) => span.name.startsWith("data-"))}>
+      {(span) => (
+        <>
+          <span class="opacity-80 italic font-bold">{span.name}</span>
+          <span class="opacity-80 font-bold">&#123;</span>
+          <For each={Object.entries(span)}>
+            {([key, value]) => (
+              <>
+                <span class="italic opacity-60">{key}</span>
+                <span class="opacity-60">=</span>
+                <span>{value as string}&nbsp;</span>
+              </>
+            )}
+          </For>
+          <span class="opacity-80 font-bold">&#125;</span>
+        </>
+      )}
+    </For>
+  );
+}
+
 export default function () {
   const [loading, setLoading] = createSignal(false);
   const [enableStreamLogs, setEnableStreamLogs] = createSignal(false);
@@ -265,6 +289,7 @@ export default function () {
                 <div class="grid grid-cols-[1fr] group-hover:block w-full">
                   <span class={clsx("truncate break-words group-hover:whitespace-normal", getContentColor(log.level))}>
                     {LogField(log)}
+                    {DataSpanField(log)}
                   </span>
                 </div>
               </div>
