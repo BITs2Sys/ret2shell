@@ -37,6 +37,7 @@ use r2s_queue::Queue;
 use sea_orm::{DatabaseTransaction, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use tokio_util::io::{ReaderStream, StreamReader};
+use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use super::{get_pod_field, worker};
@@ -315,7 +316,7 @@ async fn update_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   State(ref queue): State<Queue>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
-  Json(challenge): Json<challenge::Model>,
+  Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // refuse to change some columns when challenge is cloned from another
   // challenge.
@@ -375,7 +376,14 @@ async fn update_challenge(
   // }
   txn.commit().await?;
   if score_changed {
-    queue.publish("scoreboard", challenge.clone()).await.ok();
+    queue
+      .publish(
+        "scoreboard",
+        challenge.clone(),
+        &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+      )
+      .await
+      .ok();
   }
   cache.at("challenge").del(challenge.id).await.ok();
 
@@ -387,7 +395,7 @@ async fn up_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   State(ref queue): State<Queue>, State(checker): State<Checker>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge.clone());
@@ -417,13 +425,21 @@ async fn up_challenge(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(challenge))
 }
 
 async fn down_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
@@ -450,7 +466,14 @@ async fn down_challenge(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(challenge))
 }
 
@@ -575,8 +598,8 @@ struct SubmitRequest {
 async fn submit_flag(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  team_ext: Extension<Option<team::Model>>, Extension(challenge): Extension<challenge::Model>,
-  Json(req): Json<SubmitRequest>,
+  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
+  Extension(challenge): Extension<challenge::Model>, Json(req): Json<SubmitRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // Only game in progress and has a team, the submission record will be marked as
   // team's. otherwise the submission will only be marked as user-solved.
@@ -625,7 +648,14 @@ async fn submit_flag(
           challenge: challenge.clone(),
         })),
       };
-      queue.publish("event", event).await.ok();
+      queue
+        .publish(
+          "event",
+          event,
+          &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+        )
+        .await
+        .ok();
       warn!("player created too many submissions in a short time");
       return Err(ResponseError::TooManyRequests(
         "too many submissions, please calmdown and try again 5 miniutes later".to_owned(),
@@ -637,7 +667,13 @@ async fn submit_flag(
   }
   info!(content = ?req.content, "submit flag");
   let submission = submission::create(&db.conn, submission).await?;
-  queue.publish("check", submission.clone()).await?;
+  queue
+    .publish(
+      "check",
+      submission.clone(),
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await?;
   Ok(Json(submission))
 }
 
@@ -955,10 +991,12 @@ async fn unlock_hint(
   }
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn create_challenge_hint(
   State(bucket): State<Bucket>, State(ref db): State<Database>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Json(hint): Json<hint::Model>,
+  Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
+  Json(hint): Json<hint::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // if challenge.ref_id.is_some() {
   //   return Err(ResponseError::PreconditionFailed(
@@ -993,7 +1031,14 @@ async fn create_challenge_hint(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   sync_challenge_hint_with_bucket(&challenge_bucket, &txn, &challenge).await?;
   txn.commit().await?;
   game_bucket

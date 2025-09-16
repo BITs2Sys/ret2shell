@@ -9,7 +9,8 @@ use lettre::{
   },
 };
 use r2s_config::email;
-use tracing::{debug, error, info, warn};
+use r2s_queue::TracedMessage;
+use tracing::{debug, error, error_span, info, warn};
 
 use super::traits::{EmailCtx, EmailError, EmailRequest};
 
@@ -58,7 +59,10 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
 
 async fn process_message(message: jetstream::Message) -> Result<(), EmailError> {
   let email = String::from_utf8(message.message.payload.to_vec())?;
-  let req = serde_json::from_str::<EmailRequest>(&email)?;
+  let req = serde_json::from_str::<TracedMessage<EmailRequest>>(&email)?;
+  let span = error_span!("request", trace=%req.trace);
+  let span_guard = span.enter();
+  let req = req.payload;
   let mut retry_count = 3;
   while retry_count > 0 {
     if let Err(err) = send_email_impl(&req.config, &req.email).await {
@@ -90,6 +94,7 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
     .await
     .inspect_err(|e| error!(error=?e, "failed to drop NATS email message"))
     .ok();
+  drop(span_guard);
   Ok(())
 }
 

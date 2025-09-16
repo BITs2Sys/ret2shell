@@ -22,6 +22,7 @@ tokio      = { workspace = true }
 tracing    = { workspace = true }
 
 r2s-database = { workspace = true }
+r2s-queue    = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

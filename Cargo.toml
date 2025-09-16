@@ -103,7 +103,7 @@ features = ["limit"]
 version  = "0.5"
 
 [workspace.dependencies.tower-http]
-features = ["cors", "fs", "trace", "normalize-path"]
+features = ["cors", "fs", "trace", "normalize-path", "request-id", "util"]
 version  = "0.6"
 
 [workspace.dependencies.axum-extra]

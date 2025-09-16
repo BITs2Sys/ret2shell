@@ -17,6 +17,7 @@ use r2s_migrator::Database;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::Deserialize;
+use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
 
 use super::{is_game_admin, worker};
@@ -448,7 +449,7 @@ async fn join_team(
 async fn update_team_info(
   State(queue): State<Queue>, State(ref db): State<Database>,
   Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
-  Json(req): Json<team::Model>,
+  Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let result = team::update(
     &db.conn,
@@ -498,7 +499,14 @@ async fn update_team_info(
           Some(c) => c,
           None => continue,
         };
-        queue.publish("scoreboard", challenge.clone()).await.ok();
+        queue
+          .publish(
+            "scoreboard",
+            challenge.clone(),
+            &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+          )
+          .await
+          .ok();
       }
     });
   }

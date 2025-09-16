@@ -1,5 +1,6 @@
 use async_nats::jetstream::{Message, consumer::pull::Stream};
 use futures::StreamExt;
+use r2s_queue::TracedMessage;
 use tracing::{error, warn};
 
 use crate::{EventManager, events::EventContainer, traits::EventError};
@@ -33,7 +34,7 @@ pub async fn event_pusher(mut messages: Stream, manager: EventManager) {
 
 async fn push_event(message: Message, manager: EventManager) -> Result<(), EventError> {
   let payload = String::from_utf8(message.message.payload.to_vec())?;
-  let event = serde_json::from_str::<EventContainer>(&payload)?;
-  manager.broadcast(event).await;
+  let event = serde_json::from_str::<TracedMessage<EventContainer>>(&payload)?;
+  manager.broadcast(event.payload).await;
   Ok(())
 }

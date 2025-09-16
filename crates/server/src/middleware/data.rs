@@ -8,7 +8,7 @@ use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_database::game;
 use r2s_migrator::Database;
-use tracing::{Instrument, debug, error_span};
+use tracing::{Span, debug};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -60,19 +60,14 @@ pub async fn prepare_team_info(
   Extension(game): Extension<game::Model>, mut req: Request, next: Next,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = r2s_database::team::get_by_user_id(&db.conn, game.id, token.id).await?;
-  let resp = if let Some(team) = team.clone() {
-    req
-      .extensions_mut()
-      .insert::<Option<r2s_database::team::Model>>(Some(team.clone()));
-    let team_span = error_span!("team", id=%team.id, name=%team.name);
-    next.run(req).instrument(team_span).await
-  } else {
-    req
-      .extensions_mut()
-      .insert::<Option<r2s_database::team::Model>>(None);
-    next.run(req).await
-  };
-  Ok(resp)
+  if let Some(ref team) = team {
+    Span::current().record("team-id", team.id);
+    Span::current().record("team-name", team.name.as_str());
+  }
+  req
+    .extensions_mut()
+    .insert::<Option<r2s_database::team::Model>>(team);
+  Ok(next.run(req).await)
 }
 
 macro_rules! get_path_param_i64 {
@@ -130,26 +125,17 @@ macro_rules! prepare_data {
       };
       match data {
         Some(data) => {
-          use tracing::Instrument;
           // if trace is enabled, add trace
           let traced: Vec<&str> = vec![$(stringify!($trace)),*];
           let traced = traced.len() > 0;
-          if traced {
-          let data_span = tracing::error_span!(
-              stringify!(data-$model),
-              id=%data.id,
-              $(
-                $trace=%data.$trace,
-              )*
-            );
             req
               .extensions_mut()
-              .insert::<r2s_database::$model::Model>(data);
-            return Ok(next.run(req).instrument(data_span).await);
+              .insert::<r2s_database::$model::Model>(data.clone());
+          if traced {
+             $(
+               tracing::Span::current().record(concat!("data-", stringify!($model), "-", stringify!($trace)), &data.$trace);
+             )*
           }
-          req
-            .extensions_mut()
-            .insert::<r2s_database::$model::Model>(data);
           Ok(next.run(req).await)
         }
         None => Err(crate::traits::ResponseError::NotFound(format!(

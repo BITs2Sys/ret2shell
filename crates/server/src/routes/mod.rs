@@ -2,8 +2,9 @@ use std::{sync::Arc, time::Duration};
 
 use axum::{
   Router,
+  body::Body,
   error_handling::HandleErrorLayer,
-  http::{HeaderValue, StatusCode},
+  http::{HeaderValue, Request, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
   routing::get,
@@ -11,18 +12,19 @@ use axum::{
 use r2s_config::server;
 use tower::{ServiceBuilder, buffer::BufferLayer};
 use tower_governor::{GovernorLayer, governor::GovernorConfigBuilder};
+use tower_http::{ServiceBuilderExt, request_id::RequestId};
 use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
 };
-use tracing::{Span, debug};
+use tracing::{Span, debug, error_span};
 
 use crate::{
   middleware::{
     self,
     auth::{create_auth_header_by_user_agent, extract_user_info},
     codec,
-    forwarded::{ProxiedIpExtractor, ip_record, ip_record_worker},
+    forwarded::{MakeRequestNanoId, ProxiedIpExtractor, ip_record, ip_record_worker},
   },
   traits::GlobalState,
 };
@@ -70,11 +72,6 @@ pub async fn initialize(
         ),
     )
     .merge(web::router(&state))
-    .layer(TraceLayer::new_for_http().on_request(()).on_response(
-      |response: &Response, latency: Duration, _span: &Span| {
-        debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
-      },
-    ))
     .with_state::<()>(state);
   Ok(router)
 }
@@ -96,7 +93,44 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .route("/ping", get(ping))
     .route_layer(from_fn_with_state(state.clone(), ip_record))
     .route_layer(from_fn_with_state(state.clone(), extract_user_info))
-    .route_layer(from_fn(create_auth_header_by_user_agent));
+    .route_layer(from_fn(create_auth_header_by_user_agent))
+    .layer(
+      TraceLayer::new_for_http()
+        .make_span_with(|request: &Request<Body>| {
+          let trace = request.extensions().get::<RequestId>();
+          let request_id = trace
+            .map(|id| id.header_value().to_str().unwrap_or("UNKNOWN"))
+            .unwrap_or_else(|| "UNKNOWN");
+          error_span!(
+            "request",
+            method=%request.method(), uri=%request.uri().path(), trace=%request_id, from=tracing::field::Empty,
+            "user-id"=tracing::field::Empty,
+            "user-account"=tracing::field::Empty,
+            "user-nickname"=tracing::field::Empty,
+            "team-id"=tracing::field::Empty,
+            "team-name"=tracing::field::Empty,
+            "data-challenge-id"=tracing::field::Empty,
+            "data-challenge-name"=tracing::field::Empty,
+            "data-game-id"=tracing::field::Empty,
+            "data-game-name"=tracing::field::Empty,
+            "data-team-id"=tracing::field::Empty,
+            "data-team-name"=tracing::field::Empty,
+            "data-user-id"=tracing::field::Empty,
+            "data-user-account"=tracing::field::Empty,
+            "data-user-nickname"=tracing::field::Empty,
+            "data-notification-id"=tracing::field::Empty,
+            "data-notification-title"=tracing::field::Empty,
+            "data-audit-id"=tracing::field::Empty,
+            "data-institute-id"=tracing::field::Empty,
+            "data-institute-name"=tracing::field::Empty,
+
+          )
+        })
+        .on_request(())
+        .on_response(|response: &Response, latency: Duration, _span: &Span| {
+          debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
+        }),
+    );
 
   let route = if let Some(config) = state.config.server.clone().unwrap_or_default().rate_limit {
     let governor_conf = Arc::new(
@@ -127,6 +161,8 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
 
   route.layer(
     ServiceBuilder::new()
+      .set_x_request_id(MakeRequestNanoId)
+      .propagate_x_request_id()
       .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
         (
           StatusCode::INTERNAL_SERVER_ERROR,

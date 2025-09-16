@@ -14,11 +14,12 @@ use axum::{
 use futures::StreamExt;
 use r2s_database::ip;
 use r2s_migrator::Database;
-use r2s_queue::Queue;
+use r2s_queue::{Queue, TracedMessage};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
-use tracing::{Instrument, debug, error, error_span, warn};
+use tower_http::request_id::{MakeRequestId, RequestId};
+use tracing::{Span, debug, error, warn};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -320,6 +321,11 @@ pub async fn ip_record(
     }
   };
   debug!(?ip, "got client IP address");
+  let trace = req
+    .headers()
+    .get("x-request-id")
+    .and_then(|hv| hv.to_str().ok().map(|s| s.to_string()))
+    .unwrap_or_else(|| nanoid::nanoid!());
   if token.id != 0 {
     queue
       .publish(
@@ -328,22 +334,23 @@ pub async fn ip_record(
           ip: ip.clone(),
           user_id: token.id,
         },
+        &trace,
       )
       .await?;
     debug!("IP record message published");
   } else {
     debug!("token ID is 0, skipping IP record");
   }
-  let event_id = nanoid::nanoid!();
-  let span = error_span!("http", from=%ip, method=%req.method(), uri=%req.uri().path(), %event_id);
-  async move { Ok(next.run(req).await) }
-    .instrument(span)
-    .await
+
+  Span::current().record("from", ip.as_str());
+
+  Ok(next.run(req).await)
 }
 
 async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
   let req = String::from_utf8(message.message.payload.to_vec())?;
-  let req = serde_json::from_str::<IpRecord>(&req)?;
+  let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
+  let req = req.payload;
   let model = ip::get_or_create(&db.conn, &req.ip).await?;
   ip::link_user(&db.conn, req.user_id, model.id).await.ok();
   Ok(())
@@ -372,5 +379,16 @@ impl KeyExtractor for ProxiedIpExtractor {
   fn extract<B>(&self, req: &Request<B>) -> Result<Self::Key, GovernorError> {
     let ip = get_client_ip(req).ok_or(GovernorError::UnableToExtractKey)?;
     Ok(ip.to_string())
+  }
+}
+
+/// A [`MakeRequestId`] that generates `NanoID`s.
+#[derive(Clone, Copy, Default)]
+pub struct MakeRequestNanoId;
+
+impl MakeRequestId for MakeRequestNanoId {
+  fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
+    let request_id = nanoid::nanoid!();
+    Some(RequestId::new(request_id.parse().unwrap()))
   }
 }

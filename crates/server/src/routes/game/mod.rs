@@ -36,6 +36,7 @@ use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
 use tokio_util::io::{ReaderStream, StreamReader};
+use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
 
 use crate::{
@@ -250,10 +251,12 @@ async fn create_game(
   }
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn update_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref queue): State<Queue>,
   State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(token): Extension<Token>, Json(model): Json<game::Model>,
+  Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
+  Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let model = game::update(
@@ -306,7 +309,14 @@ async fn update_game(
         ),
       }),
     };
-    queue.publish("event", payload).await.ok();
+    queue
+      .publish(
+        "event",
+        payload,
+        &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+      )
+      .await
+      .ok();
   }
   info!("updated game");
   Ok(Json(model))

@@ -20,6 +20,7 @@ use r2s_oauth::OAuth;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
+use tower_http::request_id::RequestId;
 use tracing::{info, warn};
 
 use crate::{
@@ -253,7 +254,7 @@ struct OAuthRegisterRequest {
 async fn register_with_oauth_account(
   State(db): State<Database>, State(cache): State<Cache>, State(queue): State<Queue>,
   Extension(config): Extension<config::Model>, Extension(token_tracker): Extension<TokenTracker>,
-  Json(req): Json<OAuthRegisterRequest>,
+  Extension(trace): Extension<RequestId>, Json(req): Json<OAuthRegisterRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if config
     .captcha
@@ -343,6 +344,7 @@ async fn register_with_oauth_account(
     &user.account,
     &email,
     EmailType::Verify,
+    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
   )
   .await
   .ok();

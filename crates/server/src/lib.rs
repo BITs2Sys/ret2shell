@@ -191,7 +191,7 @@ pub async fn down(config: GlobalConfig) -> anyhow::Result<()> {
 async fn push_panic_event(queue: r2s_queue::Queue) {
   std::panic::set_hook(Box::new(move |panic| {
     if let Some(location) = panic.location() {
-      tracing::error!(
+      error!(
           message = %panic,
           panic.file = location.file(),
           panic.line = location.line(),
@@ -214,10 +214,10 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
       };
       let queue = queue.clone();
       tokio::spawn(async move {
-        queue.publish("event", event).await.ok();
+        queue.publish("event", event, "GLOBAL").await.ok();
       });
     } else {
-      tracing::error!(message = %panic);
+      error!(message = %panic);
       let event = EventContainer {
         game_id: 0,
         event: Event::Devops(Box::new(DevopsEvent {
@@ -229,7 +229,7 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
       };
       let queue = queue.clone();
       tokio::spawn(async move {
-        queue.publish("event", event).await.ok();
+        queue.publish("event", event, "GLOBAL").await.ok();
       });
     }
   }));

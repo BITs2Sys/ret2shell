@@ -20,6 +20,7 @@ use r2s_queue::Queue;
 use rand::Rng;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
+use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use crate::{
@@ -375,7 +376,7 @@ enum EmailType {
 
 async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,
-  email_type: EmailType,
+  email_type: EmailType, trace: impl AsRef<str>,
 ) -> Result<(), ResponseError> {
   let email_config = match config.email.clone() {
     Some(email::Config { enabled: false, .. }) => {
@@ -438,7 +439,7 @@ async fn send_email(
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),
   };
-  queue.publish("email", email_req).await?;
+  queue.publish("email", email_req, trace).await?;
   Ok(())
 }
 
@@ -455,7 +456,7 @@ struct RegisterRequest {
 async fn register(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(config): Extension<config::Model>, Extension(token_tracker): Extension<TokenTracker>,
-  Json(body): Json<RegisterRequest>,
+  Extension(trace): Extension<RequestId>, Json(body): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   debug!(?body, "register request");
   let txn = db.conn.begin().await?;
@@ -524,6 +525,7 @@ async fn register(
     &user.account,
     &email,
     EmailType::Verify,
+    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
   )
   .await
   .ok();
@@ -596,6 +598,7 @@ async fn verify_email(
 async fn resend_verify_email(
   State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
+  Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if user.permissions.0.contains(&Permission::Verified) {
     return Err(ResponseError::Conflict("user already verified".to_owned()));
@@ -619,6 +622,7 @@ async fn resend_verify_email(
     &user.account,
     &email,
     EmailType::Verify,
+    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
   )
   .await?;
   Ok(StatusCode::OK)
@@ -633,7 +637,8 @@ struct ForgotPasswordRequest {
 
 async fn forgot_password(
   State(cache): State<Cache>, State(db): State<Database>, State(ref queue): State<Queue>,
-  Extension(config): Extension<config::Model>, Json(body): Json<ForgotPasswordRequest>,
+  Extension(trace): Extension<RequestId>, Extension(config): Extension<config::Model>,
+  Json(body): Json<ForgotPasswordRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if config
     .captcha
@@ -663,6 +668,7 @@ async fn forgot_password(
     &user.account,
     &body.email,
     EmailType::Reset,
+    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
   )
   .await?;
   Ok(StatusCode::OK)
@@ -780,10 +786,12 @@ async fn get_profile(
   Ok(Json(user))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn change_profile(
   State(ref cache): State<Cache>, State(ref queue): State<Queue>, State(ref db): State<Database>,
   Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
-  Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<user::Model>,
+  Extension(trace): Extension<RequestId>, Extension(token_tracker): Extension<TokenTracker>,
+  Json(body): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let email_changed = body.email != user.email;
   let email = match body.email.clone() {
@@ -825,6 +833,7 @@ async fn change_profile(
       &body.account,
       &email,
       EmailType::Verify,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )
     .await?;
 

@@ -13,7 +13,7 @@ use r2s_event::{
   events::{EventContainer, SubmissionEvent, SubmissionEventType},
 };
 use r2s_migrator::Database;
-use r2s_queue::Queue;
+use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
 use tracing::{error, error_span, info, warn};
 
@@ -60,11 +60,14 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.ack().await.ok();
         continue;
       }
-      let challenge = serde_json::from_str::<challenge::Model>(&req.unwrap())
+      let challenge = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
         .inspect_err(|e| {
           error!("Failed to parse message from nats: {:?}", e);
         })
         .ok();
+      let span = error_span!("request", trace=%challenge.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned()));
+      let span_guard = span.enter();
+      let challenge = challenge.map(|c| c.payload);
       if challenge.is_none() {
         message.ack().await.ok();
         continue;
@@ -75,6 +78,7 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         .inspect_err(|e| error!("Failed to process message: {:?}", e))
         .ok();
       message.ack().await.ok();
+      drop(span_guard);
     }
   }
 }
@@ -154,7 +158,7 @@ async fn submission_worker(
         message.ack().await.ok();
         continue;
       }
-      let submission = serde_json::from_str::<submission::Model>(&req.unwrap())
+      let submission = serde_json::from_str::<TracedMessage<submission::Model>>(&req.unwrap())
         .inspect_err(|e| {
           error!("Failed to parse message from nats: {:?}", e);
         })
@@ -169,7 +173,8 @@ async fn submission_worker(
         cache.clone(),
         checker.clone(),
         bucket.clone(),
-        submission.clone().unwrap(),
+        &submission.as_ref().unwrap().payload,
+        &submission.as_ref().unwrap().trace,
       )
       .await
       .inspect_err(|e| error!("Failed to process message: {:?}", e))
@@ -178,10 +183,10 @@ async fn submission_worker(
         submission::update(
           &db.conn,
           submission::Model {
-            id: submission.clone().unwrap().id,
+            id: submission.clone().unwrap().payload.id,
             solved: Some(false),
             result: Some("checker fails on your input, incorrect.".to_owned()),
-            ..submission.unwrap()
+            ..submission.unwrap().payload
           },
         )
         .await
@@ -210,22 +215,33 @@ fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
 
 async fn submission_worker_exec(
   queue: Queue, db: Database, cache: Cache, mut checker: Checker, bucket: Bucket,
-  submission: submission::Model,
+  submission: &submission::Model, trace: impl AsRef<str>,
 ) -> Result<submission::Model, ResponseError> {
+  let span = error_span!(
+    "request", trace=%trace.as_ref(),
+    "data-submission-id"=%submission.id,
+    "data-submission-content"=?submission.content,
+    "user-id"=tracing::field::Empty,
+    "user-account"=tracing::field::Empty,
+    "user-nickname"=tracing::field::Empty,
+    "team-id"=tracing::field::Empty,
+    "team-name"=tracing::field::Empty,
+    "data-challenge-id"=%submission.challenge_id,
+    "data-challenge-name"=tracing::field::Empty,
+    "data-game-id"=tracing::field::Empty,
+    "data-game-name"=tracing::field::Empty
+  );
+  let span_guard = span.enter();
   // stage 1: get all necessary data
   let txn = db.conn.begin().await?;
-  let submission_span =
-    error_span!("submission", id = submission.id, content = ?submission.content);
-  let submission_entered = submission_span.enter();
-
   let challenge = challenge::get(&txn, submission.challenge_id).await?;
   let challenge = if let Some(challenge) = challenge {
     challenge
   } else {
     return Err(ResponseError::BadRequest("challenge not found".to_owned()));
   };
-  let challenge_span = error_span!("data-challenge", id = challenge.id, name = %challenge.name);
-  let challenge_entered = challenge_span.enter();
+  span.record("data-challenge-name", challenge.name.as_str());
+  span.record("data-game-id", challenge.game_id);
   let prev_submitted = submission::count(
     &txn,
     true,
@@ -252,15 +268,17 @@ async fn submission_worker_exec(
   } else {
     return Err(ResponseError::BadRequest("game not found".to_owned()));
   };
-  let game_span = error_span!("data-game", id=%game.id, name=%game.name);
-  let game_entered = game_span.enter();
+  span.record("data-game-name", game.name.as_str());
+
   let user = if let Some(user) = user {
     user
   } else {
     return Err(ResponseError::BadRequest("user not found".to_owned()));
   };
-  let user_span = error_span!("user", id=%user.id, account=%user.account, nickname=%user.nickname);
-  let user_entered = user_span.enter();
+  span.record("user-id", user.id);
+  span.record("user-account", user.account.as_str());
+  span.record("user-nickname", user.nickname.as_str());
+
   let challenge_bucket = bucket
     .at(
       game
@@ -286,7 +304,7 @@ async fn submission_worker_exec(
   // stage 2: invoke checker to check the submission
   checker.preload(&challenge, &challenge_bucket).await?;
   let (solved, result, audit) = checker
-    .check(&challenge_bucket, &user, &team, &submission)
+    .check(&challenge_bucket, &user, &team, submission)
     .await?;
   let submission = submission::update(
     &txn,
@@ -294,7 +312,7 @@ async fn submission_worker_exec(
       id: submission.id,
       solved: Some(solved),
       result: Some(result),
-      ..submission
+      ..submission.clone()
     },
   )
   .await?;
@@ -305,6 +323,8 @@ async fn submission_worker_exec(
   }
 
   let team = team.unwrap();
+  span.record("team-id", team.id);
+  span.record("team-name", team.name.as_str());
 
   // stage 3: update team score and create extra or audit if necessary
   if submission.solved.unwrap_or(false) {
@@ -365,9 +385,12 @@ async fn submission_worker_exec(
       })),
     };
     txn.commit().await?;
-    queue.publish("event", event).await.ok(); // publish scoreboard update event if necessary
+    queue.publish("event", event, &trace).await.ok(); // publish scoreboard update event if necessary
     if changed {
-      queue.publish("scoreboard", challenge.clone()).await.ok();
+      queue
+        .publish("scoreboard", challenge.clone(), &trace)
+        .await
+        .ok();
       cache.at("challenge").del(challenge.id).await.ok();
     }
   } else {
@@ -417,14 +440,12 @@ async fn submission_worker_exec(
         reason: Some(audit.reason),
       })),
     };
-    queue.publish("event", event).await.ok();
+    queue.publish("event", event, &trace).await.ok();
   }
 
   txn.commit().await?;
-  drop(challenge_entered);
-  drop(user_entered);
-  drop(game_entered);
-  drop(submission_entered);
+  drop(span_guard);
+
   Ok(submission)
 }
 

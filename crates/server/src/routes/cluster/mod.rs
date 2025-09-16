@@ -77,7 +77,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
               )),
             })),
           };
-          queue.publish("event", event).await.ok();
+          queue.publish("event", event, "GLOBAL").await.ok();
         } else if !o && overloaded != o {
           info!(?running, ?pending, "cluster is recovered");
           let event = EventContainer {
@@ -91,7 +91,7 @@ async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Q
               )),
             })),
           };
-          queue.publish("event", event).await.ok();
+          queue.publish("event", event, "GLOBAL").await.ok();
         }
         overloaded = o;
       }

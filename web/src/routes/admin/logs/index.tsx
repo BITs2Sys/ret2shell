@@ -12,7 +12,15 @@ import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import {
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  onMount,
+  Show,
+  Switch,
+} from "solid-js";
 
 type LogSpan = {
   name: string;
@@ -28,28 +36,6 @@ type Log = {
   spans?: LogSpan[];
 };
 
-function SpanHttp(log: Log) {
-  if (!log.spans) return null;
-  for (const span of log.spans) {
-    if (span.name === "http") {
-      return span;
-    }
-  }
-}
-
-function SpanUser(log: Log) {
-  if (!log.spans) return null;
-  for (const span of log.spans) {
-    if (span.name === "user") {
-      return (
-        <A class="hover:underline" target="_blank" rel="noreferrer" href={`/admin/users?user=${span.id}`}>
-          {span.account as string}
-        </A>
-      );
-    }
-  }
-}
-
 function LogField(log: Log) {
   if (!log.fields) return null;
   return (
@@ -58,7 +44,7 @@ function LogField(log: Log) {
         <>
           <span class="italic opacity-60">{key}</span>
           <span class="opacity-60">=</span>
-          <span>{value as string}&nbsp;</span>
+          <span>{value as string}&nbsp;&nbsp;</span>
         </>
       )}
     </For>
@@ -66,25 +52,18 @@ function LogField(log: Log) {
 }
 
 function DataSpanField(log: Log) {
-  if (!log.spans) return null;
+  if (!log.span) return null;
   return (
-    <For each={log.spans.filter((span) => span.name.startsWith("data-"))}>
-      {(span) => (
-        <>
-          <span class="opacity-80 italic font-bold">{span.name}</span>
-          <span class="opacity-80 font-bold">&#123;</span>
-          <For each={Object.entries(span)}>
-            {([key, value]) => (
-              <>
-                <span class="italic opacity-60">{key}</span>
-                <span class="opacity-60">=</span>
-                <span>{value as string}&nbsp;</span>
-              </>
-            )}
-          </For>
-          <span class="opacity-80 font-bold">&#125;</span>
-        </>
-      )}
+    <For each={Object.entries(log.span)}>
+      {([key, value]) =>
+        key.startsWith("data-") && (
+          <>
+            <span class="italic opacity-60">{key.replace("data-", "")}</span>
+            <span class="opacity-60">=</span>
+            <span>{value as string}&nbsp;&nbsp;</span>
+          </>
+        )
+      }
     </For>
   );
 }
@@ -121,7 +100,9 @@ export default function () {
   }
 
   function connect() {
-    ws = new WebSocket(`${api_root}/platform/logs/stream?token=${accountStore.token}`);
+    ws = new WebSocket(
+      `${api_root}/platform/logs/stream?token=${accountStore.token}`,
+    );
     setLoading(true);
     ws.onopen = () => {
       setLoading(false);
@@ -179,7 +160,8 @@ export default function () {
         return "text-layer-content";
     }
   }
-  const time = (ts: string, format: string) => DateTime.fromISO(ts).toFormat(format);
+  const time = (ts: string, format: string) =>
+    DateTime.fromISO(ts).toFormat(format);
   const matches = createBreakpoints(breakpoints);
   let bottomDiv: HTMLDivElement;
   return (
@@ -192,7 +174,10 @@ export default function () {
             <span>{t("platform.logs.title")}</span>
           </h1>
           <Show when={searchParams.filter}>
-            <Button size="sm" onClick={() => setSearchParams({ filter: undefined })}>
+            <Button
+              size="sm"
+              onClick={() => setSearchParams({ filter: undefined })}
+            >
               <span class="icon-[fluent--dismiss-16-regular]" />
               <span class="text-error">TRACE: {searchParams.filter}</span>
             </Button>
@@ -232,45 +217,59 @@ export default function () {
                 class={clsx(
                   "group min-h-8 flex flex-col h-auto hover:bg-layer-content/15",
                   "px-2 py-1 items-center border-b border-b-layer-content/10 overflow-hidden min-w-0",
-                  searchParams.filter && searchParams.filter !== SpanHttp(log)?.event_id && "hidden"
+                  searchParams.filter &&
+                    searchParams.filter !== log.span?.trace &&
+                    "hidden",
                 )}
               >
                 <span class="w-full grid grid-cols-[repeat(3,auto)_1fr]">
-                  <span class={clsx("w-16 mr-2 inline-block", getColor(log.level))}>{log.level}</span>
+                  <span
+                    class={clsx("w-16 mr-2 inline-block", getColor(log.level))}
+                  >
+                    {log.level}
+                  </span>
                   <span class="mr-2 text-success font-bold" title={log.target}>
                     {log.target}
                   </span>
                   <span class="truncate">
-                    {(SpanHttp(log)?.method as string) && (
-                      <span class="opacity-60">{SpanHttp(log)?.method as string}&nbsp;</span>
+                    {(log.span?.method as string) && (
+                      <span class="opacity-60">
+                        {log.span?.method as string}&nbsp;
+                      </span>
                     )}
-                    {(SpanHttp(log)?.uri as string) && (
-                      <span class="opacity-60">{SpanHttp(log)?.uri as string}&nbsp;</span>
+                    {(log.span?.uri as string) && (
+                      <span class="opacity-60">
+                        {log.span?.uri as string}&nbsp;
+                      </span>
                     )}
                   </span>
                   <span class="text-right font-bold ml-2 whitespace-nowrap">
-                    <span class="font-bold mr-2">
-                      <span class="icon-[fluent--person-16-filled] text-primary align-middle w-4 h-4 mr-1" />
-                      {SpanUser(log) ?? "GLOBAL"}
-                    </span>
-                    {(SpanHttp(log)?.from as string) && (
+                    {(log.span?.["user-id"] as string) && (
+                      <span class="font-bold mr-2">
+                        <span class="icon-[fluent--person-16-filled] text-primary align-middle w-4 h-4 mr-1" />
+                        <A href={`/admin/users?user=${log.span?.["user-id"]}`}>
+                          {log.span?.["user-account"] as string}
+                        </A>
+                      </span>
+                    )}
+                    {(log.span?.from as string) && (
                       <>
                         <span class="icon-[fluent--location-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                         <A
-                          href={`/admin/users?filter=${SpanHttp(log)?.from as string}`}
+                          href={`/admin/users?filter=${log.span?.from as string}`}
                           target="_blank"
                           rel="noreferrer"
                           class="hover:underline mr-2"
                         >
-                          {SpanHttp(log)?.from as string}
+                          {log.span?.from as string}
                         </A>
                       </>
                     )}
-                    {(SpanHttp(log)?.event_id as string) && (
+                    {(log.span?.trace as string) && (
                       <>
                         <span class="icon-[fluent--fire-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                         <A
-                          href={`/admin/logs?filter=${SpanHttp(log)?.event_id as string}`}
+                          href={`/admin/logs?filter=${log.span?.trace as string}`}
                           class="hover:underline mr-2"
                         >
                           TRACE
@@ -279,15 +278,28 @@ export default function () {
                     )}
                     <span class="icon-[fluent--clock-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                     <Switch fallback={time(log.timestamp, "HH:mm:ss")}>
-                      <Match when={matches.xl}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.lg}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.md}>{time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}</Match>
-                      <Match when={matches.sm}>{time(log.timestamp, "MM-dd HH:mm:ss")}</Match>
+                      <Match when={matches.xl}>
+                        {time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}
+                      </Match>
+                      <Match when={matches.lg}>
+                        {time(log.timestamp, "MM-dd HH:mm:ss")}
+                      </Match>
+                      <Match when={matches.md}>
+                        {time(log.timestamp, "yyyy-MM-dd HH:mm:ss")}
+                      </Match>
+                      <Match when={matches.sm}>
+                        {time(log.timestamp, "MM-dd HH:mm:ss")}
+                      </Match>
                     </Switch>
                   </span>
                 </span>
                 <div class="grid grid-cols-[1fr] group-hover:block w-full">
-                  <span class={clsx("truncate break-words group-hover:whitespace-normal", getContentColor(log.level))}>
+                  <span
+                    class={clsx(
+                      "truncate break-words group-hover:whitespace-normal",
+                      getContentColor(log.level),
+                    )}
+                  >
                     {LogField(log)}
                     {DataSpanField(log)}
                   </span>

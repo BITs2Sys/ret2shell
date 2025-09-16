@@ -13,6 +13,7 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use serde::Deserialize;
+use tower_http::request_id::RequestId;
 use tracing::warn;
 
 use crate::{
@@ -110,10 +111,11 @@ async fn player_get_chat_session(
   Ok(Json(chats))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn player_send_chat(
   State(ref db): State<Database>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
   Extension(team): Extension<Option<team::Model>>, Json(chat): Json<SendChatRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if !game.hammer_policy.enabled {
@@ -169,7 +171,14 @@ async fn player_send_chat(
       content: chat.content,
     })),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
 
   Ok(())
 }
