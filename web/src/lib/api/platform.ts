@@ -68,6 +68,7 @@ export async function queryPlatformLog(req: {
   level?: string;
   trace?: string;
   from?: string;
+  account?: string;
   query?: string;
 }) {
   const result = await api

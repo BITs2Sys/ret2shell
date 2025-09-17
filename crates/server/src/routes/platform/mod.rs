@@ -215,6 +215,7 @@ struct LogQuery {
   pub level: Option<String>,
   pub trace: Option<String>,
   pub from: Option<String>,
+  pub account: Option<String>,
   pub query: Option<String>,
 }
 
@@ -255,6 +256,9 @@ async fn get_logs(
     }
     if let Some(from) = req.from {
       result.push_str(&format!(" AND span.from:{}", from));
+    }
+    if let Some(account) = req.account {
+      result.push_str(&format!(" AND span.user-account:{}", account));
     }
     result.push_str(" | sort by (_time) desc");
     if let Some(limit) = req.limit {

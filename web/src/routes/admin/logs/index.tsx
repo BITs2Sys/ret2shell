@@ -48,12 +48,12 @@ function DataSpanField(log: Log) {
   );
 }
 
-export default function () {
+export default function() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const logFiles = useQuery(() => ({
     queryKey: ["platform", "logs", "files"],
-    queryFn: getPlatformLogs,
+    queryFn: async () => (await getPlatformLogs()).sort((a, b) => b.localeCompare(a)),
     onError: (err: Error) => {
       handleHttpError(err, t("platform.logs.errors.fetchList.title")!);
     },
@@ -70,6 +70,7 @@ export default function () {
       searchParams.level,
       searchParams.trace,
       searchParams.from,
+      searchParams.account,
     ].filter((i) => i),
     queryFn: async () => {
       return (
@@ -84,9 +85,12 @@ export default function () {
           level: searchParams.level as string | undefined,
           trace: searchParams.trace as string | undefined,
           from: searchParams.from as string | undefined,
+          account: searchParams.account as string | undefined,
           query: searchParams.query as string | undefined,
         })
-      ).reverse();
+      ).sort((a, b) => {
+        return DateTime.fromISO(a._time).toMillis() - DateTime.fromISO(b._time).toMillis();
+      });
     },
     onError: (err: Error) => {
       handleHttpError(err, t("platform.logs.errors.fetchLogs.title")!);
@@ -104,6 +108,7 @@ export default function () {
         level: searchParams.level,
         trace: searchParams.trace,
         from: searchParams.from,
+        account: searchParams.account,
       });
     }
   }, 5000);
@@ -124,20 +129,7 @@ export default function () {
         return "text-info";
     }
   }
-  function getContentColor(level: string) {
-    switch (level) {
-      case "INFO":
-        return "text-layer-content";
-      case "WARN":
-        return "text-warning";
-      case "ERROR":
-        return "text-error";
-      case "DEBUG":
-        return "opacity-60";
-      default:
-        return "text-layer-content";
-    }
-  }
+
   const time = (ts: string, format: string) => DateTime.fromISO(ts).toFormat(format);
   const matches = createBreakpoints(breakpoints);
   let bottomDiv: HTMLDivElement;
@@ -153,7 +145,7 @@ export default function () {
           <Input
             size="sm"
             class="w-48"
-            icon={<span class="icon-[fluent--filter-16-regular]" />}
+            icon={<span class="icon-[fluent--flash-16-regular]" />}
             value={searchParams.trace ?? ""}
             placeholder="Trace ID"
             onInput={(e) => setSearchParams({ trace: e.currentTarget.value })}
@@ -161,7 +153,15 @@ export default function () {
           <Input
             size="sm"
             class="w-48"
-            icon={<span class="icon-[fluent--filter-16-regular]" />}
+            icon={<span class="icon-[fluent--person-16-regular]" />}
+            value={searchParams.account ?? ""}
+            placeholder="Account"
+            onInput={(e) => setSearchParams({ account: e.currentTarget.value })}
+          />
+          <Input
+            size="sm"
+            class="w-48"
+            icon={<span class="icon-[fluent--location-16-regular]" />}
             value={searchParams.from ?? ""}
             placeholder="IP"
             onInput={(e) => setSearchParams({ from: e.currentTarget.value })}
@@ -232,15 +232,20 @@ export default function () {
                   <span class="mr-2 text-success font-bold" title={log.target}>
                     {log.target}
                   </span>
-                  <span class={clsx("truncate", getContentColor(log.level))}>
+                  <span class={clsx("truncate", getColor(log.level))}>
                     {(log["span.method"] as string) && <span>{log["span.method"] as string}&nbsp;</span>}
                     {(log["span.uri"] as string) && <span>{log["span.uri"] as string}&nbsp;</span>}
                   </span>
                   <span class="text-right font-bold ml-2 whitespace-nowrap">
-                    {(log["span.user-id"] as string) && (
+                    {(log["span.user-account"] as string) && (
                       <span class="font-bold mr-2">
                         <span class="icon-[fluent--person-16-filled] text-primary align-middle w-4 h-4 mr-1" />
-                        <A href={`/admin/users?user=${log["span.user-id"]}`}>{log["span.user-account"] as string}</A>
+                        <A href={`/admin/logs?account=${log["span.user-account"]}`} class="hover:underline mr-2">
+                          {log["span.user-account"] as string}
+                        </A>
+                        <A href={`/admin/users?user=${log["span.user-id"]}`}>
+                          <span class="icon-[fluent--open-12-regular] w-3 h-3 align-top" />
+                        </A>
                       </span>
                     )}
                     {(log["span.from"] as string) && (
@@ -248,6 +253,9 @@ export default function () {
                         <span class="icon-[fluent--location-16-filled] text-primary align-middle w-4 h-4 mr-1" />
                         <A href={`/admin/logs?from=${log["span.from"] as string}`} class="hover:underline mr-2">
                           {log["span.from"] as string}
+                        </A>
+                        <A href={`/admin/users?filter=${log["span.from"]}`}>
+                          <span class="icon-[fluent--open-12-regular] w-3 h-3 align-top" />
                         </A>
                       </>
                     )}
