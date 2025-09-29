@@ -14,7 +14,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^5.25.0",
+    "@ark-ui/solid": "^5.25.1",
     "@e965/xlsx": "^0.20.3",
     "@jsdevtools/rehype-toc": "^3.0.2",
     "@modular-forms/solid": "^0.25.1",
@@ -45,7 +45,7 @@
     "hastscript": "^9.0.1",
     "howler": "^2.2.4",
     "katex": "^0.16.22",
-    "ky": "^1.10.0",
+    "ky": "^1.11.0",
     "lorem-ipsum": "^2.0.8",
     "luxon": "^3.7.2",
     "nanoid": "^5.1.6",
@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "@iconify-json/fluent": "^1.2.31",
+    "@iconify-json/fluent": "^1.2.32",
     "@iconify-json/fluent-emoji-flat": "^1.2.5",
     "@iconify-json/meteocons": "^1.2.4",
     "@iconify/tailwind4": "^1.0.6",
