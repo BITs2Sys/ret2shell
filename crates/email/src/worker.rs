@@ -2,7 +2,7 @@ use async_nats::jetstream::{self, consumer::pull::Stream};
 use futures::StreamExt;
 use lettre::{
   AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
-  message::{SinglePart, header},
+  message::{SinglePart, header, Mailbox},
   transport::smtp::{
     authentication::Credentials,
     client::{Tls, TlsParameters},
@@ -18,8 +18,8 @@ fn construct_email(
   email: &EmailCtx, sender_name: impl AsRef<str>, sender_email: impl AsRef<str>,
 ) -> Result<Message, EmailError> {
   let envelope = Message::builder()
-    .from(format!("{} <{}>", sender_name.as_ref(), sender_email.as_ref()).parse()?)
-    .to(format!("{} <{}>", email.name, email.email).parse()?)
+    .from(Mailbox::new(Some(sender_name.as_ref().to_string()), sender_email.as_ref().parse()?))
+    .to(Mailbox::new(Some(email.name.to_string()), email.email.parse()?))
     .subject(&email.subject)
     .singlepart(
       SinglePart::builder()
@@ -50,7 +50,11 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
   .build();
 
   debug!(?mailer, "send with mailer");
-  let email = construct_email(email, &config.sender, &config.username)?;
+  let email = construct_email(
+    email,
+    &config.sender,
+    &config.sender_address.clone().unwrap_or(config.username.clone()),
+  )?;
   debug!(?email, "constructed email");
   mailer.send(email).await?;
   debug!("email sent");

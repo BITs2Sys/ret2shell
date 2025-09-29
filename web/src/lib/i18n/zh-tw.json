@@ -327,14 +327,18 @@
           "placeholder": "請輸入發信人名稱"
         },
         "username": {
-          "required": "發信郵箱不能為空",
-          "label": "發信郵箱",
-          "placeholder": "請填寫發信郵箱"
+        "required": "SMTP 用戶名不能為空",
+        "label": "SMTP 用戶名",
+        "placeholder": "請輸入 SMTP 用戶名"
+        },
+        "senderAddress": {
+          "label": "發信郵箱地址",
+          "placeholder": "請輸入發信郵箱地址"
         },
         "password": {
-          "required": "郵箱密碼不能為空",
-          "label": "郵箱密碼",
-          "placeholder": "請填寫郵箱密碼"
+          "required": "SMTP 密碼不能為空",
+          "label": "SMTP 密碼",
+          "placeholder": "請輸入 SMTP 密碼"
         },
         "verifyEmailSubject": {
           "required": "驗證郵件標題不能為空",
