@@ -64,7 +64,7 @@ impl Cluster {
       client,
       registry,
       namespace: Some(String::from("default")),
-      traffic: Some(TrafficMapper::default()),
+      traffic: Some(TrafficMapper),
     }
   }
 

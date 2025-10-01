@@ -230,7 +230,7 @@ fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
 }
 
 async fn submission_worker_exec(
-  queue: Queue, db: Database, cache: Cache, mut checker: Checker, bucket: Bucket,
+  queue: Queue, db: Database, cache: Cache, checker: Checker, bucket: Bucket,
   submission: &submission::Model, trace: impl AsRef<str>,
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data

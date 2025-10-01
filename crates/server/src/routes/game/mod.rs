@@ -25,6 +25,7 @@ use r2s_database::{
   institute, submission, team as team_db,
   user::{self, Permission},
 };
+use r2s_engine::DiagnosticMarker;
 use r2s_event::{
   Event, EventManager,
   events::{EventContainer, GameEvent, GameEventType},
@@ -1081,7 +1082,7 @@ struct GameTraffic {
 
 #[derive(Serialize)]
 struct GameTrafficResponse {
-  pub lint: Option<String>,
+  pub lint: Vec<DiagnosticMarker>,
 }
 
 async fn update_game_traffic(
@@ -1092,18 +1093,8 @@ async fn update_game_traffic(
     .traffic
     .clone()
     .ok_or(ResponseError::NotFound("traffic".to_string()))?;
-  let lint = traffic_mapper.lint(&req.traffic).await;
-  let lint = if let Err(lint) = lint {
-    match lint {
-      ClusterError::CompileError(diagnostics) => Some(diagnostics),
-      err => {
-        error!(error=?err, "failed to lint script");
-        Some(err.to_string())
-      }
-    }
-  } else {
-    None
-  };
+  let lint = traffic_mapper.lint(&req.traffic).await?;
+
   game::update(
     &db.conn,
     game::Model {

@@ -17,7 +17,7 @@ use r2s_bucket::{
   challenge::{ChallengeBucket, Hints},
 };
 use r2s_cache::Cache;
-use r2s_checker::{Checker, traits::CheckerError};
+use r2s_checker::Checker;
 use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
@@ -26,6 +26,7 @@ use r2s_database::{
   hint, submission, team,
   user::{self, Permission},
 };
+use r2s_engine::DiagnosticMarker;
 use r2s_event::{
   Event,
   events::{
@@ -1115,7 +1116,7 @@ async fn get_challenge_env_config(
 #[allow(clippy::too_many_arguments)]
 async fn start_challenge_instance(
   State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
-  State(mut checker): State<Checker>, Extension(config): Extension<config::Model>,
+  State(checker): State<Checker>, Extension(config): Extension<config::Model>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(token): Extension<Token>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -1402,7 +1403,7 @@ async fn delete_challenge_env_config(
 #[derive(Serialize)]
 struct CheckerResponse {
   pub script: String,
-  pub lint: Option<String>,
+  pub lint: Vec<DiagnosticMarker>,
 }
 
 #[derive(Deserialize)]
@@ -1417,20 +1418,9 @@ async fn get_checker_script(
 ) -> Result<impl IntoResponse, ResponseError> {
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
   let lint = if let Some(true) = query.lint {
-    let lint = checker.lint(&challenge_bucket).await;
-    if let Err(lint) = lint {
-      match lint {
-        CheckerError::CompileError(diagnostics) => Some(diagnostics),
-        err => {
-          warn!(error=?err, "failed to lint script");
-          Some(err.to_string())
-        }
-      }
-    } else {
-      None
-    }
+    checker.lint(&challenge_bucket).await?
   } else {
-    None
+    Vec::new()
   };
 
   Ok(Json(CheckerResponse {
@@ -1445,9 +1435,9 @@ struct UpdateCheckerScriptRequest {
 }
 
 async fn update_checker_script(
-  State(bucket): State<Bucket>, State(mut checker): State<Checker>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UpdateCheckerScriptRequest>,
+  State(bucket): State<Bucket>, State(checker): State<Checker>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Json(req): Json<UpdateCheckerScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   check_challenge_publishing!(challenge);
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);

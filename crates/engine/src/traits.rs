@@ -1,7 +1,8 @@
+use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum CheckerError {
+pub enum EngineError {
   #[error("io error: {0}")]
   IoError(#[from] std::io::Error),
   #[error("missing checker script: {0}")]
@@ -26,8 +27,28 @@ pub enum CheckerError {
   CompileError(String),
   #[error("missing function: {0}")]
   MissingFunction(String),
-  #[error("failed to emit diagnostics: {0}")]
-  DiagnosticsError(#[from] rune::diagnostics::EmitError),
   #[error("string UTF-8 decode error: {0}")]
   FromUtf8Error(#[from] std::string::FromUtf8Error),
+}
+
+/// DiagnosticMarker for rune scripts
+/// Originally from https://github.com/ElaBosak233/cdsctf/blob/main/crates/checker/src/traits.rs
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub struct DiagnosticMarker {
+  pub kind: DiagnosticKind,
+  pub message: String,
+  pub start_line: usize,
+  pub start_column: usize,
+  pub end_line: usize,
+  pub end_column: usize,
+}
+
+/// DiagnosticKind for rune scripts
+/// Originally from https://github.com/ElaBosak233/cdsctf/blob/main/crates/checker/src/traits.rs
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DiagnosticKind {
+  Error,
+  Warning,
 }

@@ -6,9 +6,10 @@ use axum::{
   routing::{get, patch},
 };
 use r2s_cache::Cache;
-use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError};
+use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster;
 use r2s_database::{config, user::Permission};
+use r2s_engine::DiagnosticMarker;
 use r2s_event::{
   Event,
   events::{DevopsEvent, DevopsEventType, EventContainer},
@@ -176,7 +177,7 @@ struct TrafficScriptRequest {
 
 #[derive(Serialize)]
 struct TrafficScriptResponse {
-  pub lint: Option<String>,
+  pub lint: Vec<DiagnosticMarker>,
 }
 
 async fn update_traffic_script(
@@ -187,18 +188,8 @@ async fn update_traffic_script(
     .traffic
     .clone()
     .ok_or(ResponseError::NotFound("traffic".to_string()))?;
-  let lint = traffic_mapper.lint(&req.traffic).await;
-  let lint = if let Err(lint) = lint {
-    match lint {
-      ClusterError::CompileError(diagnostics) => Some(diagnostics),
-      err => {
-        warn!(error=?err, "failed to lint script");
-        Some(err.to_string())
-      }
-    }
-  } else {
-    None
-  };
+  let lint = traffic_mapper.lint(&req.traffic).await?;
+
   config::update(
     &db.conn,
     config::Model {

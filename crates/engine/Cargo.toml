@@ -1,6 +1,6 @@
 [package]
-description = "Challenge checkers for Ret2Shell - A feature-riches CTF challenge platform."
-name        = "r2s-checker"
+description = "Base scripting engine for Ret2Shell - A feature-riches CTF challenge platform."
+name        = "r2s-engine"
 
 authors      = { workspace = true }
 edition      = { workspace = true }
@@ -12,6 +12,7 @@ version      = { workspace = true }
 
 [dependencies]
 chrono       = { workspace = true }
+once_cell    = { workspace = true }
 ret2script   = { workspace = true }
 rune         = { workspace = true }
 rune-modules = { workspace = true }
@@ -19,7 +20,3 @@ serde        = { workspace = true }
 thiserror    = { workspace = true }
 tokio        = { workspace = true }
 tracing      = { workspace = true }
-
-r2s-bucket   = { workspace = true }
-r2s-database = { workspace = true }
-r2s-engine   = { workspace = true }
