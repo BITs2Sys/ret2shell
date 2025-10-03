@@ -23,6 +23,7 @@ pub struct Config {
   pub signing_key: String,
   pub buffer_time: i64,
   pub expires_time: i64,
+  pub registrar_script: Option<String>,
 }
 
 impl Config {
