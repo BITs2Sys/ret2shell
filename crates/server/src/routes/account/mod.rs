@@ -494,7 +494,6 @@ async fn register(
 
   let permissions =
     crate::utility::registrar::compute_permissions(&txn, &config, &registrar_result).await?;
-  let email = body.email.clone();
   // Resolve institute assignment from registrar_result
   let assigned_institute_id =
     crate::utility::registrar::resolve_institute(&txn, None, &registrar_result).await?;
@@ -502,7 +501,7 @@ async fn register(
     account: body.account.clone(),
     nickname: body.nickname.clone(),
     password: Some(password),
-    email: Some(body.email),
+    email: Some(body.email.clone()),
     registered_at: Utc::now(),
     permissions,
     hidden: false,
@@ -522,7 +521,7 @@ async fn register(
       queue,
       &config,
       &user.account,
-      &email,
+      &body.email,
       EmailType::Verify,
       &trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )

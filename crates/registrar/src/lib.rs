@@ -6,8 +6,11 @@ use thiserror::Error;
 #[derive(Clone, Debug, Any)]
 #[rune(item = ::ret2shell::registrar)]
 pub struct RegisterInfo {
+  #[rune(get)]
   pub account: String,
+  #[rune(get)]
   pub nickname: String,
+  #[rune(get)]
   pub email: String,
 }
 
@@ -71,8 +74,10 @@ impl Registrar {
     let result = GLOBAL_ENGINE
       .execute(key, "intercept", (info.clone(),))
       .await?;
-    // Expect either an object with fields or a string error
-    if let Ok(object) = rune::from_value::<Object>(result.clone()) {
+    // Expect Result<Object, Value>
+    let output: Result<Object, rune::Value> =
+      rune::from_value(result).map_err(EngineError::from)?;
+    if let Ok(object) = output {
       let mut resp = RegisterResult::default();
       for (k, v) in object.iter() {
         match k.as_str() {
@@ -89,12 +94,19 @@ impl Registrar {
         }
       }
       Ok(resp)
-    } else if let Ok(reason) = rune::from_value::<String>(result) {
-      Err(RegistrarError::Rejected(reason))
     } else {
-      Err(RegistrarError::Rejected(
-        "invalid registrar result".to_owned(),
-      ))
+      // Err branch: string reason or printable value
+      if let Some(Ok(reason)) = output.err().map(|v| rune::from_value::<String>(v.clone())) {
+        Err(RegistrarError::Rejected(reason))
+      } else {
+        Err(RegistrarError::Rejected("rejected".to_owned()))
+      }
     }
+  }
+
+  pub async fn expire(&self, key: impl AsRef<str>) {
+    GLOBAL_ENGINE
+      .expire(format!("registrar-{}", key.as_ref()))
+      .await;
   }
 }
