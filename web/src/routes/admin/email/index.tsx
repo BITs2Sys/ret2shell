@@ -1,6 +1,8 @@
-import { handleHttpError } from "@api";
-import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
-import type { Config, EmailConfig } from "@models/config";
+import {
+  usePlatformConfig,
+  useUpdatePlatformConfigMutation,
+} from "@api/platform";
+import type { EmailConfig } from "@models/config";
 import { createForm, custom, getValue, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -11,44 +13,37 @@ import Divider from "@widgets/divider";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import type { HTTPError } from "ky";
-import { createSignal, onMount } from "solid-js";
+import { createEffect } from "solid-js";
 
 export default function () {
   const [form, { Form, Field }] = createForm<EmailConfig>();
-  const [loading, setLoading] = createSignal(false);
-  const [config, setConfig] = createSignal(null as null | Config);
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-      setValues(form, {
-        ...resp.email,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title"));
-    }
-  });
-
-  async function onSubmit(result: EmailConfig) {
-    setLoading(true);
-    try {
-      await updatePlatformConfig({
-        ...config()!,
-        email: {
-          ...config()?.email,
-          ...result,
-        },
-      });
+  const config = usePlatformConfig();
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
       addToast({
         level: "success",
         description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.save.status.fail"));
+    },
+  });
+  createEffect(() => {
+    if (config.data) {
+      setValues(form, {
+        ...config.data.email,
+      });
     }
-    setLoading(false);
+  });
+
+  async function onSubmit(result: EmailConfig) {
+    if (config.data)
+      mutation.mutate({
+        ...config.data,
+        email: {
+          ...config.data.email,
+          ...result,
+        },
+      });
   }
 
   return (
@@ -360,7 +355,13 @@ export default function () {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="!mt-4"
+            loading={config.isLoading || mutation.isPending}
+            disabled={config.isLoading || mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

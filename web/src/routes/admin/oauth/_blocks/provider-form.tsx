@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getOAuthProvider } from "@api/account";
+import { useOAuthProvider } from "@api/account";
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
@@ -14,14 +14,12 @@ import {
   setValues,
   url,
 } from "@modular-forms/solid";
-import { fullTheme, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { AnsiUp } from "ansi_up";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createSignal, Show, untrack } from "solid-js";
 import emailScript from "../scripts/email.rx";
 import oauth2AuthCodeScript from "../scripts/oauth2_auth_code.rx";
@@ -50,22 +48,23 @@ export default function ProviderForm(props: {
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
-  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
-  const ansi_up = new AnsiUp();
-  ansi_up.use_classes = true;
+
+  const oauthProvider = useOAuthProvider({
+    service: () => props.editSource!.provider,
+    enabled: () => !!props.editSource,
+  });
 
   createEffect(() => {
     if (props.editSource) {
       untrack(async () => {
-        const { item, lint } = await getOAuthProvider(props.editSource!.provider);
+        const { item } = oauthProvider.data || {};
         setValues(form, {
-          name: item.name,
-          provider: item.provider,
-          avatar: item.avatar,
-          script: item.script,
-          portal: item.portal,
+          name: item?.name || '' || "",
+          provider: item?.provider || '',
+          avatar: item?.avatar || '',
+          script: item?.script || '',
+          portal: item?.portal || '',
         });
-        if (lint) setRenderedLint(ansi_up.ansi_to_html(lint));
       });
     }
   });
@@ -245,35 +244,12 @@ export default function ProviderForm(props: {
             class="h-96"
             lang="rust"
             name="script"
+            lints={oauthProvider.data?.lint ?? undefined}
             value={field.value}
             error={field.error}
           />
         )}
       </Field>
-      <Show when={props.editSource}>
-        <OverlayScrollbarsComponent
-          options={{
-            scrollbars: {
-              theme: `os-theme-${fullTheme()}`,
-              autoHide: "scroll",
-            },
-          }}
-          class="relative max-h-48"
-          defer
-        >
-          <Show
-            when={renderedLint()}
-            fallback={
-              <p class="flex flex-row space-x-2 items-center text-success">
-                <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
-                <span>0 warning(s), error(s).</span>
-              </p>
-            }
-          >
-            <pre innerHTML={renderedLint() ?? undefined} />
-          </Show>
-        </OverlayScrollbarsComponent>
-      </Show>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
         {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>

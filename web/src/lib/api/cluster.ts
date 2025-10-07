@@ -9,7 +9,7 @@ export async function getClusterConfig() {
   return await api.get(`${api_root}/cluster/config`).json<ConfigMapList>();
 }
 
-export function useClusterConfig({ enabled, onError }: {  enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function useClusterConfig({ enabled, onError }: {  enabled?: () => boolean; onError?: (err: Error) => boolean }={}) {
   return useQuery(() => ({
     queryKey: ["cluster", "config"],
     queryFn: async () => await getClusterConfig(),
@@ -25,7 +25,7 @@ export async function getClusterNodes() {
   return await api.get(`${api_root}/cluster/node`).json<NodeList>();
 }
 
-export function useClusterNodes({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function useClusterNodes({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }={}) {
   return useQuery(() => ({
     queryKey: ["cluster", "nodes"],
     queryFn: async () => await getClusterNodes(),

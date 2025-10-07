@@ -7,6 +7,7 @@ import type { CaptchaRequest } from "@models/utils";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { useMutation, useQuery } from "@tanstack/solid-query";
+import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
@@ -344,7 +345,7 @@ export function useOAuthProviders(props: { enabled?: () => boolean; onError?: (e
 export async function getOAuthProvider(service: string) {
   return await api
     .get(`${api_root}/account/oauth/provider/${service}`)
-    .json<{ item: OAuthProvider; lint: string | null }>();
+    .json<{ item: OAuthProvider; lint: DiagnosticMarker[] | null }>();
 }
 
 export function useOAuthProvider({

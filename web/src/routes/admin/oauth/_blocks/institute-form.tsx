@@ -1,5 +1,5 @@
+import { useOAuthProviders } from "@api/account";
 import type { Institute } from "@models/institute";
-import type { OAuthProvider } from "@models/oauth-provider";
 import { createForm, required, setValues } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -14,11 +14,11 @@ type FormType = {
 };
 
 export default function InstituteForm(props: {
-  oauthServices: OAuthProvider[];
   onDone?: (result: Institute) => void;
   editSource?: Institute;
   loading?: boolean;
 }) {
+  const oauthProviders = useOAuthProviders();
   const [form, { Form, Field }] = createForm<FormType>();
   createEffect(() => {
     if (props.editSource) {
@@ -64,13 +64,13 @@ export default function InstituteForm(props: {
             class="flex-1"
             error={field.error}
             placeholder={t("institute.form.provider.placeholder")}
-            items={props.oauthServices.map((service) => {
+            items={oauthProviders.data?.map((service) => {
               return {
                 value: service.provider,
                 label: service.name,
                 icon: "icon-[fluent--hat-graduation-20-regular]",
               };
-            })}
+            }) || []}
             value={field.value ? [field.value as string] : undefined}
             inputProps={fieldProps}
           />

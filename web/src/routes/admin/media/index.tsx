@@ -1,5 +1,4 @@
-import { handleHttpError } from "@api";
-import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
+import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { Config, MediaConfig } from "@models/config";
 import { createForm, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
@@ -9,52 +8,35 @@ import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
-import type { HTTPError } from "ky";
-import { createSignal, onMount } from "solid-js";
+import { createEffect } from "solid-js";
 
 export default function () {
   const [form, { Form, Field }] = createForm<MediaConfig>();
-  const [loading, setLoading] = createSignal(false);
-  const [config, setConfig] = createSignal(null as null | Config);
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-      setValues(form, {
-        path: resp.media.path,
-        limit: resp.media.limit,
-        anti_theft: resp.media.anti_theft,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("platform.errors.fetchConfig.title"));
-    }
-  });
-  async function onSubmit(result: MediaConfig) {
-    setLoading(true);
-    if (!config()) {
-      addToast({
-        level: "error",
-        description: t("platform.errors.fetchConfig.notReady"),
-        duration: 5000,
-      });
-      return;
-    }
-    const mergedConfig = {
-      ...config(),
-      media: result,
-    } as Config;
-    try {
-      await updatePlatformConfig(mergedConfig);
-      setConfig(mergedConfig);
+  const config = usePlatformConfig();
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
       addToast({
         level: "success",
         description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.save.status.fail"));
+    },
+  });
+  createEffect(() => {
+    if (config.data) {
+      setValues(form, {
+        path: config.data.media.path,
+        limit: config.data.media.limit,
+        anti_theft: config.data.media.anti_theft,
+      });
     }
-    setLoading(false);
+  });
+  async function onSubmit(result: MediaConfig) {
+    const mergedConfig = {
+      ...config.data,
+      media: result,
+    } as Config;
+    mutation.mutate(mergedConfig);
   }
   return (
     <>
@@ -103,14 +85,20 @@ export default function () {
                   name={field.name}
                   value={[field.value || 1]}
                   inputProps={props}
-                  onValueChange={(e: { value: [number] }) => {
+                  onValueChange={(e) => {
                     setValues(form, { [field.name]: e.value[0] });
                   }}
                 />
               )}
             </Field>
           </div>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="!mt-4"
+            loading={config.isLoading || mutation.isPending}
+            disabled={config.isLoading || mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

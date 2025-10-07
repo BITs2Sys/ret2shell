@@ -1,17 +1,15 @@
-import { handleHttpError } from "@api";
-import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
+import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
 import { createForm, custom, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
-import { platformStore, setPlatformStore } from "@storage/platform";
+import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
-import type { HTTPError } from "ky";
-import { createSignal, onMount } from "solid-js";
+import { createEffect, untrack } from "solid-js";
 
 type PlatformConfigForm = {
   name?: string;
@@ -27,22 +25,21 @@ type PlatformConfigForm = {
 
 export default function () {
   const [form, { Form, Field }] = createForm<PlatformConfigForm>();
-  const [loading, setLoading] = createSignal(false);
-  const [config, setConfig] = createSignal(null as null | Config);
-  async function onSubmit(result: PlatformConfigForm) {
-    setLoading(true);
-    if (!config()) {
+  const config = usePlatformConfig();
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
       addToast({
-        level: "error",
-        description: t("platform.errors.fetchConfig.title"),
+        level: "success",
+        description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-      return;
-    }
+    },
+  });
+  async function onSubmit(result: PlatformConfigForm) {
     const mergedConfig = {
-      ...config(),
+      ...config.data,
       server: {
-        ...config()!.server,
+        ...config.data!.server,
         name: result.name,
         footer_info: result.footer_info,
         footer_url: result.footer_url,
@@ -54,38 +51,23 @@ export default function () {
         zen_game: result.zen_game,
       },
     } as Config;
-    try {
-      await updatePlatformConfig(mergedConfig);
-      setConfig(mergedConfig);
-      setPlatformStore({ config: mergedConfig.server });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail"));
-    }
-    setLoading(false);
+    mutation.mutate(mergedConfig);
   }
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-      setValues(form, {
-        name: resp.server.name || "",
-        footer_info: resp.server.footer_info || "",
-        footer_url: resp.server.footer_url || "",
-        subject_info: resp.server.subject_info || "",
-        subject_url: resp.server.subject_url || "",
-        record: resp.server.record || "",
-        hide_maker: resp.server.hide_maker || false,
-        highlight_banner: resp.server.highlight_banner || "",
-        zen_game: resp.server.zen_game || null,
+  createEffect(() => {
+    if (config.data)
+      untrack(() => {
+        setValues(form, {
+          name: config.data.server.name || "",
+          footer_info: config.data.server.footer_info || "",
+          footer_url: config.data.server.footer_url || "",
+          subject_info: config.data.server.subject_info || "",
+          subject_url: config.data.server.subject_url || "",
+          record: config.data.server.record || "",
+          hide_maker: config.data.server.hide_maker || false,
+          highlight_banner: config.data.server.highlight_banner || "",
+          zen_game: config.data.server.zen_game || null,
+        });
       });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title"));
-    }
   });
   return (
     <>
@@ -219,7 +201,13 @@ export default function () {
               )}
             </Field>
           </div>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="!mt-4"
+            loading={config.isLoading || mutation.isPending}
+            disabled={config.isLoading || mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

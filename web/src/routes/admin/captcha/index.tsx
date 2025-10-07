@@ -1,5 +1,4 @@
-import { handleHttpError } from "@api";
-import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
+import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { CaptchaConfig, Config } from "@models/config";
 import { createForm, getValue, required, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
@@ -9,56 +8,40 @@ import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import type { HTTPError } from "ky";
-import { createSignal, onMount } from "solid-js";
+import { createEffect } from "solid-js";
 
 export default function () {
   const [form, { Form, Field }] = createForm<CaptchaConfig>();
-  const [loading, setLoading] = createSignal(false);
-  const [config, setConfig] = createSignal(null as null | Config);
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-      setValues(form, {
-        enabled: resp.captcha.enabled,
-        difficulty: resp.captcha.difficulty,
-        validator: resp.captcha.validator,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title"));
-    }
-  });
-  async function onSubmit(result: CaptchaConfig) {
-    setLoading(true);
-    if (!config()) {
+  const config = usePlatformConfig();
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
       addToast({
-        level: "error",
-        description: t("platform.errors.fetchConfig.notReady"),
+        level: "success",
+        description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-      return;
-    }
+    },
+  });
+
+  createEffect(() => {
+    if (config.data)
+      setValues(form, {
+        enabled: config.data.captcha.enabled,
+        difficulty: config.data.captcha.difficulty,
+        validator: config.data.captcha.validator,
+      });
+  });
+
+  async function onSubmit(result: CaptchaConfig) {
     const mergedConfig = {
-      ...config(),
+      ...config.data,
       captcha: {
         enabled: result.enabled,
         difficulty: result.difficulty,
         validator: result.validator,
       },
     } as Config;
-    try {
-      await updatePlatformConfig(mergedConfig);
-      setConfig(mergedConfig);
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.save.status.fail"));
-    }
-    setLoading(false);
+    mutation.mutate(mergedConfig);
   }
   return (
     <>
@@ -122,13 +105,19 @@ export default function () {
                 name={field.name}
                 value={[field.value || 1]}
                 inputProps={props}
-                onValueChange={(e: { value: [number] }) => {
+                onValueChange={(e) => {
                   setValues(form, { [field.name]: e.value[0] });
                 }}
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="!mt-4"
+            loading={config.isLoading || mutation.isPending}
+            disabled={config.isLoading || mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

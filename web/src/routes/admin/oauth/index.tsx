@@ -1,17 +1,14 @@
-import { handleHttpError } from "@api";
 import {
-  createInstitute,
-  createOAuthProvider,
-  deleteInstitute,
-  deleteOAuthProvider,
-  getOAuthProviders,
-  updateInstitute,
-  updateOAuthProvider,
+  useCreateInstituteMutation,
+  useCreateOAuthProviderMutation,
+  useDeleteInstituteMutation,
+  useDeleteOAuthProviderMutation,
+  useInstitutes,
+  useOAuthProviders,
+  useUpdateInstituteMutation,
+  useUpdateOAuthProviderMutation,
 } from "@api/account";
 import { mediaPath } from "@lib/utils/media";
-import type { Institute } from "@models/institute";
-import type { OAuthProvider } from "@models/oauth-provider";
-import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -20,132 +17,32 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Popover from "@widgets/popover";
-import type { HTTPError } from "ky";
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import InstituteForm from "./_blocks/institute-form";
 import ProviderForm from "./_blocks/provider-form";
 
 export default function () {
-  const [loading, setLoading] = createSignal(true);
-  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
-  onMount(async () => {
-    await refreshProviders();
-    await refreshInstitutes();
-    setLoading(false);
-  });
-  async function handleUpdateInstitute(result: Institute) {
-    setLoading(true);
-    try {
-      await updateInstitute(result);
-      refreshInstitutes();
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.save.status.fail"));
-    }
-    setLoading(false);
-  }
-  async function handleCreateInstitute(result: Institute) {
-    setLoading(true);
-    try {
-      await createInstitute(result);
-      addToast({
-        level: "success",
-        description: t("general.actions.create.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.create.status.fail"));
-    }
-    setTimeout(async () => {
-      await refreshInstitutes();
-      setInstituteFormOpen(false);
-    }, 500);
-    setLoading(false);
-  }
-  async function handleDeleteInstitute(result: Institute) {
-    setLoading(true);
-    try {
-      await deleteInstitute(result.id);
-      refreshInstitutes();
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.delete.status.fail"));
-    }
-    setLoading(false);
+  const oauthProviders = useOAuthProviders();
+  const institutes = useInstitutes();
+
+  function onSuccess() {
+    oauthProviders.refetch();
+    institutes.refetch();
+    addToast({
+      level: "success",
+      description: t("general.actions.create.status.success"),
+      duration: 5000,
+    });
   }
 
-  async function refreshProviders() {
-    try {
-      setOAuthServices(await getOAuthProviders());
-    } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title"));
-    }
-  }
+  const createInstituteMutation = useCreateInstituteMutation({ onSuccess });
+  const updateInstituteMutation = useUpdateInstituteMutation({ onSuccess });
+  const deleteInstituteMutation = useDeleteInstituteMutation({ onSuccess });
 
-  async function handleCreateProvider(result: OAuthProvider) {
-    setLoading(true);
-    try {
-      createOAuthProvider(result);
-      addToast({
-        level: "success",
-        description: t("general.actions.create.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.create.status.fail"));
-    }
-    setTimeout(async () => {
-      await refreshProviders();
-      setProviderFormOpen(false);
-    }, 100);
-    setLoading(false);
-  }
+  const createOAuthProviderMutation = useCreateOAuthProviderMutation({ onSuccess });
+  const updateOAuthProviderMutation = useUpdateOAuthProviderMutation({ onSuccess });
+  const deleteOAuthProviderMutation = useDeleteOAuthProviderMutation({ onSuccess });
 
-  async function handleUpdateProvider(result: OAuthProvider) {
-    setLoading(true);
-    try {
-      updateOAuthProvider(result.provider, result);
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.save.status.fail"));
-    }
-    setTimeout(async () => {
-      await refreshProviders();
-      setProviderFormOpen(false);
-    }, 100);
-    setLoading(false);
-  }
-
-  async function handleDeleteProvider(result: OAuthProvider) {
-    setLoading(true);
-    try {
-      deleteOAuthProvider(result.provider);
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success"),
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.delete.status.fail"));
-    }
-    setTimeout(async () => {
-      await refreshProviders();
-      setProviderFormOpen(false);
-    }, 100);
-    setLoading(false);
-  }
   const [providerFormOpen, setProviderFormOpen] = createSignal(false);
   const [instituteFormOpen, setInstituteFormOpen] = createSignal(false);
   return (
@@ -170,10 +67,13 @@ export default function () {
               open={providerFormOpen()}
               onOpenChange={(detail) => setProviderFormOpen(detail.open)}
             >
-              <ProviderForm onDone={handleCreateProvider} loading={loading()} />
+              <ProviderForm
+                onDone={(v) => Promise.resolve(createOAuthProviderMutation.mutate(v))}
+                loading={createOAuthProviderMutation.isPending}
+              />
             </Dialog>
           </h3>
-          <For each={oauthServices()}>
+          <For each={oauthProviders.data}>
             {(service) => (
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
                 <Avatar src={(service.avatar && mediaPath(service.avatar)) ?? undefined} class="w-5 h-5" />
@@ -188,7 +88,13 @@ export default function () {
                   title={t("general.actions.edit.title")}
                   btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}
                 >
-                  <ProviderForm editSource={service} onDone={handleUpdateProvider} loading={loading()} />
+                  <ProviderForm
+                    editSource={service}
+                    onDone={(v) =>
+                      Promise.resolve(updateOAuthProviderMutation.mutate({ service: service.provider, req: v }))
+                    }
+                    loading={updateOAuthProviderMutation.isPending}
+                  />
                 </Dialog>
                 <Popover
                   size="sm"
@@ -204,8 +110,8 @@ export default function () {
                       level="error"
                       size="sm"
                       title={t("general.actions.confirm.title")}
-                      onClick={() => handleDeleteProvider(service)}
-                      loading={loading()}
+                      onClick={() => deleteOAuthProviderMutation.mutate({ service: service.provider })}
+                      loading={deleteOAuthProviderMutation.isPending}
                     >
                       <span>{t("general.actions.confirm.title")}</span>
                     </Button>
@@ -232,10 +138,13 @@ export default function () {
               onOpenChange={(detail) => setInstituteFormOpen(detail.open)}
               open={instituteFormOpen()}
             >
-              <InstituteForm onDone={handleCreateInstitute} loading={loading()} oauthServices={oauthServices()} />
+              <InstituteForm
+                onDone={(v) => Promise.resolve(createInstituteMutation.mutate(v))}
+                loading={createInstituteMutation.isPending}
+              />
             </Dialog>
           </h3>
-          <For each={accountStore.institutes}>
+          <For each={institutes.data}>
             {(institute) => (
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2">
                 <span class="shrink-0 icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
@@ -257,9 +166,8 @@ export default function () {
                 >
                   <InstituteForm
                     editSource={institute}
-                    onDone={handleUpdateInstitute}
-                    loading={loading()}
-                    oauthServices={oauthServices()}
+                    onDone={(v) => Promise.resolve(updateInstituteMutation.mutate(v))}
+                    loading={updateInstituteMutation.isPending}
                   />
                 </Dialog>
                 <Popover
@@ -276,8 +184,8 @@ export default function () {
                       level="error"
                       size="sm"
                       title={t("general.actions.confirm.title")}
-                      onClick={() => handleDeleteInstitute(institute)}
-                      loading={loading()}
+                      onClick={() => deleteInstituteMutation.mutate({ id: institute.id })}
+                      loading={deleteInstituteMutation.isPending}
                     >
                       <span>{t("general.actions.confirm.title")}</span>
                     </Button>

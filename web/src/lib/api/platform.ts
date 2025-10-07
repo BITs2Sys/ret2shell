@@ -4,7 +4,7 @@ import type { Institute } from "@models/institute";
 import { luxonReplacer } from "@models/utils";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
-import type { DateTime } from "luxon";
+import { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError } from ".";
 
@@ -74,7 +74,13 @@ export async function getPlatformStatistics() {
   return await api.get(`${api_root}/platform/statistics`).json<PlatformStatistics>();
 }
 
-export function usePlatformStatistics({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function usePlatformStatistics({
+  enabled,
+  onError,
+}: {
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}={}) {
   return useQuery(() => ({
     queryKey: ["platform", "statistics"],
     queryFn: getPlatformStatistics,
@@ -90,10 +96,16 @@ export async function getPlatformLogs() {
   return await api.get(`${api_root}/platform/logs`).json<string[]>();
 }
 
-export function usePlatformLogs({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function usePlatformLogs({
+  enabled,
+  onError,
+}: {
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+} = {}) {
   return useQuery(() => ({
     queryKey: ["platform", "logs"],
-    queryFn: getPlatformLogs,
+    queryFn: async () => (await getPlatformLogs()).sort((a, b) => b.localeCompare(a)),
     enabled,
     throwOnError: (err: Error) => {
       handleHttpError(err, t("platform.logs.errors.fetchList.title"));
@@ -163,7 +175,10 @@ export function useQueryPlatformLog({
   ]);
   return useQuery(() => ({
     queryKey: keys(),
-    queryFn: async () => await queryPlatformLog(req()),
+    queryFn: async () =>
+      (await queryPlatformLog(req())).sort((a, b) => {
+        return DateTime.fromISO(a._time).toMillis() - DateTime.fromISO(b._time).toMillis();
+      }),
     enabled,
     throwOnError: (err: Error) => {
       handleHttpError(err, t("platform.logs.errors.fetchLogs.title"));
@@ -183,7 +198,13 @@ export async function getPlatformLicense() {
   return await api.get(`${api_root}/platform/license`).json<PlatformLicense>();
 }
 
-export function usePlatformLicense({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function usePlatformLicense({
+  enabled,
+  onError,
+}: {
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
   return useQuery(() => ({
     queryKey: ["platform", "license"],
     queryFn: async () => await getPlatformLicense(),
@@ -198,7 +219,13 @@ export async function getPlatformConfig() {
   return await api.get(`${api_root}/platform/config`).json<Config>();
 }
 
-export function usePlatformConfig({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function usePlatformConfig({
+  enabled,
+  onError,
+}: {
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+} = {}) {
   return useQuery(() => ({
     queryKey: ["platform", "config"],
     queryFn: async () => await getPlatformConfig(),

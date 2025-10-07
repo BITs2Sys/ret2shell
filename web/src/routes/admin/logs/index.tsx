@@ -1,11 +1,10 @@
-import { api_root, handleHttpError } from "@api";
-import { getPlatformLogs, type Log, queryPlatformLog } from "@api/platform";
+import { api_root } from "@api";
+import { type Log, usePlatformLogs, useQueryPlatformLog } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
-import { useQuery } from "@tanstack/solid-query";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
@@ -50,53 +49,24 @@ function DataSpanField(log: Log) {
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
+  const logFiles = usePlatformLogs();
 
-  const logFiles = useQuery(() => ({
-    queryKey: ["platform", "logs", "files"],
-    queryFn: async () => (await getPlatformLogs()).sort((a, b) => b.localeCompare(a)),
-    throwOnError: (err) => {
-      handleHttpError(err, t("platform.logs.errors.fetchList.title"));
-      return true;
-    },
-  }));
-
-  const logs = useQuery(() => ({
-    queryKey: [
-      "platform",
-      "logs",
-      searchParams.started_at,
-      searchParams.ended_at,
-      searchParams.limit,
-      searchParams.level,
-      searchParams.trace,
-      searchParams.from,
-      searchParams.account,
-    ].filter((i) => i),
-    queryFn: async () => {
-      return (
-        await queryPlatformLog({
-          started_at: searchParams.started_at
-            ? DateTime.fromSeconds(Number.parseInt(searchParams.started_at as string, 10))
-            : DateTime.now().minus({ day: 1 }),
-          ended_at: searchParams.ended_at
-            ? DateTime.fromSeconds(Number.parseInt(searchParams.ended_at as string, 10))
-            : DateTime.now(),
-          limit: searchParams.limit ? Number.parseInt((searchParams.limit as string) || "NaN", 10) : 20,
-          level: searchParams.level as string | undefined,
-          trace: searchParams.trace as string | undefined,
-          from: searchParams.from as string | undefined,
-          account: searchParams.account as string | undefined,
-          query: searchParams.query as string | undefined,
-        })
-      ).sort((a, b) => {
-        return DateTime.fromISO(a._time).toMillis() - DateTime.fromISO(b._time).toMillis();
-      });
-    },
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("platform.logs.errors.fetchLogs.title"));
-      return false;
-    },
-  }));
+  const logs = useQueryPlatformLog({
+    req: () => ({
+      started_at: searchParams.started_at
+        ? DateTime.fromSeconds(Number.parseInt(searchParams.started_at as string, 10))
+        : DateTime.now().minus({ day: 1 }),
+      ended_at: searchParams.ended_at
+        ? DateTime.fromSeconds(Number.parseInt(searchParams.ended_at as string, 10))
+        : DateTime.now(),
+      limit: searchParams.limit ? Number.parseInt((searchParams.limit as string) || "NaN", 10) : 20,
+      level: searchParams.level as string | undefined,
+      trace: searchParams.trace as string | undefined,
+      from: searchParams.from as string | undefined,
+      account: searchParams.account as string | undefined,
+      query: searchParams.query as string | undefined,
+    }),
+  });
 
   const [enableTimer, setEnableTimer] = createSignal(false);
 
