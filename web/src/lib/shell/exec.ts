@@ -19,11 +19,16 @@ export class Exec {
     }
   }
 
-  public async exec(io: Stdio, args: ParseEntry[], origin: string, env: {
-    game?: Game;
-    team?: Team;
-    challenge?: Challenge;
-  }) {
+  public async exec(
+    io: Stdio,
+    args: ParseEntry[],
+    origin: string,
+    env: {
+      game?: Game;
+      team?: Team;
+      challenge?: Challenge;
+    }
+  ) {
     const flag_regex = /\w+\{.+\}/gm;
     if (flag_regex.test(origin)) {
       return { cmd: "submit", code: await this.commands.get("submit")!.func(io, args.slice(1), origin, env) };

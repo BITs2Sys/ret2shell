@@ -1,7 +1,4 @@
-import {
-  usePlatformConfig,
-  useUpdatePlatformConfigMutation,
-} from "@api/platform";
+import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { EmailConfig } from "@models/config";
 import { createForm, custom, getValue, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";

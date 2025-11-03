@@ -104,10 +104,9 @@ export async function updateChallenge(game_id: number, challenge: Challenge) {
     .json<Challenge>();
 }
 
-export function useUpdateChallengeMutation(props: {
-  onSuccess?: (challenge: Challenge) => void;
-  onError?: (err: Error) => void;
-}={}) {
+export function useUpdateChallengeMutation(
+  props: { onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge: Challenge }) => updateChallenge(req.game_id, req.challenge),
     onSuccess: (data: Challenge) => {
@@ -124,10 +123,9 @@ export async function upChallenge(game_id: number, challenge_id: number) {
   return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/publish`).json<Challenge>();
 }
 
-export function useUpChallengeMutation(props: {
-  onSuccess?: (challenge: Challenge) => void;
-  onError?: (err: Error) => void;
-}={}) {
+export function useUpChallengeMutation(
+  props: { onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge_id: number }) => upChallenge(req.game_id, req.challenge_id),
     onSuccess: (data: Challenge) => {
@@ -144,10 +142,9 @@ export async function downChallenge(game_id: number, challenge_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/publish`).json<Challenge>();
 }
 
-export function useDownChallengeMutation(props: {
-  onSuccess?: (challenge: Challenge) => void;
-  onError?: (err: Error) => void;
-}={}) {
+export function useDownChallengeMutation(
+  props: { onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge_id: number }) => downChallenge(req.game_id, req.challenge_id),
     onSuccess: (data: Challenge) => {
@@ -432,7 +429,7 @@ export async function updateChallengeEnv(game_id: number, challenge_id: number, 
     .json<void>();
 }
 
-export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }={}) {
+export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge_id: number; env: ChallengeEnv }) =>
       updateChallengeEnv(req.game_id, req.challenge_id, req.env),
@@ -683,7 +680,7 @@ export function useChallengeSolveStatus({
 }: {
   game_id: () => number;
   challenge_id: () => number;
-   enabled?: () => boolean;
+  enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "solveStatus"]);
@@ -710,7 +707,7 @@ export function useChallengeAnswer({
 }: {
   game_id: () => number;
   challenge_id: () => number;
-   enabled?: () => boolean;
+  enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "answer"]);

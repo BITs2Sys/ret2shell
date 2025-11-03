@@ -1,4 +1,4 @@
-import { type BaseDict, flatten} from "@solid-primitives/i18n";
+import { type BaseDict, flatten } from "@solid-primitives/i18n";
 
 const localeList = ["zh_cn", "en_us", "zh_tw", "ja_jp"] as const;
 export type Locale = (typeof localeList)[number];

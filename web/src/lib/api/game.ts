@@ -819,7 +819,15 @@ export async function getRegistryConfig(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/registry/config`).json<RegistryConfig>();
 }
 
-export function useRegistryConfig({ game_id, enabled, onError }: { game_id: () => number; enabled?: () => boolean;onError?: (err: Error) => boolean }) {
+export function useRegistryConfig({
+  game_id,
+  enabled,
+  onError,
+}: {
+  game_id: () => number;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
   const keys = createMemo(() => ["game", game_id(), "registry", "config"]);
   return useQuery(() => ({
     queryKey: keys(),

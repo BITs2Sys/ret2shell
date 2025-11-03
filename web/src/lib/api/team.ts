@@ -99,9 +99,7 @@ export async function deleteTeam(game_id: number, team_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/team/${team_id}`).json<void>();
 }
 
-export function useDeleteTeamMutation(
-  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: (data: { game_id: number; team_id: number }) => deleteTeam(data.game_id, data.team_id),
     onSuccess: () => {
@@ -145,7 +143,15 @@ export async function getSelfTeam(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/team/self`).json<Team>();
 }
 
-export function useSelfTeam({ game_id, enabled, onError }: { game_id: () => number; enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function useSelfTeam({
+  game_id,
+  enabled,
+  onError,
+}: {
+  game_id: () => number;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
   const keys = createMemo(() => ["game", game_id(), "team", "self"]);
   return useQuery(() => ({
     queryKey: keys(),
@@ -189,9 +195,7 @@ export async function leaveSelfTeam(game_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/team/self`).json<void>();
 }
 
-export function useLeaveSelfTeamMutation(
-  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useLeaveSelfTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ game_id }: { game_id: number }) => leaveSelfTeam(game_id),
     onSuccess: () => {
@@ -318,9 +322,7 @@ export async function joinTeam(game_id: number, token: string) {
     .json<Team>();
 }
 
-export function useJoinTeamMutation(
-  props: { onSuccess?: (team: Team) => void; onError?: (err: Error) => void } = {}
-) {
+export function useJoinTeamMutation(props: { onSuccess?: (team: Team) => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: (data: { game_id: number; token: string }) => joinTeam(data.game_id, data.token),
     onSuccess: (data: Team) => {
@@ -377,18 +379,19 @@ export function useTeamList({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  const keys = createMemo(() => ["game", game_id(), "teams", page?.() ?? 1, page_size?.() ?? 15, order?.() ?? "", filter?.() ?? "", institute_id?.() ?? 0]);
+  const keys = createMemo(() => [
+    "game",
+    game_id(),
+    "teams",
+    page?.() ?? 1,
+    page_size?.() ?? 15,
+    order?.() ?? "",
+    filter?.() ?? "",
+    institute_id?.() ?? 0,
+  ]);
   return useQuery(() => ({
     queryKey: keys(),
-    queryFn: () =>
-      getTeamList(
-        game_id(),
-        page?.() ?? 1,
-        page_size?.() ?? 15,
-        order?.(),
-        filter?.(),
-        institute_id?.()
-      ),
+    queryFn: () => getTeamList(game_id(), page?.() ?? 1, page_size?.() ?? 15, order?.(), filter?.(), institute_id?.()),
     enabled,
     throwOnError: (err: Error) => {
       handleHttpError(err, t("team.errors.fetchList.title"));

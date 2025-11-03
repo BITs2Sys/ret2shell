@@ -80,7 +80,7 @@ export function usePlatformStatistics({
 }: {
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
-}={}) {
+} = {}) {
   return useQuery(() => ({
     queryKey: ["platform", "statistics"],
     queryFn: getPlatformStatistics,

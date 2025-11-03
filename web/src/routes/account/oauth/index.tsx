@@ -59,7 +59,7 @@ export default function () {
       setTimeout(() => {
         navigate("/account/login", { replace: true });
       });
-    }
+    },
   });
 
   const bindWithOAuthMutation = useBindWithOAuthMutation({
@@ -71,7 +71,7 @@ export default function () {
       setTimeout(() => {
         navigate("/account/settings/oauth", { replace: true });
       });
-    }
+    },
   });
 
   async function handleAction() {

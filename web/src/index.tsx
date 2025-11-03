@@ -107,7 +107,7 @@ render(() => {
             />
             <span class="shrink-0 icon-[fluent-emoji-flat--backhand-index-pointing-left] w-8 h-8" />
           </h2>
-          <p class="opacity-60 max-w-5xl text-wrap p-8 rounded-md bg-layer-content/5">{error.message}</p>
+          <p class="opacity-60 max-w-5xl w-full text-wrap p-8 rounded-md bg-layer-content/5">{error.message}</p>
         </div>
       )}
     >

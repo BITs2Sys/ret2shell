@@ -161,7 +161,13 @@ export default function () {
                 </Field>
               )}
             </Field>
-            <Button type="submit" level="primary" class="!mt-4" loading={loginMutation.isPending} disabled={loginMutation.isPending}>
+            <Button
+              type="submit"
+              level="primary"
+              class="!mt-4"
+              loading={loginMutation.isPending}
+              disabled={loginMutation.isPending}
+            >
               {t("account.login.title")}
             </Button>
           </Form>

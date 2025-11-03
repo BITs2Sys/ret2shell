@@ -59,11 +59,11 @@ export default function ProviderForm(props: {
       untrack(async () => {
         const { item } = oauthProvider.data || {};
         setValues(form, {
-          name: item?.name || '' || "",
-          provider: item?.provider || '',
-          avatar: item?.avatar || '',
-          script: item?.script || '',
-          portal: item?.portal || '',
+          name: item?.name || "" || "",
+          provider: item?.provider || "",
+          avatar: item?.avatar || "",
+          script: item?.script || "",
+          portal: item?.portal || "",
         });
       });
     }

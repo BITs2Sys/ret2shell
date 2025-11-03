@@ -6,10 +6,15 @@ import type { Stdio } from "../stdio";
 
 export interface Command {
   name: string;
-  func(io: Stdio, args: ParseEntry[], origin: string, env: {
-    game?: Game;
-    team?: Team;
-    challenge?: Challenge;
-  }): Promise<number>;
+  func(
+    io: Stdio,
+    args: ParseEntry[],
+    origin: string,
+    env: {
+      game?: Game;
+      team?: Team;
+      challenge?: Challenge;
+    }
+  ): Promise<number>;
   man: string;
 }

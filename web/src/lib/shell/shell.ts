@@ -74,7 +74,7 @@ export class Shell {
   private team: Team | null = null;
   private onExecuted?: (cmd: string, code: number) => void;
 
-  constructor(term: Terminal, game:Game, team: Team, onExecuted: (cmd: string, code: number) => void) {
+  constructor(term: Terminal, game: Game, team: Team, onExecuted: (cmd: string, code: number) => void) {
     this.stdio = new Stdio(term);
     this.history = new BufferHistory();
     this.exec = new Exec();

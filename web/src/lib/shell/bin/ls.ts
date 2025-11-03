@@ -11,7 +11,12 @@ import type { Command } from "./interface";
 export class Ls implements Command {
   name = "ls";
   man = t("shell.ls.man");
-  func = async (io: Stdio, args: ParseEntry[], _origin: string, {game, challenge}: {game?: Game; challenge?: Challenge}) => {
+  func = async (
+    io: Stdio,
+    args: ParseEntry[],
+    _origin: string,
+    { game, challenge }: { game?: Game; challenge?: Challenge }
+  ) => {
     // console.log(args);
     if (!game || !challenge) {
       io.error(t("shell.errors.noGameSpecified.title"));

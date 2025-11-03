@@ -10,7 +10,7 @@ import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import { createMemo, For, Match, onCleanup, Show, Switch } from "solid-js";
 
-export function AuditList(props: {gameId: number}) {
+export function AuditList(props: { gameId: number }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const pageSize = 15;
@@ -23,12 +23,12 @@ export function AuditList(props: {gameId: number}) {
   const auditMutation = useUpdateGameAuditLogMutation({
     onSuccess: () => {
       audits.refetch();
-       addToast({
+      addToast({
         level: "success",
         description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-    }
+    },
   });
 
   const timer = setInterval(() => {
@@ -44,7 +44,7 @@ export function AuditList(props: {gameId: number}) {
       audit: {
         ...audit,
         state: AuditState.Misjudged,
-      }
+      },
     });
   }
 
@@ -55,7 +55,7 @@ export function AuditList(props: {gameId: number}) {
       audit: {
         ...audit,
         state: AuditState.Confirmed,
-      }
+      },
     });
   }
   const matches = createBreakpoints(breakpoints);

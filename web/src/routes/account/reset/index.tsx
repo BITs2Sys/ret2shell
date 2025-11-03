@@ -42,15 +42,15 @@ export default function () {
   const mutation = useResetPasswordMutation({
     onSuccess: () => {
       addToast({
-          level: "success",
-          description: t("account.reset.status.success.message"),
-          duration: 5000,
-        });
-        navigate("/", { replace: true });
+        level: "success",
+        description: t("account.reset.status.success.message"),
+        duration: 5000,
+      });
+      navigate("/", { replace: true });
     },
     onError: () => {
-        setTimestamp(DateTime.now().toMillis());
-    }
+      setTimestamp(DateTime.now().toMillis());
+    },
   });
 
   function handleSubmit(data: ResetForm) {
@@ -160,7 +160,13 @@ export default function () {
                 </Field>
               )}
             </Field>
-            <Button type="submit" level="primary" class="!mt-4" loading={mutation.isPending} disabled={mutation.isPending}>
+            <Button
+              type="submit"
+              level="primary"
+              class="!mt-4"
+              loading={mutation.isPending}
+              disabled={mutation.isPending}
+            >
               {t("general.actions.confirm.title")}
             </Button>
           </Form>

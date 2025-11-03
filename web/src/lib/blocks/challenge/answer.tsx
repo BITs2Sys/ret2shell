@@ -47,11 +47,13 @@ export default function (props: {
               <Button
                 size="sm"
                 level="primary"
-                onClick={() => updateAnswerMutation.mutate({
-                  game_id: props.gameId,
-                  challenge_id: props.challengeId,
-                  answer: answer(),
-                })}
+                onClick={() =>
+                  updateAnswerMutation.mutate({
+                    game_id: props.gameId,
+                    challenge_id: props.challengeId,
+                    answer: answer(),
+                  })
+                }
                 loading={updateAnswerMutation.isPending}
                 disabled={updateAnswerMutation.isPending}
               >

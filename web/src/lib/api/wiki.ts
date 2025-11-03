@@ -24,7 +24,15 @@ export async function getWiki(id: number) {
   return await api.get(`${api_root}/wiki/${id}`).json<Article>();
 }
 
-export function useWiki({ id, enabled, onError }: { id: () => number; enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function useWiki({
+  id,
+  enabled,
+  onError,
+}: {
+  id: () => number;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
   const keys = createMemo(() => ["wiki", id()]);
   return useQuery(() => ({
     queryKey: keys(),
@@ -79,9 +87,7 @@ export async function deleteWiki(id: number) {
   return await api.delete(`${api_root}/wiki/${id}`).json();
 }
 
-export function useDeleteWikiMutation(
-  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteWikiMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ id }: { id: number }) => deleteWiki(id),
     onSuccess: () => props.onSuccess?.(),

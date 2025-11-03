@@ -67,7 +67,9 @@ export default function () {
                   >
                     <Card contentClass="max-w-lg p-2">
                       <table>
-                        <For each={Object.entries(oauthStatus.data!.find((v) => v.provider === service.provider)!.data)}>
+                        <For
+                          each={Object.entries(oauthStatus.data!.find((v) => v.provider === service.provider)!.data)}
+                        >
                           {([key, value]) => (
                             <tr class="h-12 align-middle text-start border-b border-b-layer-content/15">
                               <td class="h-12 align-middle text-start font-bold px-2">{key}</td>
@@ -81,9 +83,11 @@ export default function () {
 
                   <Button
                     size="sm"
-                    onClick={() => mutation.mutate({
-                      id: oauthStatus.data!.find((v) => v.provider === service.provider)!.id
-                    })}
+                    onClick={() =>
+                      mutation.mutate({
+                        id: oauthStatus.data!.find((v) => v.provider === service.provider)!.id,
+                      })
+                    }
                   >
                     {t("account.oauth.actions.unbind.title")}
                   </Button>

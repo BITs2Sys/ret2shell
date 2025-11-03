@@ -119,7 +119,13 @@ export default function () {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={mutation.isPending} disabled={mutation.isPending}>
+          <Button
+            type="submit"
+            level="primary"
+            class="!mt-4"
+            loading={mutation.isPending}
+            disabled={mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

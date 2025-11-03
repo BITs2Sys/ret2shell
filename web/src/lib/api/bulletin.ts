@@ -110,7 +110,7 @@ export async function deleteBulletin(id: number) {
 
 export function useDeleteBulletinMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
-    mutationFn: ({id}: {id: number}) => deleteBulletin(id),
+    mutationFn: ({ id }: { id: number }) => deleteBulletin(id),
     onSuccess: () => {
       props.onSuccess?.();
     },

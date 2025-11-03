@@ -12,7 +12,12 @@ import type { Command } from "./interface";
 export class Cat implements Command {
   name = "cat";
   man = t("shell.cat.man");
-  func = async (io: Stdio, args: ParseEntry[], _: string, { game, team, challenge }: { game?: Game; team?: Team; challenge?: Challenge }) => {
+  func = async (
+    io: Stdio,
+    args: ParseEntry[],
+    _: string,
+    { game, team, challenge }: { game?: Game; team?: Team; challenge?: Challenge }
+  ) => {
     if (!game || !team || !challenge) {
       io.error(t("shell.errors.noGameSpecified.title"));
       return 1;

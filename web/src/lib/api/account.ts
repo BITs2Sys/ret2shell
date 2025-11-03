@@ -51,7 +51,7 @@ export async function register(req: RegisterRequest) {
 
 export function useRegisterMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
-    mutationFn:  register,
+    mutationFn: register,
     onSuccess: () => props.onSuccess?.(),
     onError: (err: Error) => {
       handleHttpError(err, t("account.register.errors.register.title"));
@@ -207,7 +207,7 @@ export async function getProfile() {
   return await api.get(`${api_root}/account/profile`).json<User>();
 }
 
-export function useAccountProfile(props: { enabled?: () => boolean; onError?: (err: Error) => boolean }={}) {
+export function useAccountProfile(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
   return useQuery(() => ({
     queryKey: ["account", "profile"],
     queryFn: async () => await getProfile(),
@@ -401,7 +401,7 @@ export async function deleteOAuthProvider(service: string) {
 
 export function useDeleteOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
-    mutationFn: ({service}: {service: string}) => deleteOAuthProvider(service),
+    mutationFn: ({ service }: { service: string }) => deleteOAuthProvider(service),
     onSuccess: () => {
       addToast({
         level: "success",
@@ -554,7 +554,7 @@ export async function unbindWithOAuth(id: number) {
 
 export function useUnbindWithOAuthMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
-    mutationFn: ({id}: {id: number}) => unbindWithOAuth(id),
+    mutationFn: ({ id }: { id: number }) => unbindWithOAuth(id),
     onSuccess: () => {
       addToast({
         level: "success",
@@ -642,7 +642,7 @@ export async function deleteInstitute(id: number) {
 
 export function useDeleteInstituteMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
-    mutationFn: ({id} : {id: number}) => deleteInstitute(id),
+    mutationFn: ({ id }: { id: number }) => deleteInstitute(id),
     onSuccess: () => {
       addToast({
         level: "success",

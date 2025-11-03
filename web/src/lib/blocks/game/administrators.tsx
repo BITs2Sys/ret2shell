@@ -93,9 +93,7 @@ export default function AdministratorsManagement(props: { gameId: number }) {
                 >
                   {(user) => (
                     <Dialog
-                      disabled={
-                        !user.permissions.includes(Permission.Game) || game.data?.admins.includes(user.id)
-                      }
+                      disabled={!user.permissions.includes(Permission.Game) || game.data?.admins.includes(user.id)}
                       ghost
                       btnContent={
                         <>

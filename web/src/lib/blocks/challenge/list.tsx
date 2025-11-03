@@ -9,9 +9,14 @@ import TreeView, { type TreeNode } from "@widgets/treeview";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import {  createMemo, createSignal, Match, Show, Switch } from "solid-js";
+import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 
-export default function ChallengeList(props: { gameId: number; showScore?: boolean; paginated?: boolean; inGame?: boolean }) {
+export default function ChallengeList(props: {
+  gameId: number;
+  showScore?: boolean;
+  paginated?: boolean;
+  inGame?: boolean;
+}) {
   const [searchParams, _] = useSearchParams();
   const selectedChallengeId = createMemo(() => {
     return Number.parseInt((searchParams.challenge as string) || "", 10) ?? null;

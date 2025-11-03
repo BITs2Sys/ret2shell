@@ -32,11 +32,11 @@ export function FormBare(props: {
   function onSubmit(result: ChallengeForm) {
     props.onDone(result);
   }
- 
+
   // Load edit source
   const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({ game_id: () => props.gameId, challenge_id: () => props.challengeId || 0 });
-  
+
   createEffect(() => {
     if (challenge.data) {
       untrack(() => {

@@ -1,12 +1,7 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
 import { useChallenges } from "@api/challenge";
-import {
-  type GameStatisticsExport,
-  getGameStatisticsExport,
-  useGame,
-  useGameStatistics,
-} from "@api/game";
+import { type GameStatisticsExport, getGameStatisticsExport, useGame, useGameStatistics } from "@api/game";
 import Spin from "@assets/animates/spin";
 import logo from "@assets/logo.svg";
 import XLSX from "@e965/xlsx";
@@ -60,11 +55,7 @@ export default function GameStatistics(props: { inGame?: boolean; gameId: number
     if (game.data) {
       setExporting(true);
       try {
-        const data = await getGameStatisticsExport(
-          game.data.id,
-          props.inGame,
-          selectedInstituteId() ?? undefined
-        );
+        const data = await getGameStatisticsExport(game.data.id, props.inGame, selectedInstituteId() ?? undefined);
         // save as json
         const blob = new Blob([JSON.stringify(data)], {
           type: "application/json",
@@ -152,7 +143,7 @@ export default function GameStatistics(props: { inGame?: boolean; gameId: number
         convertTeamState(team.state),
         team.score,
         ...paddedMembers.map((m) => (m.id ? `${m.id}:${m.account} (${m.nickname}) <${m.email}>` : "")),
-        ...challenges.data?.[0].map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")) ?? [],
+        ...(challenges.data?.[0].map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")) ?? []),
       ];
       scoreboardArr.push(row);
     }
@@ -478,7 +469,8 @@ export default function GameStatistics(props: { inGame?: boolean; gameId: number
                       data: Object.entries(stats.data?.institute_players || {})
                         .map(([_, v]) => v)
                         .concat(
-                          (stats.data?.total_players ?? 0) - Object.values(stats.data?.institute_players || {}).reduce((a, b) => a + b, 0)
+                          (stats.data?.total_players ?? 0) -
+                            Object.values(stats.data?.institute_players || {}).reduce((a, b) => a + b, 0)
                         ),
                       barMaxWidth: 64,
                     },
@@ -574,7 +566,8 @@ export default function GameStatistics(props: { inGame?: boolean; gameId: number
                     data: Object.entries(stats.data?.institute_teams || {})
                       .map(([_, v]) => v)
                       .concat(
-                        (stats.data?.total_teams ?? 0) - Object.values(stats.data?.institute_teams || {}).reduce((a, b) => a + b, 0)
+                        (stats.data?.total_teams ?? 0) -
+                          Object.values(stats.data?.institute_teams || {}).reduce((a, b) => a + b, 0)
                       ),
                     barMaxWidth: 64,
                   },

@@ -12,7 +12,7 @@ import { createSignal, For, Match, Show, Switch } from "solid-js";
 
 function StatisticsPanel(props: { gameId: number; challengeId: number }) {
   const [page, setPage] = createSignal(1);
-  const [pageSize, ] = createSignal(10);
+  const [pageSize] = createSignal(10);
   const [onlySolved, setOnlySolved] = createSignal(true);
 
   const challenge = useChallenge({
@@ -155,7 +155,12 @@ function HistoryPanel(props: { gameId: number; challengeId: number }) {
   );
 }
 
-export default function (props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean; gameId: number; challengeId: number }) {
+export default function (props: {
+  onStateChange?: (challenge?: Challenge) => void;
+  inGame?: boolean;
+  gameId: number;
+  challengeId: number;
+}) {
   const [tab, setTab] = createSignal("statistics" as "statistics" | "history");
   return (
     <div class="flex flex-row min-h-full">

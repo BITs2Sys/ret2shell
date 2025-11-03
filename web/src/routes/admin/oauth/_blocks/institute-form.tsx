@@ -64,13 +64,15 @@ export default function InstituteForm(props: {
             class="flex-1"
             error={field.error}
             placeholder={t("institute.form.provider.placeholder")}
-            items={oauthProviders.data?.map((service) => {
-              return {
-                value: service.provider,
-                label: service.name,
-                icon: "icon-[fluent--hat-graduation-20-regular]",
-              };
-            }) || []}
+            items={
+              oauthProviders.data?.map((service) => {
+                return {
+                  value: service.provider,
+                  label: service.name,
+                  icon: "icon-[fluent--hat-graduation-20-regular]",
+                };
+              }) || []
+            }
             value={field.value ? [field.value as string] : undefined}
             inputProps={fieldProps}
           />

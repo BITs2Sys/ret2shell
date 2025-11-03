@@ -36,7 +36,7 @@ export default function () {
     },
     onError: () => {
       setTimestamp(DateTime.now().toMillis());
-    }
+    },
   });
   async function handleDeactivate(result: CaptchaForm) {
     if (!canDelete()) {

@@ -31,39 +31,22 @@ import { t } from "./theme";
 // }
 
 export function isGameInProgress(game?: Game) {
-  if (
-    game?.start_at &&
-    game.start_at < DateTime.now() &&
-    game?.end_at &&
-    game.end_at > DateTime.now()
-  ) {
+  if (game?.start_at && game.start_at < DateTime.now() && game?.end_at && game.end_at > DateTime.now()) {
     return true;
   }
   return false;
 }
 
 export function isGameInRegister(game?: Game) {
-    const register_end = game?.can_register_after_started
-    ? game.end_at
-    : game?.start_at;
-  if (
-    game?.register_at &&
-    game.register_at < DateTime.now() &&
-    register_end &&
-    register_end > DateTime.now()
-  ) {
+  const register_end = game?.can_register_after_started ? game.end_at : game?.start_at;
+  if (game?.register_at && game.register_at < DateTime.now() && register_end && register_end > DateTime.now()) {
     return true;
   }
   return false;
 }
 
 export function isGameInArchiving(game?: Game) {
-    if (
-    game?.end_at &&
-    game.end_at < DateTime.now() &&
-    game?.archive_at &&
-    game.archive_at > DateTime.now()
-  ) {
+  if (game?.end_at && game.end_at < DateTime.now() && game?.archive_at && game.archive_at > DateTime.now()) {
     return true;
   }
   return false;
@@ -77,11 +60,7 @@ export function isGameInArchived(game?: Game) {
 }
 
 export function isGameCanParticipate(game?: Game) {
-    if (
-    !game?.can_register_after_started &&
-    game?.start_at &&
-    game.start_at < DateTime.now()
-  ) {
+  if (!game?.can_register_after_started && game?.start_at && game.start_at < DateTime.now()) {
     return false;
   }
   if (game?.end_at && game.end_at < DateTime.now()) {
@@ -91,10 +70,7 @@ export function isGameCanParticipate(game?: Game) {
     return false;
   }
   if (game?.access_policy.restrict) {
-    if (
-      accountStore.info?.institute_id &&
-      game.access_policy.institutes.includes(accountStore.info.institute_id)
-    )
+    if (accountStore.info?.institute_id && game.access_policy.institutes.includes(accountStore.info.institute_id))
       return true;
     return false;
   }
@@ -102,7 +78,7 @@ export function isGameCanParticipate(game?: Game) {
   return true;
 }
 
-export function isPlayerCanAccessChallenges(game?: Game, team?: Team | null) : [boolean, string] {
+export function isPlayerCanAccessChallenges(game?: Game, team?: Team | null): [boolean, string] {
   if (!accountStore.id) return [false, t("general.network.status.401.title")];
   if (isAdminOfGame(game)) {
     return [true, ""];
@@ -129,7 +105,7 @@ export function isPlayerCanAccessChallenges(game?: Game, team?: Team | null) : [
 
 export function isAdminOfGame(game?: Game) {
   if (!accountStore.id) return false;
-  if ( game?.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)) {
+  if (game?.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)) {
     return true;
   }
   return false;
@@ -148,9 +124,7 @@ export function gameParticipateState(game: Game) {
 // find the last one
 export function currentTimelinePeriod(game?: Game) {
   const len = game?.timeline_presets?.length;
-  const sortedTimeline = game?.timeline_presets?.sort(
-    (a, b) => a.start_at.toMillis() - b.start_at.toMillis()
-  );
+  const sortedTimeline = game?.timeline_presets?.sort((a, b) => a.start_at.toMillis() - b.start_at.toMillis());
   if (!len) return null;
   for (let i = len; i > 0; i--) {
     const period = sortedTimeline![i - 1];

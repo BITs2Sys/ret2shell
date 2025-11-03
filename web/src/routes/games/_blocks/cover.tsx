@@ -70,10 +70,7 @@ export default function (props: ComponentProps<"div">) {
             expanded() && "scale-125 blur-md"
           )}
           alt="Cover"
-          src={
-            (gameCoverStore.preload?.cover && mediaPath(gameCoverStore.preload.cover)) ||
-            bgGameDefault
-          }
+          src={(gameCoverStore.preload?.cover && mediaPath(gameCoverStore.preload.cover)) || bgGameDefault}
         />
         <div
           class={clsx(

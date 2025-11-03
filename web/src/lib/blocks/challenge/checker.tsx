@@ -159,11 +159,13 @@ export default function (props: {
             <Button
               level="info"
               size="sm"
-              onClick={() => updateScriptMutation.mutate({
-                game_id: props.gameId,
-                challenge_id: props.challengeId,
-                content: script(),
-              })}
+              onClick={() =>
+                updateScriptMutation.mutate({
+                  game_id: props.gameId,
+                  challenge_id: props.challengeId,
+                  content: script(),
+                })
+              }
               loading={updateScriptMutation.isPending || scriptQuery.isLoading}
               disabled={updateScriptMutation.isPending || scriptQuery.isLoading}
             >
