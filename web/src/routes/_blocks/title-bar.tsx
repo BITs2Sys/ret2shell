@@ -26,7 +26,6 @@ import Timer from "@widgets/timer";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import I18nBox, { I18nBoxContent } from "./i18n-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
 import ThemeBox, { ThemeBoxContent } from "./theme-box";
@@ -345,9 +344,6 @@ export default function TitleBar() {
                   <Match when={additionalMobileBox() === "theme"}>
                     <ThemeBoxContent />
                   </Match>
-                  <Match when={additionalMobileBox() === "i18n"}>
-                    <I18nBoxContent />
-                  </Match>
                 </Switch>
               </div>
             </Popover>
@@ -431,7 +427,6 @@ export default function TitleBar() {
               </Show>
               <NotificationBox />
               <ThemeBox />
-              <I18nBox />
             </div>
             <Switch
               fallback={
