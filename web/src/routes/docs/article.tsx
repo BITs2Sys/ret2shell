@@ -40,7 +40,7 @@ export default function () {
       // console.log(comps);
       let locale = themeStore.locale;
       if (comps[`./contents/${path}/index.${locale}.md`] === undefined) {
-        locale = "zh_cn";
+        locale = "en_us";
       }
       const match = comps[`./contents/${path}/index.${locale}.md`];
       const content = (await match()) as { default: string };

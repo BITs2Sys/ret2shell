@@ -12,7 +12,7 @@ let systemPrefersLocale = (window.navigator.language || window.navigator.languag
   .toLowerCase() as Locale;
 
 if (!hasLocale(systemPrefersLocale)) {
-  systemPrefersLocale = "zh_cn" as Locale;
+  systemPrefersLocale = "en_us" as Locale;
 }
 
 export const [themeStore, setThemeStore] = makePersisted(

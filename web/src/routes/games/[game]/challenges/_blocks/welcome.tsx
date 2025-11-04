@@ -9,7 +9,18 @@ export default function () {
   createEffect(() => {
     if (themeStore.locale) {
       untrack(async () => {
-        const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
+        const match =
+          comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
+        try {
+          setContent(((await match()) as { default: string }).default);
+        } catch {
+          const match = comps["../../_blocks/contents/welcome.en_us.md"];
+          setContent(((await match()) as { default: string }).default);
+        }
+      });
+    } else {
+      untrack(async () => {
+        const match = comps["../../_blocks/contents/welcome.en_us.md"];
         setContent(((await match()) as { default: string }).default);
       });
     }
