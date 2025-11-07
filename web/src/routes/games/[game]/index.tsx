@@ -1,5 +1,9 @@
 import { handleHttpError } from "@api";
-import { getGameIntroduction, updateGame, updateGameIntroduction } from "@api/game";
+import {
+  getGameIntroduction,
+  updateGame,
+  updateGameIntroduction,
+} from "@api/game";
 import { uploadMedia } from "@api/media";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
@@ -31,7 +35,16 @@ import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  Show,
+  Switch,
+  untrack,
+} from "solid-js";
 import IntroForm from "./_blocks/intro-form";
 
 function BannedWarning() {
@@ -68,16 +81,28 @@ export default function () {
   };
 
   const timeEnd = () => {
-    if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
+    if (
+      gameStore.current?.register_at &&
+      gameStore.current.register_at > DateTime.now()
+    ) {
       return gameStore.current.register_at;
     }
-    if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+    if (
+      gameStore.current?.start_at &&
+      gameStore.current.start_at > DateTime.now()
+    ) {
       return gameStore.current.start_at;
     }
-    if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
+    if (
+      gameStore.current?.end_at &&
+      gameStore.current.end_at > DateTime.now()
+    ) {
       return gameStore.current.end_at;
     }
-    if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
+    if (
+      gameStore.current?.archive_at &&
+      gameStore.current.archive_at > DateTime.now()
+    ) {
       return gameStore.current.archive_at;
     }
     return DateTime.now();
@@ -91,7 +116,9 @@ export default function () {
 
   onCleanup(() => clearInterval(updateTimer));
 
-  const [introduction, setIntroduction] = createSignal(null as ArticleModel | null);
+  const [introduction, setIntroduction] = createSignal(
+    null as ArticleModel | null,
+  );
   const [loading, setLoading] = createSignal(false);
 
   createEffect(() => {
@@ -104,7 +131,10 @@ export default function () {
             const resp = await getGameIntroduction(gameStore.current.id);
             setIntroduction(resp);
           } catch (err) {
-            handleHttpError(err as Error, t("game.errors.fetchIntroduction.title")!);
+            handleHttpError(
+              err as Error,
+              t("game.errors.fetchIntroduction.title")!,
+            );
           }
           setLoading(false);
         }
@@ -129,7 +159,9 @@ export default function () {
         setGameStore({
           current: {
             ...gameStore.current,
-            cover: URL.createObjectURL((event.target as HTMLInputElement).files![0]),
+            cover: URL.createObjectURL(
+              (event.target as HTMLInputElement).files![0],
+            ),
           },
         });
       setCoverFile((event.target as HTMLInputElement).files![0]);
@@ -177,7 +209,9 @@ export default function () {
         setGameStore({
           current: {
             ...gameStore.current,
-            logo: URL.createObjectURL((event.target as HTMLInputElement).files![0]),
+            logo: URL.createObjectURL(
+              (event.target as HTMLInputElement).files![0],
+            ),
           },
         });
       setLogoFile((event.target as HTMLInputElement).files![0]);
@@ -223,13 +257,17 @@ export default function () {
     <>
       <div class="flex-1 flex flex-col lg:flex-row-reverse">
         <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur-sm border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
-          <Card contentClass="relative">
+          <Card contentClass="flex flex-col">
             <Picture
               class="aspect-video"
-              src={(gameStore.current?.cover && mediaPath(gameStore.current.cover)) || bgGameDefault}
+              src={
+                (gameStore.current?.cover &&
+                  mediaPath(gameStore.current.cover)) ||
+                bgGameDefault
+              }
             />
 
-            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-2">
+            <div class="flex flex-col justify-end items-end space-y-2">
               <Show when={isGameAdmin()}>
                 <div class="flex flex-row space-x-2">
                   <Button
@@ -240,10 +278,17 @@ export default function () {
                     loading={coverUploading()}
                     disabled={logoSet()}
                   >
-                    <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
+                    <input
+                      type="file"
+                      class="hidden"
+                      ref={coverInput!}
+                      onChange={handleSelectedCover}
+                    />
                     <Show
                       when={coverSet()}
-                      fallback={<span class="shrink-0 icon-[fluent--draw-image-20-regular] w-5 h-5" />}
+                      fallback={
+                        <span class="shrink-0 icon-[fluent--draw-image-20-regular] w-5 h-5" />
+                      }
                     >
                       <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
@@ -256,8 +301,16 @@ export default function () {
                     loading={logoUploading()}
                     disabled={coverSet()}
                   >
-                    <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
-                    <Show when={logoSet()} fallback={<EditFlag class="w-5 h-5" />}>
+                    <input
+                      type="file"
+                      class="hidden"
+                      ref={logoInput!}
+                      onChange={handleSelectedLogo}
+                    />
+                    <Show
+                      when={logoSet()}
+                      fallback={<EditFlag class="w-5 h-5" />}
+                    >
                       <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
@@ -268,12 +321,20 @@ export default function () {
                   <Show
                     when={gameStore.current?.logo}
                     fallback={
-                      <Show when={loading()} fallback={<LogoAnimate width={64} height={64} />}>
+                      <Show
+                        when={loading()}
+                        fallback={<LogoAnimate width={64} height={64} />}
+                      >
                         <Spin width={64} height={64} />
                       </Show>
                     }
                   >
-                    <img src={mediaPath(gameStore.current!.logo!)} width={64} height={64} alt="Logo Broken" />
+                    <img
+                      src={mediaPath(gameStore.current!.logo!)}
+                      width={64}
+                      height={64}
+                      alt="Logo Broken"
+                    />
                   </Show>
                 </div>
                 <div class="flex flex-col space-y-2">
@@ -284,8 +345,17 @@ export default function () {
             </div>
           </Card>
           <div class="flex flex-col space-y-2 items-center py-4 lg:py-8 print:hidden">
-            <Show when={showTimer()} fallback={<span class="text-3xl font-bold text-warning">{t("game.ended")}</span>}>
-              <h3 class="text-xl font-bold opacity-60">{t("game.timeLast", { period: period() })}</h3>
+            <Show
+              when={showTimer()}
+              fallback={
+                <span class="text-3xl font-bold text-warning">
+                  {t("game.ended")}
+                </span>
+              }
+            >
+              <h3 class="text-xl font-bold opacity-60">
+                {t("game.timeLast", { period: period() })}
+              </h3>
               <p class="text-3xl font-bold">
                 <Timer end={timeEnd()} hasHours />
               </p>
@@ -295,7 +365,10 @@ export default function () {
             <div class="flex flex-row flex-wrap items-start justify-center">
               <Tag level="info" class="m-2">
                 <Show
-                  when={gameStore.current?.team_size && gameStore.current.team_size > 1}
+                  when={
+                    gameStore.current?.team_size &&
+                    gameStore.current.team_size > 1
+                  }
                   fallback={<span>{t("team.solo")}</span>}
                 >
                   <span>
@@ -316,7 +389,13 @@ export default function () {
                 <For each={gameStore.current?.access_policy.institutes}>
                   {(institute) => (
                     <Tag level="success" class="m-2">
-                      <span>{accountStore.institutes.find((v) => v.id === institute)?.name}</span>
+                      <span>
+                        {
+                          accountStore.institutes.find(
+                            (v) => v.id === institute,
+                          )?.name
+                        }
+                      </span>
                     </Tag>
                   )}
                 </For>
@@ -343,12 +422,18 @@ export default function () {
                   <span>{gameStore.team?.name}</span>
                   <span>&nbsp;</span>
                   <span class="text-primary">#</span>
-                  <span class="opacity-60">{gameStore.team?.id.toString(16).padStart(6, "0")}</span>
+                  <span class="opacity-60">
+                    {gameStore.team?.id.toString(16).padStart(6, "0")}
+                  </span>
                 </h3>
                 <p class="flex-row flex-wrap hidden lg:flex space-x-2 px-2 opacity-60">
-                  <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
+                  <span>
+                    {stringifyState(gameStore.team?.state || TeamState.Pending)}
+                  </span>
                   <span class="opacity-60 text-primary">-</span>
-                  <span>{gameStore.team?.institute_name || t("institute.empty")}</span>
+                  <span>
+                    {gameStore.team?.institute_name || t("institute.empty")}
+                  </span>
                 </p>
               </div>
               <p class="flex flex-col items-start justify-center font-bold">
@@ -367,12 +452,20 @@ export default function () {
           </Show>
           <div class="flex flex-row space-x-2 print:hidden">
             <Show when={isGameAdmin()}>
-              <Link href={`/games/${gameStore.current?.id}?edit=true`} square level="primary">
+              <Link
+                href={`/games/${gameStore.current?.id}?edit=true`}
+                square
+                level="primary"
+              >
                 <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
               </Link>
             </Show>
             <Show when={isGameAdmin()}>
-              <Link href={`/games/${gameStore.current?.id}/admin`} square level="primary">
+              <Link
+                href={`/games/${gameStore.current?.id}/admin`}
+                square
+                level="primary"
+              >
                 <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
               </Link>
             </Show>
@@ -380,12 +473,15 @@ export default function () {
               <Match when={gameStore.team}>
                 <Link
                   href={
-                    inArchived() ? `/training/${gameStore.current?.id}` : `/games/${gameStore.current?.id}/challenges`
+                    inArchived()
+                      ? `/training/${gameStore.current?.id}`
+                      : `/games/${gameStore.current?.id}/challenges`
                   }
                   class="flex-1"
                   level="success"
                   disabled={
-                    (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) ||
+                    (gameStore.current?.start_at &&
+                      gameStore.current.start_at > DateTime.now()) ||
                     gameStore.team?.state === TeamState.Pending ||
                     gameStore.team?.state === TeamState.Banned
                   }
@@ -393,19 +489,34 @@ export default function () {
                   <span class="shrink-0 icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Switch>
                     <Match when={inArchived()}>
-                      <span class="flex-1 text-start">{t("game.gotoTraining")}</span>
+                      <span class="flex-1 text-start">
+                        {t("game.gotoTraining")}
+                      </span>
                     </Match>
-                    <Match when={gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()}>
-                      <span class="flex-1 text-start">{t("game.notStarted")}</span>
+                    <Match
+                      when={
+                        gameStore.current?.start_at &&
+                        gameStore.current.start_at > DateTime.now()
+                      }
+                    >
+                      <span class="flex-1 text-start">
+                        {t("game.notStarted")}
+                      </span>
                     </Match>
                     <Match when={gameStore.team?.state === TeamState.Pending}>
-                      <span class="flex-1 text-start">{t("team.status.pending.placeholder")}</span>
+                      <span class="flex-1 text-start">
+                        {t("team.status.pending.placeholder")}
+                      </span>
                     </Match>
                     <Match when={gameStore.team?.state === TeamState.Banned}>
-                      <span class="flex-1 text-start">{t("team.status.banned.title")}</span>
+                      <span class="flex-1 text-start">
+                        {t("team.status.banned.title")}
+                      </span>
                     </Match>
                     <Match when={true}>
-                      <span class="flex-1 text-start">{t("game.enterChallenge")}</span>
+                      <span class="flex-1 text-start">
+                        {t("game.enterChallenge")}
+                      </span>
                     </Match>
                   </Switch>
                   <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
@@ -416,12 +527,16 @@ export default function () {
                   level="success"
                   class="flex-1"
                   href={
-                    inArchived() ? `/training/${gameStore.current?.id}` : `/games/${gameStore.current?.id}/challenges`
+                    inArchived()
+                      ? `/training/${gameStore.current?.id}`
+                      : `/games/${gameStore.current?.id}/challenges`
                   }
                   justify="start"
                 >
                   <span class="shrink-0 icon-[fluent--code-20-filled] w-5 h-5" />
-                  <span class="flex-1 text-start">{t("game.manageChallenges")}</span>
+                  <span class="flex-1 text-start">
+                    {t("game.manageChallenges")}
+                  </span>
                   <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
@@ -435,9 +550,15 @@ export default function () {
                   <span class="shrink-0 icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Show
                     when={canParticipate()}
-                    fallback={<span class="flex-1 text-start">{t("game.canNotParticipate")}</span>}
+                    fallback={
+                      <span class="flex-1 text-start">
+                        {t("game.canNotParticipate")}
+                      </span>
+                    }
                   >
-                    <span class="flex-1 text-start">{t("team.create.title")}</span>
+                    <span class="flex-1 text-start">
+                      {t("team.create.title")}
+                    </span>
                   </Show>
                   <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
@@ -449,7 +570,9 @@ export default function () {
                   level="warning"
                 >
                   <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
-                  <span class="flex-1 text-start">{t("game.loginThenBack")}</span>
+                  <span class="flex-1 text-start">
+                    {t("game.loginThenBack")}
+                  </span>
                   <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
@@ -457,13 +580,23 @@ export default function () {
           </div>
         </div>
         <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
-          <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">{t("game.introduction.title")}</h1>
+          <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">
+            {t("game.introduction.title")}
+          </h1>
           <Switch>
             <Match when={inEdit()}>
-              <IntroForm onDone={onUpdateIntroduction} editSource={introduction() || undefined} />
+              <IntroForm
+                onDone={onUpdateIntroduction}
+                editSource={introduction() || undefined}
+              />
             </Match>
             <Match when={introduction() && !loading()}>
-              <Article class="self-center" content={introduction()!.content!} extra={true} headingAnchors={true} />
+              <Article
+                class="self-center"
+                content={introduction()!.content!}
+                extra={true}
+                headingAnchors={true}
+              />
             </Match>
             <Match when={loading()}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
