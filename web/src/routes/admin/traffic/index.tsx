@@ -8,18 +8,15 @@ import {
 import { getPlatformConfig } from "@api/platform";
 import type { Config } from "@models/config";
 import { Title } from "@storage/header";
-import { fullTheme, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
-import { EditorBare } from "@widgets/editor";
+import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import Splitter from "@widgets/splitter";
-import { AnsiUp } from "ansi_up";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createSignal, onMount, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
@@ -44,12 +41,9 @@ export default function Traffic() {
   const [preset, setPreset] = createSignal(null as PresetTraffic | null);
 
   const [script, setScript] = createSignal("");
-  const [lint, setLint] = createSignal(null as string | null);
+  const [lint, setLint] = createSignal(null as DiagnosticMarker[] | null);
   const [nodeSelector, setNodeSelector] = createSignal("");
   const [saving, setSaving] = createSignal(false);
-  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
-  const ansi_up = new AnsiUp();
-  ansi_up.use_classes = true;
   createEffect(() => {
     if (preset()) {
       setScript(trafficMap[preset()!]);
@@ -68,9 +62,6 @@ export default function Traffic() {
     try {
       const resp = await updateGlobalTrafficScript(script());
       setLint(resp.lint);
-      if (resp.lint) {
-        setRenderedLint(ansi_up.ansi_to_html(resp.lint));
-      }
       addToast({
         level: "success",
         description: t("general.actions.save.status.success")!,
@@ -164,7 +155,7 @@ export default function Traffic() {
             </Show>
           </div>
           <Divider />
-          <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+          <h2 class="h-12 shrink-0 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="shrink-0 icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <span class="flex-1 flex items-center justify-start space-x-2">
               <span>{t("traffic.title")}</span>
@@ -213,52 +204,32 @@ export default function Traffic() {
               </Popover>
             </Show>
           </h2>
-          <Splitter
-            orientation="vertical"
-            defaultSize={[80, 20]}
-            panels={[
-              { id: "a", minSize: 24 },
-              { id: "b", minSize: 10 },
-            ]}
-            class="flex-1"
-            startPanel={() => (
-              <EditorBare
-                class="w-full h-full"
-                lineNumbers
-                lang="rust"
-                value={script()}
-                onValueChanged={(e) => {
-                  setScript(e);
-                }}
-              />
-            )}
-            endPanel={() => (
-              <OverlayScrollbarsComponent
-                options={{
-                  scrollbars: {
-                    theme: `os-theme-${fullTheme()}`,
-                    autoHide: "scroll",
-                  },
-                }}
-                class="relative w-full h-full print:h-auto print:overflow-auto"
-                defer
-              >
-                <Show
-                  when={lint()}
-                  fallback={
-                    <p class="flex flex-row space-x-2 items-center text-success p-3 lg:p-6">
-                      <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
-                      <span>0 warning(s), error(s).</span>
-                    </p>
-                  }
-                >
-                  <div class="p-3 lg:p-6">
-                    <pre innerHTML={renderedLint() ?? undefined} />
-                  </div>
-                </Show>
-              </OverlayScrollbarsComponent>
-            )}
+          <EditorBare
+            class="w-full h-full"
+            lineNumbers
+            lang="rust"
+            value={script()}
+            lints={lint() ?? []}
+            onValueChanged={(e) => {
+              setScript(e);
+            }}
           />
+          <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
+            <span class="text-primary icon-[fluent--info-16-regular]" />
+            <span class="text-primary">{lint()?.filter((v) => v.kind === "info").length ?? 0}</span>
+            <span class="text-warning icon-[fluent--warning-16-regular]" />
+            <span class="text-warning">{lint()?.filter((v) => v.kind === "warning").length ?? 0}</span>
+            <span class="text-error icon-[fluent--warning-16-regular]" />
+            <span class="text-error">{lint()?.filter((v) => v.kind === "error").length ?? 0}</span>
+            <div class="flex-1" />
+            <a href="https://rune-rs.github.io/" class="text-primary hover:underline">
+              Rune Grammar <span class="icon-[fluent--open-12-regular]" />
+            </a>
+            <span>&nbsp;&nbsp;</span>
+            <a href="https://github.com/ret2shell/ret2script" class="text-primary hover:underline">
+              Ret2Script <span class="icon-[fluent--open-12-regular]" />
+            </a>
+          </footer>
         </div>
       </div>
     </>

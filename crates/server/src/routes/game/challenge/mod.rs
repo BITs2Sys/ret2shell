@@ -17,7 +17,7 @@ use r2s_bucket::{
   challenge::{ChallengeBucket, Hints},
 };
 use r2s_cache::Cache;
-use r2s_checker::{Checker, traits::CheckerError};
+use r2s_checker::Checker;
 use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
@@ -26,6 +26,7 @@ use r2s_database::{
   hint, submission, team,
   user::{self, Permission},
 };
+use r2s_engine::DiagnosticMarker;
 use r2s_event::{
   Event,
   events::{
@@ -37,6 +38,7 @@ use r2s_queue::Queue;
 use sea_orm::{DatabaseTransaction, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use tokio_util::io::{ReaderStream, StreamReader};
+use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use super::{get_pod_field, worker};
@@ -119,7 +121,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         ))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(challenge, true),
+          data::prepare_data!(challenge, true, id, name),
         )),
     )
     .route_layer(middleware::from_fn_with_state(
@@ -219,13 +221,8 @@ async fn get_challenge_list(
   let is_admin = is_game_admin!(token, game);
 
   if game.start_at > Utc::now() && !is_admin {
-    return Err(ResponseError::Forbidden(
-      "game has not started".to_owned(),
-      format!(
-        "user {}:{} ({}) tried to access challenges in game {}:{}",
-        token.id, token.account, token.nickname, game.id, game.name
-      ),
-    ));
+    warn!("user tried to access challenges before game start");
+    return Err(ResponseError::Forbidden("game has not started".to_owned()));
   }
 
   if query.page.is_none() || query.page_size.is_none() {
@@ -320,7 +317,7 @@ async fn update_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   State(ref queue): State<Queue>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
-  Json(challenge): Json<challenge::Model>,
+  Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // refuse to change some columns when challenge is cloned from another
   // challenge.
@@ -353,14 +350,9 @@ async fn update_challenge(
       challenge::maintain_score(&txn, challenge.clone()).await?;
     if actually_changed {
       info!(
-        "challenge {}:{} score changed from {} to {} by user {}:{} ({}), will trigger scoreboard update",
-        challenge.id,
-        challenge.name,
-        prev_challenge.score,
-        challenge.score,
-        token.id,
-        token.account,
-        token.nickname
+        previous_score=%prev_challenge.score,
+        new_score=%challenge.score,
+        "challenge score changed, will trigger scoreboard update",
       );
     }
     challenge
@@ -385,7 +377,14 @@ async fn update_challenge(
   // }
   txn.commit().await?;
   if score_changed {
-    queue.publish("scoreboard", challenge.clone()).await.ok();
+    queue
+      .publish(
+        "scoreboard",
+        challenge.clone(),
+        &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+      )
+      .await
+      .ok();
   }
   cache.at("challenge").del(challenge.id).await.ok();
 
@@ -397,7 +396,7 @@ async fn up_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   State(ref queue): State<Queue>, State(checker): State<Checker>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge.clone());
@@ -411,10 +410,7 @@ async fn up_challenge(
   .await?;
   checker.lint(&challenge_bucket).await?;
   txn.commit().await?;
-  info!(
-    "challenge {}:{} is maken public (up) by user {}:{} ({})",
-    challenge.id, challenge.name, token.id, token.account, token.nickname
-  );
+  info!("challenge is maken public (up) by user");
 
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
@@ -430,13 +426,21 @@ async fn up_challenge(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(challenge))
 }
 
 async fn down_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
@@ -448,10 +452,7 @@ async fn down_challenge(
   )
   .await?;
   txn.commit().await?;
-  info!(
-    "challenge {}:{} is maken invisible (down) by user {}:{} ({})",
-    challenge.id, challenge.name, token.id, token.account, token.nickname
-  );
+  info!("challenge is maken invisible (down) by user");
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
@@ -466,7 +467,14 @@ async fn down_challenge(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(challenge))
 }
 
@@ -591,8 +599,8 @@ struct SubmitRequest {
 async fn submit_flag(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  team_ext: Extension<Option<team::Model>>, Extension(challenge): Extension<challenge::Model>,
-  Json(req): Json<SubmitRequest>,
+  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
+  Extension(challenge): Extension<challenge::Model>, Json(req): Json<SubmitRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // Only game in progress and has a team, the submission record will be marked as
   // team's. otherwise the submission will only be marked as user-solved.
@@ -641,21 +649,32 @@ async fn submit_flag(
           challenge: challenge.clone(),
         })),
       };
-      queue.publish("event", event).await.ok();
+      queue
+        .publish(
+          "event",
+          event,
+          &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+        )
+        .await
+        .ok();
+      warn!("player created too many submissions in a short time");
       return Err(ResponseError::TooManyRequests(
         "too many submissions, please calmdown and try again 5 miniutes later".to_owned(),
-        format!(
-          "user {}:{} ({}) submission frequency limit exceeded",
-          token.id, token.account, token.nickname
-        ),
       ));
     } else {
       cache.at("submission").incr(token.id).await?;
       cache.at("submission").expire(token.id, 5 * 60).await?;
     }
   }
+  info!(content = ?req.content, "submit flag");
   let submission = submission::create(&db.conn, submission).await?;
-  queue.publish("check", submission.clone()).await?;
+  queue
+    .publish(
+      "check",
+      submission.clone(),
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await?;
   Ok(Json(submission))
 }
 
@@ -690,13 +709,8 @@ async fn get_player_attachment(
   if !is_game_admin!(token, game)
     && (query.all == Some(true) || query.folder == Some(FileType::Checker))
   {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:{} ({}) want to access checker files",
-        token.id, token.account, token.nickname
-      ),
-    ));
+    warn!("user want to access checker files");
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
   }
   if query.all == Some(true) && is_game_admin!(token, game) {
     let files = match query.folder {
@@ -714,6 +728,7 @@ async fn get_player_attachment(
         file,
       })
       .collect();
+    debug!("admin query attachment files");
     return Ok(Json(files).into_response());
   }
   let files = get_files(
@@ -752,13 +767,14 @@ async fn get_player_attachment(
     );
     header.insert("Content-Type", "application/octet-stream".parse().unwrap());
     let stream = ReaderStream::new(file);
+    info!(file=%file_name, ?folder, "user downloaded attachment file");
     Ok((StatusCode::OK, header, Body::from_stream(stream)).into_response())
   }
 }
 
 async fn get_files(bucket: &ChallengeBucket, id: i64) -> Result<Vec<FileResponse>, ResponseError> {
   let static_files = bucket.get_static_files().await?;
-  debug!("files: {:?}", static_files);
+  debug!(?static_files);
 
   let mapped_file = bucket.get_mapped_file(id).await?;
   let mut files: Vec<FileResponse> = static_files
@@ -806,6 +822,7 @@ async fn upload_challenge_attachment(
       FileType::Mapped => challenge_bucket.upload_mapped(&file_name, reader).await?,
       FileType::Checker => challenge_bucket.upload_checker(&file_name, reader).await?,
     }
+    info!(file=%file_name, folder=?query.folder, "user uploaded attachment file");
   }
   game_bucket
     .commit(
@@ -814,10 +831,8 @@ async fn upload_challenge_attachment(
       format!("{}@private.ret.sh.cn", token.account),
     )
     .await?;
-  info!(
-    "user {}:{} ({}) uploaded files for challenge {}:{}",
-    token.id, token.account, token.nickname, challenge.id, challenge.name
-  );
+  info!("user committed attachment files");
+
   Ok(())
 }
 
@@ -904,16 +919,16 @@ async fn unlock_hint(
 ) -> Result<impl IntoResponse, ResponseError> {
   // block if the game is not in progress
   if !game.in_progress() {
+    warn!("user tried to unlock hint when the game is not in progress");
     return Err(ResponseError::Forbidden(
       "you cannot unlock hint when the game is not in progress".to_owned(),
-      "game is not in progress".to_owned(),
     ));
   }
   // block if the challenge is not released
   if challenge.release_at.is_some_and(|t| t > Utc::now()) {
+    warn!("user tried to unlock hint when the challenge is not released");
     return Err(ResponseError::Forbidden(
       "you cannot unlock hint when the challenge is not started".to_owned(),
-      "challenge is not released".to_owned(),
     ));
   }
   // block if the challenge is archived and can show hints
@@ -964,8 +979,9 @@ async fn unlock_hint(
     .await?;
     txn.commit().await?;
     info!(
-      "team {}:{} unlocked hint {} for challenge {}:{} (cost: {})",
-      team.id, team.name, hint.id, challenge.id, challenge.name, hint.cost
+      hint_id=%hint.id,
+      cost=%hint.cost,
+      "team unlocked hint",
     );
     tokio::spawn(async move {
       worker::update_team_state(&db, team).await.ok();
@@ -976,10 +992,12 @@ async fn unlock_hint(
   }
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn create_challenge_hint(
   State(bucket): State<Bucket>, State(ref db): State<Database>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Json(hint): Json<hint::Model>,
+  Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
+  Json(hint): Json<hint::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   // if challenge.ref_id.is_some() {
   //   return Err(ResponseError::PreconditionFailed(
@@ -998,8 +1016,8 @@ async fn create_challenge_hint(
   )
   .await?;
   info!(
-    "new hint {} for challenge {}:{} by user {}:{} ({})",
-    hint.id, challenge.id, challenge.name, token.id, token.account, token.nickname
+    hint_id=%hint.id,
+    "new hint created",
   );
   let event = EventContainer {
     game_id: game.id,
@@ -1014,7 +1032,14 @@ async fn create_challenge_hint(
       },
     }),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   sync_challenge_hint_with_bucket(&challenge_bucket, &txn, &challenge).await?;
   txn.commit().await?;
   game_bucket
@@ -1091,7 +1116,7 @@ async fn get_challenge_env_config(
 #[allow(clippy::too_many_arguments)]
 async fn start_challenge_instance(
   State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
-  State(mut checker): State<Checker>, Extension(config): Extension<config::Model>,
+  State(checker): State<Checker>, Extension(config): Extension<config::Model>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(token): Extension<Token>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -1114,6 +1139,7 @@ async fn start_challenge_instance(
   };
   let calmdown = cache.at("cluster").exists(token.id.to_string()).await?;
   if calmdown {
+    warn!("user is starting challenge env too frequently",);
     return Err(ResponseError::PreconditionFailed(
       "please wait for rebuilding cargo crates".to_owned(),
     ));
@@ -1126,6 +1152,10 @@ async fn start_challenge_instance(
         .get_challenge_env_by_team(team.id)
         .await?;
       if pods.len() >= game.team_size as usize {
+        warn!(
+          limit=%game.team_size,
+          "team tried to start more instances at the same time",
+        );
         return Err(ResponseError::PreconditionFailed(format!(
           "your team can only start {} instance(s) at the same time",
           game.team_size
@@ -1146,6 +1176,7 @@ async fn start_challenge_instance(
         .await?
         .is_empty()
       {
+        warn!("user tried to start more instances at the same time");
         return Err(ResponseError::PreconditionFailed(
           "you can only start one instance at the same time".to_owned(),
         ));
@@ -1162,20 +1193,9 @@ async fn start_challenge_instance(
       ));
     }
 
-    if team.is_some() {
-      let team = team.clone().unwrap();
-      info!(
-        "starting challenge env {}:{} for user {}:{} ({}) in team {}:{}",
-        challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
-      );
-    } else {
-      info!(
-        "starting challenge env {}:{} for user {}:{} ({})",
-        challenge.id, challenge.name, token.id, token.account, token.nickname
-      );
-    }
+    info!("starting challenge env");
 
-    debug!("env_config: {:?}", env_config);
+    debug!(?env_config);
     let ports = env_config
       .clone()
       .images
@@ -1186,7 +1206,7 @@ async fn start_challenge_instance(
       .collect::<Vec<_>>()
       .join(",");
     checker.preload(&challenge, &challenge_bucket).await?;
-    debug!("checker preloaded.");
+    debug!("checker preloaded");
     let env_map = checker
       .environ(
         &challenge_bucket,
@@ -1199,8 +1219,8 @@ async fn start_challenge_instance(
         &team,
       )
       .await?;
-    debug!("env_map: {:?}", env_map);
-    debug!("game: {:?}", game);
+    debug!(?env_map);
+    debug!(?game);
     let node_selector = if game.archive_at > Utc::now() {
       game.node_selector.clone().or(config.node_selector.clone())
     } else {
@@ -1213,8 +1233,8 @@ async fn start_challenge_instance(
     } else {
       config.traffic.is_some()
     };
-    debug!("node_selector: {:?}", node_selector);
-    debug!("need_expose: {:?}", need_expose);
+    debug!(?node_selector);
+    debug!(?need_expose);
     cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
@@ -1279,10 +1299,7 @@ async fn delay_challenge_instance(
   let team = extract_team!(game, team_ext, token);
 
   let count = if let Some(team) = team {
-    info!(
-      "delaying challenge env {}:{} for user {}:{} ({}) in team {}:{}",
-      challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
-    );
+    info!("delaying challenge env");
     cluster
       .at(CHALLENGE_NS)
       .delay_challenge_env_by_team(challenge.id, team.id)
@@ -1294,10 +1311,7 @@ async fn delay_challenge_instance(
     return Ok(());
   }
 
-  info!(
-    "delaying challenge env {}:{} for user {}:{} ({})",
-    challenge.id, challenge.name, token.id, token.account, token.nickname
-  );
+  info!("delaying challenge env");
   cluster
     .at(CHALLENGE_NS)
     .delay_challenge_env_by_user(challenge.id, token.id)
@@ -1313,10 +1327,7 @@ async fn stop_challenge_instance(
   let team = extract_team!(game, team_ext, token);
 
   let count = if let Some(team) = team {
-    info!(
-      "stop challenge env {}:{} for user {}:{} ({}) in team {}:{}",
-      challenge.id, challenge.name, token.id, token.account, token.nickname, team.id, team.name
-    );
+    info!("stopping challenge env");
     cluster
       .at(CHALLENGE_NS)
       .stop_challenge_env_by_team(challenge.id, team.id)
@@ -1328,10 +1339,7 @@ async fn stop_challenge_instance(
     return Ok(());
   }
 
-  info!(
-    "stop challenge env {}:{} for user {}:{} ({})",
-    challenge.id, challenge.name, token.id, token.account, token.nickname
-  );
+  info!("stopping challenge env");
   cluster
     .at(CHALLENGE_NS)
     .stop_challenge_env_by_user(challenge.id, token.id)
@@ -1355,9 +1363,10 @@ async fn update_challenge_env_config(
   let mut ports = HashSet::new();
   for image in &env.images {
     if let Some(port) = image.port
-      && !ports.insert(port) {
-        return Err(ResponseError::BadRequest("port conflict".to_owned()));
-      }
+      && !ports.insert(port)
+    {
+      return Err(ResponseError::BadRequest("port conflict".to_owned()));
+    }
   }
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket
@@ -1394,7 +1403,7 @@ async fn delete_challenge_env_config(
 #[derive(Serialize)]
 struct CheckerResponse {
   pub script: String,
-  pub lint: Option<String>,
+  pub lint: Vec<DiagnosticMarker>,
 }
 
 #[derive(Deserialize)]
@@ -1409,20 +1418,9 @@ async fn get_checker_script(
 ) -> Result<impl IntoResponse, ResponseError> {
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
   let lint = if let Some(true) = query.lint {
-    let lint = checker.lint(&challenge_bucket).await;
-    if let Err(lint) = lint {
-      match lint {
-        CheckerError::CompileError(diagnostics) => Some(diagnostics),
-        err => {
-          warn!("failed to lint script: {:?}", err);
-          Some(err.to_string())
-        }
-      }
-    } else {
-      None
-    }
+    checker.lint(&challenge_bucket).await?
   } else {
-    None
+    Vec::new()
   };
 
   Ok(Json(CheckerResponse {
@@ -1437,9 +1435,9 @@ struct UpdateCheckerScriptRequest {
 }
 
 async fn update_checker_script(
-  State(bucket): State<Bucket>, State(mut checker): State<Checker>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UpdateCheckerScriptRequest>,
+  State(bucket): State<Bucket>, State(checker): State<Checker>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Json(req): Json<UpdateCheckerScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   check_challenge_publishing!(challenge);
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
@@ -1534,20 +1532,15 @@ async fn get_answer(
     && !is_game_admin!(token, game)
     && not_archived_or_hide_after_archiving
   {
-    return Err(ResponseError::Forbidden(
-      format!(
-        "you can only get the answer after the {} is archived",
-        if game.archive_policy.challenge.show_answer {
-          "game or challenge"
-        } else {
-          "game"
-        }
-      ),
-      format!(
-        "user {}:{} ({}) want to get the answer for challenge {}:'{}'",
-        token.id, token.account, token.nickname, challenge.id, challenge.name
-      ),
-    ));
+    warn!("user tried to get answer when the game is not archived");
+    return Err(ResponseError::Forbidden(format!(
+      "you can only get the answer after the {} is archived",
+      if game.archive_policy.challenge.show_answer {
+        "game or challenge"
+      } else {
+        "game"
+      }
+    )));
   }
   let challenge_bucket = get_challenge_bucket!(bucket, game, challenge);
 
@@ -1561,6 +1554,7 @@ async fn update_answer(
 ) -> Result<impl IntoResponse, ResponseError> {
   let (game_bucket, challenge_bucket) = get_challenge_bucket_mut!(bucket, game, challenge);
   challenge_bucket.set_answer(answer.clone()).await?;
+  info!("challenge answer updated");
   game_bucket
     .commit(
       format!("update answer for challenge {}", challenge.name),

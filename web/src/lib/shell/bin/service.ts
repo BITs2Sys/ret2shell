@@ -87,7 +87,7 @@ export class Service implements Command {
       );
       const choice = await io.input();
       io.println("");
-      const chall_id = Number.parseInt(choice);
+      const chall_id = Number.parseInt(choice, 10);
       if (!chall_id) {
         io.warning(t("challenge.instance.errors.noAction.title")!);
         return 1;

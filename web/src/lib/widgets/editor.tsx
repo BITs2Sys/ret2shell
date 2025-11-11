@@ -10,6 +10,15 @@ import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
 
+export type DiagnosticMarker = {
+  kind: "error" | "warning" | "info";
+  message: string;
+  start_line: number;
+  start_column: number;
+  end_line: number;
+  end_column: number;
+};
+
 export type EditorProps = {
   value?: string;
   lang?: string;
@@ -25,6 +34,7 @@ export type EditorProps = {
   name?: string;
   title?: string;
   lineNumbers?: boolean;
+  lints?: DiagnosticMarker[];
 
   // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
   form?: FormStore<any, undefined>;
@@ -46,6 +56,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     "error",
     "onFocusIn",
     "commands",
+    "lints",
   ]);
   const [imageFile, setImageFile] = createSignal<File | null>(null);
   const [uploading, setUploading] = createSignal(false);
@@ -99,6 +110,48 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     createEffect(() => {
       if (themeStore.colorScheme && editor) {
         editor.setTheme(`ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`);
+      }
+    });
+
+    createEffect(() => {
+      if (editorProps.lints && editor) {
+        const annotations = editorProps.lints.map((lint) => ({
+          row: lint.start_line,
+          column: lint.start_column,
+          text: lint.message,
+          type: lint.kind === "error" ? "error" : lint.kind === "warning" ? "warning" : "info",
+        }));
+        editor.getSession().setAnnotations(annotations);
+        const markers = editorProps.lints.map((lint) => ({
+          startRow: lint.start_line,
+          startCol: lint.start_column,
+          endRow: lint.end_line,
+          endCol: lint.end_column,
+          className:
+            lint.kind === "error"
+              ? "ace_error-marker"
+              : lint.kind === "warning"
+                ? "ace_warning-marker"
+                : "ace_info-marker",
+          type: "text" as "text" | "line" | "fullLine",
+        }));
+        const prevMarkers = editor.session.getMarkers();
+        if (prevMarkers) {
+          const prevMarkersArr: number[] = Object.keys(prevMarkers).map((v) => Number.parseInt(v, 10));
+          for (const item of prevMarkersArr) {
+            editor.session.removeMarker(prevMarkers[item].id as number);
+          }
+        }
+        for (const marker of markers) {
+          editor
+            .getSession()
+            .addMarker(
+              new ace.Range(marker.startRow, marker.startCol, marker.endRow, marker.endCol),
+              marker.className,
+              marker.type,
+              false
+            );
+        }
       }
     });
 

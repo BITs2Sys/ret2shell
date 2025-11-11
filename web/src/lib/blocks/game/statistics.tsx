@@ -235,7 +235,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
             placeholder={t("game.statistics.selectInstitute")}
             items={gameInstitutesSelect()}
             onValueChange={(v) => {
-              setSelectedInstituteId((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null);
+              setSelectedInstituteId((v.value.at(0) && Number.parseInt(v.value.at(0)!, 10)) || null);
             }}
           />
         </Show>
@@ -445,7 +445,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                           focus: "ancestor",
                         },
                         data: Object.entries(stats()!.institute_players).map(([key, value]) => ({
-                          name: accountStore.institutes.find((v) => v.id === Number.parseInt(key))?.name || key,
+                          name: accountStore.institutes.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
                           value,
                         })),
                         label: {
@@ -492,7 +492,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                     xAxis: {
                       type: "category",
                       data: Object.entries(stats()!.institute_players)
-                        .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i))?.name)
+                        .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i, 10))?.name)
                         .concat(t("game.statistics.others")!),
                     },
                     yAxis: {
@@ -544,7 +544,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                         show: false,
                       },
                       data: Object.entries(stats()!.institute_teams).map(([key, value]) => ({
-                        name: accountStore.institutes.find((v) => v.id === Number.parseInt(key))?.name || key,
+                        name: accountStore.institutes.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
                         value,
                       })),
                       levels: [
@@ -588,7 +588,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                   xAxis: {
                     type: "category",
                     data: Object.entries(stats()!.institute_teams)
-                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i))?.name)
+                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i, 10))?.name)
                       .concat(t("game.statistics.others")!),
                   },
                   yAxis: {

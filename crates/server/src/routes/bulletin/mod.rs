@@ -74,10 +74,8 @@ async fn create_bulletin(
     },
   )
   .await?;
-  info!(
-    "bulletin {} created by user {}:{} ({})",
-    result.title, token.id, token.account, token.nickname
-  );
+
+  info!(title=%result.title, "bulletin created");
   Ok(Json(result))
 }
 
@@ -95,20 +93,14 @@ async fn update_bulletin(
     },
   )
   .await?;
-  info!(
-    "bulletin {} updated by user {}:{} ({})",
-    result.title, token.id, token.account, token.nickname
-  );
+  info!(title=%result.title, "bulletin updated");
   Ok(Json(result))
 }
 
 async fn delete_bulletin(
-  State(ref db): State<Database>, Extension(token): Extension<Token>, Path(article_id): Path<i64>,
+  State(ref db): State<Database>, Path(article_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
   article::delete(&db.conn, article_id).await?;
-  info!(
-    "bulletin {} deleted by user {}:{} ({})",
-    article_id, token.id, token.account, token.nickname
-  );
+  info!(id=%article_id, "bulletin deleted");
   Ok(())
 }

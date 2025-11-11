@@ -1,9 +1,10 @@
-use std::{net::IpAddr, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use axum::{
   Router,
   body::Body,
   error_handling::HandleErrorLayer,
+  extract::State,
   http::{HeaderValue, Request, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
@@ -13,19 +14,21 @@ use r2s_config::server;
 use tower::{ServiceBuilder, buffer::BufferLayer};
 use tower_governor::{GovernorLayer, governor::GovernorConfigBuilder};
 use tower_http::{
+  ServiceBuilderExt,
   cors::{Any, CorsLayer},
+  request_id::RequestId,
   trace::TraceLayer,
 };
-use tracing::{Span, debug, debug_span};
+use tracing::{Span, debug, error_span};
 
 use crate::{
   middleware::{
     self,
     auth::{create_auth_header_by_user_agent, extract_user_info},
     codec,
-    forwarded::{ProxiedIpExtractor, ip_record, ip_record_worker},
+    forwarded::{MakeRequestNanoId, ProxiedIpExtractor, ip_record, ip_record_worker},
   },
-  traits::GlobalState,
+  traits::{GlobalState, ResponseError},
 };
 
 mod account;
@@ -71,22 +74,6 @@ pub async fn initialize(
         ),
     )
     .merge(web::router(&state))
-    .layer(
-      TraceLayer::new_for_http()
-        .make_span_with(|request: &Request<Body>| {
-          let ip = middleware::forwarded::get_client_ip(request)
-            .unwrap_or(IpAddr::V4("0.0.0.0".parse().unwrap()));
-          debug_span!("http",
-              from = %ip.to_string(),
-              method = %request.method(),
-              uri = %request.uri().path(),
-          )
-        })
-        .on_request(())
-        .on_response(|response: &Response, latency: Duration, _span: &Span| {
-          debug!("[{}] in {}ms", response.status(), latency.as_millis());
-        }),
-    )
     .with_state::<()>(state);
   Ok(router)
 }
@@ -108,7 +95,44 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .route("/ping", get(ping))
     .route_layer(from_fn_with_state(state.clone(), ip_record))
     .route_layer(from_fn_with_state(state.clone(), extract_user_info))
-    .route_layer(from_fn(create_auth_header_by_user_agent));
+    .route_layer(from_fn(create_auth_header_by_user_agent))
+    .layer(
+      TraceLayer::new_for_http()
+        .make_span_with(|request: &Request<Body>| {
+          let trace = request.extensions().get::<RequestId>();
+          let request_id = trace
+            .map(|id| id.header_value().to_str().unwrap_or("UNKNOWN"))
+            .unwrap_or_else(|| "UNKNOWN");
+          error_span!(
+            "request",
+            method=%request.method(), uri=%request.uri().path(), trace=%request_id, from=tracing::field::Empty,
+            "user-id"=tracing::field::Empty,
+            "user-account"=tracing::field::Empty,
+            "user-nickname"=tracing::field::Empty,
+            "team-id"=tracing::field::Empty,
+            "team-name"=tracing::field::Empty,
+            "data-challenge-id"=tracing::field::Empty,
+            "data-challenge-name"=tracing::field::Empty,
+            "data-game-id"=tracing::field::Empty,
+            "data-game-name"=tracing::field::Empty,
+            "data-team-id"=tracing::field::Empty,
+            "data-team-name"=tracing::field::Empty,
+            "data-user-id"=tracing::field::Empty,
+            "data-user-account"=tracing::field::Empty,
+            "data-user-nickname"=tracing::field::Empty,
+            "data-notification-id"=tracing::field::Empty,
+            "data-notification-title"=tracing::field::Empty,
+            "data-audit-id"=tracing::field::Empty,
+            "data-institute-id"=tracing::field::Empty,
+            "data-institute-name"=tracing::field::Empty,
+
+          )
+        })
+        .on_request(())
+        .on_response(|response: &Response, latency: Duration, _span: &Span| {
+          debug!(response = ?response.status(), latency = ?format!("{}ms", latency.as_millis()));
+        }),
+    );
 
   let route = if let Some(config) = state.config.server.clone().unwrap_or_default().rate_limit {
     let governor_conf = Arc::new(
@@ -127,20 +151,20 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     tokio::spawn(async move {
       loop {
         tokio::time::sleep(interval).await;
-        debug!("rate limiting storage size: {}", governor_limiter.len());
+        debug!(size = ?governor_limiter.len(), "rate limiting storage");
         governor_limiter.retain_recent();
       }
     });
 
-    route.layer(GovernorLayer {
-      config: governor_conf,
-    })
+    route.layer(GovernorLayer::new(governor_conf))
   } else {
     route
   };
 
   route.layer(
     ServiceBuilder::new()
+      .set_x_request_id(MakeRequestNanoId)
+      .propagate_x_request_id()
       .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
         (
           StatusCode::INTERNAL_SERVER_ERROR,
@@ -151,6 +175,14 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
   )
 }
 
-async fn ping() -> impl IntoResponse {
-  "pong"
+async fn ping(State(state): State<GlobalState>) -> Result<impl IntoResponse, ResponseError> {
+  state.db.conn.ping().await?;
+  state.cache.ping().await?;
+  if state.queue.context().client().connection_state() != async_nats::connection::State::Connected {
+    return Err(ResponseError::InternalServerError(
+      "queue not connected".to_owned(),
+    ));
+  }
+
+  Ok("pong")
 }

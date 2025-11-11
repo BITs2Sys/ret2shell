@@ -11,16 +11,18 @@ pub struct Config {
   pub host: String,
   /// The email server port.
   pub port: u16,
-  /// The email address used as the sender.
+  /// The name used for the sender.
   pub sender: String,
+  /// The email address used as the sender.
+  pub sender_address: Option<String>,
   /// The username for authentication with the email server.
   pub username: String,
   /// The password for authentication with the email server.
   pub password: String,
   /// The TLS configuration for secure email communication.
+  /// could be "none", "tls", "starttls"
   pub tls: String,
-  /// The email body for reset password emails
-  /// could be 'none' | 'tls' | 'starttls'
+  /// The email body for reset password emails.
   pub reset_password_email_body: Option<String>,
   /// The email subject for reset password emails.
   pub reset_password_email_subject: Option<String>,

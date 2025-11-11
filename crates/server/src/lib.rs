@@ -38,13 +38,13 @@ pub fn greet() {
 }
 
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
-  let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
-  info!(">> Server initialization started <<");
+  let guards = logger::initialize(&config.logging).await?;
+  info!(">> server initialization started <<");
   let license = match r2s_license::check_license(PUB_KEY) {
     Ok(license) => license,
     Err(err) => {
-      error!("License check failed: {}", err.to_string().red());
-      error!("Please contact tech support <support@ret.sh.cn>.");
+      error!("license check failed: {}", err.to_string().red());
+      error!("please contact tech support <support@ret.sh.cn>.");
       return Err(err.into());
     }
   };
@@ -70,30 +70,32 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
       info!("using `ring` as default crypto backend.");
     }
   }
-  info!("Loading module: < Auditor >");
+  info!("loading module: < Auditor >");
   let auditor = r2s_auditor::initialize(&config.auditor).await?;
-  info!("Loading module: < Database >");
+  info!("loading module: < Engine >");
+  r2s_engine::initialize().await;
+  info!("loading module: < Database >");
   let (db, migrated) = r2s_migrator::initialize(&config.database).await?;
-  info!("Loading module: < Cache >");
+  info!("loading module: < Cache >");
   let cache = r2s_cache::initialize(&config.cache, Some(migrated)).await?;
-  info!("Loading module: < Bucket >");
+  info!("loading module: < Bucket >");
   let bucket = r2s_bucket::initialize(&config.bucket).await?;
-  info!("Loading module: < Message Queue >");
+  info!("loading module: < Message Queue >");
   let queue = r2s_queue::initialize(&config.queue).await?;
-  info!("Loading module: < OAuth >");
+  info!("loading module: < OAuth >");
   let oauth = r2s_oauth::initialize(&config.auth).await;
-  info!("Loading module: < Cluster >");
+  info!("loading module: < Cluster >");
   let cluster = r2s_cluster::initialize(&config.cluster).await?;
-  info!("Loading module: < Email Worker >");
+  info!("loading module: < Email Worker >");
   r2s_email::initialize(queue.subscribe("email").await?).await?;
-  info!("Loading module: < Event Worker >");
+  info!("loading module: < Event Worker >");
   let event = r2s_event::initialize(queue.subscribe("event").await?).await;
-  info!("Loading module: < Media Storage >");
+  info!("loading module: < Media Storage >");
   let media = r2s_media::initialize(&config.media).await?;
-  info!("Loading module: < Checker >");
+  info!("loading module: < Checker >");
   let checker = r2s_checker::initialize().await;
 
-  info!("Setup panic event handler...");
+  info!("setup panic event handler...");
   push_panic_event(queue.clone()).await;
 
   let state = GlobalState {
@@ -113,37 +115,36 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     media,
     version: R2S_VERSION.to_string(),
   };
-  info!("Modules loaded, constructing router...");
+  info!("modules loaded, constructing router...");
 
   let router = routes::initialize(config.server.clone(), state).await?;
   let router = NormalizePath::trim_trailing_slash(router);
-  info!("Router constructed.");
+  info!("router constructed.");
 
-  info!(">> Server initialization finished <<");
+  info!(">> server initialization finished <<");
 
-  info!("Starting server...");
+  info!("starting server...");
 
   let server_config = config
     .server
-    .ok_or(anyhow::anyhow!("Server configuration not found."))?;
+    .ok_or(anyhow::anyhow!("server configuration not found"))?;
 
   let addr_str = format!("{}:{}", &server_config.host, &server_config.port);
 
   let addr = tokio::net::TcpListener::bind(addr_str.clone())
     .await
-    .expect("Failed to bind server address");
+    .expect("failed to bind server address");
   info!("高性能ですから! (∠・ω< )⌒☆");
-  info!("Server started at [ {} ]", addr_str);
+  info!("server started at [ {} ]", addr_str);
   axum::serve(
     addr,
     ServiceExt::<Request>::into_make_service_with_connect_info::<SocketAddr>(router),
   )
   .with_graceful_shutdown(shutdown_signal())
   .await
-  .expect("Failed to start server.");
+  .expect("failed to start server.");
 
-  drop(console_guard);
-  drop(file_guard);
+  drop(guards);
   Ok(())
 }
 
@@ -169,29 +170,28 @@ pub async fn down(config: GlobalConfig) -> anyhow::Result<()> {
   let mut input = String::new();
   std::io::stdin().read_line(&mut input)?;
   if !input.trim().to_lowercase().eq("i am sure to do that") {
-    warn!("Cleanup aborted");
+    warn!("cleanup aborted");
     return Ok(());
   }
-  let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
-  warn!(">> Server cleanup started <<");
+  let guards = logger::initialize(&config.logging).await?;
+  warn!(">> server cleanup started <<");
   r2s_migrator::down(&config.database).await?;
-  info!("Cleanup done: < Database >");
+  info!("cleanup done: < Database >");
   r2s_cache::down(&config.cache).await?;
-  info!("Cleanup done: < Cache >");
+  info!("cleanup done: < Cache >");
   r2s_bucket::down(&config.bucket).await?;
-  info!("Cleanup done: < Bucket >");
+  info!("cleanup done: < Bucket >");
 
-  warn!(">> Server cleanup finished <<");
+  warn!(">> server cleanup finished <<");
 
-  drop(console_guard);
-  drop(file_guard);
+  drop(guards);
   Ok(())
 }
 
 async fn push_panic_event(queue: r2s_queue::Queue) {
   std::panic::set_hook(Box::new(move |panic| {
     if let Some(location) = panic.location() {
-      tracing::error!(
+      error!(
           message = %panic,
           panic.file = location.file(),
           panic.line = location.line(),
@@ -214,10 +214,10 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
       };
       let queue = queue.clone();
       tokio::spawn(async move {
-        queue.publish("event", event).await.ok();
+        queue.publish("event", event, "GLOBAL").await.ok();
       });
     } else {
-      tracing::error!(message = %panic);
+      error!(message = %panic);
       let event = EventContainer {
         game_id: 0,
         event: Event::Devops(Box::new(DevopsEvent {
@@ -229,7 +229,7 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
       };
       let queue = queue.clone();
       tokio::spawn(async move {
-        queue.publish("event", event).await.ok();
+        queue.publish("event", event, "GLOBAL").await.ok();
       });
     }
   }));
@@ -255,11 +255,11 @@ async fn shutdown_signal() {
 
   tokio::select! {
       _ = ctrl_c => {
-          info!("Termination `Ctrl+C` received, shutting down...");
+          info!("termination `Ctrl+C` received, shutting down...");
           std::process::exit(0);
       },
       _ = terminate => {
-          info!("Termination signal received, shutting down...");
+          info!("termination signal received, shutting down...");
           std::process::exit(0);
       },
   }

@@ -68,16 +68,16 @@ impl EventManager {
           };
           match sink.send(Message::Text(message.into())).await {
             Ok(_) => {}
-            Err(err) => {
-              warn!("Failed to send message to client: {:?}", err);
+            Err(error) => {
+              warn!(?error, "failed to send message to client");
               break;
             }
           }
         }
         Broadcast::Heartbeat => match sink.send(Message::Ping(Bytes::new())).await {
           Ok(_) => {}
-          Err(err) => {
-            warn!("Failed to send heartbeat to client: {:?}", err);
+          Err(error) => {
+            warn!(?error, "failed to send heartbeat to client");
             break;
           }
         },
@@ -85,7 +85,7 @@ impl EventManager {
     }
     {
       let mut clients = self.clients.write().await;
-      info!("Client disconnected: {id}:{client}#{ip_addr}");
+      info!(?id, ?client, ?ip_addr, "event client disconnected");
       clients
         .retain(|(i, c, a, d)| *i != id || *c != client || *a != ip_addr || *d != subscribed_time);
     }

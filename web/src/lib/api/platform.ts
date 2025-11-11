@@ -1,6 +1,7 @@
 import type { AuthConfig, Config, ServerConfig } from "@models/config";
 import type { HostType } from "@models/game";
 import type { Institute } from "@models/institute";
+import { luxonReplacer } from "@models/utils";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
 
@@ -50,6 +51,35 @@ export async function getPlatformStatistics() {
 
 export async function getPlatformLogs() {
   return await api.get(`${api_root}/platform/logs`).json<string[]>();
+}
+
+export type Log = {
+  _time: string;
+  _msg: string;
+  level: string;
+  target: string;
+  [key: string]: string;
+};
+
+export async function queryPlatformLog(req: {
+  started_at: DateTime;
+  ended_at: DateTime;
+  limit?: number;
+  level?: string;
+  trace?: string;
+  from?: string;
+  account?: string;
+  query?: string;
+}) {
+  const result = await api
+    .get(`${api_root}/platform/logs/query`, {
+      searchParams: {
+        ...JSON.parse(JSON.stringify(req, luxonReplacer)),
+      },
+    })
+    .text();
+  const logs = result.split("\n").filter((line) => line.trim() !== "");
+  return logs.map((line) => JSON.parse(line) as Log);
 }
 
 export type PlatformLicense = {

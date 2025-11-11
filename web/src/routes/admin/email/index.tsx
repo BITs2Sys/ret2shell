@@ -195,6 +195,20 @@ export default function () {
               />
             )}
           </Field>
+          <Field name="sender_address">
+            {(field, props) => (
+              <Input
+                class="flex-1"
+                disabled={getValue(form, "enabled") === false}
+                title={t("platform.email.form.senderAddress.label")}
+                placeholder={t("platform.email.form.senderAddress.placeholder")!}
+                icon={<span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />}
+                value={field.value ?? undefined}
+                error={field.error}
+                {...props}
+              />
+            )}
+          </Field>
           <div class="flex flex-col lg:flex-row lg:space-x-2 space-y-2 lg:space-y-0">
             <Field
               name="username"

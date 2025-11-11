@@ -1,26 +1,13 @@
-use std::{collections::HashMap, sync::Arc};
-
-use chrono::{DateTime, Utc};
 use k8s_openapi::api::core::v1::{Pod, Service};
 use kube::ResourceExt;
-use rune::{
-  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
-  alloc::clone::TryClone,
-  runtime::{Object, RuntimeContext},
-  termcolor::Buffer,
-};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, GLOBAL_ENGINE};
+use rune::{Any, ContextError, Module, Value, alloc::clone::TryClone, runtime::Object};
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock;
-use tracing::debug;
 
 use crate::ClusterError;
 
-type TrafficMapperContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
-
 #[derive(Clone, Debug, Default)]
-pub struct TrafficMapper {
-  contexts: Arc<RwLock<HashMap<String, TrafficMapperContext>>>,
-}
+pub struct TrafficMapper;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MappedPort {
@@ -85,7 +72,7 @@ impl RuneServiceInfo {
         .to_owned(),
       created_at,
       lifetime,
-      ports: ports_info.try_into()?,
+      ports: ports_info.try_into().map_err(EngineError::from)?,
     })
   }
 }
@@ -99,115 +86,67 @@ fn module(_stdio: bool) -> Result<Module, ContextError> {
 }
 
 impl TrafficMapper {
-  async fn build_context() -> Result<Context, ClusterError> {
-    let mut context = Context::with_default_modules()?;
-    context.install(rune_modules::http::module(true)?)?;
-    context.install(rune_modules::json::module(true)?)?;
-    context.install(rune_modules::toml::module(true)?)?;
-    context.install(rune_modules::rand::module(true)?)?;
-    context.install(rune_modules::process::module(true)?)?;
-    context.install(module(true)?)?;
-    Ok(context)
+  fn default_modules() -> Vec<fn(bool) -> Result<rune::Module, rune::ContextError>> {
+    vec![
+      rune_modules::http::module,
+      rune_modules::json::module,
+      rune_modules::toml::module,
+      rune_modules::rand::module,
+      rune_modules::process::module,
+      module,
+    ]
   }
 
-  pub async fn expire(&self, key: &str) {
-    self.contexts.write().await.remove(key);
+  pub async fn expire(&self, key: impl AsRef<str>) {
+    GLOBAL_ENGINE
+      .expire(format!("traffic-{}", key.as_ref()))
+      .await
   }
 
-  pub async fn preload(&self, key: &str, script: &str) -> Result<(), ClusterError> {
-    let mut contexts = self.contexts.write().await;
-    if contexts.contains_key(key) {
-      return Ok(());
-    }
-    let context = Self::build_context().await?;
-    let mut sources = Sources::new();
-    sources.insert(Source::memory(script)?)?;
-
-    let unit = rune::prepare(&mut sources).with_context(&context).build()?;
-    let runtime = context.runtime()?;
-
-    contexts.insert(
-      key.to_string(),
-      (Arc::new(unit), Arc::new(runtime), Utc::now()),
-    );
-    Ok(())
+  /// linter for rune scripts
+  /// Originally from https://github.com/ElaBosak233/cdsctf/blob/main/crates/checker/src/traits.rs
+  pub async fn lint(&self, script: impl AsRef<str>) -> Result<Vec<DiagnosticMarker>, EngineError> {
+    Engine::lint(Self::default_modules(), script, &["expose"]).await
   }
 
-  pub async fn lint(&self, script: &str) -> Result<(), ClusterError> {
-    let context = Self::build_context().await?;
-    let mut sources = Sources::new();
-    sources.insert(Source::memory(script)?)?;
-    let mut diagnostics = Diagnostics::new();
-    let _ = rune::prepare(&mut sources)
-      .with_context(&context)
-      .with_diagnostics(&mut diagnostics)
-      .build();
-    if !diagnostics.is_empty() {
-      let mut out = Buffer::ansi();
-      diagnostics.emit(&mut out, &sources)?;
-      return Err(ClusterError::CompileError(
-        (String::from_utf8(out.into_inner())?).to_string(),
-      ));
-    }
-    let unit = rune::prepare(&mut sources).with_context(&context).build()?;
-    let runtime = context.runtime()?;
-    let vm = Vm::new(Arc::new(runtime), Arc::new(unit));
-    vm.lookup_function(["expose"])
-      .map_err(|_| ClusterError::MissingFunction("expose".to_owned()))?;
-
-    Ok(())
+  pub async fn preload(
+    &self, key: impl AsRef<str>, script: impl AsRef<str>,
+  ) -> Result<(), EngineError> {
+    let key = key.as_ref();
+    let key = format!("traffic-{}", key);
+    GLOBAL_ENGINE
+      .preload(Self::default_modules(), key, script, None)
+      .await
   }
 
   pub async fn expose(
-    &self, key: &str, pod: Pod, service: Service,
+    &self, key: impl AsRef<str>, pod: Pod, service: Service,
   ) -> Result<Vec<MappedPort>, ClusterError> {
-    let contexts = self.contexts.read().await;
-    debug!("Exposing traffic mapper for pod: {pod:?}, service: {service:?}");
-    let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
-      ClusterError::MissingField(format!("traffic mapper not found for key: {key}"))
-    })?;
-    let vm = Vm::new(runtime.clone(), unit.clone());
+    let key = format!("traffic-{}", key.as_ref());
+
     let service_info = RuneServiceInfo::try_from_service(&service, &pod)?;
     let node_name = pod
       .spec
-      .ok_or(ClusterError::MissingField("pod spec".to_owned()))?
+      .ok_or(ClusterError::MissingField("pod::spec".to_owned()))?
       .node_name
-      .ok_or(ClusterError::MissingField("node_name".to_owned()))?;
+      .ok_or(ClusterError::MissingField("pod::node_name".to_owned()))?;
 
-    let output = vm.send_execute(["expose"], (node_name, service_info))?;
-    let output = output.async_complete().await.into_result()?;
+    let output = GLOBAL_ENGINE
+      .execute(key, "expose", (node_name, service_info))
+      .await?;
 
-    let output: Result<Object, Value> = rune::from_value(output)?;
+    let output: Result<Object, Value> = rune::from_value(output).map_err(EngineError::from)?;
     let mut result = Vec::new();
     if let Ok(object) = output {
       for (key, value) in object.iter() {
         result.push(MappedPort {
           name: key.to_string(),
-          address: rune::from_value(value.clone())?,
+          address: rune::from_value(value.clone()).map_err(EngineError::from)?,
         });
       }
       Ok(result)
     } else {
-      Err(ClusterError::ScriptError(
-        "Early returns from script".to_owned(),
-      ))
-    }
-  }
-
-  pub async fn cleanup(&mut self) {
-    let now = Utc::now();
-    self.contexts.write().await.retain(|_, (_, _, time)| {
-      let duration = now.signed_duration_since(*time);
-      duration.num_hours() < 1
-    });
-  }
-
-  pub async fn cleanup_worker(&mut self) {
-    loop {
-      tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
-      tracing::debug!("Running traffic mapper cleanup...");
-      self.cleanup().await;
-      tracing::trace!("Live mappers: {:?}", self.contexts.read().await.keys());
+      Err(EngineError::ScriptError("early returns from script".to_owned()).into())
     }
   }
 }

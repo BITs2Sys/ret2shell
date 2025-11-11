@@ -64,8 +64,8 @@ export default function ChatList() {
   const [searchParams, _] = useSearchParams();
   const pageSize = 30;
   const [page, setPage] = createSignal(1);
-  const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "") || null);
-  const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "") || null);
+  const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "", 10) || null);
+  const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "", 10) || null);
   async function refreshChats() {
     if (gameStore.current) {
       try {

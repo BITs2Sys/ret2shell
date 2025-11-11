@@ -41,7 +41,7 @@ export default function () {
   });
 
   const selectedGameId = createMemo(() => {
-    const result = searchParams.selected ? Number.parseInt(searchParams.selected as string) : Number.NaN;
+    const result = searchParams.selected ? Number.parseInt(searchParams.selected as string, 10) : Number.NaN;
     if (Number.isNaN(result)) {
       return keyGames().at(0)?.id ?? null;
     }

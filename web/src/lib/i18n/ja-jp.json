@@ -327,14 +327,18 @@
           "placeholder": "送信者名を入力してください"
         },
         "username": {
-          "required": "送信メールアドレスは空にできません",
+          "required": "SMTP ユーザー名は空にできません",
+          "label": "SMTP ユーザー名",
+          "placeholder": "SMTP ユーザー名を入力してください"
+        },
+        "senderAddress": {
           "label": "送信メールアドレス",
-          "placeholder": "送信メールアドレスを入力してください"
+          "placeholder": "送信者のメールアドレスを入力してください"
         },
         "password": {
-          "required": "メールパスワードは空にできません",
-          "label": "メールパスワード",
-          "placeholder": "メールパスワードを入力してください"
+          "required": "SMTP パスワードは空にできません",
+          "label": "SMTP パスワード",
+          "placeholder": "SMTP パスワードを入力してください"
         },
         "verifyEmailSubject": {
           "required": "確認メールの件名は空にできません",
@@ -393,6 +397,9 @@
       "errors": {
         "fetchList": {
           "title": "ログ一覧の取得に失敗しました"
+        },
+        "fetchLogs": {
+          "title": "ログの取得に失敗しました"
         },
         "socketClosed": {
           "title": "ログパイプが切断されました。自動的に再接続します..."

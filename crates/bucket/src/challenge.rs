@@ -239,7 +239,7 @@ impl ChallengeBucket {
     let name = to_file_name(name.as_ref());
     let dest_path = self.path.join(dest.as_ref()).join(&name);
     let mut file = tokio::fs::File::create(&dest_path).await?;
-    debug!("uploading file to path: {:?}", dest_path);
+    debug!(dest=?dest_path, file=?name, "uploading to bucket");
     tokio::io::copy(&mut stdin, &mut file).await?;
 
     Ok(())
@@ -349,7 +349,7 @@ impl ChallengeBucket {
   }
 
   pub async fn download_file(&self, path: impl AsRef<Path>) -> Result<File, BucketError> {
-    debug!("downloading file at path: {:?}", path.as_ref());
+    debug!(file=?path.as_ref(), "downloading file from bucket");
     Ok(File::open(path).await?)
   }
 
@@ -366,21 +366,21 @@ impl ChallengeBucket {
   }
 
   pub async fn download_static(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
-    debug!("downloading static file {}", name.as_ref());
+    debug!(file=?name.as_ref(), "downloading static file from bucket");
     self
       .download_file(&self.ensure_prefix("static", format!("static/{}", name.as_ref()))?)
       .await
   }
 
   pub async fn download_mapped(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
-    debug!("downloading mapped file {}", name.as_ref());
+    debug!(file=?name.as_ref(), "downloading mapped file from bucket");
     self
       .download_file(&self.ensure_prefix("mapped", format!("mapped/{}", name.as_ref()))?)
       .await
   }
 
   pub async fn download_checker(&self, name: impl AsRef<str>) -> Result<File, BucketError> {
-    debug!("downloading checker file {}", name.as_ref());
+    debug!(file=?name.as_ref(), "downloading checker file from bucket");
     self
       .download_file(&self.ensure_prefix("checker", format!("checker/{}", name.as_ref()))?)
       .await

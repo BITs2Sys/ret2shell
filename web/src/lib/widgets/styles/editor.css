@@ -257,3 +257,15 @@
 .ace-kuroir .ace_comment {
   @apply bg-transparent;
 }
+
+.ace_error-marker {
+  @apply absolute bg-error/10 border-b-2 border-b-error;
+}
+
+.ace_warning-marker {
+  @apply absolute bg-warning/10 border-b-2 border-b-warning;
+}
+
+.ace_info-marker {
+  @apply absolute bg-info/10 border-b-2 border-b-info;
+}

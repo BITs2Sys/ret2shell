@@ -5,36 +5,35 @@ import { challengeStore } from "@storage/challenge";
 import { isGameAdmin } from "@storage/game";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import { useMutation, useQuery } from "@tanstack/solid-query";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import LoadingTips from "@widgets/loading-tips";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createSignal, Show, Suspense } from "solid-js";
 
 export default function (props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
-  const [answer, setAnswer] = createSignal<string>("");
-  const [loading, setLoading] = createSignal(false);
-  const [submitting, setSubmitting] = createSignal(false);
+  const [answer, setAnswer] = createSignal("");
   const [inEdit, setInEdit] = createSignal(false);
 
-  createEffect(() => {
-    if (challengeStore.current) {
-      untrack(async () => {
-        setLoading(true);
-        try {
-          const data = await getChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id);
-          setAnswer(data);
-        } catch (err) {
-          handleHttpError(err as Error, t("challenge.answer.errors.fetchAnswer.title")!);
-        }
-        setLoading(false);
-      });
-    }
-  });
-  async function handleUpdateAnswer() {
-    setSubmitting(true);
-    try {
-      await updateChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id, answer());
+  const answerQuery = useQuery(() => ({
+    queryKey: ["game", challengeStore.current?.game_id, "challenge", challengeStore.current?.id, "answer"],
+    queryFn: async () => await getChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id),
+    enabled: !!challengeStore.current,
+    throwOnError: (err: Error) => {
+      handleHttpError(err, t("challenge.answer.errors.fetchAnswer.title")!);
+      return false;
+    },
+  }));
+
+  const updateAnswerMutation = useMutation(() => ({
+    mutationFn: (newAnswer: string) => {
+      if (!challengeStore.current) {
+        return Promise.reject("No challenge selected");
+      }
+      return updateChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id, newAnswer);
+    },
+    onSuccess: () => {
       addToast({
         level: "success",
         description: t("general.actions.save.status.success")!,
@@ -42,11 +41,12 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
       });
       setInEdit(false);
       if (props.onStateChange) props.onStateChange();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setSubmitting(false);
-  }
+      answerQuery.refetch();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("general.actions.save.status.fail")!);
+    },
+  }));
 
   return (
     <div class="min-h-full flex-1 flex flex-col space-y-2 p-3 lg:p-6 items-center">
@@ -60,9 +60,9 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
               <Button
                 size="sm"
                 level="primary"
-                onClick={handleUpdateAnswer}
-                loading={submitting()}
-                disabled={submitting()}
+                onClick={() => updateAnswerMutation.mutate(answer())}
+                loading={updateAnswerMutation.isPending}
+                disabled={updateAnswerMutation.isPending}
               >
                 {t("general.actions.save.title")}
               </Button>
@@ -85,15 +85,14 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
         fallback={
           <EditorBare
             class="flex-1 w-full"
-            value={answer()}
+            value={answerQuery.data}
             lang="markdown"
             lineNumbers
             onValueChanged={(v) => setAnswer(v)}
           />
         }
       >
-        <Show
-          when={!loading()}
+        <Suspense
           fallback={
             <article class="article !max-w-5xl w-full">
               <p>
@@ -102,8 +101,8 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
             </article>
           }
         >
-          <Article content={answer()} extra />
-        </Show>
+          <Article content={answerQuery.data || ""} extra />
+        </Suspense>
       </Show>
     </div>
   );

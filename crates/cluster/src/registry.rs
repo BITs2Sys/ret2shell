@@ -111,9 +111,13 @@ impl Registry {
   pub async fn upload_image(
     &self, org: &str, name: &str, mut stdin: impl AsyncRead + Send + Unpin,
   ) -> Result<(), ClusterError> {
-    if !(name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz")) {
+    if !(name.ends_with(".tar")
+      || name.ends_with(".tar.gz")
+      || name.ends_with(".tgz")
+      || name.ends_with(".tar.zst"))
+    {
       return Err(ClusterError::InvalidImageFileType(
-        "only support tar/tar.gz/tgz files".to_string(),
+        "only support tar/tar.gz/tgz/tar.zst files".to_string(),
       ));
     }
     let tmp_dir = std::env::temp_dir().join("ret2shell");
@@ -132,7 +136,7 @@ impl Registry {
       ));
     }
     let mut file = tokio::fs::File::create(&file_path).await?;
-    debug!("uploading file to path: {:?}", file_path);
+    debug!(path=?file_path, "uploading file to path");
     tokio::io::copy(&mut stdin, &mut file).await?;
     // get tag name without file extension
     let repo = to_image_name(name.split('.').next().unwrap());
@@ -150,11 +154,11 @@ impl Registry {
       .output()
       .await?;
     if output.status.success() {
-      info!("upload image {} to {}/{}", name, org, repo);
+      info!(?name, ?org, ?repo, "uploaded image");
       Ok(())
     } else {
       let error = String::from_utf8_lossy(&output.stderr).to_string();
-      warn!("upload image failed: {error}",);
+      warn!(?error, "upload image failed");
       Err(ClusterError::UploadFailed(error))
     }
   }

@@ -32,7 +32,7 @@ async fn link_challenge_env(
       .wsrx_link(&token, port, socket)
       .await;
     if let Err(e) = result {
-      debug!("Failed to link challenge env: {:?}", e);
+      debug!(error = ?e, "failed to link challenge env");
     }
   }))
 }

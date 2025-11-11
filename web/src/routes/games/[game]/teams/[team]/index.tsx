@@ -91,8 +91,8 @@ function AdminManagement(props: { team: Team | null; onDone?: (team: Team) => vo
         ...props.team!,
         name: result.name,
         tag: result.tag || null,
-        state: Number.parseInt(result.state),
-        institute_id: Number.parseInt(result.institute_id) || null,
+        state: Number.parseInt(result.state, 10),
+        institute_id: Number.parseInt(result.institute_id, 10) || null,
       });
       props.onDone?.(team);
       addToast({
@@ -291,7 +291,7 @@ function SelfManagement(props: { members: User[] }) {
       const team = await updateSelfteam(gameStore.current!.id, {
         name: result.name,
         tag: result.tag || null,
-        institute_id: Number.parseInt(result.institute_id) || null,
+        institute_id: Number.parseInt(result.institute_id, 10) || null,
       });
       setGameStore({ team });
       addToast({
@@ -502,7 +502,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
                 if (value === "0-") return [0, "0", true];
                 const neg = (/^(-*)/.exec(value)?.[1].length ?? 0) % 2 === 1;
                 value = value.replace(/[^\d]/g, "").replace(/^0+(?=\d)/, "");
-                const n = Number.parseInt(value);
+                const n = Number.parseInt(value, 10);
                 return [!Number.isNaN(n) ? n : 0, value, neg];
               }
               setNumber(...parseNumber(e.currentTarget.value));
@@ -531,7 +531,7 @@ export default function () {
   const [solves, setSolves] = createSignal([] as Submission[]);
   const [extras, setExtras] = createSignal([] as Extra[]);
   const params = useParams();
-  const teamId = () => Number.parseInt(params.team) || null;
+  const teamId = () => Number.parseInt(params.team, 10) || null;
   const isSelfTeam = () => team() && team()?.id === gameStore.team?.id;
   const navigate = useNavigate();
   async function refreshExtras() {

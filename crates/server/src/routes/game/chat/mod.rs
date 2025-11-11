@@ -13,6 +13,8 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use serde::Deserialize;
+use tower_http::request_id::RequestId;
+use tracing::warn;
 
 use crate::{
   middleware::{
@@ -43,7 +45,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/", get(player_get_chat_session).post(player_send_chat))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(challenge, true),
+          data::prepare_data!(challenge, true, id, name),
         )),
     )
     .route("/unread", get(check_unread_chats))
@@ -91,8 +93,7 @@ async fn admin_get_chat_list(
 
 async fn player_get_chat_session(
   State(ref db): State<Database>, Extension(challenge): Extension<challenge::Model>,
-  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
-  Extension(team): Extension<Option<team::Model>>,
+  Extension(game): Extension<game::Model>, Extension(team): Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if !game.hammer_policy.enabled {
     return Err(ResponseError::PreconditionFailed(
@@ -100,13 +101,8 @@ async fn player_get_chat_session(
     ));
   }
   let team = team.ok_or_else(|| {
-    ResponseError::Forbidden(
-      "team not found".into(),
-      format!(
-        "user {}:{} ({}) want to access chat session without participate game",
-        token.id, token.account, token.nickname
-      ),
-    )
+    warn!("user want to access chat session without participate game");
+    ResponseError::Forbidden("team not found".into())
   })?;
   let chats = chat::get_list(&db.conn, team.id, challenge.id).await?;
   if chats.first().is_some_and(|c| c.is_admin && !c.checked) {
@@ -115,10 +111,11 @@ async fn player_get_chat_session(
   Ok(Json(chats))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn player_send_chat(
   State(ref db): State<Database>, State(ref queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
   Extension(team): Extension<Option<team::Model>>, Json(chat): Json<SendChatRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if !game.hammer_policy.enabled {
@@ -141,12 +138,9 @@ async fn player_send_chat(
     }
   }
   if sent_count <= 0 {
+    warn!("user try to send multiple chats",);
     return Err(ResponseError::TooManyRequests(
       "please wait for administrator's reply".into(),
-      format!(
-        "user {}:{} ({}) try to send multiple chats to challenge {}:{} in game {}:{}",
-        token.id, token.account, token.nickname, challenge.id, challenge.name, game.id, game.name
-      ),
     ));
   }
   chat::create(
@@ -177,7 +171,14 @@ async fn player_send_chat(
       content: chat.content,
     })),
   };
-  queue.publish("event", event).await.ok();
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
 
   Ok(())
 }

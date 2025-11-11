@@ -57,6 +57,7 @@ export type EmailConfig = {
   host: string;
   port: number;
   sender: string;
+  sender_address: string | null;
   username: string;
   password: string;
   tls: "none" | "tls" | "starttls";

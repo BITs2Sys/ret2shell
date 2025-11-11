@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 x1b=$(printf '\033')
 

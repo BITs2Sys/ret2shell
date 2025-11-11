@@ -6,6 +6,7 @@ import "@widgets/styles/base.css";
 import { Router } from "@solidjs/router";
 import { fullTheme, initTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { ErrorBoundary, onMount } from "solid-js";
 
@@ -41,6 +42,14 @@ function postUpdated() {
     }, 1000);
   }
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 render(() => {
   checkEdition();
@@ -101,20 +110,22 @@ render(() => {
         </div>
       )}
     >
-      <OverlayScrollbarsComponent
-        options={{
-          scrollbars: {
-            theme: `os-theme-${fullTheme()}`,
-            autoHide: "scroll",
-          },
-        }}
-        class="relative w-screen h-screen print:h-auto print:overflow-auto"
-        defer
-      >
-        <div class="flex flex-col min-h-full min-w-fit">
-          <Router explicitLinks>{routes}</Router>
-        </div>
-      </OverlayScrollbarsComponent>
+      <QueryClientProvider client={queryClient}>
+        <OverlayScrollbarsComponent
+          options={{
+            scrollbars: {
+              theme: `os-theme-${fullTheme()}`,
+              autoHide: "scroll",
+            },
+          }}
+          class="relative w-screen h-screen print:h-auto print:overflow-auto"
+          defer
+        >
+          <div class="flex flex-col min-h-full min-w-fit">
+            <Router explicitLinks>{routes}</Router>
+          </div>
+        </OverlayScrollbarsComponent>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }, document.getElementById("root") || document.body);

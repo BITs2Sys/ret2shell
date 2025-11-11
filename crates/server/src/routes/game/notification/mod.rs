@@ -13,6 +13,7 @@ use r2s_event::{
 };
 use r2s_migrator::Database;
 use r2s_queue::Queue;
+use tower_http::request_id::RequestId;
 
 use crate::{
   middleware::{
@@ -30,7 +31,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/", delete(delete_notification))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(notification, false),
+          data::prepare_data!(notification, false, id, title),
         )),
     )
     .route("/", post(create_notification))
@@ -55,7 +56,7 @@ async fn get_notifications(
 async fn create_notification(
   State(ref db): State<Database>, State(ref queue): State<Queue>,
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
-  Json(notification): Json<notification::Model>,
+  Extension(trace): Extension<RequestId>, Json(notification): Json<notification::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let notification = notification::create(
     &db.conn,
@@ -81,7 +82,13 @@ async fn create_notification(
       message: notification.title.clone(),
     }),
   };
-  queue.publish("event", event).await?;
+  queue
+    .publish(
+      "event",
+      event,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await?;
   Ok(Json(notification))
 }
 

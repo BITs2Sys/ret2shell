@@ -20,7 +20,7 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const params = useParams();
   const navigate = useNavigate();
-  const userId = () => Number.parseInt(params.user) || null;
+  const userId = () => Number.parseInt(params.user, 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
   createEffect(() => {
     if (!userId()) {

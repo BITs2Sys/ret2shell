@@ -46,7 +46,7 @@ where
     let _ = tokio::fs::hard_link(original, dest).await;
     return Ok(());
   }
-  debug!("generating thumbnail for {}", original.as_ref().display());
+  debug!(src=?original.as_ref(), "generating thumbnail");
   let img = image::open(&original)?;
 
   match img
@@ -54,13 +54,13 @@ where
     .save(&dest)
   {
     Err(err) => {
-      warn!("resize image to thumbnail error: {err}");
-      info!("image will be linked to {}", dest.as_ref().display());
+      warn!(error=?err, "failed to resize image to thumbnail");
+      info!(dst=?dest.as_ref(), src=?original.as_ref(), "image will be hard linked directly as thumbnail");
       match tokio::fs::hard_link(&original, &dest).await {
         Ok(_) => Ok(()),
         Err(err) => {
-          warn!("hard link image to thumbnail error: {err}");
-          info!("image will be directly save to {}", dest.as_ref().display());
+          warn!(error=?err, "failed to hard link image to thumbnail");
+          info!(dst=?dest.as_ref(), "image will be directly saved");
           tokio::fs::copy(&original, &dest).await?;
           Ok(())
         }

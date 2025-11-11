@@ -14,11 +14,12 @@ use axum::{
 use futures::StreamExt;
 use r2s_database::ip;
 use r2s_migrator::Database;
-use r2s_queue::Queue;
+use r2s_queue::{Queue, TracedMessage};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
-use tracing::{Instrument, debug, error, info_span, warn};
+use tower_http::request_id::{MakeRequestId, RequestId};
+use tracing::{Span, debug, error, warn};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -252,17 +253,17 @@ impl IntoIterator for ForwardedHeaderValue {
 
 #[derive(Debug, Error)]
 pub enum ForwardedHeaderValueParseError {
-  #[error("Header is empty")]
+  #[error("header is empty")]
   HeaderIsEmpty,
-  #[error("Stanza contained illegal part {0}")]
+  #[error("stanza contained illegal part {0}")]
   InvalidPart(String),
-  #[error("Stanza specified an invalid protocol")]
+  #[error("stanza specified an invalid protocol")]
   InvalidProtocol,
-  #[error("Identifier specified an invalid or malformed IP address")]
+  #[error("identifier specified an invalid or malformed IP address")]
   InvalidAddress,
   #[error("Identifier specified uses an obfuscated node ({0:?}) that is invalid")]
   InvalidObfuscatedNode(String),
-  #[error("Identifier specified an invalid or malformed IP address")]
+  #[error("identifier specified an invalid or malformed IP address")]
   IpParseErr(#[from] std::net::AddrParseError),
 }
 
@@ -315,11 +316,16 @@ pub async fn ip_record(
       ip.to_string()
     }
     None => {
-      warn!("Unable to get client IP address from request {req:?}");
+      warn!(request=?req, "unable to get client IP address from request");
       return Ok(next.run(req).await);
     }
   };
-  debug!("Client IP address: {ip}");
+  debug!(?ip, "got client IP address");
+  let trace = req
+    .headers()
+    .get("x-request-id")
+    .and_then(|hv| hv.to_str().ok().map(|s| s.to_string()))
+    .unwrap_or_else(|| nanoid::nanoid!());
   if token.id != 0 {
     queue
       .publish(
@@ -328,25 +334,23 @@ pub async fn ip_record(
           ip: ip.clone(),
           user_id: token.id,
         },
+        &trace,
       )
       .await?;
     debug!("IP record message published");
   } else {
-    debug!("Token ID is 0, skipping IP record");
+    debug!("token ID is 0, skipping IP record");
   }
-  let span =
-    info_span!("http",from = %ip.to_string(), method = %req.method(), uri = %req.uri().path());
-  async move {
-    let res = next.run(req).await;
-    Ok(res)
-  }
-  .instrument(span)
-  .await
+
+  Span::current().record("from", ip.as_str());
+
+  Ok(next.run(req).await)
 }
 
 async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
   let req = String::from_utf8(message.message.payload.to_vec())?;
-  let req = serde_json::from_str::<IpRecord>(&req)?;
+  let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
+  let req = req.payload;
   let model = ip::get_or_create(&db.conn, &req.ip).await?;
   ip::link_user(&db.conn, req.user_id, model.id).await.ok();
   Ok(())
@@ -355,13 +359,13 @@ async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> an
 pub async fn ip_record_worker(mut messages: Stream, db: Database) {
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
-      message.ack().await.ok();
+      message.double_ack().await.ok();
       ip_record_worker_exec(message.clone(), &db)
         .await
-        .map_err(|e| error!("Failed to process message: {:?}", e))
+        .map_err(|e| error!(error = ?e, "failed to process message"))
         .ok();
     } else {
-      error!("Failed to receive message from nats: {:?}", message);
+      error!(?message, "failed to receive message from nats");
     }
   }
 }
@@ -375,5 +379,16 @@ impl KeyExtractor for ProxiedIpExtractor {
   fn extract<B>(&self, req: &Request<B>) -> Result<Self::Key, GovernorError> {
     let ip = get_client_ip(req).ok_or(GovernorError::UnableToExtractKey)?;
     Ok(ip.to_string())
+  }
+}
+
+/// A [`MakeRequestId`] that generates `NanoID`s.
+#[derive(Clone, Copy, Default)]
+pub struct MakeRequestNanoId;
+
+impl MakeRequestId for MakeRequestNanoId {
+  fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
+    let request_id = nanoid::nanoid!();
+    Some(RequestId::new(request_id.parse().unwrap()))
   }
 }

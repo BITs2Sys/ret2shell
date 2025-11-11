@@ -13,9 +13,9 @@ use r2s_event::{
   events::{EventContainer, SubmissionEvent, SubmissionEventType},
 };
 use r2s_migrator::Database;
-use r2s_queue::Queue;
+use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
-use tracing::{error, info, warn};
+use tracing::{Instrument, Span, error, error_span, info, warn};
 
 use crate::traits::{GlobalState, ResponseError};
 
@@ -36,12 +36,12 @@ pub async fn spawn_game_workers(state: GlobalState) {
 }
 
 async fn score_maintenance_worker(queue: Queue, db: Database) {
-  info!("Score maintenance worker started");
+  info!("score maintenance worker started");
   let messages = queue
     .subscribe("scoreboard")
     .await
     .inspect_err(|err| {
-      error!("Failed to subscribe to submission-check queue: {:?}", err);
+      error!(error=?err, "failed to subscribe to submission-check queue");
     })
     .ok();
   let mut messages = if let Some(messages) = messages {
@@ -53,28 +53,31 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
     if let Ok(message) = message {
       let req = String::from_utf8(message.message.payload.to_vec())
         .inspect_err(|e| {
-          error!("Failed to parse message from nats: {:?}", e);
+          error!(error=?e, "failed to parse message from nats");
         })
         .ok();
       if req.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
-      let challenge = serde_json::from_str::<challenge::Model>(&req.unwrap())
+      let challenge = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
         .inspect_err(|e| {
-          error!("Failed to parse message from nats: {:?}", e);
+          error!(error=?e, "failed to parse message from nats");
         })
         .ok();
+      let span = error_span!("request", trace=%challenge.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned()));
+      let challenge = challenge.map(|c| c.payload);
       if challenge.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
       let challenge = challenge.unwrap();
       score_maintenance_worker_exec(db.clone(), challenge.clone())
+        .instrument(span)
         .await
-        .inspect_err(|e| error!("Failed to process message: {:?}", e))
+        .inspect_err(|e| error!(error=?e, "failed to process message"))
         .ok();
-      message.ack().await.ok();
+      message.double_ack().await.ok();
     }
   }
 }
@@ -135,7 +138,7 @@ async fn submission_worker(
     .subscribe("check")
     .await
     .inspect_err(|err| {
-      error!("Failed to subscribe to submission-check queue: {:?}", err);
+      error!(error=?err, "failed to subscribe to submission-check queue");
     })
     .ok();
   let mut messages = if let Some(messages) = messages {
@@ -147,51 +150,69 @@ async fn submission_worker(
     if let Ok(message) = message {
       let req = String::from_utf8(message.message.payload.to_vec())
         .inspect_err(|e| {
-          error!("Failed to parse message from nats: {:?}", e);
+          error!(error=?e, "failed to parse message from nats");
         })
         .ok();
       if req.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
-      let submission = serde_json::from_str::<submission::Model>(&req.unwrap())
+      let submission = serde_json::from_str::<TracedMessage<submission::Model>>(&req.unwrap())
         .inspect_err(|e| {
-          error!("Failed to parse message from nats: {:?}", e);
+          error!(error=?e, "failed to parse message from nats");
         })
         .ok();
       if submission.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
+      let trace = submission.as_ref().unwrap().trace.to_owned();
+      let submission = submission.as_ref().unwrap().payload.to_owned();
+      let span = error_span!(
+        "request", trace=%trace,
+        "data-submission-id"=%submission.id,
+        "data-submission-content"=?submission.content,
+        "user-id"=tracing::field::Empty,
+        "user-account"=tracing::field::Empty,
+        "user-nickname"=tracing::field::Empty,
+        "team-id"=tracing::field::Empty,
+        "team-name"=tracing::field::Empty,
+        "data-challenge-id"=%submission.challenge_id,
+        "data-challenge-name"=tracing::field::Empty,
+        "data-game-id"=tracing::field::Empty,
+        "data-game-name"=tracing::field::Empty
+      );
       let result = submission_worker_exec(
         queue.clone(),
         db.clone(),
         cache.clone(),
         checker.clone(),
         bucket.clone(),
-        submission.clone().unwrap(),
+        &submission,
+        &trace,
       )
+      .instrument(span)
       .await
-      .inspect_err(|e| error!("Failed to process message: {:?}", e))
+      .inspect_err(|e| error!(error=?e, "failed to process message"))
       .ok();
       if result.is_none() {
         submission::update(
           &db.conn,
           submission::Model {
-            id: submission.clone().unwrap().id,
+            id: submission.id,
             solved: Some(false),
             result: Some("checker fails on your input, incorrect.".to_owned()),
-            ..submission.unwrap()
+            ..submission
           },
         )
         .await
         .ok();
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
-      message.ack().await.ok();
+      message.double_ack().await.ok();
     } else {
-      error!("Failed to receive message from nats: {:?}", message);
+      error!(error=?message, "failed to receive message from nats");
     }
   }
 }
@@ -209,18 +230,19 @@ fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
 }
 
 async fn submission_worker_exec(
-  queue: Queue, db: Database, cache: Cache, mut checker: Checker, bucket: Bucket,
-  submission: submission::Model,
+  queue: Queue, db: Database, cache: Cache, checker: Checker, bucket: Bucket,
+  submission: &submission::Model, trace: impl AsRef<str>,
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
   let txn = db.conn.begin().await?;
-
   let challenge = challenge::get(&txn, submission.challenge_id).await?;
   let challenge = if let Some(challenge) = challenge {
     challenge
   } else {
     return Err(ResponseError::BadRequest("challenge not found".to_owned()));
   };
+  Span::current().record("data-challenge-name", challenge.name.as_str());
+  Span::current().record("data-game-id", challenge.game_id);
   let prev_submitted = submission::count(
     &txn,
     true,
@@ -240,17 +262,24 @@ async fn submission_worker_exec(
     None
   };
   let user = user::get(&txn, submission.user_id).await?;
+
   let game = game::get(&txn, challenge.game_id).await?;
   let game = if let Some(game) = game {
     game
   } else {
     return Err(ResponseError::BadRequest("game not found".to_owned()));
   };
+  Span::current().record("data-game-name", game.name.as_str());
+
   let user = if let Some(user) = user {
     user
   } else {
     return Err(ResponseError::BadRequest("user not found".to_owned()));
   };
+  Span::current().record("user-id", user.id);
+  Span::current().record("user-account", user.account.as_str());
+  Span::current().record("user-nickname", user.nickname.as_str());
+
   let challenge_bucket = bucket
     .at(
       game
@@ -276,7 +305,7 @@ async fn submission_worker_exec(
   // stage 2: invoke checker to check the submission
   checker.preload(&challenge, &challenge_bucket).await?;
   let (solved, result, audit) = checker
-    .check(&challenge_bucket, &user, &team, &submission)
+    .check(&challenge_bucket, &user, &team, submission)
     .await?;
   let submission = submission::update(
     &txn,
@@ -284,10 +313,16 @@ async fn submission_worker_exec(
       id: submission.id,
       solved: Some(solved),
       result: Some(result),
-      ..submission
+      ..submission.clone()
     },
   )
   .await?;
+
+  if solved {
+    info!(correct = true, "submission is correct");
+  } else {
+    info!(correct = false, "submission is incorrect");
+  }
 
   if team.is_none() || prev_submitted {
     txn.commit().await?;
@@ -295,28 +330,12 @@ async fn submission_worker_exec(
   }
 
   let team = team.unwrap();
+  Span::current().record("team-id", team.id);
+  Span::current().record("team-name", team.name.as_str());
 
   // stage 3: update team score and create extra or audit if necessary
   if submission.solved.unwrap_or(false) {
-    info!(
-      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is correct",
-      submission.id,
-      submission.content,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
-    );
-    // tokio::spawn(async move {
-    //   cluster
-    //     .at(CHALLENGE_NS)
-    //     .stop_challenge_env_by_user(user.id)
-    //     .await
-    //     .ok();
-    // });
+    info!("updating score and creating events");
     // stage 3.1: update challenge score
     let (changed, decay, challenge) = challenge::maintain_score(&txn, challenge.clone()).await?;
 
@@ -372,24 +391,15 @@ async fn submission_worker_exec(
       })),
     };
     txn.commit().await?;
-    queue.publish("event", event).await.ok(); // publish scoreboard update event if necessary
+    queue.publish("event", event, &trace).await.ok(); // publish scoreboard update event if necessary
     if changed {
-      queue.publish("scoreboard", challenge.clone()).await.ok();
+      queue
+        .publish("scoreboard", challenge.clone(), &trace)
+        .await
+        .ok();
       cache.at("challenge").del(challenge.id).await.ok();
     }
   } else {
-    info!(
-      "Submission {}:{:?} by {}:{} ({}) for challenge {}:{} in game {}:{} is incorrect",
-      submission.id,
-      submission.content,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
-    );
     txn.commit().await?;
   }
 
@@ -419,16 +429,8 @@ async fn submission_worker_exec(
     };
     let audit = audit::create(&txn, audit).await?;
     warn!(
-      "Audit {} for submission {} by {}:{} ({}) for challenge {}:{} in game {}:{}",
-      audit.id,
-      submission.id,
-      user.id,
-      user.account,
-      user.nickname,
-      challenge.id,
-      challenge.name,
-      game.id,
-      game.name
+      reason=%audit.reason,
+      "cheated submission detected, created audit",
     );
     let event = EventContainer {
       game_id: challenge.game_id,
@@ -443,10 +445,11 @@ async fn submission_worker_exec(
         reason: Some(audit.reason),
       })),
     };
-    queue.publish("event", event).await.ok();
+    queue.publish("event", event, &trace).await.ok();
   }
 
   txn.commit().await?;
+
   Ok(submission)
 }
 
@@ -454,7 +457,7 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
   let txn = db.conn.begin().await?;
   let score = team::calc_score(&txn, team.id).await;
   if let Err(err) = score {
-    warn!("calc team score failed: {:?}", err);
+    warn!(error=?err, "calc team score failed");
     return Err(ResponseError::DatabaseError(err));
   }
   let score = score.unwrap();
@@ -477,7 +480,7 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
     )
     .await;
     if let Err(e) = result {
-      warn!("update team score failed: {:?}", e);
+      warn!(error=?e, "update team score failed");
     }
   }
   txn.commit().await?;

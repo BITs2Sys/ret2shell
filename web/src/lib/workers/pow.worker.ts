@@ -4,7 +4,7 @@ self.addEventListener(
   "message",
   async function (e: { data: { challenge: string } }) {
     const criteria = e.data.challenge;
-    const difficulty = Number.parseInt(criteria.split("#")[0]);
+    const difficulty = Number.parseInt(criteria.split("#")[0], 10);
     const challenge = criteria.split("#")[1];
     let nonce = 0;
     // console.log(`difficulty: ${difficulty}, challenge: ${challenge}, nonce: ${nonce}, criteria: ${criteria}`)

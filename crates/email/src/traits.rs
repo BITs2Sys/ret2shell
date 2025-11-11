@@ -18,7 +18,7 @@ pub struct EmailRequest {
 
 #[derive(Error, Debug)]
 pub enum EmailError {
-  #[error("Invalid email tls configuration: {0}")]
+  #[error("invalid email tls configuration: {0}")]
   InvalidEmailTlsConfiguration(String),
   #[error("mailer error: {0}")]
   MailerError(#[from] lettre::transport::smtp::Error),

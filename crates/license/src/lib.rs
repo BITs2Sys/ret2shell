@@ -14,11 +14,11 @@ const LICENSE_PREDEFINED_FILE_NAME: &str = "license";
 
 #[derive(Error, Debug)]
 pub enum LicenseError {
-  #[error("License is missing.")]
+  #[error("license is missing")]
   Missing,
-  #[error("License is invalid.")]
+  #[error("license is invalid")]
   Invalid,
-  #[error("License is expired.")]
+  #[error("license is expired")]
   Expired,
 }
 

@@ -442,8 +442,8 @@ function CreateForm(fnProps: {
                   step={32}
                   name={field1.name}
                   value={[
-                    Number.parseInt(field2.value?.replace("Mi", "") || "32") || 32,
-                    Number.parseInt(field1.value?.replace("Mi", "") || "128") || 128,
+                    Number.parseInt(field2.value?.replace("Mi", "") || "32", 10) || 32,
+                    Number.parseInt(field1.value?.replace("Mi", "") || "128", 10) || 128,
                   ]}
                   onValueChange={(e) => {
                     setValue(form, "mem", `${e.value[1]}Mi`);
@@ -469,8 +469,8 @@ function CreateForm(fnProps: {
                   step={32}
                   name={field1.name}
                   value={[
-                    Number.parseInt(field2.value?.replace("Mi", "") || "64") || 64,
-                    Number.parseInt(field1.value?.replace("Mi", "") || "1024") || 1024,
+                    Number.parseInt(field2.value?.replace("Mi", "") || "64", 10) || 64,
+                    Number.parseInt(field1.value?.replace("Mi", "") || "1024", 10) || 1024,
                   ]}
                   onValueChange={(e) => {
                     setValue(form, "storage", `${e.value[1]}Mi`);

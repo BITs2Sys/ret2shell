@@ -9,6 +9,7 @@ import type { Instance } from "@models/instance";
 import type { Submission } from "@models/submission";
 import { type Team, TeamState } from "@models/team";
 import type { User } from "@models/user";
+import type { DiagnosticMarker } from "@widgets/editor";
 import type { Pod } from "kubernetes-types/core/v1";
 import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
@@ -216,7 +217,7 @@ export async function getChallengeCheckerScript(game_id: number, challenge_id: n
     })
     .json<{
       script: string;
-      lint?: string;
+      lint?: DiagnosticMarker[];
     }>();
 }
 
@@ -620,7 +621,7 @@ export async function updateGameTraffic(game_id: number, traffic: string) {
       },
     })
     .json<{
-      lint: string | null;
+      lint: DiagnosticMarker[] | null;
     }>();
 }
 

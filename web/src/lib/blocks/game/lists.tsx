@@ -15,7 +15,7 @@ import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Sw
 
 export function AuditList() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const pageSize = 15;
   const [total, setTotal] = createSignal(0);
   const [audits, setAudits] = createSignal([] as Audit[]);
@@ -182,7 +182,7 @@ export function AuditList() {
 
 export function SubmissionList(props: { inGame?: boolean; archived?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const pageSize = 15;
   const [total, setTotal] = createSignal(0);
   const [submissions, setSubmissions] = createSignal([] as Submission[]);

@@ -8,8 +8,8 @@ edition      = "2024"
 homepage     = "https://ret.sh.cn/"
 publish      = false
 repository   = "https://github.com/ret2shell/ret2shell"
-rust-version = "1.89.0"
-version      = "3.8.2"
+rust-version = "1.90.0"
+version      = "3.9.0"
 
 [profile.release]
 codegen-units = 1
@@ -22,7 +22,7 @@ strip         = true
 aho-corasick       = "1.1"
 anyhow             = "1.0"
 argon2             = "0.5"
-async-nats         = "0.42"
+async-nats         = "0.44"
 async-trait        = "0.1"
 base64             = "0.22"
 bcrypt             = "0.17"
@@ -39,8 +39,7 @@ hex                = "0.4"
 hyper-util         = "0.1"
 image              = "0.25"
 infer              = "0.19"
-jsonwebtoken       = { version = "9.3", default-features = false }
-k8s-openapi        = { version = "0.25", features = ["latest"] }
+k8s-openapi        = { version = "0.26", features = ["latest"] }
 mime               = "0.3"
 nanoid             = "0.4"
 num-derive         = "0.4"
@@ -51,8 +50,8 @@ rand               = "0.9"
 regex              = "1.11"
 ret2script         = { version = "1.8", default-features = false }
 ring               = "0.17"
-roxmltree          = "0.20"
-rune               = { version = "0.14", features = ["tokio"] }
+roxmltree          = "0.21"
+rune               = { version = "0.14", features = ["tokio", "cli"] }
 rune-modules       = { version = "0.14", features = ["full"] }
 rustc_version      = "0.4"
 rustls             = { version = "0.23", features = ["ring"] }
@@ -68,11 +67,11 @@ tokio              = { version = "1.47", features = ["full"] }
 tokio-stream       = "0.1"
 tokio-util         = { version = "0.7", features = ["codec"] }
 toml               = "0.9"
-tower_governor     = "0.7"
 tracing            = "0.1"
 tracing-appender   = "0.2"
 tracing-core       = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+urlencoding        = "2.1"
 
 r2s-auditor  = { version = "3", path = "crates/auditor" }
 r2s-bucket   = { version = "3", path = "crates/bucket" }
@@ -83,6 +82,7 @@ r2s-cluster  = { version = "3", path = "crates/cluster" }
 r2s-config   = { version = "3", path = "crates/config" }
 r2s-database = { version = "3", path = "crates/database" }
 r2s-email    = { version = "3", path = "crates/email" }
+r2s-engine   = { version = "3", path = "crates/engine" }
 r2s-event    = { version = "3", path = "crates/event" }
 r2s-license  = { version = "3", path = "crates/license" }
 r2s-media    = { version = "3", path = "crates/media" }
@@ -94,12 +94,22 @@ r2s-queue    = { version = "3", path = "crates/queue" }
 features = ["ws", "http2", "tower-log", "tracing", "multipart", "macros"]
 version  = "0.8"
 
+[workspace.dependencies.jsonwebtoken]
+default-features = false
+features         = ["aws_lc_rs"]
+version          = "10.0"
+
+[workspace.dependencies.tower_governor]
+default-features = false
+features         = ["axum"]
+version          = "0.8"
+
 [workspace.dependencies.tower]
 features = ["limit"]
 version  = "0.5"
 
 [workspace.dependencies.tower-http]
-features = ["cors", "fs", "trace", "normalize-path"]
+features = ["cors", "fs", "trace", "normalize-path", "request-id", "util"]
 version  = "0.6"
 
 [workspace.dependencies.axum-extra]
@@ -146,7 +156,7 @@ version = "10.1"
 
 [workspace.dependencies.kube]
 features = ["config", "client", "rustls-tls", "runtime", "derive", "ws"]
-version  = "1.1"
+version  = "2.0"
 
 [workspace.dependencies.wsrx]
 default-features = false

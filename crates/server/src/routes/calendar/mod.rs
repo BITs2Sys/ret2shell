@@ -9,6 +9,7 @@ use chrono::{DateTime, Utc, serde::ts_seconds};
 use r2s_database::{calendar, user::Permission};
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 use crate::{
   middleware::auth::{self, Token},
@@ -61,10 +62,11 @@ async fn create_calendar(
     &db.conn,
     calendar::Model {
       reporter_id: Some(token.id),
-      ..calendar
+      ..calendar.clone()
     },
   )
   .await?;
+  info!(name=%calendar.name, "created calendar event");
   Ok(Json(result))
 }
 
@@ -77,10 +79,11 @@ async fn update_calendar(
     calendar_id,
     calendar::Model {
       reporter_id: Some(token.id),
-      ..calendar
+      ..calendar.clone()
     },
   )
   .await?;
+  info!(name=%calendar.name, "updated calendar event");
   Ok(Json(result))
 }
 
@@ -88,5 +91,6 @@ async fn delete_calendar(
   State(ref db): State<Database>, Path(calendar_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
   calendar::delete(&db.conn, calendar_id).await?;
+  info!(id=%calendar_id, "deleted calendar event");
   Ok(())
 }

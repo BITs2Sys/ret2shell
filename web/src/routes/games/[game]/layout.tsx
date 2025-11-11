@@ -18,7 +18,7 @@ export default function (props: { children?: JSX.Element }) {
     setChallengeStore({ current: null, challenges: [], solves: [] });
   });
   const params = useParams();
-  const game_id = Number.parseInt(params.game);
+  const game_id = Number.parseInt(params.game, 10);
   onMount(async () => {
     if (game_id) {
       try {

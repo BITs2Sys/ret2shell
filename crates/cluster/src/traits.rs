@@ -1,3 +1,4 @@
+use r2s_engine::EngineError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -34,28 +35,8 @@ pub enum ClusterError {
   InvalidImageFileType(String),
   #[error("path traversal detected: {0}")]
   PathTraversalDetected(String),
-  #[error("Rune context error: {0}")]
-  RuneError(#[from] rune::ContextError),
-  #[error("Rune runtime error: {0}")]
-  RuneRuntimeError(#[from] rune::runtime::RuntimeError),
-  #[error("Can not load script source: {0}")]
-  SourceError(#[from] rune::source::FromPathError),
-  #[error("Can not build script unit: {0}")]
-  BuildError(#[from] rune::BuildError),
-  #[error("Can not alloc script engine runtime: {0}")]
-  AllocError(#[from] rune::alloc::Error),
-  #[error("Executed script error: {0}")]
-  ExecError(#[from] rune::runtime::VmError),
-  #[error("Compile error: {0}")]
-  CompileError(String),
-  #[error("Missing function: {0}")]
-  MissingFunction(String),
-  #[error("Failed to emit diagnostics: {0}")]
-  DiagnosticsError(#[from] rune::diagnostics::EmitError),
-  #[error("String UTF-8 decode error: {0}")]
-  FromUtf8Error(#[from] std::string::FromUtf8Error),
-  #[error("script error: {0}")]
-  ScriptError(String),
-  #[error("Traffic port-mapping not found: {0}")]
+  #[error("engine error: {0}")]
+  EngineError(#[from] EngineError),
+  #[error("traffic-mapper not found: {0}")]
   TrafficMapperNotFound(String),
 }

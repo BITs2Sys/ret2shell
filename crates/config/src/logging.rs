@@ -16,6 +16,9 @@ pub struct Config {
   pub files_kept: Option<usize>,
   /// compress files after they are rotated
   pub compress: Option<bool>,
+  /// victoria logs server address.
+  /// once you set this, all logs will be sent to the server
+  pub victoria: Option<String>,
 }
 
 impl Merge for Option<Config> {

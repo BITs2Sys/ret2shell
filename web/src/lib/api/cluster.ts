@@ -1,3 +1,4 @@
+import type { DiagnosticMarker } from "@widgets/editor";
 import type { ConfigMapList, NodeList } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import api, { api_root } from ".";
@@ -20,7 +21,7 @@ export async function getCalmdownStatus() {
 
 export async function updateGlobalTrafficScript(traffic: string) {
   return await api.patch(`${api_root}/cluster/traffic`, { json: { traffic } }).json<{
-    lint: string | null;
+    lint: DiagnosticMarker[] | null;
   }>();
 }
 

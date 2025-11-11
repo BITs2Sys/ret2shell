@@ -22,3 +22,4 @@ tracing      = { workspace = true }
 
 r2s-bucket   = { workspace = true }
 r2s-database = { workspace = true }
+r2s-engine   = { workspace = true }

@@ -86,7 +86,7 @@ function ChartOperations(props: {
         placeholder={t("game.scoreboard.selectInstitute")}
         items={gameInstitutesSelect()}
         onValueChange={(v) => {
-          props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null);
+          props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!, 10)) || null);
         }}
         value={(props.institute && [props.institute.toString()]) || undefined}
       />
@@ -105,10 +105,13 @@ export default function () {
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(null as number | null);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
-  const selectedInstituteId = createMemo(() => Number.parseInt((searchParams.institute as string) || "NaN") || null);
+  const selectedInstituteId = createMemo(
+    () => Number.parseInt((searchParams.institute as string) || "NaN", 10) || null
+  );
   const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
-  const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);
+  // const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);
+  const [showReal, setShowReal] = createSignal(true);
   const matches = createBreakpoints(breakpoints);
 
   onMount(async () => {

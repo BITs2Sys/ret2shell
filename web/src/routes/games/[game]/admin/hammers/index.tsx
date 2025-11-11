@@ -28,8 +28,8 @@ import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack }
 
 export default function () {
   const [searchParams, _] = useSearchParams();
-  const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "") || null);
-  const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "") || null);
+  const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "", 10) || null);
+  const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "", 10) || null);
   const [challenge, setChallenge] = createSignal(null as Challenge | null);
   const [team, setTeam] = createSignal(null as Team | null);
   createEffect(() => {

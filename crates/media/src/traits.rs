@@ -4,7 +4,7 @@ use thiserror::Error;
 pub enum MediaError {
   #[error("failed to parse content type")]
   ParseContentTypeError(#[from] mime::FromStrError),
-  #[error("IO error: {0}")]
+  #[error("io error: {0}")]
   IOError(#[from] std::io::Error),
   #[error("image error: {0}")]
   ImageError(#[from] image::ImageError),

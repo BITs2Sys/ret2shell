@@ -65,6 +65,11 @@ impl Cache {
     }
   }
 
+  pub async fn ping(&self) -> Result<(), CacheError> {
+    self.client.ping::<Option<String>>(None).await?;
+    Ok(())
+  }
+
   pub async fn get<T>(
     &self, key: impl Into<Key> + Send + Display,
   ) -> Result<Option<T>, CacheError>
@@ -195,7 +200,7 @@ pub async fn initialize(
   config: &Option<cache::Config>, flush: Option<bool>,
 ) -> Result<Cache, CacheError> {
   let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
-  debug!("initialize cache manager with url: {:?}", config.url);
+  debug!(url=?config.url, "initialize cache manager");
   let config = Config::from_url(&config.url)?;
   let client = Client::new(config, None, None, None);
   client.init().await?;
@@ -207,7 +212,7 @@ pub async fn initialize(
 
 pub async fn down(config: &Option<cache::Config>) -> Result<(), CacheError> {
   let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
-  debug!("down cache manager with url: {:?}", config.url);
+  debug!(url=?config.url, "down cache manager");
   let config = Config::from_url(&config.url)?;
   let client = Client::new(config, None, None, None);
   client.init().await?;

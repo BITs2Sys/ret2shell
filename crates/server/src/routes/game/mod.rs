@@ -25,6 +25,7 @@ use r2s_database::{
   institute, submission, team as team_db,
   user::{self, Permission},
 };
+use r2s_engine::DiagnosticMarker;
 use r2s_event::{
   Event, EventManager,
   events::{EventContainer, GameEvent, GameEventType},
@@ -36,6 +37,7 @@ use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
 use tokio_util::io::{ReaderStream, StreamReader};
+use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
 
 use crate::{
@@ -121,7 +123,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             .route("/{audit}", patch(update_audit))
             .route_layer(middleware::from_fn_with_state(
               state.clone(),
-              data::prepare_data!(audit, false),
+              data::prepare_data!(audit, false, id),
             ))
             .route("/", get(get_audit_messages)),
         )
@@ -147,7 +149,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         ))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(game, true),
+          data::prepare_data!(game, true, id, name),
         )),
     )
     .route("/", get(get_game_list))
@@ -162,11 +164,9 @@ macro_rules! get_game_bucket_mut {
           .clone()
           .ok_or(ResponseError::InternalServerError(
             "bucket is not exist for this game".into(),
-            format!(
-              "game {}:{} does not have a valid bucket",
-              $game.id, $game.name
-            ),
-          ))?,
+          )).inspect_err(|err| {
+            tracing::warn!(error=?err, "game does not have a valid bucket");
+          })?,
       )
       .await?
   }};
@@ -209,10 +209,7 @@ async fn get_game(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if game.hidden && !is_game_admin!(token, game) {
-    warn!(
-      "unauthorized user {}:{} ({}) trying to get a hidden game {}:{}",
-      token.id, token.account, token.nickname, game.id, game.name
-    );
+    warn!("unauthorized user trying to get a hidden game");
     return Err(ResponseError::NotFound("game not found".to_owned()));
   }
   if is_game_admin!(token, game) {
@@ -244,19 +241,23 @@ async fn create_game(
   match model {
     Ok(model) => {
       txn.commit().await?;
+      info!(game_id=%model.id, game_name=%model.name, "created game");
       Ok(Json(model))
     }
     Err(e) => {
       bucket.delete(&game_bucket.name).await.ok();
+      warn!(error=?e, "failed to create game, rolling back bucket creation");
       Err(e)?
     }
   }
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn update_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref queue): State<Queue>,
   State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(token): Extension<Token>, Json(model): Json<game::Model>,
+  Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
+  Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let model = game::update(
@@ -286,13 +287,8 @@ async fn update_game(
   txn.commit().await?;
   if game.frozen != model.frozen {
     info!(
-      "user {}:{} ({}) {} the game {}:{}",
-      token.id,
-      token.account,
-      token.nickname,
+      "user {} the game",
       if model.frozen { "freeze" } else { "unfreeze" },
-      model.id,
-      model.name
     );
     let payload = EventContainer {
       game_id: game.id,
@@ -314,8 +310,16 @@ async fn update_game(
         ),
       }),
     };
-    queue.publish("event", payload).await.ok();
+    queue
+      .publish(
+        "event",
+        payload,
+        &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+      )
+      .await
+      .ok();
   }
+  info!("updated game");
   Ok(Json(model))
 }
 
@@ -328,12 +332,13 @@ async fn delete_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  cache.at("game").del(game.id).await?;
+  game::delete(&db.conn, game.id).await?;
   let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
   if !query.force.unwrap_or(false) {
     delete_result?;
   }
-  cache.at("game").del(game.id).await?;
-  game::delete(&db.conn, game.id).await?;
+  info!("deleted game");
   Ok(())
 }
 
@@ -400,6 +405,7 @@ async fn update_game_intro(
     )
     .await?;
   txn.commit().await?;
+  info!("created introduction for game");
 
   Ok(Json(result))
 }
@@ -576,8 +582,10 @@ async fn get_self_instances(
     .clone()
     .ok_or(ResponseError::InternalServerError(
       "traffic mapper is not initialized".to_string(),
-      "traffic mapper is not initialized".to_string(),
-    ))?;
+    ))
+    .inspect_err(|err| {
+      warn!(error=?err, "traffic mapper is not initialized");
+    })?;
 
   for env in envs {
     let mut i: Instance = match env.clone().try_into() {
@@ -615,8 +623,9 @@ async fn get_self_instances(
       Ok(service) => service,
       Err(ClusterError::KubeError(e)) => {
         warn!(
-          "service not found for env {env_name} in game {}:{}, maybe not initialized? original error is {e:?}",
-          game.id, game.name
+          env=%env_name,
+          error=?e,
+          "service not found in game, maybe not initialized?",
         );
         result.push(i);
         continue;
@@ -631,14 +640,12 @@ async fn get_self_instances(
     let exposed_ports = match traffic_mapper.expose(&traffic_key, env, service).await {
       Ok(ports) => ports,
       Err(ClusterError::MissingField(e)) => {
-        warn!(
-          "traffic mapper missing field '{e}' for env {env_name}, maybe the cluster is maintaining?",
-        );
+        warn!(field=%e, env=%env_name, "traffic mapper missing field for env, maybe the cluster is maintaining?",);
         result.push(i);
         continue;
       }
       Err(e) => {
-        error!("failed to expose traffic for env {env_name}: {e:?}");
+        error!(error=?e, env=%env_name, "failed to expose traffic for env");
         return Err(e.into());
       }
     };
@@ -1028,15 +1035,19 @@ async fn upload_image(
     let reader = StreamReader::new(field.map_err(std::io::Error::other));
     registry
       .upload_image(
-        &game.bucket.clone().unwrap_or("_".to_string()),
+        game.bucket.as_ref().unwrap_or(&"_".to_string()),
         &file_name,
         reader,
       )
       .await?;
     cache
       .at("registry")
-      .del(&game.bucket.unwrap_or("_".to_string()))
+      .del(game.bucket.as_ref().unwrap_or(&"_".to_string()))
       .await?;
+    info!(
+      repo=%game.bucket.unwrap_or("_".to_string()),
+      image=%file_name,
+      "uploaded image to registry via file upload");
     Ok(())
   } else {
     Err(ResponseError::BadRequest("no file".to_string()))
@@ -1059,7 +1070,7 @@ async fn refresh_cluster_registry(
   cache.at("registry").del("_").await?;
   cache
     .at("registry")
-    .del(&game.bucket.clone().unwrap_or("_".to_string()))
+    .del(game.bucket.as_ref().unwrap_or(&"_".to_string()))
     .await?;
   Ok(())
 }
@@ -1071,7 +1082,7 @@ struct GameTraffic {
 
 #[derive(Serialize)]
 struct GameTrafficResponse {
-  pub lint: Option<String>,
+  pub lint: Vec<DiagnosticMarker>,
 }
 
 async fn update_game_traffic(
@@ -1082,18 +1093,8 @@ async fn update_game_traffic(
     .traffic
     .clone()
     .ok_or(ResponseError::NotFound("traffic".to_string()))?;
-  let lint = traffic_mapper.lint(&req.traffic).await;
-  let lint = if let Err(lint) = lint {
-    match lint {
-      ClusterError::CompileError(diagnostics) => Some(diagnostics),
-      err => {
-        warn!("failed to lint script: {:?}", err);
-        Some(err.to_string())
-      }
-    }
-  } else {
-    None
-  };
+  let lint = traffic_mapper.lint(&req.traffic).await?;
+
   game::update(
     &db.conn,
     game::Model {
@@ -1114,6 +1115,7 @@ async fn update_game_traffic(
     )
     .await;
   cache.at("game").del(game.id).await?;
+  info!("updated game traffic");
 
   Ok(Json(GameTrafficResponse { lint }))
 }
@@ -1141,6 +1143,7 @@ async fn delete_game_traffic(
     ))?)
     .await;
   cache.at("game").del(game.id).await?;
+  info!("deleted game traffic");
   Ok(())
 }
 
@@ -1164,6 +1167,7 @@ async fn update_game_node_selector(
   )
   .await?;
   cache.at("game").del(game.id).await?;
+  info!("updated game node selector");
   Ok(Json(node_selector))
 }
 
@@ -1181,6 +1185,7 @@ async fn delete_game_node_selector(
   )
   .await?;
   cache.at("game").del(game.id).await?;
+  info!("deleted game node selector");
   Ok(())
 }
 
@@ -1293,10 +1298,9 @@ async fn game_repo_info_refs(
   let stdout = match stdout {
     Ok(stdout) => stdout,
     Err(err) => {
-      error!("Failed to run git rpc: {}", err);
+      error!(error=?err, "failed to run git rpc");
       return Err(ResponseError::InternalServerError(
         "failed to run git rpc".to_owned(),
-        err.to_string(),
       ));
     }
   };
@@ -1358,10 +1362,9 @@ async fn game_repo_git_rpc(
   let stdout = match stdout {
     Ok(stdout) => stdout,
     Err(err) => {
-      error!("Failed to run git rpc: {}", err);
+      error!(error=?err, "failed to run git rpc");
       return Err(ResponseError::InternalServerError(
         "failed to run git rpc".to_owned(),
-        err.to_string(),
       ));
     }
   };

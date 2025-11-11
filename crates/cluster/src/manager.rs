@@ -64,7 +64,7 @@ impl Cluster {
       client,
       registry,
       namespace: Some(String::from("default")),
-      traffic: Some(TrafficMapper::default()),
+      traffic: Some(TrafficMapper),
     }
   }
 
@@ -233,7 +233,7 @@ impl Cluster {
       .map(|v| v.parse::<i32>().unwrap_or(0))
       .unwrap_or(0);
     if prev_renew > 3 {
-      warn!("Pod renew exceed limit: {}", name);
+      warn!(pod=?name, "pod renew exceed limit");
       return Err(ClusterError::PodRenewExceedLimit(name.to_owned()));
     }
     let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
@@ -324,14 +324,15 @@ impl Cluster {
         "Pending" => pending += 1,
         n => {
           warn!(
-            "Deleting unknown pod {} with status {n}",
-            pod.name().unwrap()
+            pod=?pod.name(),
+            status=?n,
+            "deleting unknown pod",
           );
         }
       };
       match self.check_outdated_pod(&pod).await {
         Ok(true) => {
-          info!("Deleting outdated pod {}", pod.name().unwrap());
+          info!(pod=?pod.name(), "deleting outdated pod");
           api
             .delete(
               &pod.name().unwrap(),
@@ -344,10 +345,13 @@ impl Cluster {
           self.delete_service(&pod.name().unwrap()).await.ok();
         }
         Ok(false) => {
-          debug!("Pod is alive: {}", pod.name().unwrap());
+          debug!(pod=?pod.name(), "pod is alive");
         }
         Err(err) => {
-          error!("Failed to check outdated pod: {err:?}");
+          error!(
+            pod=?pod.name(),
+            error=?err,
+            "failed to check outdated pod");
         }
       }
     }
@@ -377,7 +381,10 @@ impl Cluster {
           .get_pods_by_label(&format!("ret.sh.cn/traffic={traffic}"))
           .await?;
         if pod.is_empty() {
-          info!("Deleting service {} without pod", service.name().unwrap());
+          info!(
+            service=?service.name(),
+            "deleting service without pod"
+          );
           api
             .delete(
               &service.name().unwrap(),
@@ -389,7 +396,10 @@ impl Cluster {
             .await?;
         }
       } else {
-        warn!("Deleting unknown service {}", service.name().unwrap());
+        warn!(
+          service=?service.name(),
+          "deleting unknown service"
+        );
       }
     }
     Ok(())
@@ -599,14 +609,16 @@ impl Cluster {
       ..Default::default()
     };
     if let Some(svc_spec) = service.spec.clone()
-      && svc_spec.ports.is_none_or(|p| p.is_empty()) {
-        return Err(ClusterError::MissingField("service ports".to_string()));
-      }
+      && svc_spec.ports.is_none_or(|p| p.is_empty())
+    {
+      return Err(ClusterError::MissingField("service ports".to_string()));
+    }
     self.create_pod(pod).await?;
-    debug!("service: {:?}", service);
+    debug!(?service, "created pod, creating service");
     match self.create_service(service).await {
       Ok(_) => Ok(()),
       Err(err) => {
+        error!(pod=?pod_name, error=?err, "failed to create service, deleting pod");
         self.delete_pod(&pod_name).await?;
         Err(err)
       }

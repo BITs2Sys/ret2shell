@@ -11,7 +11,7 @@ import Playgrounds from "./playgrounds";
 
 export default function SideBar() {
   const params = useParams();
-  const selectedGameId = () => Number.parseInt(params.game) ?? null;
+  const selectedGameId = () => Number.parseInt(params.game, 10) ?? null;
   const navigate = useNavigate();
   createEffect(() => {
     if (selectedGameId()) {

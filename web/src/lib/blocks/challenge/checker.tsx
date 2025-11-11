@@ -2,15 +2,12 @@ import { handleHttpError } from "@api";
 import { getChallengeCheckerScript, updateChallengeCheckerScript } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { challengeStore } from "@storage/challenge";
-import { fullTheme, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
-import { EditorBare } from "@widgets/editor";
+import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Select from "@widgets/select";
-import Splitter from "@widgets/splitter";
-import { AnsiUp } from "ansi_up";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, untrack } from "solid-js";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
@@ -33,7 +30,7 @@ class Tmpl {
     this.context = context;
   }
 
-  static with_context(context: TmplContext) {
+  static withContext(context: TmplContext) {
     return new Tmpl(context);
   }
 
@@ -61,8 +58,8 @@ class Tmpl {
     return tmpl.replace(reg, (_match, token: string, _callable?: string, _args?: string) => {
       try {
         return this.result2str(this.handleToken(token, !!_callable, _args ? JSON.parse(`[${_args}]`) : []));
-      } catch (err) {
-        console.error(err);
+      } catch (_err) {
+        // console.error(err);
         return _match;
       }
     });
@@ -80,22 +77,16 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
   const [preset, setPreset] = createSignal(null as PresetChecker | null);
   const presetChecker = createMemo(() => {
     if (!preset()) return null;
-    return Tmpl.with_context(checkerCtx).execute(checkerMap[preset()!]);
+    return Tmpl.withContext(checkerCtx).execute(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
-  const [lint, setLint] = createSignal(null as string | null);
-  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
-  const ansi_up = new AnsiUp();
-  ansi_up.use_classes = true;
+  const [lint, setLint] = createSignal([] as DiagnosticMarker[] | null);
   let serverScript = "";
   async function refreshScript() {
     const resp = await getChallengeCheckerScript(challengeStore.current!.game_id, challengeStore.current!.id, true);
     serverScript = resp.script;
     setScript(resp.script);
     setLint(resp.lint ?? null);
-    if (resp.lint) {
-      setRenderedLint(ansi_up.ansi_to_html(resp.lint));
-    }
   }
   function restoreScript() {
     setScript(serverScript);
@@ -130,7 +121,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
   }
 
   return (
-    <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6">
+    <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6 lg:pb-3">
       <header class="min-h-12 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
@@ -181,52 +172,32 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           </span>
         </span>
       </header>
-      <Splitter
-        orientation="vertical"
-        defaultSize={[80, 20]}
-        panels={[
-          { id: "a", minSize: 24 },
-          { id: "b", minSize: 10 },
-        ]}
-        class="flex-1"
-        startPanel={() => (
-          <EditorBare
-            class="w-full h-full"
-            lineNumbers
-            lang="rust"
-            value={script()}
-            onValueChanged={(e) => {
-              setScript(e);
-            }}
-          />
-        )}
-        endPanel={() => (
-          <OverlayScrollbarsComponent
-            options={{
-              scrollbars: {
-                theme: `os-theme-${fullTheme()}`,
-                autoHide: "scroll",
-              },
-            }}
-            class="relative w-full h-full print:h-auto print:overflow-auto"
-            defer
-          >
-            <Show
-              when={lint()}
-              fallback={
-                <p class="flex flex-row space-x-2 items-center text-success p-3 lg:p-6">
-                  <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
-                  <span>0 warning(s), error(s).</span>
-                </p>
-              }
-            >
-              <div class="p-3 lg:p-6">
-                <pre innerHTML={renderedLint() ?? undefined} />
-              </div>
-            </Show>
-          </OverlayScrollbarsComponent>
-        )}
+      <EditorBare
+        class="w-full h-full"
+        lineNumbers
+        lang="rust"
+        value={script()}
+        lints={lint() ?? []}
+        onValueChanged={(e) => {
+          setScript(e);
+        }}
       />
+      <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
+        <span class="text-primary icon-[fluent--info-16-regular]" />
+        <span class="text-primary">{lint()?.filter((v) => v.kind === "info").length ?? 0}</span>
+        <span class="text-warning icon-[fluent--warning-16-regular]" />
+        <span class="text-warning">{lint()?.filter((v) => v.kind === "warning").length ?? 0}</span>
+        <span class="text-error icon-[fluent--warning-16-regular]" />
+        <span class="text-error">{lint()?.filter((v) => v.kind === "error").length ?? 0}</span>
+        <div class="flex-1" />
+        <a href="https://rune-rs.github.io/" class="text-primary hover:underline">
+          Rune Grammar <span class="icon-[fluent--open-12-regular]" />
+        </a>
+        <span>&nbsp;&nbsp;</span>
+        <a href="https://github.com/ret2shell/ret2script" class="text-primary hover:underline">
+          Ret2Script <span class="icon-[fluent--open-12-regular]" />
+        </a>
+      </footer>
     </div>
   );
 }

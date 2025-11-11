@@ -9,6 +9,14 @@
 
 </div>
 
+## Deployment
+
+Ret2Shell is single binary with requirements of `redis/valkey 7+`, `postgres 16+`, `nats` and optional `VictoriaLog` and `registry`.
+
+All the components could be deploy anywhere, so you can deploy ret2shell as you like.
+
+For a general usage, you could see [k8s single-node deployment](./deploy/k8s-single/README.md) for details.
+
 ## Development
 
 ### 1. Install Toolchains

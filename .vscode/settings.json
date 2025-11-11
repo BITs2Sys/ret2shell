@@ -16,6 +16,8 @@
         "*.rx": "rune"
     },
     "biome.enabled": true,
+    "biome.lsp.bin": "./web/node_modules/.bin/biome",
+    "biome.configurationPath": "./web/biome.json",
     "rust-analyzer.showUnlinkedFileNotification": false,
     "javascript.format.enable": false,
     "typescript.format.enable": false,
@@ -39,5 +41,8 @@
     },
     "[typescriptreact]": {
         "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[nix]": {
+        "editor.defaultFormatter": "jnoortheen.nix-ide"
     },
 }

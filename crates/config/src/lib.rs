@@ -46,9 +46,9 @@ pub mod traits;
 
 #[derive(Error, Debug)]
 pub enum ConfigError {
-  #[error("Configuration file not found")]
+  #[error("configuration file not found")]
   NotFound,
-  #[error("Configuration file is invalid")]
+  #[error("configuration file is invalid")]
   Invalid,
   #[error("deserialize failed: {0}")]
   DeserializeFailed(#[from] toml::de::Error),

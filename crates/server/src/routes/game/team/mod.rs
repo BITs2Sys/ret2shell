@@ -17,7 +17,8 @@ use r2s_migrator::Database;
 use r2s_queue::Queue;
 use sea_orm::TransactionTrait;
 use serde::Deserialize;
-use tracing::{error, info};
+use tower_http::request_id::RequestId;
+use tracing::{error, info, warn};
 
 use super::{is_game_admin, worker};
 use crate::{
@@ -60,7 +61,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/extra", get(get_team_extra))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(team, false),
+          data::prepare_data!(team, false, id, name),
         )),
     )
 }
@@ -95,6 +96,7 @@ async fn update_self_team(
   }
   team.tag = req.tag;
   if game.archived() {
+    warn!("user try to update team in archived game");
     return Err(ResponseError::PreconditionFailed(
       "game is archived".to_owned(),
     ));
@@ -103,6 +105,10 @@ async fn update_self_team(
     let members = team::get_members(&db.conn, team.id).await?;
     for member in members {
       if member.institute_id != req.institute_id {
+        warn!(
+          member_id=%member.id, member_account=%member.account,
+          "user try to update team institute but member not match",
+        );
         return Err(ResponseError::PreconditionFailed(
           "institute not match".to_owned(),
         ));
@@ -130,11 +136,13 @@ async fn leave_self_team(
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
   if game.in_progress() {
+    warn!("user try to leave team in progress game");
     return Err(ResponseError::PreconditionFailed(
       "game is in progress, can not leave team".to_owned(),
     ));
   }
   if game.archived() {
+    warn!("user try to leave team in archived game");
     return Err(ResponseError::PreconditionFailed(
       "game is archived".to_owned(),
     ));
@@ -199,6 +207,7 @@ async fn get_team_rank(
   Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if team.state < team::State::Hidden {
+    warn!("user try to get rank of invalid team");
     return Err(ResponseError::PreconditionFailed(
       "team is not valid".to_owned(),
     ));
@@ -300,11 +309,13 @@ async fn create_team(
   Json(req): Json<CreateTeamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if game.register_at > Utc::now() {
+    warn!("user try to create team before game start");
     return Err(ResponseError::PreconditionFailed(
       "game has not start yet".to_owned(),
     ));
   }
   if (game.start_at < Utc::now() && !game.can_register_after_started) || game.end_at < Utc::now() {
+    warn!("user try to create team after game end");
     return Err(ResponseError::PreconditionFailed(
       "too late to participate".to_owned(),
     ));
@@ -318,6 +329,7 @@ async fn create_team(
       .institutes
       .contains(&user.institute_id.unwrap_or(0))
   {
+    warn!("user's institute is not allowed to join the game");
     return Err(ResponseError::PreconditionFailed(
       "institute not allowed".to_owned(),
     ));
@@ -326,6 +338,7 @@ async fn create_team(
     .await?
     .is_some()
   {
+    warn!("user try to create multiple teams");
     return Err(ResponseError::Conflict(
       "can not join multiple teams".to_owned(),
     ));
@@ -355,8 +368,8 @@ async fn create_team(
   .await?;
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
-    "team created: {}:{} by user {}:{} ({}) in game {}:{}",
-    team.id, team.name, token.id, token.account, token.nickname, game.id, game.name
+    team_id=%team.id, team_name=%team.name,
+    "team created",
   );
   Ok(Json(team))
 }
@@ -371,11 +384,13 @@ async fn join_team(
   Extension(token): Extension<auth::Token>, Json(req): Json<JoinTeamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if game.register_at > Utc::now() {
+    warn!("user try to join team before game start");
     return Err(ResponseError::PreconditionFailed(
       "game has not start yet".to_owned(),
     ));
   }
   if (game.start_at < Utc::now() && !game.can_register_after_started) || game.end_at < Utc::now() {
+    warn!("user try to join team after game end");
     return Err(ResponseError::PreconditionFailed(
       "too late to participate".to_owned(),
     ));
@@ -389,6 +404,7 @@ async fn join_team(
       .institutes
       .contains(&user.institute_id.unwrap_or(0))
   {
+    warn!("user's institute is not allowed to join the game");
     return Err(ResponseError::PreconditionFailed(
       "institute not allowed".to_owned(),
     ));
@@ -397,6 +413,7 @@ async fn join_team(
     .await?
     .is_some()
   {
+    warn!("user try to join multiple teams");
     return Err(ResponseError::Conflict(
       "can not join multiple teams".to_owned(),
     ));
@@ -406,20 +423,25 @@ async fn join_team(
     .ok_or_else(|| ResponseError::NotFound("team".to_owned()))?;
   let members = team::get_members(&db.conn, team.id).await?;
   if members.len() >= (game.team_size as usize) {
+    warn!(team_id=%team.id, team_name=%team.name, "user try to join team, but team size is full");
     return Err(ResponseError::PreconditionFailed("team is full".to_owned()));
   }
   if team
     .institute_id
     .is_some_and(|v| user.institute_id.is_some_and(|w| v != w) || user.institute_id.is_none())
   {
+    warn!(
+      team_id=%team.id, team_name=%team.name,
+      "user try to join team, but institute not match",
+    );
     return Err(ResponseError::PreconditionFailed(
       "institute not match".to_owned(),
     ));
   }
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
-    "user {}:{} ({}) joined team {}:{} in game {}:{}",
-    token.id, token.account, token.nickname, team.id, team.name, game.id, game.name
+    team_id=%team.id, team_name=%team.name,
+    "user joined team",
   );
   Ok(Json(team))
 }
@@ -427,7 +449,7 @@ async fn join_team(
 async fn update_team_info(
   State(queue): State<Queue>, State(ref db): State<Database>,
   Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
-  Json(req): Json<team::Model>,
+  Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let result = team::update(
     &db.conn,
@@ -450,7 +472,7 @@ async fn update_team_info(
       let challenges = match challenge::get_list(&db.conn, game.id, true).await {
         Ok(challenges) => challenges,
         Err(e) => {
-          error!("Failed to get challenges: {e:?}");
+          error!(error=?e, "failed to get challenges");
           return;
         }
       };
@@ -468,7 +490,7 @@ async fn update_team_info(
       {
         Ok(submissions) => submissions,
         Err(e) => {
-          error!("Failed to get submissions: {e:?}");
+          error!(error=?e, "failed to get submissions");
           return;
         }
       };
@@ -477,7 +499,14 @@ async fn update_team_info(
           Some(c) => c,
           None => continue,
         };
-        queue.publish("scoreboard", challenge.clone()).await.ok();
+        queue
+          .publish(
+            "scoreboard",
+            challenge.clone(),
+            &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+          )
+          .await
+          .ok();
       }
     });
   }

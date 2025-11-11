@@ -30,7 +30,7 @@ impl Decoder for Ret2Codec {
   type Error = std::io::Error;
 
   fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-    if src.is_empty() || src.len() % 4 != 0 {
+    if src.is_empty() || !src.len().is_multiple_of(4) {
       return Ok(None);
     }
     let consumed = src.len();

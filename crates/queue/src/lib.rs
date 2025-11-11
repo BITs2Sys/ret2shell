@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use async_nats::jetstream::{self, consumer::pull::Stream, context::PublishAckFuture};
 use r2s_config::queue;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 mod traits;
 
@@ -13,6 +13,12 @@ pub use traits::QueueError;
 #[derive(Clone, Debug)]
 pub struct Queue {
   context: jetstream::Context,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct TracedMessage<T> {
+  pub trace: String,
+  pub payload: T,
 }
 
 impl Queue {
@@ -25,8 +31,12 @@ impl Queue {
   }
 
   pub async fn publish(
-    &self, subject: &'static str, payload: impl Serialize,
+    &self, subject: &'static str, payload: impl Serialize, trace: impl AsRef<str>,
   ) -> Result<PublishAckFuture, QueueError> {
+    let payload = TracedMessage {
+      trace: trace.as_ref().to_string(),
+      payload,
+    };
     let ack = self
       .context
       .publish(subject, serde_json::to_string(&payload)?.into())
@@ -35,9 +45,9 @@ impl Queue {
   }
 
   pub async fn publish_ack(
-    &self, subject: &'static str, payload: impl Serialize,
+    &self, subject: &'static str, payload: impl Serialize, trace: impl AsRef<str>,
   ) -> Result<(), QueueError> {
-    self.publish(subject, payload).await?.await?;
+    self.publish(subject, payload, trace).await?.await?;
     Ok(())
   }
 

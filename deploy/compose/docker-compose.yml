@@ -1,7 +1,6 @@
 name: ret2shell
 
 services:
-
   database:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -29,19 +28,19 @@ services:
       - message_queue:/data
     # ports:
     #   - '4222:4222'
-    command: ['-js', '-sd', '/data']
+    command: ["-js", "-sd", "/data"]
 
   registry:
     image: registry:2.8
     restart: unless-stopped
     environment:
-      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
     volumes:
       - registry:/var/lib/registry
     ports:
-      - '5000:5000'
-    command: ['serve', '/etc/docker/registry/config.yml']
+      - "5000:5000"
+    command: ["serve", "/etc/docker/registry/config.yml"]
 
   platform:
     image: ret2shell:latest
@@ -56,7 +55,16 @@ services:
       - ./config:/etc/ret2shell:ro
       # - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - '8080:8080'
+      - "8080:8080"
+
+  logs:
+    image: victoriametrics/victoria-logs:v1.33.1
+    ports:
+      - "9428:9428"
+    command:
+      - "--storageDataPath=/vlogs"
+    volumes:
+      - vldata:/vlogs
 
   nginx:
     image: nginx:alpine
@@ -65,7 +73,7 @@ services:
       - ./nginx.conf:/etc/nginx:ro
       - ./static:/var/www/html:ro
     ports:
-      - '80:80'
+      - "80:80"
     depends_on:
       - platform
     # healthcheck:
@@ -81,6 +89,7 @@ volumes:
   message_queue:
   registry:
   platform:
+  vldata:
 
 networks:
   default:

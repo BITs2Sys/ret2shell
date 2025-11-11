@@ -87,6 +87,7 @@ compress   = true
 directory  = './data/log'
 files_kept = 3
 level      = 'info,tower_http=info,sqlx=warn'
+victoria   = 'http://localhost:9428'
 
 # * Media config, for user-uploaded files
 [media]

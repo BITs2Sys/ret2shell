@@ -1,4 +1,4 @@
-#!/bin/fish
+#!/usr/bin/env fish
 
 function print_error
     echo -e "\033[1;31mError:\033[0m $argv"

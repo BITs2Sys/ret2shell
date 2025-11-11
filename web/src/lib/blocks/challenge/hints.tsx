@@ -269,7 +269,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
                     if (value === "0-") return [0, "0", true];
                     const neg = (/^(-*)/.exec(value)?.[1].length ?? 0) % 2 === 1;
                     value = value.replace(/[^\d]/g, "").replace(/^0+(?=\d)/, "");
-                    const n = Number.parseInt(value);
+                    const n = Number.parseInt(value, 10);
                     return [!Number.isNaN(n) ? n : 0, value, neg];
                   }
                   setNumber(...parseNumber(e.currentTarget.value));

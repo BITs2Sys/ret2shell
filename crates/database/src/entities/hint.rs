@@ -86,22 +86,3 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::get_list;
-//     use sea_orm::{ConnectOptions, Database, DatabaseConnection};
-
-//     #[tokio::test]
-//     async fn test_get_hints() {
-//         let mut connect_options = ConnectOptions::new(
-//             // development only
-//
-// "postgresql://ret2shell:P@ssw02dInD3v3l0pm3nt@localhost:5432/ret2shell",
-//         );
-//         connect_options.acquire_timeout(std::time::Duration::from_secs(15));
-
-//         let db: DatabaseConnection =
-// Database::connect(connect_options).await.unwrap();         println!("{:?}",
-// get_list(&db, 1, false).await.unwrap());     }
-// }

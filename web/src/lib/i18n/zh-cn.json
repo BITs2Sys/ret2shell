@@ -327,14 +327,18 @@
           "placeholder": "请输入发信人名称"
         },
         "username": {
-          "required": "发信邮箱不能为空",
-          "label": "发信邮箱",
-          "placeholder": "请填写发信邮箱"
+          "required": "SMTP 用户名不能为空",
+          "label": "SMTP 用户名",
+          "placeholder": "请输入 SMTP 用户名"
+        },
+        "senderAddress": {
+          "label": "发信邮箱地址",
+          "placeholder": "请输入发信邮箱地址"
         },
         "password": {
-          "required": "邮箱密码不能为空",
-          "label": "邮箱密码",
-          "placeholder": "请填写邮箱密码"
+          "required": "SMTP 密码不能为空",
+          "label": "SMTP 密码",
+          "placeholder": "请输入 SMTP 密码"
         },
         "verifyEmailSubject": {
           "required": "验证邮件标题不能为空",
@@ -393,6 +397,9 @@
       "errors": {
         "fetchList": {
           "title": "获取日志列表失败"
+        },
+        "fetchLogs": {
+          "title": "获取日志失败"
         },
         "socketClosed": {
           "title": "日志管道已断开，将自动重试连接..."

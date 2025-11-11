@@ -2,14 +2,12 @@ use std::{path::PathBuf, str::FromStr};
 
 use axum::{
   Extension, Json, Router,
-  extract::{
-    Query, State, WebSocketUpgrade,
-    ws::{Message, WebSocket},
-  },
+  extract::{Query, State},
   middleware,
   response::{IntoResponse, Response},
   routing::get,
 };
+use chrono::{DateTime, Utc};
 use futures::future::join_all;
 use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
@@ -23,12 +21,12 @@ use r2s_license::{License, LicenseLevel};
 use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
-use tokio::{fs, io::AsyncBufReadExt, time::timeout};
-use tracing::{debug, error};
+use tokio::fs;
+use tracing::{debug, error, warn};
 
 use crate::{
   middleware::auth,
-  traits::{GlobalState, ResponseError},
+  traits::{GlobalState, HTTPClient, ResponseError},
   utility::file::send_file,
 };
 
@@ -44,6 +42,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .merge(
       Router::new()
         .route("/statistics", get(get_platform_statistics))
+        .route("/logs/query", get(get_logs))
         .route("/logs", get(get_logs_list))
         .route_layer(middleware::from_fn(auth::permission_required_any!(
           Permission::Statistics,
@@ -53,7 +52,6 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .route("/info", get(get_platform_info))
     .route("/auth", get(get_auth_config))
     .route("/version", get(get_version))
-    .route("/logs/stream", get(platform_stream_logs))
     .route("/license", get(get_license))
 }
 
@@ -86,7 +84,6 @@ async fn get_auth_config(
 ) -> Result<impl IntoResponse, ResponseError> {
   let auth_config = config.auth.ok_or(ResponseError::InternalServerError(
     "missing auth config".to_owned(),
-    "".to_owned(),
   ))?;
   Ok(Json(auth_config.desensitize()))
 }
@@ -165,96 +162,6 @@ async fn get_platform_statistics(
 }
 
 #[derive(Deserialize)]
-struct LogRequest {
-  pub token: String,
-}
-
-async fn platform_stream_logs(
-  State(config): State<GlobalConfig>, State(ref cache): State<Cache>,
-  Query(req): Query<LogRequest>, ws: WebSocketUpgrade,
-) -> Result<impl IntoResponse, ResponseError> {
-  // info!(
-  //     "user {}:{} ({}) requested to stream platform logs.",
-  //     token.id, token.account, token.nickname
-  // );
-  let valid = cache.at("token").exists(&req.token).await?;
-
-  let token = if valid {
-    auth::decode_token(&req.token, &config.auth.clone().unwrap().signing_key).await
-  } else {
-    auth::Token::default()
-  };
-  if !token.permissions.0.contains(&Permission::DevOps)
-    && !token.permissions.0.contains(&Permission::Statistics)
-  {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!("somebody try to access platform logs with bad token {token:?}."),
-    ));
-  }
-  let resp = ws.on_upgrade(|ws| stream_logs_worker(ws, config));
-  Ok(resp)
-}
-
-async fn stream_logs_worker(ws: WebSocket, config: GlobalConfig) {
-  let result = _stream_logs_worker(ws, config).await;
-  if let Err(e) = result {
-    error!("stream_logs_worker error: {:?}", e);
-  }
-}
-
-async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<(), ResponseError> {
-  let log_dir = PathBuf::from_str(
-    &config
-      .logging
-      .ok_or(ResponseError::InternalServerError(
-        "missing log config".to_owned(),
-        "missing log config".to_owned(),
-      ))?
-      .directory,
-  )
-  .ok();
-  if let Some(log_dir) = log_dir {
-    let current_log = log_dir.join(format!(
-      "ret2shell.{}.log",
-      chrono::Utc::now().format("%Y-%m-%d")
-    ));
-    let mut timer = tokio::time::interval(tokio::time::Duration::from_secs(1));
-    let mut lines = fs::File::open(&current_log)
-      .await
-      .map(tokio::io::BufReader::new)
-      .map(tokio::io::BufReader::lines)?;
-    let interval = tokio::time::Duration::from_secs(5);
-    loop {
-      while let Ok(log) = timeout(interval, lines.next_line()).await {
-        let log = match log {
-          Ok(Some(log)) => log,
-          Ok(None) => break,
-          Err(e) => {
-            error!("failed to read log: {:?}", e);
-            break;
-          }
-        };
-        let result = ws.send(Message::Text(log.into())).await;
-        if result.is_err() {
-          return Ok(());
-        }
-      }
-      let result = ws.send(Message::Ping(vec![].into())).await;
-      if result.is_err() {
-        return Ok(());
-      }
-      let _ = ws.recv().await;
-      timer.tick().await;
-    }
-  } else {
-    ws.send(Message::Close(None)).await.ok();
-  }
-
-  Ok(())
-}
-
-#[derive(Deserialize)]
 struct LogListRequest {
   pub file: Option<String>,
 }
@@ -267,19 +174,17 @@ async fn get_logs_list(
       .logging
       .ok_or(ResponseError::InternalServerError(
         "missing log config".to_owned(),
-        "missing log config".to_owned(),
       ))?
       .directory,
   )
   .ok();
   if let Some(log_dir) = log_dir {
     if let Some(file_name) = req.file {
-      let file_path = log_dir.join(file_name).canonicalize()?;
-      debug!("get_logs_list: {:?}", file_path);
-      debug!("log_dir: {:?}", log_dir);
+      let log_path = log_dir.join(file_name).canonicalize()?;
+      debug!(?log_path, ?log_dir, "got log file");
       // avoid path traversal
-      if file_path.starts_with(log_dir.canonicalize()?) {
-        send_file(file_path).await
+      if log_path.starts_with(log_dir.canonicalize()?) {
+        send_file(log_path).await
       } else {
         Err(ResponseError::NotFound("file not found".to_owned()))
       }
@@ -296,9 +201,87 @@ async fn get_logs_list(
   } else {
     Err(ResponseError::InternalServerError(
       "missing log config".to_owned(),
-      "missing log config".to_owned(),
     ))
   }
+}
+
+#[derive(Deserialize)]
+struct LogQuery {
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub started_at: DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub ended_at: DateTime<Utc>,
+  pub limit: Option<usize>,
+  pub level: Option<String>,
+  pub trace: Option<String>,
+  pub from: Option<String>,
+  pub account: Option<String>,
+  pub query: Option<String>,
+}
+
+async fn get_logs(
+  State(config): State<GlobalConfig>, State(client): State<HTTPClient>, Query(req): Query<LogQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let log_config = if let Some(c) = config.logging {
+    c
+  } else {
+    error!("missing log config");
+    return Err(ResponseError::InternalServerError(
+      "missing log config".to_owned(),
+    ));
+  };
+  let victoria_url = if let Some(url) = log_config.victoria {
+    url
+  } else {
+    warn!("victoria log server is not enabled");
+    return Err(ResponseError::PreconditionFailed(
+      "victoria log server is not enabled".to_owned(),
+    ));
+  };
+
+  let query = if let Some(q) = req.query {
+    q
+  } else {
+    let mut result = String::new();
+    result.push_str(&format!(
+      "_time:[{}, {}]",
+      req.started_at.timestamp_millis(),
+      req.ended_at.timestamp_millis()
+    ));
+    if let Some(level) = req.level {
+      result.push_str(&format!(" AND level:{}", level));
+    }
+    if let Some(trace) = req.trace {
+      result.push_str(&format!(" AND span.trace:{}", trace));
+    }
+    if let Some(from) = req.from {
+      result.push_str(&format!(" AND span.from:{}", from));
+    }
+    if let Some(account) = req.account {
+      result.push_str(&format!(" AND span.user-account:{}", account));
+    }
+    result.push_str(" | sort by (_time) desc");
+    if let Some(limit) = req.limit {
+      result.push_str(&format!(" | limit {}", limit));
+    } else {
+      result.push_str(" | limit 1000");
+    }
+    result
+  };
+  // escape result with url encode
+  let query = urlencoding::encode(&query);
+
+  let final_url = format!("{victoria_url}/select/logsql/query?timeout=5s&query={query}");
+  debug!(url=%final_url, "proxying to victoria");
+  let resp = client
+    .get(final_url.parse().unwrap())
+    .await
+    .map_err(|err| {
+      error!(error=?err, "victoria proxy failed");
+      ResponseError::InternalServerError(format!("victoria proxy failed: {err}"))
+    })?;
+  debug!(?resp, "proxying registry response");
+  Ok(resp.into_response())
 }
 
 async fn get_license(

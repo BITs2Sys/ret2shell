@@ -12,6 +12,7 @@ use r2s_database::{
 };
 use r2s_migrator::Database;
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
   middleware::{
@@ -36,7 +37,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/team", get(get_teams))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
-          data::prepare_data!(user, false),
+          data::prepare_data!(user, false, id, account, nickname),
         )),
     )
     .route("/", get(get_user_list))
@@ -150,7 +151,7 @@ async fn update_user(
       .renew_requested
       .store(true, std::sync::atomic::Ordering::Relaxed);
   }
-
+  info!("user updated");
   Ok(Json(user))
 }
 
@@ -160,6 +161,7 @@ async fn delete_user(
 ) -> Result<impl IntoResponse, ResponseError> {
   user::delete(&db.conn, user.id).await?;
   logout_user(cache, user.id).await?;
+  info!("user deleted");
   Ok(Json(user))
 }
 

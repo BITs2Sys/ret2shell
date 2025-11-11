@@ -46,28 +46,27 @@ pub struct ObjectInfo {
 
 impl Git {
   pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, BucketError> {
-    if path.as_ref().exists() {
-      debug!("opening git repository: {:?}", path.as_ref());
+    let path = path.as_ref();
+    if path.exists() {
+      trace!(?path, "opening git repository");
     } else {
-      warn!("git repository does not exist: {:?}", path.as_ref());
-      return Err(BucketError::PathDoesNotExist(
-        path.as_ref().display().to_string(),
-      ));
+      warn!(?path, "git repository does not exist");
+      return Err(BucketError::PathDoesNotExist(path.display().to_string()));
     }
     let output = Command::new("git")
-      .current_dir(&path)
+      .current_dir(path)
       .arg("describe")
       .arg("--all")
       .arg("--long")
       .output()
       .await?;
     if output.status.success() {
-      trace!("opened git repository: {:?}", output);
+      trace!(stdio=?output, "opened git repository");
       Ok(Self {
-        path: path.as_ref().to_path_buf().canonicalize()?,
+        path: path.to_path_buf().canonicalize()?,
       })
     } else {
-      warn!("failed to open git repository: {:?}", output);
+      warn!(stdio=?output, "failed to open git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -75,37 +74,35 @@ impl Git {
   }
 
   pub async fn new(path: impl AsRef<Path>) -> Result<Self, BucketError> {
-    if path.as_ref().exists() {
-      warn!("folder already exists: {:?}", path.as_ref());
-      return Err(BucketError::PathConflict(
-        path.as_ref().display().to_string(),
-      ));
+    let path = path.as_ref();
+    if path.exists() {
+      warn!(?path, "folder already exists");
+      return Err(BucketError::PathConflict(path.display().to_string()));
     }
     create_dir_all(&path).await?;
     Self::init(&path).await
   }
 
   async fn init(path: impl AsRef<Path>) -> Result<Self, BucketError> {
-    if path.as_ref().exists() {
-      debug!("opening git repository: {:?}", path.as_ref());
+    let path = path.as_ref();
+    if path.exists() {
+      trace!(?path, "opening git repository");
     } else {
-      warn!("git repository does not exist: {:?}", path.as_ref());
-      return Err(BucketError::PathDoesNotExist(
-        path.as_ref().display().to_string(),
-      ));
+      warn!(?path, "git repository does not exist");
+      return Err(BucketError::PathDoesNotExist(path.display().to_string()));
     }
     let output = Command::new("git")
-      .current_dir(&path)
+      .current_dir(path)
       .arg("init")
       .output()
       .await?;
     if output.status.success() {
-      trace!("initialized git repository: {:?}", output);
+      trace!(stdio=?output, "initialized git repository");
       Ok(Self {
-        path: path.as_ref().to_path_buf().canonicalize()?,
+        path: path.to_path_buf().canonicalize()?,
       })
     } else {
-      warn!("failed to initialize git repository: {:?}", output);
+      warn!(stdio=?output, "failed to initialize git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -120,10 +117,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("added all files to git repository: {:?}", output);
+      trace!(stdio=?output, "added all files to git repository");
       Ok(())
     } else {
-      warn!("failed to add all files to git repository: {:?}", output);
+      warn!(stdio=?output, "failed to add all files to git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -155,10 +152,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("committed to git repository: {:?}", output);
+      trace!(stdio=?output, "committed to git repository");
       Ok(())
     } else {
-      warn!("failed to commit to git repository: {:?}", output);
+      warn!(stdio=?output, "failed to commit to git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stdout,
       )?))
@@ -180,10 +177,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("checked out HEAD in git repository: {:?}", output);
+      trace!(stdio=?output, "checked out HEAD in git repository");
       Ok(())
     } else {
-      warn!("failed to checkout HEAD in git repository: {:?}", output);
+      warn!(stdio=?output, "failed to checkout HEAD in git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -198,10 +195,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("checked out branch in git repository: {:?}", output);
+      trace!(stdio=?output, "checked out branch in git repository");
       Ok(())
     } else {
-      warn!("failed to checkout branch in git repository: {:?}", output);
+      warn!(stdio=?output, "failed to checkout branch in git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -227,10 +224,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("reset HEAD in git repository: {:?}", output);
+      trace!(stdio=?output, "reset HEAD in git repository");
       Ok(())
     } else {
-      warn!("failed to reset HEAD in git repository: {:?}", output);
+      warn!(stdio=?output, "failed to reset HEAD in git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -245,10 +242,10 @@ impl Git {
       .arg("HEAD")
       .output()?;
     if output.status.success() {
-      trace!("reset HEAD in git repository: {:?}", output);
+      trace!(stdio=?output, "reset HEAD in git repository");
       Ok(())
     } else {
-      warn!("failed to reset HEAD in git repository: {:?}", output);
+      warn!(stdio=?output, "failed to reset HEAD in git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -263,10 +260,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("cleaned up git repository: {:?}", output);
+      trace!(stdio=?output, "cleaned up git repository");
       Ok(())
     } else {
-      warn!("failed to clean up git repository: {:?}", output);
+      warn!(stdio=?output, "failed to clean up git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -280,10 +277,10 @@ impl Git {
       .arg("-fd")
       .output()?;
     if output.status.success() {
-      trace!("cleaned up git repository: {:?}", output);
+      trace!(stdio=?output, "cleaned up git repository");
       Ok(())
     } else {
-      warn!("failed to clean up git repository: {:?}", output);
+      warn!(stdio=?output, "failed to clean up git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -305,9 +302,8 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("got commits from git repository: {:?}", output);
+      trace!(stdio=?output, "got commits from git repository");
       let output = String::from_utf8(output.stdout)?;
-      trace!("output: {:?}", output);
       Ok(
         output
           .lines()
@@ -316,7 +312,7 @@ impl Git {
           .collect(),
       )
     } else {
-      warn!("failed to get commits from git repository: {:?}", output);
+      warn!(stdio=?output, "failed to get commits from git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -343,9 +339,8 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("got objects from git repository: {:?}", output);
+      trace!(stdio=?output, "got objects from git repository");
       let output = String::from_utf8(output.stdout)?;
-      trace!("output: {:?}", output);
       let mut result: Vec<ObjectInfo> = output
         .lines()
         .map(serde_json::from_str)
@@ -362,9 +357,8 @@ impl Git {
           .arg(format!("--find-object={}", obj.commit)).output().await?;
 
         if output.status.success() {
-          trace!("got object info from git repository: {:?}", output);
+          trace!(stdio=?output, "got object info from git repository");
           let output = String::from_utf8(output.stdout)?;
-          trace!("output: {:?}", output);
           let obj_info: CommitLog = serde_json::from_str(output.lines().next().ok_or(
             BucketError::GitCommandFailed("failed to parse object info".to_string()),
           )?)?;
@@ -374,8 +368,8 @@ impl Git {
           obj.last_modified = Some(obj_info.author.date);
         } else {
           warn!(
-            "failed to get object info from git repository: {:?}",
-            output
+            stdio=?output,
+            "failed to get object info from git repository",
           );
           return Err(BucketError::GitCommandFailed(String::from_utf8(
             output.stderr,
@@ -385,7 +379,7 @@ impl Git {
 
       Ok(result)
     } else {
-      warn!("failed to get objects from git repository: {:?}", output);
+      warn!(stdio=?output, "failed to get objects from git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -400,10 +394,10 @@ impl Git {
       .output()
       .await?;
     if output.status.success() {
-      trace!("got HEAD from git repository: {:?}", output);
+      trace!(stdio=?output,"got HEAD from git repository");
       Ok(String::from_utf8(output.stdout)?.trim().to_string())
     } else {
-      warn!("failed to get HEAD from git repository: {:?}", output);
+      warn!(stdio=?output, "failed to get HEAD from git repository");
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
@@ -425,7 +419,7 @@ impl Git {
       .arg(subcmd.as_ref())
       .args(args)
       .arg(self.path.as_os_str());
-    debug!("run cmd: {:?}", cmd);
+    debug!(?cmd, "run command for git repo stream internal rpc");
     let mut child = cmd.spawn()?;
     let stdout_fd = child.stdout.take().unwrap();
     let mut stdin_fd = child.stdin.take().unwrap();
@@ -451,7 +445,7 @@ impl Git {
   pub async fn info_refs_upload(
     &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError> {
-    debug!("get info refs for repo: {:?}", self.path);
+    debug!(path = ?self.path, "get info refs for repo");
     self
       .stream_internal(
         protocol,

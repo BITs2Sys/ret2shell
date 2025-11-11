@@ -1,26 +1,14 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
-use chrono::{DateTime, Utc};
 use r2s_bucket::challenge::ChallengeBucket;
 use r2s_database::{challenge, submission, team, user};
-use rune::{
-  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
-  runtime::{Object, RuntimeContext},
-  termcolor::Buffer,
-};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, GLOBAL_ENGINE};
+use rune::{Any, ContextError, Module, Value, runtime::Object};
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock;
 use tracing::debug;
-use traits::CheckerError;
-
-pub mod traits;
-
-type CheckerContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
 
 #[derive(Clone, Debug, Default)]
-pub struct Checker {
-  contexts: Arc<RwLock<HashMap<String, CheckerContext>>>,
-}
+pub struct Checker;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AuditMessage {
@@ -110,79 +98,51 @@ fn module(_stdio: bool) -> Result<Module, ContextError> {
 }
 
 impl Checker {
-  async fn build_context() -> Result<Context, CheckerError> {
-    let mut context = Context::with_default_modules()?;
-    context.install(rune_modules::http::module(true)?)?;
-    context.install(rune_modules::json::module(true)?)?;
-    context.install(rune_modules::toml::module(true)?)?;
-    context.install(rune_modules::process::module(true)?)?;
-    context.install(ret2script::modules::crypto::module(true)?)?;
-    context.install(ret2script::modules::bucket::module(true)?)?;
-    context.install(ret2script::modules::audit::module(true)?)?;
-    context.install(ret2script::modules::utils::module(true)?)?;
-    context.install(ret2script::modules::regex::module(true)?)?;
-    context.install(module(true)?)?;
-    Ok(context)
+  fn default_modules() -> Vec<fn(bool) -> Result<rune::Module, rune::ContextError>> {
+    vec![
+      rune_modules::http::module,
+      rune_modules::json::module,
+      rune_modules::toml::module,
+      rune_modules::process::module,
+      ret2script::modules::crypto::module,
+      ret2script::modules::bucket::module,
+      ret2script::modules::audit::module,
+      ret2script::modules::utils::module,
+      ret2script::modules::regex::module,
+      module,
+    ]
   }
 
-  async fn sources(bucket: &ChallengeBucket) -> Result<Sources, CheckerError> {
-    let mut sources = Sources::new();
-    sources.insert(Source::memory(
-      bucket
-        .checker()
-        .await
-        .map_err(|e| CheckerError::MissingCheckerScript(e.to_string()))?,
-    )?)?;
-    Ok(sources)
+  /// linter for rune scripts
+  /// Originally from https://github.com/ElaBosak233/cdsctf/blob/main/crates/checker/src/traits.rs
+  pub async fn lint(&self, bucket: &ChallengeBucket) -> Result<Vec<DiagnosticMarker>, EngineError> {
+    let script = bucket
+      .checker()
+      .await
+      .map_err(|_err| EngineError::MissingCheckerScript(bucket.name.clone()))?;
+    Engine::lint(Self::default_modules(), script, &["check", "environ"]).await
   }
 
-  pub async fn lint(&self, bucket: &ChallengeBucket) -> Result<(), CheckerError> {
-    let context = Self::build_context().await?;
-    let mut sources = Self::sources(bucket).await?;
-    let mut diagnostics = Diagnostics::new();
-    let _ = rune::prepare(&mut sources)
-      .with_context(&context)
-      .with_diagnostics(&mut diagnostics)
-      .build();
-    if !diagnostics.is_empty() {
-      let mut out = Buffer::ansi();
-      diagnostics.emit(&mut out, &sources)?;
-      return Err(CheckerError::CompileError(
-        (String::from_utf8(out.into_inner())?).to_string(),
-      ));
-    }
-    let unit = rune::prepare(&mut sources).with_context(&context).build()?;
-    let runtime = context.runtime()?;
-    let vm = Vm::new(Arc::new(runtime), Arc::new(unit));
-    vm.lookup_function(["check"])
-      .map_err(|_| CheckerError::MissingFunction("check".to_owned()))?;
-    vm.lookup_function(["environ"])
-      .map_err(|_| CheckerError::MissingFunction("environ".to_owned()))?;
-    Ok(())
-  }
-
-  pub async fn expire(&mut self, bucket: &ChallengeBucket) {
-    self.contexts.write().await.remove(&bucket.hash());
+  pub async fn expire(&self, bucket: &ChallengeBucket) {
+    GLOBAL_ENGINE
+      .expire(format!("challenge-{}", bucket.hash()))
+      .await;
   }
 
   pub async fn preload(
-    &mut self, challenge: &challenge::Model, bucket: &ChallengeBucket,
-  ) -> Result<(), CheckerError> {
-    let mut contexts = self.contexts.write().await;
-    if contexts.contains_key(&bucket.hash()) && challenge.updated_at < contexts[&bucket.hash()].2 {
-      return Ok(());
-    }
-    let context = Self::build_context().await?;
-    let mut sources = Self::sources(bucket).await?;
-
-    let unit = rune::prepare(&mut sources).with_context(&context).build()?;
-    let runtime = context.runtime()?;
-
-    contexts.insert(
-      bucket.hash(),
-      (Arc::new(unit), Arc::new(runtime), Utc::now()),
-    );
-    Ok(())
+    &self, challenge: &challenge::Model, bucket: &ChallengeBucket,
+  ) -> Result<(), EngineError> {
+    GLOBAL_ENGINE
+      .preload(
+        Self::default_modules(),
+        format!("challenge-{}", bucket.hash()),
+        bucket
+          .checker()
+          .await
+          .map_err(|_| EngineError::MissingCheckerScript(bucket.name.clone()))?,
+        Some(challenge.updated_at),
+      )
+      .await
   }
 
   /// Check the flag and return results and audit messages.
@@ -194,29 +154,26 @@ impl Checker {
   pub async fn check(
     &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
     submission: &submission::Model,
-  ) -> Result<(bool, String, Option<AuditMessage>), CheckerError> {
-    debug!("checking submission: {:?}", submission);
-    let contexts = self.contexts.read().await;
-    let (unit, runtime, _) = contexts
-      .get(&bucket.hash())
-      .ok_or(CheckerError::MissingCheckerScript(bucket.name.clone()))?;
-    let vm = Vm::new(runtime.clone(), unit.clone());
-    debug!("load user: {:?}", user);
+  ) -> Result<(bool, String, Option<AuditMessage>), EngineError> {
+    let key = format!("challenge-{}", bucket.hash());
+    debug!(?user, "loading user");
     let user_object: RuneUser = user.into();
-    debug!("load submission: {:?}", submission);
+    debug!(?submission, "loading submission");
     let submission_object: RuneSubmission = submission.into();
-    debug!("load team: {:?}", team);
+    debug!(?team, "loading team");
     let team_object = match team {
       Some(team) => RuneTeam::from(team),
       None => RuneTeam::default(),
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
-    let output = vm.send_execute(
-      ["check"],
-      (bucket, user_object, team_object, submission_object),
-    )?;
-    let output = output.async_complete().await.into_result()?;
-    debug!("check output: {:?}", output);
+    let output = GLOBAL_ENGINE
+      .execute(
+        key,
+        "check",
+        (bucket, user_object, team_object, submission_object),
+      )
+      .await?;
+    debug!(?output, function = "check", "checker finished");
     let output: Result<(bool, String, Option<Object>), Value> = rune::from_value(output)?;
     if let Ok((result, message, audit)) = output {
       let audit = if let Some(audit) = audit {
@@ -224,7 +181,7 @@ impl Checker {
           peer_team: rune::from_value(
             audit
               .get("peer_team")
-              .ok_or(CheckerError::MissingResultField(
+              .ok_or(EngineError::MissingResultField(
                 "audit::peer_team".to_owned(),
               ))?
               .to_owned(),
@@ -232,7 +189,7 @@ impl Checker {
           reason: rune::from_value(
             audit
               .get("reason")
-              .ok_or(CheckerError::MissingResultField(
+              .ok_or(EngineError::MissingResultField(
                 "audit::peer_team".to_owned(),
               ))?
               .to_owned(),
@@ -243,21 +200,16 @@ impl Checker {
       };
       Ok((result, message, audit))
     } else {
-      Err(CheckerError::ScriptError(
-        "Early returns from script".to_owned(),
+      Err(EngineError::ScriptError(
+        "early returns from script".to_owned(),
       ))
     }
   }
 
   pub async fn environ(
     &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
-  ) -> Result<HashMap<String, String>, CheckerError> {
-    debug!("entering checker environ");
-    let contexts = self.contexts.read().await;
-    let (unit, runtime, _) = contexts
-      .get(&bucket.hash())
-      .ok_or(CheckerError::MissingCheckerScript(bucket.name.clone()))?;
-    let vm = Vm::new(runtime.clone(), unit.clone());
+  ) -> Result<HashMap<String, String>, EngineError> {
+    let key = format!("challenge-{}", bucket.hash());
     let user_object = RuneUser::from(user);
     let team_object = match team {
       Some(team) => RuneTeam::from(team),
@@ -265,9 +217,10 @@ impl Checker {
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
     debug!("calling environ");
-    let output = vm.send_execute(["environ"], (bucket, user_object, team_object))?;
-    let output = output.async_complete().await.into_result()?;
-    debug!("environ output: {:?}", output);
+    let output = GLOBAL_ENGINE
+      .execute(key, "environ", (bucket, user_object, team_object))
+      .await?;
+    debug!(?output, function = "environ", "checker finished");
     let object: Result<Object, Value> = rune::from_value(output)?;
     if let Ok(object) = object {
       let mut environ = HashMap::new();
@@ -276,33 +229,13 @@ impl Checker {
       }
       Ok(environ)
     } else {
-      Err(CheckerError::ScriptError(
-        "Early returns from script".to_owned(),
+      Err(EngineError::ScriptError(
+        "early returns from script".to_owned(),
       ))
-    }
-  }
-
-  pub async fn cleanup(&mut self) {
-    let now = Utc::now();
-    self.contexts.write().await.retain(|_, (_, _, time)| {
-      let duration = now.signed_duration_since(*time);
-      duration.num_hours() < 1
-    });
-  }
-
-  pub async fn cleanup_worker(&mut self) {
-    loop {
-      tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
-      tracing::debug!("Running checker cleanup...");
-      self.cleanup().await;
-      tracing::trace!("Live checkers: {:?}", self.contexts.read().await.keys());
     }
   }
 }
 
 pub async fn initialize() -> Checker {
-  let checker = Checker::default();
-  let mut checker_worker = checker.clone();
-  tokio::spawn(async move { checker_worker.cleanup_worker().await });
-  checker
+  Checker
 }

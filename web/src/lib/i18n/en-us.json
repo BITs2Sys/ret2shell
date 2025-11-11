@@ -327,14 +327,18 @@
           "placeholder": "Please enter the sender's name"
         },
         "username": {
-          "required": "Sender email cannot be empty",
-          "label": "Sender email",
-          "placeholder": "Please fill in the email address"
+          "required": "SMTP username cannot be empty",
+          "label": "SMTP username",
+          "placeholder": "Please enter SMTP username"
+        },
+        "senderAddress": {
+          "label": "Sender email address",
+          "placeholder": "Please enter the sender email address"
         },
         "password": {
-          "required": "Email password cannot be empty",
-          "label": "Email password",
-          "placeholder": "Please fill in the email password"
+          "required": "SMTP password cannot be empty",
+          "label": "SMTP password",
+          "placeholder": "Please enter SMTP password"
         },
         "verifyEmailSubject": {
           "required": "Verification email subject cannot be empty",
@@ -393,6 +397,9 @@
       "errors": {
         "fetchList": {
           "title": "Failed to fetch log list"
+        },
+        "fetchLogs": {
+          "title": "Failed to fetch logs"
         },
         "socketClosed": {
           "title": "Log pipe has been disconnected, will automatically retry connection..."

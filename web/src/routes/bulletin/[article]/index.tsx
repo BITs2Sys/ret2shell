@@ -15,7 +15,7 @@ import EditForm from "../_blocks/form";
 
 export default function () {
   const params = useParams();
-  const article_id = Number.parseInt(params.article);
+  const article_id = Number.parseInt(params.article, 10);
   const [searchParams, setSearchParams] = useSearchParams();
   const inEdit = () => searchParams.edit === "true";
   const [article, setArticle] = createSignal(null as ArticleModel | null);

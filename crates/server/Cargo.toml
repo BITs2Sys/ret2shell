@@ -41,6 +41,7 @@ tokio-util     = { workspace = true }
 tower          = { workspace = true }
 tower-http     = { workspace = true }
 tower_governor = { workspace = true }
+urlencoding    = { workspace = true }
 
 # Logger
 tracing            = { workspace = true }
@@ -57,6 +58,7 @@ r2s-cluster  = { workspace = true }
 r2s-config   = { workspace = true }
 r2s-database = { workspace = true }
 r2s-email    = { workspace = true }
+r2s-engine   = { workspace = true }
 r2s-event    = { workspace = true }
 r2s-license  = { workspace = true }
 r2s-media    = { workspace = true }

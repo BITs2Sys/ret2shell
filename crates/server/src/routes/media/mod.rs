@@ -15,6 +15,7 @@ use r2s_media::Media;
 use r2s_migrator::Database;
 use serde::Deserialize;
 use tokio_util::io::{ReaderStream, StreamReader};
+use tracing::warn;
 
 use crate::{
   middleware::auth::{self, Token},
@@ -49,13 +50,11 @@ async fn get_media(
       .is_some_and(|server| server.external_domain != host.hostname())
     && host.hostname() != "localhost"
   {
-    return Err(ResponseError::Forbidden(
-      "origin is not allowed".to_owned(),
-      format!(
-        "Someone trying to get media source from host {}",
-        host.hostname()
-      ),
-    ));
+    warn!(
+      origin=?host.hostname(),
+      "origin is not allowed to access media",
+    );
+    return Err(ResponseError::Forbidden("origin is not allowed".to_owned()));
   }
   let model = media::get_by_hash(&db.conn, &query.hash).await?;
   if model.is_none() {
@@ -70,8 +69,15 @@ async fn get_media(
       .get_mime_type(&query.hash)?
       .parse::<HeaderValue>()
       .map_err(|e| {
-        ResponseError::InternalServerError("failed to parse mime type".to_string(), e.to_string())
+        warn!(error=?e, "failed to parse mime type");
+        ResponseError::InternalServerError("failed to parse mime type".to_string())
       })?,
+  );
+  headers.insert(
+    "Content-Security-Policy",
+    HeaderValue::from_static(
+      "script-src 'none'; object-src 'none'; report-uri /cspreport; sandbox",
+    ),
   );
   Ok((StatusCode::OK, headers, Body::from_stream(stream)))
 }
@@ -92,12 +98,9 @@ async fn upload_media(
     && !token.permissions.0.contains(&Permission::Wiki)
     && uploads.is_some_and(|u| config.media.is_some_and(|m| u >= m.limit))
   {
+    warn!("user has reached the upload limit");
     return Err(ResponseError::TooManyRequests(
       "too many uploads".to_owned(),
-      format!(
-        "User {}:{} ({}) has reached the upload limit",
-        token.id, token.account, token.nickname
-      ),
     ));
   } else if uploads.is_none()
     && !token.permissions.0.contains(&Permission::Bulletin)

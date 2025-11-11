@@ -26,15 +26,15 @@ impl Captcha {
 
 #[derive(Debug, Error)]
 pub enum CaptchaError {
-  #[error("Failed to build captcha: {0}")]
+  #[error("failed to build captcha: {0}")]
   FailedToBuild(String),
-  #[error("Missing fields: {0}")]
+  #[error("missing fields: {0}")]
   MissingFields(String),
   #[error("serialization error: {0}")]
   SerializationError(#[from] serde_json::Error),
-  #[error("Unknown captcha type: {0}")]
+  #[error("unknown captcha type: {0}")]
   UnknownType(String),
-  #[error("Unknown error")]
+  #[error("unknown error")]
   Unknown,
 }
 
