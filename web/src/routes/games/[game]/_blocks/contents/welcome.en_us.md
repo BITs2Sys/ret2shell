@@ -1,6 +1,6 @@
 ## Welcome to the Game!
 
-WannaGame Championship is an annual CTF hosted by VNUHCM - University of Information Technology.
+WannaGame Championship is an annual CTF hosted by Vietnam National Ho Chi Minh city - University of Information Technology.
 
 This is a Jeopardy-style CTF competition, created by UIT students and researchers from InSecLab. You will have 48 hours to take on challenging tasks that push your skills to the limit, with various challenges from many categories including Binary Exploitation, Reverse Engineering, Web Exploitation, Cryptography, Web3, Forensics and Miscellaneous.
 
@@ -13,7 +13,7 @@ We hope that this competition will be a great place for enhancing cybersecurity 
 3. Attacking event infrastructure (DoS / DDoS) is strictly prohibited.
 4. Cross-team collaboration is not allowed. Do not discuss challenges with members from other teams.
 5. Report all rule violations and infrastructure issues/vulnerabilities to the admins ASAP. Any violation of these rules will result in your team being disqualified.
-6. If your team is Vietnamese (you will need to verify) and you place in the international ranking, you can choose to receive only one prize – either an international prize or a Vietnamese prize (not both).
+6. If your team is Vietnamese (you will need to register before playing at [here](https://forms.gle/VNA32Qx3DgkxSWyQ9)) and you place in the international ranking, you can choose to receive only one prize – either an international prize or a Vietnamese prize (not both).
 7. The format flag is **W1{[\x20-\x7e]}**
-8. We will discuss everything on Discord: https://discord.gg/UDDHzTwk
+8. We will discuss everything on Discord: https://discord.gg/XcJ5sbpnR7
 9. WannaGame Championship 2025 Organizers reserve the right to disqualify a team if suspected for breaking the rules.
