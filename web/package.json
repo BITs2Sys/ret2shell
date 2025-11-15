@@ -5,6 +5,7 @@
   "private": true,
   "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
   "scripts": {
+    "postinstall": "biome migrate --write",
     "start": "vite",
     "dev": "vite",
     "build": "vite build --mode production",
