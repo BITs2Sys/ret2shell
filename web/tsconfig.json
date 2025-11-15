@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "solid-js"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -32,5 +32,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src", "tailwind.config.mts", "vite.config.mts"]
+  "include": ["src", "tailwind.config.mts", "vite.config.mts"]
 }
