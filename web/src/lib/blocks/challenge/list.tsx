@@ -39,6 +39,23 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
       challengeStore.challenges.flatMap((c) => c.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!)
     );
     const tagsArray = Array.from(tags).sort((a, b) => a.localeCompare(b));
+    const difficulty = [
+      ["signin", "签到"],
+      ["easy", "简单"],
+      ["medium", "中等"],
+      ["hard", "困难"],
+      ["extreme", "地狱"],
+    ];
+    const getDifficulty = (tags: string[]) => {
+      let i = 0;
+      while (i < difficulty.length) {
+        if (tags.some((t) => difficulty[i].includes(t))) {
+          return i;
+        }
+        i++;
+      }
+      return i;
+    };
     for (const tag of tagsArray) {
       const taggedChallenges = result
         .filter((c) => c.challenge.tag.find((t) => t.primary)?.name === tag)
@@ -46,7 +63,12 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         .filter((c) => !c.challenge.archive_at || !hideArchived() || c.challenge.archive_at > DateTime.now())
         .sort((a, b) => {
           if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
-          return a.challenge.name < b.challenge.name ? -1 : 1;
+          const aDifficulty = getDifficulty(a.challenge.tag.map((t) => t.name));
+          const bDifficulty = getDifficulty(b.challenge.tag.map((t) => t.name));
+          console.log(a.challenge.name, aDifficulty, b.challenge.name, bDifficulty);
+          if (aDifficulty !== bDifficulty) return aDifficulty - bDifficulty;
+          if (a.challenge.name !== b.challenge.name) return a.challenge.name.localeCompare(b.challenge.name);
+          return a.challenge.id < b.challenge.id ? -1 : 1;
         });
       if (taggedChallenges.length === 0) continue;
       tree.push({
