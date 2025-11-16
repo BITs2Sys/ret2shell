@@ -23,7 +23,9 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
   const inStatistics = createMemo(() => searchParams.statistics === "true");
   const inMonitor = createMemo(() => searchParams.monitor === "true");
   function appendChallengeHistory(challenge: Challenge) {
-    if (challengeHistory().find((c) => c.id === challenge.id)) {
+    const existing = challengeHistory().find((c) => c.id === challenge.id);
+    if (existing) {
+      existing.name = challenge.name;
       setTimeout(() => {
         document.getElementById(`challenge-${challenge.id}`)?.scrollIntoView({
           behavior: "smooth",
@@ -154,40 +156,50 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
             </Show>
           </div>
           <For each={challengeHistory()}>
-            {(challenge) => (
-              <div class="fade-group-dive-left flex flex-row">
-                <Button
-                  // href={`${props.baseUrl}?challenge=${challenge.id}`}
-                  onClick={() => {
-                    // setSearchParams({ challenge: challenge.id });
-                    navigate(
-                      `${props.baseUrl}?challenge=${challenge.id}${searchParams.tab ? `&tab=${searchParams.tab}` : ""}`
-                    );
-                  }}
-                  onMouseUp={(e) => {
-                    if (e.button === 1) closeChallengeTab(challenge.id);
-                  }}
-                  id={`challenge-${challenge.id}`}
-                  active={challenge.id === selectedChallengeId() && inCreate() === false}
-                  ghost
-                  class={clsx("max-w-48", "pr-0")}
-                >
-                  <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
-                  <span class="truncate flex-1 text-left">{challenge.name}</span>
+            {(challenge) => {
+              const challengeName = createMemo(() => {
+                if (challenge.id === challengeStore.current?.id) {
+                  return challengeStore.current?.name;
+                }
+                const name = challengeStore.challenges.find((c) => c.id === challenge.id)?.name ?? challenge.name;
+                challenge.name = name;
+                return name;
+              });
+              return (
+                <div class="fade-group-dive-left flex flex-row">
                   <Button
-                    class="!rounded-l-none"
-                    square
-                    ghost
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeChallengeTab(challenge.id);
+                    // href={`${props.baseUrl}?challenge=${challenge.id}`}
+                    onClick={() => {
+                      // setSearchParams({ challenge: challenge.id });
+                      navigate(
+                        `${props.baseUrl}?challenge=${challenge.id}${searchParams.tab ? `&tab=${searchParams.tab}` : ""}`
+                      );
                     }}
+                    onMouseUp={(e) => {
+                      if (e.button === 1) closeChallengeTab(challenge.id);
+                    }}
+                    id={`challenge-${challenge.id}`}
+                    active={challenge.id === selectedChallengeId() && inCreate() === false}
+                    ghost
+                    class={clsx("max-w-48", "pr-0")}
                   >
-                    <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                    <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
+                    <span class="truncate flex-1 text-left">{challengeName()}</span>
+                    <Button
+                      class="!rounded-l-none"
+                      square
+                      ghost
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeChallengeTab(challenge.id);
+                      }}
+                    >
+                      <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                    </Button>
                   </Button>
-                </Button>
-              </div>
-            )}
+                </div>
+              );
+            }}
           </For>
         </TransitionGroup>
         <Show when={props.loading}>
