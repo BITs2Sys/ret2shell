@@ -64,7 +64,6 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
           if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
           const aDifficulty = getDifficulty(a.challenge.tag.map((t) => t.name))[1];
           const bDifficulty = getDifficulty(b.challenge.tag.map((t) => t.name))[1];
-          console.log(a.challenge.name, aDifficulty, b.challenge.name, bDifficulty);
           if (aDifficulty !== bDifficulty) return aDifficulty - bDifficulty;
           if (a.challenge.name !== b.challenge.name) return a.challenge.name.localeCompare(b.challenge.name);
           return a.challenge.id < b.challenge.id ? -1 : 1;
