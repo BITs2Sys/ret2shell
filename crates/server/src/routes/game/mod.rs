@@ -332,12 +332,12 @@ async fn delete_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  cache.at("game").del(game.id).await?;
+  game::delete(&db.conn, game.id).await?;
   let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
   if !query.force.unwrap_or(false) {
     delete_result?;
   }
-  cache.at("game").del(game.id).await?;
-  game::delete(&db.conn, game.id).await?;
   info!("deleted game");
   Ok(())
 }
