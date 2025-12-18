@@ -1,3 +1,4 @@
+import { usePlatformInfo } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 // import NarrowTips from "@blocks/narrow-tips";
 import { useNavigate, useSearchParams } from "@solidjs/router";
@@ -11,6 +12,7 @@ import { createEffect, onMount, Show } from "solid-js";
 // import Calendar from "./calendar";
 
 export default function () {
+  const platformInfo = usePlatformInfo();
   const [searchParams] = useSearchParams();
   let calendarSection: HTMLElement;
   const navigate = useNavigate();
@@ -30,8 +32,8 @@ export default function () {
   });
 
   createEffect(() => {
-    if (platformStore.config.zen_game) {
-      navigate(`/games/${platformStore.config.zen_game}`);
+    if (platformInfo.data?.zen_game) {
+      navigate(`/games/${platformInfo.data.zen_game}`);
     }
   });
 
@@ -42,34 +44,34 @@ export default function () {
           <div class="flex-1" />
           <h1 class="text-3xl font-bold opacity-80">
             &nbsp;&nbsp;
-            <span>[&nbsp;{platformStore.config.name || t("platform.name")}&nbsp;]</span>
+            <span>[&nbsp;{platformInfo.data?.name || t("platform.name")}&nbsp;]</span>
             &nbsp;
             <span class="text-primary animate-ping">_</span>
           </h1>
           <a
             class="text-xl text-error mt-8"
-            href={platformStore.config.subject_url || "#"}
+            href={platformInfo.data?.subject_url || "#"}
             target="_blank"
             rel="noreferrer"
           >
-            {platformStore.config.subject_info || t("platform.subject")}
+            {platformInfo.data?.subject_info || t("platform.subject")}
           </a>
           <div class="flex-1" />
           <div class="h-24" />
           <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
             <Button ghost class="inline-flex flex-row space-x-1 flex-wrap h-auto max-w-full">
               <span>(C) 2022 - {new Date().getFullYear()}</span>
-              <a class="hover:underline" href={platformStore.config.footer_url || "#"} target="_blank" rel="noreferrer">
-                {platformStore.config.footer_info}
+              <a class="hover:underline" href={platformInfo.data?.footer_url || "#"} target="_blank" rel="noreferrer">
+                {platformInfo.data?.footer_info}
               </a>
-              <Show when={platformStore.config.record}>
+              <Show when={platformInfo.data?.record}>
                 <span class="opacity-40">|</span>
                 <a class="hover:underline" href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer">
-                  {platformStore.config.record}
+                  {platformInfo.data?.record}
                 </a>
               </Show>
             </Button>
-            <Show when={!platformStore.config.hide_maker}>
+            <Show when={!platformInfo.data?.hide_maker}>
               <div />
             </Show>
             <Popover

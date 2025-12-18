@@ -205,7 +205,7 @@ export default function () {
               </div>
             </div>
           </Match>
-          <Match when={challenge.isFetching}>
+          <Match when={challenge.isLoading}>
             <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
               <LoadingTips />
             </div>

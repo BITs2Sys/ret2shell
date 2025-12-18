@@ -175,7 +175,8 @@ export default function () {
                 url={`${api_root}/platform/logs`}
                 searchParams={{ file }}
                 withFileName
-                file={file.replace("ret2shell.", "").replace(".log", "")}
+                displayName={file.replace("ret2shell.", "").replace(".log", "")}
+                file={file}
                 icon="icon-[fluent--folder-zip-16-regular]"
               />
             )}

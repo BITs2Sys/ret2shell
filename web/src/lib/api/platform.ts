@@ -6,13 +6,13 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, persister, toastSuccess } from ".";
 
 export async function getPlatformInfo() {
   return await api.get(`${api_root}/platform/info`).json<ServerConfig>();
 }
 
-export function usePlatformInfo({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
+export function usePlatformInfo({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }={}) {
   return useQuery(() => ({
     queryKey: ["platform", "info"],
     queryFn: getPlatformInfo,
@@ -20,7 +20,9 @@ export function usePlatformInfo({ enabled, onError }: { enabled?: () => boolean;
     throwOnError: (err: Error) => {
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+    // biome-ignore lint/suspicious/noExplicitAny: this function is matched
+    persister: persister.persisterFn as any,
+  }), () => inflyClient);
 }
 
 export async function getAuthConfig() {
@@ -39,7 +41,7 @@ export function useVersion({ enabled, onError }: { enabled?: () => boolean; onEr
     throwOnError: (err: Error) => {
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type PlatformStatistics = {
@@ -89,7 +91,7 @@ export function usePlatformStatistics({
       handleHttpError(err, t("platform.statistics.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getPlatformLogs() {
@@ -111,7 +113,7 @@ export function usePlatformLogs({
       handleHttpError(err, t("platform.logs.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type Log = {
@@ -184,7 +186,7 @@ export function useQueryPlatformLog({
       handleHttpError(err, t("platform.logs.errors.fetchLogs.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type PlatformLicense = {
@@ -212,7 +214,7 @@ export function usePlatformLicense({
     throwOnError: (err: Error) => {
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getPlatformConfig() {
@@ -234,7 +236,7 @@ export function usePlatformConfig({
       handleHttpError(err, t("platform.errors.fetchConfig.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updatePlatformConfig(config: Config) {

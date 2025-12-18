@@ -1,6 +1,5 @@
 import { type CollectionItem, createListCollection, Select, type SelectRootProps } from "@ark-ui/solid";
-import { createBreakpoints } from "@solid-primitives/media";
-import { breakpoints, fullTheme } from "@storage/theme";
+import { fullTheme } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, createMemo, Index, Show, splitProps } from "solid-js";
@@ -42,28 +41,26 @@ export default function (
       items: selectProps.items,
     })
   );
-
-  let selectEl: HTMLSelectElement;
-  const matches = createBreakpoints(breakpoints);
-
-  // const [, setSelectedItems] = createSignal<SelectItemType[]>([]);
+  let selectEl!: HTMLSelectElement;
+  console.log(JSON.stringify(props));
 
   return (
     <Select.Root
       {...others}
+      disabled={props.disabled}
       class={clsx("flex flex-col", others.class)}
-      immediate
+      // immediate
       collection={collection()}
-      // value={[selectProps.inputProps?.value?.toString() || ""]}
+      // value={JSON.parse(JSON.stringify([selectProps.inputProps?.value?.toString()]))}
       positioning={{
         sameWidth: true,
       }}
       onValueChange={(e) => {
-        selectEl!.value = e.value[0] || "";
-        if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
-          selectEl!.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        // if (selectProps.inputProps?.onChange && typeof selectProps.inputProps.onChange === "function")
-        //   selectProps.inputProps.onChange(e);
+        if (selectEl) {
+          selectEl.value = e.value[0] || "";
+          if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
+            selectEl.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        }
         others.onValueChange?.(e);
       }}
     >
@@ -79,7 +76,7 @@ export default function (
             "gap-0",
             "items-center",
             "w-full",
-            selectProps.size === "sm" ? "btn-sm" : matches.lg ? "btn-md" : "btn-sm",
+            selectProps.size === "sm" ? "btn-sm" : "btn-md",
             selectProps.ghost && "btn-ghost",
             selectProps.error && "border-error",
             selectProps.size === "sm" ? "px-1" : "px-2"
@@ -137,7 +134,7 @@ export default function (
                   <Index each={selectProps.items}>
                     {(item) => (
                       <Select.Item
-                        item={item().value}
+                        item={item()}
                         class="btn btn-ghost btn-sm items-center overflow-hidden"
                         title={item().label}
                       >
@@ -159,7 +156,7 @@ export default function (
           </Select.Content>
         </Select.Positioner>
       </Portal>
-      <Select.HiddenSelect {...selectProps.inputProps} ref={selectEl!} />
+      <Select.HiddenSelect {...props.inputProps} ref={selectEl} />
     </Select.Root>
   );
 }

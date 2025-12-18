@@ -1,6 +1,6 @@
 import { useResetPasswordMutation } from "@api/account";
 import Captcha from "@blocks/captcha";
-import { createForm, email, minLength, pattern, required, setValue } from "@modular-forms/solid";
+import { createForm, email, minLength, pattern, required } from "@modular-forms/solid";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
@@ -21,11 +21,16 @@ type ResetForm = {
 };
 
 export default function () {
-  const [form, { Form, Field }] = createForm<ResetForm>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const emailPredef = searchParams.email;
   const tokenPredef = searchParams.token;
+  const [form, { Form, Field }] = createForm<ResetForm>({
+    initialValues: {
+      email: emailPredef as string,
+      token: tokenPredef as string,
+    }
+  });
+  const navigate = useNavigate();
   if (!emailPredef || !tokenPredef) {
     addToast({
       level: "error",
@@ -35,8 +40,6 @@ export default function () {
     navigate("/sigtrap/403", { replace: true });
     return null;
   }
-  setValue(form, "email", emailPredef as string);
-  setValue(form, "token", tokenPredef as string);
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
 
   const mutation = useResetPasswordMutation({

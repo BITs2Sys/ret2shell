@@ -44,15 +44,22 @@ export default function ProviderForm(props: {
   editSource?: OAuthProvider;
   loading?: boolean;
 }) {
-  const [form, { Form, Field }] = createForm<FormType>();
-  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
-  const [avatarSet, setAvatarSet] = createSignal(false);
-  const [avatarUploading, setAvatarUploading] = createSignal(false);
-
   const oauthProvider = useOAuthProvider({
     service: () => props.editSource!.provider,
     enabled: () => !!props.editSource,
   });
+  const [form, { Form, Field }] = createForm<FormType>({
+    initialValues: {
+      name: oauthProvider.data?.item.name || "" || "",
+      provider: oauthProvider.data?.item.provider || "",
+      avatar: oauthProvider.data?.item.avatar || "",
+      script: oauthProvider.data?.item.script || "",
+      portal: oauthProvider.data?.item.portal || "",
+    },
+  });
+  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
+  const [avatarSet, setAvatarSet] = createSignal(false);
+  const [avatarUploading, setAvatarUploading] = createSignal(false);
 
   createEffect(() => {
     if (props.editSource) {

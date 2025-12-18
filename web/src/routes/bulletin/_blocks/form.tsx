@@ -18,7 +18,6 @@ type BulletinForm = {
 };
 
 export default function (props: { onDone: (calendar: Article) => void; articleId?: number }) {
-  const [form, { Form, Field }] = createForm<BulletinForm>();
   const article = useBulletin({ id: () => props.articleId!, enabled: () => !!props.articleId });
   const createBulletinMutation = useCreateBulletinMutation({
     onSuccess: (data) => {
@@ -28,6 +27,14 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
   const updateBulletinMutation = useUpdateBulletinMutation({
     onSuccess: (data) => {
       props.onDone(data);
+    },
+  });
+  const [form, { Form, Field }] = createForm<BulletinForm>({
+    initialValues: {
+      title: article.data?.title || "",
+      content: article.data?.content || "",
+      enable_comment: article.data?.enable_comment || false,
+      weight: !!article.data?.weight,
     },
   });
 

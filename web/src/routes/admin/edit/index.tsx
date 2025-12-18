@@ -23,9 +23,17 @@ type PlatformConfigForm = {
 };
 
 export default function () {
-  const [form, { Form, Field }] = createForm<PlatformConfigForm>();
   const config = usePlatformConfig();
-  const mutation = useUpdatePlatformConfigMutation();
+  const [form, { Form, Field }] = createForm<PlatformConfigForm>({
+    initialValues: {
+      ...JSON.parse(JSON.stringify(config.data?.server)),
+    },
+  });
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
+      config.refetch();
+    },
+  });
   async function onSubmit(result: PlatformConfigForm) {
     const mergedConfig = {
       ...config.data,

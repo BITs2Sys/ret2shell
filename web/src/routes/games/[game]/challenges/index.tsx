@@ -195,7 +195,7 @@ export default function () {
         <div class="flex-1 flex flex-col w-0">
           <Tabs gameId={gameId()} challengeId={selectedChallengeId() ?? undefined} />
           <Switch fallback={<Welcome />}>
-            <Match when={challenge.isFetching}>
+            <Match when={challenge.isLoading}>
               <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
                 <LoadingTips />
               </div>

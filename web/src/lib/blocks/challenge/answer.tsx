@@ -1,3 +1,4 @@
+import { inflyClient } from "@api";
 import { useChallengeAnswer, useUpdateChallengeAnswerMutation } from "@api/challenge";
 import { useGame } from "@api/game";
 import { isAdminOfGame } from "@storage/game";
@@ -23,6 +24,12 @@ export default function (props: ChallengeWidgetProps) {
     onSuccess: () => {
       setInEdit(false);
       answerQuery.refetch();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+      });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+      });
     },
   });
 

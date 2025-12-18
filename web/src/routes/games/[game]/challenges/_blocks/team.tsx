@@ -18,8 +18,6 @@ export default function (props: { gameId: number }) {
   });
   const challenges = useChallenges({
     game_id: () => props.gameId,
-    page: () => 1,
-    page_size: () => 9999,
     enabled: () => !!game.data,
   });
 

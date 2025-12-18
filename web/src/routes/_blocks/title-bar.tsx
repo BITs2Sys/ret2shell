@@ -1,5 +1,6 @@
 import { useAccountProfile } from "@api/account";
 import { useGame } from "@api/game";
+import { usePlatformInfo } from "@api/platform";
 import { useSelfTeam } from "@api/team";
 import LogoAnimate from "@assets/animates/logo-animate";
 import { mediaPath } from "@lib/utils/media";
@@ -37,12 +38,13 @@ import UserBox from "./user-box";
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
+  const platformInfo = usePlatformInfo();
   return (
     <Link ghost href={inDocs() ? "/docs" : "/"}>
       <LogoAnimate class="hidden lg:inline-block" width={24} height={24} />
       <span />
       <span>
-        {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
+        {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformInfo.data?.name || t("platform.name")}
       </span>
     </Link>
   );
@@ -65,15 +67,16 @@ function GameTitleLink() {
 
 function GlobalNav(props: { size: "sm" | "md" }) {
   const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const platformInfo = usePlatformInfo();
   return (
     <>
       <Show
-        when={!platformStore.config.zen_game}
+        when={!platformInfo.data?.zen_game}
         fallback={
           <li class="nav whitespace-nowrap">
             <Link
               class="w-full"
-              href={`/games/${platformStore.config.zen_game}`}
+              href={`/games/${platformInfo.data?.zen_game}`}
               activeMatch="partial"
               ghost
               justify="start"
@@ -140,6 +143,7 @@ function GameNav(props: { size: "sm" | "md" }) {
     silenced: true,
   });
   const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const platformInfo = usePlatformInfo();
   return (
     <>
       <li class="nav whitespace-nowrap">
@@ -218,7 +222,7 @@ function GameNav(props: { size: "sm" | "md" }) {
         </li>
       </Show>
       <Show
-        when={!platformStore.config.zen_game}
+        when={!platformInfo.data?.zen_game}
         fallback={
           <Show
             when={
@@ -253,6 +257,7 @@ export default function TitleBar() {
   const [additionalMobileBox, setAdditionalMobileBox] = createSignal<"wsrx" | "notification" | "theme" | "i18n" | null>(
     null
   );
+  const platformInfo = usePlatformInfo();
   const params = useParams();
   const gameId = () => Number.parseInt(params.game || "", 10);
   const game = useGame({ id: () => gameId(), enabled: () => !!gameId() });
@@ -271,7 +276,7 @@ export default function TitleBar() {
     <>
       <div id="page-top" class="print:hidden" />
       <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-        <span>{inDocs() ? t("docs.tip") : platformStore.config.name || t("platform.name")}</span>
+        <span>{inDocs() ? t("docs.tip") : platformInfo.data?.name || t("platform.name")}</span>
         <span class="flex-1" />
         <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
       </div>
@@ -469,10 +474,10 @@ export default function TitleBar() {
               </Match>
             </Switch>
           </div>
-          <Show when={platformStore.config.highlight_banner && !bannerRead()}>
+          <Show when={platformInfo.data?.highlight_banner && !bannerRead()}>
             <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2 backdrop-blur-lg">
               <span class="shrink-0 icon-[fluent--warning-20-filled] mx-2" />
-              <span class="font-bold flex-1 truncate">{platformStore.config.highlight_banner}</span>
+              <span class="font-bold flex-1 truncate">{platformInfo.data?.highlight_banner}</span>
               <Button ghost size="sm" onClick={() => setBannerRead(true)}>
                 <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
               </Button>

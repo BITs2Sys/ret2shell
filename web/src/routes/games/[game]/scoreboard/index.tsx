@@ -414,7 +414,7 @@ export default function () {
                   pageSize={pageSize()!}
                   total={total()}
                   showTime={false}
-                  loading={activeTeamsQuery().isFetching}
+                  loading={activeTeamsQuery().isLoading}
                   onPageChange={(p) => setPage(p)}
                 />
               </Match>
@@ -435,7 +435,7 @@ export default function () {
                   page={page()}
                   pageSize={pageSize()!}
                   showTime={!showLargePanel()}
-                  loading={activeTeamsQuery().isFetching}
+                  loading={activeTeamsQuery().isLoading}
                   onPageChange={(p) => setPage(p)}
                   total={total()}
                 />

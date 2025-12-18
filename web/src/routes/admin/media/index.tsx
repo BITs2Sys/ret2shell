@@ -7,18 +7,26 @@ import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
-import { createEffect } from "solid-js";
+import { createEffect, untrack } from "solid-js";
 
 export default function () {
-  const [form, { Form, Field }] = createForm<MediaConfig>();
   const config = usePlatformConfig();
+  const [form, { Form, Field }] = createForm<MediaConfig>({
+    initialValues: {
+      path: config.data?.media.path,
+      limit: config.data?.media.limit,
+      anti_theft: config.data?.media.anti_theft,
+    },
+  });
   const mutation = useUpdatePlatformConfigMutation();
   createEffect(() => {
     if (config.data) {
-      setValues(form, {
-        path: config.data.media.path,
-        limit: config.data.media.limit,
-        anti_theft: config.data.media.anti_theft,
+      untrack(() => {
+        setValues(form, {
+          path: config.data.media.path,
+          limit: config.data.media.limit,
+          anti_theft: config.data.media.anti_theft,
+        });
       });
     }
   });

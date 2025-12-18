@@ -4,22 +4,41 @@ import { createForm, getValue, required, setValues } from "@modular-forms/solid"
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
+import Card from "@widgets/card";
 import Checkbox from "@widgets/checkbox";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import { createEffect } from "solid-js";
+import { createEffect, Show, untrack } from "solid-js";
 
 export default function () {
-  const [form, { Form, Field }] = createForm<CaptchaConfig>();
   const config = usePlatformConfig();
-  const mutation = useUpdatePlatformConfigMutation();
+  const [form, { Form, Field }] = createForm<CaptchaConfig>({
+    initialValues: {
+      enabled: config.data?.captcha.enabled,
+      difficulty: config.data?.captcha.difficulty,
+      validator: config.data?.captcha.validator,
+    },
+  });
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
+      config.refetch();
+    },
+  });
 
   createEffect(() => {
     if (config.data)
-      setValues(form, {
-        enabled: config.data.captcha.enabled,
-        difficulty: config.data.captcha.difficulty,
-        validator: config.data.captcha.validator,
+      untrack(() => {
+        setValues(
+          form,
+          {
+            enabled: config.data.captcha.enabled,
+            difficulty: config.data.captcha.difficulty,
+            validator: config.data.captcha.validator,
+          },
+          {
+            shouldDirty: false,
+          }
+        );
       });
   });
 
@@ -43,6 +62,12 @@ export default function () {
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("captcha.title")}</span>
           </h3>
+          <Show when={form.dirty}>
+            <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
+              <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5" />
+              <span class="flex-1 text-start">{t("account.form.saveHint")}</span>
+            </Card>
+          </Show>
           <div class="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-2 lg:items-end">
             <Field name="enabled" type="boolean">
               {(field, props) => (
@@ -78,8 +103,8 @@ export default function () {
                       icon: "icon-[fluent--image-20-regular]",
                     },
                   ]}
-                  value={field.value ? [field.value as string] : undefined}
                   inputProps={props}
+                  value={field.value ? [field.value] : ["1111"]}
                 />
               )}
             </Field>

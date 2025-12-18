@@ -50,7 +50,6 @@ export default function () {
     return games.data?.[0].find((game) => game.id === selectedGameId()) ?? games.data?.[0].at(0);
   });
   createEffect(() => {
-    console.log("hello");
     setGameCoverStore({ preload: selectedGame() || null });
   });
 

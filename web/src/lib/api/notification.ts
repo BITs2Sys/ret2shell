@@ -2,7 +2,7 @@ import type { Notification } from "@models/notification";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getNotifications(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/notification`).json<Notification[]>();
@@ -26,7 +26,7 @@ export function useNotifications({
       handleHttpError(err, t("game.notification.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function createNotification(game_id: number, notification: Notification) {

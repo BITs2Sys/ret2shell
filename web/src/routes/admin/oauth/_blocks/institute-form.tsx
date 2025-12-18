@@ -19,7 +19,13 @@ export default function InstituteForm(props: {
   loading?: boolean;
 }) {
   const oauthProviders = useOAuthProviders();
-  const [form, { Form, Field }] = createForm<FormType>();
+  const [form, { Form, Field }] = createForm<FormType>({
+    initialValues: {
+      name: props.editSource!.name,
+      provider: props.editSource?.provider || undefined,
+      token: props.editSource?.token || undefined,
+    },
+  });
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {

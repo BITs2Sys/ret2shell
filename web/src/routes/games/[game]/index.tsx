@@ -464,10 +464,10 @@ export default function () {
             <Match when={inEdit()}>
               <IntroForm onDone={onUpdateIntroduction} />
             </Match>
-            <Match when={introduction.data && !introduction.isFetching}>
+            <Match when={introduction.data && !introduction.isLoading}>
               <Article class="self-center" content={introduction.data?.content || ''} extra={true} headingAnchors={true} />
             </Match>
-            <Match when={introduction.isFetching}>
+            <Match when={introduction.isLoading}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <Spin width={32} height={32} />
                 <span>{randomTips()}</span>

@@ -20,7 +20,16 @@ type WikiForm = {
 };
 
 export default function (props: { onDone: (article: Article) => void; editSource?: Article }) {
-  const [form, { Form, Field }] = createForm<WikiForm>();
+  const [form, { Form, Field }] = createForm<WikiForm>({
+    initialValues: {
+      title: props.editSource!.title,
+      path: props.editSource!.path.join("/"),
+      content: props.editSource!.content || "",
+      enable_comment: props.editSource!.enable_comment,
+      draft: props.editSource!.draft,
+      published: props.editSource!.published,
+    },
+  });
 
   const createWikiMutation = useCreateWikiMutation({
     onSuccess: (saved) => {

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import type { ConfigMapList, NodeList } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getClusterConfig() {
   return await api.get(`${api_root}/cluster/config`).json<ConfigMapList>();
@@ -24,7 +24,7 @@ export function useClusterConfig({
       handleHttpError(err, t("cluster.errors.fetchConfig.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getClusterNodes() {
@@ -46,7 +46,7 @@ export function useClusterNodes({
       handleHttpError(err, t("cluster.errors.fetchNodes.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getCalmdownStatus() {
@@ -71,7 +71,7 @@ export function useCalmdownStatus({
     throwOnError: (err: Error) => {
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateGlobalTrafficScript(traffic: string) {

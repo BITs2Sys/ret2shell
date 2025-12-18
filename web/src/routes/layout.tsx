@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getPlatformInfo, getPlatformLicense, getVersion } from "@api/platform";
+import { getPlatformLicense, getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
@@ -9,7 +9,7 @@ import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage
 import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
-import { createEffect, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import TitleBar from "./_blocks/title-bar";
 import Toasts from "./_blocks/toasts";
@@ -38,7 +38,8 @@ function checkCookiePolicy() {
 }
 
 export default function (props: { children?: JSX.Element }) {
-  let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+  const platformInfo = usePlatformInfo();
+  const platformName = createMemo(() => `\xa0\xa0[\xa0${platformInfo.data?.name || t("platform.name")}\xa0]\xa0`);
   const [platformTyped, setPlatformTyped] = createSignal("");
   const [hideAnimation, setHideAnimation] = createSignal(false);
   let showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
@@ -60,11 +61,6 @@ export default function (props: { children?: JSX.Element }) {
 
   onMount(async () => {
     try {
-      const res = await getPlatformInfo();
-      setPlatformStore({
-        config: res,
-        backend_online: true,
-      });
       loadVersion();
     } catch (err) {
       if (err instanceof HTTPError && err.response?.status === 503) {
@@ -88,16 +84,15 @@ export default function (props: { children?: JSX.Element }) {
       }
       setPlatformStore({ backend_online: false });
     }
-    platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
-    showAnimation = showAnimation && !platformStore.config.zen_game;
+    showAnimation = showAnimation && !platformInfo.data?.zen_game;
 
     setTimeout(checkCookiePolicy, 1000);
 
     if (showAnimation) {
       setTimeout(() => {
         const typeTimer = setInterval(() => {
-          if (platformTyped().length < platformName.length) {
-            setPlatformTyped(platformName.slice(0, platformTyped().length + 1));
+          if (platformTyped().length < platformName().length) {
+            setPlatformTyped(platformName().slice(0, platformTyped().length + 1));
           } else {
             clearInterval(typeTimer);
             setTimeout(() => {
@@ -167,7 +162,7 @@ export default function (props: { children?: JSX.Element }) {
 
   return (
     <>
-      <Title domain={platformStore.config.name ?? t("platform.name")} route="/" />
+      <Title domain={platformInfo.data?.name ?? t("platform.name")} route="/" />
       <Background />
       <TitleBar />
       {props.children}

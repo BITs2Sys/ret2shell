@@ -24,7 +24,6 @@ type TimelinePreset = {
 };
 
 export default function Timeline() {
-  const [form, { Form, Field }] = createForm<TimelinePresetFormType>();
   const params = useParams();
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
   const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
@@ -35,6 +34,7 @@ export default function Timeline() {
       game.refetch();
     },
   });
+  const [form, { Form, Field }] = createForm<TimelinePresetFormType>();
 
   async function handleDeleteTimelinePreset(p: TimelinePreset) {
     if (!game.data) return;

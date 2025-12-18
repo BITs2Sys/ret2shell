@@ -9,7 +9,7 @@ import { createMemo } from "solid-js";
 import type { Extra } from "../models/extra";
 import type { CommitHistory } from "../models/git";
 import type { Hint } from "../models/hint";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
   return (
@@ -38,6 +38,7 @@ export function useChallenges({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", "list", page?.() ?? 1, page_size?.() ?? 200]);
+  console.log(keys());
   return useQuery(() => ({
     queryKey: keys(),
     queryFn: async () => await getChallengeList(game_id(), page?.() ?? 1, page_size?.() ?? 200),
@@ -46,7 +47,7 @@ export function useChallenges({
       handleHttpError(err, t("challenge.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getChallenge(game_id: number, challenge_id: number) {
@@ -74,7 +75,7 @@ export function useChallenge({
       handleHttpError(err, t("challenge.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function createChallenge(game_id: number, challenge: Challenge) {
@@ -201,7 +202,7 @@ export function useChallengeHints({
       handleHttpError(err, t("challenge.hint.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function unlockChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
@@ -331,7 +332,7 @@ export function useChallengeAttachments({
       handleHttpError(err, t("challenge.file.errors.fetchFiles.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function deleteChallengeAttachment(
@@ -395,7 +396,7 @@ export function useChallengeEnv({
       handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getChallengeInstance(game_id: number, challenge_id: number) {
@@ -422,7 +423,7 @@ export function useChallengeInstance({
       handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
@@ -501,7 +502,7 @@ export function useChallengeCheckerScript({
       handleHttpError(err, t("challenge.checker.errors.fetchScript.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateChallengeCheckerScript(game_id: number, challenge_id: number, content: string) {
@@ -588,7 +589,7 @@ export function useChallengeSubmissions({
       handleHttpError(err, t("challenge.statistics.errors.fetchSubmission.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function startChallengeInstance(game_id: number, challenge_id: number) {
@@ -669,7 +670,7 @@ export function useChallengeCommitHistory({
       handleHttpError(err, t("challenge.statistics.errors.fetchCommitHistory"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getChallengeSolveStatus(game_id: number, challenge_id: number) {
@@ -699,7 +700,7 @@ export function useChallengeSolveStatus({
       handleHttpError(err, t("challenge.submission.errors.fetchSolveStatus.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getChallengeAnswer(game_id: number, challenge_id: number) {
@@ -726,7 +727,7 @@ export function useChallengeAnswer({
       handleHttpError(err, t("challenge.answer.errors.fetchAnswer.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateChallengeAnswer(game_id: number, challenge_id: number, answer: string) {

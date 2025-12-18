@@ -14,7 +14,7 @@ import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError, type SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -55,7 +55,7 @@ export function useGames({
       handleHttpError(err, t("game.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getGame(id: number) {
@@ -80,7 +80,7 @@ export function useGame({
       handleHttpError(err, t("game.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function createGame(game: Game) {
@@ -164,7 +164,7 @@ export function useGameIntroduction({
       handleHttpError(err, t("game.errors.fetchIntroduction.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateGameIntroduction(id: number, article: Article) {
@@ -244,7 +244,7 @@ export function useGameScoreboard({
       handleHttpError(err, t("game.scoreboard.errors.fetchScoreboard.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type EventDeviceInfo = {
@@ -275,7 +275,7 @@ export function useGameDevices({
       handleHttpError(err, t("game.events.errors.fetchDevices.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function regenerateGameToken(game_id: number) {
@@ -321,7 +321,7 @@ export function useGameAdmins({
       handleHttpError(err, t("game.administrator.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateGameAdmins(game_id: number, admins: number[]) {
@@ -366,7 +366,7 @@ export function useGameInstances({
       handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function submitFlag(game_id: number, challenge_id: number, flag: string) {
@@ -390,7 +390,7 @@ export function useSubmitFlagMutation(
       handleHttpError(err, t("challenge.submission.errors.submit.title"));
       props.onError?.(err);
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function checkSubmissionStatus(game_id: number, challenge_id: number, submission_id: number) {
@@ -425,7 +425,7 @@ export function useSelfSolves({
       handleHttpError(err, t("challenge.submission.errors.fetchSolves.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getGameAdminChatSessions(
@@ -480,7 +480,7 @@ export function useGameAdminChatSessions({
       handleHttpError(err, t("game.hammer.errors.fetchSessions.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getGameAdminChatMessages(game_id: number, challenge_id: number, team_id: number) {
@@ -516,7 +516,7 @@ export function useGameAdminChatMessages({
       handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function sendGameAdminChatMessage(
@@ -578,7 +578,7 @@ export function useGamePlayerChatMessages({
       handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function sendGamePlayerChatMessage(game_id: number, challenge_id: number, content: string) {
@@ -629,7 +629,7 @@ export function useCheckUnreadMessages({
       handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getGameSubmissions(game_id: number, page?: number, page_size?: number) {
@@ -667,7 +667,7 @@ export function useGameSubmissions({
       handleHttpError(err, t("game.monitor.errors.fetchSubmission.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getGameAuditLogs(game_id: number, page?: number, page_size?: number) {
@@ -705,7 +705,7 @@ export function useGameAuditLogs({
       handleHttpError(err, t("game.monitor.errors.fetchAudit.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateGameAuditLog(game_id: number, audit_id: number, audit: Audit) {
@@ -780,7 +780,7 @@ export function useGameStatistics({
       handleHttpError(err, t("game.statistics.errors.fetch"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type GameStatisticsExport = {
@@ -824,7 +824,7 @@ export function useGameStatisticsExport({
       handleHttpError(err, t("game.statistics.errors.export"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getRegistryConfig(game_id: number) {
@@ -849,7 +849,7 @@ export function useRegistryConfig({
       handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getRegistryRepositories(game_id: number) {
@@ -874,7 +874,7 @@ export function useRegistryRepositories({
       handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function refreshRegistry(game_id: number) {
@@ -918,7 +918,7 @@ export function useRegistryImageTags({
       handleHttpError(err, t("challenge.instance.errors.fetchConfigImages.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateGameTraffic(game_id: number, traffic: string) {
@@ -1044,5 +1044,5 @@ export function useGameRepo({
       handleHttpError(err, t("game.git.errors.fetchRepo.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }

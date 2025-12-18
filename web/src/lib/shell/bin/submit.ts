@@ -1,4 +1,4 @@
-import { r2sClient } from "@api";
+import { inflyClient } from "@api";
 import { checkSubmissionStatus, submitFlag } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
@@ -34,6 +34,7 @@ export class Submit implements Command {
     try {
       const submission = await submitFlag(game!.id, challenge!.id, flag);
       io.print(ansiColors.green(`${t("shell.submit.waitingForChecking")}`));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       let iter = 7;
       let checked = false;
       while (iter > 0) {
@@ -41,18 +42,18 @@ export class Submit implements Command {
         if (st.solved !== null) {
           io.println("");
           if (st.solved) {
-            r2sClient.invalidateQueries({
+            inflyClient.invalidateQueries({
               queryKey: ["game", game!.id, "challenge", challenge!.id],
             });
-            r2sClient.invalidateQueries({
+            inflyClient.invalidateQueries({
               queryKey: ["game", game!.id, "challenge", challenge!.id, "solveStatus"],
             });
-            r2sClient.invalidateQueries({
-              queryKey: ["game", game!.id, "challenges", 1, 200],
+            inflyClient.invalidateQueries({
+              queryKey: ["game", game!.id, "selfSolves"],
             });
             io.success(`${t("challenge.submission.status.solved.title")}: ${st.result}`);
             if (isGameInProgress(game) && !isAdminOfGame(game)) {
-              r2sClient.invalidateQueries({
+              inflyClient.invalidateQueries({
                 queryKey: ["game", game.id, "team", "self"],
               });
             }

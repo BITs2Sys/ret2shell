@@ -1,6 +1,7 @@
+import { inflyClient } from "@api";
 import { useChallenge } from "@api/challenge";
 import { useGame } from "@api/game";
-import { createForm, getValue, required, setValue } from "@modular-forms/solid";
+import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
@@ -27,41 +28,58 @@ export function FormBare(
     onDone: (challenge: ChallengeForm) => void;
   }
 ) {
-  const [form, { Form, Field }] = createForm<ChallengeForm>();
-  function onSubmit(result: ChallengeForm) {
-    props.onDone(result);
-  }
-
-  // Load edit source
-  const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId || 0,
     enabled: () => !!game.data && !!props.challengeId,
   });
+  const [form, { Form, Field }] = createForm<ChallengeForm>({
+    initialValues: {
+      name: challenge.data?.name,
+      tag: challenge.data?.tag.map((t) => t.name).join("/"),
+      content: challenge.data?.content || "",
+      initial: challenge.data?.score_rule?.initial || 1000,
+      minimum: challenge.data?.score_rule?.minimum || 500,
+      decay: challenge.data?.score_rule?.decay || 10,
+      release_at: challenge.data?.release_at?.toSeconds() ?? null,
+      archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
+    },
+  });
+  function onSubmit(result: ChallengeForm) {
+    props.onDone(result);
+    inflyClient.invalidateQueries({
+      queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+    });
+    inflyClient.invalidateQueries({
+      queryKey: ["game", props.gameId, "challenge", props.challengeId],
+    });
+  }
+
+  // Load edit source
+  const game = useGame({ id: () => props.gameId });
 
   createEffect(() => {
     if (challenge.data) {
       untrack(() => {
-        setValue(form, "name", challenge.data!.name);
-        setValue(form, "tag", challenge.data!.tag.map((t) => t.name).join("/"));
-        setValue(form, "content", challenge.data!.content || "");
-        if (challenge.data!.score_rule) {
-          setValue(form, "initial", challenge.data!.score_rule.initial);
-          setValue(form, "minimum", challenge.data!.score_rule.minimum);
-          setValue(form, "decay", challenge.data!.score_rule.decay);
-        } else {
-          setValue(form, "initial", 1000);
-          setValue(form, "minimum", 500);
-          setValue(form, "decay", 10);
-        }
-        setValue(form, "release_at", challenge.data!.release_at?.toSeconds() ?? null);
-        setValue(form, "archive_at", challenge.data!.archive_at?.toSeconds() ?? null);
+        setValues(form, {
+          name: challenge.data?.name,
+          tag: challenge.data?.tag.map((t) => t.name).join("/"),
+          content: challenge.data?.content || "",
+          initial: challenge.data?.score_rule?.initial || 1000,
+          minimum: challenge.data?.score_rule?.minimum || 500,
+          decay: challenge.data?.score_rule?.decay || 10,
+          release_at: challenge.data?.release_at?.toSeconds() ?? null,
+          archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
+        });
       });
     } else {
-      setValue(form, "initial", 1000);
-      setValue(form, "minimum", 500);
-      setValue(form, "decay", 15);
+      untrack(() => {
+        setValues(form, {
+          initial: 1000,
+          minimum: 500,
+          decay: 10,
+        });
+      });
     }
   });
 

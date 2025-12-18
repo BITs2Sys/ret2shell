@@ -20,7 +20,6 @@ import {
   maxLength,
   required,
   reset as resetForm,
-  setValue,
   setValues,
 } from "@modular-forms/solid";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -51,9 +50,17 @@ type TeamAdminUpdateForm = {
 };
 
 function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (team: Team) => void }) {
-  const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>();
   const navigate = useNavigate();
   const institutes = useInstitutes();
+  const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>({
+    initialValues: {
+      name: props.team!.name,
+      tag: props.team?.tag || "",
+      institute_id: props.team?.institute_id?.toString() || "0",
+      state: props.team?.state.toString() || "0",
+    },
+  });
+
   createEffect(() => {
     if (props.team) {
       untrack(() => {
@@ -256,7 +263,7 @@ type TeamSelfUpdateForm = {
 };
 
 function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; onLeft?: () => void }) {
-  const [form, { Form, Field }] = createForm<TeamSelfUpdateForm>();
+
   const game = useGame({ id: () => props.gameId, enabled: () => !!props.gameId });
   const institutes = useInstitutes();
   const team = useSelfTeam({ game_id: () => props.gameId });
@@ -265,6 +272,13 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
     team_id: () => team.data?.id || 0,
     enabled: () => !!team.data,
   });
+    const [form, { Form, Field }] = createForm<TeamSelfUpdateForm>({
+      initialValues: {
+          name: team.data?.name,
+          tag: team.data?.tag || "",
+          institute_id: team.data?.institute_id?.toString() || "0",
+      }
+    });
   createEffect(() => {
     if (team.data) {
       untrack(() => {
@@ -435,8 +449,11 @@ type CreateExtraForm = {
 };
 
 function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
-  const [form, { Form, Field }] = createForm<CreateExtraForm>();
-  setValue(form, "score", 0);
+  const [form, { Form, Field }] = createForm<CreateExtraForm>({
+    initialValues: {
+      score: 0,
+    },
+  });
 
   const ptsInputIcon = ["icon-[fluent--subtract-20-regular]", "icon-[fluent--add-20-regular]"];
   const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(1);
@@ -625,7 +642,7 @@ export default function () {
         route={`/games/${gameId()}/teams/${team.data?.id ?? teamId()}`}
       />
       <SidebarLayout
-        leftBar={() => <Sidebar team={team.data ?? null} members={members.data ?? []} loading={members.isFetching} />}
+        leftBar={() => <Sidebar team={team.data ?? null} members={members.data ?? []} loading={members.isLoading} />}
         showLeftBar={showSidebar()}
       >
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">

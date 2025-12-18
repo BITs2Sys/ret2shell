@@ -1,4 +1,4 @@
-import { api_root } from "@api";
+import { api_root, inflyClient } from "@api";
 import {
   useChallenge,
   useChallengeEnv,
@@ -36,13 +36,16 @@ import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
-  const [form, { Form, Field }] = createForm<ChallengeImage>();
-  setValue(form, "cpu", 0.5);
-  setValue(form, "cpu_req", 0.01);
-  setValue(form, "mem", "128Mi");
-  setValue(form, "mem_req", "32Mi");
-  setValue(form, "storage", "1024Mi");
-  setValue(form, "storage_req", "64Mi");
+  const [form, { Form, Field }] = createForm<ChallengeImage>({
+    initialValues: {
+      cpu: 0.5,
+      cpu_req: 0.01,
+      mem: "128Mi",
+      mem_req: "32Mi",
+      storage: "1024Mi",
+      storage_req: "64Mi",
+    }
+  });
   const [searchedRepo, setSearchedRepo] = createSignal("");
   const [selected, setSelected] = createSignal(false);
 
@@ -540,7 +543,9 @@ function InstanceList(props: ChallengeWidgetProps) {
                 <Show when={pod.metadata}>
                   <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
                     <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5" />
-                    <span>{DateTime.fromISO(pod.metadata?.creationTimestamp || "").toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                    <span>
+                      {DateTime.fromISO(pod.metadata?.creationTimestamp || "").toFormat("yyyy-MM-dd HH:mm:ss")}
+                    </span>
                   </div>
                 </Show>
                 <For each={pod.status?.containerStatuses || []}>
@@ -587,6 +592,12 @@ export default function (props: ChallengeWidgetProps) {
   const updateMutation = useUpdateChallengeEnvMutation({
     onSuccess: () => {
       challengeEnv.refetch();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+      });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+      });
     },
   });
 

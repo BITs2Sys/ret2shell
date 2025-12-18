@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { HTTPError, type SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getTeamInfo(game_id: number, team_id: number, ex?: boolean) {
   return await api
@@ -44,7 +44,7 @@ export function useTeamInfo({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -73,7 +73,7 @@ export function useTeamRank({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -146,7 +146,7 @@ export function useTeamMembers({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -177,7 +177,7 @@ export function useSelfTeam({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -253,7 +253,7 @@ export function useTeamExtras({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -307,7 +307,7 @@ export function useTeamSolves({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }
 
@@ -425,6 +425,6 @@ export function useTeamList({
         return onError?.(err) ?? false;
       },
     }),
-    () => r2sClient
+    () => inflyClient
   );
 }

@@ -2,6 +2,7 @@ import { luxonReplacer, luxonReviver } from "@models/utils";
 import { base64 } from "@scure/base";
 import { accountStore, resetUser, storeToken } from "@storage/account";
 import { platformStore } from "@storage/platform";
+import { experimental_createQueryPersister } from "@tanstack/query-persist-client-core";
 import { QueryClient } from "@tanstack/solid-query";
 import ky from "ky";
 
@@ -60,11 +61,16 @@ const api = ky.extend({
 
 export default api;
 
-export const r2sClient = new QueryClient({
+export const inflyClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
       staleTime: 1000 * 60 * 5, // 5 minutes
     },
   },
+});
+
+export const persister = experimental_createQueryPersister({
+  storage: localStorage,
+  prefix: "ret2infly",
 });

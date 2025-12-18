@@ -1,3 +1,4 @@
+import { inflyClient } from "@api";
 import {
   useChallenge,
   useChallengeHints,
@@ -7,7 +8,7 @@ import {
 } from "@api/challenge";
 import { useGame } from "@api/game";
 import { useSelfTeam, useTeamExtras } from "@api/team";
-import { clearError, createForm, required, reset as resetForm, setValue } from "@modular-forms/solid";
+import { clearError, createForm, required, reset as resetForm } from "@modular-forms/solid";
 import { isAdminOfGame } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -18,7 +19,6 @@ import clsx from "clsx";
 import { LoremIpsum } from "lorem-ipsum";
 import { DateTime } from "luxon";
 import { createSignal, For, Show } from "solid-js";
-
 import type { ChallengeWidgetProps } from ".";
 
 type CreateHintForm = {
@@ -54,11 +54,18 @@ export default function (props: ChallengeWidgetProps) {
       });
       setPtsInputIconIndex(0);
       hints.refetch();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+      });
     },
   });
   const deleteMutation = useDeleteChallengeHintMutation({
     onSuccess: () => {
       hints.refetch();
+
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+      });
     },
   });
   const unlockMutation = useUnlockChallengeHintMutation({
@@ -79,8 +86,11 @@ export default function (props: ChallengeWidgetProps) {
     },
   });
 
-  const [form, { Form, Field }] = createForm<CreateHintForm>();
-  setValue(form, "cost", 0);
+  const [form, { Form, Field }] = createForm<CreateHintForm>({
+    initialValues: {
+      cost: 0,
+    }
+  });
 
   const plus_or_minus = (n: number) => `${n < 0 ? "- " : n > 0 ? "+ " : ""}${Math.abs(n)}`;
   const hint_color = (cost: number, is_admin = false) => {

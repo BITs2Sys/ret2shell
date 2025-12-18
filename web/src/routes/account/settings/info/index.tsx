@@ -22,8 +22,15 @@ export type UserForm = {
 };
 
 export default function () {
-  const [form, { Form, Field }] = createForm<UserForm>();
   const profile = useAccountProfile();
+  const [form, { Form, Field }] = createForm<UserForm>({
+    initialValues: {
+      nickname: profile.data?.nickname,
+      email: profile.data?.email || undefined,
+      avatar: profile.data?.avatar || undefined,
+      description: profile.data?.description || undefined,
+    },
+  });
   createEffect(() => {
     if (profile.data) {
       untrack(() => {

@@ -1,8 +1,5 @@
-import { r2sClient } from "@api";
-import {
-  useChallengeCheckerScript,
-  useUpdateChallengeCheckerScriptMutation,
-} from "@api/challenge";
+import { inflyClient } from "@api";
+import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
@@ -86,15 +83,6 @@ export default function (props: ChallengeWidgetProps) {
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
-  const attachmentKeys = createMemo(() => [
-    "game",
-    props.gameId,
-    "challenge",
-    props.challengeId,
-    "attachments",
-    "checker",
-    "all",
-  ]);
 
   createEffect(() => {
     if (scriptRemote.data) {
@@ -107,8 +95,11 @@ export default function (props: ChallengeWidgetProps) {
   const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
     onSuccess: () => {
       scriptRemote.refetch();
-      r2sClient.invalidateQueries({
-        queryKey: attachmentKeys(),
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", "checker", "all"],
+      });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
       });
     },
   });

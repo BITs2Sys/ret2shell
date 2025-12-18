@@ -1,9 +1,8 @@
-import { usePlatformStatistics } from "@api/platform";
+import { usePlatformInfo, usePlatformStatistics } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import { HostType } from "@models/game";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
@@ -12,7 +11,7 @@ import { Show } from "solid-js";
 
 export default function () {
   const statistics = usePlatformStatistics();
-
+  const platformInfo = usePlatformInfo();
   return (
     <>
       <Title page={t("platform.statistics.title")} route="/admin/statistics" />
@@ -20,13 +19,13 @@ export default function () {
         <div class="flex md:col-span-6 lg:col-span-3 items-center justify-start space-x-12 px-3 lg:px-6 xl:px-9">
           <LogoAnimate class="m-0 w-16 h-16 md:w-32 md:h-32 xl:w-36 xl:h-36" />
           <h1 class="ml-6 text-2xl md:text-4xl xl:text-5xl font-bold">
-            {platformStore.config.name || t("platform.name")}
+            {platformInfo.data?.name || t("platform.name")}
           </h1>
         </div>
         <Divider class="flex col-span-1 md:col-span-6 lg:hidden" />
         <div class="col-span-1 md:col-span-3 xl:col-span-3 h-48 p-3 xl:p-6 dir-ltr lg:dir-rtl flex flex-row items-center self-center max-md:justify-self-center max-md:min-w-[50vw] space-x-8">
           <div class="h-full aspect-square flex items-center justify-center">
-            <Show when={!statistics.isLoading} fallback={<Spin width={24} height={24} />}>
+            <Show when={!statistics.isLoading && statistics.data} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -49,7 +48,7 @@ export default function () {
                     name: t("game.title"),
                     data: [
                       {
-                        value: statistics.data!.games.length === 0 ? 1 : 0,
+                        value: statistics.data?.games.length === 0 ? 1 : 0,
                         itemStyle: {
                           color: "#808080",
                         },
@@ -281,7 +280,7 @@ export default function () {
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-warning">
-                {statistics.data!.challenges.total - statistics.data!.challenges.training}
+                {(statistics.data?.challenges.total ?? 0) - (statistics.data?.challenges.training ?? 0)}
               </span>
               <span class="opacity-60">{t("challenge.inGame")}</span>
             </div>

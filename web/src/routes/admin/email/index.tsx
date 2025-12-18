@@ -9,16 +9,26 @@ import Divider from "@widgets/divider";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect } from "solid-js";
+import { createEffect, untrack } from "solid-js";
 
 export default function () {
-  const [form, { Form, Field }] = createForm<EmailConfig>();
   const config = usePlatformConfig();
-  const mutation = useUpdatePlatformConfigMutation();
+  const [form, { Form, Field }] = createForm<EmailConfig>({
+    initialValues: {
+      ...config.data?.email,
+    }
+  });
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
+      config.refetch();
+    },
+  });
   createEffect(() => {
     if (config.data) {
-      setValues(form, {
-        ...config.data.email,
+      untrack(() => {
+        setValues(form, {
+          ...config.data.email,
+        });
       });
     }
   });

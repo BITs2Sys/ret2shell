@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getUserList(
   page?: number,
@@ -63,7 +63,7 @@ export function useUsers({
       handleHttpError(err, t("user.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getUser(id: number) {
@@ -88,7 +88,7 @@ export function useUser({
       handleHttpError(err, t("user.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getUserTeams(id: number) {
@@ -113,7 +113,7 @@ export function useUserTeams({
       handleHttpError(err, t("team.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateUser(user: User) {
@@ -178,7 +178,7 @@ export function useUserIpList({
       handleHttpError(err, t("user.errors.fetchIpList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getUserOAuthList(id: number) {
@@ -203,5 +203,5 @@ export function useUserOAuthList({
       handleHttpError(err, t("user.errors.fetchOAuth.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }

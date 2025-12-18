@@ -13,7 +13,14 @@ export function PoliciesEdit(props: {
   editSource?: ArchivePolicy;
   loading?: boolean;
 }) {
-  const [form, { Form, Field }] = createForm<ArchivePolicy>();
+  const [form, { Form, Field }] = createForm<ArchivePolicy>({
+    initialValues: {
+      challenge: {
+        show_answer: props.editSource!.challenge.show_answer,
+        show_hints: props.editSource!.challenge.show_hints,
+      },
+    },
+  });
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {

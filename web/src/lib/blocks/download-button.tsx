@@ -15,10 +15,11 @@ export default function DownloadButton(
     file: string;
     url: string;
     withFileName?: boolean;
+    displayName?: string;
     searchParams?: { [key: string]: string };
   }
 ) {
-  const [downloadProps, btnProps] = splitProps(props, ["icon", "file", "url", "searchParams", "withFileName"]);
+  const [downloadProps, btnProps] = splitProps(props, ["icon", "file", "url", "searchParams", "withFileName", "displayName"]);
   const [downloading, setDownloading] = createSignal(false);
   const [downloadComplete, setDownloadComplete] = createSignal(false);
   const [progress, setProgress] = createSignal(null as DownloadProgress | null);
@@ -69,7 +70,7 @@ export default function DownloadButton(
         </Match>
       </Switch>
       <Show when={downloadProps.withFileName}>
-        <span>{downloadProps.file}</span>
+        <span>{downloadProps.displayName ?? downloadProps.file}</span>
       </Show>
       <Show when={downloading()}>
         <span class="mx-2 text-primary">

@@ -1,4 +1,4 @@
-import { r2sClient } from "@api";
+import { inflyClient } from "@api";
 import { delayChallengeInstance, getChallengeEnv, startChallengeInstance, stopChallengeInstance } from "@api/challenge";
 import { getGameInstances } from "@api/game";
 import { deunicode } from "@api/rpc";
@@ -170,7 +170,7 @@ export class Service implements Command {
     await new Promise((r) => setTimeout(r, 500));
     const instances = await getGameInstances(envVars.game.id);
     await wsrx.deleteOutdatedLocal(instances);
-    await r2sClient.invalidateQueries({
+    await inflyClient.invalidateQueries({
       queryKey: ["game", envVars.game.id, "instances"],
     });
     return 0;

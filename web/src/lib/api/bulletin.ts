@@ -3,7 +3,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getBulletinList(page: number, page_size: number) {
   return await api
@@ -38,7 +38,7 @@ export function useBulletins({
       handleHttpError(err, t("bulletin.errors.fetchList.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getBulletin(id: number) {
@@ -63,7 +63,7 @@ export function useBulletin({
       handleHttpError(err, t("bulletin.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function createBulletin(article: Article) {

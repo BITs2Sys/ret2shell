@@ -1,4 +1,4 @@
-import { api_root } from "@api";
+import { api_root, inflyClient } from "@api";
 import { useChallengeAttachments, useDeleteChallengeAttachmentMutation } from "@api/challenge";
 import DownloadButton from "@blocks/download-button";
 import UploadButton from "@blocks/upload-button";
@@ -25,6 +25,12 @@ export default function (props: ChallengeWidgetProps) {
   const deleteAttachmentMutation = useDeleteChallengeAttachmentMutation({
     onSuccess: () => {
       attachmentsQuery.refetch();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+      });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", undefined, "limited"],
+      });
     },
   });
 
@@ -90,7 +96,12 @@ export default function (props: ChallengeWidgetProps) {
           <UploadButton
             size="sm"
             url={`${api_root}/game/${props.gameId}/challenge/${props.challengeId}/file?folder=${folder()}`}
-            onDone={() => attachmentsQuery.refetch()}
+            onDone={() => {
+              inflyClient.invalidateQueries({
+                queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", undefined, "limited"],
+              });
+              attachmentsQuery.refetch();
+            }}
             multiple
           />
         </header>

@@ -33,7 +33,21 @@ export type GameForm = {
 
 export default function GameEdit(props: { onDone: (result: GameForm) => void; gameId?: number; training?: boolean }) {
   const game = useGame({ id: () => props.gameId ?? -1, enabled: () => !!props.gameId });
-  const [form, { Form, Field }] = createForm<GameForm>();
+  const [form, { Form, Field }] = createForm<GameForm>({
+    initialValues: {
+      ...game.data,
+      start_at: game.data!.start_at.toSeconds(),
+      end_at: game.data!.end_at.toSeconds(),
+      register_at: game.data!.register_at.toSeconds(),
+      archive_at: game.data!.archive_at.toSeconds(),
+      first_blood_award: game.data!.award_rates?.[0] || game.data!.award_rate,
+      second_blood_award: Math.floor(game.data!.award_rates?.[1] || (game.data!.award_rate * 2) / 3),
+      third_blood_award: Math.floor(game.data!.award_rates?.[2] || game.data!.award_rate / 3),
+      enable_hammer: game.data!.hammer_policy?.enabled || false,
+      outer_hammer_label: game.data!.hammer_policy?.outer_label || "",
+      outer_hammer_url: game.data!.hammer_policy?.outer_url || "",
+    },
+  });
   createEffect(() => {
     if (game.data) {
       untrack(() => {

@@ -14,12 +14,16 @@ type ArticleForm = {
 };
 
 export default function IntroForm(props: { onDone: (article: Article) => Promise<void> }) {
-  const [form, { Form, Field }] = createForm<ArticleForm>();
   const [loading, setLoading] = createSignal(false);
   const params = useParams();
   const gameId = Number.parseInt(params.game || "UNKN0WN", 10);
   const game = useGame({ id: () => gameId, enabled: () => !!gameId });
   const introduction = useGameIntroduction({ id: () => gameId, enabled: () => !!gameId });
+  const [form, { Form, Field }] = createForm<ArticleForm>({
+    initialValues: {
+      content: introduction.data?.content || "",
+    },
+  });
   createEffect(() => {
     if (introduction.data) {
       untrack(() => {

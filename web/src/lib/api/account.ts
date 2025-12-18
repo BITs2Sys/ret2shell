@@ -11,7 +11,7 @@ import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient } from ".";
+import api, { api_root, handleHttpError, inflyClient } from ".";
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();
@@ -35,7 +35,7 @@ export function useCaptcha({
       onError?.(err);
       return false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export type RegisterRequest = {
@@ -231,7 +231,7 @@ export function useAccountProfile(props: { enabled?: () => boolean; onError?: (e
     queryFn: async () => await getProfile(),
     enabled: props.enabled?.(),
     throwOnError: (err: Error) => props.onError?.(err) ?? false,
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function changeProfile(req: User) {
@@ -295,7 +295,7 @@ export function useInstitutes(props: { enabled?: () => boolean; onError?: (err: 
       handleHttpError(err, t("institute.errors.fetchList.title"));
       return props.onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getAccountCode() {
@@ -311,7 +311,7 @@ export function useAccountCode(props: { enabled?: () => boolean; onError?: (err:
       handleHttpError(err, t("account.errors.fetchCode.title"));
       return props.onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function generateAccountCode() {
@@ -364,7 +364,7 @@ export function useOAuthProviders(props: { enabled?: () => boolean; onError?: (e
       handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
       return props.onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getOAuthProvider(service: string) {
@@ -393,7 +393,7 @@ export function useOAuthProvider({
       handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateOAuthProvider(service: string, req: OAuthProvider) {
@@ -614,7 +614,7 @@ export function useOAuthStatus({
       handleHttpError(err, t("account.oauth.errors.fetchStatus.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function updateInstitute(req: Institute) {

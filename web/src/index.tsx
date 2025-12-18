@@ -3,7 +3,7 @@ import { render } from "solid-js/web";
 import { routes } from "./routes/routes";
 import "overlayscrollbars/overlayscrollbars.css";
 import "@widgets/styles/base.css";
-import { r2sClient } from "@api";
+import { inflyClient } from "@api";
 import { Router } from "@solidjs/router";
 import { fullTheme, initTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -103,7 +103,7 @@ render(() => {
         </div>
       )}
     >
-      <QueryClientProvider client={r2sClient}>
+      <QueryClientProvider client={inflyClient}>
         <OverlayScrollbarsComponent
           options={{
             scrollbars: {

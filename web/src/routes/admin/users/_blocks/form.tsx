@@ -42,7 +42,28 @@ export type UserForm = {
 
 export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
-  const [form, { Form, Field }] = createForm<UserForm>();
+  const [form, { Form, Field }] = createForm<UserForm>({
+    initialValues: {
+      account: compProps.editSource?.account || "",
+      nickname: compProps.editSource?.nickname || "",
+      email: compProps.editSource?.email || "",
+      avatar: compProps.editSource?.avatar || "",
+      description: compProps.editSource?.description || "",
+      institute_id: compProps.editSource?.institute_id?.toString() || undefined,
+      hidden: compProps.editSource?.hidden || false,
+      banned: compProps.editSource?.banned || false,
+      permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
+      permVerified: compProps.editSource?.permissions.includes(Permission.Verified) || false,
+      permCalendar: compProps.editSource?.permissions.includes(Permission.Calendar) || false,
+      permWiki: compProps.editSource?.permissions.includes(Permission.Wiki) || false,
+      permBulletin: compProps.editSource?.permissions.includes(Permission.Bulletin) || false,
+      permGame: compProps.editSource?.permissions.includes(Permission.Game) || false,
+      permHost: compProps.editSource?.permissions.includes(Permission.Host) || false,
+      permUser: compProps.editSource?.permissions.includes(Permission.User) || false,
+      permStat: compProps.editSource?.permissions.includes(Permission.Statistics) || false,
+      permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
+    },
+  });
   createEffect(() => {
     if (compProps.editSource) {
       untrack(async () => {

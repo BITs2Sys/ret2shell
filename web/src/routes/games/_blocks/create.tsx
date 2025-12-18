@@ -1,6 +1,6 @@
 import { useCreateGameMutation } from "@api/game";
 import { type Game, HostType } from "@models/game";
-import { createForm, maxRange, minRange, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, maxRange, minRange, required, setValue } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -25,16 +25,17 @@ type CreateGameForm = {
 };
 
 export default function CreateGame(props: { onDone: (game: Game) => void }) {
-  const [form, { Form, Field }] = createForm<CreateGameForm>();
+  const [form, { Form, Field }] = createForm<CreateGameForm>({
+    initialValues: {
+      weight: 3,
+      team_size: 4,
+      offline: false,
+      enable_audit: true,
+      can_register_after_started: true,
+    },
+  });
   const mutation = useCreateGameMutation({
     onSuccess: (data) => props.onDone(data),
-  });
-  setValues(form, {
-    weight: 3,
-    team_size: 4,
-    offline: false,
-    enable_audit: true,
-    can_register_after_started: true,
   });
   async function onSubmit(result: CreateGameForm) {
     const req: Game = {

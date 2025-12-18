@@ -2,7 +2,7 @@ import type { Article } from "@models/article";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, r2sClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export async function getWikiTree() {
   return await api.get(`${api_root}/wiki`).json<Article[]>();
@@ -17,7 +17,7 @@ export function useWikiTree({ enabled, onError }: { enabled?: () => boolean; onE
       handleHttpError(err, t("wiki.errors.fetchToc.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function getWiki(id: number) {
@@ -42,7 +42,7 @@ export function useWiki({
       handleHttpError(err, t("wiki.errors.fetch.title"));
       return onError?.(err) ?? false;
     },
-  }), () => r2sClient);
+  }), () => inflyClient);
 }
 
 export async function createWiki(article: Article) {

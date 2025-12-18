@@ -1,5 +1,5 @@
+import { usePlatformInfo } from "@api/platform";
 import type { Instance } from "@models/instance";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { Wsrx, WsrxError, WsrxFeature, type WsrxInstance, type WsrxOptions, WsrxState } from "@xdsec/wsrx";
@@ -17,9 +17,10 @@ export class WsrxWrapper {
     [this.state, this.setState] = createSignal(WsrxState.Invalid);
     [this.traffics, this.setTraffics] = createSignal([]);
     [this.apiAddr, this.setApiAddr] = createSignal("http://127.0.0.1:3307");
+    const platformInfo = usePlatformInfo();
     this.wsrx = new Wsrx({
       api: this.apiAddr(),
-      name: platformStore.config.name || location.host,
+      name: platformInfo.data?.name || location.host,
       features: [WsrxFeature.Basic],
     });
     this.wsrx.onStateChange((state) => {
@@ -37,10 +38,10 @@ export class WsrxWrapper {
     });
 
     createEffect(() => {
-      if (this.apiAddr() && platformStore.config.name) {
+      if (this.apiAddr() && platformInfo.data?.name) {
         this.wsrx.setOptions({
           api: this.apiAddr(),
-          name: platformStore.config.name,
+          name: platformInfo.data.name,
         });
       }
     });
