@@ -332,6 +332,12 @@ async fn delete_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let challenges = challenge_db::count(&db.conn, Some(game.id), Some(game.host_type), true).await?;
+  if challenges > 0 && !query.force.unwrap_or(false) {
+    return Err(ResponseError::PreconditionFailed(
+      "game has existing challenges, can not be deleted safely".to_owned(),
+    ));
+  }
   cache.at("game").del(game.id).await?;
   game::delete(&db.conn, game.id).await?;
   let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
@@ -812,7 +818,8 @@ async fn get_game_statistics_impl(
 ) -> Result<GameStatistics, ResponseError> {
   let training = query.training.unwrap_or(true);
   let institutes = institute::get_list(&db.conn).await?;
-  let total_players = user::count(&db.conn, false, query.institute, Some(game.id), training).await?;
+  let total_players =
+    user::count(&db.conn, false, query.institute, Some(game.id), training).await?;
   let mut institute_players = HashMap::new();
   for i in institutes.iter() {
     institute_players.insert(
