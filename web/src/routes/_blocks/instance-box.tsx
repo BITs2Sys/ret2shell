@@ -127,7 +127,7 @@ export function InstanceBoxContent() {
           />
         </Button>
         <Link
-          href="https://github.com/XDSEC/WebSocketReflectorX/releases"
+          href="https://ctf.cumt.edu.cn/wsrx"
           ghost
           square
           target="_blank"
