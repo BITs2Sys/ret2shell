@@ -144,22 +144,3 @@ export class Markdown {
     this.processor?.use(rehypeStringify);
   }
 }
-
-(async () => {
-  const test = new Markdown();
-  await test.init({
-    type: "html",
-    options: {
-      math: true,
-      code: true,
-      headingAnchors: true,
-      alertBlockquote: true,
-      toc: true,
-    },
-  });
-  test.renderContent(`
-$1$
-> ![NOTE]
-> 456
-`);
-})();
