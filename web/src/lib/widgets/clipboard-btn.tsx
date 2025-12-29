@@ -1,13 +1,13 @@
 import { Clipboard, type ClipboardRootProps } from "@ark-ui/solid";
 import { t } from "@storage/theme";
 import clsx from "clsx";
-import { Show, splitProps } from "solid-js";
+import { type JSX, Show, splitProps } from "solid-js";
 
 export default function ClipboardBtn(
   props: ClipboardRootProps & {
     size?: "sm" | "md";
     square?: boolean;
-    icon?: string;
+    icon?: string | JSX.Element;
     iconCopied?: string;
     label?: string;
   }
@@ -36,7 +36,12 @@ export default function ClipboardBtn(
               />
             }
           >
-            <span class={clsx("w-5 h-5", btnProps.icon ?? "icon-[fluent--copy-20-regular]")} />
+            <Show
+              when={btnProps.icon && typeof btnProps.icon !== "string"}
+              fallback={<span class={clsx("w-5 h-5", btnProps.icon || "icon-[fluent--copy-20-regular]")} />}
+            >
+              <span class={clsx("h-5")}>{btnProps.icon}</span>
+            </Show>
           </Clipboard.Indicator>
           <Show when={btnProps.label}>
             <span>{btnProps.label}</span>
