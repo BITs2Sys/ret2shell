@@ -26,7 +26,8 @@ services:
       - "4222:4222"
     command: ["-js", "-sd", "/data"]
   logs:
-    image: victoriametrics/victoria-logs:v1.38.0
+    image: victoriametrics/victoria-logs:v1.43.1
+    restart: always
     ports:
       - "9428:9428"
     command:

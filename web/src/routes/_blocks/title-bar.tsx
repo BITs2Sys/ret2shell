@@ -415,7 +415,7 @@ export default function TitleBar() {
           <div class="w-4" />
           <ul class="lg:flex flex-row space-x-2 items-center hidden">
             <Transition name="fade-group-dive-left" mode="outin">
-              <Switch fallback={<LoadingTips class="opacity-60" />}>
+              <Switch fallback={<LoadingTips class="fade-group-dive-left opacity-60" />}>
                 <Match
                   when={
                     platformStore.isOnline &&

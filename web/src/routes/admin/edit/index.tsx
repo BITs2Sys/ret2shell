@@ -1,12 +1,10 @@
 import { usePlatformConfig, usePlatformInfo, useUpdatePlatformConfigMutation } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
-import { createForm, custom, setValues } from "@modular-forms/solid";
+import { createForm, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
-import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import { createEffect, untrack } from "solid-js";
 
@@ -47,7 +45,7 @@ export default function () {
         subject_info: result.subject_info,
         subject_url: result.subject_url,
         record: result.record,
-        hide_maker: result.hide_maker,
+        hide_maker: false,
         highlight_banner: result.highlight_banner,
         zen_game: result.zen_game,
       },
@@ -64,7 +62,7 @@ export default function () {
           subject_info: config.data.server.subject_info || "",
           subject_url: config.data.server.subject_url || "",
           record: config.data.server.record || "",
-          hide_maker: config.data.server.hide_maker || false,
+          hide_maker: false,
           highlight_banner: config.data.server.highlight_banner || "",
           zen_game: config.data.server.zen_game || null,
         });
@@ -163,45 +161,19 @@ export default function () {
               />
             )}
           </Field>
-          <div class="flex flex-row space-x-2">
-            <Field name="record">
-              {(field, props) => (
-                <Input
-                  class="flex-1"
-                  icon={<span class="shrink-0 icon-[fluent--record-20-regular] w-5 h-5" />}
-                  placeholder={t("platform.form.record.placeholder")}
-                  title={t("platform.form.record.label")}
-                  {...props}
-                  value={field.value}
-                  error={field.error}
-                />
-              )}
-            </Field>
-            <Field
-              name="hide_maker"
-              type="boolean"
-              validate={[
-                custom((value) => {
-                  if (platformStore.license?.level !== "enterprise" && value) {
-                    return false;
-                  }
-                  return true;
-                }, t("platform.form.hideMaker.disabled")),
-              ]}
-            >
-              {(field, props) => (
-                <Checkbox
-                  inputProps={props}
-                  checked={platformStore.license?.level !== "enterprise" ? false : field.value}
-                  error={field.error}
-                  title={t("platform.form.hideMaker.label")}
-                  disabled={platformStore.license?.level !== "enterprise"}
-                >
-                  <span class="flex-1 text-start">{t("platform.form.hideMaker.label")}</span>
-                </Checkbox>
-              )}
-            </Field>
-          </div>
+          <Field name="record">
+            {(field, props) => (
+              <Input
+                class="flex-1"
+                icon={<span class="shrink-0 icon-[fluent--record-20-regular] w-5 h-5" />}
+                placeholder={t("platform.form.record.placeholder")}
+                title={t("platform.form.record.label")}
+                {...props}
+                value={field.value}
+                error={field.error}
+              />
+            )}
+          </Field>
           <Button
             type="submit"
             level="primary"

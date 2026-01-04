@@ -38,7 +38,7 @@ export function useChallenges({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", "list", page?.() ?? 1, page_size?.() ?? 200]);
-  console.log(keys());
+  // console.log(keys());
   return useQuery(
     () => ({
       queryKey: keys(),

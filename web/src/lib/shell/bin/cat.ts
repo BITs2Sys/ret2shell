@@ -1,7 +1,6 @@
 import { getChallengeAttachments } from "@api/challenge";
 import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
-import type { Team } from "@models/team";
 import { t } from "@storage/theme";
 import ansiColors from "ansi-colors";
 import type { ParseEntry } from "shell-quote";
@@ -16,9 +15,9 @@ export class Cat implements Command {
     io: Stdio,
     args: ParseEntry[],
     _: string,
-    { game, team, challenge }: { game?: Game; team?: Team; challenge?: Challenge }
+    { game, challenge }: { game?: Game; challenge?: Challenge }
   ) => {
-    if (!game || !team || !challenge) {
+    if (!game || !challenge) {
       io.error(t("shell.errors.noGameSpecified.title"));
       return 1;
     }

@@ -28,6 +28,8 @@ export function FormBare(
     onDone: (challenge: ChallengeForm) => void;
   }
 ) {
+  // Load edit source
+  const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId || 0,
@@ -54,9 +56,6 @@ export function FormBare(
       queryKey: ["game", props.gameId, "challenge", props.challengeId],
     });
   }
-
-  // Load edit source
-  const game = useGame({ id: () => props.gameId });
 
   createEffect(() => {
     if (challenge.data) {

@@ -48,7 +48,7 @@ export default function ScorePicker(props: {
               if (minOne !== props.min) props.onChangeMin(minOne);
             }}
           />
-          <div class="h-12" />
+          <div class="h-13" />
         </div>
         <div class="flex-1 flex flex-col">
           <Chart
@@ -132,7 +132,7 @@ export default function ScorePicker(props: {
             }}
           />
           <Slider
-            class="flex-1 flex-col-reverse pl-1"
+            class="flex-1 flex-col-reverse pl-10"
             label={t("challenge.form.scoreRule.decay.label")}
             max={50}
             min={1}

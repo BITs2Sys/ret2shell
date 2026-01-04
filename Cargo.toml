@@ -123,9 +123,8 @@ features = [
 version = "0.12"
 
 [workspace.dependencies.reqwest]
-default-features = false
-features         = ["json", "rustls-tls", "http2", "charset"]
-version          = "0.12"
+features         = ["json", "http2", "charset"]
+version          = "0.13"
 
 [workspace.dependencies.lettre]
 default-features = false
