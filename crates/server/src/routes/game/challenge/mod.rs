@@ -18,7 +18,7 @@ use r2s_bucket::{
 };
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::{CHALLENGE_NS, Cluster};
+use r2s_cluster::{CHALLENGE_NS, Cluster, Pod};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, config, extra,
@@ -47,6 +47,7 @@ use crate::{
     auth::{self, Token, is_game_admin},
     data::{self, extract_team},
   },
+  routes::game::Instance,
   traits::{GlobalState, ResponseError},
 };
 
@@ -1291,59 +1292,87 @@ async fn start_challenge_instance(
   }
 }
 
+async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
+  if !pods.is_empty() {
+    tokio::spawn(async move {
+      for pod in pods {
+        let instance: Option<Instance> = pod.try_into().ok();
+        if instance.is_none() {
+          continue;
+        }
+        let instance = instance.unwrap();
+        let traffic = instance.traffic;
+        cache.at("traffic").del(traffic).await.ok();
+      }
+    });
+  }
+}
+
 async fn delay_challenge_instance(
-  State(ref cluster): State<Cluster>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  team_ext: Extension<Option<team::Model>>,
+  State(cache): State<Cache>, State(ref cluster): State<Cluster>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
 
-  let count = if let Some(team) = team {
+  let pods = if let Some(team) = team {
     info!("delaying challenge env");
     cluster
       .at(CHALLENGE_NS)
       .delay_challenge_env_by_team(challenge.id, team.id)
       .await?
   } else {
-    0
+    Vec::new()
   };
-  if count != 0 {
+  if !pods.is_empty() {
+    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
     return Ok(());
   }
 
   info!("delaying challenge env");
-  cluster
+  let pods = cluster
     .at(CHALLENGE_NS)
     .delay_challenge_env_by_user(challenge.id, token.id)
     .await?;
+  if !pods.is_empty() {
+    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+  }
+
   Ok(())
 }
 
 async fn stop_challenge_instance(
-  State(ref cluster): State<Cluster>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  team_ext: Extension<Option<team::Model>>,
+  State(cache): State<Cache>, State(ref cluster): State<Cluster>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
 
-  let count = if let Some(team) = team {
+  let pods = if let Some(team) = team {
     info!("stopping challenge env");
     cluster
       .at(CHALLENGE_NS)
       .stop_challenge_env_by_team(challenge.id, team.id)
       .await?
   } else {
-    0
+    Vec::new()
   };
-  if count != 0 {
+  if !pods.is_empty() {
+    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+
     return Ok(());
   }
 
   info!("stopping challenge env");
-  cluster
+  let pods = cluster
     .at(CHALLENGE_NS)
     .stop_challenge_env_by_user(challenge.id, token.id)
     .await?;
+
+  if !pods.is_empty() {
+    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+  }
+
   Ok(())
 }
 

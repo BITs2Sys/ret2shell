@@ -648,52 +648,52 @@ impl Cluster {
 
   pub async fn delay_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn delay_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn stop_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
       self
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn stop_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<usize, ClusterError> {
+  ) -> Result<Vec<Pod>, ClusterError> {
     let pod = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
@@ -705,7 +705,7 @@ impl Cluster {
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
     }
-    Ok(pod.len())
+    Ok(pod)
   }
 
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {
