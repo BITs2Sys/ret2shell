@@ -1,6 +1,4 @@
 mod traits;
-pub use traits::{EmailCtx, EmailError, EmailRequest, EmailType};
-
 use lettre::{
   AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
   message::{Mailbox, SinglePart, header},
@@ -11,6 +9,7 @@ use lettre::{
 };
 use r2s_config::email;
 use tracing::debug;
+pub use traits::{EmailCtx, EmailError, EmailRequest, EmailType};
 
 fn construct_email(
   email: &EmailCtx, sender_name: impl AsRef<str>, sender_email: impl AsRef<str>,

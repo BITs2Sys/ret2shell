@@ -1,10 +1,7 @@
 use async_nats::jetstream::{Message, consumer::pull::Stream};
 use futures::StreamExt;
 use r2s_database::game;
-use r2s_event::{
-  EventManager,
-  events::EventContainer,
-};
+use r2s_event::{EventManager, events::EventContainer};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
 use tracing::{error, warn};
@@ -47,10 +44,7 @@ async fn push_event(
 ) -> Result<(), ResponseError> {
   let payload = String::from_utf8(message.message.payload.to_vec())?;
   let event = serde_json::from_str::<TracedMessage<EventContainer>>(&payload)?;
-  if game::get(&db.conn, event.payload.game_id)
-    .await?
-    .is_none()
-  {
+  if game::get(&db.conn, event.payload.game_id).await?.is_none() {
     warn!(
       game_id = event.payload.game_id,
       "skip event broadcast for missing game",

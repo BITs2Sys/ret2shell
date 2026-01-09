@@ -17,7 +17,6 @@ pub enum EmailType {
   Reset,
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EmailRequest {
   pub email: EmailCtx,

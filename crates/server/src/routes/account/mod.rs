@@ -14,8 +14,7 @@ use r2s_database::{
   config, game, institute as institute_db, team,
   user::{self, Permission, Permissions},
 };
-use r2s_email::EmailType;
-use r2s_email::{EmailCtx, EmailRequest};
+use r2s_email::{EmailCtx, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use rand::Rng;
@@ -369,7 +368,6 @@ async fn login(
     }
   }
 }
-
 
 async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,

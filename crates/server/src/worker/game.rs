@@ -60,12 +60,11 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.double_ack().await.ok();
         continue;
       }
-      let challenge_msg =
-        serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
-          .inspect_err(|e| {
-            error!(error=?e, "failed to parse message from nats");
-          })
-          .ok();
+      let challenge_msg = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
+        .inspect_err(|e| {
+          error!(error=?e, "failed to parse message from nats");
+        })
+        .ok();
       let span = error_span!(
         "request",
         trace=%challenge_msg.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned())

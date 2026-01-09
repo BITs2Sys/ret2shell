@@ -43,7 +43,7 @@ export default function (props: { status?: number }) {
         {/* </Match> */}
       </Switch>
       <h1 class="font-bold text-3xl space-x-4">
-        <span class="opacity-60">{props.status ?? 'TωT'}</span>
+        <span class="opacity-60">{props.status ?? "TωT"}</span>
         <span class="text-primary">|</span>
         <span>{message()}</span>
       </h1>
@@ -51,7 +51,12 @@ export default function (props: { status?: number }) {
       <Show when={(props.status && props.status >= 500) || !props.status}>
         <p class="flex space-x-2">
           <span class="opacity-60">{t("general.network.gotoDocs")}</span>
-          <a href="https://docs.ret.sh.cn/" class="flex flex-row space-x-2 items-center hover:underline" target="_blank" rel="noreferrer">
+          <a
+            href="https://docs.ret.sh.cn/"
+            class="flex flex-row space-x-2 items-center hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
             <span class="opacity-60">{t("docs.title")}</span>
             <span class="shrink-0 icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
           </a>

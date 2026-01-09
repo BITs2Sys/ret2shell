@@ -125,14 +125,7 @@ export default function () {
                     >
                       <span class="shrink-0 icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
                     </Link>
-                    <Link
-                      href="https://ret.sh.cn/"
-                      ghost
-                      size="sm"
-                      square
-                      title={t("about.source")}
-                      target="_blank"
-                    >
+                    <Link href="https://ret.sh.cn/" ghost size="sm" square title={t("about.source")} target="_blank">
                       <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
                     </Link>
                   </Card>
