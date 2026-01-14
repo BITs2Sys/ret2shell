@@ -479,7 +479,7 @@ impl TryFrom<Pod> for Instance {
         .metadata
         .creation_timestamp
         .clone()
-        .map(|c| c.0)
+        .map(|c| DateTime::from_timestamp_secs(c.0.as_second()).unwrap_or_default())
         .ok_or(ResponseError::Gone(
           "pod creation time not found".to_owned(),
         ))?,
