@@ -190,7 +190,7 @@ export default function Traffic() {
           <EditorBare
             class="w-full h-full"
             lineNumbers
-            lang="rust"
+            lang="rune"
             value={script()}
             lints={lint() ?? []}
             onValueChanged={(e) => {

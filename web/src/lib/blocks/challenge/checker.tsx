@@ -176,14 +176,14 @@ export default function (props: ChallengeWidgetProps) {
           </span>
         </span>
       </header>
-      <EditorBare
-        class="w-full h-full"
-        lineNumbers
-        lang="rust"
-        value={script()}
-        lints={scriptRemote.data?.lint ?? []}
-        onValueChanged={(e) => {
-          setScript(e);
+        <EditorBare
+          class="w-full h-full"
+          lineNumbers
+          lang="rune"
+          value={script()}
+          lints={scriptRemote.data?.lint ?? []}
+          onValueChanged={(e) => {
+            setScript(e);
         }}
       />
       <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">

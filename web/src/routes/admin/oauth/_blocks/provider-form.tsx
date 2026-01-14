@@ -249,7 +249,7 @@ export default function ProviderForm(props: {
             form={form}
             lineNumbers
             class="h-96"
-            lang="rust"
+            lang="rune"
             name="script"
             lints={oauthProvider.data?.lint ?? undefined}
             value={field.value}
