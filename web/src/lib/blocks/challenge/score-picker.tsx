@@ -16,7 +16,11 @@ export default function ScorePicker(props: {
   function getScore(d: number) {
     if (d < 1) return props.max;
     if (d >= props.decay) return props.min;
-    return Math.round(props.max + ((props.min - props.max) * (d * d - 1)) / (props.decay * props.decay));
+    const relative_radio = (d - 1) / (props.decay - 1);
+    const cos_theta = Math.cos(relative_radio * Math.PI);
+    const normalized_score = (cos_theta + 1) / 2;
+    const score = props.min + (props.max - props.min) * normalized_score;
+    return Math.round(score);
   }
   function getFunctionPlots() {
     const data = [];
