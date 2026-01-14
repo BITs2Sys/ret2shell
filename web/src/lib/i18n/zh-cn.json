@@ -1874,7 +1874,7 @@
     },
     "wget": {
       "man": "下载指定的文件。",
-      "usage": "使用方法： wget \\\"<文件名>\\\"",
+      "usage": "使用方法： wget <文件名>",
       "downloading": "下载中",
       "errors": {
         "fileNotFound": {

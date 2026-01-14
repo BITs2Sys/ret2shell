@@ -71,7 +71,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
   const refetchData = () => {
     challenge.refetch();
     inflyClient.invalidateQueries({
-      queryKey: ["game", props.gameId, "challenge", "list", 1, 200],
+      queryKey: ["game", props.gameId, "challenge"],
     });
   };
 
@@ -79,7 +79,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
     onSuccess: () => {
       setSearchParams({ challenge: null });
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", "list", 1, 200],
+        queryKey: ["game", props.gameId, "challenge"],
       });
     },
   });

@@ -94,12 +94,8 @@ export default function (props: ChallengeWidgetProps) {
 
   const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
     onSuccess: () => {
-      scriptRemote.refetch();
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", "checker", "all"],
-      });
-      inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
     },
   });

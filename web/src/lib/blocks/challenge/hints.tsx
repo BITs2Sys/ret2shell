@@ -55,7 +55,7 @@ export default function (props: ChallengeWidgetProps) {
       setPtsInputIconIndex(0);
       hints.refetch();
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
     },
   });
@@ -64,7 +64,7 @@ export default function (props: ChallengeWidgetProps) {
       hints.refetch();
 
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
     },
   });

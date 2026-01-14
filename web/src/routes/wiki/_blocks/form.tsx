@@ -22,12 +22,12 @@ type WikiForm = {
 export default function (props: { onDone: (article: Article) => void; editSource?: Article }) {
   const [form, { Form, Field }] = createForm<WikiForm>({
     initialValues: {
-      title: props.editSource!.title,
-      path: props.editSource!.path.join("/"),
-      content: props.editSource!.content || "",
-      enable_comment: props.editSource!.enable_comment,
-      draft: props.editSource!.draft,
-      published: props.editSource!.published,
+      title: props.editSource?.title || "",
+      path: props.editSource?.path.join("/") || "",
+      content: props.editSource?.content || "",
+      enable_comment: !!props.editSource?.enable_comment,
+      draft: !!props.editSource?.draft,
+      published: !!props.editSource?.published,
     },
   });
 
@@ -47,20 +47,20 @@ export default function (props: { onDone: (article: Article) => void; editSource
     if (props.editSource) {
       untrack(() => {
         setValues(form, {
-          title: props.editSource!.title,
-          path: props.editSource!.path.join("/"),
-          content: props.editSource!.content || "",
-          enable_comment: props.editSource!.enable_comment,
-          draft: props.editSource!.draft,
-          published: props.editSource!.published,
+          title: props.editSource?.title || "",
+          path: props.editSource?.path.join("/") || "",
+          content: props.editSource?.content || "",
+          enable_comment: !!props.editSource?.enable_comment,
+          draft: !!props.editSource?.draft,
+          published: !!props.editSource?.published,
         });
       });
     } else {
       untrack(() => {
         setValues(form, {
-          title: undefined,
-          path: undefined,
-          content: undefined,
+          title: "",
+          path: "",
+          content: "",
           enable_comment: true,
           draft: true,
           published: false,

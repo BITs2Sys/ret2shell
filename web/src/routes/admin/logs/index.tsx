@@ -300,22 +300,22 @@ export default function () {
                     {(log["span.user-account"] as string) && (
                       <span class="font-bold mr-2">
                         <span class="opacity-60 italic">user=</span>
-                        <A href={`/admin/logs?account=${log["span.user-account"]}`} class="hover:underline mr-2">
+                        <A href={`/admin/logs?account=${log["span.user-account"]}`} class="hover:underline mr-1">
                           {log["span.user-account"] as string}
                         </A>
-                        <A href={`/admin/users?user=${log["span.user-id"]}`}>
-                          <span class="icon-[fluent--open-12-regular] w-3 h-3 align-top" />
+                        <A href={`/admin/users?user=${log["span.user-id"]}`} class="hover:text-primary">
+                          <span class="icon-[fluent--open-16-regular] w-4 h-4" />
                         </A>
                       </span>
                     )}
                     {(log["span.from"] as string) && (
                       <>
                         <span class="opacity-60 italic">&nbsp;from=</span>
-                        <A href={`/admin/logs?from=${log["span.from"] as string}`} class="hover:underline mr-2">
+                        <A href={`/admin/logs?from=${log["span.from"] as string}`} class="hover:underline mr-1">
                           {log["span.from"] as string}
                         </A>
-                        <A href={`/admin/users?filter=${log["span.from"]}`}>
-                          <span class="icon-[fluent--open-12-regular] w-3 h-3 align-top" />
+                        <A href={`/admin/users?filter=${log["span.from"]}`} class="hover:text-primary">
+                          <span class="icon-[fluent--open-16-regular] w-4 h-4" />
                         </A>
                       </>
                     )}
@@ -324,9 +324,10 @@ export default function () {
                         <span class="opacity-60 italic">&nbsp;trace=</span>
                         <A
                           href={`/admin/logs?trace=${log["span.trace"] as string}`}
-                          class="hover:underline mr-2 opacity-60"
+                          class="hover:underline mr-1"
+                          title={log["span.trace"] as string}
                         >
-                          {log["span.trace"] as string}
+                          [...]
                         </A>
                       </>
                     )}

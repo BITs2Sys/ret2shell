@@ -24,12 +24,8 @@ export default function (props: ChallengeWidgetProps) {
 
   const deleteAttachmentMutation = useDeleteChallengeAttachmentMutation({
     onSuccess: () => {
-      attachmentsQuery.refetch();
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "commitHistory"],
-      });
-      inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", undefined, "limited"],
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
     },
   });
@@ -98,9 +94,8 @@ export default function (props: ChallengeWidgetProps) {
             url={`${api_root}/game/${props.gameId}/challenge/${props.challengeId}/file?folder=${folder()}`}
             onDone={() => {
               inflyClient.invalidateQueries({
-                queryKey: ["game", props.gameId, "challenge", props.challengeId, "attachments", undefined, "limited"],
+                queryKey: ["game", props.gameId, "challenge", props.challengeId],
               });
-              attachmentsQuery.refetch();
             }}
             multiple
           />
