@@ -16,8 +16,8 @@ export function PoliciesEdit(props: {
   const [form, { Form, Field }] = createForm<ArchivePolicy>({
     initialValues: {
       challenge: {
-        show_answer: props.editSource!.challenge.show_answer,
-        show_hints: props.editSource!.challenge.show_hints,
+        show_answer: !!props.editSource?.challenge.show_answer,
+        show_hints: !!props.editSource?.challenge.show_hints,
       },
     },
   });
@@ -26,8 +26,8 @@ export function PoliciesEdit(props: {
       untrack(() => {
         setValues(form, {
           challenge: {
-            show_answer: props.editSource!.challenge.show_answer,
-            show_hints: props.editSource!.challenge.show_hints,
+            show_answer: !!props.editSource?.challenge.show_answer,
+            show_hints: !!props.editSource?.challenge.show_hints,
           },
         });
       });

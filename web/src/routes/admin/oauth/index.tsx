@@ -37,7 +37,9 @@ export default function () {
   const updateOAuthProviderMutation = useUpdateOAuthProviderMutation({ onSuccess });
   const deleteOAuthProviderMutation = useDeleteOAuthProviderMutation({ onSuccess });
 
+  const [providerCreationFormOpen, setProviderCreationFormOpen] = createSignal(false);
   const [providerFormOpen, setProviderFormOpen] = createSignal(false);
+  const [instituteCreationFormOpen, setInstituteCreationFormOpen] = createSignal(false);
   const [instituteFormOpen, setInstituteFormOpen] = createSignal(false);
   return (
     <>
@@ -57,12 +59,14 @@ export default function () {
                   <span>{t("general.actions.create.title")}</span>
                 </>
               }
-              // onClick={() => setProviderFormOpen(true)}
-              open={providerFormOpen()}
-              onOpenChange={(detail) => setProviderFormOpen(detail.open)}
+              open={providerCreationFormOpen()}
+              onOpenChange={(detail) => setProviderCreationFormOpen(detail.open)}
             >
               <ProviderForm
-                onDone={(v) => Promise.resolve(createOAuthProviderMutation.mutate(v))}
+                onDone={async (v) => {
+                  await createOAuthProviderMutation.mutateAsync(v);
+                  setProviderCreationFormOpen(false);
+                }}
                 loading={createOAuthProviderMutation.isPending}
               />
             </Dialog>
@@ -81,12 +85,15 @@ export default function () {
                   square
                   title={t("general.actions.edit.title")}
                   btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}
+                  open={providerFormOpen()}
+                  onOpenChange={(detail) => setProviderFormOpen(detail.open)}
                 >
                   <ProviderForm
-                    editSource={service}
-                    onDone={(v) =>
-                      Promise.resolve(updateOAuthProviderMutation.mutate({ service: service.provider, req: v }))
-                    }
+                    provider={service.provider}
+                    onDone={async (v) => {
+                      await updateOAuthProviderMutation.mutateAsync({ service: service.provider, req: v });
+                      setProviderFormOpen(false);
+                    }}
                     loading={updateOAuthProviderMutation.isPending}
                   />
                 </Dialog>
@@ -128,12 +135,14 @@ export default function () {
                   <span>{t("general.actions.create.title")}</span>
                 </>
               }
-              // onClick={() => setInstituteFormOpen(true)}
-              onOpenChange={(detail) => setInstituteFormOpen(detail.open)}
-              open={instituteFormOpen()}
+              onOpenChange={(detail) => setInstituteCreationFormOpen(detail.open)}
+              open={instituteCreationFormOpen()}
             >
               <InstituteForm
-                onDone={(v) => Promise.resolve(createInstituteMutation.mutate(v))}
+                onDone={async (v) => {
+                  await createInstituteMutation.mutateAsync(v);
+                  setInstituteCreationFormOpen(false);
+                }}
                 loading={createInstituteMutation.isPending}
               />
             </Dialog>
@@ -157,10 +166,15 @@ export default function () {
                   square
                   title={t("general.actions.edit.title")}
                   btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}
+                  open={instituteFormOpen()}
+                  onOpenChange={(detail) => setInstituteFormOpen(detail.open)}
                 >
                   <InstituteForm
                     editSource={institute}
-                    onDone={(v) => Promise.resolve(updateInstituteMutation.mutate(v))}
+                    onDone={async (v) => {
+                      await updateInstituteMutation.mutateAsync(v);
+                      setInstituteFormOpen(false);
+                    }}
                     loading={updateInstituteMutation.isPending}
                   />
                 </Dialog>

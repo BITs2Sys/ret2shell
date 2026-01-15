@@ -57,7 +57,7 @@ impl OAuth {
   }
 
   pub async fn lint(&self, script: impl AsRef<str>) -> Result<Vec<DiagnosticMarker>, EngineError> {
-    Engine::lint(Self::default_modules(), script, &["expose"]).await
+    Engine::lint(Self::default_modules(), script, &["login", "bind"]).await
   }
 
   pub async fn login(

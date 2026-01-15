@@ -53,7 +53,7 @@ export default function () {
             </>
           }
         >
-          <span>{article.data!.title}</span>
+          <span>{article.data?.title}</span>
         </Show>
       </h1>
       <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
@@ -80,7 +80,7 @@ export default function () {
           when={
             article.data?.created_at &&
             article.data?.updated_at &&
-            article.data!.created_at !== article.data!.updated_at
+            article.data?.created_at !== article.data?.updated_at
           }
         >
           <div

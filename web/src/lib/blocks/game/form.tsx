@@ -53,16 +53,16 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
       untrack(() => {
         setValues(form, {
           ...game.data,
-          start_at: game.data!.start_at.toSeconds(),
-          end_at: game.data!.end_at.toSeconds(),
-          register_at: game.data!.register_at.toSeconds(),
-          archive_at: game.data!.archive_at.toSeconds(),
-          first_blood_award: game.data!.award_rates?.[0] || game.data!.award_rate,
-          second_blood_award: Math.floor(game.data!.award_rates?.[1] || (game.data!.award_rate * 2) / 3),
-          third_blood_award: Math.floor(game.data!.award_rates?.[2] || game.data!.award_rate / 3),
-          enable_hammer: game.data!.hammer_policy?.enabled || false,
-          outer_hammer_label: game.data!.hammer_policy?.outer_label || "",
-          outer_hammer_url: game.data!.hammer_policy?.outer_url || "",
+          start_at: game.data?.start_at.toSeconds(),
+          end_at: game.data?.end_at.toSeconds(),
+          register_at: game.data?.register_at.toSeconds(),
+          archive_at: game.data?.archive_at.toSeconds(),
+          first_blood_award: game.data?.award_rates?.[0] || game.data?.award_rate,
+          second_blood_award: Math.floor(game.data?.award_rates?.[1] || ((game.data?.award_rate || 0) * 2) / 3),
+          third_blood_award: Math.floor(game.data?.award_rates?.[2] || (game.data?.award_rate || 0) / 3),
+          enable_hammer: game.data?.hammer_policy?.enabled || false,
+          outer_hammer_label: game.data?.hammer_policy?.outer_label || "",
+          outer_hammer_url: game.data?.hammer_policy?.outer_url || "",
         });
       });
     }

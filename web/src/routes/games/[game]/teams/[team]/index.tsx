@@ -47,7 +47,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
   const institutes = useInstitutes();
   const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>({
     initialValues: {
-      name: props.team!.name,
+      name: props.team?.name || "",
       tag: props.team?.tag || "",
       institute_id: props.team?.institute_id?.toString() || "0",
       state: props.team?.state.toString() || "0",
@@ -58,7 +58,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
     if (props.team) {
       untrack(() => {
         setValues(form, {
-          name: props.team!.name,
+          name: props.team?.name || "",
           tag: props.team?.tag || "",
           institute_id: props.team?.institute_id?.toString() || "0",
           state: props.team?.state.toString() || "0",

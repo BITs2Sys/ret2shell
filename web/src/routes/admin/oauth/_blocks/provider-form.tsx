@@ -41,12 +41,12 @@ const presetMap = {
 
 export default function ProviderForm(props: {
   onDone?: (result: OAuthProvider) => Promise<void>;
-  editSource?: OAuthProvider;
+  provider?: string;
   loading?: boolean;
 }) {
   const oauthProvider = useOAuthProvider({
-    service: () => props.editSource?.provider || "",
-    enabled: () => !!props.editSource,
+    service: () => props.provider || "",
+    enabled: () => !!props.provider,
   });
   const [form, { Form, Field }] = createForm<FormType>({
     initialValues: {
@@ -62,7 +62,7 @@ export default function ProviderForm(props: {
   const [avatarUploading, setAvatarUploading] = createSignal(false);
 
   createEffect(() => {
-    if (props.editSource) {
+    if (oauthProvider.data) {
       untrack(async () => {
         const { item } = oauthProvider.data || {};
         setValues(form, {
@@ -77,7 +77,7 @@ export default function ProviderForm(props: {
   });
   async function onSubmit(result: FormType) {
     props.onDone?.({
-      id: props.editSource?.id || 0,
+      id: oauthProvider.data?.item.id || 0,
       name: result.name,
       provider: result.provider,
       avatar: result.avatar,
@@ -258,7 +258,7 @@ export default function ProviderForm(props: {
         )}
       </Field>
       <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
+        {props.provider ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

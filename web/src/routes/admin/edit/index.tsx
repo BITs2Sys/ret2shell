@@ -44,7 +44,7 @@ export default function () {
     const mergedConfig = {
       ...config.data,
       server: {
-        ...config.data!.server,
+        ...config.data?.server,
         name: result.name,
         footer_info: result.footer_info,
         footer_url: result.footer_url,
