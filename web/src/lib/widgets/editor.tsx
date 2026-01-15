@@ -2,7 +2,6 @@ import ace from "ace-builds";
 import { type ComponentProps, createEffect, createSignal, onMount, Show, splitProps } from "solid-js";
 import Card from "./card";
 import "ace-builds/esm-resolver";
-import "./ace/rune";
 import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
 import Spin from "@assets/animates/spin";
@@ -10,6 +9,11 @@ import { mediaPath } from "@lib/utils/media";
 import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
+
+const aceConfig = ace.config as typeof ace.config & {
+  setModuleLoader?: (moduleName: string, loader: () => Promise<unknown>) => void;
+};
+aceConfig.setModuleLoader?.("ace/mode/rune", () => import("./ace/rune"));
 
 export type DiagnosticMarker = {
   kind: "error" | "warning" | "info";
