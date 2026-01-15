@@ -9,6 +9,8 @@ use tracing::{error, warn};
 use crate::traits::ResponseError;
 
 pub fn spawn(messages: Stream, manager: EventManager, db: Database) {
+  let saki = manager.clone();
+  tokio::spawn(async move { saki.cry().await });
   tokio::spawn(event_pusher(messages, manager, db));
 }
 

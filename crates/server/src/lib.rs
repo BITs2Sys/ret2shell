@@ -85,10 +85,6 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let queue = r2s_queue::initialize(&config.queue).await?;
   info!("loading module: < Event Manager >");
   let event = r2s_event::initialize();
-  tokio::spawn({
-    let manager = event.clone();
-    async move { manager.cry().await }
-  });
   info!("loading module: < OAuth >");
   let oauth = r2s_oauth::initialize(&config.auth).await;
   info!("loading module: < Cluster >");

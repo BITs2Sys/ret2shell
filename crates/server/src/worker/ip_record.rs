@@ -19,11 +19,11 @@ pub fn spawn(messages: Stream, db: Database) {
 async fn ip_record_worker(mut messages: Stream, db: Database) {
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
+      message.double_ack().await.ok();
       ip_record_worker_exec(message.clone(), &db)
         .await
         .map_err(|e| error!(error = ?e, "failed to process message"))
         .ok();
-      message.double_ack().await.ok();
     } else {
       error!(?message, "failed to receive message from nats");
     }

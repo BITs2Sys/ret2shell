@@ -15,7 +15,7 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
-use tracing::{Instrument, Span, error, error_span, info, warn};
+use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
 use crate::traits::{GlobalState, ResponseError};
 
@@ -188,7 +188,7 @@ async fn submission_worker(
         continue;
       };
       if submission.result.is_some() || submission.solved.is_some() {
-        info!(
+        debug!(
           submission_id = submission.id,
           "submission already processed, skip message"
         );

@@ -64,7 +64,7 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
     && let Ok(Some(user)) = user::get_by_account_or_email(&db.conn, &req.email.email).await
     && user.permissions.0.contains(&user::Permission::Verified)
   {
-    warn!("verification email for verified account, dropping");
+    warn!("won't send verification email for already verified account, dropping");
     message.double_ack().await.ok();
     drop(span_guard);
     return Ok(());
