@@ -10,11 +10,7 @@ import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
 
-const aceConfig = ace.config as typeof ace.config & {
-  setModuleLoader?: (moduleName: string, loader: () => Promise<unknown>) => void;
-};
 const aceModule = ace as typeof ace & { require?: (name: string) => { Mode?: new () => unknown } };
-aceConfig.setModuleLoader?.("ace/mode/rune", () => import("./ace/rune"));
 
 export type DiagnosticMarker = {
   kind: "error" | "warning" | "info";
@@ -87,7 +83,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       await import("./ace/rune");
     }
     editor = ace.edit(editorElement!, {
-      mode: `ace/mode/${editorProps.lang || "text"}`,
+      mode: isRune ? "ace/mode/text" : `ace/mode/${editorProps.lang || "text"}`,
       theme: `ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`,
       readOnly: editorProps.readonly,
       showPrintMargin: false,
