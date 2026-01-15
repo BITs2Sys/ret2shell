@@ -43,7 +43,11 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
       can_register_after_started: true,
       enable_audit: false,
       weight: 1,
-      hammer_policy: null,
+      hammer_policy: {
+        enabled: false,
+        outer_label: null,
+        outer_url: null,
+      },
       archive_policy: { challenge: { show_answer: false, show_hints: false } },
       timeline_presets: [],
       award_rate: 0,

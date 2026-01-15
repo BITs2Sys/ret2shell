@@ -1,69 +1,18 @@
 import { useGameAdminChatSessions } from "@api/game";
-import type { ChatSession } from "@models/chat";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
-import Button from "@widgets/button";
 import Link from "@widgets/link";
+import Pagination from "@widgets/pagination";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
-
-function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
-  const result = oldSessions;
-  const incoming = newSessions;
-  result.sort((a, b) => {
-    if (a.team_id === b.team_id) {
-      return a.challenge_id - b.challenge_id;
-    }
-    return a.team_id - b.team_id;
-  });
-  incoming.sort((a, b) => {
-    if (a.team_id === b.team_id) {
-      return a.challenge_id - b.challenge_id;
-    }
-    return a.team_id - b.team_id;
-  });
-  let i = 0;
-  const iLen = result.length;
-  let j = 0;
-  const jLen = incoming.length;
-  while (i < iLen && j < jLen) {
-    const oldSession = result[i];
-    const newSession = incoming[j];
-    if (oldSession.team_id === newSession.team_id && oldSession.challenge_id === newSession.challenge_id) {
-      if (
-        newSession.last_active_at.toMillis() > oldSession.last_active_at.toMillis() ||
-        newSession.checked !== oldSession.checked ||
-        newSession.is_admin !== oldSession.is_admin
-      ) {
-        result[i] = newSession;
-      }
-      i++;
-      j++;
-    } else if (
-      oldSession.team_id > newSession.team_id ||
-      (oldSession.team_id === newSession.team_id && oldSession.challenge_id > newSession.challenge_id)
-    ) {
-      result.push(newSession);
-      j++;
-    } else {
-      i++;
-    }
-  }
-  while (j < jLen) {
-    result.push(incoming[j]);
-    j++;
-  }
-  return result.sort((a, b) => b.last_active_at.toMillis() - a.last_active_at.toMillis());
-}
+import { createMemo, For, onCleanup, Show } from "solid-js";
 
 export default function ChatList() {
-  const [sessions, setSessions] = createSignal([] as ChatSession[]);
   const params = useParams();
-  const [searchParams, _] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
-  const pageSize = 30;
-  const [page, setPage] = createSignal(1);
+  const pageSize = 15;
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "", 10) || null);
   const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "", 10) || null);
 
@@ -72,13 +21,6 @@ export default function ChatList() {
     page: () => 1,
     page_size: () => pageSize * page(),
     enabled: () => gameId() > 0,
-  });
-
-  createEffect(() => {
-    if (sessionsQuery.data) {
-      const result = mergeChats([...sessions()], sessionsQuery.data[0]);
-      untrack(() => setSessions([...result]));
-    }
   });
 
   const timer = setInterval(() => {
@@ -107,7 +49,7 @@ export default function ChatList() {
         defer
       >
         <Show
-          when={sessions().length > 0}
+          when={sessionsQuery.data && sessionsQuery.data[0].length > 0}
           fallback={
             <div class="w-full min-h-full flex flex-row space-x-2 p-3 lg:p-6 items-center justify-center">
               <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
@@ -116,7 +58,7 @@ export default function ChatList() {
           }
         >
           <div class="w-full min-h-full overflow-hidden flex flex-col space-y-2 p-2">
-            <For each={sessions()}>
+            <For each={sessionsQuery.data?.[0] || []}>
               {(session) => (
                 <Link
                   href={`/games/${gameId()}/admin/hammers?challenge=${session.challenge_id}&team=${session.team_id}`}
@@ -151,16 +93,13 @@ export default function ChatList() {
                 </Link>
               )}
             </For>
-            <Button
-              ghost
-              onClick={() => {
-                setPage(page() + 1);
-                sessionsQuery.refetch();
-              }}
-            >
-              <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60 hover:opacity-100" />
-              <span>{t("general.actions.loadMore.title")}</span>
-            </Button>
+            <Pagination
+              class="p-6 lg:p-9"
+              count={sessionsQuery.data?.[1] || 0}
+              pageSize={pageSize}
+              page={page()}
+              onPageChange={(page) => setSearchParams({ page: page.page.toString() })}
+            />
           </div>
         </Show>
       </OverlayScrollbarsComponent>

@@ -85,11 +85,11 @@ export default function () {
       game_id: gameId(),
       tag: tags,
       score_rule: {
-        initial: result.initial,
-        minimum: result.minimum,
-        decay: result.decay,
+        initial: result.initial ?? 1,
+        minimum: result.minimum ?? 1,
+        decay: result.decay ?? 1,
       },
-      score: result.initial,
+      score: result.initial ?? 1,
       bucket: null,
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
@@ -104,25 +104,23 @@ export default function () {
   });
 
   async function onEditGame(result: GameForm) {
+    console.log("onEditGame", result, game.data);
     if (!game.data) return;
-    updateGameMutation.mutate({
+    console.log("onEditGame proceeding to mutate");
+    await updateGameMutation.mutateAsync({
       id: game.data.id,
       game: {
         ...game.data,
         ...result,
-        start_at: DateTime.fromSeconds(result.start_at!),
-        end_at: DateTime.fromSeconds(result.end_at!),
-        archive_at: DateTime.fromSeconds(result.archive_at!),
-        register_at: DateTime.fromSeconds(result.register_at!),
-        award_rates: [
-          result.first_blood_award ?? result.award_rate ?? 0,
-          result.second_blood_award ?? ((result.award_rate ?? 0) * 2) / 3,
-          result.third_blood_award ?? (result.award_rate ?? 0) / 3,
-        ],
-        hammer_policy: {
-          enabled: !!result.enable_hammer,
-          outer_label: result.outer_hammer_label || null,
-          outer_url: result.outer_hammer_url || null,
+        start_at: game.data?.start_at,
+        end_at: game.data?.end_at,
+        register_at: game.data?.register_at,
+        archive_at: game.data?.archive_at,
+        award_rates: game.data?.award_rates || [0, 0, 0],
+        hammer_policy: game.data?.hammer_policy || {
+          enabled: true,
+          outer_label: null,
+          outer_url: null,
         },
       },
     });
@@ -148,7 +146,7 @@ export default function () {
                   defer
                 >
                   <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                    <GameEdit onDone={onEditGame} gameId={gameId()} />
+                    <GameEdit onDone={onEditGame} gameId={gameId()} training />
                     <div class="h-16" />
                     <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
                       <AdministratorsManagement gameId={gameId()} />
