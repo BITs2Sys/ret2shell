@@ -1,10 +1,11 @@
 use async_nats::jetstream::{self, consumer::pull::Stream};
+use chrono::Utc;
 use futures::StreamExt;
 use r2s_database::{ip, user};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
 use serde::{Deserialize, Serialize};
-use tracing::{error, warn};
+use tracing::{debug, error, warn};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct IpRecord {
@@ -33,6 +34,10 @@ async fn ip_record_worker(mut messages: Stream, db: Database) {
 async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
   let req = String::from_utf8(message.message.payload.to_vec())?;
   let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
+  if Utc::now().signed_duration_since(req.created_at) > chrono::Duration::minutes(30) {
+    debug!("ip record message expired, dropping");
+    return Ok(());
+  }
   let req = req.payload;
   if user::get_ex(&db.conn, req.user_id).await?.is_none() {
     warn!(user_id = req.user_id, "ip record user not found");

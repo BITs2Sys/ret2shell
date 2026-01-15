@@ -433,7 +433,6 @@ async fn send_email(
     },
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),
-    created_at: Utc::now(),
     email_type,
   };
   queue.publish("email", email_req, trace).await?;

@@ -1,10 +1,10 @@
 use async_nats::jetstream::{Message, consumer::pull::Stream};
+use chrono::{Duration, Utc};
 use futures::StreamExt;
-use r2s_database::game;
 use r2s_event::{EventManager, events::EventContainer};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
-use tracing::{error, warn};
+use tracing::{error, error_span, warn};
 
 use crate::traits::ResponseError;
 
@@ -42,17 +42,18 @@ async fn event_pusher(mut messages: Stream, manager: EventManager, db: Database)
 }
 
 async fn push_event(
-  message: Message, manager: EventManager, db: &Database,
+  message: Message, manager: EventManager, _db: &Database,
 ) -> Result<(), ResponseError> {
   let payload = String::from_utf8(message.message.payload.to_vec())?;
   let event = serde_json::from_str::<TracedMessage<EventContainer>>(&payload)?;
-  if game::get(&db.conn, event.payload.game_id).await?.is_none() {
-    warn!(
-      game_id = event.payload.game_id,
-      "skip event broadcast for missing game",
-    );
+  let span = error_span!("request", trace=%event.trace);
+  let span_guard = span.enter();
+  if Utc::now().signed_duration_since(event.created_at) > Duration::minutes(10) {
+    warn!("event message expired, dropping");
+    message.double_ack().await.ok();
     return Ok(());
   }
   manager.broadcast(event.payload).await;
+  drop(span_guard);
   Ok(())
 }

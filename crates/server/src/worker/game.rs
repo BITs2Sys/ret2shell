@@ -69,11 +69,20 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         "request",
         trace=%challenge_msg.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned())
       );
+      let created_at = challenge_msg.as_ref().map(|c| c.created_at);
+      if created_at
+        .is_none_or(|c| Utc::now().signed_duration_since(c) > chrono::Duration::minutes(10))
+      {
+        debug!("score maintenance message expired, dropping");
+        message.double_ack().await.ok();
+        continue;
+      }
       let challenge_payload = challenge_msg.map(|c| c.payload);
       if challenge_payload.is_none() {
         message.double_ack().await.ok();
         continue;
       }
+
       let Some(Some(current_challenge)) =
         challenge::get(&db.conn, challenge_payload.as_ref().unwrap().id)
           .await
@@ -157,6 +166,9 @@ async fn submission_worker(
   } else {
     return;
   };
+
+  // NOTE: we do not use message time to deduplicate here, we should ensure all the submissions are
+  // checked, even if they are redelivered due to worker crashes.
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
       let req = String::from_utf8(message.message.payload.to_vec())

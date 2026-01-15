@@ -4162,6 +4162,7 @@ name = "r2s-queue"
 version = "3.9.0"
 dependencies = [
  "async-nats",
+ "chrono",
  "r2s-config",
  "serde",
  "serde_json",

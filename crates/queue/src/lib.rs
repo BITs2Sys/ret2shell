@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use async_nats::jetstream::{self, consumer::pull::Stream, context::PublishAckFuture};
+use chrono::{DateTime, Utc};
 use r2s_config::queue;
 use serde::{Deserialize, Serialize};
 
@@ -18,6 +19,7 @@ pub struct Queue {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TracedMessage<T> {
   pub trace: String,
+  pub created_at: DateTime<Utc>,
   pub payload: T,
 }
 
@@ -35,6 +37,7 @@ impl Queue {
   ) -> Result<PublishAckFuture, QueueError> {
     let payload = TracedMessage {
       trace: trace.as_ref().to_string(),
+      created_at: Utc::now(),
       payload,
     };
     let ack = self

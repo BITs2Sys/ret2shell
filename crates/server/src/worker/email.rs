@@ -6,7 +6,7 @@ use r2s_database::{config, user};
 use r2s_email::{EmailError, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
-use tracing::{error, error_span, info, warn};
+use tracing::{debug, error, error_span, info, warn};
 
 pub fn spawn(messages: Stream, db: Database) {
   tokio::spawn(email_worker(messages, db));
@@ -53,25 +53,24 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
   let req = serde_json::from_str::<TracedMessage<EmailRequest>>(&email)?;
   let span = error_span!("request", trace=%req.trace);
   let span_guard = span.enter();
-  let mut req = req.payload;
   if Utc::now().signed_duration_since(req.created_at) > Duration::hours(1) {
-    warn!("email message expired, dropping");
+    debug!("email message expired, dropping");
     message.double_ack().await.ok();
-    drop(span_guard);
     return Ok(());
   }
+  let mut req = req.payload;
   if matches!(req.email_type, EmailType::Verify)
     && let Ok(Some(user)) = user::get_by_account_or_email(&db.conn, &req.email.email).await
     && user.permissions.0.contains(&user::Permission::Verified)
   {
-    warn!("won't send verification email for already verified account, dropping");
+    debug!("won't send verification email for already verified account, dropping");
     message.double_ack().await.ok();
     drop(span_guard);
     return Ok(());
   }
 
   let Some(config) = resolve_email_config(db).await else {
-    warn!("email config missing or disabled, dropping message");
+    debug!("email config missing or disabled, dropping message");
     message.double_ack().await.ok();
     drop(span_guard);
     return Ok(());
