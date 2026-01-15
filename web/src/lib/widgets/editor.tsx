@@ -10,7 +10,7 @@ import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
 
-const aceModule = ace as typeof ace & { require?: (name: string) => { Mode?: new () => unknown } };
+const aceModule = ace as typeof ace & { require?: (name: string) => unknown };
 
 export type DiagnosticMarker = {
   kind: "error" | "warning" | "info";
@@ -107,8 +107,12 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     });
     editor.container.style.lineHeight = "1.6";
     if (isRune) {
-      const runeModule = aceModule.require?.("ace/mode/rune");
-      if (runeModule?.Mode) editor.session.setMode(new runeModule.Mode());
+      const runeModule = typeof aceModule.require === "function" ? aceModule.require("ace/mode/rune") : undefined;
+      const RuneMode =
+        runeModule && typeof runeModule === "object" && "Mode" in runeModule
+          ? (runeModule as { Mode?: new () => unknown }).Mode
+          : undefined;
+      if (typeof RuneMode === "function") editor.session.setMode(new RuneMode());
     }
 
     editor.on("change", () => {
