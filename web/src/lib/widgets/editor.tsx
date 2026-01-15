@@ -80,7 +80,10 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   }
   let editorElement: HTMLPreElement;
   let editor: ace.Ace.Editor | null = null;
-  function initEditor() {
+  async function initEditor() {
+    if (editorProps.lang === "rune") {
+      await import("./ace/rune");
+    }
     editor = ace.edit(editorElement!, {
       mode: `ace/mode/${editorProps.lang || "text"}`,
       theme: `ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`,
@@ -105,6 +108,11 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       useWorker: false,
     });
     editor.container.style.lineHeight = "1.6";
+    if (editorProps.lang === "rune") {
+      const aceModule = ace as typeof ace & { require?: (name: string) => { Mode?: new () => unknown } };
+      const runeModule = aceModule.require?.("ace/mode/rune");
+      if (runeModule?.Mode) editor.session.setMode(new runeModule.Mode());
+    }
 
     editor.on("change", () => {
       const content = editor?.getValue();

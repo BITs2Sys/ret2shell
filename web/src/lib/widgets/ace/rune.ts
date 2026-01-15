@@ -219,27 +219,23 @@ aceModule.define(
 
 aceModule.define(
   "ace/mode/rune",
-  ["require", "exports", "module", "ace/lib/oop", "ace/mode/folding/cstyle", "ace/mode/text", "ace/mode/rune-highlight-rules"],
+  ["require", "exports", "module", "ace/lib/oop", "ace/mode/text", "ace/mode/rune-highlight-rules"],
   (require, exports) => {
     const TextMode = (require("ace/mode/text") as { Mode: new () => unknown }).Mode;
-    const FoldMode = (require("ace/mode/folding/cstyle") as { FoldMode: new () => unknown }).FoldMode;
     const RuneHighlightRules = (require("ace/mode/rune-highlight-rules") as { RuneHighlightRules: new () => unknown })
       .RuneHighlightRules;
     const oop = require("ace/lib/oop") as { inherits: (child: unknown, parent: unknown) => void };
 
     const Mode = function (this: {
       HighlightRules?: unknown;
-      foldingRules?: unknown;
       $behaviour?: unknown;
       $defaultBehaviour?: unknown;
     }) {
       this.HighlightRules = RuneHighlightRules;
-      this.foldingRules = new FoldMode();
       this.$behaviour = this.$defaultBehaviour;
     } as unknown as {
       new (): {
         HighlightRules?: unknown;
-        foldingRules?: unknown;
         $behaviour?: unknown;
         $defaultBehaviour?: unknown;
       };
