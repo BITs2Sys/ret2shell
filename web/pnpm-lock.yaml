@@ -54,14 +54,14 @@ importers:
         specifier: ^0.15.4
         version: 0.15.4(solid-js@1.9.10)
       '@tanstack/query-persist-client-core':
-        specifier: ^5.91.16
-        version: 5.91.16
+        specifier: ^5.91.17
+        version: 5.91.17
       '@tanstack/solid-query':
-        specifier: ^5.90.20
-        version: 5.90.20(solid-js@1.9.10)
+        specifier: ^5.90.21
+        version: 5.90.21(solid-js@1.9.10)
       '@tanstack/solid-query-persist-client':
-        specifier: ^5.90.20
-        version: 5.90.20(@tanstack/solid-query@5.90.20(solid-js@1.9.10))(solid-js@1.9.10)
+        specifier: ^5.90.21
+        version: 5.90.21(@tanstack/solid-query@5.90.21(solid-js@1.9.10))(solid-js@1.9.10)
       '@xdsec/wsrx':
         specifier: ^0.5.5
         version: 0.5.5
@@ -951,20 +951,20 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@tanstack/query-core@5.90.17':
-    resolution: {integrity: sha512-hDww+RyyYhjhUfoYQ4es6pbgxY7LNiPWxt4l1nJqhByjndxJ7HIjDxTBtfvMr5HwjYavMrd+ids5g4Rfev3lVQ==}
+  '@tanstack/query-core@5.90.18':
+    resolution: {integrity: sha512-rbGx6bHgPNVzutP7BEr+53UPKohpckqlMAad+To9UxTbeaQ+kC/1SDRj+QzkwbQ7qhLT/1IKp34yS6thda6fzA==}
 
-  '@tanstack/query-persist-client-core@5.91.16':
-    resolution: {integrity: sha512-jhcLN5vRpI3+DgXhLqPWvBjVorE9MxGH59uezwVBW7FJ9uTriaRmodoXytn557po6D4s1jb+tPTJYLscqLFSSw==}
+  '@tanstack/query-persist-client-core@5.91.17':
+    resolution: {integrity: sha512-NfXUCUzar8Y3fw0F6lPlrnJWfg148IXvWBIr/0x2LbYAoGdAnJDU3PzVaLTafI2vKQqIphe3uAq1068+nhn+nQ==}
 
-  '@tanstack/solid-query-persist-client@5.90.20':
-    resolution: {integrity: sha512-7lZ2y83E0adT4YnePQ+M0gBUlDJd2LaMwzpJ8xzPHMrdzPa2k292zHEqQlsigOqtOPfKFWkz7HRNdxDmSBYXYw==}
+  '@tanstack/solid-query-persist-client@5.90.21':
+    resolution: {integrity: sha512-AZt2qHJhaKBMfusKtoXkbKDM9EDUI/EnhAJsKCLYxFaENyTB0GD8Myi7piQiImncWrnkcy5FCeonJAAlEUhtIQ==}
     peerDependencies:
-      '@tanstack/solid-query': ^5.90.20
+      '@tanstack/solid-query': ^5.90.21
       solid-js: ^1.6.0
 
-  '@tanstack/solid-query@5.90.20':
-    resolution: {integrity: sha512-xZ65lfi+pSKESyn5/2WmbnCN79lh7AGIxRui7oCAF8DygfHjlgHNtKUgq6gPkf23pjEnT3zmUL86iVjBYo1IIQ==}
+  '@tanstack/solid-query@5.90.21':
+    resolution: {integrity: sha512-8sKg92ydve5t8zDqPnh4jF60SdytV/aTAGCOMFbPeUdmQnQvyHW/RhydXOuJxwSOkLIZZ5DGhEbwrmX9WvQnSg==}
     peerDependencies:
       solid-js: ^1.6.0
 
@@ -1342,8 +1342,8 @@ packages:
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
-  baseline-browser-mapping@2.9.14:
-    resolution: {integrity: sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==}
+  baseline-browser-mapping@2.9.15:
+    resolution: {integrity: sha512-kX8h7K2srmDyYnXRIppo4AH/wYgzWVCs+eKr3RusRSQ5PvRYoEFmR/I0PbdTjKFAoKqp5+kbxnNTFO9jOfSVJg==}
     hasBin: true
 
   boolbase@1.0.0:
@@ -2965,21 +2965,21 @@ snapshots:
       tailwindcss: 4.1.18
       vite: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)
 
-  '@tanstack/query-core@5.90.17': {}
+  '@tanstack/query-core@5.90.18': {}
 
-  '@tanstack/query-persist-client-core@5.91.16':
+  '@tanstack/query-persist-client-core@5.91.17':
     dependencies:
-      '@tanstack/query-core': 5.90.17
+      '@tanstack/query-core': 5.90.18
 
-  '@tanstack/solid-query-persist-client@5.90.20(@tanstack/solid-query@5.90.20(solid-js@1.9.10))(solid-js@1.9.10)':
+  '@tanstack/solid-query-persist-client@5.90.21(@tanstack/solid-query@5.90.21(solid-js@1.9.10))(solid-js@1.9.10)':
     dependencies:
-      '@tanstack/query-persist-client-core': 5.91.16
-      '@tanstack/solid-query': 5.90.20(solid-js@1.9.10)
+      '@tanstack/query-persist-client-core': 5.91.17
+      '@tanstack/solid-query': 5.90.21(solid-js@1.9.10)
       solid-js: 1.9.10
 
-  '@tanstack/solid-query@5.90.20(solid-js@1.9.10)':
+  '@tanstack/solid-query@5.90.21(solid-js@1.9.10)':
     dependencies:
-      '@tanstack/query-core': 5.90.17
+      '@tanstack/query-core': 5.90.18
       solid-js: 1.9.10
 
   '@types/babel__core@7.20.5':
@@ -3674,13 +3674,13 @@ snapshots:
 
   bail@2.0.2: {}
 
-  baseline-browser-mapping@2.9.14: {}
+  baseline-browser-mapping@2.9.15: {}
 
   boolbase@1.0.0: {}
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.14
+      baseline-browser-mapping: 2.9.15
       caniuse-lite: 1.0.30001764
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
