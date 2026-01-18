@@ -427,12 +427,19 @@ export default function (props: { inGame?: boolean }) {
                         const name = m ? m[2] : p.name;
                         return { ...p, tag: tag, name: name };
                       }) ?? [];
-                    const tagColorMap: Record<string, string> = {
-                      公: "bg-warning",
-                      内: "bg-info",
-                      公网: "bg-warning",
-                      内网: "bg-info",
-                    };
+                    const tagColorMap = new Map<(string | RegExp)[], string>([
+                      [["公", /公网/], "bg-warning"],
+                      [["内", /内网/], "bg-info"],
+                    ]);
+
+                    function findColorClass(tag: string | undefined) {
+                      if (!tag) return "bg-layer-content";
+                      for (const [patterns, color] of tagColorMap.entries()) {
+                        const matched = patterns.some((p) => (typeof p === "string" ? p === tag : p.test(tag)));
+                        if (matched) return color;
+                      }
+                      return "bg-layer-content";
+                    }
                     return (
                       <Show when={image.port}>
                         <section
@@ -506,7 +513,7 @@ export default function (props: { inGame?: boolean }) {
                                       <div
                                         class={clsx(
                                           "text-xs text-layer rounded-full h-5 flex text-center justify-center items-center px-1.5",
-                                          tagColorMap[v.tag] ?? "bg-layer-content"
+                                          findColorClass(v.tag)
                                         )}
                                       >
                                         {v.tag}
