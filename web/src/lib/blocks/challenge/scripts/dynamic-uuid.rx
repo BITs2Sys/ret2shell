@@ -30,11 +30,11 @@ const HASH_KEY = "%RANDSTR(32)%";
 pub async fn check(bucket, user, team, submission) {
   let flag = utils::Flag::parse(submission.content)?;
   if flag.prefix() != PREFIX {
-    return Ok((false, `Wrong format! flag should be ${PREFIX}{...}`, None))
+    return Ok((false, `格式错误，答案形式为 ${PREFIX}{...}`, None))
   }
 
   if CASE_SENSITIVE && flag.content().chars().any(|c| c.is_uppercase()) {
-    return Ok((false, "Incorrect!", None))
+    return Ok((false, "答案错误！", None))
   }
 
   let enc_id = if let Some(id) = team.id {

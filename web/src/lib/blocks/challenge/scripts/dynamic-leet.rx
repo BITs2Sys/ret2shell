@@ -9,7 +9,7 @@ const ENCRYPT_KEY = "%RANDSTR(16)%";
 /// FLAG 前缀，最终 FLAG 会变成例如 flag{..} 的形式
 const PREFIX = "flag";
 /// 有意义的 FLAG 内容，根据替换相似字符实现动态隐写，例如传入 `and` 会自动生成形如 `@nD` 的内容
-const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
+const TEMPLATE = "%RANDREADABLE()%";
 
 /// 检查用户提交的 FLAG 是否正确
 ///
@@ -26,7 +26,7 @@ const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 pub async fn check(bucket, user, team, submission) {
   let flag = utils::Flag::parse(submission.content)?;
   if flag.prefix() != PREFIX {
-    return Ok((false, `Wrong format! flag should be ${PREFIX}{...}`, None))
+    return Ok((false, `格式错误，答案形式为 ${PREFIX}{...}`, None))
   }
 
   let enc_id = if let Some(id) = team.id {
