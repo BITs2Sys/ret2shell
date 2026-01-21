@@ -1,7 +1,7 @@
 use axum::{
   Extension, Router,
   extract::{Request, State},
-  http::{HeaderMap, Uri},
+  http::{HeaderMap, HeaderValue, Uri},
   middleware,
   response::IntoResponse,
   routing::any,
@@ -25,7 +25,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     )))
 }
 
-fn infer_origin(headers: &HeaderMap) -> Result<String> {
+fn infer_origin(headers: &HeaderMap) -> Result<String, anyhow::Error> {
   let mut scheme = "http".to_string();
   let mut host = "".to_string();
 
@@ -57,14 +57,14 @@ fn infer_origin(headers: &HeaderMap) -> Result<String> {
     host = h.to_string();
   }
 
-  if let Some(uri_str) = headers.get("x-forwarded-uri").and_then(|v| v.to_str().ok()) {
-    if let Ok(u) = Uri::try_from(uri_str) {
-      if let Some(s) = u.scheme_str() {
-        scheme = s.to_string();
-      }
-      if let Some(h) = u.host() {
-        host = h.to_string();
-      }
+  if let Some(uri_str) = headers.get("x-forwarded-uri").and_then(|v| v.to_str().ok())
+    && let Ok(u) = Uri::try_from(uri_str)
+  {
+    if let Some(s) = u.scheme_str() {
+      scheme = s.to_string();
+    }
+    if let Some(h) = u.host() {
+      host = h.to_string();
     }
   }
 
@@ -194,7 +194,7 @@ async fn proxy_to_registry(
         format!("{}{}", origin, p)
       }
     };
-    if let Ok(new_value) = http::HeaderValue::from_str(&new_location) {
+    if let Ok(new_value) = HeaderValue::from_str(&new_location) {
       resp.headers_mut().insert("location", new_value);
     }
   }
