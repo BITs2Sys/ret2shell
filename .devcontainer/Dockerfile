@@ -9,7 +9,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
     apt-get -y install --no-install-recommends \
     ca-certificates curl wget \
     musl-dev musl-tools \
-    libc6-dev g++ gcc gdb make \
+    libc6-dev clang lld g++ gcc gdb make \
     zip unzip nginx
 
 RUN rustup component add clippy
