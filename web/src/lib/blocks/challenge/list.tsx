@@ -87,32 +87,44 @@ export default function ChallengeList(
         name: tag,
         type: "category",
         icon: "icon-[fluent--tag-20-regular] w-5 h-5",
-        children: taggedChallenges.map((c) => ({
-          id: c.challenge.id,
-          name: c.challenge.name,
-          type: "item",
-          searchValue: c.challenge.id.toString(),
-          link: props.training
-            ? `/training/${props.gameId}?challenge=${c.challenge.id}`
-            : `/games/${props.gameId}/challenges?challenge=${c.challenge.id}`,
-          extraClasses: c.solved ? "opacity-60" : "",
-          icon: c.challenge.hidden
-            ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
-            : c.solved
-              ? "icon-[fluent--checkmark-circle-20-regular] text-success"
-              : "icon-[fluent--flag-20-regular]",
-          extraPart: props.showScore ? (
-            <span
-              class={clsx(
-                "opacity-60",
-                c.challenge.archive_at && c.challenge.archive_at < DateTime.now() && "line-through"
-              )}
-            >
-              {c.challenge.score} pts
-            </span>
-          ) : null,
-          children: [],
-        })),
+        children: taggedChallenges.map((c) => {
+          const difficultyTag = getDifficulty(c.challenge.tag.map((t) => t.name))[0];
+          return {
+            id: c.challenge.id,
+            name: c.challenge.name,
+            type: "item",
+            searchValue: c.challenge.id.toString(),
+            link: props.training
+              ? `/training/${props.gameId}?challenge=${c.challenge.id}`
+              : `/games/${props.gameId}/challenges?challenge=${c.challenge.id}`,
+            extraClasses: c.solved ? "opacity-60" : "",
+            icon: c.challenge.hidden
+              ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
+              : c.solved
+                ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+                : "icon-[fluent--flag-20-regular]",
+            extraPart: (
+              <>
+                <Show when={props.showScore}>
+                  <span
+                    class={clsx(
+                      "opacity-60",
+                      c.challenge.archive_at && c.challenge.archive_at < DateTime.now() && "line-through"
+                    )}
+                  >
+                    {c.challenge.score} pts
+                  </span>
+                </Show>
+                <Show when={difficultyTag}>
+                  <span class="inline-block rounded-lg bg-layer-content/10 backdrop-blur px-1.75 py-0.75 align-middle text-[.85rem]">
+                    <span>{difficultyTag}</span>
+                  </span>
+                </Show>
+              </>
+            ),
+            children: [],
+          };
+        }),
       });
     }
     return tree;
