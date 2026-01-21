@@ -1,8 +1,7 @@
-import { logout } from "@api/account";
+import { useAccountProfile, useLogoutMutation } from "@api/account";
 import { mediaPath } from "@lib/utils/media";
 import { useNavigate } from "@solidjs/router";
-import { accountStore, refreshUser, resetUser } from "@storage/account";
-import { resetGameStore } from "@storage/game";
+import { accountStore, resetUser } from "@storage/account";
 import { t } from "@storage/theme";
 import { clearToasts } from "@storage/toast";
 import Avatar from "@widgets/avatar";
@@ -11,31 +10,39 @@ import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import UserCodeDialog from "./user-code-dialog";
 
 export default function UserBox() {
-  createEffect(() => {
-    if (accountStore.token) {
-      untrack(refreshUser);
-    }
+  const navigate = useNavigate();
+
+  const profile = useAccountProfile({ enabled: () => !!accountStore.token });
+  const userId = createMemo(() => profile.data?.id ?? accountStore.id ?? null);
+  const account = createMemo(() => profile.data?.account ?? accountStore.account ?? null);
+  const nickname = createMemo(() => profile.data?.nickname ?? accountStore.nickname ?? null);
+  const avatar = createMemo(() => profile.data?.avatar ?? null);
+
+  const userHref = createMemo(() => {
+    const id = userId();
+    return id == null ? "/users" : `/users/${id}`;
   });
 
-  const navigate = useNavigate();
-  const [loading, setLoading] = createSignal(false);
+  const userIdHex = createMemo(() => {
+    const id = userId();
+    return id == null ? null : `0x${id.toString(16).padStart(6, "0")}`;
+  });
 
-  function handleLogout() {
-    setLoading(true);
-    setTimeout(() => {
-      void logout().finally(() => {
-        resetUser();
-        resetGameStore();
-        navigate("/");
-        clearToasts();
-        setLoading(false);
-      });
-    }, 1000);
-  }
+  const logoutMutation = useLogoutMutation({
+    onSuccess: () => {
+      resetUser();
+      navigate("/");
+      clearToasts();
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <Show
@@ -50,10 +57,10 @@ export default function UserBox() {
       <Popover
         btnContent={
           <Avatar
-            alt={accountStore.info?.account ?? "USER"}
+            alt={account() ?? "USER"}
             class="w-8 h-8"
-            src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
-            fallback={accountStore.info?.account || undefined}
+            src={(avatar() && mediaPath(avatar())) || undefined}
+            fallback={account() || undefined}
           />
         }
         square
@@ -62,23 +69,16 @@ export default function UserBox() {
       >
         <div class="flex flex-col space-y-2 max-w-64 w-[calc(100vw-1rem)]">
           <Card contentClass="p-2 flex flex-col space-y-2">
-            <Link
-              ghost
-              class="h-16 space-x-2 shrink-0 py-1 flex-nowrap"
-              justify="start"
-              href={`/users/${accountStore.info?.id}`}
-            >
+            <Link ghost class="h-16 space-x-2 shrink-0 py-1 flex-nowrap" justify="start" href={userHref()}>
               <Avatar
                 class="w-10 h-10"
-                src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
-                fallback={accountStore.info?.account || undefined}
-                loading={loading()}
+                src={(avatar() && mediaPath(avatar())) || undefined}
+                fallback={account() || undefined}
+                loading={logoutMutation.isPending}
               />
               <div class="flex flex-col justify-center items-start">
-                <h2 class="font-bold">{accountStore.info?.nickname}</h2>
-                <span class="text-start text-base font-normal opacity-60">
-                  0x{accountStore.info?.id.toString(16).padStart(6, "0")}
-                </span>
+                <h2 class="font-bold">{nickname()}</h2>
+                <span class="text-start text-base font-normal opacity-60">{userIdHex()}</span>
               </div>
             </Link>
             <Divider />
@@ -88,8 +88,15 @@ export default function UserBox() {
                 <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t("account.settings.title")}</span>
               </Link>
-              <Button ghost size="sm" square title={t("account.logout")} onClick={handleLogout} loading={loading()}>
-                <Show when={!loading()}>
+              <Button
+                ghost
+                size="sm"
+                square
+                title={t("account.logout")}
+                onClick={handleLogout}
+                loading={logoutMutation.isPending}
+              >
+                <Show when={!logoutMutation.isPending}>
                   <span class="shrink-0 icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
                 </Show>
               </Button>

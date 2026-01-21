@@ -390,6 +390,10 @@
       "hideMaker": {
         "disabled": "あなたのライセンスではこの項目を非表示にすることはできません",
         "label": "開発者情報を非表示にする"
+      },
+      "zenGame": {
+        "label": "Zen大会モード",
+        "placeholder": "ゲームを選択してください"
       }
     },
     "logs": {
@@ -1330,6 +1334,9 @@
       "errors": {
         "fetchCheckerScript": {
           "title": "評価スクリプトの取得に失敗しました"
+        },
+        "fetchScript": {
+          "title": "スクリプト構成を取得できませんでした"
         }
       }
     },
@@ -1583,7 +1590,11 @@
       },
       "registeredAt": {
         "label": "登録日時"
-      }
+      },
+      "avatar": {
+        "uploadHint": "もう一度クリックして、アバターファイルをサーバーにアップロードします"
+      },
+      "saveHint": "保存することを忘れないでください！！！"
     },
     "login": {
       "title": "ログイン",
@@ -2107,6 +2118,9 @@
     "errors": {
       "fetchNodes": {
         "title": "クラスターノード情報の取得に失敗しました"
+      },
+      "fetchConfig": {
+        "title": "クラスター構成の取得に失敗しました"
       }
     }
   },

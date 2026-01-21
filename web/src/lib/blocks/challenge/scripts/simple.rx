@@ -12,7 +12,7 @@ const CASE_SENSITIVE = true;
 const PREFIX = "flag";
 /// FLAG 内容，也就是 flag{...} 大括号包裹的内容
 /// 如果启用了正则，示例如 `^you_.+_impact$`
-const TEMPLATE = "%RANDREADABLE()%";
+const TEMPLATE = "%MOTTO()%";
 
 /// 检查用户提交的 FLAG 是否正确
 ///

@@ -1,20 +1,28 @@
-import { handleHttpError } from "@api";
-import { updateGame } from "@api/game";
+import { useGame, useUpdateGameMutation } from "@api/game";
 import GameEdit, { type GameForm } from "@blocks/game/form";
-import { gameStore, setGameStore } from "@storage/game";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import { DateTime } from "luxon";
-import { createSignal } from "solid-js";
+import { createMemo } from "solid-js";
 
 export default function () {
-  const [loading, setLoading] = createSignal(false);
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+
+  const updateMutation = useUpdateGameMutation({
+    onSuccess: () => {
+      game.refetch();
+    },
+  });
+
   async function onSubmit(result: GameForm) {
-    setLoading(true);
-    try {
-      const game = await updateGame(gameStore.current!.id, {
-        ...gameStore.current!,
+    if (!game.data) return;
+    updateMutation.mutate({
+      id: game.data.id,
+      game: {
+        ...game.data,
         ...result,
         start_at: DateTime.fromSeconds(result.start_at!),
         end_at: DateTime.fromSeconds(result.end_at!),
@@ -30,23 +38,14 @@ export default function () {
           outer_label: result.outer_hammer_label || null,
           outer_url: result.outer_hammer_url || null,
         },
-      });
-      setGameStore({ current: game });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+      },
+    });
   }
   return (
     <>
-      <Title page={t("game.form.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
+      <Title page={t("game.form.title")} route={`/games/${gameId()}/admin/edit`} />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
-        <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} inGame />
+        <GameEdit onDone={onSubmit} gameId={gameId()} />
       </div>
     </>
   );

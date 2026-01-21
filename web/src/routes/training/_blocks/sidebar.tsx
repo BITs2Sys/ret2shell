@@ -1,37 +1,33 @@
-import { handleHttpError } from "@api";
-import { getGame } from "@api/game";
+import { useGame } from "@api/game";
 import ChallengeList from "@blocks/challenge/list";
+import { HostType } from "@models/game";
 import { useNavigate, useParams } from "@solidjs/router";
-import { gameStore, setGameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import { HTTPError } from "ky";
-import { createEffect, Show, untrack } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import Playgrounds from "./playgrounds";
 
 export default function SideBar() {
   const params = useParams();
-  const selectedGameId = () => Number.parseInt(params.game, 10) ?? null;
   const navigate = useNavigate();
-  createEffect(() => {
-    if (selectedGameId()) {
-      untrack(async () => {
-        try {
-          const resp = await getGame(selectedGameId());
-          setGameStore({ current: resp });
-        } catch (err) {
-          handleHttpError(err as Error, t("game.errors.fetch.title")!);
-          if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
-          else navigate("/sigtrap/unknown", { replace: true });
-        }
-      });
-    }
+
+  const selectedGameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || 0);
+  const game = useGame({
+    id: () => selectedGameId(),
+    enabled: () => selectedGameId() > 0,
+    onError: (err) => {
+      if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
+      else navigate("/sigtrap/unknown", { replace: true });
+      return false;
+    },
   });
+
   return (
     <div class="flex flex-col overflow-hidden w-full h-full">
       <div class="border-b border-b-layer-content/10 px-2 h-16 flex space-x-2 items-center">
         <Show
-          when={gameStore.current}
+          when={game.data}
           fallback={
             <Link class="flex-1" ghost justify="start" href="/training">
               <span class="shrink-0 icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
@@ -39,15 +35,15 @@ export default function SideBar() {
             </Link>
           }
         >
-          <Link class="flex-1" ghost justify="start" href={`/training/${gameStore.current?.id}`}>
+          <Link class="flex-1" ghost justify="start" href={`/training/${game.data?.id}`}>
             <span class="shrink-0 icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
-            <span class="flex-1 text-start">{gameStore.current?.name}</span>
-            <Show when={gameStore.current?.hidden}>
+            <span class="flex-1 text-start">{game.data?.name}</span>
+            <Show when={game.data?.hidden}>
               <span class="shrink-0 icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
             </Show>
           </Link>
-          <Show when={gameStore.current?.host_type === 1}>
-            <Link square ghost href={`/games/${gameStore.current?.id}`} title={t("training.gotoGamePage")}>
+          <Show when={game.data?.host_type === HostType.Game}>
+            <Link square ghost href={`/games/${game.data?.id}`} title={t("training.gotoGamePage")}>
               <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-" />
             </Link>
           </Show>
@@ -56,8 +52,8 @@ export default function SideBar() {
           </Link>
         </Show>
       </div>
-      <Show when={selectedGameId()} fallback={<Playgrounds />}>
-        <ChallengeList />
+      <Show when={selectedGameId() > 0} fallback={<Playgrounds />}>
+        <ChallengeList training gameId={selectedGameId()} challengeId={0} />
       </Show>
     </div>
   );

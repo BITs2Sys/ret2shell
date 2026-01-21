@@ -1,14 +1,12 @@
-import { handleHttpError } from "@api";
-import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
+import { useGame, useGamePlayerChatMessages, useSelfSolves, useSendGamePlayerChatMessageMutation } from "@api/game";
+import { useSelfTeam } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { mediaPath } from "@lib/utils/media";
-import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { challengeStore } from "@storage/challenge";
-import { gameStore, isGameAdmin } from "@storage/game";
+import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
@@ -16,8 +14,10 @@ import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
-import type { DateTime } from "luxon";
-import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { DateTime } from "luxon";
+import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
+
+import type { ChallengeWidgetProps } from ".";
 
 export function ChatBlock(props: {
   avatar?: string;
@@ -48,7 +48,7 @@ export function ChatBlock(props: {
             </A>
           </header>
         </Show>
-        <Article class="!max-w-full" content={props.content} noExtraPaddings compact extra />
+        <Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />
         <footer class="text-xs flex items-center space-x-2">
           <span class="opacity-30 group-hover:opacity-80 transition-opacity duration-300">
             {props.sendAt.toFormat("yyyy-MM-dd HH:mm")}
@@ -66,6 +66,7 @@ export function ChatBlock(props: {
 }
 
 export function mergeChats(
+  gameId: number,
   challengeId: number,
   teamId: number,
   a: Chat[],
@@ -84,7 +85,7 @@ export function mergeChats(
       challenge_id: challengeId,
       team_id: teamId,
       checked: true,
-      game_id: gameStore.current!.id,
+      game_id: gameId,
     });
   }
   const bb = b.sort((x, y) => x.id - y.id);
@@ -124,87 +125,58 @@ export function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function (props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  onExpand?: () => void;
-  expanded?: boolean;
-  inGame?: boolean;
-}) {
-  const [chats, setChats] = createSignal([] as Chat[]);
+export default function (props: ChallengeWidgetProps) {
+  const [prevChats, setPrevChats] = createSignal([] as Chat[]);
   const [chat, setChat] = createSignal("");
-  const [sending, setSending] = createSignal(false);
 
-  async function handleSendChat() {
-    if (chat().trim() === "") return;
-    if (gameStore.current && challengeStore.current) {
-      setSending(true);
-      try {
-        await sendGamePlayerChatMessage(gameStore.current.id, challengeStore.current.id, chat());
-        setChat("");
-        refreshChats();
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.hammer.errors.send.title")!);
-      } finally {
-        setSending(false);
-      }
+  const game = useGame({ id: () => props.gameId });
+  const team = useSelfTeam({
+    game_id: () => props.gameId,
+    enabled: () => !props.training && !!game.data && isGameInProgress(game.data) && !isAdminOfGame(game.data),
+  });
+
+  const sendMutation = useSendGamePlayerChatMessageMutation({
+    onSuccess: () => {
+      setChat("");
+      if (chatsQuery.refetch) chatsQuery.refetch();
+    },
+  });
+
+  const chatsQuery = useGamePlayerChatMessages({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+    enabled: () => !props.training && !isAdminOfGame(game.data),
+  });
+  const solvesQuery = useSelfSolves({
+    game_id: () => props.gameId,
+    enabled: () => !props.training && !isAdminOfGame(game.data),
+  });
+
+  const chats = createMemo(() => {
+    if (chatsQuery.data && solvesQuery.data) {
+      const [changed, merged] = mergeChats(
+        props.gameId,
+        props.challengeId,
+        team.data?.id ?? 0,
+        prevChats(),
+        chatsQuery.data,
+        solvesQuery.data?.find((v) => v.challenge_id === props.challengeId)?.created_at || null
+      );
+      if (changed) untrack(() => setPrevChats(merged));
+      return merged;
     }
-  }
+  });
 
-  const [loading, setLoading] = createSignal(false);
-
-  async function _refreshChats() {
-    if (gameStore.current && challengeStore.current && !isGameAdmin()) {
-      try {
-        setLoading(true);
-        const s = await getSolveStatus();
-        const result = await getGamePlayerChatMessages(gameStore.current.id, challengeStore.current.id);
-        const [changed, r] = mergeChats(challengeStore.current.id, gameStore.team?.id ?? 0, chats(), result, s);
-        setChats([...r]);
-        if (changed) {
-          setTimeout(
-            // @ts-expect-error chatBottomEl is bound by SolidJS after rendered
-            () => chatBottomEl?.scrollIntoView({ behavior: "smooth" }),
-            700
-          );
-        }
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.hammer.errors.fetch.title")!);
-      }
-      setLoading(false);
-    }
-  }
-
-  function refreshChats() {
-    if (!gameStore.current || !gameStore.current.hammer_policy?.enabled) {
-      return refreshChats;
-    }
-    _refreshChats();
-    return refreshChats;
-  }
-
-  const interval = setInterval(refreshChats(), 5000);
+  const interval = setInterval(() => chatsQuery.refetch(), 5000);
   onCleanup(() => clearInterval(interval));
   let chatBottomEl: HTMLDivElement;
 
-  async function getSolveStatus() {
-    if (gameStore.current?.id && gameStore.team?.id && !isGameAdmin()) {
-      const resp = await getTeamSolves(gameStore.current.id, gameStore.team.id);
-      try {
-        const s = resp.find((x) => x.challenge_id === challengeStore.current?.id);
-        return s?.created_at ?? null;
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.hammer.errors.fetchSolve.title")!);
-      }
-      return null;
-    }
-    return null;
-  }
   const availableMsg = createMemo(() => {
     // every player could send up to 3 messages before admin reply
     let count = 0;
-    for (let i = chats().length - 1; i >= 0; i--) {
-      if (chats().at(i)?.user_id === accountStore.id) count++;
-      if (chats().at(i)?.is_admin && chats().at(i)?.user_id !== 0) break;
+    for (let i = (chats()?.length ?? 0) - 1; i >= 0; i--) {
+      if (chats()?.at(i)?.user_id === accountStore.id) count++;
+      if (chats()?.at(i)?.is_admin && chats()?.at(i)?.user_id !== 0) break;
     }
     return 3 - count;
   });
@@ -228,8 +200,8 @@ export default function (props: {
                 link="/magic/sakana"
                 nameLabel="Ciallo～(∠・ω< )⌒☆"
                 labelClasses="text-primary"
-                content={t("challenge.hammer.tips.0")!}
-                sendAt={gameStore.current!.start_at}
+                content={t("challenge.hammer.tips.0")}
+                sendAt={game.data?.start_at || DateTime.now()}
                 isChecked
               />
               <ChatBlock
@@ -238,14 +210,14 @@ export default function (props: {
                 link="/magic/sakana"
                 nameLabel="Ciallo～(∠・ω< )⌒☆"
                 labelClasses="text-primary"
-                content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [GitHub Gists](https://gist.github.com), [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
-                sendAt={gameStore.current!.start_at}
+                content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [GitHub Gists](https://gist.github.com), [bpa.st](https://bpa.st), [paste.rs](https://paste.rs), [0x0.st](https://0x0.st)`}
+                sendAt={game.data?.start_at || DateTime.now()}
                 isChecked
               />
             </>
           }
         >
-          <Match when={!gameStore.current?.hammer_policy?.enabled && gameStore.current?.hammer_policy?.outer_url}>
+          <Match when={!game.data?.hammer_policy?.enabled && game.data?.hammer_policy?.outer_url}>
             <ChatBlock
               avatar={platformAvatar}
               showAvatar
@@ -253,12 +225,12 @@ export default function (props: {
               link="/magic/sakana"
               nameLabel="Ciallo～(∠・ω< )⌒☆"
               labelClasses="text-primary"
-              content={`${t("challenge.hammer.outerGoto")}: [${gameStore.current!.hammer_policy?.outer_label}](${gameStore.current!.hammer_policy?.outer_url})`}
-              sendAt={gameStore.current!.start_at}
+              content={`${t("challenge.hammer.outerGoto")}: [${game.data?.hammer_policy?.outer_label}](${game.data?.hammer_policy?.outer_url})`}
+              sendAt={game.data?.start_at || DateTime.now()}
               isChecked
             />
           </Match>
-          <Match when={!gameStore.current?.hammer_policy?.enabled}>
+          <Match when={!game.data?.hammer_policy?.enabled}>
             <ChatBlock
               avatar={platformAvatar}
               showAvatar
@@ -267,11 +239,11 @@ export default function (props: {
               nameLabel="Ciallo～(∠・ω< )⌒☆"
               labelClasses="text-primary"
               content={`${t("challenge.hammer.outerFollow")}`}
-              sendAt={gameStore.current!.start_at}
+              sendAt={game.data?.start_at || DateTime.now()}
               isChecked
             />
           </Match>
-          <Match when={isGameAdmin()}>
+          <Match when={isAdminOfGame(game.data)}>
             <ChatBlock
               avatar={platformAvatar}
               showAvatar
@@ -279,23 +251,23 @@ export default function (props: {
               link="/magic/sakana"
               nameLabel="Ciallo～(∠・ω< )⌒☆"
               labelClasses="text-primary"
-              content={t("challenge.hammer.adminGoto")!}
-              sendAt={gameStore.current!.start_at}
+              content={t("challenge.hammer.adminGoto")}
+              sendAt={game.data?.start_at || DateTime.now()}
               isChecked
             />
           </Match>
         </Switch>
-        <For each={chats()}>
+        <For each={chats() ?? []}>
           {(chat, index) => (
             <ChatBlock
               avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
-              showAvatar={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
+              showAvatar={index() === 0 || chats()?.at(index() - 1)?.user_id !== chat.user_id}
               roleLabel={
                 chat.id === 0
                   ? ">_<"
                   : chat.is_admin
-                    ? t("challenge.hammer.role.admin")!
-                    : t("challenge.hammer.role.player")!
+                    ? t("challenge.hammer.role.admin")
+                    : t("challenge.hammer.role.player")
               }
               link={chat.id === 0 ? "Ciallo～(∠・ω< )⌒☆" : `/users/${chat.user_id}`}
               nameLabel={chat.user_name || "Unknown"}
@@ -321,7 +293,7 @@ export default function (props: {
             </span>
           </span>
           <div class="flex-1" />
-          <Show when={loading()}>
+          <Show when={chatsQuery.isLoading || sendMutation.isPending}>
             <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
           </Show>
           <Link
@@ -339,7 +311,6 @@ export default function (props: {
             size="sm"
             square
             onClick={() => {
-              if (props.onExpand && !props.expanded) props.onExpand();
               setEditorExpanded(!editorExpanded());
             }}
           >
@@ -353,9 +324,20 @@ export default function (props: {
           <Button
             level="primary"
             size="sm"
-            onClick={handleSendChat}
-            disabled={sending() || availableMsg() <= 0 || isGameAdmin() || !gameStore.current?.hammer_policy?.enabled}
-            loading={sending()}
+            onClick={() =>
+              sendMutation.mutate({
+                game_id: props.gameId,
+                challenge_id: props.challengeId,
+                content: chat(),
+              })
+            }
+            disabled={
+              sendMutation.isPending ||
+              availableMsg() <= 0 ||
+              isAdminOfGame(game.data) ||
+              !game.data?.hammer_policy?.enabled
+            }
+            loading={sendMutation.isPending || chatsQuery.isLoading}
           >
             <span class="shrink-0 icon-[fluent--send-20-regular] w-5 h-5" />
             <span>{t("general.actions.send.title")}</span>
@@ -371,7 +353,12 @@ export default function (props: {
             {
               name: "send",
               bindKey: "Ctrl+Enter",
-              exec: handleSendChat,
+              exec: () =>
+                sendMutation.mutate({
+                  game_id: props.gameId,
+                  challenge_id: props.challengeId,
+                  content: chat(),
+                }),
             },
           ]}
         />

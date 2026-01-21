@@ -64,7 +64,7 @@ export default function () {
         <div class="relative">
           <div id="xdsec-box" />
           <Link
-            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-10 w-24 h-24"
             href="https://l.xdsec.org"
             target="_blank"
             rel="noopener noreferrer"
@@ -75,7 +75,7 @@ export default function () {
         <div class="relative hidden sm:block">
           <div id="vidar-box" />
           <Link
-            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-10 w-24 h-24"
             href="https://vidar.club"
             target="_blank"
             rel="noopener noreferrer"
@@ -86,7 +86,7 @@ export default function () {
         <div class="relative hidden lg:block">
           <div id="cnss-box" />
           <Link
-            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-10 w-24 h-24"
             href="https://cnss.io"
             target="_blank"
             rel="noopener noreferrer"

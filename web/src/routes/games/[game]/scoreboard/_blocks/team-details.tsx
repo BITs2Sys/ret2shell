@@ -1,12 +1,11 @@
 import type { Challenge } from "@models/challenge";
 import type { Team } from "@models/team";
 import { A } from "@solidjs/router";
-import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Progress from "@widgets/progress";
 import { For, Match, Switch } from "solid-js";
 
-function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number }) {
+function TeamDetail(props: { gameId: number; team: Team; challenges: Challenge[]; index: number }) {
   const solvedChallenges = () => props.team.history.filter((h) => !!h.challenge_id).length;
   const totalChallenges = () => props.challenges.length;
   return (
@@ -26,7 +25,7 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
       </div>
       <div class="flex-1 flex flex-col justify-center space-y-1">
         <h2 class="font-bold flex flex-row text-lg">
-          <A class="hover:underline flex-1" href={`/games/${gameStore.current?.id}/teams/${props.team.id}`}>
+          <A class="hover:underline flex-1" href={`/games/${props.gameId}/teams/${props.team.id}`}>
             {props.team.name}
           </A>
           <span>
@@ -45,11 +44,13 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
   );
 }
 
-export default function TeamDetails(props: { topTeams: Team[]; challenges: Challenge[] }) {
+export default function TeamDetails(props: { gameId: number; topTeams: Team[]; challenges: Challenge[] }) {
   return (
     <ul class="lg:flex flex-col space-y-2 w-full max-w-5xl self-center py-6 hidden">
       <For each={props.topTeams}>
-        {(team, index) => <TeamDetail team={team} challenges={props.challenges} index={index() + 1} />}
+        {(team, index) => (
+          <TeamDetail gameId={props.gameId} team={team} challenges={props.challenges} index={index() + 1} />
+        )}
       </For>
     </ul>
   );

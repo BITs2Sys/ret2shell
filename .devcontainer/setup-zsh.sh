@@ -1,4 +1,5 @@
 #!/bin/bash
+
 sudo mkdir -p /usr/share/
 
 if [ ! -d "/usr/share/zsh-syntax-highlighting" ]; then
@@ -11,5 +12,7 @@ if [ ! -d "/usr/share/zsh-autosuggestions" ]; then
     echo "source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
 fi
 
-echo "Please run:"
+echo "To apply for application, please run:"
 echo "  source ${ZDOTDIR:-$HOME}/.zshrc"
+
+source ${ZDOTDIR:-$HOME}/.zshrc

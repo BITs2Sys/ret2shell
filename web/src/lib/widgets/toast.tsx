@@ -92,7 +92,7 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
       </Button>
       <Show when={props.selfDestroy && toastMsgProps.toast.duration}>
         {/* bg-info bg-success bg-warning bg-error */}
-        <div class="absolute bottom-1 left-4 h-[2px] right-4">
+        <div class="absolute bottom-1 left-4 h-0.5 right-4">
           <div
             ref={progressRef!}
             class={clsx("w-full h-full", `bg-${toastMsgProps.toast.level}`, "transition-all ease-linear")}

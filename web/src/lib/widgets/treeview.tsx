@@ -90,7 +90,7 @@ export default function TreeView(props: TreeViewProps) {
           </Button>
         </Show>
         <Show when={node.type === "category" && showChildren()}>
-          <ul class="mt-2 pl-2 relative before:absolute before:-top-2 before:bottom-0 before:left-2 before:w-[1px] before:bg-layer-content/20 flex flex-col space-y-2">
+          <ul class="mt-2 pl-2 relative before:absolute before:-top-2 before:bottom-0 before:left-2 before:w-px before:bg-layer-content/20 flex flex-col space-y-2">
             <For each={node.children}>{(child) => renderNode(child, level + 1)}</For>
           </ul>
         </Show>

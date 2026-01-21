@@ -1,12 +1,13 @@
-import { handleHttpError } from "@api";
-import { getGameScoreboard } from "@api/game";
+import { useInstitutes } from "@api/account";
+import { useChallenges } from "@api/challenge";
+import { useGame, useGameScoreboard } from "@api/game";
+import { useSelfTeam } from "@api/team";
 import type { Team } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
 import { createElementSize, type Size } from "@solid-primitives/resize-observer";
-import { useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { challengeStore, refreshChallenges } from "@storage/challenge";
-import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
+import { isGameInArchived, isPlayerCanAccessChallenges } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -29,9 +30,13 @@ function ChartOperations(props: {
   onShowHiddenTeams?: (show: boolean) => void;
   institute?: number | null;
 }) {
-  const gameInstitutes = createMemo(() => {
-    return accountStore.institutes.filter((i) => gameStore.current?.access_policy.institutes.includes(i.id));
-  });
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game || "0", 10) || 0);
+  const game = useGame({ id: () => gameId(), enabled: () => gameId() > 0 });
+  const institutes = useInstitutes();
+  const gameInstitutes = createMemo(
+    () => institutes.data?.filter((i) => (game.data?.access_policy.institutes ?? []).includes(i.id)) || []
+  );
   const gameInstitutesSelect = createMemo(() => {
     return gameInstitutes().map((i) => ({
       value: i.id.toString(),
@@ -95,89 +100,101 @@ function ChartOperations(props: {
 }
 
 export default function () {
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game || "0", 10) || 0);
+
   const [showLargePanel, setShowLargePanel] = createSignal(false);
   const [showChallengeDetail, setShowChallengeDetail] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [teams, setTeams] = createSignal<Team[]>([]);
-  const [total, setTotal] = createSignal(0);
-  const [topTeams, setTopTeams] = createSignal<Team[]>([]);
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(null as number | null);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
   const selectedInstituteId = createMemo(
     () => Number.parseInt((searchParams.institute as string) || "NaN", 10) || null
   );
-  const [loading, setLoading] = createSignal(false);
   const [showPlane, setShowPlane] = createSignal(false);
   // const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);
   const [showReal, setShowReal] = createSignal(true);
   const matches = createBreakpoints(breakpoints);
 
+  const game = useGame({
+    id: () => gameId(),
+    enabled: () => gameId() > 0,
+  });
+
+  const institutes = useInstitutes();
+
+  const selfTeam = useSelfTeam({
+    game_id: () => gameId(),
+    enabled: () => !!accountStore.id && !!gameId(),
+    silenced: true,
+  });
+
+  const canAccessChallenges = createMemo(() => {
+    return isPlayerCanAccessChallenges(game.data, selfTeam.data ?? null);
+  });
+
+  const isArchived = createMemo(() => isGameInArchived(game.data));
+
+  const challenges = useChallenges({
+    game_id: () => gameId(),
+    enabled: () => gameId() > 0 && canAccessChallenges()[0],
+  });
+
+  const topTeamsQueryAll = useGameScoreboard({
+    id: () => gameId(),
+    page: () => 1,
+    page_size: () => 10,
+    with_hidden: () => showHiddenTeams(),
+    enabled: () => gameId() > 0 && !selectedInstituteId(),
+  });
+
+  const topTeamsQueryByInstitute = useGameScoreboard({
+    id: () => gameId(),
+    page: () => 1,
+    page_size: () => 10,
+    with_hidden: () => showHiddenTeams(),
+    institute_id: () => selectedInstituteId()!,
+    enabled: () => gameId() > 0 && !!selectedInstituteId(),
+  });
+
+  const teamsQueryAll = useGameScoreboard({
+    id: () => gameId(),
+    page: () => page(),
+    page_size: () => pageSize() ?? 15,
+    with_hidden: () => showHiddenTeams(),
+    enabled: () => gameId() > 0 && !!pageSize() && !selectedInstituteId(),
+  });
+
+  const teamsQueryByInstitute = useGameScoreboard({
+    id: () => gameId(),
+    page: () => page(),
+    page_size: () => pageSize() ?? 15,
+    with_hidden: () => showHiddenTeams(),
+    institute_id: () => selectedInstituteId()!,
+    enabled: () => gameId() > 0 && !!pageSize() && !!selectedInstituteId(),
+  });
+
+  const activeTopTeamsQuery = createMemo(() => (selectedInstituteId() ? topTeamsQueryByInstitute : topTeamsQueryAll));
+  const activeTeamsQuery = createMemo(() => (selectedInstituteId() ? teamsQueryByInstitute : teamsQueryAll));
+
+  const topTeams = createMemo(() => activeTopTeamsQuery().data?.[0] ?? []);
+  const teams = createMemo<Team[]>(() => activeTeamsQuery().data?.[0] ?? []);
+  const total = createMemo(() => activeTeamsQuery().data?.[1] ?? 0);
+  const challengeList = createMemo(() => challenges.data?.[0] ?? []);
+
   onMount(async () => {
     pageHeight = createElementSize(autoPageSizeWatcher!);
   });
-  async function getTopTeams() {
-    setLoading(true);
-    try {
-      setTopTeams(
-        (
-          await getGameScoreboard(
-            gameStore.current?.id || 0,
-            1,
-            10,
-            showHiddenTeams(),
-            selectedInstituteId() || undefined
-          )
-        )[0]
-      );
-    } catch (err) {
-      handleHttpError(err as Error, t("game.scoreboard.errors.fetchScoreboard.title")!);
-    }
-    setLoading(false);
+
+  function handleRefresh() {
+    topTeamsQueryAll.refetch();
+    topTeamsQueryByInstitute.refetch();
+    teamsQueryAll.refetch();
+    teamsQueryByInstitute.refetch();
+    challenges.refetch();
   }
-
-  async function getTeams() {
-    if (!page() || !pageSize() || !gameStore.current?.id) return;
-    setLoading(true);
-    setTeams([]);
-    try {
-      const data = await getGameScoreboard(
-        gameStore.current?.id || 0,
-        page(),
-        pageSize()!,
-        showHiddenTeams(),
-        selectedInstituteId() || undefined
-      );
-      setTeams(data[0]);
-      setTotal(data[1]);
-    } catch (err) {
-      handleHttpError(err as Error, t("game.scoreboard.errors.fetchScoreboard.title")!);
-    }
-    setLoading(false);
-  }
-
-  createEffect(() => {
-    if (gameStore.current?.id) {
-      if (showHiddenTeams() || selectedInstituteId()) {
-        /// ... just monitor the changes
-      }
-      untrack(getTopTeams);
-      untrack(getTeams);
-    }
-  });
-
-  createEffect(() => {
-    if (canAccessChallenges()[0] && challengeStore.challenges.length === 0) {
-      untrack(refreshChallenges);
-    }
-  });
-
-  createEffect(() => {
-    if (page() && pageSize() && gameStore.current?.id) {
-      untrack(getTeams);
-    }
-  });
 
   let autoPageSizeWatcher: HTMLDivElement;
   let pageHeight: Readonly<Size>;
@@ -187,12 +204,12 @@ export default function () {
       name: t.name,
       type: "line",
       step: "end",
-      data: [[gameStore.current?.start_at.toMillis() ?? Date.now(), 0]]
+      data: [[game.data?.start_at.toMillis() ?? Date.now(), 0]]
         .concat(
           t.history
             .filter((h) => {
-              if (gameStore.current && gameStore.current.start_at < DateTime.now()) {
-                return h.changed_at > gameStore.current?.start_at && h.changed_at < gameStore.current?.end_at;
+              if (game.data && game.data.start_at < DateTime.now()) {
+                return h.changed_at > game.data?.start_at && h.changed_at < game.data?.end_at;
               }
               return true;
             })
@@ -204,14 +221,14 @@ export default function () {
                       ? h.score
                       : t.history
                           .filter((i) => i.changed_at <= h.changed_at && i.challenge_id)
-                          .map((i) => challengeStore.challenges.find((c) => c.id === i.challenge_id)?.score ?? 0)
+                          .map((i) => challengeList().find((c) => c.id === i.challenge_id)?.score ?? 0)
                           .reduce((a, b) => a + b, 0),
                   ]
                 : null
             )
             .filter((i) => i !== null)
         )
-        .concat([[Math.min(Date.now(), gameStore.current?.end_at.toMillis() ?? Date.now()), t.score]]),
+        .concat([[Math.min(Date.now(), game.data?.end_at.toMillis() ?? Date.now()), t.score]]),
     }));
   };
 
@@ -226,19 +243,9 @@ export default function () {
     }
   });
 
-  createEffect(() => {
-    if (gameStore.current) {
-      untrack(async () => {
-        if (challengeStore.challenges.length === 0 && canAccessChallenges()[0]) {
-          await refreshChallenges();
-        }
-      });
-    }
-  });
-
   return (
     <>
-      <Title page={t("game.scoreboard.title")} route={`/games/${gameStore.current?.id}/scoreboard`} />
+      <Title page={t("game.scoreboard.title")} route={`/games/${gameId()}/scoreboard`} />
       <div class="flex flex-col lg:flex-row flex-1 min-w-min">
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={topTeams().length > 0}>
@@ -246,7 +253,7 @@ export default function () {
             class={clsx(
               "lg:sticky w-full top-0 left-0",
               showChallengeDetail()
-                ? "lg:w-[30vw] lg:max-w-[400px] backdrop-blur-sm border-r border-r-layer-content/10"
+                ? "lg:w-[30vw] lg:max-w-100 backdrop-blur-sm border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "lg:w-[75vw] justify-center"
                   : "lg:w-[40vw]",
@@ -359,7 +366,7 @@ export default function () {
                   size={showChallengeDetail() ? "sm" : "md"}
                   onClick={() => setShowChallengeDetail(!showChallengeDetail())}
                   class="hidden lg:flex"
-                  disabled={!canAccessChallenges()[0] && !inArchived()}
+                  disabled={!canAccessChallenges()[0] && !isArchived()}
                 >
                   <Show
                     when={showChallengeDetail()}
@@ -374,6 +381,7 @@ export default function () {
                   <ChartOperations
                     size="sm"
                     ghost
+                    onRefresh={handleRefresh}
                     showHiddenTeams={showHiddenTeams()}
                     onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
                     onInstituteChanged={(e) => setSearchParams({ institute: e })}
@@ -386,6 +394,7 @@ export default function () {
               <ChartOperations
                 size="md"
                 showHiddenTeams={showHiddenTeams()}
+                onRefresh={handleRefresh}
                 onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
                 onInstituteChanged={(e) => setSearchParams({ institute: e })}
                 institute={selectedInstituteId()}
@@ -393,16 +402,19 @@ export default function () {
             </Show>
             <Switch>
               <Match when={!showChallengeDetail() && !showLargePanel()}>
-                <TeamDetails topTeams={topTeams().slice(0, 3)} challenges={challengeStore.challenges} />
+                <TeamDetails gameId={gameId()} topTeams={topTeams().slice(0, 3)} challenges={challengeList()} />
               </Match>
               <Match when={showChallengeDetail()}>
                 <TeamRanks
+                  gameId={gameId()}
+                  game={game.data}
+                  institutes={institutes.data ?? []}
                   teams={teams()}
                   page={page()}
                   pageSize={pageSize()!}
                   total={total()}
                   showTime={false}
-                  loading={loading()}
+                  loading={activeTeamsQuery().isLoading}
                   onPageChange={(p) => setPage(p)}
                 />
               </Match>
@@ -416,18 +428,21 @@ export default function () {
               <>
                 <h1 class="text-3xl font-bold py-6 text-center hidden lg:inline-block">{t("game.scoreboard.title")}</h1>
                 <TeamRanks
+                  gameId={gameId()}
+                  game={game.data}
+                  institutes={institutes.data ?? []}
                   teams={teams()}
                   page={page()}
                   pageSize={pageSize()!}
                   showTime={!showLargePanel()}
-                  loading={loading()}
+                  loading={activeTeamsQuery().isLoading}
                   onPageChange={(p) => setPage(p)}
                   total={total()}
                 />
               </>
             }
           >
-            <TeamSolves teams={teams()} challenges={challengeStore.challenges} />
+            <TeamSolves game={game.data} teams={teams()} challenges={challengeList()} />
           </Show>
         </div>
       </div>

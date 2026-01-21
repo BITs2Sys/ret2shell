@@ -9,7 +9,7 @@ const ENCRYPT_KEY = "%RANDSTR(16)%";
 /// FLAG 前缀，最终 FLAG 会变成例如 flag{..} 的形式
 const PREFIX = "flag";
 /// 有意义的 FLAG 内容，根据替换相似字符实现动态隐写，例如传入 `and` 会自动生成形如 `@nD` 的内容
-const TEMPLATE = "%RANDREADABLE()%";
+const TEMPLATE = "%MOTTO()%";
 
 /// 检查用户提交的 FLAG 是否正确
 ///

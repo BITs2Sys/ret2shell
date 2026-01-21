@@ -54,7 +54,7 @@ impl RuneServiceInfo {
       .clone()
       .unwrap()
       .0
-      .timestamp();
+      .as_second();
     let mut ports_info = Vec::new();
     for port in service.spec.as_ref().unwrap().ports.as_ref().unwrap() {
       let port_info = RunePortInfo {

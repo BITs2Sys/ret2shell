@@ -14,7 +14,7 @@ use r2s_database::{
   config, game, institute as institute_db, team,
   user::{self, Permission, Permissions},
 };
-use r2s_email::{EmailCtx, EmailRequest};
+use r2s_email::{EmailCtx, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use rand::Rng;
@@ -369,11 +369,6 @@ async fn login(
   }
 }
 
-enum EmailType {
-  Verify,
-  Reset,
-}
-
 async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,
   email_type: EmailType, trace: impl AsRef<str>,
@@ -438,6 +433,7 @@ async fn send_email(
     },
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),
+    email_type,
   };
   queue.publish("email", email_req, trace).await?;
   Ok(())
@@ -874,7 +870,7 @@ async fn delete_self(
   let txn = db.conn.begin().await?;
 
   // Check if user is the only user
-  let user_count = user::count(&txn, false, None, None, false).await?;
+  let user_count = user::count(&txn, false, None, None, true).await?;
   if user_count == 1 {
     warn!("the only user cannot delete itself");
     return Err(ResponseError::Forbidden(

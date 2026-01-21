@@ -1,68 +1,51 @@
 import { handleHttpError } from "@api";
-import { deleteBulletin, getBulletin } from "@api/bulletin";
+import { useBulletin, useDeleteBulletinMutation } from "@api/bulletin";
 import Spin from "@assets/animates/spin";
-import type { Article as ArticleModel } from "@models/article";
 import { Permission } from "@models/user";
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import { HTTPError } from "ky";
-import { createSignal, onMount, Show } from "solid-js";
+import { Show } from "solid-js";
 import EditForm from "../_blocks/form";
 
 export default function () {
   const params = useParams();
-  const article_id = Number.parseInt(params.article, 10);
+  const articleId = Number.parseInt(params.article || "", 10);
   const [searchParams, setSearchParams] = useSearchParams();
   const inEdit = () => searchParams.edit === "true";
-  const [article, setArticle] = createSignal(null as ArticleModel | null);
   const navigate = useNavigate();
 
-  if (Number.isNaN(article_id)) navigate("/sigtrap/404", { replace: true });
+  if (Number.isNaN(articleId)) navigate("/sigtrap/404", { replace: true });
 
-  onMount(async () => {
-    try {
-      const resp = await getBulletin(article_id);
-      setArticle(resp);
-    } catch (err) {
-      handleHttpError(err as Error, t("bulletin.errors.fetch.title")!);
+  const article = useBulletin({
+    id: () => articleId,
+    onError: (err) => {
+      handleHttpError(err as Error, t("bulletin.errors.fetch.title"));
       if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
       else navigate("/sigtrap/unknown", { replace: true });
-    }
+      return false;
+    },
   });
 
-  async function onDelete() {
-    try {
-      await deleteBulletin(article_id);
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("general.actions.delete.status.fail")!);
-    }
-  }
+  const deleteMutation = useDeleteBulletinMutation({
+    onSuccess: () => {
+      navigate("/bulletin", { replace: true });
+    },
+  });
 
-  async function onDone(article: ArticleModel) {
-    try {
-      setArticle(await getBulletin(article.id));
-    } catch (err) {
-      handleHttpError(err as Error, t("bulletin.errors.fetch.title")!);
-      if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
-      else navigate("/sigtrap/unknown", { replace: true });
-    }
+  async function onDone() {
+    article.refetch();
     setSearchParams({ edit: undefined });
   }
   return (
     <>
-      <Title page={article()?.title ?? t("bulletin.title")} route={`/bulletin/${article()?.id}`} />
+      <Title page={article.data?.title ?? t("bulletin.title")} route={`/bulletin/${article.data?.id}`} />
       <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
         <Show
-          when={article()}
+          when={article.data}
           fallback={
             <>
               <Spin width={32} height={32} />
@@ -70,51 +53,62 @@ export default function () {
             </>
           }
         >
-          <span>{article()!.title}</span>
+          <span>{article.data?.title}</span>
         </Show>
       </h1>
       <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
         <A
           class="hover:underline font-bold flex flex-row space-x-2 items-center"
-          title={article()?.publisher_name || t("bulletin.unknownPublisher")!}
-          href={`/users/${article()?.publisher_id}`}
+          title={article.data?.publisher_name || t("bulletin.unknownPublisher")}
+          href={`/users/${article.data?.publisher_id}`}
         >
           <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">By</span>
-          <span>{article()?.publisher_name}</span>
+          <span>{article.data?.publisher_name}</span>
         </A>
         <div
           class="font-bold flex flex-row space-x-2 items-center"
           title={t("bulletin.form.createdAt.label", {
-            time: article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
+            time: article.data?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
           })}
         >
           <span class="shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">at</span>
-          <span>{article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+          <span>{article.data?.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
         </div>
-        <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
+        <Show
+          when={
+            article.data?.created_at &&
+            article.data?.updated_at &&
+            article.data?.created_at !== article.data?.updated_at
+          }
+        >
           <div
             class="font-bold flex flex-row space-x-2 items-center print:hidden"
             title={t("bulletin.form.updatedAt.label", {
-              time: article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
+              time: article.data?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
             })}
           >
             <span class="shrink-0 icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
-            <span>{article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+            <span>{article.data?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
           </div>
         </Show>
         <Show when={accountStore.permissions.includes(Permission.Wiki)}>
           <A
             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
-            href={`/bulletin/${article()?.id}?edit=true`}
+            href={`/bulletin/${article.data?.id}?edit=true`}
           >
             <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t("general.actions.edit.title")}</span>
           </A>
           <button
             class="cursor-pointer font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
-            onClick={onDelete}
+            onClick={() => {
+              if (article.data)
+                deleteMutation.mutate({
+                  id: article.data.id,
+                });
+            }}
             type="button"
           >
             <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
@@ -132,10 +126,12 @@ export default function () {
       </div>
       <Show
         when={inEdit()}
-        fallback={<Article class="self-center" content={article()?.content || ""} extra={true} headingAnchors={true} />}
+        fallback={
+          <Article class="self-center" content={article.data?.content || ""} extra={true} headingAnchors={true} />
+        }
       >
         <div class="flex-1 flex flex-row justify-center px-3 lg:px-6 pb-3 lg:pb-6">
-          <EditForm editSource={article() || undefined} onDone={onDone} />
+          <EditForm articleId={articleId} onDone={onDone} />
         </div>
       </Show>
     </>

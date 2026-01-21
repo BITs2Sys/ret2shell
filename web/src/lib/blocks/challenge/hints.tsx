@@ -1,19 +1,16 @@
-import { handleHttpError } from "@api";
+import { inflyClient } from "@api";
 import {
-  createChallengeHint,
-  deleteChallengeHint,
-  getChallengeHint,
-  getTeamExtras,
-  unlockChallengeHint,
-} from "@api/game";
-import type { Challenge } from "@models/challenge";
-import type { Extra } from "@models/extra";
-import type { Hint } from "@models/hint";
-import { clearError, createForm, required, reset as resetForm, setValue } from "@modular-forms/solid";
-import { challengeStore } from "@storage/challenge";
-import { gameStore, isGameAdmin } from "@storage/game";
+  useChallenge,
+  useChallengeHints,
+  useCreateChallengeHintMutation,
+  useDeleteChallengeHintMutation,
+  useUnlockChallengeHintMutation,
+} from "@api/challenge";
+import { useGame } from "@api/game";
+import { useSelfTeam, useTeamExtras } from "@api/team";
+import { clearError, createForm, required, reset as resetForm } from "@modular-forms/solid";
+import { isAdminOfGame } from "@storage/game";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
@@ -21,109 +18,73 @@ import Popover from "@widgets/popover";
 import clsx from "clsx";
 import { LoremIpsum } from "lorem-ipsum";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Show, untrack } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 
 type CreateHintForm = {
   content: string;
   cost: number;
 };
 
-export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
-  const [hints, setHints] = createSignal([] as Hint[]);
-  const [extras, setExtras] = createSignal([] as Extra[]);
-  const [unlocking, setUnlocking] = createSignal(false);
-  const ptsInputIcon = ["icon-[fluent--subtract-20-regular]", "icon-[fluent--add-20-regular]"];
-  const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(0);
-  const lorem = new LoremIpsum({
-    wordsPerSentence: {
-      max: 8,
-      min: 3,
-    },
+export default function (props: ChallengeWidgetProps) {
+  const game = useGame({ id: () => props.gameId });
+  const challenge = useChallenge({ game_id: () => props.gameId, challenge_id: () => props.challengeId });
+  const team = useSelfTeam({
+    game_id: () => props.gameId,
+    enabled: () => !props.training && !!game.data && !isAdminOfGame(game.data),
   });
-  const [form, { Form, Field }] = createForm<CreateHintForm>();
-  setValue(form, "cost", 0);
-  const [loading, setLoading] = createSignal(false);
-  async function onSubmit(result: CreateHintForm) {
-    const hint = {
-      id: 0,
-      created_at: DateTime.now(),
-      challenge_id: challengeStore.current!.id,
-      content: result.content,
-      cost: (result.cost || 0) * (ptsInputIconIndex() === 0 ? 1 : -1),
-    } as Hint;
-    try {
-      await createChallengeHint(challengeStore.current!.game_id, challengeStore.current!.id, hint);
-      addToast({
-        level: "success",
-        description: t("general.actions.create.status.success")!,
-        duration: 5000,
-      });
+
+  const hints = useChallengeHints({ game_id: () => props.gameId, challenge_id: () => props.challengeId });
+  const extras = useTeamExtras({
+    game_id: () => props.gameId,
+    team_id: () => team.data?.id || 0,
+    enabled: () => !props.training && !!game.data && !isAdminOfGame(game.data),
+  });
+
+  const createMutation = useCreateChallengeHintMutation({
+    onSuccess: () => {
       resetForm(form, {
         initialValues: {
           content: "",
           cost: 0,
         },
       });
-      refreshHint();
       setPtsInputIconIndex(0);
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
-    }
-  }
-  async function refreshHint() {
-    setLoading(true);
-    try {
-      async function getExtrasOpt() {
-        if (!isGameAdmin() && gameStore.team) {
-          return await getTeamExtras(gameStore.current!.id, gameStore.team.id);
-        }
-        return [];
-      }
-      const [hints, extras] = await Promise.all([
-        getChallengeHint(gameStore.current!.id, challengeStore.current!.id),
-        getExtrasOpt(),
-      ]);
-      setHints(hints);
-      if (extras.length) {
-        setExtras(extras);
-      }
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.hint.errors.fetch.title")!);
-    }
-    setLoading(false);
-  }
-  createEffect(() => {
-    if (challengeStore.current) {
-      untrack(() => {
-        refreshHint();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
-    }
-    if (gameStore.current && gameStore.team) {
-      untrack(() => {
-        refreshHint();
+    },
+  });
+  const deleteMutation = useDeleteChallengeHintMutation({
+    onSuccess: () => {
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
-    }
+    },
+  });
+  const unlockMutation = useUnlockChallengeHintMutation({
+    onSuccess: () => {
+      hints.refetch();
+      team.refetch();
+      extras.refetch();
+    },
   });
 
-  async function handleDeleteHint(id: number) {
-    try {
-      await deleteChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
-      refreshHint();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
-  }
+  const ptsInputIcon = ["icon-[fluent--subtract-20-regular]", "icon-[fluent--add-20-regular]"];
+  const [ptsInputIconIndex, setPtsInputIconIndex] = createSignal(0);
 
-  async function handleUnlockHint(id: number) {
-    setUnlocking(true);
-    try {
-      await unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
-      refreshHint();
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.hint.errors.unlock.title")!);
-    }
-    setUnlocking(false);
-  }
+  const lorem = new LoremIpsum({
+    wordsPerSentence: {
+      max: 8,
+      min: 3,
+    },
+  });
+
+  const [form, { Form, Field }] = createForm<CreateHintForm>({
+    initialValues: {
+      cost: 0,
+    },
+  });
 
   const plus_or_minus = (n: number) => `${n < 0 ? "- " : n > 0 ? "+ " : ""}${Math.abs(n)}`;
   const hint_color = (cost: number, is_admin = false) => {
@@ -133,7 +94,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
   return (
     <div class="flex flex-col p-3 lg:p-6">
       <For
-        each={hints()}
+        each={hints.data ?? []}
         fallback={
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
             <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
@@ -146,14 +107,14 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
             <Show
               when={
-                !_props.inGame ||
-                isGameAdmin() ||
+                props.training ||
+                isAdminOfGame(game.data) ||
                 hint.cost === 0 ||
-                extras().find((e) => e.hint_id === hint.id) ||
-                (challengeStore.current?.archive_at &&
-                  challengeStore.current.archive_at < DateTime.now() &&
-                  gameStore.current?.archive_policy.challenge.show_hints) ||
-                (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now())
+                extras.data?.find((e) => e.hint_id === hint.id) ||
+                (challenge.data?.archive_at &&
+                  challenge.data.archive_at < DateTime.now() &&
+                  game.data?.archive_policy.challenge.show_hints) ||
+                (game.data?.end_at && game.data.end_at < DateTime.now())
               }
               fallback={
                 <>
@@ -178,9 +139,15 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
                       <Button
                         size="sm"
                         level="error"
-                        onClick={() => handleUnlockHint(hint.id)}
-                        disabled={unlocking()}
-                        loading={unlocking()}
+                        onClick={() =>
+                          unlockMutation.mutate({
+                            game_id: props.gameId,
+                            challenge_id: props.challengeId,
+                            hint_id: hint.id,
+                          })
+                        }
+                        disabled={unlockMutation.isPending}
+                        loading={unlockMutation.isPending}
                       >
                         {t("general.actions.yes.title")}
                       </Button>
@@ -192,27 +159,43 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
               <span class="flex-1 text-start">{hint.content}</span>
               <Show when={hint.cost !== 0}>
                 <div class="btn btn-sm btn-ghost justify-center hover:bg-transparent cursor-auto">
-                  <span class={clsx(isGameAdmin() ? "" : "opacity-60", hint_color(hint.cost, isGameAdmin()))}>
+                  <span
+                    class={clsx(
+                      isAdminOfGame(game.data) ? "" : "opacity-60",
+                      hint_color(hint.cost, isAdminOfGame(game.data))
+                    )}
+                  >
                     {plus_or_minus(-hint.cost)}
                   </span>
-                  <span class={clsx(isGameAdmin() ? "" : "opacity-60", hint_color(hint.cost, isGameAdmin()))}>pts</span>
+                  <span
+                    class={clsx(
+                      isAdminOfGame(game.data) ? "" : "opacity-60",
+                      hint_color(hint.cost, isAdminOfGame(game.data))
+                    )}
+                  >
+                    pts
+                  </span>
                   <span
                     class={clsx(
                       "icon-[fluent--lock-open-20-regular] w-5 h-5",
-                      isGameAdmin() ? "" : "opacity-60",
-                      hint_color(hint.cost, isGameAdmin())
+                      isAdminOfGame(game.data) ? "" : "opacity-60",
+                      hint_color(hint.cost, isAdminOfGame(game.data))
                     )}
                   />
                 </div>
               </Show>
             </Show>
-            <Show when={isGameAdmin()}>
+            <Show when={isAdminOfGame(game.data)}>
               <Button
                 size="sm"
                 ghost
                 square
                 onClick={() => {
-                  handleDeleteHint(hint.id);
+                  deleteMutation.mutate({
+                    game_id: props.gameId,
+                    challenge_id: props.challengeId,
+                    hint_id: hint.id,
+                  });
                 }}
               >
                 <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
@@ -221,10 +204,25 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           </div>
         )}
       </For>
-      <Show when={isGameAdmin()}>
-        <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
+      <Show when={isAdminOfGame(game.data)}>
+        <Form
+          onSubmit={(value) => {
+            createMutation.mutate({
+              game_id: props.gameId,
+              challenge_id: props.challengeId,
+              hint: {
+                ...value,
+                id: 0,
+                created_at: DateTime.now(),
+                challenge_id: props.challengeId,
+                cost: (value.cost || 0) * (ptsInputIconIndex() === 0 ? 1 : -1),
+              },
+            });
+          }}
+          class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2"
+        >
           <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary" />
-          <Field name="content" validate={[required(t("challenge.hint.form.content.required")!)]}>
+          <Field name="content" validate={[required(t("challenge.hint.form.content.required"))]}>
             {(field, props) => (
               <Input
                 type="text"
@@ -285,7 +283,13 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           </Field>
           <span class="font-bold opacity-60">pts</span>
           <span class="w-2" />
-          <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
+          <Button
+            size="sm"
+            level="primary"
+            type="submit"
+            loading={createMutation.isPending}
+            disabled={createMutation.isPending}
+          >
             <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("general.actions.add.title")}</span>
           </Button>

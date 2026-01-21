@@ -1,11 +1,11 @@
 import LogoAnimate from "@assets/animates/logo-animate";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
+import type { Game } from "@models/game";
 import type { Team } from "@models/team";
-import { gameStore } from "@storage/game";
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
-export default function TeamSolves(props: { teams: Team[]; challenges: Challenge[] }) {
+export default function TeamSolves(props: { game?: Game; teams: Team[]; challenges: Challenge[] }) {
   const tags = createMemo(() => {
     const tags = new Set(
       props.challenges.filter((c) => c.hidden === false).flatMap((c) => c.tag.find((t) => t.primary)?.name ?? "UNKNOWN")
@@ -31,10 +31,10 @@ export default function TeamSolves(props: { teams: Team[]; challenges: Challenge
     <>
       <header class="border-b border-b-layer-content/10 flex flex-col">
         <div class="flex flex-row items-center self-end space-x-6 h-24 sticky right-3 lg:right-6">
-          <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={80} height={80} />}>
-            <img class="shrink-0" src={mediaPath(gameStore.current!.logo!)} width={80} height={80} alt="Logo Broken" />
+          <Show when={props.game?.logo} fallback={<LogoAnimate width={80} height={80} />}>
+            <img class="shrink-0" src={mediaPath(props.game?.logo)} width={80} height={80} alt="Logo Broken" />
           </Show>
-          <h1 class="text-3xl font-bold">{gameStore.current?.name}</h1>
+          <h1 class="text-3xl font-bold">{props.game?.name}</h1>
         </div>
         <div class="h-2" />
         <div class="h-12 flex flex-row border-b border-b-layer-content/10">

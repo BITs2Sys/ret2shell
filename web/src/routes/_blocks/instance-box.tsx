@@ -1,9 +1,9 @@
+import { useGame, useGameInstances } from "@api/game";
 import Spin from "@assets/animates/spin";
 import { wsrx } from "@lib/wsrx";
 import type { Instance } from "@models/instance";
-import { useLocation } from "@solidjs/router";
+import { useLocation, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -18,6 +18,14 @@ import clsx from "clsx";
 import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
 export function InstanceBoxContent() {
+  const params = useParams();
+  const gameId = Number.parseInt(params.game || "", 10);
+  const game = useGame({ id: () => gameId });
+  const instances = useGameInstances({
+    game_id: () => gameId,
+    enabled: () => !!accountStore.token && !!game.data,
+  });
+
   const [connecting, setConnecting] = createSignal(false);
   const [refreshingTraffic, setRefreshingTraffic] = createSignal(false);
   const [deletingAllTraffic, setDeletingAllTraffic] = createSignal(false);
@@ -26,7 +34,7 @@ export function InstanceBoxContent() {
   const [showSettings, setShowSettings] = createSignal(false);
   const location = useLocation();
   function challengeLink(i: Instance) {
-    if (i.game_id !== gameStore.current?.id) {
+    if (i.game_id !== game.data?.id) {
       return "#";
     }
     if (location.pathname.startsWith("/training")) {
@@ -216,7 +224,7 @@ export function InstanceBoxContent() {
               onClick={() => {
                 setDeletingOutdatedTraffic(true);
                 wsrx
-                  .deleteOutdatedLocal()
+                  .deleteOutdatedLocal(instances.data)
                   .then(() => wsrx.syncLocal())
                   .finally(() => setDeletingOutdatedTraffic(false));
               }}
@@ -254,7 +262,7 @@ export function InstanceBoxContent() {
           </div>
         </Card>
       </Show>
-      <For each={wsrx.instances()}>
+      <For each={instances.data}>
         {(instance) => (
           <Card contentClass="p-2">
             <Link size="sm" ghost class="relative w-full" href={challengeLink(instance)}>
@@ -268,7 +276,7 @@ export function InstanceBoxContent() {
                 })}
               />
               <TimeProgress
-                class="absolute bottom-[calc(var(--spacing)_*_-1)] left-2 right-2"
+                class="absolute -bottom-1 left-2 right-2"
                 startAt={instance.created_at}
                 endAt={instance.created_at.plus({
                   hours: instance.renew_count + 1,

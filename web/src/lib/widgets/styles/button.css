@@ -31,7 +31,7 @@
       @apply px-4 rounded-lg min-h-12;
 
       &.btn-square {
-        @apply rounded-lg !h-12 !w-12 !p-0;
+        @apply rounded-lg h-12! w-12! p-0!;
       }
     }
 
@@ -39,7 +39,7 @@
       @apply px-2 rounded-md min-h-8;
 
       &.btn-square {
-        @apply rounded-md !h-8 !w-8 !p-0;
+        @apply rounded-md h-8! w-8! p-0!;
       }
     }
 
@@ -47,7 +47,7 @@
       @apply px-1 rounded-xs min-h-6;
 
       &.btn-square {
-        @apply rounded-xs !h-6 !w-6 !p-0;
+        @apply rounded-xs h-6! w-6! p-0!;
       }
     }
 

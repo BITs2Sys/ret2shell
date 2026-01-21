@@ -1,28 +1,33 @@
-import { handleHttpError } from "@api";
-import { updateGame } from "@api/game";
+import { useGame, useUpdateGameMutation } from "@api/game";
 import type { ArchivePolicy } from "@models/game";
 import { createForm, setValues } from "@modular-forms/solid";
-import { gameStore, setGameStore } from "@storage/game";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
-import { createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, untrack } from "solid-js";
 
 export function PoliciesEdit(props: {
   onDone: (result: ArchivePolicy) => void;
   editSource?: ArchivePolicy;
   loading?: boolean;
 }) {
-  const [form, { Form, Field }] = createForm<ArchivePolicy>();
+  const [form, { Form, Field }] = createForm<ArchivePolicy>({
+    initialValues: {
+      challenge: {
+        show_answer: !!props.editSource?.challenge.show_answer,
+        show_hints: !!props.editSource?.challenge.show_hints,
+      },
+    },
+  });
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {
           challenge: {
-            show_answer: props.editSource!.challenge.show_answer,
-            show_hints: props.editSource!.challenge.show_hints,
+            show_answer: !!props.editSource?.challenge.show_answer,
+            show_hints: !!props.editSource?.challenge.show_hints,
           },
         });
       });
@@ -61,7 +66,7 @@ export function PoliciesEdit(props: {
         </Field>
       </div>
 
-      <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
+      <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
         {t("general.actions.save.title")}
       </Button>
     </Form>
@@ -69,31 +74,31 @@ export function PoliciesEdit(props: {
 }
 
 export default function () {
-  const [loading, setLoading] = createSignal(false);
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+
+  const updateMutation = useUpdateGameMutation({
+    onSuccess: () => {
+      game.refetch();
+    },
+  });
+
   async function onSubmit(result: ArchivePolicy) {
-    // console.log(result);
-    setLoading(true);
-    try {
-      const game = await updateGame(gameStore.current!.id, {
-        ...gameStore.current!,
+    if (!game.data) return;
+    updateMutation.mutate({
+      id: game.data.id,
+      game: {
+        ...game.data,
         archive_policy: result,
-      });
-      setGameStore({ current: game });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+      },
+    });
   }
   return (
     <>
-      <Title page={t("game.policies.title")} route={`/games/${gameStore.current?.id}/admin/polocies`} />
+      <Title page={t("game.policies.title")} route={`/games/${gameId()}/admin/policies`} />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
-        <PoliciesEdit onDone={onSubmit} editSource={gameStore.current?.archive_policy} loading={loading()} />
+        <PoliciesEdit onDone={onSubmit} editSource={game.data?.archive_policy} loading={updateMutation.isPending} />
       </div>
     </>
   );

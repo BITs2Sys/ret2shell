@@ -1,10 +1,19 @@
-import { api_root, handleHttpError } from "@api";
-import { getCalmdownStatus } from "@api/cluster";
-import { delayChallengeInstance, startChallengeInstance, stopChallengeInstance } from "@api/game";
+import { api_root } from "@api";
+import {
+  useChallenge,
+  useChallengeAttachments,
+  useChallengeEnv,
+  useChallengeSolveStatus,
+  useDelayChallengeInstanceMutation,
+  useStartChallengeInstanceMutation,
+  useStopChallengeInstanceMutation,
+} from "@api/challenge";
+import { useCalmdownStatus } from "@api/cluster";
+import { useGame, useGameInstances } from "@api/game";
+import { useSelfTeam } from "@api/team";
 import Spin from "@assets/animates/spin";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
-import { challengeStore, refreshStatus } from "@storage/challenge";
-import { gameStore, inProgress } from "@storage/game";
+import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
@@ -20,6 +29,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
 import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import DownloadButton from "../download-button";
+import type { ChallengeWidgetProps } from ".";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],
@@ -31,39 +41,39 @@ passiveSupport({
   ],
 });
 
-export default function (props: { inGame?: boolean }) {
+export default function (props: ChallengeWidgetProps) {
+  const instances = useGameInstances({ game_id: () => props.gameId });
   const instance = createMemo(() => {
-    if (challengeStore.current && challengeStore.env) {
-      return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
-    }
-    return null;
+    return instances.data?.find((s) => s.challenge_id === props.challengeId) ?? null;
   });
-  const [calmdownStart, setCalmdownStart] = createSignal<DateTime | null>(null);
-  async function refreshCalmdown() {
-    try {
-      const result = await getCalmdownStatus();
-      setCalmdownStart(result);
-    } catch {
-      setCalmdownStart(null);
-      return;
-    }
-  }
-  createEffect(() => {
-    if (challengeStore.current && challengeStore.env) {
-      untrack(refreshCalmdown);
-    }
+  const calmdownStatus = useCalmdownStatus();
+  const game = useGame({ id: () => props.gameId });
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
-  createEffect(() => {
-    if (challengeStore.current) {
-      untrack(refreshStatus);
-    }
+  const attachments = useChallengeAttachments({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const env = useChallengeEnv({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const solveStatus = useChallengeSolveStatus({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const team = useSelfTeam({
+    game_id: () => props.gameId,
+    enabled: () => !props.training && !!game.data && isGameInProgress(game.data) && !isAdminOfGame(game.data),
   });
 
   let instanceStateIter = 0;
   async function maintainInstances() {
-    await wsrx.syncRemote();
-    await wsrx.deleteOutdatedLocal();
-    await wsrx.openAllTraffic();
+    await instances.refetch();
+    await wsrx.deleteOutdatedLocal(instances.data);
+    await wsrx.openAllTraffic(instances.data);
   }
   function maintainInstancesWorker() {
     if (instance()?.state === "Pending" || instanceStateIter === 0) {
@@ -74,7 +84,10 @@ export default function (props: { inGame?: boolean }) {
     return maintainInstancesWorker;
   }
   const instanceCountExceeded = createMemo(() => {
-    return wsrx.instances().length >= (inProgress() && gameStore.team ? (gameStore.current?.team_size ?? 1) : 1);
+    return (
+      instances.data &&
+      instances.data.length >= (isGameInProgress(game.data) && team.data ? (game.data?.team_size ?? 1) : 1)
+    );
   });
 
   const timer = setInterval(maintainInstancesWorker(), 1000);
@@ -88,67 +101,60 @@ export default function (props: { inGame?: boolean }) {
     }
   });
 
-  const [starting, setStarting] = createSignal(false);
-  async function handleStartChallengeInstance() {
-    setStarting(true);
-    try {
-      await startChallengeInstance(challengeStore.current!.game_id, challengeStore.current!.id);
+  const startInstanceMutation = useStartChallengeInstanceMutation({
+    onSuccess: () => {
       setTimeout(() => {
         maintainInstances();
       }, 500);
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.start.title")!);
-    }
-    setStarting(false);
+    },
+  });
+  async function handleStartChallengeInstance() {
+    startInstanceMutation.mutate({
+      game_id: props.gameId,
+      challenge_id: props.challengeId,
+    });
   }
 
-  const [delaying, setDelaying] = createSignal(false);
+  const delayInstanceMutation = useDelayChallengeInstanceMutation({
+    onSuccess: () => {
+      setTimeout(() => {
+        maintainInstances();
+      }, 500);
+    },
+  });
+
   function handleDelayChallengeInstance() {
-    setDelaying(true);
-    setTimeout(async () => {
-      try {
-        await delayChallengeInstance(challengeStore.current!.game_id, challengeStore.current!.id);
-        setTimeout(() => {
-          maintainInstances();
-        }, 500);
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.instance.errors.delay.title")!);
-      }
-      setDelaying(false);
-    }, 500);
+    delayInstanceMutation.mutate({
+      game_id: props.gameId,
+      challenge_id: props.challengeId,
+    });
   }
-  const [stopping, setStopping] = createSignal(false);
+
+  const stopInstanceMutation = useStopChallengeInstanceMutation({
+    onSuccess: () => {
+      setTimeout(() => {
+        maintainInstances();
+        calmdownStatus.refetch();
+      }, 500);
+    },
+  });
   function handleStopChallengeInstance() {
-    setStopping(true);
-    setTimeout(async () => {
-      try {
-        await stopChallengeInstance(challengeStore.current!.game_id, challengeStore.current!.id);
-        setTimeout(() => {
-          maintainInstances();
-          refreshCalmdown();
-        }, 500);
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.instance.errors.stop.title")!);
-      }
-      setStopping(false);
-    }, 500);
+    stopInstanceMutation.mutate({
+      game_id: props.gameId,
+      challenge_id: props.challengeId,
+    });
   }
 
   const [stoppingExplicit, setStoppingExplicit] = createSignal(0);
-  function handleStopChallengeInstanceExplicit(game_id: number, id: number) {
+  async function handleStopChallengeInstanceExplicit(game_id: number, id: number) {
     setStoppingExplicit(id);
-    setTimeout(async () => {
-      try {
-        await stopChallengeInstance(game_id, id);
-        setTimeout(() => {
-          maintainInstances();
-          refreshCalmdown();
-        }, 500);
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.instance.errors.stop.title")!);
-      }
-      setStoppingExplicit(0);
-    }, 500);
+    stopInstanceMutation.mutate({
+      game_id: game_id,
+      challenge_id: id,
+    });
+    await maintainInstances();
+    await calmdownStatus.refetch();
+    setStoppingExplicit(0);
   }
 
   return (
@@ -168,46 +174,44 @@ export default function (props: { inGame?: boolean }) {
             <header class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 font-bold py-2 gap-y-2">
               <span class="flex flex-row space-x-2 items-center overflow-hidden">
                 <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
-                <span class="flex-1 truncate">{challengeStore.current?.name}</span>
+                <span class="flex-1 truncate">{challenge.data?.name}</span>
               </span>
               <span class="flex-1" />
               <div class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-6">
-                <Show when={props.inGame}>
+                <Show when={!props.training}>
                   <span
                     class={clsx(
                       "font-bold flex flex-row space-x-2 items-center",
-                      challengeStore.status?.solved ? "text-success" : "text-warning"
+                      solveStatus.data?.solved ? "text-success" : "text-warning"
                     )}
                   >
                     <span
                       class={
-                        challengeStore.status?.solved
+                        solveStatus.data?.solved
                           ? "icon-[fluent--checkmark-circle-20-regular] w-5 h-5"
                           : "icon-[fluent--flag-20-regular] w-5 h-5"
                       }
                     />
                     <span
                       class={
-                        challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()
-                          ? "line-through"
-                          : ""
+                        challenge.data?.archive_at && challenge.data.archive_at < DateTime.now() ? "line-through" : ""
                       }
                     >
-                      {challengeStore.current?.score} pts
+                      {challenge.data?.score} pts
                     </span>
                   </span>
                 </Show>
                 <span class="font-bold flex flex-row space-x-2 items-center">
                   <span class="shrink-0 icon-[fluent--data-bar-vertical-24-regular] w-5 h-5" />
                   <span>
-                    {challengeStore.status?.solves ?? 0} solve
-                    {challengeStore.status?.solves && challengeStore.status.solves > 1 ? "s" : ""}
+                    {solveStatus.data?.solves ?? 0} solve
+                    {solveStatus.data?.solves && solveStatus.data.solves > 1 ? "s" : ""}
                   </span>
                 </span>
               </div>
             </header>
             <Switch>
-              <Match when={challengeStore.current?.release_at && challengeStore.current.release_at > DateTime.now()}>
+              <Match when={challenge.data?.release_at && challenge.data.release_at > DateTime.now()}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
                     <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-info" />
@@ -216,11 +220,11 @@ export default function (props: { inGame?: boolean }) {
                   <span class="flex-1" />
                   <span class="text-end">
                     <span class="inline-block">{t("challenge.status.unreleased.countdown")}:</span>
-                    <Timer end={challengeStore.current!.release_at!} hasHours />
+                    <Timer end={challenge.data?.release_at || DateTime.now()} hasHours />
                   </span>
                 </section>
               </Match>
-              <Match when={challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()}>
+              <Match when={challenge.data?.archive_at && challenge.data.archive_at < DateTime.now()}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
                     <span class="shrink-0 icon-[fluent--archive-20-regular] w-5 h-5 text-warning" />
@@ -230,17 +234,13 @@ export default function (props: { inGame?: boolean }) {
                   </span>
                   <span class="flex-1" />
                   <span class="text-warning text-end">
-                    <span class="inline-block">
-                      {challengeStore.current?.release_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
-                    </span>
+                    <span class="inline-block">{challenge.data?.release_at?.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                     <span>&nbsp;-&nbsp;</span>
-                    <span class="inline-block">
-                      {challengeStore.current?.archive_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
-                    </span>
+                    <span class="inline-block">{challenge.data?.archive_at?.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                   </span>
                 </section>
               </Match>
-              <Match when={challengeStore.current?.archive_at}>
+              <Match when={challenge.data?.archive_at}>
                 <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 py-2 gap-y-2">
                   <span class="flex flex-row space-x-2 items-center overflow-hidden">
                     <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5 text-info" />
@@ -249,19 +249,19 @@ export default function (props: { inGame?: boolean }) {
                   <span class="flex-1" />
                   <span class="text-end">
                     <span class="inline-block">{t("challenge.status.inPeriod.countdown")}:</span>
-                    <Timer end={challengeStore.current!.archive_at!} hasHours />
+                    <Timer end={challenge.data?.archive_at || DateTime.now()} hasHours />
                   </span>
                 </section>
               </Match>
             </Switch>
-            <Show when={challengeStore.files.length > 0}>
+            <Show when={attachments.data && attachments.data.length > 0}>
               <section class="inline-flex flex-row items-center flex-wrap min-h-12 border-b border-b-layer-content/15">
                 <h3 class="font-bold flex space-x-2 items-center">
                   <span class="shrink-0 icon-[fluent--folder-zip-20-regular] w-5 h-5" />
                   <span>{t("challenge.file.title")}:</span>
                 </h3>
                 <div class="w-4" />
-                <For each={challengeStore.files}>
+                <For each={attachments.data}>
                   {(file) => (
                     <DownloadButton
                       class="m-1"
@@ -269,14 +269,14 @@ export default function (props: { inGame?: boolean }) {
                       file={file.file}
                       withFileName
                       icon="icon-[fluent--arrow-download-20-regular]"
-                      url={`${api_root}/game/${challengeStore.current!.game_id}/challenge/${challengeStore.current!.id}/file`}
+                      url={`${api_root}/game/${challenge.data!.game_id}/challenge/${challenge.data!.id}/file`}
                       searchParams={{ file: file.file, folder: file.folder }}
                     />
                   )}
                 </For>
               </section>
             </Show>
-            <Show when={challengeStore.env}>
+            <Show when={env.data}>
               <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 relative py-2 gap-y-2">
                 <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
                   <h3 class="font-bold flex space-x-2 items-center flex-1">
@@ -317,15 +317,15 @@ export default function (props: { inGame?: boolean }) {
                       ghost
                       size="sm"
                       onClick={handleStartChallengeInstance}
-                      loading={starting()}
+                      loading={startInstanceMutation.isPending}
                       disabled={
-                        starting() ||
-                        calmdownStart() !== null ||
-                        challengeStore.env?.images.every((image) => !image.port)
+                        startInstanceMutation.isPending ||
+                        !!calmdownStatus.data ||
+                        env.data?.images.every((image) => !image.port)
                       }
                     >
                       <Show
-                        when={calmdownStart()}
+                        when={calmdownStatus.data}
                         fallback={
                           <>
                             <span class="shrink-0 icon-[fluent--play-20-regular] w-5 h-5 text-success" />
@@ -336,10 +336,10 @@ export default function (props: { inGame?: boolean }) {
                         <span class="shrink-0 icon-[fluent--history-20-regular] w-5 h-5" />
                         <span class="opacity-60">{t("challenge.instance.errors.calmdown.title")}</span>
                         <Timer
-                          end={calmdownStart()!.plus({ minutes: 1 })}
+                          end={calmdownStatus.data!.plus({ minutes: 1 })}
                           onTimeout={() => {
                             setTimeout(() => {
-                              refreshCalmdown();
+                              calmdownStatus.refetch();
                             }, 500);
                           }}
                         />
@@ -375,10 +375,10 @@ export default function (props: { inGame?: boolean }) {
                       title={t("challenge.instance.actions.delay.title")}
                       square
                       onClick={handleDelayChallengeInstance}
-                      loading={delaying()}
-                      disabled={delaying()}
+                      loading={delayInstanceMutation.isPending}
+                      disabled={delayInstanceMutation.isPending}
                     >
-                      <Show when={!delaying()}>
+                      <Show when={!delayInstanceMutation.isPending}>
                         <span class="shrink-0 icon-[fluent--clock-alarm-20-regular] w-5 h-5 text-primary" />
                       </Show>
                     </Button>
@@ -388,22 +388,22 @@ export default function (props: { inGame?: boolean }) {
                       title={t("challenge.instance.actions.stop.title")}
                       square
                       onClick={handleStopChallengeInstance}
-                      loading={stopping()}
-                      disabled={stopping()}
+                      loading={stopInstanceMutation.isPending}
+                      disabled={stopInstanceMutation.isPending}
                     >
-                      <Show when={!stopping()}>
+                      <Show when={!stopInstanceMutation.isPending}>
                         <span class="shrink-0 icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
                       </Show>
                     </Button>
                   </Match>
                   <Match when={instanceCountExceeded()}>
-                    <For each={wsrx.instances()}>
+                    <For each={instances.data}>
                       {(inst) => (
                         <Button
                           ghost
                           size="sm"
                           title={t("challenge.instance.actions.stop.title")}
-                          disabled={stopping() || !!stoppingExplicit()}
+                          disabled={stopInstanceMutation.isPending || !!stoppingExplicit()}
                           loading={stoppingExplicit() === inst.challenge_id}
                           onClick={() => handleStopChallengeInstanceExplicit(inst.game_id, inst.challenge_id)}
                         >
@@ -418,7 +418,7 @@ export default function (props: { inGame?: boolean }) {
                 </Switch>
               </section>
               <Show when={instance()}>
-                <For each={challengeStore.env?.images}>
+                <For each={env.data?.images}>
                   {(image) => {
                     const ep =
                       instance()!.exposed_ports?.map((p) => {
@@ -533,9 +533,9 @@ export default function (props: { inGame?: boolean }) {
                 </For>
               </Show>
             </Show>
-            <Show when={challengeStore.current}>
+            <Show when={challenge.data}>
               <div class="flex flex-row-reverse flex-wrap py-2">
-                <For each={challengeStore.current!.tag}>
+                <For each={challenge.data!.tag}>
                   {(tag) => (
                     <Tag level={tag.primary ? "success" : "info"} class="m-1">
                       <span>{tag.name}</span>
@@ -544,7 +544,7 @@ export default function (props: { inGame?: boolean }) {
                 </For>
               </div>
             </Show>
-            <Article content={challengeStore.current?.content ?? ""} extra />
+            <Article content={challenge.data?.content ?? ""} extra />
           </div>
         </div>
       </OverlayScrollbarsComponent>

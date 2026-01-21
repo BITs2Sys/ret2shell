@@ -2,12 +2,11 @@ import type { Article } from "@models/article";
 import { Permission } from "@models/user";
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
-import { wikiStore } from "@storage/wiki";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import TreeView, { type TreeNode } from "@widgets/treeview";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 
 function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
   let node = tree.find((node) => node.type === "category" && node.name === paths[0]);
@@ -50,8 +49,8 @@ function buildTocTree(articles: Article[]) {
   return tree;
 }
 
-export default function SideBar() {
-  const toc = () => buildTocTree(wikiStore.toc);
+export default function SideBar(props: { toc: Article[]; highlightPaths?: string[] }) {
+  const toc = createMemo(() => buildTocTree(props.toc));
   return (
     <OverlayScrollbarsComponent
       options={{
@@ -69,13 +68,13 @@ export default function SideBar() {
             <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("general.actions.create.title")}</span>
           </Link>
-          <Divider class="!mt-6 !mb-4" />
+          <Divider class="mt-6! mb-4!" />
         </Show>
-        <TreeView tree={toc()} activeMatch="exact" size="sm" highlightPaths={wikiStore.current?.path} />
+        <TreeView tree={toc()} activeMatch="exact" size="sm" highlightPaths={props.highlightPaths} />
       </div>
       <a
         class="sticky bottom-0 h-16 border-t border-t-layer-content/10 flex flex-row items-center justify-center px-4 space-x-2"
-        href="/docs"
+        href="https://docs.ret.sh.cn/"
         target="_blank"
         rel="noopener noreferrer"
       >

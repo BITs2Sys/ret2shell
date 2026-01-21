@@ -415,8 +415,7 @@ async fn bind_oauth_account(
         ("email", user.email.clone().unwrap_or_default()),
       ]
       .iter()
-      .cloned()
-      .map(|(k, v)| (k.to_owned(), v.to_owned()))
+      .map(|(k, v)| (k.to_owned().to_owned(), v.to_owned()))
       .collect(),
     )
     .await?;

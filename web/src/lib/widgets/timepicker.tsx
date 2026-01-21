@@ -442,7 +442,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
         }
         extraBtn={
           <Button
-            class="!rounded-l-none"
+            class="rounded-l-none!"
             type="button"
             onClick={() => {
               setTime(null);

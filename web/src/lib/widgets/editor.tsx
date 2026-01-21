@@ -10,6 +10,8 @@ import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
 
+let runeModePromise: Promise<unknown> | null = null;
+
 export type DiagnosticMarker = {
   kind: "error" | "warning" | "info";
   message: string;
@@ -68,16 +70,21 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
         const resp = await uploadMedia(imageFile()!, false);
         editor?.insert(`![${imageFile()!.name}](${mediaPath(resp.hash)})`);
       } catch (err) {
-        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail"));
       }
       setUploading(false);
     }
   }
   let editorElement: HTMLPreElement;
   let editor: ace.Ace.Editor | null = null;
-  function initEditor() {
+  async function initEditor() {
+    const isRune = editorProps.lang === "rune";
+    if (isRune) {
+      runeModePromise ??= import("./ace/rune");
+      await runeModePromise;
+    }
     editor = ace.edit(editorElement!, {
-      mode: `ace/mode/${editorProps.lang || "text"}`,
+      mode: isRune ? "ace/mode/rune" : `ace/mode/${editorProps.lang || "text"}`,
       theme: `ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`,
       readOnly: editorProps.readonly,
       showPrintMargin: false,
@@ -100,59 +107,10 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       useWorker: false,
     });
     editor.container.style.lineHeight = "1.6";
-
     editor.on("change", () => {
       const content = editor?.getValue();
       editorProps.onValueChanged?.(content || "");
       if (editorProps.form && editorProps.name) setValue(editorProps.form, editorProps.name, content);
-    });
-
-    createEffect(() => {
-      if (themeStore.colorScheme && editor) {
-        editor.setTheme(`ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`);
-      }
-    });
-
-    createEffect(() => {
-      if (editorProps.lints && editor) {
-        const annotations = editorProps.lints.map((lint) => ({
-          row: lint.start_line,
-          column: lint.start_column,
-          text: lint.message,
-          type: lint.kind === "error" ? "error" : lint.kind === "warning" ? "warning" : "info",
-        }));
-        editor.getSession().setAnnotations(annotations);
-        const markers = editorProps.lints.map((lint) => ({
-          startRow: lint.start_line,
-          startCol: lint.start_column,
-          endRow: lint.end_line,
-          endCol: lint.end_column,
-          className:
-            lint.kind === "error"
-              ? "ace_error-marker"
-              : lint.kind === "warning"
-                ? "ace_warning-marker"
-                : "ace_info-marker",
-          type: "text" as "text" | "line" | "fullLine",
-        }));
-        const prevMarkers = editor.session.getMarkers();
-        if (prevMarkers) {
-          const prevMarkersArr: number[] = Object.keys(prevMarkers).map((v) => Number.parseInt(v, 10));
-          for (const item of prevMarkersArr) {
-            editor.session.removeMarker(prevMarkers[item].id as number);
-          }
-        }
-        for (const marker of markers) {
-          editor
-            .getSession()
-            .addMarker(
-              new ace.Range(marker.startRow, marker.startCol, marker.endRow, marker.endCol),
-              marker.className,
-              marker.type,
-              false
-            );
-        }
-      }
     });
 
     editor.on("blur", () => {
@@ -211,6 +169,52 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       editor?.setValue(editorProps.value || "");
     }
   });
+  createEffect(() => {
+    if (themeStore.colorScheme && editor) {
+      editor.setTheme(`ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`);
+    }
+  });
+  createEffect(() => {
+    if (editorProps.lints && editor) {
+      const annotations = editorProps.lints.map((lint) => ({
+        row: lint.start_line,
+        column: lint.start_column,
+        text: lint.message,
+        type: lint.kind === "error" ? "error" : lint.kind === "warning" ? "warning" : "info",
+      }));
+      editor.getSession().setAnnotations(annotations);
+      const markers = editorProps.lints.map((lint) => ({
+        startRow: lint.start_line,
+        startCol: lint.start_column,
+        endRow: lint.end_line,
+        endCol: lint.end_column,
+        className:
+          lint.kind === "error"
+            ? "ace_error-marker"
+            : lint.kind === "warning"
+              ? "ace_warning-marker"
+              : "ace_info-marker",
+        type: "text" as "text" | "line" | "fullLine",
+      }));
+      const prevMarkers = editor.session.getMarkers();
+      if (prevMarkers) {
+        const prevMarkersArr: number[] = Object.keys(prevMarkers).map((v) => Number.parseInt(v, 10));
+        for (const item of prevMarkersArr) {
+          editor.session.removeMarker(prevMarkers[item].id as number);
+        }
+      }
+      for (const marker of markers) {
+        editor
+          .getSession()
+          .addMarker(
+            new ace.Range(marker.startRow, marker.startCol, marker.endRow, marker.endCol),
+            marker.className,
+            marker.type,
+            false
+          );
+      }
+    }
+  });
 
   onMount(() => {
     setTimeout(() => {
@@ -221,7 +225,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   return (
     <div {...native} class={clsx("relative", native.class, native.classList)}>
       <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
-        <pre class="w-full min-h-full relative !bg-[transparent]" ref={editorElement!} />
+        <pre class="w-full min-h-full relative bg-transparent!" ref={editorElement!} />
       </div>
       <Show when={editorProps.error}>
         <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">

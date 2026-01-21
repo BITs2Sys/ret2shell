@@ -1,11 +1,12 @@
 import { luxonReplacer, luxonReviver } from "@models/utils";
 import { base64 } from "@scure/base";
 import { accountStore, resetUser, storeToken } from "@storage/account";
-import { resetGameStore } from "@storage/game";
 import { platformStore } from "@storage/platform";
+import { experimental_createQueryPersister } from "@tanstack/query-persist-client-core";
+import { QueryClient } from "@tanstack/solid-query";
 import ky from "ky";
 
-export { handleHttpError } from "./utils";
+export { handleHttpError, toastError, toastSuccess } from "./utils";
 
 export const api_root = (import.meta.env.VITE_API_ROOT as string) || "/api";
 
@@ -46,7 +47,6 @@ const api = ky.extend({
       (_request, _options, response) => {
         if (response.status === 401) {
           resetUser();
-          resetGameStore();
         }
         if (response.headers.has("Set-Token")) {
           const token = response.headers.get("Set-Token");
@@ -60,3 +60,17 @@ const api = ky.extend({
 });
 
 export default api;
+
+export const inflyClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 1000 * 5, // 5 seconds
+    },
+  },
+});
+
+export const persister = experimental_createQueryPersister({
+  storage: localStorage,
+  prefix: "ret2infly",
+});

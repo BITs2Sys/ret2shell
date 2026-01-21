@@ -20,7 +20,7 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const params = useParams();
   const navigate = useNavigate();
-  const userId = () => Number.parseInt(params.user, 10) || null;
+  const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
   createEffect(() => {
     if (!userId()) {
@@ -34,7 +34,7 @@ export default function () {
           (await getUserTeams(userId()!)).sort((a, b) => a.last_active_at.toMillis() - b.last_active_at.toMillis())
         );
       } catch (err) {
-        handleHttpError(err as Error, t("team.errors.fetchList.title")!);
+        handleHttpError(err as Error, t("team.errors.fetchList.title"));
       }
       setLoading(false);
     });
@@ -58,7 +58,7 @@ export default function () {
                   <LoadingTips />
                 </Match>
                 <Match when={true}>
-                  <Article content={user()?.description || t("user.description.empty")!} />
+                  <Article content={user()?.description || t("user.description.empty")} />
                 </Match>
               </Switch>
             </section>

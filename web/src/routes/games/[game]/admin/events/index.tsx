@@ -1,43 +1,35 @@
-import { handleHttpError } from "@api";
-import { type EventDeviceInfo, getGameDevices, regenerateGameToken } from "@api/game";
+import { useGame, useGameDevices, useRegenerateGameTokenMutation } from "@api/game";
 import { createBreakpoints } from "@solid-primitives/media";
-import { gameStore, setGameStore } from "@storage/game";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
 import Popover from "@widgets/popover";
-import { createEffect, createSignal, For, Match, Switch, untrack } from "solid-js";
+import { createMemo, For, Match, Switch } from "solid-js";
 
 export default function () {
-  const [linkedDevices, setLinkedDevices] = createSignal([] as EventDeviceInfo[]);
-  createEffect(() => {
-    if (gameStore.current) {
-      untrack(async () => {
-        try {
-          const devices = await getGameDevices(gameStore.current!.id);
-          setLinkedDevices(devices);
-        } catch (err) {
-          handleHttpError(err as Error, t("game.events.errors.fetchDevices.title")!);
-        }
-      });
-    }
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+  const devices = useGameDevices({ game_id: gameId, enabled: () => gameId() > 0 });
+  const tokenMutation = useRegenerateGameTokenMutation({
+    onSuccess: () => {
+      game.refetch();
+      devices.refetch();
+    },
   });
 
   async function handleRefreshToken() {
-    try {
-      const resp = await regenerateGameToken(gameStore.current!.id);
-      setGameStore({ current: { ...gameStore.current!, token: resp.token } });
-    } catch (err) {
-      handleHttpError(err as Error, t("game.errors.regenerateToken.title")!);
-    }
+    if (gameId() <= 0) return;
+    tokenMutation.mutate({ id: gameId() });
   }
 
   const matches = createBreakpoints(breakpoints);
   return (
     <>
-      <Title page={t("game.events.title")} route={`/games/${gameStore.current?.id}/admin/events`} />
+      <Title page={t("game.events.title")} route={`/games/${gameId()}/admin/events`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 relative">
         <div class="flex-1 flex flex-col w-full max-w-5xl">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
@@ -50,7 +42,7 @@ export default function () {
               <span>{t("game.events.howto")}</span>
               <span>&nbsp;</span>
               <a
-                href="/docs/events"
+                href="https://docs.ret.sh.cn/"
                 class="inline-flex flex-row space-x-2 items-center hover:underline"
                 target="_blank"
                 rel="noreferrer"
@@ -65,7 +57,7 @@ export default function () {
           <div class="flex flex-row space-x-2 mt-2">
             <Clipboard
               class="flex-1"
-              value={`${window.origin.replace("http", "ws")}/api/event/connect?game_id=${gameStore.current?.id}&token=${gameStore.current?.token || undefined}`}
+              value={`${window.origin.replace("http", "ws")}/api/event/connect?game_id=${gameId()}&token=${game.data?.token || undefined}`}
             />
             <Popover
               square
@@ -88,7 +80,7 @@ export default function () {
             <span>{t("game.events.linkedDevices")}</span>
           </h2>
           <For
-            each={linkedDevices()}
+            each={devices.data || []}
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <span class="shrink-0 icon-[fluent--desktop-20-regular] w-24 h-24" />

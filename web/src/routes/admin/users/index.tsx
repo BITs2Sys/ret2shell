@@ -1,13 +1,11 @@
-import { handleHttpError } from "@api";
-import { getUser, getUserList, updateUser } from "@api/user";
+import { useInstitutes } from "@api/account";
+import { useUpdateUserMutation, useUser, useUsers } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
-import { permissionToIcon, type User } from "@models/user";
+import { permissionToIcon } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useSearchParams } from "@solidjs/router";
-import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
@@ -15,53 +13,38 @@ import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
-import { createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch, untrack } from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 import Form from "./_blocks/form";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";
 
 function UserList() {
-  const [users, setUsers] = createSignal([] as User[]);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const pageSize = 15;
-  const [loading, setLoading] = createSignal(true);
-  const [total, setTotal] = createSignal(0);
   const filter = createMemo(() => (searchParams.filter as string) || null);
   const order = createMemo(() => (searchParams.order as string) || "id");
   const instituteId = createMemo(
     () => (searchParams.institute && Number.parseInt(searchParams.institute as string, 10)) || null
   );
-  async function refreshUsers() {
-    setLoading(true);
-    try {
-      const resp = await getUserList(
-        page(),
-        pageSize,
-        order() || "id",
-        filter() ?? undefined,
-        instituteId() ?? undefined
-      );
-      setUsers(resp[0]);
-      setTotal(resp[1]);
-    } catch (err) {
-      handleHttpError(err as Error, t("user.errors.fetchList.title")!);
-    }
-    setLoading(false);
-  }
-
+  const users = useUsers({
+    page: () => page(),
+    page_size: () => pageSize,
+    order: () => (searchParams.order as OrderType) || "id",
+    filter,
+    institute_id: instituteId,
+  });
+  const institutes = useInstitutes();
   const institutesSelect = createMemo(() => {
-    return accountStore.institutes.map((i) => ({
-      value: i.id.toString(),
-      label: i.name,
-      icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
-    }));
+    return (
+      institutes.data?.map((i) => ({
+        value: i.id.toString(),
+        label: i.name,
+        icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
+      })) ?? []
+    );
   });
-  createEffect(() => {
-    if (page()) {
-      untrack(refreshUsers);
-    }
-  });
+
   const matches = createBreakpoints(breakpoints);
   return (
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1">
@@ -83,34 +66,32 @@ function UserList() {
             },
             {
               value: "account",
-              label: t("account.form.account.label")!,
+              label: t("account.form.account.label"),
               icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
             },
             {
               value: "institute_id",
-              label: t("account.form.institute.label")!,
+              label: t("account.form.institute.label"),
               icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
             },
             {
               value: "registered_at",
-              label: t("account.form.registeredAt.label")!,
+              label: t("account.form.registeredAt.label"),
               icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
             },
           ]}
           onValueChange={(v) => {
             setSearchParams({ order: (v.value.at(0) || "id") as OrderType });
-            setTimeout(refreshUsers, 100);
           }}
           value={order() ? [order()!] : undefined}
         />
         <Select
           class="flex-1 max-w-64 min-w-48"
           size="sm"
-          placeholder={t("account.form.institute.label")!}
+          placeholder={t("account.form.institute.label")}
           items={institutesSelect()}
           onValueChange={(v) => {
             setSearchParams({ institute: (v.value.at(0) && Number.parseInt(v.value.at(0)!, 10)) || null });
-            setTimeout(refreshUsers, 100);
           }}
           value={instituteId() ? [instituteId()!.toString()] : undefined}
         />
@@ -122,17 +103,16 @@ function UserList() {
           placeholder={t("user.filter")}
           onChange={(e) => {
             setSearchParams({ filter: e.target.value || undefined, page: null });
-            setTimeout(refreshUsers, 100);
           }}
         />
       </h3>
-      <Show when={loading()}>
+      <Show when={users.isLoading}>
         <div class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2 hover:bg-layer-content/5">
           <LoadingTips />
         </div>
       </Show>
       <div class="grid grid-cols-1">
-        <For each={users()}>
+        <For each={users.data?.[0]}>
           {(user) => (
             <A
               class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2 hover:bg-layer-content/5 cursor-pointer"
@@ -159,7 +139,7 @@ function UserList() {
                 <Show when={user.institute_id}>
                   <Tag class="min-w-16" level="info">
                     <span class="flex-1 truncate">
-                      {accountStore.institutes.find((v) => v.id === user.institute_id)?.name}
+                      {institutes.data?.find((v) => v.id === user.institute_id)?.name}
                     </span>
                   </Tag>
                 </Show>
@@ -176,7 +156,7 @@ function UserList() {
       </div>
       <Pagination
         class="p-6 lg:p-9"
-        count={total()}
+        count={users.data?.[1] || 0}
         pageSize={pageSize}
         page={page()}
         onPageChange={(page) => setSearchParams({ page: page.page })}
@@ -188,48 +168,32 @@ function UserList() {
 export default function () {
   const [searchParams] = useSearchParams();
   const inEdit = createMemo(() => (searchParams.user && Number.parseInt(searchParams.user as string, 10)) || null);
-  const [user, setUser] = createSignal(null as User | null);
-  createEffect(() => {
-    if (inEdit()) {
-      untrack(async () => {
-        try {
-          const resp = await getUser(inEdit()!);
-          setUser(resp);
-        } catch (err) {
-          handleHttpError(err as Error, t("user.errors.fetch.title")!);
-        }
-      });
-    } else {
-      setUser(null);
-    }
+  const user = useUser({ id: () => inEdit()!, enabled: () => Boolean(inEdit()) });
+  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
+  const pageSize = 15;
+  const filter = createMemo(() => (searchParams.filter as string) || null);
+  const instituteId = createMemo(
+    () => (searchParams.institute && Number.parseInt(searchParams.institute as string, 10)) || null
+  );
+  const users = useUsers({
+    page: () => page(),
+    page_size: () => pageSize,
+    order: () => (searchParams.order as OrderType) || "id",
+    filter,
+    institute_id: instituteId,
   });
-
-  const [updatingUser, setUpdatingUser] = createSignal(false);
-  async function handleUpdateUser(user: User) {
-    setUpdatingUser(true);
-    try {
-      await updateUser(user);
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      setUser(user);
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setUpdatingUser(false);
-  }
-
-  onMount(() => {
-    refreshInstitutes();
+  const mutation = useUpdateUserMutation({
+    onSuccess: () => {
+      user.refetch();
+      users.refetch();
+    },
   });
   return (
     <>
       <Title page={t("user.list.title")} route="/admin/users" />
       <div class="flex-1 flex flex-col items-center">
         <Show when={inEdit()} fallback={<UserList />}>
-          <Form editSource={user() || undefined} onDone={handleUpdateUser} loading={updatingUser()} />
+          <Form editSource={user.data} onDone={(v) => mutation.mutate(v)} loading={mutation.isPending} />
         </Show>
       </div>
     </>

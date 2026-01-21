@@ -1,6 +1,6 @@
 import { handleHttpError } from "@api";
 import { getProfile } from "@api/account";
-import { getPlatformInfo, getPlatformLicense, getVersion } from "@api/platform";
+import { getPlatformLicense, getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
 import { hashToHexSync } from "@lib/utils/hash";
 import { Permission } from "@models/user";
@@ -11,7 +11,7 @@ import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage
 import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
 import { HTTPError } from "ky";
-import { createEffect, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import TitleBar from "./_blocks/title-bar";
 import Toasts from "./_blocks/toasts";
@@ -20,7 +20,7 @@ function checkCookiePolicy() {
   if (!platformStore.accept_cookies) {
     const toastId = addToast({
       level: "info",
-      description: t("platform.cookiePolicy")!,
+      description: t("platform.cookiePolicy"),
       accept: () => {
         setPlatformStore({ accept_cookies: true });
         setTimeout(() => {
@@ -61,18 +61,17 @@ function forceLogin() {
 }
 
 export default function (props: { children?: JSX.Element }) {
-  let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+  const platformInfo = usePlatformInfo();
+  const platformName = createMemo(() => `\xa0\xa0[\xa0${platformInfo.data?.name || t("platform.name")}\xa0]\xa0`);
   const [platformTyped, setPlatformTyped] = createSignal("");
   const [hideAnimation, setHideAnimation] = createSignal(false);
   let showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
   const navigate = useNavigate();
-  const location = useLocation();
-  const inDocs = () => location.pathname.startsWith("/docs");
   function checkEmailVerification() {
     if (accountStore.token && !accountStore.permissions.includes(Permission.Verified)) {
       addToast({
         level: "warning",
-        description: t("account.status.unverified.message")!,
+        description: t("account.status.unverified.message"),
         accept: () => {
           navigate("/account/settings");
         },
@@ -84,44 +83,38 @@ export default function (props: { children?: JSX.Element }) {
   onMount(async () => {
     if (JSON.parse((import.meta.env.VITE_FORCE_LOGIN as string) || "0")) forceLogin(); // force login, forbid access to the platform without login
     try {
-      const res = await getPlatformInfo();
-      setPlatformStore({
-        config: res,
-        backend_online: true,
-      });
-      loadVersion();
+      await loadVersion();
     } catch (err) {
+      console.log(err);
       if (err instanceof HTTPError && err.response?.status === 503) {
         setPlatformStore({ under_maintenance: true });
-        if (!inDocs()) navigate("/");
-      } else if (err instanceof HTTPError && err.response?.status === 502 && !inDocs()) {
+      } else if (err instanceof HTTPError && err.response?.status === 502) {
         addToast({
           level: "error",
           description: `${t("platform.errors.offline.title")}: ${t("platform.errors.offline.message")}`,
         });
         navigate(`/sigtrap/${err.response?.status || 502}`);
-      } else if (err instanceof HTTPError && !inDocs()) {
+      } else if (err instanceof HTTPError) {
         addToast({
           level: "error",
           description: `${t("platform.errors.internal.title")}: ${err.response?.statusText || err.message}`,
         });
         navigate(`/sigtrap/${err.response?.status || 500}`);
       } else {
-        handleHttpError(err as Error, t("platform.errors.internal.title")!);
+        handleHttpError(err as Error, t("platform.errors.internal.title"));
         navigate("/sigtrap/unknown");
       }
       setPlatformStore({ backend_online: false });
     }
-    platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
-    showAnimation = showAnimation && !platformStore.config.zen_game;
+    showAnimation = showAnimation && !platformInfo.data?.zen_game;
 
     setTimeout(checkCookiePolicy, 1000);
 
     if (showAnimation) {
       setTimeout(() => {
         const typeTimer = setInterval(() => {
-          if (platformTyped().length < platformName.length) {
-            setPlatformTyped(platformName.slice(0, platformTyped().length + 1));
+          if (platformTyped().length < platformName().length) {
+            setPlatformTyped(platformName().slice(0, platformTyped().length + 1));
           } else {
             clearInterval(typeTimer);
             setTimeout(() => {
@@ -174,8 +167,9 @@ export default function (props: { children?: JSX.Element }) {
       setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
       if (err instanceof HTTPError && err.response?.status === 503) {
         setPlatformStore({ under_maintenance: true, backend_online: false });
-        if (!inDocs()) navigate("/");
+        navigate("/");
       }
+      throw err;
     }
   }
 
@@ -191,7 +185,7 @@ export default function (props: { children?: JSX.Element }) {
 
   return (
     <>
-      <Title domain={platformStore.config.name ?? t("platform.name")} route="/" />
+      <Title domain={platformInfo.data?.name ?? t("platform.name")} route="/" />
       <Background />
       <TitleBar />
       {props.children}

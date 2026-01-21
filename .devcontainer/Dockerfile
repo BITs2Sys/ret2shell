@@ -14,4 +14,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
 
 RUN rustup component add clippy
 RUN rustup toolchain install stable nightly
+RUN rustup default nightly && \
+    rustup component add rustfmt
 RUN rustup default stable

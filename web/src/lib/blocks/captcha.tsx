@@ -1,7 +1,5 @@
-import { handleHttpError } from "@api";
-import { getCaptcha } from "@api/account";
+import { useCaptcha } from "@api/account";
 import Working from "@assets/animates/working";
-import type { Captcha } from "@models/captcha";
 import { type FormStore, type Maybe, setValue } from "@modular-forms/solid";
 import { base64 } from "@scure/base";
 import { t } from "@storage/theme";
@@ -22,38 +20,26 @@ export default function (
     }
 ) {
   const [fieldProps, inputProps] = splitProps(props, ["idFieldValue", "answerFieldValue"]);
-  const [captcha, setCaptcha] = createSignal<Captcha | null>(null);
-  const [loading, setLoading] = createSignal(true);
   const [calculating, setCalculating] = createSignal(false);
   const [manuallyFill, setManuallyFill] = createSignal(true);
 
-  async function reload() {
-    setLoading(true);
-    try {
-      const resp = await getCaptcha();
-      setCaptcha(resp);
-      if (resp.validator === "pow") startPow();
-      else if (resp.validator === "none") {
-        setValue(props.captchaForm, "captcha_answer", "0xDEADBEEF");
-        setValue(props.captchaForm, "captcha_id", "0xCAFEBABE");
-      }
-      setValue(props.captchaForm, "captcha_id", resp.id);
-    } catch (err) {
-      setCaptcha(null);
-      setValue(props.captchaForm, "captcha_id", "");
-      handleHttpError(err as Error, t("captcha.errors.fetch.title")!);
-    }
-    setLoading(false);
-  }
+  const captcha = useCaptcha({ timestamp: props.timestamp });
 
   createEffect(() => {
-    if (props.timestamp) {
-      untrack(reload);
+    if (!captcha.isLoading && captcha.data) {
+      untrack(() => {
+        if (captcha.data.validator === "pow") startPow();
+        else if (captcha.data.validator === "none") {
+          setValue(props.captchaForm, "captcha_answer", "0xDEADBEEF");
+          setValue(props.captchaForm, "captcha_id", "0xCAFEBABE");
+        }
+        setValue(props.captchaForm, "captcha_id", captcha.data.id);
+      });
     }
   });
 
   function getCaptchaContent() {
-    const captchaObj = captcha();
+    const captchaObj = captcha.data;
     if (captchaObj)
       switch (captchaObj.validator) {
         case "none":
@@ -92,7 +78,7 @@ export default function (
     setCalculating(true);
     const worker = new Worker(new URL("@lib/workers/pow.worker.ts", import.meta.url), { type: "module" });
     worker.postMessage({
-      challenge: captcha()?.challenge,
+      challenge: captcha.data?.challenge,
     });
     worker.onmessage = (e) => {
       setCalculating(false);
@@ -114,20 +100,28 @@ export default function (
         error={props.idFieldError || props.answerFieldError}
         extraBtn={
           <Button
-            class="!rounded-l-none"
-            loading={loading()}
-            onClick={reload}
-            disabled={calculating() || loading()}
+            class="rounded-l-none!"
+            loading={calculating() || captcha.isLoading}
+            onClick={() => {
+              setValue(props.captchaForm, "captcha_answer", "");
+              setValue(props.captchaForm, "captcha_id", "");
+              captcha.refetch();
+            }}
+            disabled={calculating() || captcha.isLoading}
             type="button"
             title={
-              loading()
-                ? t("captcha.fetching")!
+              captcha.isLoading
+                ? t("captcha.fetching")
                 : calculating()
-                  ? t("captcha.calculating")!
-                  : t("general.actions.refresh.title")!
+                  ? t("captcha.calculating")
+                  : t("general.actions.refresh.title")
             }
           >
-            {loading() ? null : captcha() ? getCaptchaContent() : t("captcha.errors.fetch.title")}
+            {calculating() || captcha.isLoading
+              ? null
+              : captcha.data
+                ? getCaptchaContent()
+                : t("captcha.errors.fetch.title")}
           </Button>
         }
       />

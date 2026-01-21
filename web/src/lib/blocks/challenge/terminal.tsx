@@ -1,6 +1,6 @@
 import Terminal from "@lib/shell/terminal";
-import type { Challenge } from "@models/challenge";
+import type { ChallengeWidgetProps } from ".";
 
-export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
-  return <Terminal />;
+export default function (props: ChallengeWidgetProps) {
+  return <Terminal {...props} />;
 }

@@ -1,12 +1,11 @@
-import { handleHttpError } from "@api";
-import { createNotification, deleteNotification, getNotifications } from "@api/notification";
+import { useGame } from "@api/game";
+import { useCreateNotificationMutation, useDeleteNotificationMutation, useNotifications } from "@api/notification";
 import type { Notification } from "@models/notification";
 import { createForm, required, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { gameStore, isGameAdmin } from "@storage/game";
+import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Editor from "@widgets/editor";
@@ -14,76 +13,55 @@ import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
+import { createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 type NotificationForm = {
   title: string;
   content: string;
 };
 
-export default function () {
-  const [notifications, setNotifications] = createSignal([] as Notification[]);
-  const sortedNotifications = () =>
-    notifications().sort((a, b) => b.published_at.toMillis() - a.published_at.toMillis());
+export default function (props: { gameId: number }) {
+  const game = useGame({ id: () => props.gameId });
+  const notifications = useNotifications({
+    game_id: () => props.gameId,
+    enabled: () => !!props.gameId,
+  });
+  const sortedNotifications = createMemo(() => {
+    return [...(notifications.data ?? [])].sort((a, b) => b.published_at.toMillis() - a.published_at.toMillis());
+  });
   const [createFormExpanded, setCreateFormExpanded] = createSignal(false);
   const [form, { Form, Field }] = createForm<NotificationForm>();
-  async function onSubmit(result: NotificationForm) {
+  const createMutation = useCreateNotificationMutation({
+    onSuccess: () => {
+      setValues(form, { title: "", content: "" });
+      setCreateFormExpanded(false);
+      notifications.refetch();
+    },
+  });
+  const deleteMutation = useDeleteNotificationMutation({
+    onSuccess: () => {
+      notifications.refetch();
+    },
+  });
+
+  function onSubmit(result: NotificationForm) {
     const payload = {
       id: 0,
       title: result.title,
       content: result.content,
       published_at: DateTime.now(),
       publisher_id: accountStore.id,
-      game_id: gameStore.current!.id,
+      game_id: props.gameId,
     } as Notification;
-    try {
-      await createNotification(gameStore.current!.id, payload);
-      addToast({
-        level: "success",
-        description: t("general.actions.create.status.success")!,
-        duration: 5000,
-      });
-      setValues(form, {
-        title: "",
-        content: "",
-      });
-      setCreateFormExpanded(false);
-      refreshNotifications();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
-    }
+    createMutation.mutate({ game_id: props.gameId, notification: payload });
   }
-  const [loading, setLoading] = createSignal(false);
-  async function refreshNotifications() {
-    setLoading(true);
-    try {
-      setNotifications(await getNotifications(gameStore.current!.id));
-    } catch (err) {
-      handleHttpError(err as Error, t("game.notification.errors.fetch.title")!);
-    }
-    setLoading(false);
+
+  function onDelete(id: number) {
+    deleteMutation.mutate({ game_id: props.gameId, id });
   }
-  async function onDelete(id: number) {
-    try {
-      await deleteNotification(gameStore.current!.id, id);
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-      refreshNotifications();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
-  }
-  createEffect(() => {
-    if (gameStore.current) {
-      refreshNotifications();
-    }
-  });
 
   const refreshTimer = setInterval(() => {
-    refreshNotifications();
+    notifications.refetch();
   }, 30 * 1000);
 
   onCleanup(() => {
@@ -103,14 +81,14 @@ export default function () {
         defer
       >
         <div class="flex flex-col space-y-2 p-3 lg:p-6">
-          <Show when={isGameAdmin()}>
+          <Show when={isAdminOfGame(game.data)}>
             <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
               <Show when={createFormExpanded()}>
-                <Field name="title" validate={[required(t("game.notification.form.title.required")!)]}>
+                <Field name="title" validate={[required(t("game.notification.form.title.required"))]}>
                   {(field, props) => (
                     <Input
-                      placeholder={t("game.notification.form.title.placeholder")!}
-                      title={t("game.notification.form.title.label")!}
+                      placeholder={t("game.notification.form.title.placeholder")}
+                      title={t("game.notification.form.title.label")}
                       {...props}
                       value={field.value}
                       error={field.error}
@@ -118,14 +96,14 @@ export default function () {
                     />
                   )}
                 </Field>
-                <Field name="content" validate={[required(t("game.notification.form.content.required")!)]}>
+                <Field name="content" validate={[required(t("game.notification.form.content.required"))]}>
                   {(field) => (
                     <Editor
                       form={form}
                       class="h-48"
                       lang="plaintext"
                       placeholder="PLAINTEXT"
-                      title={t("game.notification.form.content.label")!}
+                      title={t("game.notification.form.content.label")}
                       name="content"
                       value={field.value}
                       error={field.error}
@@ -166,7 +144,7 @@ export default function () {
             fallback={
               <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
                 <Show
-                  when={loading()}
+                  when={notifications.isLoading}
                   fallback={
                     <>
                       <span class="shrink-0 icon-[fluent--chat-empty-20-regular] w-5 h-5" />
@@ -196,7 +174,7 @@ export default function () {
                     <A class="shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
                       <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
                     </A>
-                    <Show when={isGameAdmin()}>
+                    <Show when={isAdminOfGame(game.data)}>
                       <button
                         class="shrink-0 flex items-center cursor-pointer hover:text-error"
                         type="button"

@@ -11,9 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       solidPlugin(),
-      tailwindcss({
-        config: "./tailwind.config.mts",
-      }),
+      tailwindcss(),
       viteCompression(),
       {
         name: "markdown-loader",

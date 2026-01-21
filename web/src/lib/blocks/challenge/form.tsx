@@ -1,6 +1,7 @@
-import type { Challenge } from "@models/challenge";
-import { createForm, getValue, required, setValue } from "@modular-forms/solid";
-import { gameStore } from "@storage/game";
+import { inflyClient } from "@api";
+import { useChallenge } from "@api/challenge";
+import { useGame } from "@api/game";
+import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
@@ -8,6 +9,7 @@ import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, Show, untrack } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 import ScorePicker from "./score-picker";
 
 export type ChallengeForm = {
@@ -21,44 +23,65 @@ export type ChallengeForm = {
   archive_at: number | null;
 };
 
-export function FormBare(props: {
-  onDone: (challenge: ChallengeForm) => void;
-  editSource?: Challenge;
-  loading?: boolean;
-  inGame?: boolean;
-}) {
-  const [form, { Form, Field }] = createForm<ChallengeForm>();
-  function onSubmit(result: ChallengeForm) {
-    props.onDone(result);
+export function FormBare(
+  props: ChallengeWidgetProps & {
+    onDone: (challenge: ChallengeForm) => Promise<void>;
   }
+) {
+  // Load edit source
+  const game = useGame({ id: () => props.gameId });
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId || 0,
+    enabled: () => !!game.data && !!props.challengeId,
+  });
+  const [form, { Form, Field }] = createForm<ChallengeForm>({
+    initialValues: {
+      name: challenge.data?.name,
+      tag: challenge.data?.tag.map((t) => t.name).join("/"),
+      content: challenge.data?.content || "",
+      initial: challenge.data?.score_rule?.initial || 1000,
+      minimum: challenge.data?.score_rule?.minimum || 500,
+      decay: challenge.data?.score_rule?.decay || 10,
+      release_at: challenge.data?.release_at?.toSeconds() ?? null,
+      archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
+    },
+  });
+  async function onSubmit(result: ChallengeForm) {
+    await props.onDone(result);
+    inflyClient.invalidateQueries({
+      queryKey: ["game", props.gameId, "challenge"],
+    });
+  }
+
   createEffect(() => {
-    if (props.editSource) {
+    if (challenge.data) {
       untrack(() => {
-        setValue(form, "name", props.editSource!.name);
-        setValue(form, "tag", props.editSource!.tag.map((t) => t.name).join("/"));
-        setValue(form, "content", props.editSource!.content || "");
-        if (props.editSource?.score_rule) {
-          setValue(form, "initial", props.editSource.score_rule.initial);
-          setValue(form, "minimum", props.editSource.score_rule.minimum);
-          setValue(form, "decay", props.editSource.score_rule.decay);
-        } else {
-          setValue(form, "initial", 1000);
-          setValue(form, "minimum", 500);
-          setValue(form, "decay", 10);
-        }
-        setValue(form, "release_at", props.editSource!.release_at?.toSeconds() ?? null);
-        setValue(form, "archive_at", props.editSource!.archive_at?.toSeconds() ?? null);
+        setValues(form, {
+          name: challenge.data?.name,
+          tag: challenge.data?.tag.map((t) => t.name).join("/"),
+          content: challenge.data?.content || "",
+          initial: challenge.data?.score_rule?.initial || 1000,
+          minimum: challenge.data?.score_rule?.minimum || 500,
+          decay: challenge.data?.score_rule?.decay || 10,
+          release_at: challenge.data?.release_at?.toSeconds() ?? null,
+          archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
+        });
       });
     } else {
-      setValue(form, "initial", 1000);
-      setValue(form, "minimum", 500);
-      setValue(form, "decay", 15);
+      untrack(() => {
+        setValues(form, {
+          initial: 1000,
+          minimum: 500,
+          decay: 10,
+        });
+      });
     }
   });
 
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-      <Field name="name" validate={[required(t("challenge.form.name.required")!)]}>
+      <Field name="name" validate={[required(t("challenge.form.name.required"))]}>
         {(field, props) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -71,7 +94,7 @@ export function FormBare(props: {
           />
         )}
       </Field>
-      <Field name="tag" validate={[required(t("challenge.form.tag.required")!)]}>
+      <Field name="tag" validate={[required(t("challenge.form.tag.required"))]}>
         {(field, props) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
@@ -84,7 +107,7 @@ export function FormBare(props: {
           />
         )}
       </Field>
-      <Show when={props.inGame}>
+      <Show when={!props.training}>
         <div class="flex space-y-2 lg:space-x-2 lg:space-y-0 flex-col lg:flex-row">
           <Field name="initial" type="number">
             {(initialField, initialProps) => (
@@ -155,7 +178,7 @@ export function FormBare(props: {
           </Field>
         </div>
       </Show>
-      <Show when={props.inGame && (gameStore.current?.timeline_presets?.length ?? 0) > 0}>
+      <Show when={!props.training && (game.data?.timeline_presets?.length ?? 0) > 0}>
         <Field name="release_at" type="number">
           {() => (
             <Field name="archive_at" type="number">
@@ -166,7 +189,7 @@ export function FormBare(props: {
                     label={t("challenge.form.scoringPeriod.label")}
                     class="flex-1"
                     items={
-                      gameStore.current?.timeline_presets?.map((t) => {
+                      game.data?.timeline_presets?.map((t) => {
                         return {
                           value: t.label,
                           label: `${t.start_at.toFormat("yyyy-MM-dd HH:mm:ss")} - ${t.end_at.toFormat("yyyy-MM-dd HH:mm:ss")}: ${t.label}`,
@@ -175,7 +198,7 @@ export function FormBare(props: {
                     }
                     value={
                       [
-                        gameStore.current?.timeline_presets?.find(
+                        game.data?.timeline_presets?.find(
                           (i) =>
                             i.start_at.toSeconds() === getValue(form, "release_at") &&
                             i.end_at.toSeconds() === getValue(form, "archive_at")
@@ -184,7 +207,7 @@ export function FormBare(props: {
                     }
                     onValueChange={(v) => {
                       if (v.value[0]) {
-                        const item = gameStore.current?.timeline_presets?.find((i) => i.label === v.value[0]);
+                        const item = game.data?.timeline_presets?.find((i) => i.label === v.value[0]);
                         setValue(form, "release_at", item?.start_at.toSeconds() ?? null);
                         setValue(form, "archive_at", item?.end_at.toSeconds() ?? null);
                       } else {
@@ -199,7 +222,7 @@ export function FormBare(props: {
           )}
         </Field>
       </Show>
-      <Field name="content" validate={[required(t("challenge.form.content.required")!)]}>
+      <Field name="content" validate={[required(t("challenge.form.content.required"))]}>
         {(field) => (
           <Editor
             form={form}
@@ -214,19 +237,24 @@ export function FormBare(props: {
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
+      <Button
+        type="submit"
+        level="primary"
+        class="mt-4!"
+        loading={game.isLoading || challenge.isLoading}
+        disabled={game.isLoading || challenge.isLoading}
+      >
+        {props.challengeId ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );
 }
 
-export default function (props: {
-  onDone: (challenge: ChallengeForm) => void;
-  editSource?: Challenge;
-  loading?: boolean;
-  inGame?: boolean;
-}) {
+export default function (
+  props: ChallengeWidgetProps & {
+    onDone: (challenge: ChallengeForm) => Promise<void>;
+  }
+) {
   return (
     <div class="flex-1 w-full relative">
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden">

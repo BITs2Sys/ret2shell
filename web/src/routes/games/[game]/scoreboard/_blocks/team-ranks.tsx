@@ -1,10 +1,11 @@
 import Spin from "@assets/animates/spin";
 import { randomTips } from "@lib/utils/loading-tips";
+import type { Game } from "@models/game";
+import type { Institute } from "@models/institute";
 import { type Team, TeamState } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
-import { accountStore } from "@storage/account";
-import { currentTimelinePeriod, gameStore } from "@storage/game";
+import { currentTimelinePeriod } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
@@ -12,6 +13,9 @@ import clsx from "clsx";
 import { For, Match, Show, Switch } from "solid-js";
 
 export default function TeamRanks(props: {
+  gameId: number;
+  game?: Game;
+  institutes: Institute[];
   teams: Team[];
   page: number;
   pageSize: number;
@@ -20,14 +24,18 @@ export default function TeamRanks(props: {
   loading?: boolean;
   onPageChange?: (page: number) => void;
 }) {
+  const period = () => currentTimelinePeriod(props.game);
+
   function realIndex(index: number) {
     return index + (props.page - 1) * props.pageSize + 1;
   }
   function getScoreDiff(team: Team) {
     const len = team.history.length;
     if (len === 0) return 0;
+    const p = period();
+    if (!p) return team.score;
     for (let i = len - 1; i >= 0; i--) {
-      if (team.history[i].changed_at <= currentTimelinePeriod()!.start_at) {
+      if (team.history[i].changed_at <= p.start_at) {
         return team.score - team.history[i].score;
       }
     }
@@ -71,7 +79,7 @@ export default function TeamRanks(props: {
                 </Switch>
               </span>
               <div class="flex flex-col flex-1 w-0">
-                <A class="font-bold hover:underline truncate" href={`/games/${gameStore.current?.id}/teams/${team.id}`}>
+                <A class="font-bold hover:underline truncate" href={`/games/${props.gameId}/teams/${team.id}`}>
                   {team.name}
                 </A>
                 <Show when={team.tag}>
@@ -92,18 +100,18 @@ export default function TeamRanks(props: {
                     <Show when={team.institute_id} fallback={<span>&nbsp;</span>}>
                       <span
                         class="opacity-80 text-primary truncate w-full"
-                        title={accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
+                        title={props.institutes.find((v) => v.id === team.institute_id)?.name}
                       >
-                        #{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
+                        #{props.institutes.find((v) => v.id === team.institute_id)?.name}
                       </span>
                     </Show>
                   </div>
                 </Show>
               </span>
-              <span class={clsx("text-end", currentTimelinePeriod() && props.showTime ? "w-48" : "w-20")}>
+              <span class={clsx("text-end", period() && props.showTime ? "w-48" : "w-20")}>
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
-                <Show when={props.showTime && currentTimelinePeriod()}>
+                <Show when={props.showTime && period()}>
                   <Show
                     when={getScoreDiff(team) >= 0}
                     fallback={<span class="text-error">&nbsp;{getScoreDiff(team)}&nbsp;pts</span>}

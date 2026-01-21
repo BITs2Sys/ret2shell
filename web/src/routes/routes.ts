@@ -87,20 +87,6 @@ export const routes = {
       ],
     },
     {
-      path: "/docs",
-      component: lazy(() => import("./docs/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./docs/index")),
-        },
-        {
-          path: "/*article",
-          component: lazy(() => import("./docs/article")),
-        },
-      ],
-    },
-    {
       path: "/training",
       component: lazy(() => import("./training/layout")),
       children: [
@@ -365,6 +351,10 @@ export const routes = {
         {
           path: "/502",
           component: lazy(() => import("./sigtrap/e502")),
+        },
+        {
+          path: "/unknown",
+          component: lazy(() => import("./sigtrap/unknown")),
         },
       ],
     },

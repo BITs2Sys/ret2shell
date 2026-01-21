@@ -1,13 +1,12 @@
 import { handleHttpError } from "@api";
-import { changeProfile, resendEmail } from "@api/account";
+import { useAccountProfile, useChangeProfileMutation, useResendEmailMutation } from "@api/account";
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import { Permission } from "@models/user";
-import { createForm, email, required, setValue, setValues } from "@modular-forms/solid";
-import { accountStore, refreshUser, setAccountStore } from "@storage/account";
+import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -23,22 +22,34 @@ export type UserForm = {
 };
 
 export default function () {
-  const [form, { Form, Field }] = createForm<UserForm>();
+  const profile = useAccountProfile();
+  const [form, { Form, Field }] = createForm<UserForm>({
+    initialValues: {
+      nickname: profile.data?.nickname,
+      email: profile.data?.email || undefined,
+      avatar: profile.data?.avatar || undefined,
+      description: profile.data?.description || undefined,
+    },
+  });
   createEffect(() => {
-    if (accountStore.info) {
+    if (profile.data) {
       untrack(() => {
-        setValues(form, {
-          nickname: accountStore.info?.nickname || "",
-          email: accountStore.info?.email || "",
-          avatar: accountStore.info?.avatar || "",
-          description: accountStore.info?.description || "",
-        });
-        setAvatarSet(!!accountStore.info?.avatar);
+        setValues(
+          form,
+          {
+            nickname: profile.data?.nickname || "",
+            email: profile.data?.email || "",
+            avatar: profile.data?.avatar || "",
+            description: profile.data?.description || "",
+          },
+          {
+            shouldDirty: false,
+          }
+        );
+        setAvatarSet(!!profile.data?.avatar);
       });
     }
   });
-  const [loading, setLoading] = createSignal(false);
-  const [sendingEmail, setSendingEmail] = createSignal(false);
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
@@ -61,53 +72,30 @@ export default function () {
       setAvatarUploading(true);
       try {
         const resp = await uploadMedia(avatarFile()!, false);
-        if (accountStore.info)
-          setAccountStore({
-            info: {
-              ...accountStore.info,
-              avatar: resp.hash,
-            },
-          });
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail"));
       }
       setAvatarUploading(false);
     }
   }
-  async function handleResendVerifyEmail() {
-    setSendingEmail(true);
-    try {
-      await resendEmail();
-      addToast({
-        level: "success",
-        description: t("general.actions.send.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.send.status.fail")!);
-    }
-    setSendingEmail(false);
+
+  const resendEmailMutation = useResendEmailMutation();
+
+  const updateMutation = useChangeProfileMutation({
+    onSuccess: () => {
+      profile.refetch();
+    },
+  });
+
+  function onSubmit(result: UserForm) {
+    updateMutation.mutate({
+      ...profile.data!,
+      ...result,
+    });
   }
-  async function onSubmit(result: UserForm) {
-    setLoading(true);
-    try {
-      await changeProfile({
-        ...accountStore.info!,
-        ...result,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      refreshUser();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
-  }
+
   return (
     <>
       <Title page={t("account.info.title")} route="/account/settings/info" />
@@ -117,6 +105,12 @@ export default function () {
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.info.title")}</span>
           </h3>
+          <Show when={form.dirty}>
+            <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
+              <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5" />
+              <span class="flex-1 text-start">{t("account.form.saveHint")}</span>
+            </Card>
+          </Show>
           <div class="flex flex-row space-x-4 items-center">
             <div class="flex flex-col space-y-2 flex-1">
               <Input
@@ -126,8 +120,7 @@ export default function () {
                 value={accountStore.account!}
                 disabled
               />
-              <span class="block label w-full text-start font-normal">* {t("account.form.account.tip")}</span>
-              <Field name="nickname" validate={[required(t("account.form.nickname.required")!)]}>
+              <Field name="nickname" validate={[required(t("account.form.nickname.required"))]}>
                 {(field, props) => (
                   <Input
                     icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
@@ -145,25 +138,19 @@ export default function () {
               {(field, props) => (
                 <Avatar
                   class="w-28 h-28 relative m-2"
-                  src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
-                  fallback={accountStore.info?.account}
+                  src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar"))) || undefined}
+                  fallback={profile.data?.account}
                 >
                   <Button
                     loading={avatarUploading()}
                     disabled={avatarUploading()}
                     type="button"
-                    class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
+                    class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                     onClick={() => {
                       if (avatarSet()) {
                         setAvatarSet(false);
                         setAvatarFile(null);
                         setValue(form, "avatar", "");
-                        setAccountStore({
-                          info: {
-                            ...accountStore.info!,
-                            avatar: "",
-                          },
-                        });
                       } else {
                         handleSelectAvatar();
                       }
@@ -178,7 +165,7 @@ export default function () {
                       onChange={handleSelectedAvatar}
                     />
                     <Show
-                      when={accountStore.info?.avatar}
+                      when={getValue(form, "avatar") && avatarSet()}
                       fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                     >
                       <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
@@ -190,7 +177,7 @@ export default function () {
           </div>
           <Field
             name="email"
-            validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
+            validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid"))]}
           >
             {(field, props) => (
               <Input
@@ -212,9 +199,9 @@ export default function () {
               <Button
                 size="sm"
                 type="button"
-                onClick={handleResendVerifyEmail}
-                loading={sendingEmail()}
-                disabled={sendingEmail()}
+                onClick={() => resendEmailMutation.mutate()}
+                loading={resendEmailMutation.isPending}
+                disabled={resendEmailMutation.isPending}
               >
                 <span>{t("account.status.unverified.action")}</span>
               </Button>
@@ -235,7 +222,13 @@ export default function () {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="mt-4!"
+            loading={updateMutation.isPending}
+            disabled={updateMutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

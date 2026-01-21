@@ -1,10 +1,6 @@
-import { handleHttpError } from "@api";
-import { getInstitutes, getOAuthProviders, getOAuthStatus, unbindWithOAuth } from "@api/account";
+import { useInstitutes, useOAuthProviders, useOAuthStatus, useUnbindWithOAuthMutation } from "@api/account";
 import { mediaPath } from "@lib/utils/media";
-import type { Institute } from "@models/institute";
-import type { OAuth } from "@models/oauth";
 import type { OAuthProvider } from "@models/oauth-provider";
-import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -12,7 +8,7 @@ import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
-import { createEffect, createSignal, For, onMount, Show, untrack } from "solid-js";
+import { For, Show } from "solid-js";
 
 function getOAuthLink(service: OAuthProvider) {
   if (!service.portal) {
@@ -22,45 +18,16 @@ function getOAuthLink(service: OAuthProvider) {
 }
 
 export default function () {
-  const [institutes, setInstitutes] = createSignal([] as Institute[]);
-  const [selfOAuthItems, setSelfOAuthItems] = createSignal([] as OAuth[]);
-  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
-  onMount(async () => {
-    try {
-      setInstitutes(await getInstitutes());
-    } catch (err) {
-      handleHttpError(err as Error, t("institute.errors.fetchList.title")!);
-    }
-    try {
-      setOAuthServices(await getOAuthProviders());
-    } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
-    }
-  });
-  async function refreshOAuthStatus() {
-    try {
-      setSelfOAuthItems(await getOAuthStatus());
-    } catch (err) {
-      setSelfOAuthItems([]);
-      handleHttpError(err as Error, t("account.oauth.errors.fetchStatus.title")!);
-    }
-  }
-  createEffect(() => {
-    if (accountStore.token) {
-      untrack(() => {
-        refreshOAuthStatus();
-      });
-    }
+  const institutes = useInstitutes();
+  const oauthProviders = useOAuthProviders();
+  const oauthStatus = useOAuthStatus();
+
+  const mutation = useUnbindWithOAuthMutation({
+    onSuccess: () => {
+      oauthStatus.refetch();
+    },
   });
 
-  async function handleUnbind(id: number) {
-    try {
-      await unbindWithOAuth(id);
-      refreshOAuthStatus();
-    } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.errors.unbind.title")!);
-    }
-  }
   return (
     <>
       <Title page={t("account.oauth.title")} route="/account/settings/oauth" />
@@ -70,20 +37,20 @@ export default function () {
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.oauth.title")}</span>
           </h3>
-          <For each={oauthServices()}>
+          <For each={oauthProviders.data}>
             {(service) => (
               <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-                <img src={mediaPath(service.avatar ?? "")} alt={service.name} class="w-5 h-5" />
+                <img src={mediaPath(service.avatar)} alt={service.name} class="w-5 h-5" />
                 <h4 class="font-bold text-start flex-1">
                   <span>{service.name}</span>
                 </h4>
-                <Show when={institutes().find((v) => v.provider === service.provider)}>
+                <Show when={institutes.data?.find((v) => v.provider === service.provider)}>
                   <Tag level="info">
-                    <span>{institutes().find((v) => v.provider === service.provider)?.name}</span>
+                    <span>{institutes.data?.find((v) => v.provider === service.provider)?.name}</span>
                   </Tag>
                 </Show>
                 <Show
-                  when={selfOAuthItems().find((v) => v.provider === service.provider)}
+                  when={oauthStatus.data?.find((v) => v.provider === service.provider)}
                   fallback={
                     <>
                       <span class="opacity-60">{t("account.oauth.notBind")}</span>
@@ -100,7 +67,11 @@ export default function () {
                   >
                     <Card contentClass="max-w-lg p-2">
                       <table>
-                        <For each={Object.entries(selfOAuthItems().find((v) => v.provider === service.provider)!.data)}>
+                        <For
+                          each={Object.entries(
+                            oauthStatus.data?.find((v) => v.provider === service.provider)?.data ?? []
+                          )}
+                        >
                           {([key, value]) => (
                             <tr class="h-12 align-middle text-start border-b border-b-layer-content/15">
                               <td class="h-12 align-middle text-start font-bold px-2">{key}</td>
@@ -114,7 +85,12 @@ export default function () {
 
                   <Button
                     size="sm"
-                    onClick={() => handleUnbind(selfOAuthItems().find((v) => v.provider === service.provider)!.id)}
+                    onClick={() =>
+                      oauthStatus.data?.find((v) => v.provider === service.provider)?.id &&
+                      mutation.mutate({
+                        id: oauthStatus.data?.find((v) => v.provider === service.provider)?.id || 0,
+                      })
+                    }
                   >
                     {t("account.oauth.actions.unbind.title")}
                   </Button>

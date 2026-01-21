@@ -1,22 +1,23 @@
-import { api_root, handleHttpError } from "@api";
+import { api_root, inflyClient } from "@api";
 import {
-  deleteChallengeEnv,
-  getChallengeInstance,
-  getRegistryConfig,
-  getRegistryImageTags,
-  getRegistryRepositories,
-  refreshRegistry,
-  updateChallengeEnv,
+  useChallenge,
+  useChallengeEnv,
+  useChallengeInstance,
+  useDeleteChallengeEnvMutation,
+  useUpdateChallengeEnvMutation,
+} from "@api/challenge";
+import {
+  useGame,
+  useRefreshRegistryMutation,
+  useRegistryConfig,
+  useRegistryImageTags,
+  useRegistryRepositories,
 } from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
-import { wsrx } from "@lib/wsrx";
-import type { Challenge, ChallengeImage } from "@models/challenge";
-import type { RegistryConfig } from "@models/config";
+import type { ChallengeImage } from "@models/challenge";
 import { createForm, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
-import { challengeStore, refreshChallengeAssets } from "@storage/challenge";
-import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -29,53 +30,43 @@ import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import RangeSlider from "@widgets/range-slider";
 import Select from "@widgets/select";
-import type { Pod } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  onMount,
-  Show,
-  Switch,
-  untrack,
-} from "solid-js";
+import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 
-function CreateForm(fnProps: {
-  repos: string[];
-  refreshRepos?: () => Promise<void>;
-  registryConfig: RegistryConfig | null;
-  onDone?: () => void;
-}) {
-  const [loading, setLoading] = createSignal(false);
-
-  const [tags, setTags] = createSignal<string[]>([]);
-  const [form, { Form, Field }] = createForm<ChallengeImage>();
-  setValue(form, "cpu", 0.5);
-  setValue(form, "cpu_req", 0.01);
-  setValue(form, "mem", "128Mi");
-  setValue(form, "mem_req", "32Mi");
-  setValue(form, "storage", "1024Mi");
-  setValue(form, "storage_req", "64Mi");
+function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
+  const [form, { Form, Field }] = createForm<ChallengeImage>({
+    initialValues: {
+      cpu: 0.5,
+      cpu_req: 0.01,
+      mem: "128Mi",
+      mem_req: "32Mi",
+      storage: "1024Mi",
+      storage_req: "64Mi",
+    },
+  });
   const [searchedRepo, setSearchedRepo] = createSignal("");
   const [selected, setSelected] = createSignal(false);
-  async function fetchTags(repo: string) {
-    if (!fnProps.registryConfig?.enabled) {
-      return;
-    }
-    setLoading(true);
-    try {
-      setTags(await getRegistryImageTags(gameStore.current!.id, repo));
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.fetchConfigImages.title")!);
-    }
-    setLoading(false);
-  }
-  const [adding, setAdding] = createSignal(false);
+
+  const game = useGame({ id: () => fnProps.gameId });
+  const challenge = useChallenge({
+    game_id: () => fnProps.gameId,
+    challenge_id: () => fnProps.challengeId,
+  });
+  const challengeEnv = useChallengeEnv({
+    game_id: () => fnProps.gameId,
+    challenge_id: () => fnProps.challengeId,
+  });
+
+  const repos = useRegistryRepositories({ game_id: () => fnProps.gameId });
+  const registryConfig = useRegistryConfig({ game_id: () => fnProps.gameId });
+
+  const tags = useRegistryImageTags({
+    game_id: () => fnProps.gameId,
+    repo: () => searchedRepo(),
+  });
+
   function sanitizeChallengeImage(image: ChallengeImage): ChallengeImage {
     return {
       ...image,
@@ -85,20 +76,9 @@ function CreateForm(fnProps: {
       port: image.port && !Number.isNaN(image.port) && image.port > 0 && image.port < 65536 ? image.port : null,
     };
   }
-  async function onSubmit(result: ChallengeImage) {
-    setAdding(true);
-    try {
-      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
-        internet: challengeStore.env?.internet || false,
-        restricted: challengeStore.env?.restricted ?? null,
-        images: [...(challengeStore.env?.images || []), sanitizeChallengeImage(result)],
-        pull_secret: challengeStore.env?.pull_secret || null,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.add.status.success")!,
-        duration: 5000,
-      });
+
+  const addMutation = useUpdateChallengeEnvMutation({
+    onSuccess: () => {
       setValues(form, {
         name: "",
         tag: "",
@@ -112,33 +92,40 @@ function CreateForm(fnProps: {
         service_type: null,
         description: "",
       });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.add.status.fail")!);
-    }
-    setAdding(false);
-    fnProps.onDone?.();
-  }
+      challengeEnv.refetch();
+      fnProps.onDone?.();
+    },
+  });
 
-  async function onRefreshRegistry() {
-    if (gameStore.current) {
-      try {
-        await refreshRegistry(gameStore.current.id);
-        await fnProps.refreshRepos?.();
-      } catch (err) {
-        handleHttpError(err as Error, t("general.actions.refresh.status.fail")!);
-      }
-    }
-  }
+  const refreshMutation = useRefreshRegistryMutation({
+    onSuccess: () => {
+      repos.refetch();
+      tags.refetch();
+    },
+  });
 
   return (
-    <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
+    <Form
+      onSubmit={(form) =>
+        addMutation.mutate({
+          game_id: challenge.data!.game_id,
+          challenge_id: challenge.data!.id,
+          env: {
+            internet: challengeEnv.data?.internet || false,
+            restricted: challengeEnv.data?.restricted ?? null,
+            images: [...(challengeEnv.data?.images || []), sanitizeChallengeImage(form)],
+            pull_secret: challengeEnv.data?.pull_secret || null,
+          },
+        })
+      }
+      class="flex flex-col space-y-2"
+    >
       <div class="flex flex-row space-x-2">
         <Field
           name="name"
           validate={[
-            required(t("challenge.instance.image.form.containerName.required")!),
-            pattern(/^[a-z0-9-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")!),
+            required(t("challenge.instance.image.form.containerName.required")),
+            pattern(/^[a-z0-9-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")),
           ]}
         >
           {(field, props) => (
@@ -154,10 +141,10 @@ function CreateForm(fnProps: {
             />
           )}
         </Field>
-        <Field name="tag" validate={[required(t("challenge.instance.image.form.tag.required")!)]}>
+        <Field name="tag" validate={[required(t("challenge.instance.image.form.tag.required"))]}>
           {(field, props) => (
             <Show
-              when={fnProps.registryConfig?.enabled}
+              when={registryConfig.data?.enabled}
               fallback={
                 <div class="flex-1 flex flex-row space-x-2">
                   <Input
@@ -211,7 +198,16 @@ function CreateForm(fnProps: {
                         setValue(form, "tag", "");
                       }}
                       extraBtn={
-                        <Button square class="!rounded-l-none" onClick={onRefreshRegistry} type="button">
+                        <Button
+                          square
+                          class="rounded-l-none!"
+                          onClick={() =>
+                            refreshMutation.mutate({
+                              game_id: fnProps.gameId,
+                            })
+                          }
+                          type="button"
+                        >
                           <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5" />
                         </Button>
                       }
@@ -230,10 +226,10 @@ function CreateForm(fnProps: {
                         defer
                       >
                         <div class="card-content p-2 flex flex-col space-y-2">
-                          <Show when={loading()}>
+                          <Show when={repos.isLoading}>
                             <LoadingTips />
                           </Show>
-                          <For each={fnProps.repos.filter((repo) => repo.includes(searchedRepo()))}>
+                          <For each={repos.data?.filter((repo) => repo.includes(searchedRepo())) ?? []}>
                             {(repo) => (
                               <Button
                                 class="btn-sm"
@@ -243,7 +239,7 @@ function CreateForm(fnProps: {
                                 onClick={() => {
                                   setSearchedRepo(repo);
                                   setSelected(true);
-                                  fetchTags(repo);
+                                  setValue(form, "tag", "");
                                 }}
                               >
                                 <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
@@ -259,23 +255,23 @@ function CreateForm(fnProps: {
               </div>
               <div class="flex-1 flex flex-row space-x-2">
                 <Select
-                  label={t("challenge.instance.image.form.version.label")!}
+                  label={t("challenge.instance.image.form.version.label")}
                   error={field.error}
                   class="flex-1"
                   placeholder={t("challenge.instance.image.form.version.placeholder")}
                   items={
-                    tags().map((tag) => ({
+                    tags.data?.map((tag) => ({
                       value: tag,
                       label: tag,
                       icon: "icon-[fluent--tag-20-regular]",
-                    })) || []
+                    })) ?? []
                   }
                   // inputProps={props}
                   onValueChange={(e) => {
                     setValue(
                       form,
                       "tag",
-                      `${fnProps.registryConfig?.external}/${gameStore.current!.bucket}/${searchedRepo()}:${e.value.at(0)}`
+                      `${registryConfig.data?.external}/${game.data?.bucket}/${searchedRepo()}:${e.value.at(0)}`
                     );
                   }}
                 />
@@ -306,7 +302,7 @@ function CreateForm(fnProps: {
           validate={[
             (value) => {
               if (!value?.trim() && [getValue(form, "service_type"), getValue(form, "port")].some(Boolean)) {
-                return t("challenge.instance.image.form.service.description.requiredWhenHavePort")!;
+                return t("challenge.instance.image.form.service.description.requiredWhenHavePort");
               }
               return "";
             },
@@ -330,7 +326,7 @@ function CreateForm(fnProps: {
             validate={[
               (value) => {
                 if (!value && [getValue(form, "description"), getValue(form, "port")].some(Boolean)) {
-                  return t("challenge.instance.image.form.service.type.requiredWhenHavePort")!;
+                  return t("challenge.instance.image.form.service.type.requiredWhenHavePort");
                 }
                 return "";
               },
@@ -344,17 +340,17 @@ function CreateForm(fnProps: {
                 items={[
                   {
                     value: "http",
-                    label: t("challenge.instance.image.form.service.type.items.http")!,
+                    label: t("challenge.instance.image.form.service.type.items.http"),
                     icon: "icon-[fluent--globe-20-regular]",
                   },
                   {
                     value: "tcp",
-                    label: t("challenge.instance.image.form.service.type.items.tcp")!,
+                    label: t("challenge.instance.image.form.service.type.items.tcp"),
                     icon: "icon-[fluent--globe-20-regular]",
                   },
                   {
                     value: "udp",
-                    label: t("challenge.instance.image.form.service.type.items.udp")!,
+                    label: t("challenge.instance.image.form.service.type.items.udp"),
                     icon: "icon-[fluent--globe-20-regular]",
                   },
                 ]}
@@ -370,13 +366,13 @@ function CreateForm(fnProps: {
             validate={[
               (value) => {
                 if ((value || value === 0) && (value < 1 || value > 65535)) {
-                  return t("challenge.instance.image.form.service.port.mustBeInRange")!;
+                  return t("challenge.instance.image.form.service.port.mustBeInRange");
                 }
-                if (value && challengeStore.env?.images?.some((image) => image.port && image.port === value)) {
-                  return t("challenge.instance.image.form.service.port.conflict")!;
+                if (value && challengeEnv.data?.images?.some((image) => image.port && image.port === value)) {
+                  return t("challenge.instance.image.form.service.port.conflict");
                 }
                 if (!value && [getValue(form, "description"), getValue(form, "service_type")].some(Boolean)) {
-                  return t("challenge.instance.image.form.service.port.required")!;
+                  return t("challenge.instance.image.form.service.port.required");
                 }
                 return "";
               },
@@ -404,12 +400,12 @@ function CreateForm(fnProps: {
         </Card>
       </Show>
       <div class="flex flex-row space-x-2">
-        <Field name="cpu" type="number" validate={[required(t("challenge.instance.image.form.service.cpu.required")!)]}>
+        <Field name="cpu" type="number" validate={[required(t("challenge.instance.image.form.service.cpu.required"))]}>
           {(field1) => (
             <Field
               name="cpu_req"
               type="number"
-              validate={[required(t("challenge.instance.image.form.service.cpu.required")!)]}
+              validate={[required(t("challenge.instance.image.form.service.cpu.required"))]}
             >
               {(field2) => (
                 <RangeSlider
@@ -430,9 +426,9 @@ function CreateForm(fnProps: {
             </Field>
           )}
         </Field>
-        <Field name="mem" validate={[required(t("challenge.instance.image.form.service.mem.required")!)]}>
+        <Field name="mem" validate={[required(t("challenge.instance.image.form.service.mem.required"))]}>
           {(field1) => (
-            <Field name="mem_req" validate={[required(t("challenge.instance.image.form.service.mem.required")!)]}>
+            <Field name="mem_req" validate={[required(t("challenge.instance.image.form.service.mem.required"))]}>
               {(field2) => (
                 <RangeSlider
                   class="flex-1"
@@ -454,11 +450,11 @@ function CreateForm(fnProps: {
             </Field>
           )}
         </Field>
-        <Field name="storage" validate={[required(t("challenge.instance.image.form.service.storage.required")!)]}>
+        <Field name="storage" validate={[required(t("challenge.instance.image.form.service.storage.required"))]}>
           {(field1) => (
             <Field
               name="storage_req"
-              validate={[required(t("challenge.instance.image.form.service.storage.required")!)]}
+              validate={[required(t("challenge.instance.image.form.service.storage.required"))]}
             >
               {(field2) => (
                 <RangeSlider
@@ -482,40 +478,26 @@ function CreateForm(fnProps: {
           )}
         </Field>
       </div>
-      <Button type="submit" level="primary" class="!mt-4" loading={adding()} disabled={adding()}>
+      <Button
+        type="submit"
+        level="primary"
+        class="mt-4!"
+        loading={addMutation.isPending}
+        disabled={addMutation.isPending}
+      >
         {t("general.actions.add.title")}
       </Button>
     </Form>
   );
 }
 
-function InstanceList() {
-  const [pods, setPods] = createSignal<Pod[]>([]);
-  async function refreshPods() {
-    setPods(await getChallengeInstance(challengeStore!.current!.game_id, challengeStore!.current!.id));
-  }
-  const launchedInstances = createMemo(() => {
-    if (challengeStore.current && challengeStore.env) {
-      return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
-    }
-    return null;
-  });
-  createEffect(async () => {
-    if (challengeStore.current) {
-      untrack(async () => {
-        try {
-          await refreshPods();
-        } catch (err) {
-          handleHttpError(err as Error, t("challenge.instance.errors.fetchInstances.title")!);
-        }
-      });
-      if (launchedInstances()) {
-        await refreshPods();
-      }
-    }
+function InstanceList(props: ChallengeWidgetProps) {
+  const pods = useChallengeInstance({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
   const refreshTimer = setInterval(() => {
-    refreshPods();
+    pods.refetch();
   }, 30 * 1000);
   onCleanup(() => {
     clearInterval(refreshTimer);
@@ -523,7 +505,7 @@ function InstanceList() {
   return (
     <ul class="flex flex-col">
       <For
-        each={pods()}
+        each={pods.data ?? []}
         fallback={
           <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
             <span class="shrink-0 icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
@@ -544,7 +526,7 @@ function InstanceList() {
             </A>
             <A
               class="hover:underline flex items-center space-x-2"
-              href={`/games/${gameStore.current?.id}/teams/${pod.metadata?.labels?.["ret.sh.cn/team"]}`}
+              href={`/games/${props.gameId}/teams/${pod.metadata?.labels?.["ret.sh.cn/team"]}`}
             >
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{pod.metadata?.annotations?.["ret.sh.cn/team"]}</span>
@@ -561,7 +543,9 @@ function InstanceList() {
                 <Show when={pod.metadata}>
                   <div class="py-2 flex flex-row space-x-2 items-center border-b border-b-layer-content/5">
                     <span class="shrink-0 icon-[fluent--clock-20-regular] w-5 h-5" />
-                    <span>{DateTime.fromISO(pod.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                    <span>
+                      {DateTime.fromISO(pod.metadata?.creationTimestamp || "").toFormat("yyyy-MM-dd HH:mm:ss")}
+                    </span>
                   </div>
                 </Show>
                 <For each={pod.status?.containerStatuses || []}>
@@ -592,114 +576,90 @@ function InstanceList() {
   );
 }
 
-export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
-  const [registryConfig, setRegistryConfig] = createSignal<RegistryConfig | null>(null);
+export default function (props: ChallengeWidgetProps) {
   let pullSecretInput: HTMLInputElement;
-  onMount(async () => {
-    try {
-      setRegistryConfig(await getRegistryConfig(gameStore.current!.id));
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.fetchRegistry.title")!);
-    }
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
-  const [repos, setRepos] = createSignal<string[]>([]);
-  async function fetchRepos() {
-    try {
-      setRepos(await getRegistryRepositories(gameStore.current!.id));
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.fetchRegistry.title")!);
-    }
-  }
-  createEffect(() => {
-    if (challengeStore.current) {
-      untrack(fetchRepos);
-    }
+  const challengeEnv = useChallengeEnv({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
+
+  const registryConfig = useRegistryConfig({ game_id: () => props.gameId });
+  const repos = useRegistryRepositories({ game_id: () => props.gameId });
+  const updateMutation = useUpdateChallengeEnvMutation({
+    onSuccess: () => {
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+      });
+    },
+  });
+
   async function onToggleInternet() {
-    try {
-      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
-        internet: !challengeStore.env?.internet,
-        restricted: challengeStore.env?.restricted ?? null,
-        images: challengeStore.env?.images || [],
-        pull_secret: challengeStore.env?.pull_secret || null,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.toggleNetworkConfig.title")!);
-    }
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: !(challengeEnv.data?.internet || false),
+        restricted: challengeEnv.data?.restricted ?? null,
+        images: challengeEnv.data?.images || [],
+        pull_secret: challengeEnv.data?.pull_secret || null,
+      },
+    });
   }
   async function onToggleRestricted() {
-    try {
-      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
-        internet: challengeStore.env?.internet || false,
-        restricted: !challengeStore.env?.restricted,
-        images: challengeStore.env?.images || [],
-        pull_secret: challengeStore.env?.pull_secret || null,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.instance.errors.toggleRestrict.title")!);
-    }
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: challengeEnv.data?.internet || false,
+        restricted: !(challengeEnv.data?.restricted ?? false),
+        images: challengeEnv.data?.images || [],
+        pull_secret: challengeEnv.data?.pull_secret || null,
+      },
+    });
   }
+
   async function onDeleteImage(name: string) {
-    try {
-      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
-        internet: challengeStore.env?.internet || false,
-        restricted: challengeStore.env?.restricted ?? null,
-        images: challengeStore.env?.images?.filter((image) => image.name !== name) || [],
-        pull_secret: challengeStore.env?.pull_secret || null,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: challengeEnv.data?.internet || false,
+        restricted: challengeEnv.data?.restricted ?? null,
+        images: challengeEnv.data?.images?.filter((image) => image.name !== name) || [],
+        pull_secret: challengeEnv.data?.pull_secret || null,
+      },
+    });
   }
+
+  const deleteMutation = useDeleteChallengeEnvMutation({
+    onSuccess: () => {
+      challengeEnv.refetch();
+    },
+  });
   async function onDeleteEnv() {
-    try {
-      await deleteChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id);
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
+    deleteMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+    });
   }
+
   async function onSavePullSecret(n: string) {
-    try {
-      await updateChallengeEnv(challengeStore!.current!.game_id, challengeStore!.current!.id, {
-        internet: challengeStore.env?.internet || false,
-        restricted: challengeStore.env?.restricted ?? null,
-        images: challengeStore.env?.images || [],
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: challengeEnv.data?.internet || false,
+        restricted: challengeEnv.data?.restricted ?? null,
+        images: challengeEnv.data?.images || [],
         pull_secret: n ?? null,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      refreshChallengeAssets();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
+      },
+    });
   }
+
   const [formOpen, setFormOpen] = createSignal(false);
   return (
     <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
@@ -709,21 +669,21 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           <span class="flex-1 truncate text-start">{t("challenge.instance.image.label")}</span>
         </span>
         <span class="flex-1" />
-        <Show when={registryConfig()?.enabled}>
+        <Show when={registryConfig.data?.enabled}>
           <span class="truncate font-bold">{t("challenge.instance.image.upload")}:</span>
         </Show>
         <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
-          <Show when={registryConfig()?.enabled}>
+          <Show when={registryConfig.data?.enabled}>
             <UploadButton
               size="sm"
-              url={`${api_root}/game/${gameStore.current!.id}/registry`}
+              url={`${api_root}/game/${props.gameId}/registry`}
               onDone={() => {
                 addToast({
                   level: "success",
-                  description: t("general.actions.upload.status.success")!,
+                  description: t("general.actions.upload.status.success"),
                   duration: 5000,
                 });
-                fetchRepos();
+                repos.refetch();
               }}
             />
           </Show>
@@ -740,15 +700,14 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             // }}
           >
             <CreateForm
-              repos={repos()}
-              registryConfig={registryConfig()}
-              refreshRepos={fetchRepos}
+              gameId={props.gameId}
+              challengeId={props.challengeId}
               onDone={() => {
                 setFormOpen(false);
               }}
             />
           </Dialog>
-          <Show when={challengeStore.env}>
+          <Show when={challengeEnv.data}>
             <Popover level="error" size="sm" btnContent={<span>{t("general.actions.delete.title")}</span>}>
               <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                 <span class="inline-block space-x-2">
@@ -765,7 +724,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
       </header>
       <div class="grid grid-cols-fit-xs max-w-full gap-2">
         <Checkbox
-          checked={challengeStore.env?.internet}
+          checked={challengeEnv.data?.internet}
           onChange={() => {
             onToggleInternet();
           }}
@@ -773,7 +732,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           <span class="flex-1 text-start">{t("challenge.instance.internet")}</span>
         </Checkbox>
         <Checkbox
-          checked={challengeStore.env?.restricted ?? false}
+          checked={challengeEnv.data?.restricted ?? false}
           onChange={() => {
             onToggleRestricted();
           }}
@@ -785,10 +744,10 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           icon={<span class="shrink-0 icon-[fluent--lock-20-regular] w-5 h-5" />}
           placeholder={t("challenge.instance.registrySecret")}
           ref={pullSecretInput!}
-          value={challengeStore.env?.pull_secret || ""}
+          value={challengeEnv.data?.pull_secret || ""}
           extraBtn={
             <Button
-              class="!rounded-l-none"
+              class="rounded-l-none!"
               onClick={() => {
                 onSavePullSecret(pullSecretInput!.value);
               }}
@@ -798,14 +757,14 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           }
         />
       </div>
-      <Show when={challengeStore.env?.images.every((image) => !image.port)}>
+      <Show when={challengeEnv.data?.images.every((image) => !image.port)}>
         <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
           <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
           <p class="font-bold">{`${t("challenge.instance.errors.noExportedServices.title")}: ${t("challenge.instance.errors.noExportedServices.message")}`}</p>
         </Card>
       </Show>
       <For
-        each={challengeStore.env?.images || []}
+        each={challengeEnv.data?.images || []}
         fallback={
           <div class="h-12 flex flex-row space-x-2 items-center opacity-60 border-b border-b-layer-content/10">
             <span class="shrink-0 icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
@@ -864,12 +823,12 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
           </div>
         )}
       </For>
-      <Show when={challengeStore.env}>
+      <Show when={challengeEnv.data}>
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
           <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("challenge.instance.runningContainers")}</span>
         </header>
-        <InstanceList />
+        <InstanceList gameId={props.gameId} challengeId={props.challengeId} />
       </Show>
     </div>
   );

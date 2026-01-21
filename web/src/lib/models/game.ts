@@ -62,5 +62,5 @@ export type Game = {
     | null;
   node_selector: string | null;
   traffic: string | null;
-  hammer_policy: HammerPolicy | null;
+  hammer_policy: HammerPolicy;
 };

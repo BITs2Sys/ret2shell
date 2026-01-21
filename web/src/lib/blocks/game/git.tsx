@@ -1,10 +1,9 @@
 import { handleHttpError } from "@api";
-import { getGameRepo } from "@api/game";
+import { getGameRepo, useGame } from "@api/game";
 import { deunicode } from "@api/rpc";
 import Spin from "@assets/animates/spin";
 import type { ObjectInfo } from "@models/git";
 import { A, useSearchParams } from "@solidjs/router";
-import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
@@ -14,8 +13,9 @@ import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, For, Show, untrack } from "solid-js";
 
-export default function () {
-  const [repoName, setRepoName] = createSignal<string>(gameStore.current?.name || "");
+export default function (props: { gameId: number }) {
+  const game = useGame({ id: () => props.gameId });
+  const [repoName, setRepoName] = createSignal<string>(game.data?.name || "");
   const [loading, setLoading] = createSignal(false);
 
   const [searchParams] = useSearchParams();
@@ -23,19 +23,19 @@ export default function () {
   const [objects, setObjects] = createSignal<ObjectInfo[]>([]);
 
   createEffect(() => {
-    if (gameStore.current) {
+    if (game.data) {
       untrack(async () => {
-        setRepoName(await deunicode(gameStore.current!.name, true));
+        setRepoName(await deunicode(game.data!.name, true));
       });
     }
   });
 
   createEffect(() => {
-    if (gameStore.current && path()) {
+    if (game.data && path()) {
       untrack(async () => {
         setLoading(true);
         try {
-          const result = await getGameRepo(gameStore.current!.id, `${path()}/`);
+          const result = await getGameRepo(game.data!.id, `${path()}/`);
           setObjects(
             result.sort((a, b) => {
               if (a.type === b.type) {
@@ -45,7 +45,7 @@ export default function () {
             })
           );
         } catch (err) {
-          handleHttpError(err as Error, t("game.git.errors.fetchRepo.title")!);
+          handleHttpError(err as Error, t("game.git.errors.fetchRepo.title"));
         }
         setLoading(false);
       });
@@ -64,14 +64,14 @@ export default function () {
       </Card>
       <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
         <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
-        <Show when={gameStore.current?.hidden} fallback={<span>{t("game.git.status.readonly.message")}</span>}>
+        <Show when={game.data?.hidden} fallback={<span>{t("game.git.status.readonly.message")}</span>}>
           <span>{t("game.git.status.writable.message")}</span>
         </Show>
       </Card>
-      <Clipboard value={`${window.location.origin}/api/game/${gameStore.current?.id}/repo/${repoName()}.git`} />
+      <Clipboard value={`${window.location.origin}/api/game/${game.data?.id}/repo/${repoName()}.git`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
-        <A class="font-bold" href={`/games/${gameStore.current?.id}/admin/git`}>
+        <A class="font-bold" href={`/games/${game.data?.id}/admin/git`}>
           {repoName()}
         </A>
         <span>/</span>
@@ -80,7 +80,7 @@ export default function () {
             <>
               <A
                 class="text-layer-content/60"
-                href={`/games/${gameStore.current?.id}/admin/git?path=${path().split(p)[0]}${p}`}
+                href={`/games/${game.data?.id}/admin/git?path=${path().split(p)[0]}${p}`}
               >
                 {p}
               </A>
@@ -105,8 +105,8 @@ export default function () {
               <Link
                 ghost
                 justify="start"
-                href={`/games/${gameStore.current?.id}/admin/git?path=${object.path}`}
-                class={clsx("overflow-hidden relative", loading() && object.path === path() && "!bg-layer-content/5")}
+                href={`/games/${game.data?.id}/admin/git?path=${object.path}`}
+                class={clsx("overflow-hidden relative", loading() && object.path === path() && "bg-layer-content/5!")}
                 disabled={loading() || object.type === "blob"}
                 title={object.subject || ""}
               >

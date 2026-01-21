@@ -1,7 +1,6 @@
-import { handleHttpError } from "@api";
-import { updateGame } from "@api/game";
+import { useGame, useUpdateGameMutation } from "@api/game";
 import { createForm, required } from "@modular-forms/solid";
-import { gameStore, setGameStore } from "@storage/game";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -10,7 +9,7 @@ import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import TimePicker from "@widgets/timepicker";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For } from "solid-js";
+import { createMemo, For } from "solid-js";
 
 type TimelinePresetFormType = {
   label: string;
@@ -25,42 +24,30 @@ type TimelinePreset = {
 };
 
 export default function Timeline() {
-  const [form, { Form, Field }] = createForm<TimelinePresetFormType>();
-  const [loading, setLoading] = createSignal(false);
-  const [presets, setPresets] = createSignal([] as TimelinePreset[]);
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+  const presets = createMemo(() => (game.data?.timeline_presets ?? []) as TimelinePreset[]);
 
-  createEffect(() => {
-    if (gameStore.current) {
-      setPresets(gameStore.current.timeline_presets ?? []);
-    }
+  const updateMutation = useUpdateGameMutation({
+    onSuccess: () => {
+      game.refetch();
+    },
   });
-
-  // const timepoint = createMemo(() => {
-  //   const result = new Set<DateTime>();
-  //   result.add(gameStore.current!.start_at);
-  //   result.add(gameStore.current!.end_at);
-  //   for (const preset of presets()) {
-  //     result.add(preset.start_at);
-  //     result.add(preset.end_at);
-  //   }
-  //   return Array.from(result.values()).sort((a, b) => a.toSeconds() - b.toSeconds());
-  // });
+  const [form, { Form, Field }] = createForm<TimelinePresetFormType>();
 
   async function handleDeleteTimelinePreset(p: TimelinePreset) {
-    const payload = {
-      ...gameStore.current!,
-      timeline_presets: presets().filter((preset) => !(p.start_at === preset.start_at && p.end_at === preset.end_at)),
-    };
-    try {
-      const game = await updateGame(gameStore.current!.id, payload);
-      setGameStore({ current: game });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
+    if (!game.data) return;
+    updateMutation.mutate({
+      id: game.data.id,
+      game: {
+        ...game.data,
+        timeline_presets: presets().filter((preset) => !(p.start_at === preset.start_at && p.end_at === preset.end_at)),
+      },
+    });
   }
 
   async function onSubmit(result: TimelinePresetFormType) {
-    setLoading(true);
     const results = [
       ...presets(),
       {
@@ -69,29 +56,26 @@ export default function Timeline() {
         end_at: DateTime.fromSeconds(result.end_at),
       },
     ].sort((a, b) => a.start_at.toSeconds() - b.start_at.toSeconds());
-    const payload = {
-      ...gameStore.current!,
-      timeline_presets: results,
-    };
-    try {
-      const game = await updateGame(gameStore.current!.id, payload);
-      setGameStore({ current: game });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+    if (!game.data) return;
+    updateMutation.mutate({
+      id: game.data.id,
+      game: {
+        ...game.data,
+        timeline_presets: results,
+      },
+    });
   }
   return (
     <>
-      <Title page={t("game.timeline.title")} route={`/games/${gameStore.current?.id}/admin/timeline`} />
+      <Title page={t("game.timeline.title")} route={`/games/${gameId()}/admin/timeline`} />
       <div class="flex flex-col space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 p-3 lg:p-6 w-full">
         <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
-          <Field name="label" validate={[required(t("game.timeline.form.label.required")!)]}>
+          <Field name="label" validate={[required(t("game.timeline.form.label.required"))]}>
             {(field, props) => (
               <Input
                 icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
-                placeholder={t("game.timeline.form.label.placeholder")!}
-                title={t("game.timeline.form.label.label")!}
+                placeholder={t("game.timeline.form.label.placeholder")}
+                title={t("game.timeline.form.label.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -99,29 +83,35 @@ export default function Timeline() {
               />
             )}
           </Field>
-          <Field name="start_at" type="number" validate={[required(t("game.timeline.form.startAt.required")!)]}>
+          <Field name="start_at" type="number" validate={[required(t("game.timeline.form.startAt.required"))]}>
             {(startAtField) => (
-              <Field name="end_at" type="number" validate={[required(t("game.timeline.form.endAt.required")!)]}>
+              <Field name="end_at" type="number" validate={[required(t("game.timeline.form.endAt.required"))]}>
                 {(endAtField) => (
                   <TimePicker
                     form={form}
                     type="time"
                     range
-                    title={t("game.timeline.form.startEndTime.label")!}
-                    placeholder={t("game.timeline.form.startEndTime.placeholder")!}
+                    title={t("game.timeline.form.startEndTime.label")}
+                    placeholder={t("game.timeline.form.startEndTime.placeholder")}
                     name={startAtField.name}
                     value={startAtField.value}
                     nameNext={endAtField.name}
                     valueNext={endAtField.value}
                     error={startAtField.error || endAtField.error}
-                    startEdge={gameStore.current?.start_at}
-                    endEdge={gameStore.current?.end_at}
+                    startEdge={game.data?.start_at}
+                    endEdge={game.data?.end_at}
                   />
                 )}
               </Field>
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="mt-4!"
+            loading={updateMutation.isPending}
+            disabled={updateMutation.isPending}
+          >
             {t("general.actions.create.title")}
           </Button>
         </Form>
@@ -162,7 +152,7 @@ export default function Timeline() {
                         size="sm"
                         class="self-end"
                         onClick={() => handleDeleteTimelinePreset(preset)}
-                        loading={loading()}
+                        loading={updateMutation.isPending}
                       >
                         {t("general.actions.yes.title")}
                       </Button>

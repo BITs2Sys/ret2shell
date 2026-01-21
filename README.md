@@ -4,18 +4,20 @@
   </a>
   <p><em>A feature-riches CTF challenge platform</em></p>
 
-[![MSRV 1.88.0+](https://img.shields.io/badge/MSRV-1.88.0+-blue)](https://releases.rs/docs/1.88.0/)
+[![MSRV 1.92.0+](https://img.shields.io/badge/MSRV-1.92.0+-blue)](https://releases.rs/docs/1.92.0/)
 [![Solid.js 1.9+](https://img.shields.io/badge/Solid.js-1.9+-orange)](https://www.solidjs.com/)
 
 </div>
 
 ## Deployment
 
-Ret2Shell is single binary with requirements of `redis/valkey 7+`, `postgres 16+`, `nats` and optional `VictoriaLog` and `registry`.
+Ret2Shell is single binary with requirements of `redis/valkey 8+`, `postgres 18+`, `nats 2+` and optional `VictoriaLog` and `registry`.
 
 All the components could be deploy anywhere, so you can deploy ret2shell as you like.
 
-For a general usage, you could see [k8s single-node deployment](./deploy/k8s-single/README.md) for details.
+> [!WARNING] The new helm charts is work-in-progress.
+
+For a general usage, you could see [k8s single-node deployment](./deploy/k8s-deprecated/README.md) for details.
 
 ## Development
 
@@ -79,9 +81,9 @@ pnpm install
 
 #### Setup other services
 
-See [deploy/nginx-http.dev.conf](deploy/nginx-http.dev.conf). You could put it into your nginx configuration directory like `/etc/nginx/sites-enabled/`.
+See [deploy/nginx-module/ret2shell.dev.conf](deploy/nginx-module/ret2shell.dev.conf). You could put it into your nginx configuration directory like `/etc/nginx/sites-enabled/`.
 
-You may need other services like database, redis to be configured, please refer to [deploy/docker-compose.dev.yml](deploy/docker-compose.dev.yml).
+You may need other services like database, redis to be configured, please refer to [deploy/docker-compose.dev.yml](deploy/compose/docker-compose.dev.yml).
 
 Copy [config/config.sample.toml](config/config.sample.toml) to `config/config.toml`, and modify it to fit your environment.
 

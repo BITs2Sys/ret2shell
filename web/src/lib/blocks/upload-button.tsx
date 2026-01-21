@@ -46,7 +46,7 @@ export default function UploadButton(
       setUploadComplete(true);
       uploadProps.onDone?.();
     } catch (err) {
-      handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
+      handleHttpError(err as Error, t("general.actions.upload.status.fail"));
     }
     setUploading(false);
   }

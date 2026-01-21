@@ -153,7 +153,7 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn get_list<C>(
   db: &C, only_solved: bool, with_content: bool, game_id: Option<i64>, challenge_id: Option<i64>,
-  team_id: Option<i64>, user_id: Option<i64>, in_game: bool,
+  team_id: Option<i64>, user_id: Option<i64>, training: bool,
 ) -> Result<Vec<ExModel>, DbErr>
 where
   C: ConnectionTrait, {
@@ -176,7 +176,7 @@ where
   if only_solved {
     sql = sql.filter(Column::Solved.eq(true));
   }
-  if in_game && only_solved {
+  if !training && only_solved {
     sql = sql
       .filter(Column::TeamId.is_not_null())
       .filter(team::Column::State.gte(team::State::Hidden))
@@ -206,7 +206,7 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn get_list_ex<C>(
   db: &C, only_solved: bool, with_content: bool, game_id: Option<i64>, challenge_id: Option<i64>,
-  team_id: Option<i64>, user_id: Option<i64>, in_game: bool,
+  team_id: Option<i64>, user_id: Option<i64>, training: bool,
 ) -> Result<Vec<ExModel>, DbErr>
 where
   C: ConnectionTrait, {
@@ -232,7 +232,7 @@ where
   if only_solved {
     sql = sql.filter(Column::Solved.eq(true));
   }
-  if in_game && only_solved {
+  if !training && only_solved {
     sql = sql
       .filter(Column::TeamId.is_not_null())
       .filter(team::Column::State.gte(team::State::Hidden))
@@ -313,7 +313,7 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn count<C>(
   db: &C, only_solved: bool, game_id: Option<i64>, challenge_id: Option<i64>, team_id: Option<i64>,
-  user_id: Option<i64>, institute_id: Option<i64>, in_game: bool,
+  user_id: Option<i64>, institute_id: Option<i64>, training: bool,
 ) -> Result<u64, DbErr>
 where
   C: ConnectionTrait, {
@@ -335,7 +335,7 @@ where
   if let Some(institute_id) = institute_id {
     sql = sql.filter(team::Column::InstituteId.eq(institute_id));
   }
-  if in_game {
+  if !training {
     sql = sql
       .filter(Column::TeamId.is_not_null())
       .filter(team::Column::State.gte(team::State::Hidden));
@@ -346,7 +346,7 @@ where
       (Entity, Column::ChallengeId),
       (
         Entity,
-        if in_game {
+        if !training {
           Column::TeamId
         } else {
           Column::UserId

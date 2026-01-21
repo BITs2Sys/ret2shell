@@ -1,68 +1,44 @@
-import { handleHttpError } from "@api";
-import { updateChallenge } from "@api/game";
+import { useChallenge, useUpdateChallengeMutation } from "@api/challenge";
 import type { Challenge } from "@models/challenge";
-import { challengeStore, setChallengeStore } from "@storage/challenge";
-import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
-import Button from "@widgets/button";
 import { DateTime } from "luxon";
-import { createEffect, createSignal } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 import { type ChallengeForm, FormBare } from "./form";
 
-export default function (props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
-  const [loading, setLoading] = createSignal(false);
-
-  const [challengeSource, setChallengeSource] = createSignal<Challenge | null>(
-    (challengeStore.current && { ...challengeStore.current }) ?? null
-  );
-
-  createEffect(() => {
-    if (!challengeStore.current?.hidden) {
-      setChallengeSource(challengeStore.current);
-    }
+export default function (props: ChallengeWidgetProps) {
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
 
+  const updateChallengeMutation = useUpdateChallengeMutation();
+
   async function handleUpdateChallenge(result: ChallengeForm) {
-    setLoading(true);
     const tags = result.tag.split("/").map((t) => {
       return { name: t, primary: false };
     });
     tags[0].primary = true;
 
-    const challenge: Challenge = {
-      ...challengeStore.current,
-      id: challengeStore.current!.id,
+    const data: Challenge = {
+      ...challenge.data,
+      id: challenge.data!.id,
       name: result.name,
       updated_at: DateTime.now(),
       content: result.content,
-      game_id: gameStore.current!.id,
+      game_id: props.gameId,
       tag: tags,
-      hidden: challengeStore.current?.hidden ?? false,
-      score: challengeStore.current?.score ?? result.initial,
-      bucket: challengeStore.current!.bucket!,
+      hidden: challenge.data?.hidden ?? false,
+      score: challenge.data?.score ?? result.initial,
+      bucket: challenge.data!.bucket,
       score_rule: {
-        initial: result.initial ?? challengeStore.current?.score_rule.initial ?? 0,
-        minimum: result.minimum ?? challengeStore.current?.score_rule.minimum ?? 0,
-        decay: result.decay ?? challengeStore.current?.score_rule.decay ?? 0,
+        initial: result.initial ?? challenge.data?.score_rule.initial ?? 0,
+        minimum: result.minimum ?? challenge.data?.score_rule.minimum ?? 0,
+        decay: result.decay ?? challenge.data?.score_rule.decay ?? 0,
       },
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
     };
-    try {
-      const result = await updateChallenge(gameStore.current!.id, challenge);
-      props.onStateChange?.(result);
-      setChallengeStore({ current: result });
-      setChallengeSource(result);
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+    await updateChallengeMutation.mutateAsync({ game_id: props.gameId, challenge: data });
   }
   return (
     <div class="flex flex-col p-3 lg:p-6 w-full items-center">
@@ -72,21 +48,12 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
           <span class="font-bold inline-block whitespace-nowrap">{t("general.actions.edit.title")}</span>
         </span>
         <span class="flex-1" />
-        <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
-          <Button
-            size="sm"
-            square
-            onClick={() => setChallengeSource((challengeStore.current && { ...challengeStore.current }) ?? null)}
-          >
-            <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
-          </Button>
-        </span>
       </header>
       <FormBare
         onDone={handleUpdateChallenge}
-        editSource={challengeSource() || undefined}
-        inGame={props.inGame}
-        loading={loading()}
+        training={props.training}
+        gameId={props.gameId}
+        challengeId={props.challengeId}
       />
     </div>
   );

@@ -1,7 +1,6 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import { Show } from "solid-js";
 import CreatePlayground from "./_blocks/create";
 
@@ -23,11 +22,6 @@ export default function () {
         <div class="flex-1 flex flex-col">
           <CreatePlayground
             onDone={(resp) => {
-              addToast({
-                level: "success",
-                description: t("general.actions.create.status.success")!,
-                duration: 5000,
-              });
               navigate(`/training/${resp.id}`);
             }}
           />

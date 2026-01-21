@@ -1,76 +1,45 @@
 import { handleHttpError } from "@api";
-import { type GameStatisticsExport, getGameStatistics, getGameStatisticsExport } from "@api/game";
+import { useInstitutes } from "@api/account";
+import { useChallenges } from "@api/challenge";
+import { type GameStatisticsExport, getGameStatisticsExport, useGame, useGameStatistics } from "@api/game";
 import Spin from "@assets/animates/spin";
 import logo from "@assets/logo.svg";
 import XLSX from "@e965/xlsx";
 import { mediaPath } from "@lib/utils/media";
 import type { User } from "@models/user";
-import { accountStore, refreshInstitutes } from "@storage/account";
-import { challengeStore, refreshChallenges } from "@storage/challenge";
-import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
 import Select from "@widgets/select";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 
-export default function GameStatistics(props: { inGame?: boolean }) {
-  const [loading, setLoading] = createSignal(false);
+export default function GameStatistics(props: { training?: boolean; gameId: number }) {
   const [selectedInstituteId, setSelectedInstituteId] = createSignal<number | null>(null);
-  const [stats, setStats] = createSignal(
-    null as {
-      total_players: number;
-      institute_players: { [key: number]: number };
-      total_teams: number;
-      total_passed_teams: number;
-      institute_teams: { [key: number]: number };
-      total_submissions: number;
-      total_solves: number;
-      challenge_submissions: { [key: number]: number };
-      challenge_solves: { [key: number]: number };
-    } | null
-  );
-
-  createEffect(() => {
-    if (gameStore.current) {
-      void selectedInstituteId();
-      untrack(async () => {
-        setLoading(true);
-        refreshChallenges();
-        refreshInstitutes();
-        try {
-          setStats(await getGameStatistics(gameStore.current!.id, props.inGame, selectedInstituteId() ?? undefined));
-        } catch (err) {
-          handleHttpError(err as Error, t("game.statistics.errors.fetch")!);
-        }
-        setLoading(false);
-      });
-    }
+  const game = useGame({ id: () => props.gameId });
+  const challenges = useChallenges({ game_id: () => props.gameId });
+  const stats = useGameStatistics({
+    game_id: () => props.gameId,
+    training: () => props.training,
+    institute: () => selectedInstituteId() ?? undefined,
   });
-
-  const challenges = createMemo(() => {
-    if (challengeStore) {
-      return challengeStore.challenges;
-    }
-    return [];
-  });
+  const institutes = useInstitutes();
 
   const challengeStats = createMemo(() => {
-    if (challenges().length > 0 && stats()) {
-      return challenges()
+    if (challenges.data && challenges.data[0].length > 0 && stats.data) {
+      return challenges.data[0]
         .map((challenge) => ({
           id: challenge.id,
           name: challenge.name,
-          submissions: stats()?.challenge_submissions[challenge.id] || 0,
-          solves: stats()?.challenge_solves[challenge.id] || 0,
+          submissions: stats.data?.challenge_submissions[challenge.id] || 0,
+          solves: stats.data?.challenge_solves[challenge.id] || 0,
         }))
         .sort((a, b) => b.solves - a.solves);
     }
     return [];
   });
   const gameInstitutes = createMemo(() => {
-    return accountStore.institutes.filter((i) => gameStore.current?.access_policy.institutes.includes(i.id));
+    return institutes.data?.filter((i) => game.data?.access_policy.institutes.includes(i.id)) || [];
   });
   const gameInstitutesSelect = createMemo(() => {
     return gameInstitutes().map((i) => ({
@@ -83,14 +52,10 @@ export default function GameStatistics(props: { inGame?: boolean }) {
   const [exporting, setExporting] = createSignal(false);
 
   async function exportStatisticsJson() {
-    if (gameStore.current) {
+    if (game.data) {
       setExporting(true);
       try {
-        const data = await getGameStatisticsExport(
-          gameStore.current.id,
-          props.inGame,
-          selectedInstituteId() ?? undefined
-        );
+        const data = await getGameStatisticsExport(game.data.id, !props.training, selectedInstituteId() ?? undefined);
         // save as json
         const blob = new Blob([JSON.stringify(data)], {
           type: "application/json",
@@ -102,7 +67,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         link.click();
         URL.revokeObjectURL(url);
       } catch (err) {
-        handleHttpError(err as Error, t("game.statistics.errors.export")!);
+        handleHttpError(err as Error, t("game.statistics.errors.export"));
       }
       setExporting(false);
     }
@@ -142,8 +107,8 @@ export default function GameStatistics(props: { inGame?: boolean }) {
       "Institute",
       "State",
       "Score",
-      ...Array.from({ length: gameStore.current?.team_size ?? 0 }, (_, i) => `PLAYER ${i}`),
-      ...Array.from({ length: challenges().length }, (_, i) => challenges()[i].name),
+      ...Array.from({ length: game.data?.team_size ?? 0 }, (_, i) => `PLAYER ${i}`),
+      ...Array.from({ length: challenges.data?.[0].length ?? 0 }, (_, i) => challenges.data?.[0][i].name),
     ];
     const scoreboardSheet = XLSX.utils.aoa_to_sheet([scoreboardHeader]);
     const scoreboardArr = [];
@@ -161,7 +126,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
     }
     for (const [index, [team, members]] of data.scoreboard.entries()) {
       const paddedMembers: User[] = JSON.parse(JSON.stringify(members));
-      while (paddedMembers.length < (gameStore.current?.team_size ?? 0)) {
+      while (paddedMembers.length < (game.data?.team_size ?? 0)) {
         paddedMembers.push({
           id: 0,
           account: "",
@@ -174,11 +139,11 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         team.id,
         team.name,
         team.tag,
-        accountStore.institutes.find((i) => i.id === team.institute_id)?.name ?? "",
+        institutes.data?.find((i) => i.id === team.institute_id)?.name ?? "",
         convertTeamState(team.state),
         team.score,
         ...paddedMembers.map((m) => (m.id ? `${m.id}:${m.account} (${m.nickname}) <${m.email}>` : "")),
-        ...challenges().map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")),
+        ...(challenges.data?.[0].map((c) => (team.history.find((h) => h.challenge_id === c.id) ? "*" : "")) ?? []),
       ];
       scoreboardArr.push(row);
     }
@@ -207,14 +172,14 @@ export default function GameStatistics(props: { inGame?: boolean }) {
   }
 
   async function exportStatisticsXlsx() {
-    if (gameStore.current) {
+    if (game.data) {
       setExporting(true);
       try {
         _exportStatisticsXlsx(
-          await getGameStatisticsExport(gameStore.current.id, props.inGame, selectedInstituteId() ?? undefined)
+          await getGameStatisticsExport(game.data.id, !props.training, selectedInstituteId() ?? undefined)
         );
       } catch (err) {
-        handleHttpError(err as Error, t("game.statistics.errors.export")!);
+        handleHttpError(err as Error, t("game.statistics.errors.export"));
       }
       setExporting(false);
     }
@@ -223,12 +188,12 @@ export default function GameStatistics(props: { inGame?: boolean }) {
   return (
     <div class="flex-1 flex flex-col p-3 lg:p-6 gap-3 lg:gap-6 w-full">
       <div class="hidden lg:flex items-center justify-start space-x-12 px-12">
-        <img class="w-24 h-24" src={gameStore.current?.logo ? mediaPath(gameStore.current!.logo) : logo} alt="CTF" />
-        <h1 class="text-5xl font-bold flex-1 truncate">{gameStore.current?.name}</h1>
+        <img class="w-24 h-24" src={game.data?.logo ? mediaPath(game.data.logo) : logo} alt="CTF" />
+        <h1 class="text-5xl font-bold flex-1 truncate">{game.data?.name}</h1>
         <h2 class="text-5xl font-bold">{t("game.statistics.title")}</h2>
       </div>
       <div class="flex flex-row space-x-2 p-3">
-        <Show when={props.inGame}>
+        <Show when={!props.training}>
           <Select
             class="flex-1 max-w-64 min-w-0 w-0"
             size="sm"
@@ -258,15 +223,15 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-info">{stats()?.total_players}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-info">{stats.data?.total_players}</span>
             </Show>
             <span class="opacity-60">PLAYERS</span>
           </div>
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--people-team-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-success">{stats()?.total_teams}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-success">{stats.data?.total_teams}</span>
             </Show>
             <span class="opacity-60">TEAMS</span>
           </div>
@@ -274,15 +239,15 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-success">{stats()?.total_solves}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-success">{stats.data?.total_solves}</span>
             </Show>
             <span class="opacity-60">SOLVES</span>
           </div>
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-warning">{stats()?.total_submissions}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-warning">{stats.data?.total_submissions}</span>
             </Show>
             <span class="opacity-60">SUBMITS</span>
           </div>
@@ -290,15 +255,15 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         <div class="lg:flex-1 flex flex-col space-y-2 lg:space-y-4">
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-info">{challenges().filter((c) => !c.hidden).length}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-info">{challenges.data?.[0].filter((c) => !c.hidden).length}</span>
             </Show>
             <span class="opacity-60">PLUBLISHED CHALLS</span>
           </div>
           <div class="flex flex-row space-x-4 items-center flex-1">
             <span class="shrink-0 icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
-              <span class="font-bold text-3xl text-info">{challenges().length}</span>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
+              <span class="font-bold text-3xl text-info">{challenges.data?.[0].length}</span>
             </Show>
             <span class="opacity-60">TOTAL CHALLS</span>
           </div>
@@ -310,7 +275,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         </div>
         <div class="h-64 flex flex-row lg:space-x-4">
           <div class="h-full aspect-square flex items-center justify-center">
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -334,11 +299,11 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                           color: "#17a750",
                         },
                         name: "Solves",
-                        value: stats()?.total_solves ?? 0,
+                        value: stats.data?.total_solves ?? 0,
                       },
                       {
                         name: "Fails",
-                        value: (stats()?.total_submissions ?? 0) - (stats()?.total_solves ?? 0),
+                        value: (stats.data?.total_submissions ?? 0) - (stats.data?.total_solves ?? 0),
                         itemStyle: {
                           color: "#db640e",
                         },
@@ -359,7 +324,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
               />
             </Show>
           </div>
-          <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+          <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
             <Chart
               class="hidden lg:block flex-1"
               option={{
@@ -417,7 +382,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         </div>
       </div>
       <Show
-        when={props.inGame}
+        when={!props.training}
         fallback={
           <div class="flex flex-col space-y-4">
             <div class="flex flex-row items-center">
@@ -425,7 +390,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
             </div>
             <div class="h-64 flex flex-row lg:space-x-4">
               <div class="h-full aspect-square flex items-center justify-center">
-                <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+                <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
                   <Chart
                     class="hidden lg:block"
                     option={{
@@ -444,8 +409,8 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                         emphasis: {
                           focus: "ancestor",
                         },
-                        data: Object.entries(stats()!.institute_players).map(([key, value]) => ({
-                          name: accountStore.institutes.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
+                        data: Object.entries(stats.data?.institute_players || {}).map(([key, value]) => ({
+                          name: institutes.data?.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
                           value,
                         })),
                         label: {
@@ -463,7 +428,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                   />
                 </Show>
               </div>
-              <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+              <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
                 <Chart
                   class="flex-1"
                   option={{
@@ -491,9 +456,9 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                     toolbox: {},
                     xAxis: {
                       type: "category",
-                      data: Object.entries(stats()!.institute_players)
-                        .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i, 10))?.name)
-                        .concat(t("game.statistics.others")!),
+                      data: Object.entries(stats.data?.institute_players || {})
+                        .map(([i, _]) => institutes.data?.find((v) => v.id === Number.parseInt(i, 10))?.name)
+                        .concat(t("game.statistics.others")),
                     },
                     yAxis: {
                       type: "value",
@@ -501,10 +466,11 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                     },
                     series: {
                       type: "bar",
-                      data: Object.entries(stats()!.institute_players)
+                      data: Object.entries(stats.data?.institute_players || {})
                         .map(([_, v]) => v)
                         .concat(
-                          stats()!.total_players - Object.values(stats()!.institute_players).reduce((a, b) => a + b, 0)
+                          (stats.data?.total_players ?? 0) -
+                            Object.values(stats.data?.institute_players || {}).reduce((a, b) => a + b, 0)
                         ),
                       barMaxWidth: 64,
                     },
@@ -521,7 +487,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           </div>
           <div class="h-64 flex flex-row lg:space-x-4">
             <div class="h-full aspect-square flex items-center justify-center">
-              <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+              <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
                 <Chart
                   class="block"
                   option={{
@@ -543,8 +509,8 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                       label: {
                         show: false,
                       },
-                      data: Object.entries(stats()!.institute_teams).map(([key, value]) => ({
-                        name: accountStore.institutes.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
+                      data: Object.entries(stats.data?.institute_teams || {}).map(([key, value]) => ({
+                        name: institutes.data?.find((v) => v.id === Number.parseInt(key, 10))?.name || key,
                         value,
                       })),
                       levels: [
@@ -559,7 +525,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                 />
               </Show>
             </div>
-            <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
+            <Show when={!stats.isLoading} fallback={<Spin width={24} height={24} />}>
               <Chart
                 class="hidden lg:block flex-1"
                 option={{
@@ -587,9 +553,9 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                   toolbox: {},
                   xAxis: {
                     type: "category",
-                    data: Object.entries(stats()!.institute_teams)
-                      .map(([i, _]) => accountStore.institutes.find((v) => v.id === Number.parseInt(i, 10))?.name)
-                      .concat(t("game.statistics.others")!),
+                    data: Object.entries(stats.data?.institute_teams || {})
+                      .map(([i, _]) => institutes.data?.find((v) => v.id === Number.parseInt(i, 10))?.name)
+                      .concat(t("game.statistics.others")),
                   },
                   yAxis: {
                     type: "value",
@@ -597,10 +563,11 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                   },
                   series: {
                     type: "bar",
-                    data: Object.entries(stats()!.institute_teams)
+                    data: Object.entries(stats.data?.institute_teams || {})
                       .map(([_, v]) => v)
                       .concat(
-                        stats()!.total_teams - Object.values(stats()!.institute_teams).reduce((a, b) => a + b, 0)
+                        (stats.data?.total_teams ?? 0) -
+                          Object.values(stats.data?.institute_teams || {}).reduce((a, b) => a + b, 0)
                       ),
                     barMaxWidth: 64,
                   },

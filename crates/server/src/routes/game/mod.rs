@@ -46,13 +46,13 @@ use crate::{
     data::{self, extract_team},
   },
   traits::{GlobalState, ResponseError},
+  worker,
 };
 
 mod challenge;
 mod chat;
 mod notification;
 mod team;
-pub mod worker;
 
 // // default_chain!(game.archive_policy.clone(), challenge.show_answer)
 // #[macro_export]
@@ -64,7 +64,7 @@ pub mod worker;
 // }
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
-  tokio::spawn(worker::spawn_game_workers(state.clone()));
+  tokio::spawn(worker::game::spawn_game_workers(state.clone()));
   Router::new()
     .route("/", post(create_game))
     .route_layer(middleware::from_fn(auth::permission_required_all!(
@@ -332,6 +332,12 @@ async fn delete_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let challenges = challenge_db::count(&db.conn, Some(game.id), Some(game.host_type), true).await?;
+  if challenges > 0 && !query.force.unwrap_or(false) {
+    return Err(ResponseError::PreconditionFailed(
+      "game has existing challenges, can not be deleted safely".to_owned(),
+    ));
+  }
   cache.at("game").del(game.id).await?;
   game::delete(&db.conn, game.id).await?;
   let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
@@ -473,7 +479,7 @@ impl TryFrom<Pod> for Instance {
         .metadata
         .creation_timestamp
         .clone()
-        .map(|c| c.0)
+        .map(|c| DateTime::from_timestamp_secs(c.0.as_second()).unwrap_or_default())
         .ok_or(ResponseError::Gone(
           "pod creation time not found".to_owned(),
         ))?,
@@ -511,7 +517,7 @@ async fn get_self_solves(
       None,
       None,
       Some(token.id),
-      false,
+      true,
     )
     .await?;
     return Ok(Json(solves));
@@ -525,7 +531,7 @@ async fn get_self_solves(
     None,
     team.clone().map(|t| t.id),
     if team.is_none() { Some(token.id) } else { None },
-    false,
+    true,
   )
   .await?;
   Ok(Json(solves))
@@ -803,21 +809,22 @@ struct GameStatistics {
 
 #[derive(Deserialize, Clone)]
 struct GameStatisticsQuery {
-  pub in_game: Option<bool>,
+  pub training: Option<bool>,
   pub institute: Option<i64>,
 }
 
 async fn get_game_statistics_impl(
   db: &Database, game: &game::Model, query: GameStatisticsQuery,
 ) -> Result<GameStatistics, ResponseError> {
-  let in_game = query.in_game.unwrap_or(false);
+  let training = query.training.unwrap_or(true);
   let institutes = institute::get_list(&db.conn).await?;
-  let total_players = user::count(&db.conn, false, query.institute, Some(game.id), in_game).await?;
+  let total_players =
+    user::count(&db.conn, false, query.institute, Some(game.id), training).await?;
   let mut institute_players = HashMap::new();
   for i in institutes.iter() {
     institute_players.insert(
       i.id,
-      user::count(&db.conn, false, Some(i.id), Some(game.id), in_game).await?,
+      user::count(&db.conn, false, Some(i.id), Some(game.id), training).await?,
     );
   }
   let total_teams =
@@ -839,7 +846,7 @@ async fn get_game_statistics_impl(
     None,
     None,
     query.institute,
-    in_game,
+    training,
   )
   .await?;
   let total_solves = submission::count(
@@ -850,7 +857,7 @@ async fn get_game_statistics_impl(
     None,
     None,
     query.institute,
-    in_game,
+    training,
   )
   .await?;
 
@@ -868,7 +875,7 @@ async fn get_game_statistics_impl(
         None,
         None,
         query.institute,
-        in_game,
+        training,
       )
       .await?,
     );
@@ -882,7 +889,7 @@ async fn get_game_statistics_impl(
         None,
         None,
         query.institute,
-        in_game,
+        training,
       )
       .await?,
     );

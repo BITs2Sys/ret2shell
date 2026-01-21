@@ -11,6 +11,10 @@
     @apply transition-all duration-300 ease-in-out;
   }
 
+  .fade-group-flip {
+    @apply transition-all duration-300 ease-in-out transform-3d perspective-midrange;
+  }
+
   .fade-group-dive-right {
     @apply transition-all duration-300 ease-in-out;
   }
@@ -22,6 +26,7 @@
   .fade-group-up {
     @apply transition-all duration-300 ease-in-out;
   }
+
   .rainbow {
     background-image: -webkit-linear-gradient(
       left,
@@ -63,6 +68,13 @@
 .fade-group-dive-exit-to {
   opacity: 0;
   transform: scale(0.8);
+}
+
+.fade-group-flip-enter {
+  transform: rotateY(90deg);
+}
+.fade-group-flip-exit-to {
+  transform: rotateY(-90deg);
 }
 
 .fade-group-dive-right-enter {

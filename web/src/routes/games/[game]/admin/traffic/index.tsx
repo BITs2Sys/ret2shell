@@ -1,9 +1,13 @@
-import { handleHttpError } from "@api";
-import { deleteGameNodeSelector, deleteGameTraffic, updateGameNodeSelector, updateGameTraffic } from "@api/game";
-import { gameStore, setGameStore } from "@storage/game";
+import {
+  useDeleteGameNodeSelectorMutation,
+  useDeleteGameTrafficMutation,
+  useGame,
+  useUpdateGameNodeSelectorMutation,
+  useUpdateGameTrafficMutation,
+} from "@api/game";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
@@ -11,7 +15,7 @@ import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
 
@@ -23,12 +27,49 @@ const trafficMap = {
 };
 
 export default function Traffic() {
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+
   const [preset, setPreset] = createSignal(null as PresetTraffic | null);
 
   const [script, setScript] = createSignal("");
   const [lint, setLint] = createSignal(null as DiagnosticMarker[] | null);
   const [nodeSelector, setNodeSelector] = createSignal("");
-  const [saving, setSaving] = createSignal(false);
+
+  const hasTraffic = createMemo(() => !!game.data?.traffic);
+  const hasNodeSelector = createMemo(() => !!game.data?.node_selector);
+
+  const updateTrafficMutation = useUpdateGameTrafficMutation({
+    onSuccess: (resp) => {
+      setLint(resp.lint);
+      game.refetch();
+    },
+  });
+  const deleteTrafficMutation = useDeleteGameTrafficMutation({
+    onSuccess: () => {
+      setLint(null);
+      game.refetch();
+    },
+  });
+  const updateNodeSelectorMutation = useUpdateGameNodeSelectorMutation({
+    onSuccess: () => {
+      game.refetch();
+    },
+  });
+  const deleteNodeSelectorMutation = useDeleteGameNodeSelectorMutation({
+    onSuccess: () => {
+      game.refetch();
+    },
+  });
+
+  const saving = createMemo(
+    () =>
+      updateTrafficMutation.isPending ||
+      deleteTrafficMutation.isPending ||
+      updateNodeSelectorMutation.isPending ||
+      deleteNodeSelectorMutation.isPending
+  );
   createEffect(() => {
     if (preset()) {
       setScript(trafficMap[preset()!]);
@@ -36,90 +77,34 @@ export default function Traffic() {
   });
 
   createEffect(() => {
-    if (gameStore.current) {
-      setScript(gameStore.current.traffic || "");
-      setNodeSelector(gameStore.current.node_selector || "");
+    if (game.data) {
+      setScript(game.data.traffic || "");
+      setNodeSelector(game.data.node_selector || "");
     }
   });
 
   async function handleUpdateTraffic() {
-    if (gameStore.current) {
-      setSaving(true);
-      try {
-        const resp = await updateGameTraffic(gameStore.current.id, script());
-        setLint(resp.lint);
-        addToast({
-          level: "success",
-          description: t("general.actions.save.status.success")!,
-          duration: 5000,
-        });
-        setGameStore({ current: { ...gameStore.current, traffic: script() } });
-      } catch (err) {
-        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-      }
-      setSaving(false);
-    }
+    if (!game.data) return;
+    updateTrafficMutation.mutate({ game_id: game.data.id, traffic: script() });
   }
 
   async function handleDeleteTraffic() {
-    if (gameStore.current) {
-      setSaving(true);
-      try {
-        await deleteGameTraffic(gameStore.current.id);
-        setLint(null);
-        addToast({
-          level: "success",
-          description: t("general.actions.delete.status.success")!,
-          duration: 5000,
-        });
-        setGameStore({ current: { ...gameStore.current, traffic: "" } });
-      } catch (err) {
-        handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-      }
-      setSaving(false);
-    }
+    if (!game.data) return;
+    deleteTrafficMutation.mutate({ game_id: game.data.id });
   }
 
   async function handleUpdateNodeSelector() {
-    if (gameStore.current) {
-      setSaving(true);
-      try {
-        await updateGameNodeSelector(gameStore.current.id, nodeSelector());
-        addToast({
-          level: "success",
-          description: t("general.actions.save.status.success")!,
-          duration: 5000,
-        });
-        setGameStore({
-          current: { ...gameStore.current, node_selector: nodeSelector() },
-        });
-      } catch (err) {
-        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-      }
-      setSaving(false);
-    }
+    if (!game.data) return;
+    updateNodeSelectorMutation.mutate({ game_id: game.data.id, node_selector: nodeSelector() });
   }
 
   async function handleDeleteNodeSelector() {
-    if (gameStore.current) {
-      setSaving(true);
-      try {
-        await deleteGameNodeSelector(gameStore.current.id);
-        addToast({
-          level: "success",
-          description: t("general.actions.delete.status.success")!,
-          duration: 5000,
-        });
-        setGameStore({ current: { ...gameStore.current, node_selector: "" } });
-      } catch (err) {
-        handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-      }
-      setSaving(false);
-    }
+    if (!game.data) return;
+    deleteNodeSelectorMutation.mutate({ game_id: game.data.id });
   }
   return (
     <>
-      <Title page={t("traffic.title")} route={`/games/${gameStore.current?.id}/admin/traffic`} />
+      <Title page={t("traffic.title")} route={`/games/${gameId()}/admin/traffic`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 lg:pb-3 relative">
         <div class="flex-1 flex flex-col w-full">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
@@ -132,7 +117,7 @@ export default function Traffic() {
             <Button size="sm" level="primary" onClick={handleUpdateNodeSelector} loading={saving()}>
               {t("general.actions.save.title")}
             </Button>
-            <Show when={gameStore.current?.node_selector}>
+            <Show when={hasNodeSelector()}>
               <Popover
                 level="error"
                 ghost
@@ -165,12 +150,12 @@ export default function Traffic() {
               size="sm"
               items={[
                 {
-                  label: t("traffic.preset.singleNodeDirectScript")!,
+                  label: t("traffic.preset.singleNodeDirectScript"),
                   value: "single-node-direct",
                   icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
                 },
                 {
-                  label: t("traffic.preset.multiNodeDirectScript")!,
+                  label: t("traffic.preset.multiNodeDirectScript"),
                   value: "multi-node-direct",
                   icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
                 },
@@ -182,7 +167,7 @@ export default function Traffic() {
             <Button size="sm" level="primary" onClick={handleUpdateTraffic} loading={saving()}>
               {t("general.actions.save.title")}
             </Button>
-            <Show when={gameStore.current?.traffic}>
+            <Show when={hasTraffic()}>
               <Popover
                 level="error"
                 ghost
@@ -205,7 +190,7 @@ export default function Traffic() {
           <EditorBare
             class="w-full h-full"
             lineNumbers
-            lang="rust"
+            lang="rune"
             value={script()}
             lints={lint() ?? []}
             onValueChanged={(e) => {

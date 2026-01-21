@@ -1,10 +1,11 @@
-import { handleHttpError } from "@api";
-import { createTeam } from "@api/game";
+import { useGame } from "@api/game";
+import { useCreateTeamMutation } from "@api/team";
 import { generateRandomName } from "@lib/utils/random-names";
 import { createForm, maxLength, required, setValue } from "@modular-forms/solid";
-import { useNavigate } from "@solidjs/router";
+import { setTeamCoverStore } from "@routes/games/[game]/_blocks/team-cover";
+import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canParticipate, gameParticipateState, gameStore, setGameStore } from "@storage/game";
+import { gameParticipateState, isGameCanParticipate } from "@storage/game";
 import { Title } from "@storage/header";
 import { t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -16,7 +17,7 @@ import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import clsx from "clsx";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
 
 type TeamCreateForm = {
   name: string;
@@ -25,43 +26,71 @@ type TeamCreateForm = {
 };
 
 export default function () {
+  const params = useParams();
+  const gameId = () => Number.parseInt(params.game || "0", 10) || 0;
+
   const navigate = useNavigate();
   if (!accountStore.token) {
-    navigate(`/account/login?next=/games/${gameStore.current?.id}/teams/create`, { replace: true });
+    navigate(`/account/login?next=/games/${gameId()}/teams/create`, { replace: true });
   }
+
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+
+  const blockReason = createMemo(() => {
+    if (!game.data) return null;
+
+    const [canRegister, message] = gameParticipateState(game.data);
+    if (!canRegister) return message || t("game.registerEnded");
+
+    if (!isGameCanParticipate(game.data)) return t("game.canNotParticipate");
+
+    return null;
+  });
+
+  createEffect(() => {
+    if (!game.data) return;
+    const reason = blockReason();
+    if (!reason) return;
+    addToast({
+      level: "warning",
+      description: reason,
+      duration: 5000,
+    });
+    navigate(`/games/${gameId()}`, { replace: true });
+  });
+
   const [customDisabled, setCustomDisabled] = createSignal(false);
   const [form, { Form, Field }] = createForm<TeamCreateForm>();
   createEffect(() => {
-    if (gameStore.current && !canParticipate()) {
-      addToast({
-        level: "warning",
-        description: t("game.canNotParticipate")!,
-        duration: 5000,
-      });
-      navigate(`/games/${gameStore.current.id}`, { replace: true });
-    }
-  });
-  createEffect(() => {
-    if (gameStore.current) {
+    if (game.data) {
       untrack(() => {
-        setCustomDisabled(gameStore.current?.team_size === 1);
-        if (gameStore.current?.team_size === 1) setValue(form, "name", accountStore.nickname!);
+        setCustomDisabled(game.data?.team_size === 1);
+        if (game.data?.team_size === 1) setValue(form, "name", accountStore.nickname!);
       });
     }
   });
-  const [loading, setLoading] = createSignal(false);
-  async function onSubmit(data: TeamCreateForm) {
-    setLoading(true);
-    try {
-      const team = await createTeam(gameStore.current!.id, data);
-      setGameStore({ team, showTeamCover: true });
+
+  const createTeamMutation = useCreateTeamMutation({
+    onSuccess: () => {
+      setTeamCoverStore({ showTeamCover: true });
       setTimeout(() => {
-        navigate(`/games/${gameStore.current?.id}`);
+        navigate(`/games/${gameId()}`);
       }, 2000);
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
-    }
-    setLoading(false);
+    },
+  });
+
+  const submitLabel = createMemo(() => blockReason() ?? t("general.actions.create.title"));
+  const submitDisabled = createMemo(() => createTeamMutation.isPending || !game.data || !!blockReason());
+
+  function onSubmit(data: TeamCreateForm) {
+    if (!game.data) return;
+    createTeamMutation.mutate({
+      game_id: gameId(),
+      team: {
+        name: data.name,
+        tag: data.tag || null,
+      },
+    });
   }
   const [generator, setGenerator] = createSignal<"chuunibyou" | "hacker">("hacker");
   const [content, setContent] = createSignal(null as null | string);
@@ -77,7 +106,7 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("team.create.title")} route={`/games/${gameStore.current?.id}/teams/create`} />
+      <Title page={t("team.create.title")} route={`/games/${gameId()}/teams/create`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"
@@ -87,7 +116,7 @@ export default function () {
             <h2 class="font-bold text-center">{t("team.create.title")}</h2>
             <Field
               name="name"
-              validate={[required(t("team.form.name.required")!), maxLength(32, t("team.form.name.maximumLength")!)]}
+              validate={[required(t("team.form.name.required")!), maxLength(32, t("team.form.name.maximumLength"))]}
             >
               {(field, props) => (
                 <Input
@@ -102,7 +131,7 @@ export default function () {
                   extraBtn={
                     <>
                       <Button
-                        class="!rounded-none"
+                        class="rounded-none!"
                         square
                         type="button"
                         disabled={customDisabled()}
@@ -114,7 +143,7 @@ export default function () {
                         <span class="shrink-0 icon-[fluent--diversity-20-regular] w-5 h-5" />
                       </Button>
                       <Popover
-                        class="!rounded-l-none"
+                        class="rounded-l-none!"
                         square
                         type="button"
                         disabled={customDisabled()}
@@ -152,7 +181,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength")!)]}>
+            <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength"))]}>
               {(field, props) => (
                 <Input
                   icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
@@ -164,7 +193,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required")!)]}>
+            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required"))]}>
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />
@@ -222,13 +251,13 @@ export default function () {
                 type="submit"
                 level="primary"
                 class="flex-1"
-                loading={loading()}
-                disabled={loading() || !gameParticipateState()[0]}
+                loading={createTeamMutation.isPending}
+                disabled={submitDisabled()}
               >
-                {gameParticipateState()[0] ? t("general.actions.create.title") : gameParticipateState()[1]}
+                {submitLabel()}
               </Button>
-              <Show when={(gameStore.current?.team_size || 0) > 1}>
-                <Link href={`/games/${gameStore.current?.id}/teams/join`}>
+              <Show when={(game.data?.team_size || 0) > 1}>
+                <Link href={`/games/${gameId()}/teams/join`}>
                   <span>{t("team.join.title")}</span>
                   <span class="shrink-0 icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>

@@ -3,6 +3,7 @@ import { setThemeStore, t, themeStore } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Popover from "@widgets/popover";
+import clsx from "clsx";
 import { Show } from "solid-js";
 
 export function ThemeBoxContent() {
@@ -13,7 +14,7 @@ export function ThemeBoxContent() {
         <Button
           ghost
           size="sm"
-          class="!min-h-0 !h-0 group-hover:!min-h-8 group-hover:!h-8 overflow-hidden border-none"
+          class="min-h-0! h-0! group-hover:min-h-8! group-hover:h-8! overflow-hidden border-none"
           onClick={() => {
             setThemeStore({
               colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem,
@@ -36,7 +37,16 @@ export function ThemeBoxContent() {
 export default function ThemeBox() {
   return (
     <Popover
-      btnContent={<span class="shrink-0 icon-[fluent--wand-20-regular] w-5 h-5" />}
+      btnContent={
+        <span
+          class={clsx(
+            "shrink-0 w-5 h-5",
+            themeStore.colorScheme === "dark"
+              ? "icon-[fluent--weather-moon-20-regular]"
+              : "icon-[fluent--weather-sunny-20-regular]"
+          )}
+        />
+      }
       square
       ghost
       popContentClass="pt-2"

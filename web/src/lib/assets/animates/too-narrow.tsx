@@ -3,14 +3,7 @@ import type { ComponentProps } from "solid-js";
 export default function (props: ComponentProps<"svg">) {
   const { width, height } = { width: 256, height: 256, ...props };
   return (
-    <svg
-      width={width}
-      height={height}
-      {...props}
-      viewBox="0 0 65536 65536"
-      version="1.1"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width={width} height={height} {...props} viewBox="0 0 65536 65536" xmlns="http://www.w3.org/2000/svg">
       <g id="g4" transform="matrix(270.26017,0,0,270.26017,-2048.9648,-889.99669)">
         <path
           fill="#0078d6"

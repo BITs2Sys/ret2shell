@@ -1,7 +1,8 @@
+import { useChallenge, useChallenges } from "@api/challenge";
+import { useGame } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { challengeStore } from "@storage/challenge";
-import { isGameAdmin } from "@storage/game";
+import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
@@ -11,12 +12,23 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame?: boolean }) {
+export default function Tabs(props: { training?: boolean; archived?: boolean; gameId: number; challengeId?: number }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedChallengeId = createMemo(
-    () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
-  );
+  const game = useGame({ id: () => props.gameId });
+
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId || 0,
+    enabled: () => !!props.challengeId,
+  });
+  const challenges = useChallenges({
+    game_id: () => props.gameId,
+    enabled: () => !!game.data,
+  });
+  const baseUrl = createMemo(() => {
+    return props.training ? `/training/${props.gameId}` : `/games/${props.gameId}/challenges`;
+  });
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
   const inCreate = createMemo(() => searchParams.create === "true");
   const inEditGame = createMemo(() => searchParams.edit === "true");
@@ -45,15 +57,14 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
     }, 100);
   }
   function closeChallengeTab(challengeId: number) {
-    if (challengeId === selectedChallengeId()) setSearchParams({ challenge: null });
+    if (challengeId === props.challengeId) setSearchParams({ challenge: null });
     setChallengeHistory([...challengeHistory().filter((s) => s.id !== challengeId)]);
   }
+
   createEffect(() => {
-    if (challengeStore.current) {
-      untrack(() => {
-        appendChallengeHistory(challengeStore.current!);
-      });
-    }
+    if (!props.challengeId) return;
+    if (challenge.isLoading || !challenge.data) return;
+    untrack(() => appendChallengeHistory(challenge.data));
   });
   return (
     <OverlayScrollbarsComponent
@@ -73,13 +84,13 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
               // href={props.baseUrl}
               onClick={() => {
                 // setSearchParams({ challenge: null });
-                navigate(props.baseUrl);
+                navigate(baseUrl());
               }}
               square={challengeHistory().length > 0}
               ghost
               class="transition-all duration-300 overflow-hidden"
               active={
-                selectedChallengeId() === null &&
+                !props.challengeId &&
                 inCreate() === false &&
                 inEditGame() === false &&
                 inStatistics() === false &&
@@ -91,16 +102,16 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
                 <span>{t("game.welcome")}</span>
               </Show>
             </Button>
-            <Show when={isGameAdmin()}>
-              <Show when={!props.inGame}>
+            <Show when={isAdminOfGame(game.data)}>
+              <Show when={props.training}>
                 <Button
                   active={inStatistics()}
                   title={t("game.statistics.title")}
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
-                  // href={`${props.baseUrl}?statistics=true`}
-                  onClick={() => navigate(`${props.baseUrl}?statistics=true`)}
+                  // href={`${baseUrl()}?statistics=true`}
+                  onClick={() => navigate(`${baseUrl()}?statistics=true`)}
                 >
                   <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
@@ -113,8 +124,8 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
-                  // href={`${props.baseUrl}?monitor=true`}
-                  onClick={() => navigate(`${props.baseUrl}?monitor=true`)}
+                  // href={`${baseUrl()}?monitor=true`}
+                  onClick={() => navigate(`${baseUrl()}?monitor=true`)}
                 >
                   <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
@@ -127,8 +138,8 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
-                  // href={`${props.baseUrl}?edit=true`}
-                  onClick={() => navigate(`${props.baseUrl}?edit=true`)}
+                  // href={`${baseUrl()}?edit=true`}
+                  onClick={() => navigate(`${baseUrl()}?edit=true`)}
                 >
                   <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
@@ -142,8 +153,8 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
                 square={challengeHistory().length > 0}
                 ghost
                 class="transition-all duration-300 overflow-hidden"
-                // href={`${props.baseUrl}?create=true`}
-                onClick={() => navigate(`${props.baseUrl}?create=true`)}
+                // href={`${baseUrl()}?create=true`}
+                onClick={() => navigate(`${baseUrl()}?create=true`)}
               >
                 <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
                 <Show when={challengeHistory().length === 0}>
@@ -156,42 +167,46 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
             </Show>
           </div>
           <For each={challengeHistory()}>
-            {(challenge) => {
+            {(c) => {
               const challengeName = createMemo(() => {
-                if (challenge.id === challengeStore.current?.id) {
-                  return challengeStore.current?.name;
+                if (c.id === challenge.data?.id) {
+                  return challenge.data?.name;
                 }
-                const name = challengeStore.challenges.find((c) => c.id === challenge.id)?.name ?? challenge.name;
-                challenge.name = name;
+                const name = challenges.data?.[0].find((challenge) => challenge.id === c.id)?.name ?? c.name;
+                c.name = name;
                 return name;
               });
               return (
                 <div class="fade-group-dive-left flex flex-row">
                   <Button
-                    // href={`${props.baseUrl}?challenge=${challenge.id}`}
+                    // href={`${baseUrl()}?challenge=${challenge.id}`}
                     onClick={() => {
                       // setSearchParams({ challenge: challenge.id });
-                      navigate(
-                        `${props.baseUrl}?challenge=${challenge.id}${searchParams.tab ? `&tab=${searchParams.tab}` : ""}`
-                      );
+                      navigate(`${baseUrl()}?challenge=${c.id}${searchParams.tab ? `&tab=${searchParams.tab}` : ""}`);
                     }}
                     onMouseUp={(e) => {
-                      if (e.button === 1) closeChallengeTab(challenge.id);
+                      if (e.button === 1) closeChallengeTab(c.id);
                     }}
-                    id={`challenge-${challenge.id}`}
-                    active={challenge.id === selectedChallengeId() && inCreate() === false}
+                    loading={challenge.isLoading && c.id === props.challengeId}
+                    id={`challenge-${c.id}`}
+                    active={c.id === props.challengeId && inCreate() === false}
                     ghost
                     class={clsx("max-w-48", "pr-0")}
                   >
-                    <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
+                    <Show
+                      when={challenge.isLoading && c.id === props.challengeId}
+                      fallback={<span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />}
+                    >
+                      {null /* Loading spinner handled by Button component */}
+                    </Show>
                     <span class="truncate flex-1 text-left">{challengeName()}</span>
                     <Button
-                      class="!rounded-l-none"
+                      class="rounded-l-none!"
                       square
                       ghost
                       onClick={(e) => {
                         e.stopPropagation();
-                        closeChallengeTab(challenge.id);
+                        closeChallengeTab(c.id);
                       }}
                     >
                       <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
@@ -202,7 +217,7 @@ export default function Tabs(props: { baseUrl: string; loading?: boolean; inGame
             }}
           </For>
         </TransitionGroup>
-        <Show when={props.loading}>
+        <Show when={challenge.isLoading && !challenges.data?.[0].find((c) => c.id === props.challengeId)}>
           <Button class="opacity-60" loading ghost>
             <span>{t("general.loading.short")}</span>
           </Button>

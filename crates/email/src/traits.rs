@@ -11,9 +11,16 @@ pub struct EmailCtx {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum EmailType {
+  Verify,
+  Reset,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EmailRequest {
   pub email: EmailCtx,
   pub config: email::Config,
+  pub email_type: EmailType,
 }
 
 #[derive(Error, Debug)]

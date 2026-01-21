@@ -390,6 +390,10 @@
       "hideMaker": {
         "disabled": "你的许可证不允许隐藏此项",
         "label": "隐藏开发者信息"
+      },
+      "zenGame": {
+        "label": "独立比赛模式",
+        "placeholder": "选择比赛……"
       }
     },
     "logs": {
@@ -1330,6 +1334,9 @@
       "errors": {
         "fetchCheckerScript": {
           "title": "获取评测脚本失败"
+        },
+        "fetchScript": {
+          "title": "获取脚本配置失败"
         }
       }
     },
@@ -1583,7 +1590,11 @@
       },
       "registeredAt": {
         "label": "注册时间"
-      }
+      },
+      "avatar": {
+        "uploadHint": "再点一下将头像文件上传到服务器哦"
+      },
+      "saveHint": "记得保存！！！"
     },
     "login": {
       "title": "登录",
@@ -1864,7 +1875,7 @@
     },
     "wget": {
       "man": "下载指定的文件。",
-      "usage": "使用方法： wget \\\"<文件名>\\\"",
+      "usage": "使用方法： wget <文件名>",
       "downloading": "下载中",
       "errors": {
         "fileNotFound": {
@@ -2107,6 +2118,9 @@
     "errors": {
       "fetchNodes": {
         "title": "获取集群节点信息失败"
+      },
+      "fetchConfig": {
+        "title": "获取集群配置失败"
       }
     }
   },

@@ -1,10 +1,10 @@
 import { type ComponentProps, onMount } from "solid-js";
 
 export default function (props: ComponentProps<"svg">) {
-  let svgPath1: SVGPathElement;
-  let svgPath2: SVGPathElement;
-  let svgPath3: SVGPathElement;
-  let svgPath4: SVGPathElement;
+  let svgPath1!: SVGPathElement;
+  let svgPath2!: SVGPathElement;
+  let svgPath3!: SVGPathElement;
+  let svgPath4!: SVGPathElement;
   const { width, height } = { width: 256, height: 256, ...props };
   onMount(() => {
     setTimeout(() => {

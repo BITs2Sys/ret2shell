@@ -1,12 +1,10 @@
-import { handleHttpError } from "@api";
-import { getGameAdmins, updateGameAdmins } from "@api/game";
-import { getUserList } from "@api/user";
+import { useInstitutes } from "@api/account";
+import { useGame, useGameAdmins, useUpdateGameAdminsMutation } from "@api/game";
+import { useUsers } from "@api/user";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToIcon, type User } from "@models/user";
 import { A } from "@solidjs/router";
-import { accountStore } from "@storage/account";
-import { gameStore, setGameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -19,68 +17,32 @@ import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createSignal, For, Show, untrack } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
-export default function AdministratorsManagement() {
-  const [loading, setLoading] = createSignal(false);
-  const [admins, setAdmins] = createSignal([] as User[]);
-  createEffect(() => {
-    if (gameStore.current?.admins) {
-      untrack(async () => {
-        setLoading(true);
-        try {
-          setAdmins(await getGameAdmins(gameStore.current!.id));
-        } catch (err) {
-          handleHttpError(err as Error, t("game.administrator.errors.fetchList.title")!);
-        }
-        setLoading(false);
-      });
-    }
+export default function AdministratorsManagement(props: { gameId: number }) {
+  const admins = useGameAdmins({
+    game_id: () => props.gameId,
   });
+  const game = useGame({ id: () => props.gameId });
+  const institutes = useInstitutes();
 
   const [adminSearch, setAdminSearch] = createSignal<string>("");
-  const [searching, setSearching] = createSignal(false);
-  const [searchedUsers, setSearchedUsers] = createSignal([] as User[]);
-  createEffect(() => {
-    if (adminSearch()) {
-      untrack(async () => {
-        setSearching(true);
-        setSearchedUsers([]);
-        try {
-          setSearchedUsers((await getUserList(1, 30, "id", adminSearch()))[0]);
-        } catch (err) {
-          handleHttpError(err as Error, t("user.errors.fetchList.title")!);
-        }
-        setSearching(false);
-      });
-    }
+
+  const searchedUsers = useUsers({
+    page: () => 1,
+    page_size: () => 30,
+    order: () => "id",
+    filter: () => adminSearch(),
   });
-  const [adding, setAdding] = createSignal(false);
+
+  const updateMutation = useUpdateGameAdminsMutation();
+
   async function handleAddAdmin(user: User) {
-    setAdding(true);
-    try {
-      const resp = await updateGameAdmins(gameStore.current!.id, [...gameStore.current!.admins, user.id]);
-      setGameStore({ current: resp });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.add.status.fail")!);
-    }
-    setAdding(false);
-    setSearching(false);
+    updateMutation.mutate({ game_id: props.gameId, admins: [...(game.data?.admins || []), user.id] });
     setAdminSearch("");
-    setSearchedUsers([]);
   }
   async function handleDeleteAdmin(user: User) {
-    setLoading(true);
-    try {
-      const resp = await updateGameAdmins(
-        gameStore.current!.id,
-        gameStore.current!.admins.filter((v) => v !== user.id)
-      );
-      setGameStore({ current: resp });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
-    setLoading(false);
+    updateMutation.mutate({ game_id: props.gameId, admins: (game.data?.admins || []).filter((v) => v !== user.id) });
   }
   return (
     <>
@@ -88,7 +50,7 @@ export default function AdministratorsManagement() {
         <span class="shrink-0 icon-[fluent--person-key-20-regular] w-5 h-5" />
         <span>{t("game.administrator.title")}</span>
       </h3>
-      <Show when={loading()}>
+      <Show when={admins.isLoading}>
         <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10">
           <LoadingTips />
         </div>
@@ -115,13 +77,13 @@ export default function AdministratorsManagement() {
               defer
             >
               <div class="card-content p-2 flex flex-col space-y-2">
-                <Show when={searching()}>
+                <Show when={searchedUsers.isLoading}>
                   <LoadingTips />
                 </Show>
                 <For
-                  each={searchedUsers()}
+                  each={searchedUsers.data?.[0] || []}
                   fallback={
-                    <Show when={!searching() && adminSearch()}>
+                    <Show when={!searchedUsers.isLoading && adminSearch()}>
                       <div class="h-12 flex items-center font-bold space-x-4 px-2">
                         <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
                         <span class="font-bold opacity-60">{t("game.administrator.empty")}</span>
@@ -131,9 +93,7 @@ export default function AdministratorsManagement() {
                 >
                   {(user) => (
                     <Dialog
-                      disabled={
-                        !user.permissions.includes(Permission.Game) || gameStore.current?.admins.includes(user.id)
-                      }
+                      disabled={!user.permissions.includes(Permission.Game) || game.data?.admins.includes(user.id)}
                       ghost
                       btnContent={
                         <>
@@ -153,7 +113,7 @@ export default function AdministratorsManagement() {
                               <span>{t("game.administrator.errors.noPermission.title")}</span>
                             </Tag>
                           </Show>
-                          <Show when={gameStore.current?.admins.includes(user.id)}>
+                          <Show when={game.data?.admins.includes(user.id)}>
                             <Tag level="success">
                               <span>{t("game.administrator.errors.alreadyAdded.title")}</span>
                             </Tag>
@@ -185,8 +145,8 @@ export default function AdministratorsManagement() {
                           level="info"
                           class="w-full"
                           onClick={() => handleAddAdmin(user)}
-                          loading={adding()}
-                          disabled={adding()}
+                          loading={updateMutation.isPending}
+                          disabled={updateMutation.isPending}
                         >
                           {t("general.actions.confirm.title")}
                         </Button>
@@ -200,7 +160,7 @@ export default function AdministratorsManagement() {
         </ArkPopover.Positioner>
       </ArkPopover.Root>
       <div class="grid grid-cols-1 w-full">
-        <For each={admins()}>
+        <For each={admins.data || []}>
           {(user) => (
             <div class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2">
               <Avatar
@@ -224,7 +184,7 @@ export default function AdministratorsManagement() {
                 <Show when={user.institute_id}>
                   <Tag class="min-w-16" level="info">
                     <span class="flex-1 truncate">
-                      {accountStore.institutes.find((v) => v.id === user.institute_id)?.name}
+                      {institutes.data?.find((v) => v.id === user.institute_id)?.name}
                     </span>
                   </Tag>
                 </Show>
@@ -244,7 +204,7 @@ export default function AdministratorsManagement() {
                     size="sm"
                     title={t("general.actions.yes.title")}
                     onClick={() => handleDeleteAdmin(user)}
-                    loading={loading()}
+                    loading={updateMutation.isPending}
                   >
                     <span>{t("general.actions.yes.title")}</span>
                   </Button>

@@ -45,4 +45,7 @@
     "[nix]": {
         "editor.defaultFormatter": "jnoortheen.nix-ide"
     },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
 }

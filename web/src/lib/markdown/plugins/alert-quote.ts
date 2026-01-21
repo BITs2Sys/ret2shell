@@ -1,4 +1,5 @@
 import { h } from "hastscript";
+// @ts-expect-error types are not exported
 import type { Root } from "remark-parse/lib";
 import { visit } from "unist-util-visit";
 

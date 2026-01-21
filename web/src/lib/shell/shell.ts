@@ -1,3 +1,5 @@
+import type { Game } from "@models/game";
+import type { Team } from "@models/team";
 import type { Terminal } from "@xterm/xterm";
 import ansiColors from "ansi-colors";
 import { DateTime } from "luxon";
@@ -5,7 +7,6 @@ import { parse } from "shell-quote";
 import stripAnsi from "strip-ansi";
 import type { Challenge } from "../models/challenge";
 import { accountStore } from "../storage/account";
-import { gameStore } from "../storage/game";
 import { t } from "../storage/theme";
 import { cursorDown1, cursorUp1, link } from "./escapes";
 import { Exec } from "./exec";
@@ -69,12 +70,16 @@ export class Shell {
   private exec: Exec;
   private running = false;
   private challenge: Challenge | null = null;
+  private game: Game | null = null;
+  private team: Team | null = null;
   private onExecuted?: (cmd: string, code: number) => void;
 
-  constructor(term: Terminal, onExecuted: (cmd: string, code: number) => void) {
+  constructor(term: Terminal, game: Game, team: Team | null, onExecuted: (cmd: string, code: number) => void) {
     this.stdio = new Stdio(term);
     this.history = new BufferHistory();
     this.exec = new Exec();
+    this.game = game;
+    this.team = team;
     this.onExecuted = onExecuted;
     ansiColors.enabled = true;
   }
@@ -152,7 +157,11 @@ export class Shell {
       }
       this.history.push(stripAnsi(this.inputBuffer));
       const args = parse(this.inputBuffer);
-      const result = await this.exec.exec(this.stdio, args, this.inputBuffer);
+      const result = await this.exec.exec(this.stdio, args, this.inputBuffer, {
+        game: this.game || undefined,
+        team: this.team || undefined,
+        challenge: this.challenge || undefined,
+      });
       this.onExecuted?.(result.cmd, result.code);
       this.code = result.code;
     }
@@ -166,8 +175,8 @@ export class Shell {
     } else {
       slicedChallengeName = challengeName;
     }
-    const leftPart = `${ansiColors.green(accountStore.account || "guest")}:${ansiColors.blue(gameStore.team?.name || "wheel")} ${ansiColors.yellow(`~/${slicedChallengeName}`)}`;
-    const rightPart = `${ansiColors.dim("in")} ${ansiColors.blue(gameStore.current?.name || "unknown")}${
+    const leftPart = `${ansiColors.green(accountStore.account || "guest")}:${ansiColors.blue(this.team?.name || "wheel")} ${ansiColors.yellow(`~/${slicedChallengeName}`)}`;
+    const rightPart = `${ansiColors.dim("in")} ${ansiColors.blue(this.game?.name || "unknown")}${
       this.code === 0 ? "" : ansiColors.redBright(` [${this.code}]`)
     } [${DateTime.now().toFormat("HH:mm:ss")}]`;
     // console.log(this.stdio.termWidth());

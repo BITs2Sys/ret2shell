@@ -111,7 +111,7 @@ struct SubmissionStatistics {
 #[derive(Serialize)]
 struct ChallengeStatistics {
   pub total: u64,
-  pub in_game: u64,
+  pub training: u64,
 }
 
 #[derive(Serialize)]
@@ -128,12 +128,12 @@ async fn get_platform_statistics(
 ) -> Result<impl IntoResponse, ResponseError> {
   let institutes = institute::get_list(&db.conn).await?;
   let users = UserStatistics {
-    total: user::count(&db.conn, true, None, None, false).await?,
-    valid: user::count(&db.conn, false, None, None, false).await?,
+    total: user::count(&db.conn, true, None, None, true).await?,
+    valid: user::count(&db.conn, false, None, None, true).await?,
     institutes: join_all(institutes.iter().map(|i| async {
       Ok((
         i.id,
-        user::count(&db.conn, true, Some(i.id), None, false).await?,
+        user::count(&db.conn, true, Some(i.id), None, true).await?,
       ))
     }))
     .await
@@ -144,12 +144,12 @@ async fn get_platform_statistics(
   };
   let games = game::get_statistics(&db.conn).await?;
   let submissions = SubmissionStatistics {
-    total: submission::count(&db.conn, false, None, None, None, None, None, false).await?,
-    solved: submission::count(&db.conn, true, None, None, None, None, None, false).await?,
+    total: submission::count(&db.conn, false, None, None, None, None, None, true).await?,
+    solved: submission::count(&db.conn, true, None, None, None, None, None, true).await?,
   };
   let challenges = ChallengeStatistics {
     total: challenge::count(&db.conn, None, None, true).await?,
-    in_game: challenge::count(&db.conn, None, Some(HostType::Game), true).await?,
+    training: challenge::count(&db.conn, None, Some(HostType::Training), true).await?,
   };
   let statistics = Statistics {
     users,

@@ -1,14 +1,15 @@
+import { useWikiTree } from "@api/wiki";
 import type { Article } from "@models/article";
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { refreshWikiToc } from "@storage/wiki";
 import CreateForm from "../_blocks/form";
 
 export default function () {
   const navigate = useNavigate();
+  const wikiTree = useWikiTree({ enabled: () => false });
   async function onDone(article: Article) {
-    await refreshWikiToc();
+    await wikiTree.refetch();
     navigate(`/wiki/${article.id}`);
   }
   return (

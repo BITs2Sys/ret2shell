@@ -53,7 +53,7 @@ pub struct Database {
   pub conn: DatabaseConnection,
 }
 
-pub async fn initialize(config: &Option<database::Config>) -> Result<(Database, bool), DbErr> {
+async fn get_conn(config: &Option<database::Config>) -> Result<DatabaseConnection, DbErr> {
   let config = config
     .clone()
     .ok_or(DbErr::Custom("database config not found".to_string()))?;
@@ -62,8 +62,11 @@ pub async fn initialize(config: &Option<database::Config>) -> Result<(Database, 
     .acquire_timeout(std::time::Duration::from_secs(15))
     .sqlx_logging(true)
     .sqlx_logging_level(LevelFilter::Debug);
+  sea_orm::Database::connect(connect_options).await
+}
 
-  let conn = sea_orm::Database::connect(connect_options).await?;
+pub async fn initialize(config: &Option<database::Config>) -> Result<(Database, bool), DbErr> {
+  let conn = get_conn(config).await?;
   let needs_migrate = !Migrator::get_pending_migrations(&conn).await?.is_empty();
   if needs_migrate {
     Migrator::up(&conn, None).await?;
@@ -72,15 +75,7 @@ pub async fn initialize(config: &Option<database::Config>) -> Result<(Database, 
 }
 
 pub async fn down(config: &Option<database::Config>) -> Result<(), DbErr> {
-  let config = config
-    .clone()
-    .ok_or(DbErr::Custom("database config not found".to_string()))?;
-  let mut connect_options = ConnectOptions::new(config.dsn());
-  connect_options
-    .sqlx_logging(true)
-    .sqlx_logging_level(LevelFilter::Debug);
-
-  let db: DatabaseConnection = sea_orm::Database::connect(connect_options).await?;
-  Migrator::down(&db, None).await?;
+  let conn = get_conn(config).await?;
+  Migrator::down(&conn, None).await?;
   Ok(())
 }

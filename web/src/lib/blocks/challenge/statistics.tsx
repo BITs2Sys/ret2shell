@@ -1,11 +1,5 @@
-import { handleHttpError } from "@api";
-import { getChallengeCommitHistory, getChallengeSubmission } from "@api/game";
-import type { Challenge } from "@models/challenge";
-import type { CommitHistory } from "@models/git";
-import type { Submission } from "@models/submission";
+import { useChallenge, useChallengeCommitHistory, useChallengeSubmissions } from "@api/challenge";
 import { createBreakpoints } from "@solid-primitives/media";
-import { challengeStore } from "@storage/challenge";
-import { gameStore } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
@@ -13,41 +7,27 @@ import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 
-function StatisticsPanel() {
-  const [solves, setSolves] = createSignal([] as Submission[]);
+function StatisticsPanel(props: ChallengeWidgetProps) {
   const [page, setPage] = createSignal(1);
-  const [pageSize, _setPageSize] = createSignal(10);
-  const [total, setTotal] = createSignal(0);
-  const [loading, setLoading] = createSignal(false);
+  const [pageSize] = createSignal(10);
   const [onlySolved, setOnlySolved] = createSignal(true);
-  async function fetchSolves() {
-    setLoading(true);
-    try {
-      const resp = await getChallengeSubmission(
-        gameStore.current!.id,
-        challengeStore.current!.id,
-        page(),
-        pageSize(),
-        onlySolved()
-      );
-      setSolves(resp[0]);
-      setTotal(resp[1]);
-    } catch (err) {
-      handleHttpError(err as Error, t("challenge.statistics.errors.fetchSubmission.title")!);
-    }
-    setLoading(false);
-  }
 
-  createEffect(() => {
-    if (challengeStore.current && page()) {
-      if (onlySolved()) {
-        // .. NOTE: just placable
-      }
-      untrack(fetchSolves);
-    }
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
+
+  const solves = useChallengeSubmissions({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+    page: () => page(),
+    page_size: () => pageSize(),
+    only_solved: () => onlySolved(),
+  });
+
   const matches = createBreakpoints(breakpoints);
   return (
     <>
@@ -69,12 +49,12 @@ function StatisticsPanel() {
           <span>{t("challenge.statistics.showAll")}</span>
         </Button>
       </h3>
-      <Show when={loading()}>
+      <Show when={challenge.isLoading || solves.isLoading}>
         <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
           <LoadingTips />
         </div>
       </Show>
-      <For each={solves()}>
+      <For each={solves.data?.[0] || []}>
         {(item) => (
           <div class="min-h-12 w-full flex flex-row py-2 gap-y-2 px-2 flex-wrap justify-end space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
             <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
@@ -83,7 +63,7 @@ function StatisticsPanel() {
                 {item.user_name}
               </a>
               <span class="opacity-60">@</span>
-              <a class="truncate hover:underline" href={`/games/${gameStore.current?.id}/teams/${item.team_id}`}>
+              <a class="truncate hover:underline" href={`/games/${props.gameId}/teams/${item.team_id}`}>
                 {item.team_name ?? "wheel"}
               </a>
               <span>{t("challenge.submission.submit")}</span>
@@ -119,30 +99,22 @@ function StatisticsPanel() {
       </For>
       <Pagination
         class="p-6 lg:p-9"
-        count={total()}
+        count={solves.data?.[1] || 0}
         pageSize={pageSize()}
         page={page()}
-        onPageChange={(p) => setPage(p.page)}
+        onPageChange={(p) => {
+          setPage(p.page);
+          solves.refetch();
+        }}
       />
     </>
   );
 }
 
-function HistoryPanel() {
-  const [history, setHistory] = createSignal([] as CommitHistory[]);
-  const [loading, setLoading] = createSignal(false);
-  createEffect(() => {
-    if (challengeStore.current) {
-      untrack(async () => {
-        setLoading(true);
-        try {
-          setHistory(await getChallengeCommitHistory(gameStore.current!.id, challengeStore.current!.id));
-        } catch (err) {
-          handleHttpError(err as Error, t("challenge.statistics.errors.fetchCommitHistory")!);
-        }
-        setLoading(false);
-      });
-    }
+function HistoryPanel(props: ChallengeWidgetProps) {
+  const history = useChallengeCommitHistory({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
   });
   const matches = createBreakpoints(breakpoints);
   return (
@@ -151,12 +123,12 @@ function HistoryPanel() {
         <span class="shrink-0 icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
         <span>{t("challenge.statistics.commits.title")}</span>
       </h3>
-      <Show when={loading()}>
+      <Show when={history.isLoading}>
         <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
           <LoadingTips />
         </div>
       </Show>
-      <For each={history()}>
+      <For each={history.data || []}>
         {(item) => (
           <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
             <span class="shrink-0 icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary" />
@@ -183,7 +155,7 @@ function HistoryPanel() {
   );
 }
 
-export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
+export default function (props: ChallengeWidgetProps) {
   const [tab, setTab] = createSignal("statistics" as "statistics" | "history");
   return (
     <div class="flex flex-row min-h-full">
@@ -195,7 +167,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             onClick={() => setTab("statistics")}
             title={t("challenge.statistics.solves.title")}
           >
-            <div class="flex flex-col py-2 items-start w-full">
+            <div class="flex flex-col py-2 items-start w-full text-start">
               <span>{t("challenge.statistics.solves.title")}</span>
               <span class="font-normal opacity-60 w-full text-start truncate">
                 {t("challenge.statistics.solves.subject")}
@@ -210,7 +182,7 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             onClick={() => setTab("history")}
             title={t("challenge.statistics.commits.title")}
           >
-            <div class="flex flex-col py-2 items-start w-full">
+            <div class="flex flex-col py-2 items-start w-full text-start">
               <span>{t("challenge.statistics.commits.title")}</span>
               <span class="font-normal opacity-60 w-full text-start truncate">
                 {t("challenge.statistics.commits.subject")}
@@ -223,10 +195,10 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
       <div class="flex-1 w-0 flex flex-col p-3 lg:p-6">
         <Switch>
           <Match when={tab() === "statistics"}>
-            <StatisticsPanel />
+            <StatisticsPanel gameId={props.gameId} challengeId={props.challengeId} />
           </Match>
           <Match when={tab() === "history"}>
-            <HistoryPanel />
+            <HistoryPanel gameId={props.gameId} challengeId={props.challengeId} />
           </Match>
         </Switch>
       </div>

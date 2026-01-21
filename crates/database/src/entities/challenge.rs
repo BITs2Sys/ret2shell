@@ -240,18 +240,21 @@ where
     None,
     None,
     None,
-    true,
+    false,
   )
   .await?;
+  let score_rule = &challenge.score_rule;
   let score = if decay < 1 {
-    challenge.score_rule.initial
-  } else if decay >= challenge.score_rule.decay as u64 {
-    challenge.score_rule.minimum
+    score_rule.initial
+  } else if decay >= score_rule.decay as u64 {
+    score_rule.minimum
   } else {
-    (challenge.score_rule.initial
-      + ((challenge.score_rule.minimum - challenge.score_rule.initial)
-        * (decay * decay - 1) as i32
-        / (challenge.score_rule.decay * challenge.score_rule.decay))) as i32
+    let relative_ratio = (decay as f64 - 1.0) / (score_rule.decay as f64 - 1.0);
+    let cos_theta = (relative_ratio * std::f64::consts::PI).cos();
+    let normalized_score = (cos_theta + 1.0) / 2.0;
+    let score_f = score_rule.minimum as f64
+      + (score_rule.initial - score_rule.minimum) as f64 * normalized_score;
+    score_f.round() as i32
   };
   let challenge_score_changed = challenge.score != score;
   if challenge_score_changed {

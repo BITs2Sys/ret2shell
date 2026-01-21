@@ -1,5 +1,6 @@
-import { handleHttpError } from "@api";
-import { checkUnreadMessages, createChallenge, getChallenge } from "@api/game";
+import { useChallenge, useChallenges, useCreateChallengeMutation } from "@api/challenge";
+import { useCheckUnreadMessages, useGame } from "@api/game";
+import { useSelfTeam } from "@api/team";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import ChallengeList from "@blocks/challenge/list";
@@ -8,10 +9,9 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
-import { useNavigate, useSearchParams } from "@solidjs/router";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
-import { gameStore, isGameAdmin } from "@storage/game";
+import { isAdminOfGame, isGameInArchived } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
@@ -20,7 +20,7 @@ import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
@@ -28,62 +28,76 @@ import Welcome from "./_blocks/welcome";
 
 export default function () {
   const navigate = useNavigate();
+  const params = useParams();
+  const gameId = () => Number.parseInt(params.game || "UNKN0WN", 10);
+
   if (!accountStore.token) {
-    navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ""}`);
+    navigate(`/account/login?redirect=/games/${gameId() || ""}`);
     return null;
   }
-  const [loadingChallenge, setLoadingChallenge] = createSignal(false);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedChallengeId = createMemo(
-    () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
-  );
+  const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "", 10) || null);
   const inCreate = createMemo(() => searchParams.create === "true");
-  const [creating, setCreating] = createSignal(false);
+
+  const game = useGame({ id: () => gameId(), enabled: () => !!gameId() });
+  const team = useSelfTeam({
+    game_id: () => gameId(),
+    enabled: () => !!accountStore.token && !!gameId(),
+    silenced: true,
+  });
+
+  const challenge = useChallenge({
+    game_id: () => gameId(),
+    challenge_id: () => selectedChallengeId() || 0,
+    enabled: () => !!selectedChallengeId(),
+    onError: () => {
+      setSearchParams({ challenge: null, create: null });
+      return false;
+    },
+  });
+
+  const challenges = useChallenges({
+    game_id: () => gameId(),
+    enabled: () => !!gameId(),
+  });
+
+  const archived = createMemo(() => {
+    if (!game.data?.archive_policy.challenge.show_answer) return false;
+    return (challenge.data?.archive_at?.toMillis() || Number.POSITIVE_INFINITY) < Date.now();
+  });
 
   createEffect(() => {
-    if (gameStore.current && gameStore.current.archive_at < DateTime.now()) {
+    if (isGameInArchived(game.data)) {
       addToast({
         level: "warning",
-        description: t("game.gotoTraining")!,
+        description: t("game.gotoTraining"),
         duration: 5000,
       });
-      navigate(`/games/${gameStore.current.id}`);
+      navigate(`/games/${gameId()}`);
     }
   });
 
   createEffect(() => {
-    if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
+    if (game.data && game.data.start_at > DateTime.now() && !isAdminOfGame(game.data)) {
       addToast({
         level: "warning",
-        description: t("game.notStarted")!,
+        description: t("game.notStarted"),
         duration: 5000,
       });
-      navigate(`/games/${gameStore.current.id}`);
+      navigate(`/games/${gameId()}`);
       return;
     }
   });
 
-  createEffect(() => {
-    if (selectedChallengeId() && gameStore.current) {
-      untrack(async () => {
-        setLoadingChallenge(true);
-        try {
-          const resp = await getChallenge(gameStore.current!.id, selectedChallengeId()!);
-          setChallengeStore({ current: resp });
-          refreshChallengeAssets();
-        } catch (err) {
-          handleHttpError(err as Error, t("challenge.errors.fetch.title")!);
-          setSearchParams({ challenge: null, create: null });
-        }
-        setLoadingChallenge(false);
-      });
-    } else {
-      setChallengeStore({ current: null });
-    }
+  const createChallengeMutation = useCreateChallengeMutation({
+    onSuccess: (created) => {
+      setSearchParams({ create: null, challenge: created.id });
+      challenges.refetch();
+    },
   });
 
   async function onCreateChallenge(result: ChallengeForm) {
-    setCreating(true);
     const tags = result.tag.split("/").map((t) => {
       return { name: t, primary: false };
     });
@@ -95,7 +109,7 @@ export default function () {
       updated_at: DateTime.now(),
       hidden: true,
       content: result.content,
-      game_id: gameStore.current?.id,
+      game_id: gameId(),
       tag: tags,
       score_rule: {
         initial: result.initial,
@@ -107,55 +121,44 @@ export default function () {
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
     } as ChallengeModel;
-    try {
-      const result = await createChallenge(gameStore.current!.id, challenge);
-      setSearchParams({
-        create: null,
-        challenge: result.id,
-      });
-      refreshChallenges();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
-    }
-    setCreating(false);
+    await createChallengeMutation.mutateAsync({ game_id: gameId(), challenge });
   }
 
   let prevUnreadChats: Chat[] = [];
-  // hammer chats timer
-  const chatsRefreshTimer = setInterval(async () => {
-    if (gameStore.current?.hammer_policy?.enabled !== true || !gameStore.team) {
+  const canCheckUnread = createMemo(() => game.data?.hammer_policy?.enabled === true && !!team.data);
+  const unreadChatsQuery = useCheckUnreadMessages({
+    game_id: () => gameId(),
+    enabled: () => canCheckUnread(),
+  });
+
+  createEffect(() => {
+    if (!canCheckUnread()) {
+      prevUnreadChats = [];
       return;
     }
-    if (gameStore.current && gameStore.team) {
-      try {
-        const unreadChats = await checkUnreadMessages(gameStore.current.id);
-        for (const chat of unreadChats) {
-          if (prevUnreadChats.find((c) => chat.id === c.id)) {
-            continue;
-          }
-          let msg = chat.content;
-          if (msg.length > 32) {
-            msg = `${msg.slice(0, 32)}...`;
-          }
-          const toastId = addToast({
-            level: "info",
-            description: `${t("game.hammer.newMessages", {
-              challenge: challengeStore.challenges.find((v) => v.id === chat.challenge_id)?.name ?? "[DELETED]",
-            })}: ${msg}`,
-            accept: () => {
-              navigate(`/games/${gameStore.current?.id}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
-              setTimeout(() => {
-                removeToast(toastId);
-              }, 50);
-            },
-            acceptLabel: t("general.actions.goto.title")!,
-          });
-        }
-        prevUnreadChats = unreadChats;
-      } catch (err) {
-        handleHttpError(err as Error, t("challenge.hammer.errors.fetch.title")!);
-      }
+    if (!unreadChatsQuery.data) return;
+
+    for (const chat of unreadChatsQuery.data) {
+      if (prevUnreadChats.find((c) => chat.id === c.id)) continue;
+      let msg = chat.content;
+      if (msg.length > 32) msg = `${msg.slice(0, 32)}...`;
+      const challengeName = challenges.data?.[0].find((v) => v.id === chat.challenge_id)?.name ?? "[DELETED]";
+      const toastId = addToast({
+        level: "info",
+        description: `${t("game.hammer.newMessages", { challenge: challengeName })}: ${msg}`,
+        accept: () => {
+          navigate(`/games/${gameId()}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
+          setTimeout(() => removeToast(toastId), 50);
+        },
+        acceptLabel: t("general.actions.goto.title"),
+      });
     }
+    prevUnreadChats = unreadChatsQuery.data;
+  });
+
+  const chatsRefreshTimer = setInterval(() => {
+    if (!canCheckUnread()) return;
+    unreadChatsQuery.refetch();
   }, 30 * 1000);
 
   onCleanup(() => {
@@ -167,48 +170,41 @@ export default function () {
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);
   return (
     <>
-      <Title page={t("challenge.title")} route={`/games/${gameStore.current?.id}/challenges`} />
+      <Title page={t("challenge.title")} route={`/games/${gameId()}/challenges`} />
       <SidebarLayout
         showLeftBar={showLeftSidebar()}
         leftBar={() => (
           <div class="h-full flex flex-col">
             <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
-              <Link class="w-full" ghost justify="start" href={`/games/${gameStore.current?.id}/challenges`}>
+              <Link class="w-full" ghost justify="start" href={`/games/${gameId()}/challenges`}>
                 <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
                 <span>{t("challenge.list")}</span>
               </Link>
             </div>
-            <ChallengeList showScore inGame />
+            <ChallengeList showScore gameId={gameId()} challengeId={selectedChallengeId() ?? 0} />
           </div>
         )}
         showRightBar={showRightSidebar()}
         rightBar={() => (
           <div class="h-full flex flex-col">
-            <Team />
-            <Notifications />
+            <Team gameId={gameId()} />
+            <Notifications gameId={gameId()} />
           </div>
         )}
       >
         <div class="flex-1 flex flex-col w-0">
-          <Tabs baseUrl={`/games/${gameStore.current?.id}/challenges`} loading={loadingChallenge()} inGame />
+          <Tabs gameId={gameId()} challengeId={selectedChallengeId() ?? undefined} />
           <Switch fallback={<Welcome />}>
-            <Match when={loadingChallenge()}>
+            <Match when={challenge.isLoading}>
               <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
                 <LoadingTips />
               </div>
             </Match>
             <Match when={inCreate()}>
-              <Form onDone={onCreateChallenge} loading={creating()} inGame />
+              <Form onDone={onCreateChallenge} gameId={gameId()} challengeId={0} />
             </Match>
-            <Match when={challengeStore.current}>
-              <Challenge
-                inGame
-                onStateChange={refreshChallenges}
-                archived={
-                  !!gameStore.current?.archive_policy.challenge.show_answer &&
-                  (challengeStore.current?.archive_at?.toMillis() || Number.POSITIVE_INFINITY) < Date.now()
-                }
-              />
+            <Match when={selectedChallengeId() && challenge.data}>
+              <Challenge challengeId={selectedChallengeId()!} gameId={gameId()} archived={archived()} />
             </Match>
           </Switch>
         </div>

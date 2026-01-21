@@ -20,7 +20,7 @@ export default function UserCodeDialog() {
         setCode(await getAccountCode());
       } catch (err) {
         setCode(null);
-        handleHttpError(err as Error, t("account.errors.fetchCode.title")!);
+        handleHttpError(err as Error, t("account.errors.fetchCode.title"));
       }
       setLoadingCode(false);
     }
@@ -36,7 +36,7 @@ export default function UserCodeDialog() {
       try {
         setCode(await generateAccountCode());
       } catch (err) {
-        handleHttpError(err as Error, t("account.errors.fetchCode.title")!);
+        handleHttpError(err as Error, t("account.errors.fetchCode.title"));
       }
       setLoadingCode(false);
     }, 500);

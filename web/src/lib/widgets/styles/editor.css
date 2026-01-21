@@ -1,9 +1,9 @@
 .ace_search {
   @apply text-base text-layer-content bg-layer flex flex-col shadow-xs;
-  @apply border-layer-content/15 border rounded-lg !space-y-0 !px-4 !py-2;
+  @apply border-layer-content/15 border rounded-lg space-y-0! px-4! py-2!;
 
   .ace_search_form {
-    @apply text-layer-content !bg-transparent !p-0 !m-0 flex flex-row space-x-2 items-center !h-12;
+    @apply text-layer-content bg-transparent! p-0! m-0! flex flex-row space-x-2 items-center h-12!;
 
     .ace_search_field {
       @apply text-base m-1 border-none;
@@ -221,7 +221,7 @@
 }
 
 .ace_nomatch {
-  @apply !outline-hidden;
+  @apply outline-hidden!;
 }
 
 .ace_scrollbar {
@@ -241,7 +241,7 @@
 
   /* Handle */
   &::-webkit-scrollbar-thumb {
-    @apply bg-layer-content/30 rounded-lg min-h-[4rem] min-w-[4rem];
+    @apply bg-layer-content/30 rounded-lg min-h-16 min-w-16;
   }
 
   /* Handle on hover */

@@ -1,5 +1,4 @@
-import { handleHttpError } from "@api";
-import { getClusterConfig, getClusterNodes } from "@api/cluster";
+import { useClusterConfig, useClusterNodes } from "@api/cluster";
 import Spin from "@assets/animates/spin";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -9,41 +8,31 @@ import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
 import type { Node } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import { createSignal, For, Match, onMount, Show, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 
 export default function () {
-  const [available, setAvailable] = createSignal(false);
-  const [loading, setLoading] = createSignal(true);
   const [since, setSince] = createSignal("");
   const [clusterDNS, setClusterDNS] = createSignal("");
   const [clusterDomain, setClusterDomain] = createSignal("");
-  const [clusterNodes, setClusterNodes] = createSignal([] as Node[]);
 
-  onMount(async () => {
-    try {
-      const resp = await getClusterConfig();
-      setAvailable(true);
-      for (const c of resp.items) {
-        if (c.data?.since) {
-          setSince(c.data.since);
-        }
-        if (c.data?.clusterDNS) {
-          setClusterDNS(c.data.clusterDNS);
-        }
-        if (c.data?.clusterDomain) {
-          setClusterDomain(c.data.clusterDomain);
-        }
-      }
-    } catch {
-      setAvailable(false);
-    }
-    setLoading(false);
+  const config = useClusterConfig();
+  const nodes = useClusterNodes();
 
-    try {
-      const resp = await getClusterNodes();
-      setClusterNodes(resp.items);
-    } catch (err) {
-      handleHttpError(err as Error, t("cluster.errors.fetchNodes.title")!);
+  createEffect(() => {
+    if (config.data) {
+      untrack(() => {
+        for (const c of config.data.items) {
+          if (c.data?.since) {
+            setSince(c.data.since);
+          }
+          if (c.data?.clusterDNS) {
+            setClusterDNS(c.data.clusterDNS);
+          }
+          if (c.data?.clusterDomain) {
+            setClusterDomain(c.data.clusterDomain);
+          }
+        }
+      });
     }
   });
 
@@ -55,10 +44,10 @@ export default function () {
         <div class="h-32 lg:h-48 flex flex-row items-center">
           <div class="h-full aspect-square flex items-center justify-center">
             <Switch>
-              <Match when={loading()}>
+              <Match when={config.isLoading}>
                 <Spin width={24} height={24} />
               </Match>
-              <Match when={available()}>
+              <Match when={!config.isError}>
                 <span class="shrink-0 icon-[meteocons--compass] w-full h-full" />
               </Match>
               <Match when={true}>
@@ -69,10 +58,10 @@ export default function () {
           <h1 class="flex flex-col justify-center space-y-2">
             <span class="text-3xl lg:text-5xl font-bold">{t("cluster.title")}</span>
             <Switch>
-              <Match when={loading()}>
+              <Match when={config.isLoading}>
                 <LoadingTips />
               </Match>
-              <Match when={available()}>
+              <Match when={!config.isError}>
                 <span class="text-info">{t("cluster.status.available.title")}</span>
               </Match>
               <Match when={true}>
@@ -82,13 +71,13 @@ export default function () {
           </h1>
         </div>
         <Divider />
-        <Show when={loading()}>
+        <Show when={config.isLoading || nodes.isLoading}>
           <div class="h-20 lg:h-12 flex flex-row space-x-4 items-center px-4">
             <LoadingTips />
           </div>
           <Divider />
         </Show>
-        <Show when={available()}>
+        <Show when={!config.isError}>
           <div class="h-20 lg:h-12 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 justify-center items-center px-3">
             <span class="lg:flex-1 opacity-60">
               Since {since()}, {DateTime.fromFormat(since(), "yyyy-MM-dd").diffNow().negate().toFormat("hh")} hours
@@ -102,10 +91,10 @@ export default function () {
           </div>
           <Divider />
           <div class="flex flex-row flex-wrap py-2">
-            <For each={clusterNodes()}>
+            <For each={nodes.data?.items}>
               {(node) => (
                 <Button
-                  class="m-1 min-w-fit !h-auto py-2"
+                  class="m-1 min-w-fit h-auto! py-2"
                   level={shownNode()?.metadata?.name === node.metadata?.name ? "primary" : undefined}
                   onClick={() => setShownNode(node)}
                 >
@@ -142,7 +131,7 @@ export default function () {
               <span class="opacity-60 hidden lg:inline">
                 <span>Online at: </span>
                 <span>
-                  {DateTime.fromISO(shownNode()!.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}
+                  {DateTime.fromISO(shownNode()?.metadata?.creationTimestamp || "").toFormat("yyyy-MM-dd HH:mm:ss")}
                 </span>
               </span>
               <Button size="sm" square title={t("cluster.actions.refreshNode.title")}>
@@ -160,10 +149,10 @@ export default function () {
               <h3 class="text-center font-bold">{t("cluster.nodeInfo.title")}</h3>
               <table>
                 <tbody>
-                  <For each={Object.entries(shownNode()!.status!.nodeInfo!)}>
+                  <For each={Object.entries(shownNode()?.status?.nodeInfo || {})}>
                     {([key, value]) => (
                       <tr class="border-b border-b-layer-content/10">
-                        <td class="font-bold opacity-60 p-2">{`${t(`cluster.nodeInfo.${key}`) as string}`}</td>
+                        <td class="font-bold opacity-60 p-2">{`${t(`cluster.nodeInfo.${key}`) ?? key}`}</td>
                         <td class="p-2">{value}</td>
                       </tr>
                     )}
@@ -176,7 +165,7 @@ export default function () {
                     <td class="font-bold opacity-60 p-2">Addresses</td>
                     <td class="p-2">
                       {shownNode()
-                        ?.status!.addresses!.map((a) => a.address)
+                        ?.status?.addresses?.map((a) => a.address)
                         .join(", ")}
                     </td>
                   </tr>
@@ -192,7 +181,7 @@ export default function () {
               <div class="flex flex-col lg:flex-row p-3 lg:p-6">
                 <table class="flex-1">
                   <tbody>
-                    <For each={Object.entries(shownNode()!.status!.capacity!)}>
+                    <For each={Object.entries(shownNode()?.status?.capacity || {})}>
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
                           <td class="font-bold opacity-60 p-2">Capacity {key}</td>
@@ -204,7 +193,7 @@ export default function () {
                 </table>
                 <table class="flex-1">
                   <tbody>
-                    <For each={Object.entries(shownNode()!.status!.allocatable!)}>
+                    <For each={Object.entries(shownNode()?.status?.allocatable || {})}>
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
                           <td class="font-bold opacity-60 p-2">Allocatable {key}</td>

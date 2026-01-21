@@ -45,7 +45,7 @@ class RouteHeader {
       }
     }
     if (page) return `${page} - ${domain}`;
-    return domain ?? t("platform.name")!;
+    return domain ?? t("platform.name");
   }
 
   public duplicate(fullRoutes: string[]): boolean {

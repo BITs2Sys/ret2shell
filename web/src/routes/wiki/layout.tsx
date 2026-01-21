@@ -1,7 +1,8 @@
+import { useWiki, useWikiTree } from "@api/wiki";
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
+import { useParams } from "@solidjs/router";
 import { breakpoints } from "@storage/theme";
-import { refreshWikiToc } from "@storage/wiki";
 import Button from "@widgets/button";
 import clsx from "clsx";
 import { createSignal, type JSX, Show } from "solid-js";
@@ -9,12 +10,21 @@ import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
+  const params = useParams();
+  const articleId = () => Number.parseInt(params.article || "0", 10) || 0;
+
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
-  refreshWikiToc();
+
+  const wikiTree = useWikiTree({ enabled: () => true });
+  const currentWiki = useWiki({ id: articleId, enabled: () => articleId() > 0 });
+
   return (
     <>
-      <SidebarLayout leftBar={() => <SideBar />} showLeftBar={showSidebar()}>
+      <SidebarLayout
+        leftBar={() => <SideBar toc={wikiTree.data || []} highlightPaths={currentWiki.data?.path} />}
+        showLeftBar={showSidebar()}
+      >
         {props.children}
       </SidebarLayout>
       <Transition name="slide-fade-right">

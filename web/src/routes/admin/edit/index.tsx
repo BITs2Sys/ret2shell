@@ -1,17 +1,15 @@
-import { handleHttpError } from "@api";
-import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
+import { useGames } from "@api/game";
+import { usePlatformConfig, usePlatformInfo, useUpdatePlatformConfigMutation } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
-import { createForm, custom, setValues } from "@modular-forms/solid";
+import { createForm, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
-import { platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
-import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
-import type { HTTPError } from "ky";
-import { createSignal, onMount } from "solid-js";
+import Select from "@widgets/select";
+import { DateTime } from "luxon";
+import { createEffect, untrack } from "solid-js";
 
 type PlatformConfigForm = {
   name?: string;
@@ -26,66 +24,55 @@ type PlatformConfigForm = {
 };
 
 export default function () {
-  const [form, { Form, Field }] = createForm<PlatformConfigForm>();
-  const [loading, setLoading] = createSignal(false);
-  const [config, setConfig] = createSignal(null as null | Config);
+  const config = usePlatformConfig();
+  const info = usePlatformInfo();
+  const [form, { Form, Field }] = createForm<PlatformConfigForm>({
+    initialValues: {
+      ...JSON.parse(JSON.stringify(config.data?.server || {})),
+    },
+  });
+  const games = useGames({
+    weight: () => 3,
+  });
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: () => {
+      config.refetch();
+      info.refetch();
+    },
+  });
   async function onSubmit(result: PlatformConfigForm) {
-    setLoading(true);
-    if (!config()) {
-      addToast({
-        level: "error",
-        description: t("platform.errors.fetchConfig.title")!,
-        duration: 5000,
-      });
-      return;
-    }
     const mergedConfig = {
-      ...config(),
+      ...config.data,
       server: {
-        ...config()!.server,
+        ...config.data?.server,
         name: result.name,
         footer_info: result.footer_info,
         footer_url: result.footer_url,
         subject_info: result.subject_info,
         subject_url: result.subject_url,
         record: result.record,
-        hide_maker: result.hide_maker,
+        hide_maker: false,
         highlight_banner: result.highlight_banner,
         zen_game: result.zen_game,
       },
     } as Config;
-    try {
-      await updatePlatformConfig(mergedConfig);
-      setConfig(mergedConfig);
-      setPlatformStore({ config: mergedConfig.server });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+    mutation.mutate(mergedConfig);
   }
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-      setValues(form, {
-        name: resp.server.name || "",
-        footer_info: resp.server.footer_info || "",
-        footer_url: resp.server.footer_url || "",
-        subject_info: resp.server.subject_info || "",
-        subject_url: resp.server.subject_url || "",
-        record: resp.server.record || "",
-        hide_maker: resp.server.hide_maker || false,
-        highlight_banner: resp.server.highlight_banner || "",
-        zen_game: resp.server.zen_game || null,
+  createEffect(() => {
+    if (config.data)
+      untrack(() => {
+        setValues(form, {
+          name: config.data.server.name || "",
+          footer_info: config.data.server.footer_info || "",
+          footer_url: config.data.server.footer_url || "",
+          subject_info: config.data.server.subject_info || "",
+          subject_url: config.data.server.subject_url || "",
+          record: config.data.server.record || "",
+          hide_maker: false,
+          highlight_banner: config.data.server.highlight_banner || "",
+          zen_game: config.data.server.zen_game || null,
+        });
       });
-    } catch (err) {
-      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title")!);
-    }
   });
   return (
     <>
@@ -169,57 +156,50 @@ export default function () {
           </Field>
           <Field name="zen_game" type="number">
             {(field, props) => (
-              <Input
-                icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
-                placeholder="Zen Game ID"
-                title="Zen Game ID"
-                {...props}
-                value={field.value ?? undefined}
+              <Select
+                name={field.name}
+                label={t("platform.form.zenGame.label")}
+                class="flex-1"
                 error={field.error}
-                type="number"
+                placeholder={t("platform.form.zenGame.placeholder")}
+                items={
+                  games.data?.[0]
+                    .filter((g) => g.archive_at > DateTime.now())
+                    .map((game) => ({
+                      value: game.id.toString(),
+                      label: `${game.name} => ~ ${game.archive_at.toFormat("yyyy-MM-dd HH:mm:ss")}`,
+                      icon: "icon-[fluent--flag-20-regular]",
+                    })) ?? []
+                }
+                inputProps={props}
+                value={field.value ? [field.value.toString()] : []}
+                onValueChange={(val) => {
+                  const gameId = val.value.length > 0 ? Number.parseInt(val.value[0], 10) : null;
+                  setValues(form, { zen_game: gameId });
+                }}
               />
             )}
           </Field>
-          <div class="flex flex-row space-x-2">
-            <Field name="record">
-              {(field, props) => (
-                <Input
-                  class="flex-1"
-                  icon={<span class="shrink-0 icon-[fluent--record-20-regular] w-5 h-5" />}
-                  placeholder={t("platform.form.record.placeholder")}
-                  title={t("platform.form.record.label")}
-                  {...props}
-                  value={field.value}
-                  error={field.error}
-                />
-              )}
-            </Field>
-            <Field
-              name="hide_maker"
-              type="boolean"
-              validate={[
-                custom((value) => {
-                  if (platformStore.license?.level !== "enterprise" && value) {
-                    return false;
-                  }
-                  return true;
-                }, t("platform.form.hideMaker.disabled")!),
-              ]}
-            >
-              {(field, props) => (
-                <Checkbox
-                  inputProps={props}
-                  checked={platformStore.license?.level !== "enterprise" ? false : field.value}
-                  error={field.error}
-                  title={t("platform.form.hideMaker.label")}
-                  disabled={platformStore.license?.level !== "enterprise"}
-                >
-                  <span class="flex-1 text-start">{t("platform.form.hideMaker.label")}</span>
-                </Checkbox>
-              )}
-            </Field>
-          </div>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
+          <Field name="record">
+            {(field, props) => (
+              <Input
+                class="flex-1"
+                icon={<span class="shrink-0 icon-[fluent--record-20-regular] w-5 h-5" />}
+                placeholder={t("platform.form.record.placeholder")}
+                title={t("platform.form.record.label")}
+                {...props}
+                value={field.value}
+                error={field.error}
+              />
+            )}
+          </Field>
+          <Button
+            type="submit"
+            level="primary"
+            class="mt-4!"
+            loading={config.isLoading || mutation.isPending}
+            disabled={config.isLoading || mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>

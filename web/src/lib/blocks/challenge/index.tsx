@@ -1,20 +1,21 @@
-import { handleHttpError } from "@api";
-import { deleteChallenge, downChallenge, upChallenge } from "@api/game";
-import type { Challenge } from "@models/challenge";
+import { inflyClient } from "@api";
+import {
+  useChallenge,
+  useDeleteChallengeMutation,
+  useDownChallengeMutation,
+  useUpChallengeMutation,
+} from "@api/challenge";
+import { useGame } from "@api/game";
 import { useSearchParams } from "@solidjs/router";
-import { challengeStore, setChallengeStore } from "@storage/challenge";
-import { isGameAdmin } from "@storage/game";
+import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import Popover from "@widgets/popover";
 import Splitter from "@widgets/splitter";
-import clsx from "clsx";
-import type { HTTPError } from "ky";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, createSignal, onCleanup, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
 import Checker from "./checker";
@@ -27,13 +28,14 @@ import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
 
-function BottomPanel(props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  expanded: boolean;
-  onExpand?: () => void;
-  inGame: boolean;
-  archived: boolean;
-}) {
+export type ChallengeWidgetProps = {
+  training?: boolean;
+  archived?: boolean;
+  gameId: number;
+  challengeId: number;
+};
+
+function BottomPanel(props: ChallengeWidgetProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const pages = {
     terminal: Terminal,
@@ -50,55 +52,46 @@ function BottomPanel(props: {
     const key = (searchParams.tab as string) || "terminal";
     return Object.keys(pages).includes(key) ? key : "terminal";
   });
+  const game = useGame({ id: () => props.gameId });
   const pageComponent = () => {
-    if (!isGameAdmin() && ["statistics", "instances", "checker", "settings"].includes(page())) {
+    if (!isAdminOfGame(game.data) && ["statistics", "instances", "checker", "settings"].includes(page())) {
       return pages.terminal;
     }
-    if (!props.inGame && page() === "hammer") {
+    if (props.training && page() === "hammer") {
       return pages.terminal;
     }
     return pages[page() as keyof typeof pages];
   };
-  const [deleting, setDeleting] = createSignal(false);
-  async function handleDeleteChallenge() {
-    if (challengeStore.current) {
-      setDeleting(true);
-      try {
-        await deleteChallenge(challengeStore.current.game_id, challengeStore.current.id);
-        setSearchParams({ challenge: null });
-        addToast({
-          level: "success",
-          description: t("general.actions.delete.status.success")!,
-          duration: 5000,
-        });
-        props.onStateChange?.();
-      } catch (err) {
-        handleHttpError(err as HTTPError, t("general.actions.delete.status.fail")!);
-      }
-      setDeleting(false);
-    }
-  }
-  const [publishing, setPublishing] = createSignal(false);
+
+  const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+
+  const refetchData = () => {
+    challenge.refetch();
+    inflyClient.invalidateQueries({
+      queryKey: ["game", props.gameId, "challenge"],
+    });
+  };
+
+  const deleteMutation = useDeleteChallengeMutation({
+    onSuccess: () => {
+      setSearchParams({ challenge: null });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge"],
+      });
+    },
+  });
+
+  const upMutation = useUpChallengeMutation({
+    onSuccess: refetchData,
+  });
+  const downMutation = useDownChallengeMutation({
+    onSuccess: refetchData,
+  });
   const [challengeStateWarningDialogOpen, setChallengeStateWarningDialogOpen] = createSignal(false);
 
-  async function handlePublishChallenge() {
-    setPublishing(true);
-    try {
-      const resp = await (challengeStore.current?.hidden ? upChallenge : downChallenge)(
-        challengeStore.current!.game_id,
-        challengeStore.current!.id
-      );
-      props.onStateChange?.(resp);
-      setChallengeStore({ current: resp });
-    } catch (err) {
-      handleHttpError(
-        err as HTTPError,
-        challengeStore.current?.hidden ? t("challenge.errors.up.title")! : t("challenge.errors.down.title")!
-      );
-    }
-
-    setPublishing(false);
-  }
   return (
     <div class="w-full h-full overflow-hidden flex flex-col">
       <OverlayScrollbarsComponent
@@ -112,17 +105,6 @@ function BottomPanel(props: {
         defer
       >
         <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
-          <Button onClick={props.onExpand} ghost square>
-            <span
-              class={clsx(
-                props.expanded
-                  ? "icon-[fluent--chevron-double-down-20-regular]"
-                  : "icon-[fluent--chevron-double-up-20-regular]",
-                "w-5 h-5"
-              )}
-            />
-          </Button>
-          <Divider direction="vertical" class="h-8" />
           <Button onClick={() => setSearchParams({ tab: "terminal" })} ghost={page() !== "terminal"}>
             <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("challenge.terminal.title")}</span>
@@ -134,7 +116,7 @@ function BottomPanel(props: {
           <Button
             onClick={() => setSearchParams({ tab: "hammer" })}
             ghost={page() !== "hammer"}
-            disabled={!props.inGame}
+            disabled={props.training}
           >
             <span class="shrink-0 icon-[fluent-emoji-flat--hammer] w-5 h-5" />
             <span>{t("challenge.hammer.title")}</span>
@@ -142,12 +124,12 @@ function BottomPanel(props: {
           <Button
             onClick={() => setSearchParams({ tab: "answer" })}
             ghost={page() !== "answer"}
-            disabled={!props.archived && !isGameAdmin()}
+            disabled={!props.archived && !isAdminOfGame(game.data)}
           >
             <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("challenge.answer.title")}</span>
           </Button>
-          <Show when={isGameAdmin()}>
+          <Show when={isAdminOfGame(game.data)}>
             <Divider direction="vertical" class="h-8" />
             <Button onClick={() => setSearchParams({ tab: "statistics" })} ghost={page() !== "statistics"}>
               <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
@@ -179,7 +161,7 @@ function BottomPanel(props: {
               onClick={() => setChallengeStateWarningDialogOpen(true)}
               btnContent={
                 <Show
-                  when={challengeStore.current?.hidden === true}
+                  when={challenge.data?.hidden === true}
                   fallback={
                     <>
                       <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5 text-warning" />
@@ -196,7 +178,7 @@ function BottomPanel(props: {
                 <span class="inline-block space-x-2">
                   <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5 text-primary align-middle" />
                   <Show
-                    when={challengeStore.current?.hidden === true}
+                    when={challenge.data?.hidden === true}
                     fallback={<span>{t("challenge.actions.down.message")}</span>}
                   >
                     <span>{t("challenge.actions.up.message")}</span>
@@ -207,10 +189,20 @@ function BottomPanel(props: {
                   size="sm"
                   class="self-end"
                   onClick={async () => {
-                    await handlePublishChallenge();
+                    if (challenge.data?.hidden === true) {
+                      upMutation.mutate({
+                        game_id: props.gameId,
+                        challenge_id: props.challengeId,
+                      });
+                    } else {
+                      downMutation.mutate({
+                        game_id: props.gameId,
+                        challenge_id: props.challengeId,
+                      });
+                    }
                     setChallengeStateWarningDialogOpen(false);
                   }}
-                  loading={publishing()}
+                  loading={upMutation.isPending || downMutation.isPending}
                 >
                   {t("general.actions.yes.title")}
                 </Button>
@@ -230,7 +222,18 @@ function BottomPanel(props: {
                   <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("general.actions.delete.message")}</span>
                 </span>
-                <Button level="primary" size="sm" class="self-end" onClick={handleDeleteChallenge} loading={deleting()}>
+                <Button
+                  level="primary"
+                  size="sm"
+                  class="self-end"
+                  onClick={() =>
+                    deleteMutation.mutate({
+                      game_id: props.gameId,
+                      challenge_id: props.challengeId,
+                    })
+                  }
+                  loading={deleteMutation.isPending}
+                >
                   {t("general.actions.yes.title")}
                 </Button>
               </Card>
@@ -254,47 +257,21 @@ function BottomPanel(props: {
   );
 }
 
-export default function (props: {
-  onStateChange?: (challenge?: Challenge) => void;
-  inGame?: boolean;
-  archived: boolean;
-}) {
-  onCleanup(() => {
-    setChallengeStore({ current: null, env: null, files: [], adminFiles: [] });
-  });
-  const [expanded, setExpanded] = createSignal(false);
-  const size = () => {
-    if (expanded()) {
-      // return [
-      //   { id: "a", size: 24, minSize: 24 },
-      //   { id: "b", size: 76, minSize: 20 },
-      // ];
-      return [24, 76];
-    }
-    // return [
-    //   { id: "a", size: 64, minSize: 24 },
-    //   { id: "b", size: 36, minSize: 20 },
-    // ];
-    return [64, 36];
-  };
-
+export default function (props: ChallengeWidgetProps) {
   return (
     <div class="flex-1">
       <Splitter
-        startPanel={() => <Intro inGame={props.inGame} />}
+        startPanel={() => <Intro training={props.training} gameId={props.gameId} challengeId={props.challengeId} />}
         endPanel={() => (
           <BottomPanel
-            inGame={props.inGame ?? false}
+            training={props.training ?? false}
             archived={props.archived}
-            onStateChange={props.onStateChange}
-            expanded={expanded()}
-            onExpand={() => {
-              setExpanded(!expanded());
-            }}
+            gameId={props.gameId}
+            challengeId={props.challengeId}
           />
         )}
         orientation="vertical"
-        defaultSize={size()}
+        defaultSize={[64, 36]}
         panels={[
           { id: "a", minSize: 24 },
           { id: "b", minSize: 20 },

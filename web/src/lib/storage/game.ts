@@ -1,180 +1,133 @@
-import { getSelfTeam, getTeamRank } from "@api/game";
+import { useAccountProfile } from "@api/account";
 import type { Game } from "@models/game";
 import { type Team, TeamState } from "@models/team";
-import { Permission, type User } from "@models/user";
+import { Permission } from "@models/user";
 import { DateTime } from "luxon";
-import { createStore } from "solid-js/store";
 import { accountStore } from "./account";
 import { t } from "./theme";
-import { addToast } from "./toast";
 
-export const [gameStore, setGameStore] = createStore({
-  games: [] as Game[],
-  current: null as Game | null,
-  preload: null as Game | null,
-  team: null as Team | null,
-  rank: null as number | null,
-  score: null as number | null,
-  members: [] as User[],
-  showTeamCover: false,
-  visited: [] as number[],
-});
+// export async function refreshSelfTeam() {
+//   if (gameStore.current && !isGameAdmin() && accountStore.permissions.includes(Permission.Verified)) {
+//     try {
+//       const team = await getSelfTeam(gameStore.current?.id);
+//       setGameStore({ team });
+//       if (!team) return;
+//       try {
+//         const rank = await getTeamRank(gameStore.current!.id, team.id);
+//         setGameStore({ rank });
+//       } catch {
+//         setGameStore({ rank: null });
+//       }
+//       if (team.state === TeamState.Pending) {
+//         addToast({
+//           level: "warning",
+//           description: t("team.status.pending.message"),
+//           duration: 5000,
+//         });
+//       }
+//     } catch {
+//       setGameStore({ team: null });
+//     }
+//   }
+// }
 
-export type GameStoreType = typeof gameStore;
-
-export function appendGames(games: Game[]) {
-  const ids = new Set(games.map((g) => g.id));
-  setGameStore({
-    games: [...gameStore.games.filter((g) => !ids.has(g.id)), ...games],
-  });
-}
-
-export async function refreshSelfTeam() {
-  if (gameStore.current && !isGameAdmin() && accountStore.permissions.includes(Permission.Verified)) {
-    try {
-      const team = await getSelfTeam(gameStore.current?.id);
-      setGameStore({ team });
-      if (!team) return;
-      try {
-        const rank = await getTeamRank(gameStore.current!.id, team.id);
-        setGameStore({ rank });
-      } catch {
-        setGameStore({ rank: null });
-      }
-      if (team.state === TeamState.Pending) {
-        addToast({
-          level: "warning",
-          description: t("team.status.pending.message")!,
-          duration: 5000,
-        });
-      }
-    } catch {
-      setGameStore({ team: null });
-    }
-  }
-}
-
-export function inProgress() {
-  if (
-    gameStore.current?.start_at &&
-    gameStore.current?.start_at < DateTime.now() &&
-    gameStore.current?.end_at &&
-    gameStore.current?.end_at > DateTime.now()
-  ) {
+export function isGameInProgress(game?: Game) {
+  if (game?.start_at && game.start_at < DateTime.now() && game?.end_at && game.end_at > DateTime.now()) {
     return true;
   }
   return false;
 }
 
-export function inRegister() {
-  const register_end = gameStore.current?.can_register_after_started
-    ? gameStore.current?.end_at
-    : gameStore.current?.start_at;
-  if (
-    gameStore.current?.register_at &&
-    gameStore.current?.register_at < DateTime.now() &&
-    register_end &&
-    register_end > DateTime.now()
-  ) {
+export function isGameInRegister(game?: Game) {
+  const register_end = game?.can_register_after_started ? game.end_at : game?.start_at;
+  if (game?.register_at && game.register_at < DateTime.now() && register_end && register_end > DateTime.now()) {
     return true;
   }
   return false;
 }
 
-export function inArchiving() {
-  if (
-    gameStore.current?.end_at &&
-    gameStore.current?.end_at < DateTime.now() &&
-    gameStore.current?.archive_at &&
-    gameStore.current?.archive_at > DateTime.now()
-  ) {
+export function isGameInArchiving(game?: Game) {
+  if (game?.end_at && game.end_at < DateTime.now() && game?.archive_at && game.archive_at > DateTime.now()) {
     return true;
   }
   return false;
 }
 
-export function inArchived() {
-  if (gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()) {
+export function isGameInArchived(game?: Game) {
+  if (game?.archive_at && game.archive_at < DateTime.now()) {
     return true;
   }
   return false;
 }
 
-export const canParticipate = () => {
-  if (
-    !gameStore.current?.can_register_after_started &&
-    gameStore.current?.start_at &&
-    gameStore.current.start_at < DateTime.now()
-  ) {
+export function isGameCanParticipate(game?: Game) {
+  const account = useAccountProfile();
+  if (!game) return false;
+  if (!game.can_register_after_started && game.start_at && game.start_at < DateTime.now()) {
     return false;
   }
-  if (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()) {
+  if (game.end_at && game.end_at < DateTime.now()) {
     return false;
   }
-  if (isGameAdmin()) {
+  if (isAdminOfGame(game)) {
     return false;
   }
-  if (gameStore.current?.access_policy.restrict) {
-    if (
-      accountStore.info?.institute_id &&
-      gameStore.current.access_policy.institutes.includes(accountStore.info.institute_id)
-    )
-      return true;
+  if (game.access_policy.restrict) {
+    const instituteId = account.data?.institute_id;
+    if (instituteId && game.access_policy.institutes.includes(instituteId)) return true;
     return false;
   }
 
   return true;
-};
+}
 
-export function canAccessChallenges(): [boolean, string] {
-  if (!accountStore.id) return [false, t("general.network.status.401.title")!];
-  if (isGameAdmin()) {
+export function isPlayerCanAccessChallenges(game?: Game, team?: Team | null): [boolean, string] {
+  if (!accountStore.id) return [false, t("general.network.status.401.title")];
+  if (isAdminOfGame(game)) {
     return [true, ""];
   }
-  if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
-    return [false, t("game.notStarted")!];
+  if (game?.start_at && game.start_at > DateTime.now()) {
+    return [false, t("game.notStarted")];
   }
-  if (inArchived()) {
-    return [true, t("game.ended")!];
+  if (isGameInArchived(game)) {
+    return [true, t("game.ended")];
   }
-  if (inProgress() || inArchiving()) {
-    if (gameStore.team) {
+  if (isGameInProgress(game) || isGameInArchiving(game)) {
+    if (team) {
       return [true, ""];
     }
   }
-  if (gameStore.team?.state === TeamState.Pending) {
-    return [false, t("team.status.pending.message")!];
+  if (team?.state === TeamState.Pending) {
+    return [false, t("team.status.pending.message")];
   }
-  if (gameStore.team?.state === TeamState.Banned) {
-    return [false, t("team.status.banned.message")!];
+  if (team?.state === TeamState.Banned) {
+    return [false, t("team.status.banned.message")];
   }
-  return [false, t("team.status.empty.message")!];
+  return [false, t("team.status.empty.message")];
 }
 
-export function isGameAdmin() {
+export function isAdminOfGame(game?: Game) {
   if (!accountStore.id) return false;
-  if (gameStore.current?.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)) {
+  if (game?.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)) {
     return true;
   }
   return false;
 }
 
-export function gameParticipateState() {
-  if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
-    return [false, t("game.registerNotStarted")!];
+export function gameParticipateState(game: Game): [boolean, string] {
+  if (game.register_at && game.register_at > DateTime.now()) {
+    return [false, t("game.registerNotStarted")];
   }
-  if (!inRegister()) {
-    return [false, t("game.registerEnded")!];
+  if (!isGameInRegister(game)) {
+    return [false, t("game.registerEnded")];
   }
   return [true, ""];
 }
 
 // find the last one
-export function currentTimelinePeriod() {
-  const len = gameStore.current?.timeline_presets?.length;
-  const sortedTimeline = gameStore.current?.timeline_presets?.sort(
-    (a, b) => a.start_at.toMillis() - b.start_at.toMillis()
-  );
+export function currentTimelinePeriod(game?: Game) {
+  const len = game?.timeline_presets?.length;
+  const sortedTimeline = game?.timeline_presets?.sort((a, b) => a.start_at.toMillis() - b.start_at.toMillis());
   if (!len) return null;
   for (let i = len; i > 0; i--) {
     const period = sortedTimeline![i - 1];
@@ -182,18 +135,4 @@ export function currentTimelinePeriod() {
       return period;
     }
   }
-}
-
-export function resetGameStore() {
-  setGameStore({
-    games: [],
-    current: null,
-    preload: null,
-    team: null,
-    rank: null,
-    score: null,
-    members: [],
-    showTeamCover: false,
-    visited: [],
-  });
 }

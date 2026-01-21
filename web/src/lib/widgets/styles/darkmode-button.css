@@ -94,7 +94,7 @@
   &[data-color-scheme="dark"] {
     background-color: var(--darkmode-clr-background-night);
     .darkmode-stars {
-      @apply animate-pulse translate-x-0 translate-y-0;
+      @apply translate-x-0 translate-y-0;
     }
     .darkmode-button {
       background: radial-gradient(#eee, transparent);

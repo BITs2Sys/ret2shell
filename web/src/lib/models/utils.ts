@@ -1,5 +1,10 @@
 import { DateTime } from "luxon";
 
+export type CaptchaRequest = {
+  captcha_id: string;
+  captcha_answer: string;
+};
+
 export function luxonReviver(key: string, value: unknown): unknown {
   if (key.endsWith("_at")) {
     if (typeof value === "number") {

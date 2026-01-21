@@ -1,18 +1,23 @@
+import { useGame } from "@api/game";
 import { AuditList, SubmissionList } from "@blocks/game/lists";
-import { useSearchParams } from "@solidjs/router";
-import { gameStore, inArchived } from "@storage/game";
+import { useParams, useSearchParams } from "@solidjs/router";
+import { isGameInArchived } from "@storage/game";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Tag from "@widgets/tag";
-import { createSignal, Match, Switch } from "solid-js";
+import { createMemo, createSignal, Match, Switch } from "solid-js";
 
 export default function () {
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+
   const [tab, setTab] = createSignal("submissions" as "submissions" | "audits");
   const [_, setSearchParams] = useSearchParams();
   return (
     <>
-      <Title page={t("game.monitor.title")} route={`/games/${gameStore.current?.id}/admin/monitor`} />
+      <Title page={t("game.monitor.title")} route={`/games/${gameId()}/admin/monitor`} />
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 py-2 gap-y-2 flex flex-wrap justify-end items-center border-b border-b-layer-content/10 font-bold space-x-2 *:whitespace-nowrap">
           <span class="flex flex-row items-center space-x-2">
@@ -50,10 +55,10 @@ export default function () {
         </h3>
         <Switch>
           <Match when={tab() === "submissions"}>
-            <SubmissionList inGame archived={inArchived()} />
+            <SubmissionList gameId={gameId()} archived={isGameInArchived(game.data)} />
           </Match>
           <Match when={tab() === "audits"}>
-            <AuditList />
+            <AuditList gameId={gameId()} />
           </Match>
         </Switch>
         {/* <NarrowTips breakpoint="md" /> */}

@@ -1,7 +1,4 @@
 import { onMount } from "solid-js";
-// import { themeStore } from "@storage/theme";
-// import BgBlurNight from "@assets/imgs/bg-blur-stars.webp";
-// import BgBlurDay from "@assets/imgs/bg-blur-suzume.webp";
 
 export default function () {
   let svgPath1: SVGPathElement;

@@ -21,7 +21,7 @@ export default function (props: { children?: JSX.Element }) {
   ) {
     addToast({
       level: "error",
-      description: t("general.network.status.403.title")!,
+      description: t("general.network.status.403.title"),
       duration: 5000,
     });
     navigate("/sigtrap/403");

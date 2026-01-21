@@ -1,15 +1,12 @@
-import { handleHttpError } from "@api";
 import {
-  deleteDefaultNodeSelector,
-  deleteGlobalTrafficScript,
-  updateDefaultNodeSelector,
-  updateGlobalTrafficScript,
+  useDeleteDefaultNodeSelectorMutation,
+  useDeleteGlobalTrafficScriptMutation,
+  useUpdateDefaultNodeSelectorMutation,
+  useUpdateGlobalTrafficScriptMutation,
 } from "@api/cluster";
-import { getPlatformConfig } from "@api/platform";
-import type { Config } from "@models/config";
+import { usePlatformConfig } from "@api/platform";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
@@ -17,7 +14,7 @@ import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
 
@@ -29,21 +26,12 @@ const trafficMap = {
 };
 
 export default function Traffic() {
-  const [config, setConfig] = createSignal(null as null | Config);
-  onMount(async () => {
-    try {
-      const resp = await getPlatformConfig();
-      setConfig(resp);
-    } catch (err) {
-      handleHttpError(err as Error, t("platform.errors.fetchConfig.title")!);
-    }
-  });
+  const config = usePlatformConfig();
   const [preset, setPreset] = createSignal(null as PresetTraffic | null);
-
   const [script, setScript] = createSignal("");
-  const [lint, setLint] = createSignal(null as DiagnosticMarker[] | null);
   const [nodeSelector, setNodeSelector] = createSignal("");
-  const [saving, setSaving] = createSignal(false);
+  const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
+
   createEffect(() => {
     if (preset()) {
       setScript(trafficMap[preset()!]);
@@ -51,74 +39,30 @@ export default function Traffic() {
   });
 
   createEffect(() => {
-    if (config()?.cluster) {
-      setScript(config()?.cluster.traffic || "");
-      setNodeSelector(config()?.cluster.node_selector || "");
+    if (config.data?.cluster) {
+      setScript(config.data.cluster.traffic || "");
+      setNodeSelector(config.data.cluster.node_selector || "");
+    } else {
+      setScript("");
+      setNodeSelector("");
     }
   });
 
-  async function handleUpdateTraffic() {
-    setSaving(true);
-    try {
-      const resp = await updateGlobalTrafficScript(script());
-      setLint(resp.lint);
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setSaving(false);
+  function onSuccess() {
+    config.refetch();
   }
 
-  async function handleDeleteTraffic() {
-    setSaving(true);
-    try {
-      await deleteGlobalTrafficScript();
-      setLint(null);
-      setScript("");
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
-    setSaving(false);
-  }
+  const updateTrafficMutation = useUpdateGlobalTrafficScriptMutation({
+    onSuccess: (v) => {
+      setLint(v.lint ?? []);
+      onSuccess();
+    },
+  });
+  const deleteTrafficMutation = useDeleteGlobalTrafficScriptMutation({ onSuccess });
 
-  async function handleUpdateNodeSelector() {
-    setSaving(true);
-    try {
-      await updateDefaultNodeSelector(nodeSelector());
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setSaving(false);
-  }
+  const updateNodeSelectorMutation = useUpdateDefaultNodeSelectorMutation({ onSuccess });
+  const deleteNodeSelectorMutation = useDeleteDefaultNodeSelectorMutation({ onSuccess });
 
-  async function handleDeleteNodeSelector() {
-    setSaving(true);
-    try {
-      await deleteDefaultNodeSelector();
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
-    setSaving(false);
-  }
   return (
     <>
       <Title page={t("traffic.title")} route="/admin/traffic" />
@@ -131,10 +75,15 @@ export default function Traffic() {
           <div class="flex flex-row space-x-2 py-2 items-center">
             <span class="text-primary">ret.sh.cn/workload = </span>
             <Input size="sm" class="flex-1" value={nodeSelector()} onInput={(e) => setNodeSelector(e.target.value)} />
-            <Button size="sm" level="primary" onClick={handleUpdateNodeSelector} loading={saving()}>
+            <Button
+              size="sm"
+              level="primary"
+              onClick={() => updateNodeSelectorMutation.mutate({ node_selector: nodeSelector() })}
+              loading={updateNodeSelectorMutation.isPending}
+            >
               {t("general.actions.save.title")}
             </Button>
-            <Show when={config()?.cluster.node_selector}>
+            <Show when={config.data?.cluster.node_selector}>
               <Popover
                 level="error"
                 ghost
@@ -147,7 +96,12 @@ export default function Traffic() {
                     <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
-                  <Button level="primary" size="sm" class="self-end" onClick={handleDeleteNodeSelector}>
+                  <Button
+                    level="primary"
+                    size="sm"
+                    class="self-end"
+                    onClick={() => deleteNodeSelectorMutation.mutate()}
+                  >
                     {t("general.actions.yes.title")}
                   </Button>
                 </Card>
@@ -163,16 +117,16 @@ export default function Traffic() {
             </span>
             <Select
               class="w-60 hidden lg:flex"
-              placeholder={t("traffic.preset.title")!}
+              placeholder={t("traffic.preset.title")}
               size="sm"
               items={[
                 {
-                  label: t("traffic.preset.singleNodeDirectScript")!,
+                  label: t("traffic.preset.singleNodeDirectScript"),
                   value: "single-node-direct",
                   icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
                 },
                 {
-                  label: t("traffic.preset.multiNodeDirectScript")!,
+                  label: t("traffic.preset.multiNodeDirectScript"),
                   value: "multi-node-direct",
                   icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
                 },
@@ -181,10 +135,15 @@ export default function Traffic() {
                 setPreset((e.value.at(0) as PresetTraffic) || null);
               }}
             />
-            <Button size="sm" level="primary" onClick={handleUpdateTraffic} loading={saving()}>
+            <Button
+              size="sm"
+              level="primary"
+              onClick={() => updateTrafficMutation.mutate({ traffic: script() })}
+              loading={updateTrafficMutation.isPending}
+            >
               {t("general.actions.save.title")}
             </Button>
-            <Show when={config()?.cluster.traffic}>
+            <Show when={config.data?.cluster.traffic}>
               <Popover
                 level="error"
                 ghost
@@ -197,7 +156,7 @@ export default function Traffic() {
                     <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
-                  <Button level="primary" size="sm" class="self-end" onClick={handleDeleteTraffic}>
+                  <Button level="primary" size="sm" class="self-end" onClick={() => deleteTrafficMutation.mutate()}>
                     {t("general.actions.yes.title")}
                   </Button>
                 </Card>
@@ -207,9 +166,9 @@ export default function Traffic() {
           <EditorBare
             class="w-full h-full"
             lineNumbers
-            lang="rust"
+            lang="rune"
             value={script()}
-            lints={lint() ?? []}
+            lints={lint()}
             onValueChanged={(e) => {
               setScript(e);
             }}

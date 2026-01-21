@@ -94,7 +94,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
           class={clsx(
             "article",
             articleProps.compact && "article-compact",
-            "!max-w-5xl w-full",
+            "max-w-5xl! w-full",
             nativeProps.class,
             nativeProps.classList
           )}
@@ -110,7 +110,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
         class={clsx(
           "article",
           articleProps.compact && "article-compact",
-          "!max-w-5xl w-full",
+          "max-w-5xl! w-full",
           nativeProps.class,
           nativeProps.classList
         )}

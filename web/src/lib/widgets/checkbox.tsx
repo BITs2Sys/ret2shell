@@ -39,8 +39,8 @@ export default function (
         >
           <Checkbox.Label asChild={() => children} />
           <Checkbox.Control class="w-5 h-5 relative">
-            <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] !w-5 !h-5 absolute top-0 left-0" />
-            <Checkbox.Indicator class="icon-[fluent--checkmark-circle-20-filled] text-primary !w-5 !h-5" />
+            <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5! h-5! absolute top-0 left-0" />
+            <Checkbox.Indicator class="icon-[fluent--checkmark-circle-20-filled] text-primary w-5! h-5!" />
           </Checkbox.Control>
           <Checkbox.HiddenInput {...checkboxProps.inputProps} />
         </Checkbox.Root>

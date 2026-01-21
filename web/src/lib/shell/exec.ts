@@ -1,3 +1,6 @@
+import type { Challenge } from "@models/challenge";
+import type { Game } from "@models/game";
+import type { Team } from "@models/team";
 import type { ParseEntry } from "shell-quote";
 import { t } from "../storage/theme";
 import * as commands from "./bin";
@@ -16,28 +19,37 @@ export class Exec {
     }
   }
 
-  public async exec(io: Stdio, args: ParseEntry[], origin: string) {
+  public async exec(
+    io: Stdio,
+    args: ParseEntry[],
+    origin: string,
+    env: {
+      game?: Game;
+      team?: Team;
+      challenge?: Challenge;
+    }
+  ) {
     const flag_regex = /\w+\{.+\}/gm;
     if (flag_regex.test(origin)) {
-      return { cmd: "submit", code: await this.commands.get("submit")!.func(io, args.slice(1), origin) };
+      return { cmd: "submit", code: await this.commands.get("submit")!.func(io, args.slice(1), origin, env) };
     }
 
     let cmd = args[0];
     if (typeof cmd !== "string") {
-      io.error(t("shell.errors.commandInvalid.title")!);
+      io.error(t("shell.errors.commandInvalid.title"));
       return { cmd: "", code: -127 };
     }
     cmd = cmd.trim();
     if (cmd === "") return { cmd, code: 0 };
     if (cmd === "cd") {
-      io.error(t("shell.errors.traversalDetected.title")!);
+      io.error(t("shell.errors.traversalDetected.title"));
       return { cmd, code: -127 };
     }
     if (this.commands.has(cmd)) {
-      return { cmd, code: await this.commands.get(cmd)!.func(io, args.slice(1), origin) };
+      return { cmd, code: await this.commands.get(cmd)!.func(io, args.slice(1), origin, env) };
     }
 
-    io.error(t("shell.commandNotFound", { command: cmd })!);
+    io.error(t("shell.commandNotFound", { command: cmd }));
     return { cmd, code: -127 };
   }
 }

@@ -2,10 +2,8 @@ import { fetchDictionary, hasLocale, type Locale } from "@lib/i18n";
 import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { createPrefersDark } from "@solid-primitives/media";
 import { makePersisted } from "@solid-primitives/storage";
-import { createEffect, createResource, untrack } from "solid-js";
+import { createEffect, createResource, createRoot, untrack } from "solid-js";
 import { createStore } from "solid-js/store";
-
-const prefersDark = createPrefersDark();
 
 let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
   .replace("-", "_")
@@ -15,16 +13,27 @@ if (!hasLocale(systemPrefersLocale)) {
   systemPrefersLocale = "zh_cn" as Locale;
 }
 
-export const [themeStore, setThemeStore] = makePersisted(
-  createStore({
-    theme: "cyber",
-    locale: systemPrefersLocale,
-    colorScheme: "dark",
-    colorSchemeFollowsSystem: true,
-    showBackgroundImg: true,
-  }),
-  { name: "theme" }
-);
+const themeRoot = createRoot(() => {
+  const prefersDark = createPrefersDark();
+  const [themeStore, setThemeStore] = makePersisted(
+    createStore({
+      theme: "cyber",
+      locale: systemPrefersLocale,
+      colorScheme: "dark",
+      colorSchemeFollowsSystem: true,
+      showBackgroundImg: true,
+    }),
+    { name: "theme" }
+  );
+  const [dict] = createResource(() => themeStore.locale || systemPrefersLocale, fetchDictionary);
+  return { prefersDark, themeStore, setThemeStore, dict };
+});
+
+export const themeStore = themeRoot.themeStore;
+export const setThemeStore = themeRoot.setThemeStore;
+
+const prefersDark = themeRoot.prefersDark;
+const dict = themeRoot.dict;
 
 export function setTheme(theme: string) {
   setThemeStore({ theme });
@@ -69,9 +78,11 @@ export function initTheme() {
   window.onbeforeprint = onBeforePrint;
   window.onafterprint = onAfterPrint;
 }
-
-const [dict] = createResource(themeStore.locale || systemPrefersLocale, fetchDictionary);
-export const t = translator(dict, resolveTemplate);
+// biome-ignore lint/suspicious/noExplicitAny: disable typescript lint
+export const t = translator(dict as any, resolveTemplate) as (
+  key: string,
+  vars?: Record<string, string | number>
+) => string;
 export const colorPalette = {
   fg: () => (themeStore.colorScheme === "dark" ? "#eee" : "#121212"),
   primary: "#0991ed",

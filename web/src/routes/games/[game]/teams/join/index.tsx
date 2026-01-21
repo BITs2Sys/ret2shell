@@ -1,9 +1,10 @@
-import { handleHttpError } from "@api";
-import { joinTeam } from "@api/game";
+import { useGame } from "@api/game";
+import { useJoinTeamMutation } from "@api/team";
 import { createForm, required, setValue } from "@modular-forms/solid";
-import { useNavigate } from "@solidjs/router";
+import { setTeamCoverStore } from "@routes/games/[game]/_blocks/team-cover";
+import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canParticipate, gameParticipateState, gameStore, setGameStore } from "@storage/game";
+import { gameParticipateState, isGameCanParticipate } from "@storage/game";
 import { Title } from "@storage/header";
 import { t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -13,7 +14,7 @@ import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
 
 type TeamJoinForm = {
   token: string;
@@ -21,36 +22,59 @@ type TeamJoinForm = {
 };
 
 export default function () {
+  const params = useParams();
+  const gameId = () => Number.parseInt(params.game || "0", 10) || 0;
+
   const navigate = useNavigate();
   if (!accountStore.token) {
-    navigate(`/account/login?next=/games/${gameStore.current?.id}/teams/join`, {
+    navigate(`/account/login?next=/games/${gameId()}/teams/join`, {
       replace: true,
     });
   }
+
+  const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
+  const blockReason = createMemo(() => {
+    if (!game.data) return null;
+
+    const [canRegister, message] = gameParticipateState(game.data);
+    if (!canRegister) return message || t("game.registerEnded");
+
+    if (!isGameCanParticipate(game.data)) return t("game.canNotParticipate");
+
+    return null;
+  });
+
   const [form, { Form, Field }] = createForm<TeamJoinForm>();
   createEffect(() => {
-    if (gameStore.current && !canParticipate()) {
-      addToast({
-        level: "warning",
-        description: t("game.canNotParticipate")!,
-        duration: 5000,
-      });
-      navigate(`/games/${gameStore.current.id}`, { replace: true });
-    }
+    if (!game.data) return;
+    const reason = blockReason();
+    if (!reason) return;
+    addToast({
+      level: "warning",
+      description: reason,
+      duration: 5000,
+    });
+    navigate(`/games/${gameId()}`, { replace: true });
   });
-  const [loading, setLoading] = createSignal(false);
-  async function onSubmit(data: TeamJoinForm) {
-    setLoading(true);
-    try {
-      const team = await joinTeam(gameStore.current!.id, data.token);
-      setGameStore({ team, showTeamCover: true });
+
+  const joinTeamMutation = useJoinTeamMutation({
+    onSuccess: () => {
+      setTeamCoverStore({ showTeamCover: true });
       setTimeout(() => {
-        navigate(`/games/${gameStore.current?.id}`);
+        navigate(`/games/${gameId()}`);
       }, 2000);
-    } catch (err) {
-      handleHttpError(err as Error, t("team.errors.join.title")!);
-    }
-    setLoading(false);
+    },
+  });
+
+  const submitLabel = createMemo(() => blockReason() ?? t("team.join.title"));
+  const submitDisabled = createMemo(() => joinTeamMutation.isPending || !game.data || !!blockReason());
+
+  function onSubmit(data: TeamJoinForm) {
+    if (!game.data) return;
+    joinTeamMutation.mutate({
+      game_id: gameId(),
+      token: data.token,
+    });
   }
   const [content, setContent] = createSignal(null as null | string);
   const comps = import.meta.glob("../../_blocks/contents/*.md");
@@ -65,7 +89,7 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("team.join.title")} route={`/games/${gameStore.current?.id}/teams/join`} />
+      <Title page={t("team.join.title")} route={`/games/${gameId()}/teams/join`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"
@@ -73,7 +97,7 @@ export default function () {
         >
           <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("team.join.title")}</h2>
-            <Field name="token" validate={[required(t("team.join.form.token.required")!)]}>
+            <Field name="token" validate={[required(t("team.join.form.token.required"))]}>
               {(field, props) => (
                 <Input
                   icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -86,7 +110,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required")!)]}>
+            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required"))]}>
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />
@@ -144,13 +168,13 @@ export default function () {
                 type="submit"
                 level="primary"
                 class="flex-1"
-                loading={loading()}
-                disabled={loading() || !gameParticipateState()[0]}
+                loading={joinTeamMutation.isPending}
+                disabled={submitDisabled()}
               >
-                {gameParticipateState()[0] ? t("team.join.title") : gameParticipateState()[1]}
+                {submitLabel()}
               </Button>
-              <Show when={(gameStore.current?.team_size || 0) > 1}>
-                <Link href={`/games/${gameStore.current?.id}/teams/create`}>
+              <Show when={(game.data?.team_size || 0) > 1}>
+                <Link href={`/games/${gameId()}/teams/create`}>
                   <span>{t("team.create.title")}</span>
                   <span class="shrink-0 icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>

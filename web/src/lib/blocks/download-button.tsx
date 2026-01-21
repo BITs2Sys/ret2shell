@@ -15,10 +15,18 @@ export default function DownloadButton(
     file: string;
     url: string;
     withFileName?: boolean;
+    displayName?: string;
     searchParams?: { [key: string]: string };
   }
 ) {
-  const [downloadProps, btnProps] = splitProps(props, ["icon", "file", "url", "searchParams", "withFileName"]);
+  const [downloadProps, btnProps] = splitProps(props, [
+    "icon",
+    "file",
+    "url",
+    "searchParams",
+    "withFileName",
+    "displayName",
+  ]);
   const [downloading, setDownloading] = createSignal(false);
   const [downloadComplete, setDownloadComplete] = createSignal(false);
   const [progress, setProgress] = createSignal(null as DownloadProgress | null);
@@ -37,7 +45,7 @@ export default function DownloadButton(
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail"));
     }
     setDownloading(false);
     setDownloadComplete(true);
@@ -50,6 +58,7 @@ export default function DownloadButton(
   return (
     <Button
       {...btnProps}
+      title={btnProps.title ?? downloadProps.displayName ?? downloadProps.file ?? t("general.actions.download.title")}
       square={btnProps.square && !downloading() && !downloadComplete()}
       class={clsx("relative", btnProps.class)}
       loading={downloading()}
@@ -69,7 +78,7 @@ export default function DownloadButton(
         </Match>
       </Switch>
       <Show when={downloadProps.withFileName}>
-        <span>{downloadProps.file}</span>
+        <span>{downloadProps.displayName ?? downloadProps.file}</span>
       </Show>
       <Show when={downloading()}>
         <span class="mx-2 text-primary">

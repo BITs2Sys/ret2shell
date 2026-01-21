@@ -1,12 +1,8 @@
+import { inflyClient } from "@api";
 import { checkSubmissionStatus, submitFlag } from "@api/game";
-import {
-  challengeStore,
-  refreshChallenges,
-  refreshCurrentChallenge,
-  refreshSolves,
-  refreshStatus,
-} from "@storage/challenge";
-import { gameStore, inProgress, isGameAdmin, refreshSelfTeam } from "@storage/game";
+import type { Challenge } from "@models/challenge";
+import type { Game } from "@models/game";
+import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { t } from "@storage/theme";
 import ansiColors from "ansi-colors";
 import { HTTPError } from "ky";
@@ -16,35 +12,55 @@ import type { Command } from "./interface";
 
 export class Submit implements Command {
   name = "submit";
-  man = t("shell.submit.man")!;
-  func = async (io: Stdio, _args: ParseEntry[], origin: string) => {
+  man = t("shell.submit.man");
+  func = async (
+    io: Stdio,
+    _args: ParseEntry[],
+    origin: string,
+    {
+      game,
+      challenge,
+    }: {
+      game?: Game;
+      challenge?: Challenge;
+    }
+  ) => {
+    if (!game || !challenge) {
+      io.error(t("shell.errors.noGameSpecified.title"));
+      return 1;
+    }
     const flag = origin.replace("submit", "").trim();
     io.info(`${t("shell.submit.submitting")}: ${ansiColors.blue(flag)}`);
     try {
-      const submission = await submitFlag(gameStore.current!.id, challengeStore.current!.id, flag);
+      const submission = await submitFlag(game!.id, challenge!.id, flag);
       io.print(ansiColors.green(`${t("shell.submit.waitingForChecking")}`));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       let iter = 7;
       let checked = false;
       while (iter > 0) {
-        const s = await checkSubmissionStatus(gameStore.current!.id, challengeStore.current!.id, submission.id);
-        if (s.solved !== null) {
+        const st = await checkSubmissionStatus(game!.id, challenge!.id, submission.id);
+        if (st.solved !== null) {
           io.println("");
-          if (s.solved) {
-            io.success(`${t("challenge.submission.status.solved.title")}: ${s.result}`);
-            refreshStatus();
-            refreshSolves();
-            if (inProgress() && !isGameAdmin()) {
-              refreshSelfTeam();
-              refreshChallenges();
-              refreshCurrentChallenge();
+          if (st.solved) {
+            inflyClient.invalidateQueries({
+              queryKey: ["game", game!.id, "challenge"],
+            });
+            inflyClient.invalidateQueries({
+              queryKey: ["game", game!.id, "selfSolves"],
+            });
+            io.success(`${t("challenge.submission.status.solved.title")}: ${st.result}`);
+            if (isGameInProgress(game) && !isAdminOfGame(game)) {
+              inflyClient.invalidateQueries({
+                queryKey: ["game", game.id, "team", "self"],
+              });
             }
           } else {
-            io.error(`${t("challenge.submission.status.failed.title")}: ${s.result}`);
+            io.error(`${t("challenge.submission.status.failed.title")}: ${st.result}`);
           }
           checked = true;
           break;
         }
-        io.print(ansiColors.yellow("."));
+        io.print(ansiColors.green("."));
         await new Promise((resolve) => setTimeout(resolve, 1000));
         iter--;
       }

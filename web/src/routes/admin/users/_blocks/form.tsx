@@ -1,15 +1,12 @@
 import { handleHttpError } from "@api";
+import { useInstitutes } from "@api/account";
 import { uploadMedia } from "@api/media";
-import { deleteUser, getUserIpList, getUserOAuthList } from "@api/user";
+import { useDeleteUserMutation, useUserIpList, useUserOAuthList } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
-import type { Ip } from "@models/ip";
-import type { OAuth } from "@models/oauth";
 import { Permission, permissionToString, type User } from "@models/user";
 import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
-import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -45,8 +42,28 @@ export type UserForm = {
 
 export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
-  const [deleteLoading, setDeleteLoading] = createSignal(false);
-  const [form, { Form, Field }] = createForm<UserForm>();
+  const [form, { Form, Field }] = createForm<UserForm>({
+    initialValues: {
+      account: compProps.editSource?.account || "",
+      nickname: compProps.editSource?.nickname || "",
+      email: compProps.editSource?.email || "",
+      avatar: compProps.editSource?.avatar || "",
+      description: compProps.editSource?.description || "",
+      institute_id: compProps.editSource?.institute_id?.toString() || undefined,
+      hidden: compProps.editSource?.hidden || false,
+      banned: compProps.editSource?.banned || false,
+      permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
+      permVerified: compProps.editSource?.permissions.includes(Permission.Verified) || false,
+      permCalendar: compProps.editSource?.permissions.includes(Permission.Calendar) || false,
+      permWiki: compProps.editSource?.permissions.includes(Permission.Wiki) || false,
+      permBulletin: compProps.editSource?.permissions.includes(Permission.Bulletin) || false,
+      permGame: compProps.editSource?.permissions.includes(Permission.Game) || false,
+      permHost: compProps.editSource?.permissions.includes(Permission.Host) || false,
+      permUser: compProps.editSource?.permissions.includes(Permission.User) || false,
+      permStat: compProps.editSource?.permissions.includes(Permission.Statistics) || false,
+      permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
+    },
+  });
   createEffect(() => {
     if (compProps.editSource) {
       untrack(async () => {
@@ -71,26 +88,16 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
           permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
         });
         setAvatarSet(!!compProps.editSource?.avatar);
-        try {
-          const resp = await getUserIpList(compProps.editSource!.id);
-          setIps(resp);
-        } catch (err) {
-          handleHttpError(err as Error, t("user.errors.fetchIpList.title")!);
-        }
-        try {
-          const resp = await getUserOAuthList(compProps.editSource!.id);
-          setOauthes(resp);
-        } catch (err) {
-          handleHttpError(err as Error, t("user.errors.fetchOAuth.title")!);
-        }
       });
     }
   });
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
-  const [ips, setIps] = createSignal<Ip[]>([]);
-  const [oauths, setOauthes] = createSignal([] as OAuth[]);
+  const ips = useUserIpList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
+  const oauths = useUserOAuthList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
+  const institutes = useInstitutes();
+
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
     avatarInput!.click();
@@ -113,34 +120,25 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail"));
       }
       setAvatarUploading(false);
     }
   }
+  const deleteMutation = useDeleteUserMutation();
   async function handleDeleteUser() {
-    try {
-      setDeleteLoading(true);
-      await deleteUser(compProps.editSource!.id);
-      // compProps.onDone?.(compProps.editSource!);
-      setDeleteConfirmValue("");
-      setDeleteLoading(false);
-      addToast({
-        level: "success",
-        description: t("general.actions.delete.status.success")!,
-        duration: 5000,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
-    }
+    if (!compProps.editSource) return;
+    deleteMutation.mutate({ id: compProps.editSource.id });
   }
 
   const institutesSelect = createMemo(() => {
-    return accountStore.institutes.map((i) => ({
-      value: i.id.toString(),
-      label: i.name,
-      icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
-    }));
+    return (
+      institutes.data?.map((i) => ({
+        value: i.id.toString(),
+        label: i.name,
+        icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
+      })) ?? []
+    );
   });
 
   function onSubmit(result: UserForm) {
@@ -203,8 +201,8 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                   size="sm"
                   level="warning"
                   class="rounded-l-none"
-                  disabled={deleteConfirmValue() !== compProps.editSource?.account || deleteLoading()}
-                  loading={deleteLoading()}
+                  disabled={deleteConfirmValue() !== compProps.editSource?.account || deleteMutation.isPending}
+                  loading={deleteMutation.isPending}
                   onClick={handleDeleteUser}
                 >
                   <span>{t("general.actions.delete.title")}</span>
@@ -219,7 +217,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
         <div class="flex flex-row space-x-4 items-center">
           <div class="flex flex-col space-y-2 flex-1">
             <div class="flex flex-row space-x-2">
-              <Field name="account" validate={[required(t("account.form.account.required")!)]}>
+              <Field name="account" validate={[required(t("account.form.account.required"))]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
@@ -233,7 +231,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                   />
                 )}
               </Field>
-              <Field name="nickname" validate={[required(t("account.form.nickname.required")!)]}>
+              <Field name="nickname" validate={[required(t("account.form.nickname.required"))]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
@@ -251,7 +249,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
             <div class="flex flex-row space-x-2">
               <Field
                 name="email"
-                validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
+                validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid"))]}
               >
                 {(field, props) => (
                   <Input
@@ -289,14 +287,14 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
             {(field, props) => (
               <Avatar
                 class="w-28 h-28 relative m-2"
-                src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar")!)) || undefined}
+                src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar"))) || undefined}
                 fallback={getValue(form, "account")}
               >
                 <Button
                   loading={avatarUploading()}
                   disabled={avatarUploading()}
                   type="button"
-                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
+                  class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                   onClick={() => {
                     if (avatarSet()) {
                       setAvatarSet(false);
@@ -334,7 +332,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
               class="h-80"
               lang="markdown"
               placeholder="MARKDOWN"
-              title={t("account.form.description.label")!}
+              title={t("account.form.description.label")}
               name="description"
               value={field.value}
               error={field.error}
@@ -427,7 +425,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
             )}
           </Field>
         </div>
-        <Button type="submit" level="primary" class="!mt-4" loading={compProps.loading} disabled={compProps.loading}>
+        <Button type="submit" level="primary" class="mt-4!" loading={compProps.loading} disabled={compProps.loading}>
           {t("general.actions.save.title")}
         </Button>
       </Form>
@@ -436,7 +434,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
           <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("account.form.oauths.label")}</span>
         </h3>
-        <For each={oauths()}>
+        <For each={oauths.data}>
           {(oauth) => (
             <div class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full px-2">
               <span class="flex-1 text-start text-info">Adapter: {oauth.provider}</span>
@@ -454,7 +452,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
         <span>{t("account.form.ips.tips")}</span>
       </Card>
       <div class="flex flex-row flex-wrap">
-        <For each={ips()}>
+        <For each={ips.data}>
           {(ip) => (
             <Tag level="info" class="m-1">
               <A href={`/admin/users?filter=${ip.address}`}>{ip.address}</A>

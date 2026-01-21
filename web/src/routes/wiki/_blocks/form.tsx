@@ -1,5 +1,4 @@
-import { handleHttpError } from "@api";
-import { createWiki, updateWiki } from "@api/wiki";
+import { useCreateWikiMutation, useUpdateWikiMutation } from "@api/wiki";
 import { type Article, ArticleAccessPolicy } from "@models/article";
 import { createForm, required, setValues } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
@@ -9,7 +8,7 @@ import Editor from "@widgets/editor";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, untrack } from "solid-js";
 
 type WikiForm = {
   title: string;
@@ -21,26 +20,47 @@ type WikiForm = {
 };
 
 export default function (props: { onDone: (article: Article) => void; editSource?: Article }) {
-  const [form, { Form, Field }] = createForm<WikiForm>();
-  const [loading, setLoading] = createSignal(false);
+  const [form, { Form, Field }] = createForm<WikiForm>({
+    initialValues: {
+      title: props.editSource?.title || "",
+      path: props.editSource?.path.join("/") || "",
+      content: props.editSource?.content || "",
+      enable_comment: !!props.editSource?.enable_comment,
+      draft: !!props.editSource?.draft,
+      published: !!props.editSource?.published,
+    },
+  });
+
+  const createWikiMutation = useCreateWikiMutation({
+    onSuccess: (saved) => {
+      props.onDone(saved);
+    },
+  });
+  const updateWikiMutation = useUpdateWikiMutation({
+    onSuccess: (saved) => {
+      props.onDone(saved);
+    },
+  });
+  const loading = createMemo(() => createWikiMutation.isPending || updateWikiMutation.isPending);
+
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {
-          title: props.editSource!.title,
-          path: props.editSource!.path.join("/"),
-          content: props.editSource!.content || "",
-          enable_comment: props.editSource!.enable_comment,
-          draft: props.editSource!.draft,
-          published: props.editSource!.published,
+          title: props.editSource?.title || "",
+          path: props.editSource?.path.join("/") || "",
+          content: props.editSource?.content || "",
+          enable_comment: !!props.editSource?.enable_comment,
+          draft: !!props.editSource?.draft,
+          published: !!props.editSource?.published,
         });
       });
     } else {
       untrack(() => {
         setValues(form, {
-          title: undefined,
-          path: undefined,
-          content: undefined,
+          title: "",
+          path: "",
+          content: "",
           enable_comment: true,
           draft: true,
           published: false,
@@ -48,8 +68,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
       });
     }
   });
-  async function onSubmit(result: WikiForm) {
-    setLoading(true);
+  function onSubmit(result: WikiForm) {
     const article: Article = {
       ...result,
       path: result.path.split("/"),
@@ -60,24 +79,20 @@ export default function (props: { onDone: (article: Article) => void; editSource
       access_policy: ArticleAccessPolicy.Wiki,
       weight: 0,
     };
-    try {
-      props.onDone(await (props.editSource ? updateWiki(article) : createWiki(article)));
-    } catch (err) {
-      handleHttpError(
-        err as Error,
-        props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!
-      );
+    if (props.editSource) {
+      updateWikiMutation.mutate(article);
+    } else {
+      createWikiMutation.mutate(article);
     }
-    setLoading(false);
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
-      <Field name="title" validate={[required(t("wiki.form.title.required")!)]}>
+      <Field name="title" validate={[required(t("wiki.form.title.required"))]}>
         {(field, props) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" />}
-            placeholder={t("wiki.form.title.placeholder")!}
-            title={t("wiki.form.title.label")!}
+            placeholder={t("wiki.form.title.placeholder")}
+            title={t("wiki.form.title.label")}
             {...props}
             value={field.value}
             error={field.error}
@@ -88,7 +103,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                   {(field, props) => (
                     <IconCheckbox
                       title={t("wiki.form.enableComment.label")}
-                      class="!rounded-none"
+                      class="rounded-none!"
                       uncheckedIcon="icon-[fluent--chat-20-regular]"
                       checkedIcon="icon-[fluent--chat-20-filled]"
                       inputProps={props}
@@ -102,7 +117,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                   {(field, props) => (
                     <IconCheckbox
                       title={t("wiki.form.draft.label")}
-                      class="!rounded-none"
+                      class="rounded-none!"
                       uncheckedIcon="icon-[fluent--edit-20-regular]"
                       checkedIcon="icon-[fluent--edit-20-filled]"
                       inputProps={props}
@@ -116,7 +131,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                   {(field, props) => (
                     <IconCheckbox
                       title={t("wiki.form.published.label")}
-                      class="!rounded-l-none"
+                      class="rounded-l-none!"
                       uncheckedIcon="icon-[fluent--megaphone-loud-20-regular]"
                       checkedIcon="icon-[fluent--megaphone-loud-20-filled]"
                       inputProps={props}
@@ -131,12 +146,12 @@ export default function (props: { onDone: (article: Article) => void; editSource
           />
         )}
       </Field>
-      <Field name="path" validate={[required(t("wiki.form.path.required")!)]}>
+      <Field name="path" validate={[required(t("wiki.form.path.required"))]}>
         {(field, props) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />}
-            placeholder={t("wiki.form.path.placeholder")!}
-            title={t("wiki.form.path.label")!}
+            placeholder={t("wiki.form.path.placeholder")}
+            title={t("wiki.form.path.label")}
             {...props}
             value={field.value}
             error={field.error}
@@ -144,7 +159,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
           />
         )}
       </Field>
-      <Field name="content" validate={[required(t("wiki.form.content.required")!)]}>
+      <Field name="content" validate={[required(t("wiki.form.content.required"))]}>
         {(field) => (
           <Editor
             form={form}
@@ -152,14 +167,14 @@ export default function (props: { onDone: (article: Article) => void; editSource
             class="flex-1"
             lang="markdown"
             placeholder="MARKDOWN"
-            title={t("wiki.form.content.label")!}
+            title={t("wiki.form.content.label")}
             name="content"
             value={field.value}
             error={field.error}
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+      <Button type="submit" level="primary" class="mt-4!" loading={loading()} disabled={loading()}>
         {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>

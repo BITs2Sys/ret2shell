@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getOAuthProvider } from "@api/account";
+import { useOAuthProvider } from "@api/account";
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
@@ -14,14 +14,12 @@ import {
   setValues,
   url,
 } from "@modular-forms/solid";
-import { fullTheme, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { AnsiUp } from "ansi_up";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createSignal, Show, untrack } from "solid-js";
 import emailScript from "../scripts/email.rx";
 import oauth2AuthCodeScript from "../scripts/oauth2_auth_code.rx";
@@ -43,35 +41,43 @@ const presetMap = {
 
 export default function ProviderForm(props: {
   onDone?: (result: OAuthProvider) => Promise<void>;
-  editSource?: OAuthProvider;
+  provider?: string;
   loading?: boolean;
 }) {
-  const [form, { Form, Field }] = createForm<FormType>();
+  const oauthProvider = useOAuthProvider({
+    service: () => props.provider || "",
+    enabled: () => !!props.provider,
+  });
+  const [form, { Form, Field }] = createForm<FormType>({
+    initialValues: {
+      name: oauthProvider.data?.item.name || "" || "",
+      provider: oauthProvider.data?.item.provider || "",
+      avatar: oauthProvider.data?.item.avatar || "",
+      script: oauthProvider.data?.item.script || "",
+      portal: oauthProvider.data?.item.portal || "",
+    },
+  });
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
-  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
-  const ansi_up = new AnsiUp();
-  ansi_up.use_classes = true;
 
   createEffect(() => {
-    if (props.editSource) {
+    if (oauthProvider.data) {
       untrack(async () => {
-        const { item, lint } = await getOAuthProvider(props.editSource!.provider);
+        const { item } = oauthProvider.data || {};
         setValues(form, {
-          name: item.name,
-          provider: item.provider,
-          avatar: item.avatar,
-          script: item.script,
-          portal: item.portal,
+          name: item?.name || "" || "",
+          provider: item?.provider || "",
+          avatar: item?.avatar || "",
+          script: item?.script || "",
+          portal: item?.portal || "",
         });
-        if (lint) setRenderedLint(ansi_up.ansi_to_html(lint));
       });
     }
   });
   async function onSubmit(result: FormType) {
     props.onDone?.({
-      id: props.editSource?.id || 0,
+      id: oauthProvider.data?.item.id || 0,
       name: result.name,
       provider: result.provider,
       avatar: result.avatar,
@@ -101,7 +107,7 @@ export default function ProviderForm(props: {
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
+        handleHttpError(err as Error, t("general.actions.save.status.fail"));
       }
       setAvatarUploading(false);
     }
@@ -110,7 +116,7 @@ export default function ProviderForm(props: {
     <Form onSubmit={onSubmit} class="flex flex-col w-screen max-w-5xl space-y-2 relative">
       <div class="flex flex-row space-x-4 items-end">
         <div class="flex flex-col space-y-2 flex-1">
-          <Field name="name" validate={[required(t("oauth.form.name.required")!)]}>
+          <Field name="name" validate={[required(t("oauth.form.name.required"))]}>
             {(field, props) => (
               <Input
                 icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -126,11 +132,11 @@ export default function ProviderForm(props: {
           <Field
             name="provider"
             validate={[
-              required(t("oauth.form.provider.required")!),
-              minLength(2, t("oauth.form.provider.minimumLength")!),
-              maxLength(32, t("oauth.form.provider.maximumLength")!),
+              required(t("oauth.form.provider.required")),
+              minLength(2, t("oauth.form.provider.minimumLength")),
+              maxLength(32, t("oauth.form.provider.maximumLength")),
               // only ascii visible characters, no whitespaces
-              pattern(/^[0-9a-z_]*$/, t("oauth.form.provider.invalid")!),
+              pattern(/^[0-9a-z_]*$/, t("oauth.form.provider.invalid")),
             ]}
           >
             {(field, props) => (
@@ -150,14 +156,14 @@ export default function ProviderForm(props: {
           {(field, props) => (
             <Avatar
               class="w-32 h-32 relative"
-              src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar")!)) || undefined}
+              src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar"))) || undefined}
               fallback={getValue(form, "provider")?.toUpperCase()}
             >
               <Button
                 loading={avatarUploading()}
                 disabled={avatarUploading()}
                 type="button"
-                class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
+                class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                 onClick={() => {
                   if (avatarSet()) {
                     setAvatarSet(false);
@@ -187,7 +193,7 @@ export default function ProviderForm(props: {
           )}
         </Field>
       </div>
-      <Field name="portal" validate={[url(t("oauth.form.portal.invalid")!)]}>
+      <Field name="portal" validate={[url(t("oauth.form.portal.invalid"))]}>
         {(field, props) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -207,21 +213,21 @@ export default function ProviderForm(props: {
         </h3>
         <Select
           class="w-60 hidden lg:flex"
-          placeholder={t("oauth.form.script.preset.placeholder")!}
+          placeholder={t("oauth.form.script.preset.placeholder")}
           size="sm"
           items={[
             {
-              label: t("oauth.form.script.preset.email")!,
+              label: t("oauth.form.script.preset.email"),
               value: "email",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {
-              label: t("oauth.form.script.preset.yaleCas")!,
+              label: t("oauth.form.script.preset.yaleCas"),
               value: "yale_cas",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {
-              label: t("oauth.form.script.preset.oauth2AuthCode")!,
+              label: t("oauth.form.script.preset.oauth2AuthCode"),
               value: "oauth2_auth_code",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
@@ -237,45 +243,22 @@ export default function ProviderForm(props: {
           }}
         />
       </header>
-      <Field name="script" validate={[required(t("oauth.form.script.required")!)]}>
+      <Field name="script" validate={[required(t("oauth.form.script.required"))]}>
         {(field) => (
           <Editor
             form={form}
             lineNumbers
             class="h-96"
-            lang="rust"
+            lang="rune"
             name="script"
+            lints={oauthProvider.data?.lint ?? undefined}
             value={field.value}
             error={field.error}
           />
         )}
       </Field>
-      <Show when={props.editSource}>
-        <OverlayScrollbarsComponent
-          options={{
-            scrollbars: {
-              theme: `os-theme-${fullTheme()}`,
-              autoHide: "scroll",
-            },
-          }}
-          class="relative max-h-48"
-          defer
-        >
-          <Show
-            when={renderedLint()}
-            fallback={
-              <p class="flex flex-row space-x-2 items-center text-success">
-                <span class="shrink-0 icon-[fluent--thumb-like-20-regular] w-5 h-5" />
-                <span>0 warning(s), error(s).</span>
-              </p>
-            }
-          >
-            <pre innerHTML={renderedLint() ?? undefined} />
-          </Show>
-        </OverlayScrollbarsComponent>
-      </Show>
-      <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
+      <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
+        {props.provider ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

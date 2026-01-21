@@ -4,11 +4,11 @@
       "status": {
         "400": {
           "title": "Bad request",
-          "message": "This exp seems incorrect"
+          "message": "This exp looks off"
         },
         "401": {
           "title": "Log in first",
-          "message": "Hackers also should have an account"
+          "message": "Even hackers need a name"
         },
         "403": {
           "title": "Access denied",
@@ -39,7 +39,7 @@
         "title": "Unknown error",
         "message": "You fell into the void"
       },
-      "gotoDocs": "If you are an operator, you can view"
+      "gotoDocs": "If you're ops, see"
     },
     "loading": {
       "10": "Using pencil and magnifier to rescue data...",
@@ -47,16 +47,16 @@
       "12": "Training branch prediction algorithm...",
       "13": "Hit the scheduled cache...",
       "14": "Executing the shortcut algorithm...",
-      "15": "Adding large language model hallucination...",
+      "15": "Adding LLM hallucinations...",
       "short": "Shoujo praying...",
-      "00": "Trying to prove P != NP...",
+      "00": "Fixing cosmic-ray bit flips...",
       "01": "Trying to prove P != NP...",
       "02": "Trying to factor RSA 4096...",
       "03": "Dividing by 0...",
       "04": "Downloading more RAM from Internet...",
       "05": "Sorting 1 and 0...",
       "06": "Enumerating ML neural network...",
-      "07": "Importing artificial intelligence...",
+      "07": "Importing artificial incomptence...",
       "08": "Cracking Alice and Bob's one-time pads...",
       "09": "Trying to exit from VIM..."
     },
@@ -75,7 +75,7 @@
       },
       "confirm": {
         "title": "Confirm",
-        "message": "Are you sure to continue?",
+        "message": "Continue?",
         "status": {
           "success": "Successfully executed",
           "fail": "Failed to execute"
@@ -83,7 +83,7 @@
       },
       "send": {
         "title": "Send",
-        "message": "Are you sure to send?",
+        "message": "Send now?",
         "status": {
           "success": "Successfully sent",
           "fail": "Failed to send"
@@ -91,7 +91,7 @@
       },
       "delete": {
         "title": "Delete",
-        "message": "Are you sure you want to delete it? We don't sell regret!",
+        "message": "Delete it? No undo.",
         "status": {
           "success": "Successfully deleted",
           "fail": "Failed to delete"
@@ -102,7 +102,7 @@
       },
       "save": {
         "title": "Save",
-        "message": "Are you sure to save?",
+        "message": "Save changes?",
         "status": {
           "success": "Successfully saved",
           "fail": "Failed to save"
@@ -110,7 +110,7 @@
       },
       "add": {
         "title": "Add",
-        "message": "Are you sure to add?",
+        "message": "Add it?",
         "status": {
           "success": "Successfully added",
           "fail": "Failed to add"
@@ -118,7 +118,7 @@
       },
       "create": {
         "title": "Create",
-        "message": "Are you sure to create?",
+        "message": "Create it?",
         "status": {
           "success": "Successfully created",
           "fail": "Failed to create"
@@ -126,7 +126,7 @@
       },
       "update": {
         "title": "Update",
-        "message": "Are you sure to update?",
+        "message": "Update it?",
         "status": {
           "success": "Successfully updated",
           "fail": "Failed to update"
@@ -134,7 +134,7 @@
       },
       "reset": {
         "title": "Reset",
-        "message": "Are you sure to reset?",
+        "message": "Reset it?",
         "status": {
           "success": "Successfully reset",
           "fail": "Failed to reset"
@@ -152,7 +152,7 @@
       },
       "leave": {
         "title": "Leave",
-        "message": "Are you sure to leave?",
+        "message": "Leave now?",
         "status": {
           "success": "Leaved successfully",
           "fail": "Failed to leave"
@@ -205,7 +205,7 @@
       },
       "clear": {
         "title": "Clear",
-        "message": "Are you sure to clear?",
+        "message": "Clear output?",
         "status": {
           "success": "Successfully cleared",
           "fail": "Failed to clear"
@@ -215,8 +215,8 @@
         "title": "Upload",
         "status": {
           "pending": "Uploading...",
-          "success": "Successfully uploaded",
-          "fail": "Failed to upload",
+          "success": "Uploaded",
+          "fail": "Failed",
           "invalidFileType": "Invalid file type",
           "fileTooLarge": "File too large, up to {{ size }} MB",
           "fileTooSmall": "File too small, down to {{ size }} MB",
@@ -227,8 +227,8 @@
         "title": "Download",
         "status": {
           "pending": "Downloading...",
-          "success": "Successfully downloaded",
-          "fail": "Failed to download"
+          "success": "Downloaded",
+          "fail": "Failed"
         }
       },
       "goto": {
@@ -262,8 +262,8 @@
         "message": "({{frontend}} != {{backend}}), the server may not work properly, please contact operations for troubleshooting."
       },
       "tooNarrow": {
-        "title": "The viewport is too narrow",
-        "message": "Please open this website with a wider device"
+        "title": "Window too narrow",
+        "message": "Use a wider screen"
       },
       "notImplemented": {
         "hello": "Hello",
@@ -287,8 +287,8 @@
       }
     },
     "notifications": {
-      "title": "Notification messages",
-      "clear": "Clear all notifications",
+      "title": "Notifications",
+      "clear": "Clear all",
       "empty": "No unread messages"
     },
     "theme": {
@@ -296,13 +296,13 @@
       "followSystem": "Follow system"
     },
     "ret2codec": {
-      "title": "Alternate protocol"
+      "title": "Switch protocol"
     },
     "sync": {
-      "title": "Resource synchronization"
+      "title": "Sync resources"
     },
     "email": {
-      "title": "Platform email address",
+      "title": "Platform email",
       "form": {
         "enabled": "Enable email",
         "tls": {
@@ -317,7 +317,7 @@
         },
         "port": {
           "required": "Email server port cannot be empty",
-          "invalid": "Port should between 1 and 65535",
+          "invalid": "Port must be 1–65535",
           "label": "Server port",
           "placeholder": "Please enter the email server port"
         },
@@ -390,10 +390,14 @@
       "hideMaker": {
         "disabled": "Your license does not allow hiding this item",
         "label": "Hide developer information tags"
+      },
+      "zenGame": {
+        "label": "Zen game mode",
+        "placeholder": "Select game..."
       }
     },
     "logs": {
-      "title": "Server logs",
+      "title": "Logs",
       "errors": {
         "fetchList": {
           "title": "Failed to fetch log list"
@@ -410,14 +414,14 @@
       "enableStreamWarning": "Be cautious when enabling it if there are a lot of logs, only display the logs of the current day according to the server time, please download the log file for other logs"
     },
     "statistics": {
-      "title": "Platform statistics",
+      "title": "Platform stats",
       "errors": {
         "fetch": {
           "title": "Failed to fetch platform statistics"
         }
       },
       "instituteUsers": {
-        "title": "Institute player stats",
+        "title": "User distribution",
         "others": "Others"
       }
     }
@@ -459,13 +463,13 @@
     },
     "errors": {
       "fetchToc": {
-        "title": "Failed to fetch wiki tocs"
+        "title": "Failed to load TOC"
       },
       "fetch": {
         "title": "Failed to fetch knowledge base article"
       }
     },
-    "unknownPublisher": "Unknown"
+    "unknownPublisher": "Anonymous"
   },
   "training": {
     "title": "Training",
@@ -585,10 +589,10 @@
       "submission": "Submission stats",
       "challengeStats": "Challenge solving stats",
       "players": "Player statistics",
-      "institutePlayers": "Player statistics of the institute",
+      "institutePlayers": "Institute player stats",
       "others": "Others",
       "teams": "Team statistics",
-      "instituteTeams": "Team Statistics of the institute"
+      "instituteTeams": "Institute team stats"
     },
     "monitor": {
       "title": "Event monitor",
@@ -924,7 +928,7 @@
       },
       "archived": {
         "title": "Archived",
-        "message": "Solving after archiving will no longer retrieving pts."
+        "message": "No points after archive."
       },
       "inPeriod": {
         "title": "In progress",
@@ -1330,6 +1334,9 @@
       "errors": {
         "fetchCheckerScript": {
           "title": "Failed to fetch check script"
+        },
+        "fetchScript": {
+          "title": "Failed to fetch checker script"
         }
       }
     },
@@ -1583,7 +1590,11 @@
       },
       "registeredAt": {
         "label": "Registration time"
-      }
+      },
+      "avatar": {
+        "uploadHint": "Click again to upload the avatar file to the server"
+      },
+      "saveHint": "Remember to save!!!"
     },
     "login": {
       "title": "Login",
@@ -2107,6 +2118,9 @@
     "errors": {
       "fetchNodes": {
         "title": "Failed to fetch cluster node information"
+      },
+      "fetchConfig": {
+        "title": "Failed to fetch cluster configuration"
       }
     }
   },

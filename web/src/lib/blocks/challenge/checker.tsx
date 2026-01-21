@@ -1,13 +1,12 @@
-import { handleHttpError } from "@api";
-import { getChallengeCheckerScript, updateChallengeCheckerScript } from "@api/game";
-import type { Challenge } from "@models/challenge";
-import { challengeStore } from "@storage/challenge";
+import { inflyClient } from "@api";
+import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
+import { generateRandomMotto } from "@lib/utils/random-motto";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
-import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
+import { EditorBare } from "@widgets/editor";
 import Select from "@widgets/select";
 import { createEffect, createMemo, createSignal, untrack } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
@@ -71,208 +70,43 @@ const checkerCtx = {
     const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     return Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
   },
-  RANDREADABLE() {
-    const verbs = [
-      "building",
-      "creating",
-      "developing",
-      "designing",
-      "implementing",
-      "optimizing",
-      "refactoring",
-      "debugging",
-      "deploying",
-      "testing",
-      "monitoring",
-      "scaling",
-      "exploring",
-      "discovering",
-      "learning",
-      "mastering",
-      "crafting",
-      "solving",
-      "connecting",
-      "streaming",
-      "processing",
-      "analyzing",
-      "integrating",
-      "automating",
-    ];
-
-    const adjectives = [
-      "efficient",
-      "robust",
-      "scalable",
-      "modern",
-      "elegant",
-      "innovative",
-      "creative",
-      "responsive",
-      "dynamic",
-      "flexible",
-      "secure",
-      "lightweight",
-      "powerful",
-      "smart",
-      "intuitive",
-      "seamless",
-      "reliable",
-      "advanced",
-      "cutting_edge",
-      "user_friendly",
-      "high_performance",
-      "cloud_native",
-      "real_time",
-      "cross_platform",
-    ];
-
-    // technical nouns
-    const techNouns = [
-      "API",
-      "database",
-      "framework",
-      "library",
-      "component",
-      "service",
-      "module",
-      "pipeline",
-      "workflow",
-      "architecture",
-      "infrastructure",
-      "platform",
-      "solution",
-      "algorithm",
-      "protocol",
-      "interface",
-      "dashboard",
-      "analytics",
-      "microservice",
-      "container",
-      "cluster",
-      "network",
-      "authentication",
-      "middleware",
-      "cache",
-    ];
-
-    // life nouns
-    const lifeNouns = [
-      "morning_routine",
-      "coffee_break",
-      "weekend_project",
-      "garden_space",
-      "kitchen_setup",
-      "reading_corner",
-      "workout_session",
-      "movie_night",
-      "dinner_party",
-      "beach_walk",
-      "hiking_trail",
-      "city_exploration",
-      "art_gallery",
-      "music_festival",
-      "book_club",
-      "cooking_experiment",
-      "travel_adventure",
-      "sunset_viewing",
-      "stargazing_session",
-    ];
-
-    // contexts/domains
-    const contexts = [
-      "development",
-      "production",
-      "testing",
-      "staging",
-      "deployment",
-      "monitoring",
-      "performance",
-      "security",
-      "scalability",
-      "maintenance",
-      "integration",
-      "automation",
-      "experience",
-      "lifestyle",
-      "wellness",
-      "creativity",
-      "productivity",
-      "entertainment",
-      "education",
-      "collaboration",
-      "innovation",
-      "exploration",
-      "relaxation",
-      "adventure",
-    ];
-
-    // connectors and prepositions
-    const connectors = ["with", "for", "in", "on", "through", "using", "via", "across", "within"];
-
-    const patterns = [
-      // technical patterns
-      () => `${getRandomItem(verbs)}_${getRandomItem(adjectives)}_${getRandomItem(techNouns)}`,
-      () =>
-        `${getRandomItem(adjectives)}_${getRandomItem(techNouns)}_${getRandomItem(connectors)}_${getRandomItem(contexts)}`,
-      () =>
-        `${getRandomItem(verbs)}_${getRandomItem(techNouns)}_${getRandomItem(connectors)}_${getRandomItem(contexts)}`,
-      () => `${getRandomItem(adjectives)}_${getRandomItem(verbs)}_${getRandomItem(techNouns)}_solution`,
-
-      // life patterns
-      () => `${getRandomItem(verbs)}_${getRandomItem(adjectives)}_${getRandomItem(lifeNouns)}`,
-      () =>
-        `${getRandomItem(adjectives)}_${getRandomItem(lifeNouns)}_${getRandomItem(connectors)}_${getRandomItem(contexts)}`,
-      () => `${getRandomItem(verbs)}_perfect_${getRandomItem(lifeNouns)}_experience`,
-      () => `daily_${getRandomItem(verbs)}_${getRandomItem(lifeNouns)}_routine`,
-
-      // mixed patterns
-      () => `${getRandomItem(verbs)}_${getRandomItem(adjectives)}_${getRandomItem(contexts)}_platform`,
-      () =>
-        `smart_${getRandomItem(verbs)}_${getRandomItem(techNouns)}_${getRandomItem(connectors)}_${getRandomItem(contexts)}`,
-      () => `${getRandomItem(adjectives)}_${getRandomItem(verbs)}_${getRandomItem(contexts)}_workflow`,
-      () => `next_gen_${getRandomItem(verbs)}_${getRandomItem(techNouns)}_system`,
-
-      // more complex patterns
-      () => `${getRandomItem(verbs)}_and_${getRandomItem(verbs)}_${getRandomItem(techNouns)}`,
-      () => `${getRandomItem(adjectives)}_${getRandomItem(lifeNouns)}_${getRandomItem(connectors)}_modern_life`,
-      () =>
-        `${getRandomItem(verbs)}_${getRandomItem(contexts)}_${getRandomItem(connectors)}_${getRandomItem(adjectives)}_way`,
-      () => `auto_${getRandomItem(verbs)}_${getRandomItem(techNouns)}_${getRandomItem(contexts)}`,
-    ];
-
-    function getRandomItem(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    }
-
-    const pattern = getRandomItem(patterns);
-    return pattern();
+  MOTTO() {
+    return generateRandomMotto();
   },
 } as const;
 
-export default function (_props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
+export default function (props: ChallengeWidgetProps) {
   const [preset, setPreset] = createSignal(null as PresetChecker | null);
   const presetChecker = createMemo(() => {
     if (!preset()) return null;
     return Tmpl.withContext(checkerCtx).execute(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
-  const [lint, setLint] = createSignal([] as DiagnosticMarker[] | null);
-  let serverScript = "";
-  async function refreshScript() {
-    const resp = await getChallengeCheckerScript(challengeStore.current!.game_id, challengeStore.current!.id, true);
-    serverScript = resp.script;
-    setScript(resp.script);
-    setLint(resp.lint ?? null);
-  }
-  function restoreScript() {
-    setScript(serverScript);
-  }
-  refreshScript();
+
+  const scriptRemote = useChallengeCheckerScript({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+
   createEffect(() => {
-    if (!challengeStore.current?.hidden) {
-      untrack(refreshScript);
+    if (scriptRemote.data) {
+      untrack(() => {
+        setScript(scriptRemote.data?.script || "");
+      });
     }
   });
+
+  const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
+    onSuccess: () => {
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+      });
+    },
+  });
+
+  function restoreScript() {
+    setScript(scriptRemote.data?.script || "");
+  }
 
   createEffect(() => {
     if (presetChecker()) {
@@ -281,20 +115,6 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
       });
     }
   });
-
-  async function handleUpdateScript() {
-    try {
-      await updateChallengeCheckerScript(challengeStore.current!.game_id, challengeStore.current!.id, script());
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
-      refreshScript();
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-  }
 
   return (
     <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6 lg:pb-3">
@@ -312,22 +132,22 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             size="sm"
             items={[
               {
-                label: t("challenge.checker.preset.simple.label")!,
+                label: t("challenge.checker.preset.simple.label"),
                 value: "simple",
                 icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
               },
               {
-                label: t("challenge.checker.preset.leet.label")!,
+                label: t("challenge.checker.preset.leet.label"),
                 value: "dynamic-leet",
                 icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
               },
               {
-                label: t("challenge.checker.preset.uuid.label")!,
+                label: t("challenge.checker.preset.uuid.label"),
                 value: "dynamic-uuid",
                 icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
               },
               {
-                label: t("challenge.checker.preset.mapped.label")!,
+                label: t("challenge.checker.preset.mapped.label"),
                 value: "mapped",
                 icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
               },
@@ -340,7 +160,19 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
             <Button size="sm" square onClick={restoreScript}>
               <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
             </Button>
-            <Button level="info" size="sm" onClick={handleUpdateScript}>
+            <Button
+              level="info"
+              size="sm"
+              onClick={() =>
+                updateScriptMutation.mutate({
+                  game_id: props.gameId,
+                  challenge_id: props.challengeId,
+                  content: script(),
+                })
+              }
+              loading={updateScriptMutation.isPending || scriptRemote.isLoading}
+              disabled={updateScriptMutation.isPending || scriptRemote.isLoading}
+            >
               {t("general.actions.save.title")}
               <span>&</span>
               {t("general.actions.compile.title")}
@@ -351,20 +183,20 @@ export default function (_props: { onStateChange?: (challenge?: Challenge) => vo
       <EditorBare
         class="w-full h-full"
         lineNumbers
-        lang="rust"
+        lang="rune"
         value={script()}
-        lints={lint() ?? []}
+        lints={scriptRemote.data?.lint ?? []}
         onValueChanged={(e) => {
           setScript(e);
         }}
       />
       <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
         <span class="text-primary icon-[fluent--info-16-regular]" />
-        <span class="text-primary">{lint()?.filter((v) => v.kind === "info").length ?? 0}</span>
+        <span class="text-primary">{scriptRemote.data?.lint?.filter((v) => v.kind === "info").length ?? 0}</span>
         <span class="text-warning icon-[fluent--warning-16-regular]" />
-        <span class="text-warning">{lint()?.filter((v) => v.kind === "warning").length ?? 0}</span>
+        <span class="text-warning">{scriptRemote.data?.lint?.filter((v) => v.kind === "warning").length ?? 0}</span>
         <span class="text-error icon-[fluent--warning-16-regular]" />
-        <span class="text-error">{lint()?.filter((v) => v.kind === "error").length ?? 0}</span>
+        <span class="text-error">{scriptRemote.data?.lint?.filter((v) => v.kind === "error").length ?? 0}</span>
         <div class="flex-1" />
         <a href="https://rune-rs.github.io/" class="text-primary hover:underline">
           Rune Grammar <span class="icon-[fluent--open-12-regular]" />

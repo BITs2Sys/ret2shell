@@ -13,6 +13,7 @@ use k8s_openapi::{
     networking::v1::NetworkPolicy,
   },
   apimachinery::pkg::{api::resource::Quantity, version::Info},
+  jiff,
 };
 use kube::{
   Api, Client,
@@ -122,7 +123,8 @@ impl Cluster {
           follow,
           container,
           tail_lines,
-          since_time,
+          since_time: since_time
+            .map(|t| jiff::Timestamp::from_second(t.timestamp()).unwrap_or_default()),
           timestamps: true,
           ..LogParams::default()
         },
@@ -279,7 +281,7 @@ impl Cluster {
       .clone()
       .ok_or(ClusterError::MissingField("creation_timestamp".to_string()))?
       .0
-      .timestamp();
+      .as_second();
     let now = Utc::now().timestamp();
     Ok(now - started_at > 3600 * (renew + 1) as i64)
   }
@@ -580,7 +582,6 @@ impl Cluster {
         selector: Some(
           [("ret.sh.cn/traffic".to_owned(), traffic.clone())]
             .iter()
-            .cloned()
             .map(|(k, v)| (k.to_owned(), v.to_owned()))
             .collect(),
         ),
@@ -648,52 +649,52 @@ impl Cluster {
 
   pub async fn delay_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn delay_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn stop_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<usize, ClusterError> {
-    let pod = self
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
-    for p in pod.iter() {
+    for p in pods.iter() {
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
       self
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
     }
-    Ok(pod.len())
+    Ok(pods)
   }
 
   pub async fn stop_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<usize, ClusterError> {
+  ) -> Result<Vec<Pod>, ClusterError> {
     let pod = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
@@ -705,7 +706,7 @@ impl Cluster {
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
     }
-    Ok(pod.len())
+    Ok(pod)
   }
 
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {

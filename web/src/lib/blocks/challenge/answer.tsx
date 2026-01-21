@@ -1,66 +1,54 @@
-import { handleHttpError } from "@api";
-import { getChallengeAnswer, updateChallengeAnswer } from "@api/game";
-import type { Challenge } from "@models/challenge";
-import { challengeStore } from "@storage/challenge";
-import { isGameAdmin } from "@storage/game";
+import { inflyClient } from "@api";
+import { useChallengeAnswer, useUpdateChallengeAnswerMutation } from "@api/challenge";
+import { useGame } from "@api/game";
+import { isAdminOfGame } from "@storage/game";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
-import { useMutation, useQuery } from "@tanstack/solid-query";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import LoadingTips from "@widgets/loading-tips";
 import { createSignal, Show, Suspense } from "solid-js";
+import type { ChallengeWidgetProps } from ".";
 
-export default function (props: { onStateChange?: (challenge?: Challenge) => void; inGame?: boolean }) {
+export default function (props: ChallengeWidgetProps) {
   const [answer, setAnswer] = createSignal("");
   const [inEdit, setInEdit] = createSignal(false);
+  const game = useGame({ id: () => props.gameId });
 
-  const answerQuery = useQuery(() => ({
-    queryKey: ["game", challengeStore.current?.game_id, "challenge", challengeStore.current?.id, "answer"],
-    queryFn: async () => await getChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id),
-    enabled: !!challengeStore.current,
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.answer.errors.fetchAnswer.title")!);
-      return false;
-    },
-  }));
+  const answerQuery = useChallengeAnswer({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
 
-  const updateAnswerMutation = useMutation(() => ({
-    mutationFn: (newAnswer: string) => {
-      if (!challengeStore.current) {
-        return Promise.reject("No challenge selected");
-      }
-      return updateChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id, newAnswer);
-    },
+  const updateAnswerMutation = useUpdateChallengeAnswerMutation({
     onSuccess: () => {
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
       setInEdit(false);
-      if (props.onStateChange) props.onStateChange();
       answerQuery.refetch();
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+      });
     },
-    onError: (err: Error) => {
-      handleHttpError(err, t("general.actions.save.status.fail")!);
-    },
-  }));
+  });
 
   return (
     <div class="min-h-full flex-1 flex flex-col space-y-2 p-3 lg:p-6 items-center">
       <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold w-full">
         <span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" />
         <span class="flex-1 text-start">{t("challenge.answer.title")}</span>
-        <Show when={isGameAdmin()}>
+        <Show when={isAdminOfGame(game.data)}>
           <Show
             when={!inEdit()}
             fallback={
               <Button
                 size="sm"
                 level="primary"
-                onClick={() => updateAnswerMutation.mutate(answer())}
+                onClick={() =>
+                  updateAnswerMutation.mutate({
+                    game_id: props.gameId,
+                    challenge_id: props.challengeId,
+                    answer: answer(),
+                  })
+                }
                 loading={updateAnswerMutation.isPending}
                 disabled={updateAnswerMutation.isPending}
               >
@@ -94,7 +82,7 @@ export default function (props: { onStateChange?: (challenge?: Challenge) => voi
       >
         <Suspense
           fallback={
-            <article class="article !max-w-5xl w-full">
+            <article class="article max-w-5xl! w-full">
               <p>
                 <LoadingTips />
               </p>

@@ -1,16 +1,20 @@
+import { useAccountProfile } from "@api/account";
+import { useGame } from "@api/game";
+import { usePlatformInfo } from "@api/platform";
+import { useSelfTeam } from "@api/team";
 import LogoAnimate from "@assets/animates/logo-animate";
+import { unicodeStrDisplayLength } from "@lib/shell/pty";
 import { mediaPath } from "@lib/utils/media";
 import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useLocation, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import {
-  canAccessChallenges,
-  canParticipate,
   currentTimelinePeriod,
-  gameStore,
-  inProgress,
-  isGameAdmin,
+  isAdminOfGame,
+  isGameCanParticipate,
+  isGameInProgress,
+  isPlayerCanAccessChallenges,
 } from "@storage/game";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -25,49 +29,88 @@ import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, Show, Switch, untrack } from "solid-js";
+import { Transition, TransitionGroup } from "solid-transition-group";
 import I18nBox, { I18nBoxContent } from "./i18n-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
 import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import UserBox from "./user-box";
 
-function GlobalTitleLink() {
+function TitleLink() {
+  const platformInfo = usePlatformInfo();
+  const params = useParams();
   const location = useLocation();
-  const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
-  return (
-    <Link ghost href={inDocs() ? "/docs" : "/"}>
-      <LogoAnimate class="hidden lg:inline-block" width={24} height={24} />
-      <span />
-      <span>
-        {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
-      </span>
-    </Link>
-  );
-}
+  const gameId = () => Number.parseInt(params.game || "", 10);
+  const game = useGame({ id: () => gameId(), enabled: () => !!gameId() });
+  const link = createMemo(() => {
+    if (game.data && game.data.host_type === HostType.Game && params.game) {
+      return `/games/${game.data.id}/`;
+    }
+    return "/";
+  });
 
-function GameTitleLink() {
+  const name = createMemo(() => {
+    if (game.data && game.data.host_type === HostType.Game && location.pathname.startsWith("/games/")) {
+      return game.data.name;
+    }
+    return platformInfo.data?.name || t("platform.name");
+  });
+
+  const [typedName, setTypedName] = createSignal("");
+  const [inClear, setInClear] = createSignal(false);
+
+  createEffect(() => {
+    if (name()) {
+      untrack(() => {
+        setInClear(true);
+        setTimeout(() => {
+          setTypedName(name());
+          setInClear(false);
+        }, 500);
+      });
+    }
+  });
+
   return (
-    <Link ghost href={`/games/${gameStore.current?.id}/`}>
-      <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
-        <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
-      </Show>
+    <Link href={link()} ghost>
+      <div class="w-6 h-6">
+        <Transition name="fade-group-flip" mode="outin">
+          <Switch fallback={<LogoAnimate class="fade-group-flip hidden lg:inline-block" width={24} height={24} />}>
+            <Match when={game.data?.logo && location.pathname.startsWith("/games/")}>
+              <img class="fade-group-flip" src={mediaPath(game.data?.logo)} width={24} height={24} alt="CTF" />
+            </Match>
+          </Switch>
+        </Transition>
+      </div>
       <span />
-      <span>{gameStore.current?.name}</span>
+      <div
+        class={clsx(
+          "transition-all duration-500 text-nowrap overflow-hidden border-r-2",
+          inClear() ? "border-r-layer-content" : "border-r-transparent"
+        )}
+        style={{
+          "max-width": inClear() ? "0px" : `${unicodeStrDisplayLength(typedName()) / 2 + 0.5}rem`,
+        }}
+      >
+        {typedName()}
+      </div>
     </Link>
   );
 }
 
 function GlobalNav(props: { size: "sm" | "md" }) {
+  const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const platformInfo = usePlatformInfo();
   return (
-    <>
+    <div class="fade-group-dive-left flex flex-row items-center space-x-2">
       <Show
-        when={!platformStore.config.zen_game}
+        when={!platformInfo.data?.zen_game}
         fallback={
           <li class="nav whitespace-nowrap">
             <Link
               class="w-full"
-              href={`/games/${platformStore.config.zen_game}`}
+              href={`/games/${platformInfo.data?.zen_game}`}
               activeMatch="partial"
               ghost
               justify="start"
@@ -107,10 +150,10 @@ function GlobalNav(props: { size: "sm" | "md" }) {
       <Show
         when={
           accountStore.token &&
-          accountStore.info &&
-          (accountStore.info?.permissions.includes(Permission.Statistics) ||
-            accountStore.info?.permissions.includes(Permission.DevOps) ||
-            accountStore.info?.permissions.includes(Permission.User))
+          accountInfo.data &&
+          (accountInfo.data?.permissions.includes(Permission.Statistics) ||
+            accountInfo.data?.permissions.includes(Permission.DevOps) ||
+            accountInfo.data?.permissions.includes(Permission.User))
         }
       >
         <li class="nav whitespace-nowrap">
@@ -120,23 +163,33 @@ function GlobalNav(props: { size: "sm" | "md" }) {
           </Link>
         </li>
       </Show>
-    </>
+    </div>
   );
 }
 
 function GameNav(props: { size: "sm" | "md" }) {
+  const params = useParams();
+  const gameId = Number.parseInt(params.game || "", 10);
+  const game = useGame({ id: () => gameId, enabled: () => !!gameId });
+  const team = useSelfTeam({
+    game_id: () => gameId,
+    enabled: () => !!accountStore.token && !!game.data && !isAdminOfGame(game.data),
+    silenced: true,
+  });
+  const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const platformInfo = usePlatformInfo();
   return (
-    <>
+    <div class="fade-group-dive-left flex flex-row items-center space-x-2">
       <li class="nav whitespace-nowrap">
         <Link
           class="w-full"
-          href={`/games/${gameStore.current?.id}/challenges`}
+          href={`/games/${gameId}/challenges`}
           activeMatch="partial"
           ghost
           justify="start"
           size={props.size}
-          disabled={!canAccessChallenges()[0]}
-          title={canAccessChallenges()[1]}
+          disabled={!isPlayerCanAccessChallenges(game.data)[0]}
+          title={isPlayerCanAccessChallenges(game.data)[1]}
         >
           <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t("challenge.title")}</span>
@@ -145,7 +198,7 @@ function GameNav(props: { size: "sm" | "md" }) {
       <li class="nav whitespace-nowrap">
         <Link
           class="w-full"
-          href={`/games/${gameStore.current?.id}/scoreboard`}
+          href={`/games/${gameId}/scoreboard`}
           activeMatch="partial"
           ghost
           justify="start"
@@ -156,11 +209,11 @@ function GameNav(props: { size: "sm" | "md" }) {
         </Link>
       </li>
       <Switch>
-        <Match when={gameStore.team}>
+        <Match when={team.data}>
           <li class="nav whitespace-nowrap">
             <Link
               class="w-full"
-              href={`/games/${gameStore.current?.id}/teams/${gameStore.team?.id}`}
+              href={`/games/${gameId}/teams/${team.data?.id}`}
               activeMatch="partial"
               ghost
               justify="start"
@@ -171,11 +224,11 @@ function GameNav(props: { size: "sm" | "md" }) {
             </Link>
           </li>
         </Match>
-        <Match when={canParticipate()}>
+        <Match when={isGameCanParticipate(game.data)}>
           <li class="nav whitespace-nowrap">
             <Link
               class="w-full"
-              href={`/games/${gameStore.current?.id}/teams/choose`}
+              href={`/games/${gameId}/teams/choose`}
               activeMatch="partial"
               ghost
               justify="start"
@@ -187,11 +240,11 @@ function GameNav(props: { size: "sm" | "md" }) {
           </li>
         </Match>
       </Switch>
-      <Show when={isGameAdmin()}>
+      <Show when={isAdminOfGame(game.data)}>
         <li class="nav whitespace-nowrap">
           <Link
             class="w-full"
-            href={`/games/${gameStore.current?.id}/admin`}
+            href={`/games/${gameId}/admin`}
             activeMatch="partial"
             ghost
             justify="start"
@@ -203,15 +256,15 @@ function GameNav(props: { size: "sm" | "md" }) {
         </li>
       </Show>
       <Show
-        when={!platformStore.config.zen_game}
+        when={!platformInfo.data?.zen_game}
         fallback={
           <Show
             when={
               accountStore.token &&
-              accountStore.info &&
-              (accountStore.info?.permissions.includes(Permission.Statistics) ||
-                accountStore.info?.permissions.includes(Permission.DevOps) ||
-                accountStore.info?.permissions.includes(Permission.User))
+              accountInfo.data &&
+              (accountInfo.data?.permissions.includes(Permission.Statistics) ||
+                accountInfo.data?.permissions.includes(Permission.DevOps) ||
+                accountInfo.data?.permissions.includes(Permission.User))
             }
           >
             <li class="nav whitespace-nowrap">
@@ -230,7 +283,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           </Link>
         </li>
       </Show>
-    </>
+    </div>
   );
 }
 
@@ -238,9 +291,11 @@ export default function TitleBar() {
   const [additionalMobileBox, setAdditionalMobileBox] = createSignal<"wsrx" | "notification" | "theme" | "i18n" | null>(
     null
   );
+  const platformInfo = usePlatformInfo();
   const params = useParams();
   const location = useLocation();
-  const inDocs = () => location.pathname.startsWith("/docs");
+  const gameId = () => Number.parseInt(params.game || "NaN", 10);
+  const game = useGame({ id: () => gameId(), enabled: () => !!gameId() });
   const [offlineLoading, setOfflineLoading] = createSignal(false);
   const [bannerRead, setBannerRead] = createSignal(false);
   function reloadPage() {
@@ -254,12 +309,18 @@ export default function TitleBar() {
     <>
       <div id="page-top" class="print:hidden" />
       <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-        <span>{inDocs() ? t("docs.tip") : platformStore.config.name || t("platform.name")}</span>
+        <span>{platformInfo.data?.name || t("platform.name")}</span>
         <span class="flex-1" />
         <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
       </div>
-      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur-sm z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
-        <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
+      <div
+        class={clsx(
+          "w-screen bg-layer/60 backdrop-blur-sm z-50",
+          "print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden",
+          "sticky top-0 left-0 transition-colors duration-700 flex flex-col"
+        )}
+      >
+        <div class="bg-layer-content/5 border-b border-b-layer-content/15 w-full h-16 px-2 py-0 flex flex-row items-center relative">
           <div class="lg:hidden">
             <Popover
               btnContent={<span class="shrink-0 icon-[fluent--navigation-20-regular] w-5 h-5" />}
@@ -273,10 +334,10 @@ export default function TitleBar() {
                     <Switch>
                       <Match
                         when={
-                          gameStore.current &&
-                          gameStore.current.host_type === HostType.Game &&
                           params.game &&
-                          location.pathname.startsWith(`/games/${params.game}`)
+                          game.data &&
+                          game.data.host_type === HostType.Game &&
+                          location.pathname.startsWith("/games/")
                         }
                       >
                         <GameNav size="sm" />
@@ -352,83 +413,67 @@ export default function TitleBar() {
               </div>
             </Popover>
           </div>
-          <Switch fallback={<GlobalTitleLink />}>
-            <Match
-              when={
-                gameStore.current &&
-                gameStore.current.host_type === HostType.Game &&
-                params.game &&
-                location.pathname.startsWith(`/games/${params.game}`)
-              }
-            >
-              <GameTitleLink />
-            </Match>
-          </Switch>
+          <TitleLink />
           <div class="w-4" />
           <ul class="lg:flex flex-row space-x-2 items-center hidden">
-            <Switch fallback={<LoadingTips class="opacity-60" />}>
-              <Match
-                when={
-                  platformStore.isOnline &&
-                  gameStore.current &&
-                  gameStore.current.host_type === HostType.Game &&
-                  params.game &&
-                  location.pathname.startsWith(`/games/${params.game}`)
-                }
-              >
-                <GameNav size="md" />
-              </Match>
-              <Match when={inDocs()}>
-                <span class="flex flex-row items-center space-x-2">
-                  <span class="opacity-60">{t("docs.forVersion")}:</span>
-                  <span class="font-bold opacity-80">{platformStore.version}</span>
-                </span>
-              </Match>
-              <Match when={platformStore.isOnline}>
-                <GlobalNav size="md" />
-              </Match>
-            </Switch>
+            <Transition name="fade-group-dive-left" mode="outin">
+              <Switch fallback={<LoadingTips class="fade-group-dive-left opacity-60" />}>
+                <Match
+                  when={
+                    platformStore.isOnline &&
+                    game.data &&
+                    game.data.host_type === HostType.Game &&
+                    location.pathname.startsWith("/games")
+                  }
+                >
+                  <GameNav size="md" />
+                </Match>
+                <Match when={platformStore.isOnline}>
+                  <GlobalNav size="md" />
+                </Match>
+              </Switch>
+            </Transition>
           </ul>
           <div class="flex-1" />
           <div class="flex flex-row space-x-2">
             <div class="hidden lg:flex flex-row space-x-2">
-              <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
-                <Switch>
-                  <Match when={gameStore.current && gameStore.current.host_type === HostType.Training}>
-                    <div class="grid grid-cols-1 items-center justify-center px-4 relative">
-                      <div>
-                        <span class="space-x-2 truncate max-w-full">{t("training.openForever")}</span>
-                        <TimeProgress
-                          class="w-full"
-                          startAt={gameStore.current!.start_at}
-                          endAt={gameStore.current!.start_at}
-                        />
-                      </div>
-                    </div>
-                  </Match>
-                  <Match when={inProgress()}>
-                    <div class="grid grid-cols-1 items-center justify-center px-4 relative">
-                      <div>
-                        <div class="space-x-2 truncate max-w-full">
-                          <Show when={currentTimelinePeriod()?.end_at}>
-                            <span>[</span>
-                            <span class="font-bold text-primary">{currentTimelinePeriod()?.label ?? ""}</span>
-                            <Timer class="text-primary" end={currentTimelinePeriod()!.end_at} hasHours />
-                            <span>]</span>
-                          </Show>
-                          <Timer end={gameStore.current!.end_at} hasHours />
+              <TransitionGroup name="fade-group-right">
+                <Show when={platformStore.isOnline && accountStore.token !== null && game.data}>
+                  <Switch>
+                    <Match when={game.data && game.data.host_type === HostType.Training}>
+                      <div class="fade-group-right grid grid-cols-1 items-center justify-center px-4 relative">
+                        <div>
+                          <span class="space-x-2 truncate max-w-full">{t("training.openForever")}</span>
+                          <TimeProgress
+                            class="w-full"
+                            startAt={game.data?.start_at || DateTime.now()}
+                            endAt={game.data?.start_at || DateTime.now()}
+                          />
                         </div>
-                        <TimeProgress
-                          class="w-full"
-                          startAt={gameStore.current!.start_at}
-                          endAt={gameStore.current!.end_at}
-                        />
                       </div>
-                    </div>
-                  </Match>
-                </Switch>
-                <InstanceBox />
-              </Show>
+                    </Match>
+                    <Match when={isGameInProgress(game.data)}>
+                      <div class="fade-group-right grid grid-cols-1 items-center justify-center px-4 relative">
+                        <div>
+                          <div class="space-x-2 truncate max-w-full">
+                            <Show when={currentTimelinePeriod(game.data)?.end_at}>
+                              <span>[</span>
+                              <span class="font-bold text-primary">
+                                {currentTimelinePeriod(game.data)?.label ?? ""}
+                              </span>
+                              <Timer class="text-primary" end={currentTimelinePeriod(game.data)!.end_at} hasHours />
+                              <span>]</span>
+                            </Show>
+                            <Timer end={game.data!.end_at} hasHours />
+                          </div>
+                          <TimeProgress class="w-full" startAt={game.data!.start_at} endAt={game.data!.end_at} />
+                        </div>
+                      </div>
+                    </Match>
+                  </Switch>
+                  <InstanceBox />
+                </Show>
+              </TransitionGroup>
               <NotificationBox />
               <ThemeBox />
               <I18nBox />
@@ -456,15 +501,18 @@ export default function TitleBar() {
               </Match>
             </Switch>
           </div>
-          <Show when={platformStore.config.highlight_banner && !bannerRead()}>
-            <div class="absolute left-0 right-0 top-16 h-12 bg-primary/30 flex items-center px-2 space-x-2 backdrop-blur-lg">
-              <span class="shrink-0 icon-[fluent--warning-20-filled] mx-2" />
-              <span class="font-bold flex-1 truncate">{platformStore.config.highlight_banner}</span>
-              <Button ghost size="sm" onClick={() => setBannerRead(true)}>
-                <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
-              </Button>
-            </div>
-          </Show>
+        </div>
+        <div
+          class={clsx(
+            platformInfo.data?.highlight_banner && !bannerRead() ? "h-12" : "h-0",
+            "transition-all overflow-hidden bg-primary/30 flex items-center px-2 space-x-2 backdrop-blur-lg"
+          )}
+        >
+          <span class="shrink-0 icon-[fluent--warning-20-filled] mx-2" />
+          <span class="font-bold flex-1 truncate">{platformInfo.data?.highlight_banner}</span>
+          <Button square ghost size="sm" onClick={() => setBannerRead(true)}>
+            <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
+          </Button>
         </div>
       </div>
     </>

@@ -1,6 +1,5 @@
 use std::{net::IpAddr, sync::Arc};
 
-use async_nats::jetstream::consumer::pull::Stream;
 use axum::{
   body::Bytes,
   extract::ws::{Message, WebSocket},
@@ -11,7 +10,6 @@ use futures::{SinkExt, StreamExt};
 use tokio::sync::{RwLock, broadcast};
 
 pub mod events;
-mod worker;
 pub use events::Event;
 pub mod traits;
 use tracing::{info, warn};
@@ -95,7 +93,7 @@ impl EventManager {
     self.tx.send(Broadcast::Publish(Box::new(message))).ok();
   }
 
-  pub async fn heartbeat(&self) {
+  pub async fn cry(&self) {
     loop {
       self.tx.send(Broadcast::Heartbeat).ok();
       tokio::time::sleep(std::time::Duration::from_secs(10)).await;
@@ -103,11 +101,6 @@ impl EventManager {
   }
 }
 
-pub async fn initialize(stream: Stream) -> EventManager {
-  let manager = EventManager::new();
-  let future = worker::event_pusher(stream, manager.clone());
-  tokio::spawn(future);
-  let heartbeater = manager.clone();
-  tokio::spawn(async move { heartbeater.heartbeat().await });
-  manager
+pub fn initialize() -> EventManager {
+  EventManager::new()
 }

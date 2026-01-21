@@ -390,6 +390,10 @@
       "hideMaker": {
         "disabled": "你的許可證不允許隱藏此項",
         "label": "隱藏開發者信息"
+      },
+      "zenGame": {
+        "label": "獨立比賽模式",
+        "placeholder": "選擇比賽……"
       }
     },
     "logs": {
@@ -474,6 +478,7 @@
     "noArchives": "沒有歸檔的往期賽事",
     "placeholder": "開始今日份的訓練！",
     "openForever": "永久開放",
+    "gotoGamePage": "查看比賽信息",
     "errors": {
       "fetchList": {
         "title": "獲取練習場列表失敗"
@@ -500,8 +505,7 @@
         "placeholder": "請輸入簡介",
         "required": "簡介不能為空"
       }
-    },
-    "gotoGamePage": "查看比賽資訊"
+    }
   },
   "calendar": {
     "day": {
@@ -1330,6 +1334,9 @@
       "errors": {
         "fetchCheckerScript": {
           "title": "獲取評測腳本失敗"
+        },
+        "fetchScript": {
+          "title": "獲取腳本配置失敗"
         }
       }
     },
@@ -1583,7 +1590,11 @@
       },
       "registeredAt": {
         "label": "註冊時間"
-      }
+      },
+      "avatar": {
+        "uploadHint": "再點一下將頭像文件上傳到服務器哦"
+      },
+      "saveHint": "記得保存！！！"
     },
     "login": {
       "title": "登錄",
@@ -2107,6 +2118,9 @@
     "errors": {
       "fetchNodes": {
         "title": "獲取集群節點信息失敗"
+      },
+      "fetchConfig": {
+        "title": "獲取集群配置失敗"
       }
     }
   },

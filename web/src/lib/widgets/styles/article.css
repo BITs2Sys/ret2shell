@@ -103,7 +103,7 @@ nav.toc {
 }
 
 nav.toc ol {
-  @apply !m-0 !p-0 !pl-2;
+  @apply m-0! p-0! pl-2!;
 }
 
 nav.toc li {
@@ -120,7 +120,7 @@ article.article pre * {
 }
 
 article.article pre {
-  @apply bg-layer-content/5 text-layer-content backdrop-blur-sm rounded-md !mx-0 !min-w-0 !text-wrap;
+  @apply bg-layer-content/5 text-layer-content backdrop-blur-sm rounded-md mx-0! min-w-0! text-wrap!;
 }
 
 article.article pre > code {
@@ -128,7 +128,7 @@ article.article pre > code {
 }
 
 code:not(pre code) {
-  @apply !text-[1em] !break-words !bg-layer-content/10 rounded-xs !mx-1 !px-1 !font-normal;
+  @apply text-[1em]! break-words! bg-layer-content/10! rounded-xs mx-1! px-1! font-normal!;
 }
 
 pre code {
@@ -167,8 +167,8 @@ pre code > [data-highlighted-line] {
 }
 
 pre button.rehype-pretty-copy {
-  @apply !absolute !top-2 !right-2;
-  @apply !w-8 !h-8 flex items-center justify-center;
+  @apply absolute! top-2! right-2!;
+  @apply w-8! h-8! flex items-center justify-center;
   @apply text-success;
 
   span.ready {
@@ -195,7 +195,7 @@ html[data-style="light"] {
 }
 
 article.article img {
-  @apply !rounded-sm;
+  @apply rounded-sm!;
 }
 
 article > *:first-child {
@@ -208,17 +208,17 @@ article > h3 > a,
 article > h4 > a,
 article > h5 > a,
 article > h6 > a {
-  @apply !no-underline;
+  @apply no-underline!;
 }
 
 article > h1 > a,
 article > h2 > a {
-  @apply !font-bold;
+  @apply font-bold!;
 }
 
 article > h3 > a,
 article > h4 > a {
-  @apply !font-semibold;
+  @apply font-semibold!;
 }
 
 article > h1 > a:hover::after,
@@ -232,7 +232,7 @@ article > h6 > a:hover::after {
 }
 
 article a:not(h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a) {
-  @apply text-primary !no-underline hover:!underline;
+  @apply text-primary no-underline! hover:underline!;
 }
 
 article blockquote {
@@ -269,15 +269,15 @@ article blockquote {
   border-left-color: var(--quote-color) !important;
   background-color: var(--quote-bg) !important;
 
-  @apply !not-italic text-layer-content/80 border-l-[5px] rounded-sm !px-4 !py-3 !mx-0 backdrop-blur-xs;
+  @apply not-italic! text-layer-content/80 border-l-[5px] rounded-sm px-4! py-3! mx-0! backdrop-blur-xs;
 
   & figure,
   & pre {
-    @apply !m-0;
+    @apply m-0!;
   }
 
   & p {
-    @apply !mx-0 !my-2;
+    @apply mx-0! my-2!;
   }
 
   &.markdown-alert[data-alert-title] > p:first-child {
@@ -286,16 +286,16 @@ article blockquote {
   }
 
   & > *:first-child {
-    @apply !mt-0;
-    @apply before:!content-[''] after:!content-[''];
+    @apply mt-0!;
+    @apply before:content-['']! after:content-['']!;
   }
 
   & > * {
-    @apply !mx-0;
+    @apply mx-0!;
   }
 
   & > *:last-child {
-    @apply !mb-0;
+    @apply mb-0!;
   }
 
   /* & pre code {

@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
+import { createRoot } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 
 export type ToastMessage = {
@@ -16,9 +17,14 @@ export type ToastMessage = {
   shown?: boolean;
 };
 
-export const [toastStore, setToastStore] = createStore({
-  toasts: [] as ToastMessage[],
-});
+const toastRoot = createRoot(() =>
+  createStore({
+    toasts: [] as ToastMessage[],
+  })
+);
+
+export const toastStore = toastRoot[0];
+export const setToastStore = toastRoot[1];
 
 export function addToast(toast: ToastMessage): string {
   const id = nanoid();

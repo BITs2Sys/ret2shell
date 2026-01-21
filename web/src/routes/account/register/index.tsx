@@ -1,5 +1,4 @@
-import { handleHttpError } from "@api";
-import { register, registerWithOAuth } from "@api/account";
+import { useRegisterMutation, useRegisterWithOAuthMutation } from "@api/account";
 import { deunicode, leet } from "@api/rpc";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import Captcha from "@blocks/captcha";
@@ -8,7 +7,6 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Input from "@widgets/input";
@@ -31,33 +29,30 @@ export default function () {
     return null;
   }
   const [form, { Form, Field }] = createForm<RegisterForm>();
-  const [loading, setLoading] = createSignal(false);
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
   let accountInputRef: HTMLInputElement;
   const [searchParams, _] = useSearchParams();
 
+  function onSuccess() {
+    navigate("/", { replace: true });
+  }
+
+  function onError() {
+    setTimestamp(DateTime.now().toMillis());
+  }
+
+  const mutation = useRegisterMutation({ onSuccess, onError });
+  const oauthMutation = useRegisterWithOAuthMutation({ onSuccess, onError });
+
   function onSubmit(result: RegisterForm) {
-    setLoading(true);
-    setTimeout(async () => {
-      try {
-        if (searchParams.token && searchParams.auth_key) {
-          await registerWithOAuth(searchParams.token as string, result);
-        } else {
-          await register(result);
-        }
-        addToast({
-          level: "success",
-          description: t("account.register.status.success.message")!,
-          duration: 5000,
-          // img: xdsecMascotHappy,
-        });
-        navigate("/", { replace: true });
-      } catch (err) {
-        handleHttpError(err as Error, t("account.register.errors.register.title")!);
-        setTimestamp(DateTime.now().toMillis());
-      }
-      setLoading(false);
-    }, 500);
+    if (searchParams.token && searchParams.auth_key) {
+      oauthMutation.mutate({
+        token: searchParams.token as string,
+        data: result,
+      });
+    } else {
+      mutation.mutate(result);
+    }
   }
 
   return (
@@ -83,9 +78,9 @@ export default function () {
               <Field
                 name="nickname"
                 validate={[
-                  required(t("account.form.nickname.required")!),
-                  minLength(2, t("account.form.nickname.minLength")!),
-                  maxLength(32, t("account.form.nickname.maxLength")!),
+                  required(t("account.form.nickname.required")),
+                  minLength(2, t("account.form.nickname.minLength")),
+                  maxLength(32, t("account.form.nickname.maxLength")),
                 ]}
               >
                 {(field, props) => (
@@ -112,11 +107,11 @@ export default function () {
               <Field
                 name="account"
                 validate={[
-                  required(t("account.form.account.required")!),
-                  minLength(4, t("account.form.account.minimumLength")!),
-                  maxLength(32, t("account.form.account.maximumLength")!),
+                  required(t("account.form.account.required")),
+                  minLength(4, t("account.form.account.minimumLength")),
+                  maxLength(32, t("account.form.account.maximumLength")),
                   // only ascii visible characters, no whitespaces
-                  pattern(/^[0-9a-zA-Z_]*$/, t("account.form.account.invalid")!),
+                  pattern(/^[0-9a-zA-Z_]*$/, t("account.form.account.invalid")),
                 ]}
               >
                 {(field, props) => (
@@ -133,7 +128,7 @@ export default function () {
                     ref={accountInputRef!}
                     extraBtn={
                       <Button
-                        class="!rounded-l-none"
+                        class="rounded-l-none!"
                         type="button"
                         onClick={async () => {
                           if (accountInputRef! && accountInputRef.value) {
@@ -152,7 +147,7 @@ export default function () {
             </div>
             <Field
               name="email"
-              validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
+              validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid"))]}
             >
               {(field, props) => (
                 <Input
@@ -172,12 +167,12 @@ export default function () {
               <Field
                 name="password"
                 validate={[
-                  required(t("account.form.password.required")!),
-                  minLength(8, t("account.form.password.minimumLength")!),
+                  required(t("account.form.password.required")),
+                  minLength(8, t("account.form.password.minimumLength")),
                   pattern(
                     // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                    t("account.form.password.tooWeak")!
+                    t("account.form.password.tooWeak")
                   ),
                 ]}
               >
@@ -201,8 +196,8 @@ export default function () {
                   <Field
                     name="captcha_answer"
                     validate={[
-                      required(t("captcha.form.answer.required")!),
-                      minLength(4, t("captcha.form.answer.minimumLength")!),
+                      required(t("captcha.form.answer.required")),
+                      minLength(4, t("captcha.form.answer.minimumLength")),
                     ]}
                   >
                     {(answerField, props) => (
@@ -221,7 +216,13 @@ export default function () {
                 )}
               </Field>
             </div>
-            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+            <Button
+              type="submit"
+              level="primary"
+              class="mt-4!"
+              loading={mutation.isPending || oauthMutation.isPending}
+              disabled={mutation.isPending || oauthMutation.isPending}
+            >
               {t("account.register.title")}
             </Button>
           </Form>

@@ -1,57 +1,43 @@
-import { handleHttpError } from "@api";
-import { bindWithOAuth, getOAuthProviders, loginWithOAuth } from "@api/account";
+import { useBindWithOAuthMutation, useLoginWithOAuthMutation, useOAuthProviders } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import logo from "@assets/logo-gray.svg";
 import { mediaPath } from "@lib/utils/media";
-import type { OAuthProvider } from "@models/oauth-provider";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
-import { createSignal, onMount } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 
 export default function () {
   const [animate, setAnimate] = createSignal(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, _] = useSearchParams();
-  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
-  onMount(async () => {
-    try {
-      setOAuthServices(await getOAuthProviders());
-    } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
+  const oauthProviders = useOAuthProviders();
+
+  createEffect(() => {
+    if (!oauthProviders.isLoading && oauthProviders.data) {
+      setTimeout(() => {
+        setAnimate(true);
+      }, 100);
+      setTimeout(() => {
+        handleAction();
+      }, 2000);
     }
-    setTimeout(() => {
-      setAnimate(true);
-    }, 100);
-    setTimeout(() => {
-      handleAction();
-    }, 2000);
   });
 
   const brand = () => {
     const service = searchParams.service;
-    const avatar = oauthServices().find((s) => s.provider === service)?.avatar;
+    const avatar = oauthProviders.data?.find((s) => s.provider === service)?.avatar;
     if (avatar) return mediaPath(avatar);
     return logo;
   };
 
-  async function handleAction() {
-    if (accountStore.token) {
-      handleBindWithOAuth();
-    } else {
-      handleLoginWithOAuth();
-    }
-  }
-
-  async function handleLoginWithOAuth() {
-    try {
-      const resp = await loginWithOAuth(location.search);
+  const loginWithOAuthMutation = useLoginWithOAuthMutation({
+    onSuccess: (resp) => {
       if (resp.token && resp.data) {
         navigate(`/account/register?token=${resp.token}&auth_key=${resp.data.auth_key as string} `, {
           replace: true,
@@ -59,29 +45,30 @@ export default function () {
         return;
       }
       navigate("/", { replace: true });
-      addToast({
-        level: "success",
-        description: t("account.login.status.success.message")!,
-        duration: 5000,
-        // img: xdsecMascotHappy,
-      });
-    } catch (err) {
-      handleHttpError(err as Error, t("account.login.errors.login.title")!);
+    },
+    onError: () => {
       setTimeout(() => {
         navigate("/account/login", { replace: true });
       });
-    }
-  }
+    },
+  });
 
-  async function handleBindWithOAuth() {
-    try {
-      await bindWithOAuth(location.search);
+  const bindWithOAuthMutation = useBindWithOAuthMutation({
+    onSuccess: () => {
       navigate("/account/settings/oauth", { replace: true });
-    } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.errors.bind.title")!);
+    },
+    onError: () => {
       setTimeout(() => {
         navigate("/account/settings/oauth", { replace: true });
       });
+    },
+  });
+
+  async function handleAction() {
+    if (accountStore.token) {
+      bindWithOAuthMutation.mutate(location.search);
+    } else {
+      loginWithOAuthMutation.mutate(location.search);
     }
   }
 

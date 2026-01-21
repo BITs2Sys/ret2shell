@@ -33,7 +33,7 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             "flex flex-row border border-transparent",
             size === "md" ? "rounded-lg" : "rounded-md",
             "has-[input:focus]:outline-2 has-[input:focus]:outline-offset-2 has-[input:focus]:outline-layer-content/60",
-            inputProps.error && "!border-error !outline-error"
+            inputProps.error && "border-error! outline-error!"
           )}
         >
           <Show when={props.icon}>
@@ -56,8 +56,8 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
             class={clsx(
               // input-sm input-md
               `input w-0 flex-1 input-${size} border-0 outline-none`,
-              inputProps.icon && "!rounded-l-none",
-              (others.type === "password" || inputProps.extraBtn) && "!rounded-r-none"
+              inputProps.icon && "rounded-l-none!",
+              (others.type === "password" || inputProps.extraBtn) && "rounded-r-none!"
             )}
             type={type()}
             on:blur={() => setFocusing(false)}
@@ -66,7 +66,7 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
           <Show when={props.type === "password"}>
             {/* btn-sm btn-md */}
             <button
-              class={clsx("btn", "!rounded-l-none", `btn-${size}`, "justify-center", props.extraBtn && "!rounded-none")}
+              class={clsx("btn", "rounded-l-none!", `btn-${size}`, "justify-center", props.extraBtn && "rounded-none!")}
               onClick={() => setType(type() === "password" ? "text" : "password")}
               type="button"
             >

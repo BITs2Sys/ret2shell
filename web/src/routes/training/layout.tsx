@@ -1,17 +1,13 @@
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
-import { setGameStore } from "@storage/game";
 import { breakpoints } from "@storage/theme";
 import Button from "@widgets/button";
 import clsx from "clsx";
-import { createSignal, type JSX, onCleanup, Show } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
-  onCleanup(() => {
-    setGameStore({ current: null, games: [], preload: null });
-  });
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (

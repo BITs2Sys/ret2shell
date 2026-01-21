@@ -1,29 +1,17 @@
-import { handleHttpError } from "@api";
-import { getPlatformStatistics, type PlatformStatistics } from "@api/platform";
+import { usePlatformInfo, usePlatformStatistics } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import { HostType } from "@models/game";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
 import { DateTime } from "luxon";
-import { createSignal, onMount, Show } from "solid-js";
+import { Show } from "solid-js";
 
 export default function () {
-  const [loading, setLoading] = createSignal(true);
-  const [statistics, setStatistics] = createSignal(null as null | PlatformStatistics);
-  onMount(async () => {
-    try {
-      const resp = await getPlatformStatistics();
-      setStatistics(resp);
-    } catch (err) {
-      handleHttpError(err as Error, t("platform.statistics.errors.fetch.title")!);
-    }
-    setLoading(false);
-  });
-
+  const statistics = usePlatformStatistics();
+  const platformInfo = usePlatformInfo();
   return (
     <>
       <Title page={t("platform.statistics.title")} route="/admin/statistics" />
@@ -31,13 +19,13 @@ export default function () {
         <div class="flex md:col-span-6 lg:col-span-3 items-center justify-start space-x-12 px-3 lg:px-6 xl:px-9">
           <LogoAnimate class="m-0 w-16 h-16 md:w-32 md:h-32 xl:w-36 xl:h-36" />
           <h1 class="ml-6 text-2xl md:text-4xl xl:text-5xl font-bold">
-            {platformStore.config.name || t("platform.name")!}
+            {platformInfo.data?.name || t("platform.name")}
           </h1>
         </div>
         <Divider class="flex col-span-1 md:col-span-6 lg:hidden" />
         <div class="col-span-1 md:col-span-3 xl:col-span-3 h-48 p-3 xl:p-6 dir-ltr lg:dir-rtl flex flex-row items-center self-center max-md:justify-self-center max-md:min-w-[50vw] space-x-8">
           <div class="h-full aspect-square flex items-center justify-center">
-            <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
+            <Show when={!statistics.isLoading && statistics.data} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -60,26 +48,26 @@ export default function () {
                     name: t("game.title"),
                     data: [
                       {
-                        value: statistics()!.games.length === 0 ? 1 : 0,
+                        value: statistics.data?.games.length === 0 ? 1 : 0,
                         itemStyle: {
                           color: "#808080",
                         },
                       },
                       {
                         value:
-                          (statistics()!.games.filter((g) => g.host_type === HostType.Training).length *
-                            statistics()!
-                              .games.filter((g) => g.host_type === HostType.Game)
+                          (statistics.data!.games.filter((g) => g.host_type === HostType.Training).length *
+                            statistics
+                              .data!.games.filter((g) => g.host_type === HostType.Game)
                               .reduce((a, b) => a + b.teams, 0)) /
-                          statistics()!.games.length,
+                          statistics.data!.games.length,
                         name: t("training.title"),
                         itemStyle: {
                           color: "#0991ed",
                         },
                       },
                       {
-                        value: statistics()!
-                          .games.filter((g) => g.host_type === HostType.Game)
+                        value: statistics
+                          .data!.games.filter((g) => g.host_type === HostType.Game)
                           .reduce((a, b) => a + b.teams, 0),
                         name: t("game.title"),
                         itemStyle: {
@@ -91,11 +79,11 @@ export default function () {
                               color: "#0991ed",
                             },
                             name: t("game.pending"),
-                            value: statistics()!
-                              .games.filter((g) => g.host_type === HostType.Game && g.start_at > DateTime.now())
+                            value: statistics
+                              .data!.games.filter((g) => g.host_type === HostType.Game && g.start_at > DateTime.now())
                               .reduce((a, b) => a + b.teams, 0),
-                            children: statistics()!
-                              .games.filter((g) => g.host_type === HostType.Game && g.start_at > DateTime.now())
+                            children: statistics
+                              .data!.games.filter((g) => g.host_type === HostType.Game && g.start_at > DateTime.now())
                               .map((g) => ({
                                 value: g.teams,
                                 name: g.name,
@@ -106,16 +94,16 @@ export default function () {
                               color: "#17a750",
                             },
                             name: t("game.started"),
-                            value: statistics()!
-                              .games.filter(
+                            value: statistics
+                              .data!.games.filter(
                                 (g) =>
                                   g.host_type === HostType.Game &&
                                   g.start_at < DateTime.now() &&
                                   g.end_at > DateTime.now()
                               )
                               .reduce((a, b) => a + b.teams, 0),
-                            children: statistics()!
-                              .games.filter(
+                            children: statistics
+                              .data!.games.filter(
                                 (g) =>
                                   g.host_type === HostType.Game &&
                                   g.start_at < DateTime.now() &&
@@ -131,11 +119,11 @@ export default function () {
                               color: "#808080",
                             },
                             name: t("game.ended"),
-                            value: statistics()!
-                              .games.filter((g) => g.host_type === HostType.Game && g.end_at < DateTime.now())
+                            value: statistics
+                              .data!.games.filter((g) => g.host_type === HostType.Game && g.end_at < DateTime.now())
                               .reduce((a, b) => a + b.teams, 0),
-                            children: statistics()!
-                              .games.filter((g) => g.host_type === HostType.Game && g.end_at < DateTime.now())
+                            children: statistics
+                              .data!.games.filter((g) => g.host_type === HostType.Game && g.end_at < DateTime.now())
                               .map((g) => ({
                                 value: g.teams,
                                 name: g.name,
@@ -168,14 +156,14 @@ export default function () {
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">
-                {statistics()?.games.filter((g) => g.host_type === HostType.Training).length}
+                {statistics.data?.games.filter((g) => g.host_type === HostType.Training).length}
               </span>
               <span class="opacity-60">{t("training.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-error">
-                {statistics()?.games.filter((g) => g.host_type === HostType.Game).length}
+                {statistics.data?.games.filter((g) => g.host_type === HostType.Game).length}
               </span>
               <span class="opacity-60">{t("game.title")}</span>
             </div>
@@ -184,7 +172,7 @@ export default function () {
         <Divider class="hidden col-span-6 lg:flex" />
         <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
           <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
-            <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
+            <Show when={statistics.data && !statistics.isLoading} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -203,10 +191,10 @@ export default function () {
                         itemStyle: {
                           color: "#0991ed",
                         },
-                        value: statistics()!.users.valid,
+                        value: statistics.data!.users.valid,
                       },
                       {
-                        value: statistics()!.users.total - statistics()!.users.valid,
+                        value: statistics.data!.users.total - statistics.data!.users.valid,
                         itemStyle: {
                           color: "#db640e",
                         },
@@ -228,19 +216,19 @@ export default function () {
             <h3 class="font-bold flex items-center space-x-2">{t("user.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
+              <span class="font-bold text-3xl text-info">{statistics.data?.users.valid}</span>
               <span class="opacity-60">{t("user.status.valid.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl">{statistics()?.users.total}</span>
+              <span class="font-bold text-3xl">{statistics.data?.users.total}</span>
               <span class="opacity-60">{t("user.total")}</span>
             </div>
           </div>
         </div>
         <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
           <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
-            <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
+            <Show when={statistics.data && !statistics.isLoading} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -260,16 +248,16 @@ export default function () {
                         itemStyle: {
                           color: "#db640e",
                         },
-                        value: statistics()!.challenges.in_game,
+                        value: statistics.data!.challenges.total - statistics.data!.challenges.training,
                       },
                       {
-                        value: statistics()!.challenges.total - statistics()!.challenges.in_game,
+                        value: statistics.data!.challenges.training,
                         itemStyle: {
                           color: "#0991ed",
                         },
                       },
                       {
-                        value: statistics()!.challenges.total === 0 ? 1 : 0,
+                        value: statistics.data!.challenges.total === 0 ? 1 : 0,
                         itemStyle: {
                           color: "#808080",
                         },
@@ -291,19 +279,21 @@ export default function () {
             <h3 class="font-bold flex items-center space-x-2">{t("challenge.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl text-warning">{statistics()?.challenges.in_game}</span>
+              <span class="font-bold text-3xl text-warning">
+                {(statistics.data?.challenges.total ?? 0) - (statistics.data?.challenges.training ?? 0)}
+              </span>
               <span class="opacity-60">{t("challenge.inGame")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl">{statistics()?.challenges.total}</span>
+              <span class="font-bold text-3xl">{statistics.data?.challenges.total}</span>
               <span class="opacity-60">{t("challenge.total")}</span>
             </div>
           </div>
         </div>
         <div class="col-span-1 md:col-span-3 lg:col-span-2 h-32 lg:h-48 p-3 lg:p-6 flex flex-row items-center self-center max-md:justify-self-center max-md:w-xs max-md:max-w-full space-x-8">
           <div class="h-full aspect-square flex items-center justify-center lg:max-xl:me-0">
-            <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
+            <Show when={statistics.data && !statistics.isLoading} fallback={<Spin width={24} height={24} />}>
               <Chart
                 option={{
                   grid: {
@@ -323,16 +313,16 @@ export default function () {
                         itemStyle: {
                           color: "#17a750",
                         },
-                        value: statistics()!.submissions.solved,
+                        value: statistics.data!.submissions.solved,
                       },
                       {
-                        value: statistics()!.submissions.total - statistics()!.submissions.solved,
+                        value: statistics.data!.submissions.total - statistics.data!.submissions.solved,
                         itemStyle: {
                           color: "#db640e",
                         },
                       },
                       {
-                        value: statistics()!.submissions.total === 0 ? 1 : 0,
+                        value: statistics.data!.submissions.total === 0 ? 1 : 0,
                         itemStyle: {
                           color: "#808080",
                         },
@@ -354,18 +344,18 @@ export default function () {
             <h3 class="font-bold flex items-center space-x-2">{t("challenge.submission.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
+              <span class="font-bold text-3xl text-success">{statistics.data?.submissions.solved}</span>
               <span class="opacity-60">{t("challenge.submission.status.solved.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="shrink-0 icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
-              <span class="font-bold text-3xl">{statistics()?.submissions.total}</span>
+              <span class="font-bold text-3xl">{statistics.data?.submissions.total}</span>
               <span class="opacity-60">{t("challenge.submission.total")}</span>
             </div>
           </div>
         </div>
         <div class="col-span-1 md:col-span-6 min-h-64 lg:min-h-80 p-3 lg:p-6 flex flex-row items-center">
-          <Show when={statistics() && !loading()} fallback={<Spin width={24} height={24} />}>
+          <Show when={statistics.data && !statistics.isLoading} fallback={<Spin width={24} height={24} />}>
             <Chart
               option={{
                 grid: {
@@ -375,7 +365,7 @@ export default function () {
                   top: "48px",
                 },
                 title: {
-                  text: t("platform.statistics.instituteUsers.title")!,
+                  text: t("platform.statistics.instituteUsers.title"),
                   right: "center",
                 },
                 tooltip: {
@@ -392,9 +382,9 @@ export default function () {
                 toolbox: {},
                 xAxis: {
                   type: "category",
-                  data: statistics()!
-                    .users.institutes.map((i) => statistics()!.institutes.find((ii) => ii.id === i[0])!.name)
-                    .concat(t("platform.statistics.instituteUsers.others")!),
+                  data: statistics
+                    .data!.users.institutes.map((i) => statistics.data?.institutes.find((ii) => ii.id === i[0])?.name)
+                    .concat(t("platform.statistics.instituteUsers.others")),
                 },
                 yAxis: {
                   type: "value",
@@ -402,9 +392,11 @@ export default function () {
                 },
                 series: {
                   type: "bar",
-                  data: statistics()!
-                    .users.institutes.map((i) => i[1])
-                    .concat(statistics()!.users.total - statistics()!.users.institutes.reduce((a, b) => a + b[1], 0)),
+                  data: statistics
+                    .data!.users.institutes.map((i) => i[1])
+                    .concat(
+                      statistics.data!.users.total - statistics.data!.users.institutes.reduce((a, b) => a + b[1], 0)
+                    ),
                   barMaxWidth: 64,
                 },
               }}

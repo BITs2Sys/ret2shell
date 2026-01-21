@@ -1,14 +1,11 @@
-import { handleHttpError } from "@api";
-import { changePassword } from "@api/account";
+import { useChangePasswordMutation } from "@api/account";
 import { createForm, custom, getValue, minLength, pattern, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, resetUser } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
-import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
-import { createSignal } from "solid-js";
 
 type ChangePasswordForm = {
   old_password: string;
@@ -18,28 +15,19 @@ type ChangePasswordForm = {
 
 export default function () {
   const [form, { Form, Field }] = createForm<ChangePasswordForm>();
-  const [loading, setLoading] = createSignal(false);
   const navigate = useNavigate();
-  async function onSubmit(result: ChangePasswordForm) {
-    setLoading(true);
-    try {
-      await changePassword({
-        old_password: result.old_password,
-        new_password: result.new_password,
-      });
-      addToast({
-        level: "success",
-        description: t("general.actions.save.status.success")!,
-        duration: 5000,
-      });
+
+  const mutation = useChangePasswordMutation({
+    onSuccess: () => {
       setTimeout(() => {
         resetUser();
         navigate("/account/login");
       }, 1000);
-    } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
-    }
-    setLoading(false);
+    },
+  });
+
+  async function onSubmit(result: ChangePasswordForm) {
+    mutation.mutate(result);
   }
   return (
     <>
@@ -58,7 +46,7 @@ export default function () {
             autocomplete="username"
             disabled
           />
-          <Field name="old_password" validate={[required(t("account.form.oldPassword.required")!)]}>
+          <Field name="old_password" validate={[required(t("account.form.oldPassword.required"))]}>
             {(field, props) => (
               <Input
                 icon={<span class="shrink-0 icon-[fluent--password-20-regular] w-5 h-5" />}
@@ -76,12 +64,12 @@ export default function () {
           <Field
             name="new_password"
             validate={[
-              required(t("account.form.password.required")!),
-              minLength(8, t("account.form.password.minimumLength")!),
+              required(t("account.form.password.required")),
+              minLength(8, t("account.form.password.minimumLength")),
               pattern(
                 // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                t("account.form.password.tooWeak")!
+                t("account.form.password.tooWeak")
               ),
             ]}
           >
@@ -102,13 +90,13 @@ export default function () {
           <Field
             name="confirm_password"
             validate={[
-              required(t("account.form.password.confirmRequired")!),
+              required(t("account.form.password.confirmRequired")),
               custom((v) => {
                 if (v !== getValue(form, "new_password")) {
                   return false;
                 }
                 return true;
-              }, t("account.form.password.confirmMismatch")!),
+              }, t("account.form.password.confirmMismatch")),
             ]}
           >
             {(field, props) => (
@@ -125,7 +113,13 @@ export default function () {
               />
             )}
           </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          <Button
+            type="submit"
+            level="primary"
+            class="mt-4!"
+            loading={mutation.isPending}
+            disabled={mutation.isPending}
+          >
             {t("general.actions.save.title")}
           </Button>
         </Form>
