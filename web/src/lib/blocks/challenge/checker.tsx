@@ -1,5 +1,6 @@
 import { inflyClient } from "@api";
 import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
+import { generateRandomMotto } from "@lib/utils/random-motto";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
@@ -70,8 +71,7 @@ const checkerCtx = {
     return Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
   },
   MOTTO() {
-    const mottos = ["the_quick_brown_fox_jumps_over_the_lazy_dog"];
-    return mottos[Math.floor(Math.random() * mottos.length)];
+    return generateRandomMotto();
   },
 } as const;
 
