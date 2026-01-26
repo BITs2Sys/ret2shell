@@ -25,7 +25,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     )))
 }
 
-fn infer_origin(headers: &HeaderMap) -> Result<String, anyhow::Error> {
+fn infer_origin(headers: &HeaderMap) -> Result<String, ResponseError> {
   let mut scheme = "http".to_string();
   let mut host = "".to_string();
 
@@ -72,7 +72,9 @@ fn infer_origin(headers: &HeaderMap) -> Result<String, anyhow::Error> {
     return Ok(format!("{}://{}", scheme, host));
   }
 
-  Err(anyhow::anyhow!("Cannot extract host from request headers"))
+  Err(ResponseError::BadRequest(
+    "Cannot extract host from request headers".to_owned(),
+  ))
 }
 
 async fn proxy_to_registry(
