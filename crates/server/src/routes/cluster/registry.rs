@@ -73,7 +73,7 @@ fn infer_origin(headers: &HeaderMap) -> Result<String, ResponseError> {
   }
 
   Err(ResponseError::BadRequest(
-    "Failed to infer origin from request headers".to_owned(),
+    "failed to infer origin from request headers".to_owned(),
   ))
 }
 
