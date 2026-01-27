@@ -61,6 +61,7 @@ impl Queue {
       .get_or_create_stream(async_nats::jetstream::stream::Config {
         name: subject.clone(),
         max_messages: 10_000,
+        max_age: Duration::from_secs(3600 * 24),
         consumer_limits: Some(async_nats::jetstream::stream::ConsumerLimits {
           inactive_threshold: Duration::from_secs(120),
           max_ack_pending: 3,

@@ -741,11 +741,8 @@ async fn get_player_attachment(
     },
   )
   .await?;
-  if query.file.is_none() || query.folder.is_none() {
-    Ok(Json(files).into_response())
-  } else {
-    let file_name = query.file.unwrap();
-    let folder = query.folder.unwrap();
+
+  if let (Some(folder), Some(file_name)) = (query.folder, query.file.clone()) {
     let checked_file = files
       .into_iter()
       .find(|f| f.folder == folder && f.file == file_name);
@@ -770,6 +767,8 @@ async fn get_player_attachment(
     let stream = ReaderStream::new(file);
     info!(file=%file_name, ?folder, "user downloaded attachment file");
     Ok((StatusCode::OK, header, Body::from_stream(stream)).into_response())
+  } else {
+    Ok(Json(files).into_response())
   }
 }
 

@@ -30,7 +30,7 @@ export class Service implements Command {
       team?: Team;
     }
   ) => {
-    if (!envVars.game || !envVars.challenge || !envVars.team) {
+    if (!envVars.game || !envVars.challenge) {
       io.error(t("shell.errors.noGameSpecified.title"));
       return 1;
     }

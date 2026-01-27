@@ -89,16 +89,16 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let oauth = r2s_oauth::initialize(&config.auth).await;
   info!("loading module: < Cluster >");
   let cluster = r2s_cluster::initialize(&config.cluster).await?;
-  info!("loading module: < Email Worker >");
-  worker::email::spawn(queue.subscribe("email").await?, db.clone());
-  info!("loading module: < Event Worker >");
-  worker::event::spawn(queue.subscribe("event").await?, event.clone(), db.clone());
-  info!("loading module: < IP Record Worker >");
-  worker::ip_record::spawn(queue.subscribe("ip-record").await?, db.clone());
   info!("loading module: < Media Storage >");
   let media = r2s_media::initialize(&config.media).await?;
   info!("loading module: < Checker >");
   let checker = r2s_checker::initialize().await;
+  info!("starting workers: < Email Worker >");
+  worker::email::spawn(queue.subscribe("email").await?, db.clone());
+  info!("starting workers: < Event Worker >");
+  worker::event::spawn(queue.subscribe("event").await?, event.clone(), db.clone());
+  info!("starting workers: < IP Record Worker >");
+  worker::ip_record::spawn(queue.subscribe("ip-record").await?, db.clone());
 
   info!("setup panic event handler...");
   push_panic_event(queue.clone()).await;
@@ -122,7 +122,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   };
   info!("modules loaded, constructing router...");
 
-  let router = routes::initialize(config.server.clone(), state).await?;
+  let router = routes::initialize(config.server.clone(), state.clone()).await?;
   let router = NormalizePath::trim_trailing_slash(router);
   info!("router constructed.");
 
@@ -145,7 +145,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     addr,
     ServiceExt::<Request>::into_make_service_with_connect_info::<SocketAddr>(router),
   )
-  .with_graceful_shutdown(shutdown_signal())
+  .with_graceful_shutdown(shutdown_signal(state))
   .await
   .expect("failed to start server.");
 
@@ -240,7 +240,7 @@ async fn push_panic_event(queue: r2s_queue::Queue) {
   }));
 }
 
-async fn shutdown_signal() {
+async fn shutdown_signal(_state: GlobalState) {
   let ctrl_c = async {
     signal::ctrl_c()
       .await

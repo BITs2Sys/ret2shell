@@ -7,6 +7,8 @@ use r2s_queue::TracedMessage;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error, warn};
 
+use crate::traits::ResponseError;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct IpRecord {
   pub ip: String,
@@ -31,7 +33,9 @@ async fn ip_record_worker(mut messages: Stream, db: Database) {
   }
 }
 
-async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
+async fn ip_record_worker_exec(
+  message: jetstream::Message, db: &Database,
+) -> Result<(), ResponseError> {
   let req = String::from_utf8(message.message.payload.to_vec())?;
   let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
   if Utc::now().signed_duration_since(req.created_at) > chrono::Duration::minutes(30) {

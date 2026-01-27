@@ -76,7 +76,7 @@ function TitleLink() {
     <Link href={link()} ghost>
       <div class="w-6 h-6">
         <Transition name="fade-group-flip" mode="outin">
-          <Switch fallback={<LogoAnimate class="fade-group-flip hidden lg:inline-block" width={24} height={24} />}>
+          <Switch fallback={<LogoAnimate class="fade-group-flip" width={24} height={24} />}>
             <Match when={game.data?.logo && location.pathname.startsWith("/games/")}>
               <img class="fade-group-flip" src={mediaPath(game.data?.logo)} width={24} height={24} alt="CTF" />
             </Match>
@@ -103,11 +103,11 @@ function GlobalNav(props: { size: "sm" | "md" }) {
   const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
   const platformInfo = usePlatformInfo();
   return (
-    <div class="fade-group-dive-left flex flex-row items-center space-x-2">
+    <div class="fade-group-dive-left flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-2">
       <Show
         when={!platformInfo.data?.zen_game}
         fallback={
-          <li class="nav whitespace-nowrap">
+          <li class="nav whitespace-nowrap w-full lg:w-auto">
             <Link
               class="w-full"
               href={`/games/${platformInfo.data?.zen_game}`}
@@ -122,25 +122,25 @@ function GlobalNav(props: { size: "sm" | "md" }) {
           </li>
         }
       >
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="shrink-0 icon-[fluent--book-number-20-regular] w-5 h-5" />
             <span>{t("wiki.title")}</span>
           </Link>
         </li>
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="shrink-0 icon-[fluent--dumbbell-20-regular] w-5 h-5" />
             <span>{t("training.title")}</span>
           </Link>
         </li>
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
             <span>{t("game.title")}</span>
           </Link>
         </li>
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="shrink-0 icon-[fluent--megaphone-20-regular] w-5 h-5" />
             <span>{t("bulletin.title")}</span>
@@ -156,7 +156,7 @@ function GlobalNav(props: { size: "sm" | "md" }) {
             accountInfo.data?.permissions.includes(Permission.User))
         }
       >
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("admin.title")}</span>
@@ -179,8 +179,8 @@ function GameNav(props: { size: "sm" | "md" }) {
   const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
   const platformInfo = usePlatformInfo();
   return (
-    <div class="fade-group-dive-left flex flex-row items-center space-x-2">
-      <li class="nav whitespace-nowrap">
+    <div class="fade-group-dive-left flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-2">
+      <li class="nav whitespace-nowrap w-full lg:w-auto">
         <Link
           class="w-full"
           href={`/games/${gameId}/challenges`}
@@ -188,14 +188,14 @@ function GameNav(props: { size: "sm" | "md" }) {
           ghost
           justify="start"
           size={props.size}
-          disabled={!isPlayerCanAccessChallenges(game.data)[0]}
-          title={isPlayerCanAccessChallenges(game.data)[1]}
+          disabled={!isPlayerCanAccessChallenges(game.data, team.data)[0]}
+          title={isPlayerCanAccessChallenges(game.data, team.data)[1]}
         >
           <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t("challenge.title")}</span>
         </Link>
       </li>
-      <li class="nav whitespace-nowrap">
+      <li class="nav whitespace-nowrap w-full lg:w-auto">
         <Link
           class="w-full"
           href={`/games/${gameId}/scoreboard`}
@@ -210,7 +210,7 @@ function GameNav(props: { size: "sm" | "md" }) {
       </li>
       <Switch>
         <Match when={team.data}>
-          <li class="nav whitespace-nowrap">
+          <li class="nav whitespace-nowrap w-full lg:w-auto">
             <Link
               class="w-full"
               href={`/games/${gameId}/teams/${team.data?.id}`}
@@ -225,7 +225,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           </li>
         </Match>
         <Match when={isGameCanParticipate(game.data)}>
-          <li class="nav whitespace-nowrap">
+          <li class="nav whitespace-nowrap w-full lg:w-auto">
             <Link
               class="w-full"
               href={`/games/${gameId}/teams/choose`}
@@ -241,7 +241,7 @@ function GameNav(props: { size: "sm" | "md" }) {
         </Match>
       </Switch>
       <Show when={isAdminOfGame(game.data)}>
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link
             class="w-full"
             href={`/games/${gameId}/admin`}
@@ -267,7 +267,7 @@ function GameNav(props: { size: "sm" | "md" }) {
                 accountInfo.data?.permissions.includes(Permission.User))
             }
           >
-            <li class="nav whitespace-nowrap">
+            <li class="nav whitespace-nowrap w-full lg:w-auto">
               <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
                 <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t("admin.platformTitle")}</span>
@@ -276,7 +276,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           </Show>
         }
       >
-        <li class="nav whitespace-nowrap">
+        <li class="nav whitespace-nowrap w-full lg:w-auto">
           <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
             <span class="shrink-0 icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
             <span>{t("general.actions.back.title")}</span>
@@ -421,8 +421,7 @@ export default function TitleBar() {
                 <Match
                   when={
                     platformStore.isOnline &&
-                    game.data &&
-                    game.data.host_type === HostType.Game &&
+                    game.data?.host_type === HostType.Game &&
                     location.pathname.startsWith("/games")
                   }
                 >

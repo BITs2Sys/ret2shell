@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 
 # --------------------------------------------------------------------------------------------------------
 
-FROM rust:1.90-alpine AS server
+FROM rust:1.93-alpine AS server
 
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld ca-certificates
