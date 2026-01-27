@@ -41,7 +41,7 @@ export default function TeamCover(props: ComponentProps<"div">) {
     <div
       {...props}
       class={clsx(
-        "fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-50 duration-500",
+        "fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-40 duration-500",
         expanded() ? "h-full" : "h-0",
         props.class
       )}
