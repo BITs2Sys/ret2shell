@@ -10,7 +10,7 @@ import { createMemo, createSignal, Match, Switch } from "solid-js";
 
 export default function () {
   const params = useParams();
-  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "UNKN0WN", 10) || -1);
   const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
 
   const [tab, setTab] = createSignal("submissions" as "submissions" | "audits");
