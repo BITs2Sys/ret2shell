@@ -73,7 +73,7 @@ fn infer_origin(headers: &HeaderMap) -> Result<String, ResponseError> {
   }
 
   Err(ResponseError::BadRequest(
-    "Cannot extract host from request headers".to_owned(),
+    "Failed to infer origin from request headers".to_owned(),
   ))
 }
 
@@ -103,6 +103,7 @@ async fn proxy_to_registry(
     .path_and_query()
     .map(|pq| pq.as_str())
     .unwrap_or(path);
+  let req_headers = req.headers().clone();
 
   let path = path.trim_start_matches("/");
   let path_query = path_query.trim_start_matches("/");
@@ -178,9 +179,7 @@ async fn proxy_to_registry(
 
   // modify response headers to set correct origin, if has location header
   if let Some(location) = resp.headers().get("location").and_then(|v| v.to_str().ok()) {
-    let origin = infer_origin(resp.headers()).map_err(|err| {
-      ResponseError::BadRequest(format!("failed to infer origin for location header: {err}"))
-    })?;
+    let origin = infer_origin(&req_headers)?;
     let new_location = match Uri::try_from(location) {
       Ok(u) => {
         let path_and_query = u.path_and_query().map_or("", |pq| pq.as_str());
