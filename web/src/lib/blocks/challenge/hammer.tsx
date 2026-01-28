@@ -88,8 +88,8 @@ export function mergeChats(
       game_id: gameId,
     });
   }
-  const bb = b.sort((x, y) => x.id - y.id);
   const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId).sort((x, y) => x.id - y.id);
+  const bb = b.sort((x, y) => x.id - y.id).filter((x) => aa.findIndex((v) => v.id === x.id) === -1);
 
   let i = 0;
   const iLen = aa.length;
@@ -154,16 +154,18 @@ export default function (props: ChallengeWidgetProps) {
 
   const chats = createMemo(() => {
     if (chatsQuery.data && solvesQuery.data) {
-      const [changed, merged] = mergeChats(
-        props.gameId,
-        props.challengeId,
-        team.data?.id ?? 0,
-        prevChats(),
-        chatsQuery.data,
-        solvesQuery.data?.find((v) => v.challenge_id === props.challengeId)?.created_at || null
-      );
-      if (changed) untrack(() => setPrevChats(merged));
-      return merged;
+      return untrack(() => {
+        const [changed, merged] = mergeChats(
+          props.gameId,
+          props.challengeId,
+          team.data?.id ?? 0,
+          prevChats(),
+          chatsQuery.data,
+          solvesQuery.data?.find((v) => v.challenge_id === props.challengeId)?.created_at || null
+        );
+        if (changed) setPrevChats(merged);
+        return merged;
+      });
     }
   });
 
