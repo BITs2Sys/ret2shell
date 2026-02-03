@@ -200,10 +200,8 @@ export function FormBare(
                       [
                         game.data?.timeline_presets?.find(
                           (i) =>
-                            i.start_at.toSeconds() ===
-                              (getValue(form, "release_at") || challenge.data?.release_at?.toSeconds()) &&
-                            i.end_at.toSeconds() ===
-                              (getValue(form, "archive_at") || challenge.data?.archive_at?.toSeconds())
+                            i.start_at.toSeconds() === getValue(form, "release_at") &&
+                            i.end_at.toSeconds() === getValue(form, "archive_at")
                         )?.label ?? "",
                       ].filter((s) => s) ?? []
                     }
