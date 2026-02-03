@@ -10,6 +10,7 @@ import type { Extra } from "../models/extra";
 import type { CommitHistory } from "../models/git";
 import type { Hint } from "../models/hint";
 import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import { sleep } from "@lib/utils/timeout";
 
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
   return (
@@ -215,6 +216,7 @@ export function useChallengeHints({
 }
 
 export async function unlockChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
+  await sleep(500);
   return await api
     .post(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint/unlock`, {
       json: {
@@ -617,6 +619,7 @@ export function useChallengeSubmissions({
 }
 
 export async function startChallengeInstance(game_id: number, challenge_id: number) {
+  await sleep(1000);
   return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
 }
 
@@ -635,6 +638,7 @@ export function useStartChallengeInstanceMutation(props: { onSuccess?: () => voi
 }
 
 export async function delayChallengeInstance(game_id: number, challenge_id: number) {
+  await sleep(1000);
   return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`, {}).json<void>();
 }
 
@@ -653,6 +657,7 @@ export function useDelayChallengeInstanceMutation(props: { onSuccess?: () => voi
 }
 
 export async function stopChallengeInstance(game_id: number, challenge_id: number) {
+  await sleep(1000);
   return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
 }
 
