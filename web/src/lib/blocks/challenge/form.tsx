@@ -71,9 +71,9 @@ export function FormBare(
     } else {
       untrack(() => {
         setValues(form, {
-          initial: 1000,
-          minimum: 500,
-          decay: 10,
+          initial: 500,
+          minimum: 50,
+          decay: 15,
         });
       });
     }
@@ -164,7 +164,7 @@ export function FormBare(
                           onChangeMin={(v) => {
                             setValue(form, "minimum", v);
                           }}
-                          decay={decayField.value || 10}
+                          decay={decayField.value || 15}
                           onChangeDecay={(v) => {
                             setValue(form, "decay", v);
                           }}
