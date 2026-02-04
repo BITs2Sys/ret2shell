@@ -303,7 +303,7 @@ async fn create_challenge(
   .await?;
   game_bucket
     .commit(
-      format!("create challenge {}", challenge.name),
+      format!(":sparkles: create challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -370,7 +370,7 @@ async fn update_challenge(
     .await?;
   game_bucket
     .commit(
-      format!("update challenge config {}", challenge.name),
+      format!(":building_construction: update challenge config {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -510,7 +510,7 @@ async fn delete_challenge(
     .await?;
   game_bucket
     .commit(
-      format!("delete challenge {}", challenge.name),
+      format!(":fire: delete challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -826,7 +826,7 @@ async fn upload_challenge_attachment(
   }
   game_bucket
     .commit(
-      format!("upload files for challenge {}", challenge.name),
+      format!(":package: upload files for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -857,7 +857,7 @@ async fn delete_challenge_attachment(
   };
   game_bucket
     .commit(
-      format!("delete file {} for challenge {}", file, challenge.name),
+      format!(":fire: delete file {} for challenge {}", file, challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1044,7 +1044,7 @@ async fn create_challenge_hint(
   txn.commit().await?;
   game_bucket
     .commit(
-      format!("new hint for challenge {}", challenge.name),
+      format!(":speech_balloon: new hint for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1074,7 +1074,7 @@ async fn delete_challenge_hint(
   txn.commit().await?;
   game_bucket
     .commit(
-      format!("delete hint for challenge {}", challenge.name),
+      format!(":fire: delete hint for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1400,7 +1400,7 @@ async fn update_challenge_env_config(
     .await?;
   game_bucket
     .commit(
-      format!("update env for challenge {}", challenge.name),
+      format!(":building_construction: update env for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1418,7 +1418,7 @@ async fn delete_challenge_env_config(
   challenge_bucket.delete_env().await?;
   game_bucket
     .commit(
-      format!("delete env for challenge {}", challenge.name),
+      format!(":fire: delete env for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1471,7 +1471,7 @@ async fn update_checker_script(
   checker.expire(&challenge_bucket).await;
   game_bucket
     .commit(
-      format!("update checker script for challenge {}", challenge.name),
+      format!(":building_construction: update checker script for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1583,7 +1583,7 @@ async fn update_answer(
   info!("challenge answer updated");
   game_bucket
     .commit(
-      format!("update answer for challenge {}", challenge.name),
+      format!(":fire: update answer for challenge {}", challenge.name),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )

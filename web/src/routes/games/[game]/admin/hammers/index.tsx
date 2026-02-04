@@ -78,15 +78,18 @@ export default function () {
   const chats = createMemo(() => {
     if (!enabledSession()) return;
     if (!chatsQuery.data) return;
-    const solvedAt = solves.data?.find((x) => x.challenge_id === challengeId())?.created_at ?? null;
-    const [changed, merged] = mergeChats(gameId(), challengeId()!, teamId()!, prevChats(), chatsQuery.data, solvedAt);
-    if (changed) {
-      untrack(() => setPrevChats(merged));
-      setTimeout(() => {
-        chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
-      }, 700);
-    }
-    return merged;
+    return untrack(() => {
+      const solvedAt = solves.data?.find((x) => x.challenge_id === challengeId())?.created_at ?? null;
+      const [changed, merged] = mergeChats(gameId(), challengeId()!, teamId()!, prevChats(), chatsQuery.data, solvedAt);
+      if (changed) {
+        setPrevChats(merged);
+        setTimeout(() => {
+          chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
+        }, 700);
+      }
+      console.log(merged);
+      return merged;
+    });
   });
 
   const [editorExpanded, setEditorExpanded] = createSignal(false);
