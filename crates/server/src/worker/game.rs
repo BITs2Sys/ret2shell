@@ -167,8 +167,9 @@ async fn submission_worker(
     return;
   };
 
-  // NOTE: we do not use message time to deduplicate here, we should ensure all the submissions are
-  // checked, even if they are redelivered due to worker crashes.
+  // NOTE: we do not use message time to deduplicate here, we should ensure all
+  // the submissions are checked, even if they are redelivered due to worker
+  // crashes.
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
       let req = String::from_utf8(message.message.payload.to_vec())

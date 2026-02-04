@@ -12,11 +12,12 @@ use std::{
 };
 
 use axum::{body::Body, http::Request};
+use chrono::{Datelike, Utc};
+use flate2::{Compression, write::GzEncoder};
 use hyper_util::{
   client::legacy::{Client, connect::HttpConnector},
   rt::TokioExecutor,
 };
-use flate2::{Compression, write::GzEncoder};
 use r2s_config::logging;
 use tar::Builder as TarBuilder;
 use thiserror::Error;
@@ -25,7 +26,6 @@ use tokio::{
   task::spawn_blocking,
   time::{MissedTickBehavior, interval},
 };
-use chrono::{Datelike, Utc};
 use tracing::error;
 use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling};
 use tracing_subscriber::{
@@ -198,8 +198,8 @@ async fn run_vl_worker(
 #[derive(Default)]
 struct LogInventory {
   daily: HashMap<(i32, u32), Vec<PathBuf>>, // (year, month) -> daily files
-  monthly: HashMap<(i32, u32), PathBuf>, // (year, month) -> archive path
-  yearly: HashMap<i32, PathBuf>,          // year -> archive path
+  monthly: HashMap<(i32, u32), PathBuf>,    // (year, month) -> archive path
+  yearly: HashMap<i32, PathBuf>,            // year -> archive path
 }
 
 fn parse_daily_log(name: &str) -> Option<(i32, u32, u32)> {
@@ -258,11 +258,7 @@ async fn collect_log_inventory(directory: &Path) -> IoResult<LogInventory> {
       continue;
     };
     if let Some((year, month, _day)) = parse_daily_log(name) {
-      inventory
-        .daily
-        .entry((year, month))
-        .or_default()
-        .push(path);
+      inventory.daily.entry((year, month)).or_default().push(path);
       continue;
     }
     if let Some((year, month)) = parse_monthly_archive(name) {
