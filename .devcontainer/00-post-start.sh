@@ -18,11 +18,12 @@ exec $ctx_dir/install-deps.sh || eprintln "Failed to install dependencies."
 
 # install devtools
 echo "Installing devtools..."
-# find file in devtools
-find "$ctx_dir/devtools" -type f -executable -exec cp {} -t /usr/local/bin/ \;
+find "$ctx_dir/devtools" -type f -executable -exec cp --no-clobber {} -t /usr/local/bin/ \;
 
 # copy config
-cp config/config.sample.toml config/config.toml
+if [ ! -f 'config/config.toml']; then
+  cp config/config.sample.toml config/config.toml
+fi
 
 # get kubeconfig.yaml configuration
 if command -v kubectl &> /dev/null; then
