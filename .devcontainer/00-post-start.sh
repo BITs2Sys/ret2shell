@@ -14,7 +14,7 @@ echo "Setting up zsh..."
 
 # install dependencies
 echo "Installing project dependencies..."
-exec $ctx_dir/install-deps.sh || eprintln "Failed to install dependencies."
+$ctx_dir/install-deps.sh || eprintln "Failed to install dependencies."
 
 # install devtools
 echo "Installing devtools..."
@@ -24,9 +24,9 @@ echo "Installing devtools..."
 } || eprintln "Failed to install devtools."
 
 # copy config
-if [ ! -f 'config/config.toml']; then
+if [ ! -f 'config/config.toml' ]; then
   cp config/config.sample.toml config/config.toml || eprintln "Failed to create config/config.toml."
 fi
 
 # pre-generate license
-exec $ctx_dir/gen-license.sh || eprintln "Failed to generate license."
+$ctx_dir/gen-license.sh || eprintln "Failed to generate license."

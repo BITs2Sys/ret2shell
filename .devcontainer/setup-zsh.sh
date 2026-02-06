@@ -25,4 +25,4 @@ add_zsh_plugin "docker"
 echo "To apply for application, please run:"
 echo "  source ${ZDOTDIR:-$HOME}/.zshrc"
 
-source ${ZDOTDIR:-$HOME}/.zshrc
+# source ${ZDOTDIR:-$HOME}/.zshrc
