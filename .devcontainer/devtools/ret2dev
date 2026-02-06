@@ -1,0 +1,109 @@
+#!/bin/bash
+if [ -f "$HOME/.ret2shell/.env.development" ]; then
+  source "$HOME/.ret2shell/.env.development"
+fi
+
+function eprintln() {
+  echo "$@" 1>&2
+}
+
+function print_usage() {
+  echo "Usage: $0 [OPTIONS] <COMMAND>"
+  echo ""
+  echo "Commands:"
+  echo "  database, db            Enter the database shell (psql)"
+  echo "  cache, redis, redis-cli Enter the cache shell (redis-cli)"
+  echo "  help, -h, --help        Show this help message and exit"
+  echo ""
+  echo "Options:"
+  echo "  --name, -n NAME         Specify the service name prefix (default: ${DOCKER_SVC_NAME:-ret2shell})"
+  echo "  --container-name NAME   Specify the exact container name to connect to"
+}
+
+rest_args=()
+
+function parse_rest_args() {
+  while [ "$#" -gt 0 ]; do
+    arg="$1"
+    shift
+    rest_args+=("$arg")
+  done
+}
+
+opt_cmd=""
+opt_name="${DOCKER_SVC_NAME:-ret2shell}"
+opt_container_name=""
+function parse_args() {
+  while [ "$#" -gt 0 ]; do
+    arg="$1"
+    shift
+    case "$arg" in
+      database|db)
+        opt_cmd="database"
+        break
+        ;;
+      cache|redis|redis-cli)
+        opt_cmd="cache"
+        break
+        ;;
+      --name|-n)
+        if [ "$#" -gt 0 ]; then
+          opt_name="$1"
+          shift
+        else
+          eprintln "Option --name requires an argument."
+          exit 1
+        fi
+        ;;
+      --container-name)
+        if [ "$#" -gt 0 ]; then
+          opt_container_name="$1"
+          shift
+        else
+          eprintln "Option --container-name requires an argument."
+          exit 1
+        fi
+        ;;
+      help|-h|--help)
+        print_usage
+        exit 0
+        ;;
+      -*)
+        eprintln "Unknown option: $arg"
+        exit 1
+        ;;
+      *)
+        eprintln "Unknown command: $arg"
+        exit 1
+        ;;
+    esac
+  done
+  parse_rest_args "$@"
+}
+
+parse_args "$@"
+
+function build_container_name() {
+  if [ -n "$opt_container_name" ]; then
+    echo "$opt_container_name"
+  else
+    echo "${opt_name}-$1-1"
+  fi
+}
+
+function enter_database_shell() {
+  docker exec -it "$(build_container_name database)" psql -U ret2shell -d ret2shell
+}
+
+function enter_cache_shell() {
+  docker exec -it "$(build_container_name cache)" redis-cli
+}
+
+if [ "$opt_cmd" = "database" ]; then
+  enter_database_shell
+elif [ "$opt_cmd" = "cache" ]; then
+  enter_cache_shell
+else
+  eprintln "No command specified. Use --help for usage information."
+  exit 1
+fi

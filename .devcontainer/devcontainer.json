@@ -1,4 +1,9 @@
 {
+	"hostRequirements": {
+		"cpus": 4,
+		"memory": "16gb",
+		"storage": "32gb"
+	},
 	"name": "Ret2Shell",
 	"build": {
 		"dockerfile": "Dockerfile",
@@ -29,7 +34,13 @@
 			"pnpmVersion": "latest",
 			"nvmVersion": "latest"
 		},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		// Deployment, Testing challenge clusters with k3s on host
+		"ghcr.io/microsoft/k3s-on-host": {
+			"k3sVersion": "latest",
+			"criDockerd": "true",
+			"cluster_enabled": "true"
+		}
 	},
 	// Configure tool-specific properties.
 	"customizations": {
@@ -37,10 +48,12 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
+				"editor.tabSize": 2,
 				"lldb.executable": "/usr/bin/lldb",
 				// VS Code don't watch files under ./target
 				"files.watcherExclude": {
-					"**/target/**": true
+					"**/target/**": true,
+					"**/node_modules/**": true
 				},
 				"rust-analyzer.check.command": "clippy"
 			},
@@ -58,10 +71,11 @@
 				"Lokalise.i18n-ally",
 				"GitHub.vscode-github-actions",
 				"ms-azuretools.vscode-containers",
+				// help development
 				"GitHub.copilot-chat"
 			]
 		}
 	},
-	"postStartCommand": "./.devcontainer/post-start.sh",
+	"postStartCommand": "./.devcontainer/00-post-start.sh",
 	"remoteUser": "vscode"
 }

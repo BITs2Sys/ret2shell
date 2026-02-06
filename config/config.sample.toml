@@ -56,9 +56,9 @@ enable_capture = true
 # ? If enabled, other registries are not supported, but the images in the registry could be searched.
 [cluster.registry]
 enabled  = true
-external = "ctf.xidian.edu.cn" # ? used for k8s pulling.
+external = "localhost:5000" # ? used for k8s pulling.
 insecure = false
-server   = "ctf.xidian.edu.cn" # ? used for platform pushing
+server   = "localhost:5000" # ? used for platform pushing
 # username =
 # password =
 
