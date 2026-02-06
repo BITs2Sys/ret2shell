@@ -178,7 +178,7 @@ export function FormBare(
           </Field>
         </div>
       </Show>
-      <Show when={!props.training && (game.data?.timeline_presets?.length ?? 0) > 0}>
+      <Show when={!props.training && (game.data?.timeline_presets?.length ?? 0) > 0 && challenge.data}>
         <Field name="release_at" type="number">
           {() => (
             <Field name="archive_at" type="number">

@@ -1,6 +1,7 @@
 name: ret2shell
 
 services:
+  # database
   database:
     image: postgres:18-alpine
     restart: unless-stopped
@@ -13,6 +14,7 @@ services:
     # ports:
     #   - '5432:5432'
 
+  # cache
   cache:
     image: valkey/valkey:8-alpine
     restart: unless-stopped
@@ -21,6 +23,7 @@ services:
     # ports:
     #   - '6379:6379'
 
+  # message queue
   message_queue:
     image: nats:2-alpine
     restart: unless-stopped
@@ -30,6 +33,17 @@ services:
     #   - '4222:4222'
     command: ["-js", "-sd", "/data"]
 
+  # logs
+  vlogs:
+    image: victoriametrics/victoria-logs:v1.43.1
+    ports:
+      - "9428:9428"
+    command:
+      - "--storageDataPath=/vlogs"
+    volumes:
+      - vlogs:/vlogs
+
+  # container registry
   registry:
     image: registry:3
     restart: unless-stopped
@@ -42,6 +56,7 @@ services:
       - "5000:5000"
     command: ["serve", "/etc/docker/registry/config.yml"]
 
+  # back-end platform
   platform:
     image: ret2shell:latest
     restart: on-failure:5
@@ -49,6 +64,7 @@ services:
       - database
       - cache
       - message_queue
+      - vlogs
       - registry # if internal registry is used
     volumes:
       - platform:/var/lib/ret2shell
@@ -57,15 +73,7 @@ services:
     ports:
       - "8080:8080"
 
-  logs:
-    image: victoriametrics/victoria-logs:v1.43.1
-    ports:
-      - "9428:9428"
-    command:
-      - "--storageDataPath=/vlogs"
-    volumes:
-      - vldata:/vlogs
-
+  # nginx, routes front-end files and back-end API
   nginx:
     image: nginx:alpine
     restart: unless-stopped
@@ -87,9 +95,9 @@ volumes:
   database:
   cache:
   message_queue:
+  vlogs:
   registry:
   platform:
-  vldata:
 
 networks:
   default:

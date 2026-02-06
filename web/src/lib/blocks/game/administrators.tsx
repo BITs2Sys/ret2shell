@@ -35,7 +35,12 @@ export default function AdministratorsManagement(props: { gameId: number }) {
     filter: () => adminSearch(),
   });
 
-  const updateMutation = useUpdateGameAdminsMutation();
+  const updateMutation = useUpdateGameAdminsMutation({
+    onSuccess: () => {
+      admins.refetch();
+      game.refetch();
+    },
+  });
 
   async function handleAddAdmin(user: User) {
     updateMutation.mutate({ game_id: props.gameId, admins: [...(game.data?.admins || []), user.id] });

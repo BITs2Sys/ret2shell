@@ -2,7 +2,16 @@ import { type CollectionItem, createListCollection, Select, type SelectRootProps
 import { fullTheme, t } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { type ComponentProps, createMemo, Index, Show, splitProps } from "solid-js";
+import {
+  type ComponentProps,
+  createEffect,
+  createMemo,
+  createSignal,
+  Index,
+  Show,
+  splitProps,
+  untrack,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 
 export type SelectProps = {
@@ -42,7 +51,22 @@ export default function (
     })
   );
   let selectEl!: HTMLSelectElement;
-  // console.log(JSON.stringify(props));
+
+  const [proxiedValue, setProxiedValue] = createSignal<string[] | undefined>(others.value);
+
+  createEffect(() => {
+    if (others.value) {
+      untrack(() => {
+        requestAnimationFrame(() => {
+          if (others?.value !== undefined) {
+            setProxiedValue(others.value);
+          }
+        });
+      });
+    } else {
+      setProxiedValue(undefined);
+    }
+  });
 
   return (
     <Select.Root
@@ -55,6 +79,7 @@ export default function (
       positioning={{
         sameWidth: true,
       }}
+      value={proxiedValue()}
       onValueChange={(e) => {
         if (selectEl) {
           selectEl.value = e.value[0] || "";

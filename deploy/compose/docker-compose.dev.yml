@@ -1,4 +1,7 @@
+name: ret2shell-dev
+
 services:
+  # database
   database:
     image: postgres:18-alpine
     restart: always
@@ -10,6 +13,8 @@ services:
       - database:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  # cache
   cache:
     image: valkey/valkey:8-alpine
     restart: always
@@ -17,6 +22,8 @@ services:
       - cache:/data
     ports:
       - "6379:6379"
+
+  # message queue
   message_queue:
     image: nats:2-alpine
     restart: always
@@ -25,7 +32,9 @@ services:
     ports:
       - "4222:4222"
     command: ["-js", "-sd", "/data"]
-  logs:
+
+  # logs
+  vlogs:
     image: victoriametrics/victoria-logs:v1.43.1
     restart: always
     ports:
@@ -33,10 +42,24 @@ services:
     command:
       - "--storageDataPath=/vlogs"
     volumes:
-      - logs:/vlogs
+      - vlogs:/vlogs
+
+  # container registry
+  registry:
+    image: registry:3
+    restart: unless-stopped
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+    volumes:
+      - registry:/var/lib/registry
+    ports:
+      - "5000:5000"
+    command: ["serve", "/etc/docker/registry/config.yml"]
 
 volumes:
   database:
   cache:
   message_queue:
-  logs:
+  vlogs:
+  registry:

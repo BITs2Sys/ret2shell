@@ -14,15 +14,19 @@ Follow these instructions when contributing to this repository. Keep changes min
 - Use SolidJS idioms with functional components.
 - Prefer existing helpers in `web/src/lib` and keep imports organized.
 - Formatting and linting are handled by Biome:
-  - `pnpm --prefix web format`
-  - `pnpm --prefix web lint`
+  - `pnpm -C web format`
+  - `pnpm -C web lint`
 - Follow the existing file structure: routes in `web/src/routes`, reusable widgets in `web/src/lib/widgets`, and API modules in `web/src/lib/api`.
+- Prefer `async/await` grammar than old Promise (then, catch, finally, etc.) one.
+- Keep translation file sync, the translations is presented in `web/src/lib/i18n`, take a look at `index.ts`.
 
 ## Backend (Rust)
 
 - Follow the formatting conventions in `rustfmt.toml` (2-space indentation, same-line braces).
 - Favor existing helpers in `crates/*/src` and keep modules aligned with current structure.
-- Run formatting with `cargo fmt --all` when touching Rust files.
+- Never add new dependencies in you work, if you actually need it to implement some functions, abort the session and told user to add dependency manually.
+- Run formatting with `cargo +nightly fmt` when touching Rust files.
+- You'd better use `cargo clippy` when you finished your work, and fix all the warnings/errors shown in clippy.
 
 ## Git & Pull Request Conventions
 
@@ -49,5 +53,5 @@ Follow these instructions when contributing to this repository. Keep changes min
 ## Testing
 
 - Only run tests relevant to your changes.
-- Frontend: `pnpm --prefix web lint` (and `format` if needed).
-- Backend: `cargo fmt --all` and targeted test commands if applicable.
+- Frontend: `pnpm -C web lint` (and `format` if needed).
+- Backend: `cargo +nightly fmt` and targeted test commands if applicable.

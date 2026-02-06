@@ -85,7 +85,7 @@ export default function (props: { children?: JSX.Element }) {
     try {
       await loadVersion();
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       if (err instanceof HTTPError && err.response?.status === 503) {
         setPlatformStore({ under_maintenance: true });
       } else if (err instanceof HTTPError && err.response?.status === 502) {

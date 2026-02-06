@@ -1,4 +1,9 @@
 {
+	"hostRequirements": {
+		"cpus": 4,
+		"memory": "16gb",
+		"storage": "32gb"
+	},
 	"name": "Ret2Shell",
 	"build": {
 		"dockerfile": "Dockerfile",
@@ -19,17 +24,20 @@
 			"username": "vscode",
 			"upgradePackages": "true"
 		},
-		"ghcr.io/devcontainers/features/git:1": {
-			"version": "latest",
-			"ppa": "true"
-		},
+		// Already installed by features/common-utils, comment out to speed up build time
+		// "ghcr.io/devcontainers/features/git:1": {
+		// 	"version": "latest",
+		// 	"ppa": "true"
+		// },
 		"ghcr.io/devcontainers/features/rust:1": "latest",
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts",
 			"pnpmVersion": "latest",
 			"nvmVersion": "latest"
 		},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		// Deployment, Testing challenge clusters with k3s on host
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
 	},
 	// Configure tool-specific properties.
 	"customizations": {
@@ -37,10 +45,11 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
+				"editor.tabSize": 2,
 				"lldb.executable": "/usr/bin/lldb",
-				// VS Code don't watch files under ./target
 				"files.watcherExclude": {
-					"**/target/**": true
+					"**/target/**": true,
+					"**/node_modules/**": true
 				},
 				"rust-analyzer.check.command": "clippy"
 			},
@@ -58,10 +67,11 @@
 				"Lokalise.i18n-ally",
 				"GitHub.vscode-github-actions",
 				"ms-azuretools.vscode-containers",
+				// help development
 				"GitHub.copilot-chat"
 			]
 		}
 	},
-	"postStartCommand": "./.devcontainer/post-start.sh",
+	"postStartCommand": "./.devcontainer/00-post-start.sh",
 	"remoteUser": "vscode"
 }

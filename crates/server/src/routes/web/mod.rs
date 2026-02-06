@@ -18,7 +18,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       FrontendServeType::Static => Router::new().fallback_service(
         ServeDir::new(&frontend_config.path)
           .precompressed_gzip()
-          .not_found_service(ServeFile::new(format!(
+          .fallback(ServeFile::new(format!(
             "{}/index.html",
             frontend_config.path
           ))),

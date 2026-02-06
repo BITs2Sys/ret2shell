@@ -5,20 +5,25 @@
 //! writer. You should keep the file descriptor until application exit.
 
 use std::{
+  collections::HashMap,
   io::{Result as IoResult, Write},
-  path::Path,
+  path::{Path, PathBuf},
   time::Duration,
 };
 
 use axum::{body::Body, http::Request};
+use chrono::{Datelike, Utc};
+use flate2::{Compression, write::GzEncoder};
 use hyper_util::{
   client::legacy::{Client, connect::HttpConnector},
   rt::TokioExecutor,
 };
 use r2s_config::logging;
+use tar::Builder as TarBuilder;
 use thiserror::Error;
 use tokio::{
   sync::mpsc,
+  task::spawn_blocking,
   time::{MissedTickBehavior, interval},
 };
 use tracing::error;
@@ -189,6 +194,222 @@ async fn run_vl_worker(
     }
   }
 }
+
+#[derive(Default)]
+struct LogInventory {
+  daily: HashMap<(i32, u32), Vec<PathBuf>>, // (year, month) -> daily files
+  monthly: HashMap<(i32, u32), PathBuf>,    // (year, month) -> archive path
+  yearly: HashMap<i32, PathBuf>,            // year -> archive path
+}
+
+fn parse_daily_log(name: &str) -> Option<(i32, u32, u32)> {
+  if !name.starts_with("ret2shell.") || !name.ends_with(".log") {
+    return None;
+  }
+  if name.ends_with(".log.tar.gz") {
+    return None;
+  }
+  let middle = &name["ret2shell.".len()..name.len() - ".log".len()];
+  let mut parts = middle.split('-');
+  let year = parts.next()?.parse::<i32>().ok()?;
+  let month = parts.next()?.parse::<u32>().ok()?;
+  let day = parts.next()?.parse::<u32>().ok()?;
+  if parts.next().is_some() {
+    return None;
+  }
+  Some((year, month, day))
+}
+
+fn parse_monthly_archive(name: &str) -> Option<(i32, u32)> {
+  if !name.starts_with("ret2shell.") || !name.ends_with(".log.tar.gz") {
+    return None;
+  }
+  let middle = &name["ret2shell.".len()..name.len() - ".log.tar.gz".len()];
+  let mut parts = middle.split('-');
+  let year = parts.next()?.parse::<i32>().ok()?;
+  let month = parts.next()?.parse::<u32>().ok()?;
+  if parts.next().is_some() {
+    return None;
+  }
+  Some((year, month))
+}
+
+fn parse_yearly_archive(name: &str) -> Option<i32> {
+  if !name.starts_with("ret2shell.") || !name.ends_with(".log.tar.gz") {
+    return None;
+  }
+  let middle = &name["ret2shell.".len()..name.len() - ".log.tar.gz".len()];
+  if middle.contains('-') {
+    return None;
+  }
+  middle.parse::<i32>().ok()
+}
+
+async fn collect_log_inventory(directory: &Path) -> IoResult<LogInventory> {
+  let mut inventory = LogInventory::default();
+  let mut dir = tokio::fs::read_dir(directory).await?;
+
+  while let Some(entry) = dir.next_entry().await? {
+    let path = entry.path();
+    if !path.is_file() {
+      continue;
+    }
+    let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+      continue;
+    };
+    if let Some((year, month, _day)) = parse_daily_log(name) {
+      inventory.daily.entry((year, month)).or_default().push(path);
+      continue;
+    }
+    if let Some((year, month)) = parse_monthly_archive(name) {
+      inventory.monthly.insert((year, month), path);
+      continue;
+    }
+    if let Some(year) = parse_yearly_archive(name) {
+      inventory.yearly.insert(year, path);
+    }
+  }
+
+  Ok(inventory)
+}
+
+fn build_monthly_archive_path(directory: &Path, year: i32, month: u32) -> PathBuf {
+  directory.join(format!("ret2shell.{year:04}-{month:02}.log.tar.gz"))
+}
+
+fn build_yearly_archive_path(directory: &Path, year: i32) -> PathBuf {
+  directory.join(format!("ret2shell.{year:04}.log.tar.gz"))
+}
+
+fn create_tar_gz(archive_path: &Path, files: &[PathBuf]) -> IoResult<()> {
+  let file = std::fs::File::create(archive_path)?;
+  let encoder = GzEncoder::new(file, Compression::default());
+  let mut builder = TarBuilder::new(encoder);
+  for path in files {
+    if let Some(name) = path.file_name() {
+      builder.append_path_with_name(path, name)?;
+    }
+  }
+  let encoder = builder.into_inner()?;
+  encoder.finish()?;
+  Ok(())
+}
+
+async fn archive_and_cleanup(archive_path: PathBuf, files: Vec<PathBuf>) -> IoResult<()> {
+  if files.is_empty() {
+    return Ok(());
+  }
+  let files_for_blocking = files.clone();
+  let archive_for_blocking = archive_path.clone();
+  spawn_blocking(move || create_tar_gz(&archive_for_blocking, &files_for_blocking)).await??;
+  spawn_blocking(move || {
+    for path in files {
+      let _ = std::fs::remove_file(path);
+    }
+    IoResult::Ok(())
+  })
+  .await??;
+  Ok(())
+}
+
+async fn cleanup_files(files: Vec<PathBuf>) -> IoResult<()> {
+  if files.is_empty() {
+    return Ok(());
+  }
+  spawn_blocking(move || {
+    for path in files {
+      let _ = std::fs::remove_file(path);
+    }
+    IoResult::Ok(())
+  })
+  .await??;
+  Ok(())
+}
+
+async fn compress_logs_once(directory: &Path) -> IoResult<()> {
+  let inventory = collect_log_inventory(directory).await?;
+  let now = Utc::now();
+  let current_year = now.year();
+  let current_month = now.month();
+
+  // First: compress all daily logs outside current month into monthly archives.
+  for ((year, month), daily_files) in &inventory.daily {
+    if *year == current_year && *month == current_month {
+      continue;
+    }
+
+    if inventory.monthly.contains_key(&(*year, *month)) {
+      cleanup_files(daily_files.clone()).await?;
+      continue;
+    }
+
+    let archive_path = build_monthly_archive_path(directory, *year, *month);
+    archive_and_cleanup(archive_path, daily_files.clone()).await?;
+  }
+
+  // Refresh inventory to include newly created monthly archives.
+  let inventory = collect_log_inventory(directory).await?;
+
+  let mut years: Vec<i32> = inventory
+    .daily
+    .keys()
+    .map(|(year, _)| *year)
+    .chain(inventory.monthly.keys().map(|(year, _)| *year))
+    .chain(inventory.yearly.keys().copied())
+    .collect();
+  years.sort();
+  years.dedup();
+
+  // Then: compress full past years (not current year) into yearly archives.
+  for year in years {
+    if year >= current_year {
+      continue;
+    }
+
+    let yearly_exists = inventory.yearly.contains_key(&year);
+    let mut files = Vec::new();
+
+    for ((y, _month), path) in &inventory.monthly {
+      if *y == year {
+        files.push(path.clone());
+      }
+    }
+
+    for ((y, _m), daily_files) in &inventory.daily {
+      if *y == year {
+        files.extend(daily_files.iter().cloned());
+      }
+    }
+
+    if yearly_exists {
+      cleanup_files(files).await?;
+      continue;
+    }
+
+    if !files.is_empty() {
+      let archive_path = build_yearly_archive_path(directory, year);
+      archive_and_cleanup(archive_path, files).await?;
+    }
+  }
+
+  Ok(())
+}
+
+async fn run_log_compress_worker(directory: PathBuf) {
+  if let Err(err) = compress_logs_once(&directory).await {
+    error!(error=?err, "failed to compress log archives");
+  }
+
+  let mut ticker = interval(Duration::from_secs(6 * 60 * 60));
+  ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
+  loop {
+    ticker.tick().await;
+    if let Err(err) = compress_logs_once(&directory).await {
+      error!(error=?err, "failed to compress log archives");
+    }
+  }
+}
+
 /// Initialize the logger.
 pub async fn initialize(config: &Option<logging::Config>) -> Result<Vec<WorkerGuard>, LoggerError> {
   let config = config.clone().unwrap_or(logging::Config {
@@ -206,6 +427,8 @@ pub async fn initialize(config: &Option<logging::Config>) -> Result<Vec<WorkerGu
     victoria,
   } = config;
   tokio::fs::create_dir_all(&directory).await?;
+  let log_directory = PathBuf::from(directory.clone());
+  tokio::spawn(async move { run_log_compress_worker(log_directory).await });
   let mut file_appender = rolling::RollingFileAppender::builder()
     .rotation(rolling::Rotation::DAILY)
     .filename_prefix("ret2shell")

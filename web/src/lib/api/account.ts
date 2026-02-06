@@ -1,3 +1,4 @@
+import { sleep } from "@lib/utils/timeout";
 import type { Captcha } from "@models/captcha";
 import type { Institute } from "@models/institute";
 import type { OAuth } from "@models/oauth";
@@ -49,6 +50,7 @@ export type RegisterRequest = {
 } & CaptchaRequest;
 
 export async function register(req: RegisterRequest) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/register`, { json: req }).json();
 }
 
@@ -77,6 +79,7 @@ export type LoginRequest = {
 } & CaptchaRequest;
 
 export async function login(req: LoginRequest) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/login`, { json: req }).json();
 }
 
@@ -100,6 +103,7 @@ export function useLoginMutation(props: { onSuccess?: () => void; onError?: (err
 }
 
 export async function logout() {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/logout`).json();
 }
 
@@ -118,6 +122,7 @@ export type ForgotPasswordRequest = {
 } & CaptchaRequest;
 
 export async function forgotPassword(req: ForgotPasswordRequest) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/forgot`, { json: req }).json();
 }
 
@@ -154,6 +159,7 @@ export type ResetPasswordRequest = {
 } & CaptchaRequest;
 
 export async function resetPassword(req: ResetPasswordRequest) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/reset`, { json: req }).json();
 }
 
@@ -181,6 +187,7 @@ export type VerifyEmailRequest = {
 };
 
 export async function verifyEmail(req: VerifyEmailRequest) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/verify`, { json: req }).json();
 }
 
@@ -203,6 +210,7 @@ export function useVerifyEmailMutation(props: { onSuccess?: () => void; onError?
 }
 
 export async function resendEmail() {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.patch(`${api_root}/account/verify`).json();
 }
 
@@ -263,6 +271,7 @@ export function useChangeProfileMutation(props: { onSuccess?: () => void; onErro
 }
 
 export async function deleteSelf(captcha: CaptchaRequest) {
+  await sleep(1000); // artificial delay to prevent brute-force
   return await api
     .delete(`${api_root}/account/profile`, {
       json: captcha,
@@ -327,6 +336,7 @@ export function useAccountCode(props: { enabled?: () => boolean; onError?: (err:
 }
 
 export async function generateAccountCode() {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.post(`${api_root}/account/code`).json<{ code: number; generate_at: DateTime }>();
 }
 
@@ -342,6 +352,7 @@ export function useGenerateAccountCodeMutation(props: { onSuccess?: () => void; 
 }
 
 export async function changePassword(req: { old_password: string; new_password: string }) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api.patch(`${api_root}/account/password`, { json: req }).json();
 }
 
@@ -534,6 +545,7 @@ export async function registerWithOAuth(
     captcha_answer: string;
   }
 ) {
+  await sleep(500); // artificial delay to prevent brute-force
   return await api
     .post(`${api_root}/account/oauth/register`, {
       json: {

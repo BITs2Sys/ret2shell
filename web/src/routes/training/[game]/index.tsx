@@ -104,9 +104,9 @@ export default function () {
   });
 
   async function onEditGame(result: GameForm) {
-    console.log("onEditGame", result, game.data);
+    // console.log("onEditGame", result, game.data);
     if (!game.data) return;
-    console.log("onEditGame proceeding to mutate");
+    // console.log("onEditGame proceeding to mutate");
     await updateGameMutation.mutateAsync({
       id: game.data.id,
       game: {

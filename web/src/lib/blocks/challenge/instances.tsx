@@ -65,6 +65,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
   const tags = useRegistryImageTags({
     game_id: () => fnProps.gameId,
     repo: () => searchedRepo(),
+    enabled: () => searchedRepo().length > 0 && selected(),
   });
 
   function sanitizeChallengeImage(image: ChallengeImage): ChallengeImage {

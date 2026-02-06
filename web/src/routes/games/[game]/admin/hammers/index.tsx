@@ -87,7 +87,7 @@ export default function () {
           chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
         }, 700);
       }
-      console.log(merged);
+      // console.log(merged);
       return merged;
     });
   });

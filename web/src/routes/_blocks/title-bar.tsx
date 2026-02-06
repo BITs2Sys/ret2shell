@@ -75,12 +75,21 @@ function TitleLink() {
   return (
     <Link href={link()} ghost>
       <div class="w-6 h-6">
-        <Transition name="fade-group-flip" mode="outin">
-          <Switch fallback={<LogoAnimate class="fade-group-flip" width={24} height={24} />}>
-            <Match when={game.data?.logo && location.pathname.startsWith("/games/")}>
-              <img class="fade-group-flip" src={mediaPath(game.data?.logo)} width={24} height={24} alt="CTF" />
-            </Match>
-          </Switch>
+        <Transition
+          name="fade-group-flip"
+          mode="outin"
+          onExit={(_el, done) => {
+            setTimeout(() => {
+              done();
+            }, 300);
+          }}
+        >
+          <Show
+            when={game.data?.logo && location.pathname.startsWith("/games/")}
+            fallback={<LogoAnimate class="fade-group-flip" width={24} height={24} />}
+          >
+            <img class="fade-group-flip" src={mediaPath(game.data?.logo)} width={24} height={24} alt="CTF" />
+          </Show>
         </Transition>
       </div>
       <span />
@@ -100,7 +109,9 @@ function TitleLink() {
 }
 
 function GlobalNav(props: { size: "sm" | "md" }) {
-  const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const accountInfo = useAccountProfile({
+    enabled: () => !!accountStore.token,
+  });
   const platformInfo = usePlatformInfo();
   return (
     <div class="fade-group-dive-left flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-2">
@@ -176,7 +187,9 @@ function GameNav(props: { size: "sm" | "md" }) {
     enabled: () => !!accountStore.token && !!game.data && !isAdminOfGame(game.data),
     silenced: true,
   });
-  const accountInfo = useAccountProfile({ enabled: () => !!accountStore.token });
+  const accountInfo = useAccountProfile({
+    enabled: () => !!accountStore.token,
+  });
   const platformInfo = usePlatformInfo();
   return (
     <div class="fade-group-dive-left flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-2">
@@ -334,10 +347,7 @@ export default function TitleBar() {
                     <Switch>
                       <Match
                         when={
-                          params.game &&
-                          game.data &&
-                          game.data.host_type === HostType.Game &&
-                          location.pathname.startsWith("/games/")
+                          platformStore.isOnline && params.game && game.data && location.pathname.startsWith("/games/")
                         }
                       >
                         <GameNav size="sm" />
@@ -416,22 +426,24 @@ export default function TitleBar() {
           <TitleLink />
           <div class="w-4" />
           <ul class="lg:flex flex-row space-x-2 items-center hidden">
-            <Transition name="fade-group-dive-left" mode="outin">
-              <Switch fallback={<LoadingTips class="fade-group-dive-left opacity-60" />}>
-                <Match
-                  when={
-                    platformStore.isOnline &&
-                    game.data?.host_type === HostType.Game &&
-                    location.pathname.startsWith("/games")
-                  }
+            <Show when={platformStore.isOnline} fallback={<LoadingTips class="fade-group-dive-left opacity-60" />}>
+              <Transition
+                name="fade-group-dive-left"
+                mode="outin"
+                onExit={(_el, done) => {
+                  setTimeout(() => {
+                    done();
+                  }, 300);
+                }}
+              >
+                <Show
+                  when={platformStore.isOnline && params.game && game.data && location.pathname.startsWith("/games/")}
+                  fallback={<GlobalNav size="md" />}
                 >
                   <GameNav size="md" />
-                </Match>
-                <Match when={platformStore.isOnline}>
-                  <GlobalNav size="md" />
-                </Match>
-              </Switch>
-            </Transition>
+                </Show>
+              </Transition>
+            </Show>
           </ul>
           <div class="flex-1" />
           <div class="flex flex-row space-x-2">
