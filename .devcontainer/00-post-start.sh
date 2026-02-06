@@ -18,24 +18,14 @@ exec $ctx_dir/install-deps.sh || eprintln "Failed to install dependencies."
 
 # install devtools
 echo "Installing devtools..."
-find "$ctx_dir/devtools" -type f -executable -exec cp --no-clobber {} -t /usr/local/bin/ \;
+{
+  sudo mkdir -p /usr/local/bin
+  find "$ctx_dir/devtools" -type f -executable -exec sudo cp --no-clobber {} -t /usr/local/bin/ \;
+} || eprintln "Failed to install devtools."
 
 # copy config
 if [ ! -f 'config/config.toml']; then
-  cp config/config.sample.toml config/config.toml
-fi
-
-# get kubeconfig.yaml configuration
-if command -v kubectl &> /dev/null; then
-  if [ ! -f config/kubeconfig.yaml ]; then
-    echo "Setting up kubeconfig..."
-    {
-      kubectl config view --raw > config/kubeconfig.yaml && \
-      sed -i 's@kube_config_path\s*=\s*".*"@kube_config_path = "config/kubeconfig.yaml"@' config/config.toml
-    } || eprintln "Failed to get kubeconfig."
-  fi
-else
-  echo "kubectl not found, skipping kubeconfig setup."
+  cp config/config.sample.toml config/config.toml || eprintln "Failed to create config/config.toml."
 fi
 
 # pre-generate license

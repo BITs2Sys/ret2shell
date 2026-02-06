@@ -24,10 +24,11 @@
 			"username": "vscode",
 			"upgradePackages": "true"
 		},
-		"ghcr.io/devcontainers/features/git:1": {
-			"version": "latest",
-			"ppa": "true"
-		},
+		// Already installed by features/common-utils, comment out to speed up build time
+		// "ghcr.io/devcontainers/features/git:1": {
+		// 	"version": "latest",
+		// 	"ppa": "true"
+		// },
 		"ghcr.io/devcontainers/features/rust:1": "latest",
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts",
