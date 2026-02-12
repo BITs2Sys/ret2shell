@@ -69,7 +69,7 @@ impl RuneServiceInfo {
           .app_protocol
           .clone()
           .unwrap_or("tcp".to_owned())
-          .replace("ret.sh.cn/traffic/", ""),
+          .replace("ret.sh.cn/traffic-", ""),
       };
       ports_info.push(port_info);
     }

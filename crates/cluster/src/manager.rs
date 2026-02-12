@@ -615,7 +615,7 @@ impl Cluster {
                 .port
                 .map(|port| k8s_openapi::api::core::v1::ServicePort {
                   app_protocol: Some(format!(
-                    "ret.sh.cn/traffic/{}",
+                    "ret.sh.cn/traffic-{}",
                     self.map_app_protocol(&image)
                   )),
                   name: Some(image.name.clone()),
