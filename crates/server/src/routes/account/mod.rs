@@ -17,7 +17,7 @@ use r2s_database::{
 use r2s_email::{EmailCtx, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
-use rand::Rng;
+use rand::RngExt;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;

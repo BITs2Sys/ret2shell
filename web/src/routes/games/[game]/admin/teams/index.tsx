@@ -43,7 +43,7 @@ export default function () {
     page_size: () => pageSize,
     order: () => order() || "id",
     filter: () => filter() ?? "",
-    institute_id: () => instituteId() ?? 0,
+    institute_id: () => instituteId(),
     enabled: () => gameId() > 0,
   });
 

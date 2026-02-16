@@ -207,6 +207,16 @@ export class Service implements Command {
     );
     io.println(`     Active: ${getInstState(inst)}`);
     if (inst) {
+      const getImageScheme = (image: {
+        protocol?: "tcp" | "stcp" | "udp" | null;
+        app_protocol?: "raw" | "http" | null;
+        service_type?: "http" | "tcp" | "udp" | null;
+      }) => {
+        if (image.app_protocol === "http") {
+          return "http";
+        }
+        return image.protocol || image.service_type || "tcp";
+      };
       // await wsrx.openAllTraffic();
       await wsrx.syncLocal();
       // wsrx-local.service
@@ -249,8 +259,9 @@ export class Service implements Command {
           const locals = wsrx.getTrafficLocal(inst, image.port!);
           for (const local of locals) {
             if (local) {
+              const scheme = getImageScheme(image);
               io.println(
-                `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx-local.service (${ansiColors.green(`${local.latency}ms`)})`
+                `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${scheme}://${local.local}`, `${scheme}://${local.local}`))} *-> wsrx-local.service (${ansiColors.green(`${local.latency}ms`)})`
               );
             }
           }

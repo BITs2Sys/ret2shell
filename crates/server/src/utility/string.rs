@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
-use rand::Rng;
+use rand::RngExt;
 
 static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
   let mut map = HashMap::new();

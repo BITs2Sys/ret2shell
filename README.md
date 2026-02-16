@@ -4,7 +4,7 @@
   </a>
   <p><em>A feature-riches CTF challenge platform</em></p>
 
-[![MSRV 1.92.0+](https://img.shields.io/badge/MSRV-1.92.0+-blue)](https://releases.rs/docs/1.92.0/)
+[![MSRV 1.93.0+](https://img.shields.io/badge/MSRV-1.93.0+-blue)](https://releases.rs/docs/1.93.0/)
 [![Solid.js 1.9+](https://img.shields.io/badge/Solid.js-1.9+-orange)](https://www.solidjs.com/)
 
 </div>
@@ -15,7 +15,8 @@ Ret2Shell is single binary with requirements of `redis/valkey 8+`, `postgres 18+
 
 All the components could be deploy anywhere, so you can deploy ret2shell as you like.
 
-> [!WARNING] The new helm charts is work-in-progress.
+> [!WARNING]
+> The new helm charts is work-in-progress.
 
 For a general usage, you could see [k8s single-node deployment](./deploy/k8s-deprecated/README.md) for details.
 

@@ -400,7 +400,7 @@ export function useTeamList({
   page_size?: () => number;
   order?: () => string;
   filter?: () => string;
-  institute_id?: () => number;
+  institute_id?: () => number | null;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
@@ -412,13 +412,13 @@ export function useTeamList({
     page_size?.() ?? 15,
     order?.() ?? "",
     filter?.() ?? "",
-    institute_id?.() ?? 0,
+    institute_id?.() ?? undefined,
   ]);
   return useQuery(
     () => ({
       queryKey: keys(),
       queryFn: () =>
-        getTeamList(game_id(), page?.() ?? 1, page_size?.() ?? 15, order?.(), filter?.(), institute_id?.()),
+        getTeamList(game_id(), page?.() ?? 1, page_size?.() ?? 15, order?.(), filter?.(), institute_id?.() ?? undefined),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("team.errors.fetchList.title"));
