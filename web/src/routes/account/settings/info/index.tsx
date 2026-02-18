@@ -120,6 +120,7 @@ export default function () {
                 value={accountStore.account!}
                 disabled
               />
+              <span class="block label w-full text-start font-normal">* {t("account.form.account.tip")}</span>
               <Field name="nickname" validate={[required(t("account.form.nickname.required"))]}>
                 {(field, props) => (
                   <Input
