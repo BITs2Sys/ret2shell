@@ -24,15 +24,12 @@ const PUBLIC_ENTRIES = #{
 //   * name:string : the service name on this port
 //   * address:string : the actual address for this service
 //
-// NOTE: This function will be called when user first requesting the challenge environment.
-// 
-// Ret 2 Shell will automatically cache the result of this function, but it is still possible
-// to call this function twice on the same traffic.
+// NOTE: 当用户请求题目环境时，将调用此函数。
 //
-// If you use some external controller like RESTful-controlled FRP, you should ensure that
-// your external controller will check duplicated traffic at first, then create it if not exist.
-// also, Ret 2 Shell does not provide API for traffic-cleanup, you should use `create_at` /
-// `lifetime` to calculate and manage the traffic in your external controller.
+// 平台会自动缓存此函数的结果，但仍有可能在同一流量上调用此函数两次。如果你使用某些外部控制器
+//（如 RESTful 控制的 FRP），你应当确保外部控制器会首先检查重复流量，然后在不存在时创建
+// 它。同时，平台不提供流量清理的 API，您应该使用诸如 `create_at` / `lifetime` 之类的量
+// 来计算和管理外部控制器中的流量。
 pub async fn expose(node, service) {
     let result = #{};
     let ip = PUBLIC_ENTRIES.get(node)?;
