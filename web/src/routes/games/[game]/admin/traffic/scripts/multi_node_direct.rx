@@ -3,10 +3,10 @@ const PUBLIC_ENTRIES = #{
     node2: "10.0.0.2",
 };
 
-// Traffic exposing API
+// 暴露地址 API
 //
 // Args:
-// 
+//
 // * node:string : k8s node name
 // * service: { traffic:string, created_at:u64, lifetime:u64, ports:Vec<#{name:string, node_port:u16, protocol:string, app_protocol:string}> }
 //   * traffic:string : the traffic id
