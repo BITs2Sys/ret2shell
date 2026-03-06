@@ -3,7 +3,7 @@ mod utility;
 use std::collections::HashMap;
 
 use r2s_config::auth::Config;
-use r2s_engine::{DiagnosticMarker, Engine, EngineError, GLOBAL_ENGINE};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError};
 use rune::{Any, ContextError, Module, Value, runtime::Object};
 pub use traits::OAuthError;
 
@@ -41,17 +41,15 @@ impl OAuth {
     ]
   }
 
-  pub async fn expire(&self, key: impl AsRef<str>) {
-    GLOBAL_ENGINE
-      .expire(format!("oauth-{}", key.as_ref()))
-      .await;
+  pub async fn expire(&self, engine: &Engine, key: impl AsRef<str>) {
+    engine.expire(format!("oauth-{}", key.as_ref())).await;
   }
 
   pub async fn preload(
-    &self, key: impl AsRef<str>, script: impl AsRef<str>,
+    &self, engine: &Engine, key: impl AsRef<str>, script: impl AsRef<str>,
   ) -> Result<(), EngineError> {
     let key = format!("oauth-{}", key.as_ref());
-    GLOBAL_ENGINE
+    engine
       .preload(Self::default_modules(), key, script, None)
       .await
   }
@@ -61,14 +59,12 @@ impl OAuth {
   }
 
   pub async fn login(
-    &self, key: impl AsRef<str>, params: &HashMap<String, String>,
+    &self, engine: &Engine, key: impl AsRef<str>, params: &HashMap<String, String>,
   ) -> Result<HashMap<String, String>, OAuthError> {
     let key = key.as_ref();
     let key = format!("oauth-{}", key);
     let params_object = RuneMap(params.clone());
-    let result = GLOBAL_ENGINE
-      .execute(key, "login", (params_object,))
-      .await?;
+    let result = engine.execute(key, "login", (params_object,)).await?;
     let output: Result<Object, Value> = rune::from_value(result).map_err(EngineError::from)?;
     if let Ok(object) = output {
       let _ = object
@@ -90,13 +86,14 @@ impl OAuth {
   }
 
   pub async fn bind(
-    &self, key: impl AsRef<str>, params: &HashMap<String, String>, user: &HashMap<String, String>,
+    &self, engine: &Engine, key: impl AsRef<str>, params: &HashMap<String, String>,
+    user: &HashMap<String, String>,
   ) -> Result<HashMap<String, String>, OAuthError> {
     let key = key.as_ref();
     let key = format!("oauth-{}", key);
     let params_object = RuneMap(params.clone());
     let user_object = RuneMap(user.clone());
-    let result = GLOBAL_ENGINE
+    let result = engine
       .execute(key, "bind", (params_object, user_object))
       .await?;
     let output: Result<Object, Value> = rune::from_value(result).map_err(EngineError::from)?;

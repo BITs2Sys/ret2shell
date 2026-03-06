@@ -15,6 +15,7 @@ use r2s_database::{
   config,
   user::{self, Permission, Permissions},
 };
+use r2s_engine::Engine;
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
 use r2s_queue::Queue;
@@ -111,8 +112,8 @@ async fn create_oauth_provider(
 }
 
 async fn update_oauth_provider(
-  State(db): State<Database>, State(oauth): State<OAuth>, Path(service): Path<String>,
-  Json(provider): Json<r2s_database::oauth_provider::Model>,
+  State(db): State<Database>, State(oauth): State<OAuth>, State(engine): State<Engine>,
+  Path(service): Path<String>, Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let original_provider =
@@ -124,7 +125,7 @@ async fn update_oauth_provider(
     };
   let provider = r2s_database::oauth_provider::update(&txn, original_provider.id, provider).await?;
   let lint = oauth.lint(&provider.script).await;
-  oauth.expire(provider.provider.as_str()).await;
+  oauth.expire(&engine, provider.provider.as_str()).await;
   txn.commit().await?;
   Ok(Json(OAuthProviderResponse {
     item: provider,
@@ -158,7 +159,8 @@ pub struct OAuthLoginResponse {
 }
 async fn login_with_oauth_account(
   State(db): State<Database>, State(oauth): State<OAuth>, State(cache): State<Cache>,
-  Extension(token_tracker): Extension<TokenTracker>, Query(params): Query<HashMap<String, String>>,
+  State(engine): State<Engine>, Extension(token_tracker): Extension<TokenTracker>,
+  Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let provider = params.get("service").ok_or_else(|| {
     warn!(?params, "oauth login request missing service");
@@ -173,9 +175,11 @@ async fn login_with_oauth_account(
       return Err(ResponseError::NotFound("oauth service".to_owned()));
     }
   };
-  oauth.preload(provider_str, &provider.script).await?;
+  oauth
+    .preload(&engine, provider_str, &provider.script)
+    .await?;
 
-  let oauth_item = oauth.login(provider_str, &params).await?;
+  let oauth_item = oauth.login(&engine, provider_str, &params).await?;
   let auth_key = oauth_item.get("auth_key").ok_or(ResponseError::NotFound(
     "missing auth_key in oauth server response".to_owned(),
   ))?;
@@ -379,7 +383,7 @@ async fn get_oauth_status(
 
 async fn bind_oauth_account(
   State(db): State<Database>, State(cache): State<Cache>, State(oauth): State<OAuth>,
-  Extension(user): Extension<r2s_database::user::Model>,
+  State(engine): State<Engine>, Extension(user): Extension<r2s_database::user::Model>,
   Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
@@ -404,9 +408,12 @@ async fn bind_oauth_account(
     }
   };
 
-  oauth.preload(provider_str, &provider.script).await?;
+  oauth
+    .preload(&engine, provider_str, &provider.script)
+    .await?;
   let data = oauth
     .bind(
+      &engine,
       provider_str,
       &params,
       &[

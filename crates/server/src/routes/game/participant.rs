@@ -3,6 +3,7 @@ use chrono::Utc;
 use r2s_cache::Cache;
 use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError};
 use r2s_database::{config, game, submission, team as team_db, user::Permission};
+use r2s_engine::Engine;
 use r2s_migrator::Database;
 use tracing::{error, warn};
 
@@ -49,7 +50,7 @@ pub(super) async fn get_self_solves(
 }
 
 pub(super) async fn get_self_instances(
-  State(cluster): State<Cluster>, State(cache): State<Cache>,
+  State(cluster): State<Cluster>, State(cache): State<Cache>, State(engine): State<Engine>,
   Extension(config): Extension<config::Model>, Extension(game): Extension<game::Model>,
   Extension(token): Extension<Token>, team_ext: Extension<Option<team_db::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -152,9 +153,12 @@ pub(super) async fn get_self_instances(
       }
     };
     traffic_mapper
-      .preload(&traffic_key, &traffic_script)
+      .preload(&engine, &traffic_key, &traffic_script)
       .await?;
-    let exposed_ports = match traffic_mapper.expose(&traffic_key, env, service).await {
+    let exposed_ports = match traffic_mapper
+      .expose(&engine, &traffic_key, env, service)
+      .await
+    {
       Ok(ports) => ports,
       Err(ClusterError::MissingField(e)) => {
         warn!(field=%e, env=%env_name, "traffic mapper missing field for env, maybe the cluster is maintaining?",);

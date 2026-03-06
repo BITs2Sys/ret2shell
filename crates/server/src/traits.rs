@@ -12,6 +12,7 @@ use r2s_checker::Checker;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::DbErr;
+use r2s_engine::Engine;
 use r2s_event::EventManager;
 use r2s_license::License;
 use r2s_media::Media;
@@ -31,6 +32,7 @@ pub struct GlobalState {
   pub cache: Cache,
   pub auditor: Auditor,
   pub bucket: Bucket,
+  pub engine: Engine,
   pub queue: Queue,
   pub oauth: OAuth,
   pub cluster: Cluster,

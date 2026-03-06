@@ -9,7 +9,7 @@ use r2s_cache::Cache;
 use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster;
 use r2s_database::{config, user::Permission};
-use r2s_engine::DiagnosticMarker;
+use r2s_engine::{DiagnosticMarker, Engine};
 use r2s_event::{
   Event,
   events::{DevopsEvent, DevopsEventType, EventContainer},
@@ -182,7 +182,8 @@ struct TrafficScriptResponse {
 
 async fn update_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>, Json(req): Json<TrafficScriptRequest>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
+  Json(req): Json<TrafficScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -201,7 +202,7 @@ async fn update_traffic_script(
     },
   )
   .await?;
-  traffic_mapper.expire("default").await;
+  traffic_mapper.expire(&engine, "default").await;
   cache.at("platform").del("config").await?;
   info!("default traffic script updated");
   Ok(Json(TrafficScriptResponse { lint }))
@@ -209,7 +210,7 @@ async fn update_traffic_script(
 
 async fn delete_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -226,7 +227,7 @@ async fn delete_traffic_script(
     },
   )
   .await?;
-  traffic_mapper.expire("default").await;
+  traffic_mapper.expire(&engine, "default").await;
   cache.at("platform").del("config").await?;
 
   info!("default traffic script deleted");

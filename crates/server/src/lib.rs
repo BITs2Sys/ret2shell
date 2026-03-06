@@ -74,7 +74,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   info!("loading module: < Auditor >");
   let auditor = r2s_auditor::initialize(&config.auditor).await?;
   info!("loading module: < Engine >");
-  r2s_engine::initialize().await;
+  let engine = r2s_engine::initialize();
   info!("loading module: < Database >");
   let (db, migrated) = r2s_migrator::initialize(&config.database).await?;
   info!("loading module: < Cache >");
@@ -111,6 +111,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     cache,
     auditor,
     bucket,
+    engine,
     event,
     queue,
     oauth,

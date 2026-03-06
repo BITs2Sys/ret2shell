@@ -12,6 +12,7 @@ use r2s_database::{
   challenge, config, game, team,
   user::{self, Permission},
 };
+use r2s_engine::Engine;
 use serde_json::to_value;
 use tracing::{debug, info, warn};
 
@@ -44,9 +45,10 @@ pub(super) async fn get_challenge_env_config(
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn start_challenge_instance(
   State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
-  State(checker): State<Checker>, Extension(config): Extension<config::Model>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Extension(token): Extension<Token>, team_ext: Extension<Option<team::Model>>,
+  State(checker): State<Checker>, State(engine): State<Engine>,
+  Extension(config): Extension<config::Model>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(token): Extension<Token>,
+  team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let team = if team.is_some()
@@ -132,10 +134,13 @@ pub(super) async fn start_challenge_instance(
       .map(|p| p.expect("checked as some").to_string())
       .collect::<Vec<_>>()
       .join(",");
-    checker.preload(&challenge, &challenge_bucket).await?;
+    checker
+      .preload(&engine, &challenge, &challenge_bucket)
+      .await?;
     debug!("checker preloaded");
     let env_map = checker
       .environ(
+        &engine,
         &challenge_bucket,
         &user::Model {
           id: token.id,

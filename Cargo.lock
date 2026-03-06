@@ -4153,7 +4153,6 @@ name = "r2s-engine"
 version = "3.10.3"
 dependencies = [
  "chrono",
- "once_cell",
  "ret2script",
  "rune",
  "rune-modules",
