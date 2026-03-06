@@ -20,9 +20,9 @@ use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
 
-use super::{is_game_admin, worker};
+use super::worker;
 use crate::{
-  middleware::{auth, data},
+  middleware::{auth, auth::is_game_admin, data},
   traits::{GlobalState, ResponseError},
 };
 
