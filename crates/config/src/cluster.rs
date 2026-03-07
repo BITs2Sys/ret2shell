@@ -34,6 +34,8 @@ pub struct Config {
   pub node_selector: Option<String>,
   /// the `traffic` script for challenge routes.
   pub traffic: Option<String>,
+  /// the `lifecycle` script for challenge instance events.
+  pub lifecycle: Option<String>,
   /// `enable_capture` is a flag to enable the stream capture feature.
   pub enable_capture: Option<bool>,
   /// `capture_directory` is the directory to store the capture files.
@@ -56,6 +58,7 @@ impl Merge for Option<Config> {
         kube_config_path: a.kube_config_path,
         node_selector: b.node_selector.or(a.node_selector),
         traffic: b.traffic,
+        lifecycle: b.lifecycle,
         enable_capture: b.enable_capture.or(a.enable_capture),
         capture_directory: b.capture_directory.or(a.capture_directory),
         registry: a.registry,

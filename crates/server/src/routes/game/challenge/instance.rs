@@ -6,7 +6,10 @@ use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::{CHALLENGE_NS, Cluster, Pod};
+use r2s_cluster::{
+  CHALLENGE_NS, Cluster,
+  lifecycle::{LifecycleEvent, LifecycleStopReason},
+};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, config, game, team,
@@ -14,11 +17,13 @@ use r2s_database::{
 };
 use r2s_engine::Engine;
 use serde_json::to_value;
+use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use crate::{
+  lifecycle,
   middleware::{auth::Token, data::extract_team},
-  routes::game::{Instance, get_pod_field},
+  routes::game::get_pod_field,
   traits::ResponseError,
 };
 
@@ -46,9 +51,9 @@ pub(super) async fn get_challenge_env_config(
 pub(super) async fn start_challenge_instance(
   State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
   State(checker): State<Checker>, State(engine): State<Engine>,
-  Extension(config): Extension<config::Model>, Extension(game): Extension<game::Model>,
+  Extension(config_model): Extension<config::Model>, Extension(game): Extension<game::Model>,
   Extension(challenge): Extension<challenge::Model>, Extension(token): Extension<Token>,
-  team_ext: Extension<Option<team::Model>>,
+  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let team = if team.is_some()
@@ -59,7 +64,7 @@ pub(super) async fn start_challenge_instance(
   } else {
     None
   };
-  let config = if let Some(config) = &config.cluster {
+  let config = if let Some(config) = &config_model.cluster {
     config
   } else {
     return Err(ResponseError::PreconditionFailed(
@@ -165,9 +170,10 @@ pub(super) async fn start_challenge_instance(
     } else {
       config.traffic.is_some()
     };
+    let lifecycle_team = team.clone();
     debug!(?node_selector);
     debug!(?need_expose);
-    cluster
+    let snapshot = cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
         [
@@ -197,6 +203,7 @@ pub(super) async fn start_challenge_instance(
           ),
           ("ret.sh.cn/game", game.name.to_string()),
           ("ret.sh.cn/user", token.account.to_string()),
+          ("ret.sh.cn/user-nickname", token.nickname.to_string()),
           ("ret.sh.cn/renew", 0.to_string()),
           ("ret.sh.cn/ports", ports),
         ]
@@ -213,6 +220,23 @@ pub(super) async fn start_challenge_instance(
       .at("cluster")
       .set_ex(token.id.to_string(), Utc::now().timestamp(), 60)
       .await?;
+    lifecycle::spawn_request_hooks(
+      None,
+      cluster.clone(),
+      engine.clone(),
+      config_model.clone(),
+      game.clone(),
+      challenge.clone(),
+      token.clone(),
+      lifecycle_team,
+      vec![snapshot],
+      LifecycleEvent::Start,
+      trace
+        .header_value()
+        .to_str()
+        .unwrap_or("UNKNOWN")
+        .to_owned(),
+    );
     Ok(())
   } else {
     Err(ResponseError::PreconditionFailed(
@@ -221,28 +245,14 @@ pub(super) async fn start_challenge_instance(
   }
 }
 
-async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
-  if !pods.is_empty() {
-    tokio::spawn(async move {
-      for pod in pods {
-        let instance: Option<Instance> = pod.try_into().ok();
-        if instance.is_none() {
-          continue;
-        }
-        let instance = instance.expect("checked as some");
-        let traffic = instance.traffic;
-        cache.at("traffic").del(traffic).await.ok();
-      }
-    });
-  }
-}
-
 pub(super) async fn delay_challenge_instance(
-  State(cache): State<Cache>, State(ref cluster): State<Cluster>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, team_ext: Extension<Option<team::Model>>,
+  State(cache): State<Cache>, State(ref cluster): State<Cluster>, State(engine): State<Engine>,
+  Extension(config_model): Extension<config::Model>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
+  let lifecycle_team = team.clone();
 
   let pods = if let Some(team) = team {
     info!("delaying challenge env");
@@ -254,7 +264,23 @@ pub(super) async fn delay_challenge_instance(
     Vec::new()
   };
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    lifecycle::spawn_request_hooks(
+      Some(cache.clone()),
+      cluster.clone(),
+      engine.clone(),
+      config_model.clone(),
+      game.clone(),
+      challenge.clone(),
+      token.clone(),
+      lifecycle_team.clone(),
+      pods,
+      LifecycleEvent::Delay,
+      trace
+        .header_value()
+        .to_str()
+        .unwrap_or("UNKNOWN")
+        .to_owned(),
+    );
     return Ok(());
   }
 
@@ -264,18 +290,36 @@ pub(super) async fn delay_challenge_instance(
     .delay_challenge_env_by_user(challenge.id, token.id)
     .await?;
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    lifecycle::spawn_request_hooks(
+      Some(cache.clone()),
+      cluster.clone(),
+      engine.clone(),
+      config_model.clone(),
+      game.clone(),
+      challenge.clone(),
+      token.clone(),
+      lifecycle_team,
+      pods,
+      LifecycleEvent::Delay,
+      trace
+        .header_value()
+        .to_str()
+        .unwrap_or("UNKNOWN")
+        .to_owned(),
+    );
   }
 
   Ok(())
 }
 
 pub(super) async fn stop_challenge_instance(
-  State(cache): State<Cache>, State(ref cluster): State<Cluster>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, team_ext: Extension<Option<team::Model>>,
+  State(cache): State<Cache>, State(ref cluster): State<Cluster>, State(engine): State<Engine>,
+  Extension(config_model): Extension<config::Model>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
+  let lifecycle_team = team.clone();
 
   let pods = if let Some(team) = team {
     info!("stopping challenge env");
@@ -287,8 +331,23 @@ pub(super) async fn stop_challenge_instance(
     Vec::new()
   };
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
-
+    lifecycle::spawn_request_hooks(
+      Some(cache.clone()),
+      cluster.clone(),
+      engine.clone(),
+      config_model.clone(),
+      game.clone(),
+      challenge.clone(),
+      token.clone(),
+      lifecycle_team.clone(),
+      pods,
+      LifecycleEvent::Stop(LifecycleStopReason::Manual),
+      trace
+        .header_value()
+        .to_str()
+        .unwrap_or("UNKNOWN")
+        .to_owned(),
+    );
     return Ok(());
   }
 
@@ -299,7 +358,23 @@ pub(super) async fn stop_challenge_instance(
     .await?;
 
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    lifecycle::spawn_request_hooks(
+      Some(cache.clone()),
+      cluster.clone(),
+      engine.clone(),
+      config_model.clone(),
+      game.clone(),
+      challenge.clone(),
+      token.clone(),
+      lifecycle_team,
+      pods,
+      LifecycleEvent::Stop(LifecycleStopReason::Manual),
+      trace
+        .header_value()
+        .to_str()
+        .unwrap_or("UNKNOWN")
+        .to_owned(),
+    );
   }
 
   Ok(())

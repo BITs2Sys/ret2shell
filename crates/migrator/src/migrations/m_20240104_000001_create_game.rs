@@ -44,6 +44,7 @@ pub enum Game {
   TimelinePresets,
   Traffic,
   NodeSelector,
+  Lifecycle,
 }
 
 #[async_trait::async_trait]

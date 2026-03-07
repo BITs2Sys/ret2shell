@@ -490,6 +490,7 @@ async fn sync_game_config(
         timeline_presets: game.timeline_presets.clone(),
         node_selector: game.node_selector.clone(),
         traffic: game.traffic.clone(),
+        lifecycle: game.lifecycle.clone(),
       },
     )
     .await?,

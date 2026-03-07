@@ -16,6 +16,7 @@ use tracing::{error, info, warn};
 use crate::traits::GlobalState;
 
 mod hook;
+mod lifecycle;
 mod logger;
 mod middleware;
 mod routes;

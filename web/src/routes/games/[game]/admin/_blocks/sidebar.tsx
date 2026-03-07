@@ -182,6 +182,20 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
+            href={`/games/${gameId()}/admin/lifecycle`}
+            justify={expanded() ? "start" : "center"}
+            title={t("lifecycle.title")}
+          >
+            <span class="shrink-0 icon-[fluent--script-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("lifecycle.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
             href={`/games/${gameId()}/admin/captures`}
             justify={expanded() ? "start" : "center"}
             title={t("captures.title")}

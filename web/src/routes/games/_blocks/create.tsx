@@ -95,6 +95,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       award_rates: [0, 0, 0],
       node_selector: null,
       traffic: null,
+      lifecycle: null,
       bucket: null,
       archive_policy: { challenge: { show_answer: false, show_hints: false } },
       hammer_policy: {

@@ -15,7 +15,7 @@ pub(super) struct GameTraffic {
 }
 
 #[derive(Serialize)]
-pub(super) struct GameTrafficResponse {
+pub(super) struct GameScriptResponse {
   pub lint: Vec<DiagnosticMarker>,
 }
 
@@ -53,7 +53,7 @@ pub(super) async fn update_game_traffic(
   cache.at("game").del(game.id).await?;
   info!("updated game traffic");
 
-  Ok(Json(GameTrafficResponse { lint }))
+  Ok(Json(GameScriptResponse { lint }))
 }
 
 pub(super) async fn delete_game_traffic(
@@ -83,6 +83,78 @@ pub(super) async fn delete_game_traffic(
     .await;
   cache.at("game").del(game.id).await?;
   info!("deleted game traffic");
+  Ok(())
+}
+
+#[derive(Deserialize)]
+pub(super) struct GameLifecycle {
+  pub lifecycle: String,
+}
+
+pub(super) async fn update_game_lifecycle(
+  State(cluster): State<Cluster>, State(ref db): State<Database>, State(cache): State<Cache>,
+  State(engine): State<Engine>, Extension(game): Extension<game::Model>,
+  Json(req): Json<GameLifecycle>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let lifecycle_mapper = cluster
+    .lifecycle
+    .clone()
+    .ok_or(ResponseError::NotFound("lifecycle".to_string()))?;
+  let lint = lifecycle_mapper.lint(&req.lifecycle).await?;
+
+  game::update(
+    &db.conn,
+    game::Model {
+      id: game.id,
+      lifecycle: Some(req.lifecycle.clone()),
+      ..game.clone()
+    },
+  )
+  .await?;
+  lifecycle_mapper
+    .expire(
+      &engine,
+      &game
+        .bucket
+        .clone()
+        .ok_or(ResponseError::PreconditionFailed(
+          "game bucket does not exist".to_owned(),
+        ))?,
+    )
+    .await;
+  cache.at("game").del(game.id).await?;
+  info!("updated game lifecycle");
+
+  Ok(Json(GameScriptResponse { lint }))
+}
+
+pub(super) async fn delete_game_lifecycle(
+  State(cluster): State<Cluster>, State(ref db): State<Database>, State(cache): State<Cache>,
+  State(engine): State<Engine>, Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let lifecycle_mapper = cluster
+    .lifecycle
+    .clone()
+    .ok_or(ResponseError::NotFound("lifecycle".to_string()))?;
+  game::update(
+    &db.conn,
+    game::Model {
+      id: game.id,
+      lifecycle: None,
+      ..game.clone()
+    },
+  )
+  .await?;
+  lifecycle_mapper
+    .expire(
+      &engine,
+      &game.bucket.ok_or(ResponseError::PreconditionFailed(
+        "game bucket not exist".to_owned(),
+      ))?,
+    )
+    .await;
+  cache.at("game").del(game.id).await?;
+  info!("deleted game lifecycle");
   Ok(())
 }
 

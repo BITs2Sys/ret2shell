@@ -2101,6 +2101,15 @@
       "multiNodeDirectScript": "多节点直连"
     }
   },
+  "lifecycle": {
+    "title": "生命周期",
+    "functions": "函数：on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "脚本预设",
+      "webhookExample": "Webhook 示例",
+      "reservedBlank": "空置预留"
+    }
+  },
   "cluster": {
     "title": "集群管理",
     "status": {

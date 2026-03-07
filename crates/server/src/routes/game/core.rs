@@ -302,6 +302,7 @@ pub(super) async fn update_game(
       id: game.id,
       bucket: game.bucket.clone(),
       traffic: game.traffic.clone(),
+      lifecycle: game.lifecycle.clone(),
       node_selector: game.node_selector.clone(),
       introduction_id: game.introduction_id,
       ..model

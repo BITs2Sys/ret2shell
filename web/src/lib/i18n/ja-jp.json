@@ -2101,6 +2101,15 @@
       "multiNodeDirectScript": "マルチノード直結"
     }
   },
+  "lifecycle": {
+    "title": "ライフサイクル",
+    "functions": "関数: on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "スクリプトプリセット",
+      "webhookExample": "Webhook サンプル",
+      "reservedBlank": "空の予約枠"
+    }
+  },
   "cluster": {
     "title": "クラスタ管理",
     "status": {

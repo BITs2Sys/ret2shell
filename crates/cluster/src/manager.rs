@@ -31,12 +31,27 @@ use crate::{registry::Registry, traffic::TrafficMapper};
 
 pub const CHALLENGE_NS: &str = "ret2shell-challenge";
 
+#[derive(Clone, Debug)]
+pub struct ChallengeEnvSnapshot {
+  pub pod: Pod,
+  pub service: Option<Service>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct DeleteOutdatedEnvsResult {
+  pub overloaded: bool,
+  pub running: i32,
+  pub pending: i32,
+  pub deleted: Vec<ChallengeEnvSnapshot>,
+}
+
 #[derive(Clone)]
 pub struct Cluster {
   client: Option<Client>,
   pub registry: Option<Registry>,
   namespace: Option<String>,
   pub traffic: Option<TrafficMapper>,
+  pub lifecycle: Option<crate::lifecycle::LifecycleMapper>,
 }
 
 macro_rules! with_namespace {
@@ -68,6 +83,7 @@ impl Cluster {
       registry,
       namespace: Some(String::from("default")),
       traffic: Some(TrafficMapper),
+      lifecycle: Some(crate::lifecycle::LifecycleMapper),
     }
   }
 
@@ -288,7 +304,7 @@ impl Cluster {
     Ok(now - started_at > 3600 * (renew + 1) as i64)
   }
 
-  pub async fn delete_outdated_envs(&self) -> Result<(bool, i32, i32), ClusterError> {
+  pub async fn delete_outdated_envs(&self) -> Result<DeleteOutdatedEnvsResult, ClusterError> {
     // cleanup unknown services first
     self.cleanup_services().await?;
     // then check outdated pods, when pod is outdated, the corresponding service
@@ -296,7 +312,18 @@ impl Cluster {
     self.delete_outdated_pods().await
   }
 
-  async fn delete_outdated_pods(&self) -> Result<(bool, i32, i32), ClusterError> {
+  async fn capture_service_snapshot(&self, pod: &Pod) -> Option<Service> {
+    let name = pod.metadata.name.as_deref()?;
+    match self.get_service(name).await {
+      Ok(service) => Some(service),
+      Err(err) => {
+        warn!(pod=?pod.name(), error=?err, "failed to capture service snapshot");
+        None
+      }
+    }
+  }
+
+  async fn delete_outdated_pods(&self) -> Result<DeleteOutdatedEnvsResult, ClusterError> {
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(
       client,
@@ -310,6 +337,7 @@ impl Cluster {
       .await?;
     let mut running = 0;
     let mut pending = 0;
+    let mut deleted = Vec::new();
     let default_status = PodStatus {
       phase: Some("Unknown".to_owned()),
       ..Default::default()
@@ -336,6 +364,7 @@ impl Cluster {
       };
       match self.check_outdated_pod(&pod).await {
         Ok(true) => {
+          let service = self.capture_service_snapshot(&pod).await;
           info!(pod=?pod.name(), "deleting outdated pod");
           api
             .delete(
@@ -347,6 +376,7 @@ impl Cluster {
             )
             .await?;
           self.delete_service(&pod.name().unwrap()).await.ok();
+          deleted.push(ChallengeEnvSnapshot { pod, service });
         }
         Ok(false) => {
           debug!(pod=?pod.name(), "pod is alive");
@@ -362,7 +392,12 @@ impl Cluster {
 
     // if pending > 32, means that the cluster have too many pending pods
     // push a warning event to the queue
-    Ok((pending > 32, running, pending))
+    Ok(DeleteOutdatedEnvsResult {
+      overloaded: pending > 32,
+      running,
+      pending,
+      deleted,
+    })
   }
 
   async fn cleanup_services(&self) -> Result<(), ClusterError> {
@@ -471,7 +506,7 @@ impl Cluster {
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
     envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
     need_expose: bool,
-  ) -> Result<(), ClusterError> {
+  ) -> Result<ChallengeEnvSnapshot, ClusterError> {
     let challenge_id = labels
       .get("ret.sh.cn/challenge")
       .ok_or(ClusterError::MissingField("challenge".to_string()))?;
@@ -640,10 +675,13 @@ impl Cluster {
     {
       return Err(ClusterError::MissingField("service ports".to_string()));
     }
-    self.create_pod(pod).await?;
+    let pod = self.create_pod(pod).await?;
     debug!(?service, "created pod, creating service");
     match self.create_service(service).await {
-      Ok(_) => Ok(()),
+      Ok(service) => Ok(ChallengeEnvSnapshot {
+        pod,
+        service: Some(service),
+      }),
       Err(err) => {
         error!(pod=?pod_name, error=?err, "failed to create service, deleting pod");
         self.delete_pod(&pod_name).await?;
@@ -675,64 +713,110 @@ impl Cluster {
 
   pub async fn delay_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<Vec<Pod>, ClusterError> {
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
     let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
+    let mut snapshots = Vec::new();
     for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
+      let mut pod = p.clone();
+      let renew = pod
+        .metadata
+        .annotations
+        .clone()
+        .unwrap_or_default()
+        .get("ret.sh.cn/renew")
+        .and_then(|value| value.parse::<i32>().ok())
+        .unwrap_or(0);
+      let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
+      annotations.insert("ret.sh.cn/renew".to_owned(), (renew + 1).to_string());
+      pod.metadata.annotations = Some(annotations);
+      snapshots.push(ChallengeEnvSnapshot {
+        pod,
+        service: self.capture_service_snapshot(p).await,
+      });
     }
-    Ok(pods)
+    Ok(snapshots)
   }
 
   pub async fn delay_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<Vec<Pod>, ClusterError> {
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
     let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
       ))
       .await?;
+    let mut snapshots = Vec::new();
     for p in pods.iter() {
       self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
+      let mut pod = p.clone();
+      let renew = pod
+        .metadata
+        .annotations
+        .clone()
+        .unwrap_or_default()
+        .get("ret.sh.cn/renew")
+        .and_then(|value| value.parse::<i32>().ok())
+        .unwrap_or(0);
+      let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
+      annotations.insert("ret.sh.cn/renew".to_owned(), (renew + 1).to_string());
+      pod.metadata.annotations = Some(annotations);
+      snapshots.push(ChallengeEnvSnapshot {
+        pod,
+        service: self.capture_service_snapshot(p).await,
+      });
     }
-    Ok(pods)
+    Ok(snapshots)
   }
 
   pub async fn stop_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
-  ) -> Result<Vec<Pod>, ClusterError> {
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
     let pods = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
       ))
       .await?;
+    let mut snapshots = Vec::new();
     for p in pods.iter() {
+      let service = self.capture_service_snapshot(p).await;
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
       self
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
+      snapshots.push(ChallengeEnvSnapshot {
+        pod: p.clone(),
+        service,
+      });
     }
-    Ok(pods)
+    Ok(snapshots)
   }
 
   pub async fn stop_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
-  ) -> Result<Vec<Pod>, ClusterError> {
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
     let pod = self
       .get_pods_by_label(&format!(
         "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
       ))
       .await?;
+    let mut snapshots = Vec::new();
     for p in pod.iter() {
+      let service = self.capture_service_snapshot(p).await;
       self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
       self
         .delete_service(p.metadata.name.as_ref().unwrap())
         .await?;
+      snapshots.push(ChallengeEnvSnapshot {
+        pod: p.clone(),
+        service,
+      });
     }
-    Ok(pod)
+    Ok(snapshots)
   }
 
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {

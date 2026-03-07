@@ -1,0 +1,13 @@
+//! * reserved_blank.rx
+
+pub async fn on_start(_ctx) {
+    Ok(())
+}
+
+pub async fn on_delay(_ctx) {
+    Ok(())
+}
+
+pub async fn on_stop(_ctx) {
+    Ok(())
+}

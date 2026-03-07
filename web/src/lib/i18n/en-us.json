@@ -2101,6 +2101,15 @@
       "multiNodeDirectScript": "Multi-node direct connection"
     }
   },
+  "lifecycle": {
+    "title": "Lifecycle",
+    "functions": "Functions: on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "Script presets",
+      "webhookExample": "Webhook example",
+      "reservedBlank": "Reserved blank"
+    }
+  },
   "cluster": {
     "title": "Cluster management",
     "status": {

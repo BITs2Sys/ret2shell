@@ -151,6 +151,8 @@ pub struct Model {
   pub node_selector: Option<String>,
   #[serde(default = "Option::default")]
   pub traffic: Option<String>,
+  #[serde(default = "Option::default")]
+  pub lifecycle: Option<String>,
 }
 
 impl Model {
@@ -160,6 +162,7 @@ impl Model {
       token: None,
       node_selector: None,
       traffic: None,
+      lifecycle: None,
       ..self
     }
   }

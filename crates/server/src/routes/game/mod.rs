@@ -48,6 +48,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           patch(runtime::update_game_traffic).delete(runtime::delete_game_traffic),
         )
         .route(
+          "/lifecycle",
+          patch(runtime::update_game_lifecycle).delete(runtime::delete_game_lifecycle),
+        )
+        .route(
           "/node-selector",
           patch(runtime::update_game_node_selector).delete(runtime::delete_game_node_selector),
         )

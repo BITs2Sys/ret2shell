@@ -1,0 +1,31 @@
+//! * webhook_example.rx
+
+const WEBHOOK_URL = "https://ret.sh.cn/api/dev/null";
+
+pub async fn send_event(event) {
+    let client = http::Client::new();
+    client.post(WEBHOOK_URL)
+          .header("Accept", "application/json")
+          .header("Content-Type", "application/json")
+          .body_bytes(json::to_bytes(#{
+              event: event,
+          })?)
+          .send()
+          .await?;
+    Ok(())
+}
+
+pub async fn on_start(_ctx) {
+    send_event("start").await?;
+    Ok(())
+}
+
+pub async fn on_delay(_ctx) {
+    send_event("delay").await?;
+    Ok(())
+}
+
+pub async fn on_stop(_ctx) {
+    send_event("stop").await?;
+    Ok(())
+}

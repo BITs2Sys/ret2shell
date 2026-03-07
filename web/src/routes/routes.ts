@@ -169,6 +169,10 @@ export const routes = {
                   component: lazy(() => import("./games/[game]/admin/traffic/index")),
                 },
                 {
+                  path: "/lifecycle",
+                  component: lazy(() => import("./games/[game]/admin/lifecycle/index")),
+                },
+                {
                   path: "/captures",
                   component: lazy(() => import("./games/[game]/admin/captures/index")),
                 },
@@ -289,6 +293,10 @@ export const routes = {
         {
           path: "/traffic",
           component: lazy(() => import("./admin/traffic/index")),
+        },
+        {
+          path: "/lifecycle",
+          component: lazy(() => import("./admin/lifecycle/index")),
         },
       ],
     },
