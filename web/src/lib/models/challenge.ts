@@ -18,6 +18,8 @@ export type Challenge = {
 export type ChallengeImage = {
   name: string;
   tag: string;
+  internal_managed: boolean;
+  internal_tag: string | null;
   cpu: number;
   cpu_req: number;
   mem: string;

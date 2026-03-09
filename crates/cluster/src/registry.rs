@@ -31,6 +31,15 @@ impl Registry {
     }
   }
 
+  pub fn external(&self) -> Option<&str> {
+    self
+      .credentials
+      .as_ref()
+      .map(|credentials| credentials.external.as_str())
+      .map(str::trim)
+      .filter(|external| !external.is_empty())
+  }
+
   fn base(&self) -> Result<String, ClusterError> {
     let credentials = self
       .credentials

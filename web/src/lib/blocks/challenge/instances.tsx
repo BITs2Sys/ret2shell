@@ -35,9 +35,32 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
+function normalizeInternalImageTag(value?: string | null) {
+  const normalized = value?.trim().replace(/^\/+|\/+$/g, "") || "";
+  return normalized || null;
+}
+
+function buildInternalImageReference(
+  registryExternal?: string | null,
+  imageNamespace?: string | null,
+  internalTag?: string | null
+) {
+  const normalizedRegistry = registryExternal?.trim().replace(/\/+$/g, "") || "";
+  const normalizedNamespace = imageNamespace?.trim().replace(/^\/+|\/+$/g, "") || "";
+  const normalizedTag = normalizeInternalImageTag(internalTag);
+
+  if (!normalizedRegistry || !normalizedNamespace || !normalizedTag) {
+    return null;
+  }
+
+  return `${normalizedRegistry}/${normalizedNamespace}/${normalizedTag}`;
+}
+
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<ChallengeImage>({
     initialValues: {
+      internal_managed: false,
+      internal_tag: null,
       cpu: 0.5,
       cpu_req: 0.01,
       mem: "128Mi",
@@ -69,9 +92,14 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
   });
 
   function sanitizeChallengeImage(image: ChallengeImage): ChallengeImage {
+    const internalTag = normalizeInternalImageTag(image.internal_tag);
+    const internalManaged = !!image.internal_managed && !!internalTag;
+
     return {
       ...image,
       description: image.description || null,
+      internal_managed: internalManaged,
+      internal_tag: internalManaged ? internalTag : null,
       service_type: null,
       protocol: image.protocol || null,
       app_protocol: image.app_protocol || null,
@@ -84,6 +112,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
       setValues(form, {
         name: "",
         tag: "",
+        internal_managed: false,
+        internal_tag: null,
         cpu: 0.5,
         cpu_req: 0.01,
         mem: "128Mi",
@@ -199,6 +229,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                         setSearchedRepo(e.target.value);
                         setSelected(false);
                         setValue(form, "tag", "");
+                        setValue(form, "internal_managed", false);
+                        setValue(form, "internal_tag", null);
                       }}
                       extraBtn={
                         <Button
@@ -243,6 +275,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                                   setSearchedRepo(repo);
                                   setSelected(true);
                                   setValue(form, "tag", "");
+                                  setValue(form, "internal_managed", false);
+                                  setValue(form, "internal_tag", null);
                                 }}
                               >
                                 <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
@@ -271,11 +305,15 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                   }
                   // inputProps={props}
                   onValueChange={(e) => {
+                    const version = e.value.at(0) || "latest";
+                    const internalTag = `${searchedRepo()}:${version}`;
                     setValue(
                       form,
                       "tag",
-                      `${registryConfig.data?.external}/${game.data?.bucket}/${searchedRepo()}:${e.value.at(0)}`
+                      buildInternalImageReference(registryConfig.data?.external, game.data?.bucket, internalTag) || ""
                     );
+                    setValue(form, "internal_managed", true);
+                    setValue(form, "internal_tag", internalTag);
                   }}
                 />
                 <Field name="restricted" type="boolean">
@@ -627,6 +665,7 @@ function InstanceList(props: ChallengeWidgetProps) {
 
 export default function (props: ChallengeWidgetProps) {
   let pullSecretInput: HTMLInputElement;
+  const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
@@ -645,6 +684,12 @@ export default function (props: ChallengeWidgetProps) {
       });
     },
   });
+
+  function effectiveImageTag(image: ChallengeImage) {
+    return (
+      buildInternalImageReference(registryConfig.data?.external, game.data?.bucket, image.internal_tag) || image.tag
+    );
+  }
 
   async function onToggleInternet() {
     updateMutation.mutate({
@@ -826,8 +871,8 @@ export default function (props: ChallengeWidgetProps) {
             <div class="flex flex-row space-x-2 items-center">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{image.name}</span>
-              <span class="opacity-60 flex-1 text-end truncate" title={image.tag}>
-                {image.tag}
+              <span class="opacity-60 flex-1 text-end truncate" title={effectiveImageTag(image)}>
+                {effectiveImageTag(image)}
               </span>
               <Popover
                 level="error"

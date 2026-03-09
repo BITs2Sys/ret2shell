@@ -5,7 +5,7 @@ use chrono::Utc;
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cluster::{
-  CHALLENGE_NS, Cluster,
+  CHALLENGE_NS, ChallengeEnvCreateOptions, Cluster,
   lifecycle::{LifecycleEvent, LifecycleStopReason},
 };
 use r2s_config::cluster::ChallengeEnv;
@@ -211,8 +211,11 @@ pub(super) async fn start_challenge_instance(
         .collect(),
         env_map,
         env_config,
-        node_selector,
-        need_expose,
+        ChallengeEnvCreateOptions {
+          image_namespace: game.bucket.clone(),
+          node_selector,
+          need_expose,
+        },
       )
       .await?;
     cache

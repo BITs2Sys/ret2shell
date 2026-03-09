@@ -873,6 +873,8 @@ mod tests {
     ChallengeImage {
       name: name.to_owned(),
       tag: "latest".to_owned(),
+      internal_managed: false,
+      internal_tag: None,
       cpu: 1.0,
       cpu_req: 0.5,
       mem: "256Mi".to_owned(),
