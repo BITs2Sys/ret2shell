@@ -4,10 +4,12 @@ import {
   useDeleteSyncSourceMutation,
   useDiscoverDirectSyncMutation,
   useFetchSyncSourceMutation,
+  useImportDirectSyncMutation,
   useSyncSources,
   useUpdateSyncSourceMutation,
 } from "@api/sync";
 import type { DirectDiscoverResponse, SyncRegistrySource } from "@models/sync";
+import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -27,6 +29,7 @@ const EMPTY_FORM: SyncRegistrySourcePayload = {
 };
 
 export default function () {
+  const navigate = useNavigate();
   const sources = useSyncSources();
   const [editingId, setEditingId] = createSignal<number | null>(null);
   const [form, setForm] = createSignal<SyncRegistrySourcePayload>({ ...EMPTY_FORM });
@@ -64,6 +67,11 @@ export default function () {
   const discoverMutation = useDiscoverDirectSyncMutation({
     onSuccess: (data) => {
       setDiscoverResult(data);
+    },
+  });
+  const importMutation = useImportDirectSyncMutation({
+    onSuccess: (data) => {
+      navigate(`/games/${data.game_id}/admin/sync`);
     },
   });
 
@@ -111,6 +119,18 @@ export default function () {
       sync_token: discoverSyncToken() || null,
       game_key: discoverGameKey() || null,
       release_id: discoverReleaseId() || null,
+    });
+  }
+
+  function onImport() {
+    if (!discoverGameKey().trim() || !discoverReleaseId().trim()) {
+      return;
+    }
+    importMutation.mutate({
+      base_url: discoverBaseUrl(),
+      sync_token: discoverSyncToken() || null,
+      game_key: discoverGameKey().trim(),
+      release_id: discoverReleaseId().trim(),
     });
   }
 
@@ -226,14 +246,23 @@ export default function () {
             />
           </div>
           <div class="flex flex-row justify-end">
-            <Button
-              level="primary"
-              onClick={onDiscover}
-              loading={discoverMutation.isPending}
-              disabled={discoverMutation.isPending}
-            >
-              {t("platform.sync.direct.action")}
-            </Button>
+            <div class="flex flex-row gap-2">
+              <Button
+                level="primary"
+                onClick={onDiscover}
+                loading={discoverMutation.isPending}
+                disabled={discoverMutation.isPending}
+              >
+                {t("platform.sync.direct.action")}
+              </Button>
+              <Button
+                onClick={onImport}
+                loading={importMutation.isPending}
+                disabled={importMutation.isPending || !discoverGameKey().trim() || !discoverReleaseId().trim()}
+              >
+                {t("platform.sync.direct.import.title")}
+              </Button>
+            </div>
           </div>
           <Show when={discoverResult()}>
             {(result) => (
@@ -249,12 +278,19 @@ export default function () {
                     <div class="font-bold">{t("platform.sync.direct.games")}</div>
                     <For each={result().games || []}>
                       {(game) => (
-                        <div class="border border-layer-content/10 rounded-lg p-3 flex flex-row justify-between gap-2">
+                        <button
+                          type="button"
+                          class="border border-layer-content/10 rounded-lg p-3 flex flex-row justify-between gap-2 text-start hover:border-primary/40 transition-colors"
+                          onClick={() => {
+                            setDiscoverGameKey(game.game_key);
+                            setDiscoverReleaseId("");
+                          }}
+                        >
                           <span class="font-mono break-all">{game.game_key}</span>
                           <span class="opacity-70 text-sm">
                             {t("platform.sync.direct.releaseCount", { count: game.release_count })}
                           </span>
-                        </div>
+                        </button>
                       )}
                     </For>
                   </div>
@@ -264,10 +300,17 @@ export default function () {
                     <div class="font-bold">{t("platform.sync.direct.releases")}</div>
                     <For each={result().releases || []}>
                       {(release) => (
-                        <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-1">
+                        <button
+                          type="button"
+                          class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-1 text-start hover:border-primary/40 transition-colors"
+                          onClick={() => {
+                            setDiscoverGameKey(release.game_key);
+                            setDiscoverReleaseId(release.release_id);
+                          }}
+                        >
                           <span class="font-mono break-all">{release.release_id}</span>
                           <span class="text-sm opacity-70">{release.first_party_base_url}</span>
-                        </div>
+                        </button>
                       )}
                     </For>
                   </div>

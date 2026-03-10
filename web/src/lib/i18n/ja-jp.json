@@ -339,6 +339,11 @@
         "title": "直接 upstream 探索",
         "description": "registry ソースを使わず、別の Ret2Shell インスタンスを直接探索します。",
         "action": "リモートを探索",
+        "import": {
+          "title": "release を取り込む",
+          "success": "リモート release の取り込みに成功しました",
+          "fail": "リモート release の取り込みに失敗しました"
+        },
         "games": "リモートゲーム",
         "releases": "リモート release",
         "releaseCount": "{{count}} 件の release",

@@ -339,6 +339,11 @@
         "title": "直连上游探测",
         "description": "不经过 registry 源，直接探测另一台 Ret2Shell 实例。",
         "action": "探测远端",
+        "import": {
+          "title": "导入 release",
+          "success": "远端 release 导入成功",
+          "fail": "远端 release 导入失败"
+        },
         "games": "远端赛事",
         "releases": "远端 release",
         "releaseCount": "{{count}} 个 release",

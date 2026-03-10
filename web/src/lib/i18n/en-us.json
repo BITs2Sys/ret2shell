@@ -339,6 +339,11 @@
         "title": "Direct upstream discovery",
         "description": "Probe another Ret2Shell instance directly without using a registry source.",
         "action": "Discover remote",
+        "import": {
+          "title": "Import release",
+          "success": "Remote release imported successfully",
+          "fail": "Failed to import remote release"
+        },
         "games": "Remote games",
         "releases": "Remote releases",
         "releaseCount": "{{count}} release(s)",

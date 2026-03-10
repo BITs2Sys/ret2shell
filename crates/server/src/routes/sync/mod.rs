@@ -39,6 +39,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/discover",
           axum::routing::post(direct::discover_remote_source),
         )
+        .route(
+          "/import",
+          axum::routing::post(direct::import_remote_release),
+        )
         .route_layer(middleware::from_fn(auth::permission_required_any!(
           Permission::Host,
           Permission::DevOps

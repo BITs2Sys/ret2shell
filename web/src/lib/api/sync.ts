@@ -21,6 +21,20 @@ export type DirectDiscoverPayload = {
   release_id?: string | null;
 };
 
+export type DirectImportPayload = {
+  base_url: string;
+  sync_token?: string | null;
+  game_key: string;
+  release_id: string;
+};
+
+export type DirectImportResponse = {
+  game_id: number;
+  game_key: string;
+  release_id: string;
+  bucket: string;
+};
+
 export async function getSyncSources() {
   return await api.get(`${api_root}/sync/source`).json<SyncRegistrySource[]>();
 }
@@ -230,6 +244,26 @@ export function useDiscoverDirectSyncMutation(
     onSuccess: (data) => props.onSuccess?.(data),
     onError: (err: Error) => {
       handleHttpError(err, t("platform.sync.direct.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function importDirectSyncRelease(payload: DirectImportPayload) {
+  return await api.post(`${api_root}/sync/direct/import`, { json: payload }).json<DirectImportResponse>();
+}
+
+export function useImportDirectSyncMutation(
+  props: { onSuccess?: (response: DirectImportResponse) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: importDirectSyncRelease,
+    onSuccess: (data) => {
+      toastSuccess(t("platform.sync.direct.import.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.direct.import.fail"));
       props.onError?.(err);
     },
   }));

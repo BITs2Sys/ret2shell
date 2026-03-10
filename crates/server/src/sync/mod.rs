@@ -76,6 +76,10 @@ pub fn source_cache_dir(
   )
 }
 
+pub fn job_workspace_dir(config: &Option<bucket::Config>, job_id: &str) -> anyhow::Result<PathBuf> {
+  Ok(sync_root(config)?.join(JOBS_DIR).join(job_id))
+}
+
 fn generate_instance_id() -> String {
   let mut bytes = [0_u8; 16];
   rand::rng().fill_bytes(&mut bytes);
