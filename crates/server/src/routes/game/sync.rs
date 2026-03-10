@@ -108,11 +108,6 @@ pub(super) struct AdvertiseUpstreamRequest {
 }
 
 #[derive(Deserialize)]
-pub(super) struct RevokeUpstreamRequest {
-  pub registry_source_id: i64,
-}
-
-#[derive(Deserialize)]
 pub(super) struct DetachRemoteSyncRequest {
   pub reason: Option<String>,
 }
@@ -304,92 +299,6 @@ pub(super) async fn advertise_remote_sync_upstream(
       sync_token: Some(&sync_token),
       protocol_version: Some(1),
       reason: None,
-      published_at: Utc::now(),
-    },
-  )
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
-
-  Ok(Json(ManualRegistryUpstreamPublicationResponse {
-    release: GameReleaseResponse::from(release),
-    registry_source_name: publication.registry_source_name,
-    registry_git_url: publication.registry_git_url,
-    registry_branch: publication.registry_branch,
-    upstream_file_path: publication.upstream_file_path,
-    upstream_file_content: publication.upstream_file_content,
-    suggested_pr_title: publication.suggested_pr_title,
-  }))
-}
-
-pub(super) async fn revoke_remote_sync_upstream(
-  State(config): State<GlobalConfig>, State(ref db): State<Database>,
-  Extension(game): Extension<game::Model>, Json(req): Json<RevokeUpstreamRequest>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let source = game_registry_source::get(&db.conn, req.registry_source_id)
-    .await?
-    .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
-    ))?;
-  if !source.enabled {
-    return Err(ResponseError::PreconditionFailed(
-      "registry source is disabled".to_owned(),
-    ));
-  }
-
-  let remote_sync =
-    game_remote_sync::get(&db.conn, game.id)
-      .await?
-      .ok_or(ResponseError::PreconditionFailed(
-        "this game is not a remote mirror".to_owned(),
-      ))?;
-  if remote_sync.state != game_remote_sync::RemoteGameState::Detached {
-    return Err(ResponseError::PreconditionFailed(
-      "only detached remote mirrors may publish a revocation record".to_owned(),
-    ));
-  }
-
-  let release =
-    game_release::get_by_game_and_release(&db.conn, game.id, &remote_sync.current_release_id)
-      .await?
-      .ok_or(ResponseError::PreconditionFailed(
-        "current remote release record not found".to_owned(),
-      ))?;
-  if release.origin_role != game_release::OriginRole::Mirror {
-    return Err(ResponseError::PreconditionFailed(
-      "only mirrored releases may publish a third-party revocation record".to_owned(),
-    ));
-  }
-
-  let source_release = registry::get_catalog_release_detail(
-    &config.bucket,
-    &source,
-    &release.game_key,
-    &release.release_id,
-  )
-  .await
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
-  if source_release.manifest_sha256 != release.manifest_sha256 {
-    return Err(ResponseError::Conflict(
-      "the selected registry source contains a different release manifest for this release"
-        .to_owned(),
-    ));
-  }
-
-  let instance_id = sync::instance_id(&config.bucket)
-    .await
-    .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
-  let publication = registry::build_manual_registry_upstream_publication(
-    &source,
-    registry::RegistryUpstreamPublicationRequest {
-      game_key: &release.game_key,
-      release_id: &release.release_id,
-      instance_id: &instance_id,
-      role: "third_party",
-      status: "revoked",
-      base_url: None,
-      auth_mode: None,
-      sync_token: None,
-      protocol_version: None,
-      reason: Some("mirror_detached"),
       published_at: Utc::now(),
     },
   )

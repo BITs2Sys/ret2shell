@@ -5,7 +5,6 @@ import {
   useGameSyncReleases,
   useGameSyncSources,
   usePublishGameSyncMutation,
-  useRevokeGameSyncMutation,
   useRotateGameSyncTokenMutation,
 } from "@api/sync";
 import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
@@ -28,11 +27,8 @@ export default function () {
   const sources = useGameSyncSources({ game_id: gameId, enabled: () => gameId() > 0 });
   const [selectedSourceId, setSelectedSourceId] = createSignal<string>("");
   const [selectedAdvertiseSourceId, setSelectedAdvertiseSourceId] = createSignal<string>("");
-  const [selectedRevokeSourceId, setSelectedRevokeSourceId] = createSignal<string>("");
   const [manualPublication, setManualPublication] = createSignal<ManualRegistryPublication | null>(null);
   const [manualUpstreamPublication, setManualUpstreamPublication] =
-    createSignal<ManualRegistryUpstreamPublication | null>(null);
-  const [manualRevocationPublication, setManualRevocationPublication] =
     createSignal<ManualRegistryUpstreamPublication | null>(null);
 
   createEffect(() => {
@@ -52,16 +48,6 @@ export default function () {
     const defaultSource = sources.data.find((source) => source.publish_enabled && source.enabled) ?? sources.data[0];
     if (defaultSource) {
       setSelectedAdvertiseSourceId(defaultSource.id.toString());
-    }
-  });
-
-  createEffect(() => {
-    if (selectedRevokeSourceId() || !sources.data?.length) {
-      return;
-    }
-    const defaultSource = sources.data.find((source) => source.publish_enabled && source.enabled) ?? sources.data[0];
-    if (defaultSource) {
-      setSelectedRevokeSourceId(defaultSource.id.toString());
     }
   });
 
@@ -86,12 +72,6 @@ export default function () {
   const advertiseMutation = useAdvertiseGameSyncMutation({
     onSuccess: (publication) => {
       setManualUpstreamPublication(publication);
-      syncStatus.refetch();
-    },
-  });
-  const revokeMutation = useRevokeGameSyncMutation({
-    onSuccess: (publication) => {
-      setManualRevocationPublication(publication);
       syncStatus.refetch();
     },
   });
@@ -225,44 +205,6 @@ export default function () {
             </Card>
           </Show>
 
-          <Show when={syncStatus.data?.remote_state === "detached"}>
-            <Card contentClass="p-4 flex flex-col space-y-3">
-              <div class="flex flex-row items-center space-x-2 font-bold">
-                <span class="shrink-0 icon-[fluent--arrow-undo-20-regular] w-5 h-5" />
-                <span>{t("game.sync.revoke.title")}</span>
-              </div>
-              <p class="opacity-80 text-sm">{t("game.sync.revoke.description")}</p>
-              <Select
-                label={t("game.sync.revoke.source")}
-                placeholder={t("game.sync.revoke.sourcePlaceholder")}
-                items={publishableSources().map((source) => ({
-                  label: `${source.name} (${source.branch})`,
-                  value: source.id.toString(),
-                }))}
-                value={selectedRevokeSourceId() ? [selectedRevokeSourceId()] : []}
-                onValueChange={(details) => {
-                  setSelectedRevokeSourceId(details.value[0] || "");
-                }}
-                disabled={!publishableSources().length}
-              />
-              <div class="flex flex-row justify-end">
-                <Button
-                  level="warning"
-                  onClick={() =>
-                    revokeMutation.mutate({
-                      game_id: gameId(),
-                      registry_source_id: Number.parseInt(selectedRevokeSourceId() || "0", 10),
-                    })
-                  }
-                  loading={revokeMutation.isPending}
-                  disabled={!selectedRevokeSourceId() || revokeMutation.isPending}
-                >
-                  {t("game.sync.actions.revoke.title")}
-                </Button>
-              </div>
-            </Card>
-          </Show>
-
           <Card contentClass="p-4 flex flex-col space-y-3">
             <div class="flex flex-row items-center space-x-2 font-bold">
               <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
@@ -353,37 +295,6 @@ export default function () {
                   </span>
                   <span>
                     {t("game.sync.manualUpstream.prTitle", {
-                      title: publication().suggested_pr_title,
-                    })}
-                  </span>
-                </div>
-                <div class="flex flex-col gap-2">
-                  <span class="font-bold text-sm">{publication().upstream_file_path}</span>
-                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto">
-                    {publication().upstream_file_content}
-                  </pre>
-                </div>
-              </Card>
-            )}
-          </Show>
-
-          <Show when={manualRevocationPublication()}>
-            {(publication) => (
-              <Card contentClass="p-4 flex flex-col space-y-3">
-                <div class="flex flex-row items-center space-x-2 font-bold">
-                  <span class="shrink-0 icon-[fluent--document-text-20-regular] w-5 h-5" />
-                  <span>{t("game.sync.manualRevoke.title")}</span>
-                </div>
-                <p class="opacity-80 text-sm">{t("game.sync.manualRevoke.description")}</p>
-                <div class="text-sm flex flex-col gap-1">
-                  <span>
-                    {t("game.sync.manualRevoke.target", {
-                      repo: publication().registry_git_url,
-                      branch: publication().registry_branch,
-                    })}
-                  </span>
-                  <span>
-                    {t("game.sync.manualRevoke.prTitle", {
                       title: publication().suggested_pr_title,
                     })}
                   </span>

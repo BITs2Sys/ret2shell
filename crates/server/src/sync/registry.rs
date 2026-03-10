@@ -35,16 +35,10 @@ struct UpstreamAdvertisement {
   role: String,
   #[serde(with = "ts_seconds")]
   published_at: DateTime<Utc>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  base_url: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  auth_mode: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  sync_token: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  protocol_version: Option<i32>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  reason: Option<String>,
+  base_url: String,
+  auth_mode: String,
+  sync_token: String,
+  protocol_version: i32,
 }
 
 pub struct RegistryUpstreamPublicationRequest<'a> {
@@ -52,12 +46,8 @@ pub struct RegistryUpstreamPublicationRequest<'a> {
   pub release_id: &'a str,
   pub instance_id: &'a str,
   pub role: &'a str,
-  pub status: &'a str,
-  pub base_url: Option<&'a str>,
-  pub auth_mode: Option<&'a str>,
-  pub sync_token: Option<&'a str>,
-  pub protocol_version: Option<i32>,
-  pub reason: Option<&'a str>,
+  pub base_url: &'a str,
+  pub sync_token: &'a str,
   pub published_at: DateTime<Utc>,
 }
 
@@ -338,12 +328,8 @@ pub fn build_manual_registry_publication(
     release_id: release.release_id,
     instance_id: release.instance_id,
     role: "first_party",
-    status: "active",
-    base_url: Some(release.base_url),
-    auth_mode: Some("sync_token"),
-    sync_token: Some(release.sync_token),
-    protocol_version: Some(1),
-    reason: None,
+    base_url: release.base_url,
+    sync_token: release.sync_token,
     published_at: release.published_at,
   })?;
   Ok(ManualRegistryPublication {
@@ -390,12 +376,7 @@ pub fn build_manual_registry_upstream_publication(
     ),
     upstream_file_content: upstream_body,
     suggested_pr_title: format!(
-      "{} {} upstream {}@{}",
-      if release.status == "revoked" {
-        ":fire: revoke"
-      } else {
-        ":sparkles: add"
-      },
+      ":sparkles: add {} upstream {}@{}",
       release.role,
       release.game_key,
       short_release_id(release.release_id)
@@ -410,17 +391,16 @@ fn build_upstream_advertisement_body(
     &UpstreamAdvertisement {
       spec_version: 1,
       kind: "upstream".to_owned(),
+      status: "active".to_owned(),
       game_key: release.game_key.to_owned(),
       release_id: release.release_id.to_owned(),
       instance_id: release.instance_id.to_owned(),
       role: release.role.to_owned(),
       published_at: release.published_at,
-      status: release.status.to_owned(),
-      base_url: release.base_url.map(str::to_owned),
-      auth_mode: release.auth_mode.map(str::to_owned),
-      sync_token: release.sync_token.map(str::to_owned),
-      protocol_version: release.protocol_version,
-      reason: release.reason.map(str::to_owned),
+      base_url: release.base_url.to_owned(),
+      auth_mode: "sync_token".to_owned(),
+      sync_token: release.sync_token.to_owned(),
+      protocol_version: 1,
     },
   )?)
 }
@@ -621,12 +601,8 @@ kind = "ret2shell-game-registry"
         release_id: "deadbeefcafebabe",
         instance_id: "instance-id",
         role: "third_party",
-        status: "active",
-        base_url: Some("https://mirror.example.com"),
-        auth_mode: Some("sync_token"),
-        sync_token: Some("sync-token"),
-        protocol_version: Some(1),
-        reason: None,
+        base_url: "https://mirror.example.com",
+        sync_token: "sync-token",
         published_at: DateTime::<Utc>::UNIX_EPOCH,
       },
     )
@@ -642,51 +618,5 @@ kind = "ret2shell-game-registry"
         .upstream_file_path
         .contains("games/game_key/upstreams/instance-id/")
     );
-  }
-
-  #[test]
-  fn build_manual_registry_upstream_publication_supports_revocation_records() {
-    let publication = build_manual_registry_upstream_publication(
-      &game_registry_source::Model {
-        id: 1,
-        name: "official".to_owned(),
-        git_url: "https://example.com/registry.git".to_owned(),
-        branch: "main".to_owned(),
-        enabled: true,
-        priority: 0,
-        publish_enabled: true,
-        private_source: false,
-        last_fetched_at: None,
-        last_error: None,
-        created_at: DateTime::<Utc>::UNIX_EPOCH,
-        updated_at: DateTime::<Utc>::UNIX_EPOCH,
-      },
-      RegistryUpstreamPublicationRequest {
-        game_key: "game_key",
-        release_id: "deadbeefcafebabe",
-        instance_id: "instance-id",
-        role: "third_party",
-        status: "revoked",
-        base_url: None,
-        auth_mode: None,
-        sync_token: None,
-        protocol_version: None,
-        reason: Some("mirror_detached"),
-        published_at: DateTime::<Utc>::UNIX_EPOCH,
-      },
-    )
-    .expect("manual upstream revocation should build");
-
-    assert!(
-      publication
-        .upstream_file_content
-        .contains("status = \"revoked\"")
-    );
-    assert!(
-      publication
-        .upstream_file_content
-        .contains("reason = \"mirror_detached\"")
-    );
-    assert!(publication.suggested_pr_title.starts_with(":fire: revoke"));
   }
 }

@@ -101,7 +101,6 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/sync/advertise",
           post(sync::advertise_remote_sync_upstream),
         )
-        .route("/sync/revoke", post(sync::revoke_remote_sync_upstream))
         .route("/sync/publish", post(sync::publish_game_release))
         .route("/doc/{doc}", patch(core::update_game_doc))
         .route("/introduction", patch(core::update_game_intro_compat))

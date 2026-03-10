@@ -1,4 +1,7 @@
-use std::{collections::BTreeMap, path::Path};
+use std::{
+  collections::{BTreeMap, BTreeSet},
+  path::Path,
+};
 
 use axum::{
   Extension, Json,
@@ -94,8 +97,24 @@ pub(super) struct SyncJobResponse {
 struct DirectImportCheckpoint {
   discovered: Option<DirectImportDiscovered>,
   bucket_name: Option<String>,
-  repo_fetched: bool,
-  media_fetched: bool,
+  repo: RepoCheckpoint,
+  media: MediaCheckpoint,
+}
+
+#[derive(Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
+struct RepoCheckpoint {
+  initialized: bool,
+  fetched_release_ref: bool,
+  checked_out_snapshot: bool,
+  verified_snapshot: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
+struct MediaCheckpoint {
+  downloaded_hashes: BTreeSet<String>,
+  completed: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -393,6 +412,7 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     .await?;
     let discovered = discover_release_for_import(&state.requestor, &request).await?;
     checkpoint.bucket_name = Some(pick_local_bucket_name(&state.bucket, &request.game_key));
+    checkpoint.media.completed = discovered.manifest.assets.media_hashes.is_empty();
     checkpoint.discovered = Some(discovered);
     job = update_job(
       &state.db,
@@ -417,35 +437,14 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
       "sync checkpoint lost discovered release metadata".to_owned(),
     ))?;
 
-  if !checkpoint.repo_fetched || !repo_dir.exists() {
-    job = update_job(
+  if !checkpoint.repo.verified_snapshot || !repo_dir.exists() {
+    ensure_repo_snapshot(
       &state.db,
-      job,
-      game_sync_job::SyncJobStatus::Running,
-      Some("fetch_repo".to_owned()),
-      Some(&checkpoint),
-      None,
-      None,
-    )
-    .await?;
-    fetch_release_repository(
+      &mut job,
+      &mut checkpoint,
       &repo_dir,
-      &request.base_url,
-      normalized_sync_token(request.sync_token.as_deref()),
-      &request.game_key,
-      &request.release_id,
+      &request,
       &discovered.release.snapshot_commit,
-    )
-    .await?;
-    checkpoint.repo_fetched = true;
-    job = update_job(
-      &state.db,
-      job,
-      game_sync_job::SyncJobStatus::Running,
-      Some("fetch_repo".to_owned()),
-      Some(&checkpoint),
-      None,
-      None,
     )
     .await?;
   }
@@ -454,18 +453,8 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     return Ok(());
   }
 
-  if !checkpoint.media_fetched {
-    job = update_job(
-      &state.db,
-      job,
-      game_sync_job::SyncJobStatus::Running,
-      Some("fetch_media".to_owned()),
-      Some(&checkpoint),
-      None,
-      None,
-    )
-    .await?;
-    download_release_media(
+  if !checkpoint.media.completed {
+    job = download_release_media_resumable(
       &state.requestor,
       &state.db,
       &state.media,
@@ -473,17 +462,8 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
       normalized_sync_token(request.sync_token.as_deref()),
       &discovered.manifest.assets.media_hashes,
       job.created_by,
-    )
-    .await?;
-    checkpoint.media_fetched = true;
-    job = update_job(
-      &state.db,
       job,
-      game_sync_job::SyncJobStatus::Running,
-      Some("fetch_media".to_owned()),
-      Some(&checkpoint),
-      None,
-      None,
+      &mut checkpoint,
     )
     .await?;
   }
@@ -503,34 +483,23 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     remove_dir_all(&final_repo_path).await.ok();
   }
   if !repo_dir.exists() {
-    checkpoint.repo_fetched = false;
-    job = update_job(
+    checkpoint.repo = RepoCheckpoint::default();
+    ensure_repo_snapshot(
       &state.db,
-      job,
-      game_sync_job::SyncJobStatus::Running,
-      Some("fetch_repo".to_owned()),
-      Some(&checkpoint),
-      None,
-      None,
-    )
-    .await?;
-    fetch_release_repository(
+      &mut job,
+      &mut checkpoint,
       &repo_dir,
-      &request.base_url,
-      normalized_sync_token(request.sync_token.as_deref()),
-      &request.game_key,
-      &request.release_id,
+      &request,
       &discovered.release.snapshot_commit,
     )
     .await?;
-    checkpoint.repo_fetched = true;
   }
 
   job = update_job(
     &state.db,
     job,
     game_sync_job::SyncJobStatus::Running,
-    Some("finalize".to_owned()),
+    Some("finalize:move_repo".to_owned()),
     Some(&checkpoint),
     None,
     None,
@@ -552,6 +521,7 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
   match finalize_result {
     Ok((game, _release)) => {
       remove_dir_all(&workspace).await.ok();
+      job.game_id = Some(game.id);
       let _job = update_job(
         &state.db,
         job,
@@ -562,24 +532,6 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
         None,
       )
       .await?;
-      let completed_job = game_sync_job::get(&state.db.conn, job_id)
-        .await?
-        .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
-      let _ = update_job(
-        &state.db,
-        completed_job,
-        game_sync_job::SyncJobStatus::Completed,
-        Some("completed".to_owned()),
-        Some(&checkpoint),
-        Some(Utc::now()),
-        None,
-      )
-      .await?;
-      let mut final_job = game_sync_job::get(&state.db.conn, job_id)
-        .await?
-        .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
-      final_job.game_id = Some(game.id);
-      game_sync_job::update(&state.db.conn, final_job).await?;
       Ok(())
     }
     Err(err) => {
@@ -589,6 +541,239 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
       Err(err)
     }
   }
+}
+
+async fn ensure_repo_snapshot(
+  db: &Database, job: &mut game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
+  repo_dir: &Path, request: &DirectImportRequest, snapshot_commit: &str,
+) -> Result<(), ResponseError> {
+  sync_repo_checkpoint_from_disk(repo_dir, snapshot_commit, &mut checkpoint.repo).await?;
+  if !checkpoint.repo.initialized {
+    *job = update_job(
+      db,
+      job.clone(),
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo:init".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    let repo_dir_str = repo_dir.to_string_lossy().to_string();
+    run_git(
+      None,
+      normalized_sync_token(request.sync_token.as_deref()),
+      &["init".to_owned(), repo_dir_str],
+    )
+    .await?;
+    checkpoint.repo.initialized = true;
+  }
+  if !checkpoint.repo.fetched_release_ref {
+    *job = update_job(
+      db,
+      job.clone(),
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo:fetch".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    let repo_url = format!(
+      "{}/api/sync/v1/games/{}/releases/{}/repo",
+      request.base_url, request.game_key, request.release_id
+    );
+    let release_ref = manifest::release_ref(&request.release_id);
+    run_git(
+      Some(repo_dir),
+      normalized_sync_token(request.sync_token.as_deref()),
+      &[
+        "fetch".to_owned(),
+        "--no-tags".to_owned(),
+        repo_url,
+        format!("{release_ref}:{release_ref}"),
+      ],
+    )
+    .await?;
+    checkpoint.repo.fetched_release_ref = true;
+  }
+  if !checkpoint.repo.checked_out_snapshot {
+    *job = update_job(
+      db,
+      job.clone(),
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo:checkout".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    run_git(
+      Some(repo_dir),
+      normalized_sync_token(request.sync_token.as_deref()),
+      &[
+        "checkout".to_owned(),
+        "--detach".to_owned(),
+        snapshot_commit.to_owned(),
+      ],
+    )
+    .await?;
+    checkpoint.repo.checked_out_snapshot = true;
+  }
+  if !checkpoint.repo.verified_snapshot {
+    *job = update_job(
+      db,
+      job.clone(),
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo:verify".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    let git = Git::try_open(repo_dir).await?;
+    let head = git.get_head().await?;
+    if head != snapshot_commit {
+      return Err(ResponseError::Conflict(
+        "fetched repository head does not match the release snapshot".to_owned(),
+      ));
+    }
+    checkpoint.repo.verified_snapshot = true;
+  }
+  *job = update_job(
+    db,
+    job.clone(),
+    game_sync_job::SyncJobStatus::Running,
+    Some("fetch_repo:done".to_owned()),
+    Some(checkpoint),
+    None,
+    None,
+  )
+  .await?;
+  Ok(())
+}
+
+async fn sync_repo_checkpoint_from_disk(
+  repo_dir: &Path, snapshot_commit: &str, repo: &mut RepoCheckpoint,
+) -> Result<(), ResponseError> {
+  let git_dir = repo_dir.join(".git");
+  if !git_dir.exists() {
+    return Ok(());
+  }
+  repo.initialized = true;
+  let git = Git::try_open(repo_dir).await?;
+  if let Ok(release_head) = git.get_head().await
+    && release_head == snapshot_commit
+  {
+    repo.fetched_release_ref = true;
+    repo.checked_out_snapshot = true;
+    repo.verified_snapshot = true;
+  }
+  Ok(())
+}
+
+async fn download_release_media_resumable(
+  client: &HTTPClient, db: &Database, media_store: &Media, base_url: &str,
+  sync_token: Option<&str>, media_hashes: &[String], uploader_id: i64,
+  mut job: game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
+) -> Result<game_sync_job::Model, ResponseError> {
+  let total = media_hashes.len();
+  if total == 0 {
+    checkpoint.media.completed = true;
+    return update_job(
+      db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_media:0/0".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await;
+  }
+
+  for hash in media_hashes {
+    if checkpoint.media.downloaded_hashes.contains(hash)
+      || media::get_by_hash(&db.conn, hash).await?.is_some()
+    {
+      checkpoint.media.downloaded_hashes.insert(hash.clone());
+      continue;
+    }
+
+    if job_cancelled(db, job.id).await? {
+      return Ok(job);
+    }
+
+    let done_before = checkpoint.media.downloaded_hashes.len();
+    job = update_job(
+      db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some(format!("fetch_media:{done_before}/{total}")),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+
+    let (status, body) =
+      fetch_remote_body(client, base_url, &format!("/media/{hash}"), sync_token).await?;
+    if !status.is_success() {
+      let body = to_bytes(body, usize::MAX).await.map_err(|err| {
+        ResponseError::BadRequest(format!("failed to read remote media response: {err}"))
+      })?;
+      return Err(ResponseError::PreconditionFailed(format!(
+        "failed to download media {hash}: {}",
+        String::from_utf8_lossy(&body)
+      )));
+    }
+    let reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
+    let model = media_store.save(reader).await?;
+    if model.hash != *hash {
+      return Err(ResponseError::Conflict(format!(
+        "downloaded media hash mismatch: expected {hash}, got {}",
+        model.hash
+      )));
+    }
+    if media::get_by_hash(&db.conn, &model.hash).await?.is_none() {
+      media::create(
+        &db.conn,
+        media::Model {
+          id: 0,
+          hash: model.hash,
+          uploader_id,
+        },
+      )
+      .await?;
+    }
+    checkpoint.media.downloaded_hashes.insert(hash.clone());
+    job = update_job(
+      db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some(format!(
+        "fetch_media:{}/{}",
+        checkpoint.media.downloaded_hashes.len(),
+        total
+      )),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+  }
+
+  checkpoint.media.completed = true;
+  update_job(
+    db,
+    job,
+    game_sync_job::SyncJobStatus::Running,
+    Some(format!("fetch_media:{total}/{total}")),
+    Some(checkpoint),
+    None,
+    None,
+  )
+  .await
 }
 
 async fn discover_release_for_import(
@@ -903,87 +1088,6 @@ fn build_imported_game(
     lifecycle: None,
     hammer_policy: game::HammerPolicy::default(),
   }
-}
-
-async fn fetch_release_repository(
-  repo_dir: &Path, base_url: &str, sync_token: Option<&str>, game_key: &str, release_id: &str,
-  snapshot_commit: &str,
-) -> Result<(), ResponseError> {
-  let repo_dir_str = repo_dir.to_string_lossy().to_string();
-  run_git(None, sync_token, &["init".to_owned(), repo_dir_str.clone()]).await?;
-  let repo_url = format!("{base_url}/api/sync/v1/games/{game_key}/releases/{release_id}/repo");
-  let release_ref = manifest::release_ref(release_id);
-  run_git(
-    Some(repo_dir),
-    sync_token,
-    &[
-      "fetch".to_owned(),
-      "--no-tags".to_owned(),
-      repo_url,
-      format!("{release_ref}:{release_ref}"),
-    ],
-  )
-  .await?;
-  run_git(
-    Some(repo_dir),
-    sync_token,
-    &[
-      "checkout".to_owned(),
-      "--detach".to_owned(),
-      snapshot_commit.to_owned(),
-    ],
-  )
-  .await?;
-  let git = Git::try_open(repo_dir).await?;
-  let head = git.get_head().await?;
-  if head != snapshot_commit {
-    return Err(ResponseError::Conflict(
-      "fetched repository head does not match the release snapshot".to_owned(),
-    ));
-  }
-  Ok(())
-}
-
-async fn download_release_media(
-  client: &HTTPClient, db: &Database, media_store: &Media, base_url: &str,
-  sync_token: Option<&str>, media_hashes: &[String], uploader_id: i64,
-) -> Result<(), ResponseError> {
-  for hash in media_hashes {
-    if media::get_by_hash(&db.conn, hash).await?.is_some() {
-      continue;
-    }
-    let (status, body) =
-      fetch_remote_body(client, base_url, &format!("/media/{hash}"), sync_token).await?;
-    if !status.is_success() {
-      let body = to_bytes(body, usize::MAX).await.map_err(|err| {
-        ResponseError::BadRequest(format!("failed to read remote media response: {err}"))
-      })?;
-      return Err(ResponseError::PreconditionFailed(format!(
-        "failed to download media {hash}: {}",
-        String::from_utf8_lossy(&body)
-      )));
-    }
-    let reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
-    let model = media_store.save(reader).await?;
-    if model.hash != *hash {
-      return Err(ResponseError::Conflict(format!(
-        "downloaded media hash mismatch: expected {hash}, got {}",
-        model.hash
-      )));
-    }
-    if media::get_by_hash(&db.conn, &model.hash).await?.is_none() {
-      media::create(
-        &db.conn,
-        media::Model {
-          id: 0,
-          hash: model.hash,
-          uploader_id,
-        },
-      )
-      .await?;
-    }
-  }
-  Ok(())
 }
 
 async fn fetch_remote_body(
