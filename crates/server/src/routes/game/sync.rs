@@ -72,6 +72,19 @@ pub(super) struct GameReleaseResponse {
   pub created_at: chrono::DateTime<Utc>,
 }
 
+#[derive(Serialize)]
+pub(super) struct ManualRegistryPublicationResponse {
+  pub release: GameReleaseResponse,
+  pub registry_source_name: String,
+  pub registry_git_url: String,
+  pub registry_branch: String,
+  pub release_file_path: String,
+  pub release_file_content: String,
+  pub upstream_file_path: String,
+  pub upstream_file_content: String,
+  pub suggested_pr_title: String,
+}
+
 #[derive(Deserialize)]
 pub(super) struct PublishGameReleaseRequest {
   pub registry_source_id: i64,
@@ -221,10 +234,9 @@ pub(super) async fn publish_game_release(
       "server configuration not found".to_owned(),
     ))?
     .external_origin();
-  let publish_result = registry::publish_release_to_registry(
-    &config.bucket,
+  let manual_publication = registry::build_manual_registry_publication(
     &source,
-    registry::PublishRegistryRelease {
+    registry::RegistryPublicationRequest {
       game_key: current_game.sync_key.as_deref().unwrap_or(&bucket_name),
       release_id: &manifest.release_id,
       manifest_body: &manifest.manifest_body,
@@ -234,18 +246,7 @@ pub(super) async fn publish_game_release(
       published_at,
     },
   )
-  .await;
-  game_registry_source::update(
-    &db.conn,
-    game_registry_source::Model {
-      last_fetched_at: publish_result.as_ref().ok().map(|_| Utc::now()),
-      last_error: publish_result.as_ref().err().map(|err| err.to_string()),
-      updated_at: Utc::now(),
-      ..source.clone()
-    },
-  )
-  .await?;
-  publish_result.map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
 
   let release =
     match game_release::get_by_game_and_release(&db.conn, current_game.id, &manifest.release_id)
@@ -281,7 +282,17 @@ pub(super) async fn publish_game_release(
       }
     };
   cache.at("game").del(current_game.id).await.ok();
-  Ok(Json(GameReleaseResponse::from(release)))
+  Ok(Json(ManualRegistryPublicationResponse {
+    release: GameReleaseResponse::from(release),
+    registry_source_name: manual_publication.registry_source_name,
+    registry_git_url: manual_publication.registry_git_url,
+    registry_branch: manual_publication.registry_branch,
+    release_file_path: manual_publication.release_file_path,
+    release_file_content: manual_publication.release_file_content,
+    upstream_file_path: manual_publication.upstream_file_path,
+    upstream_file_content: manual_publication.upstream_file_content,
+    suggested_pr_title: manual_publication.suggested_pr_title,
+  }))
 }
 
 impl From<game_release::Model> for GameReleaseResponse {

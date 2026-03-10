@@ -722,9 +722,15 @@
       },
       "publish": {
         "title": "发布 release",
-        "description": "将当前已归档的赛事快照发布到某个 registry 源。",
+        "description": "为当前归档赛事生成 registry 文件，然后由用户手动向目标 registry 仓库发起 PR。",
         "source": "Registry 源",
         "sourcePlaceholder": "请选择一个源"
+      },
+      "manualPr": {
+        "title": "手动 PR 信息",
+        "description": "平台不再自动向 registry git 仓库推送内容。请将下面的文件加入目标仓库，并手动发起 PR。",
+        "target": "目标仓库：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建议 PR 标题：{{title}}"
       },
       "actions": {
         "rotateToken": {
@@ -733,7 +739,7 @@
         },
         "publish": {
           "title": "发布 release",
-          "success": "赛事 release 发布成功",
+          "success": "已成功生成手动 PR 所需信息",
           "fail": "赛事 release 发布失败"
         }
       },

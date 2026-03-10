@@ -40,6 +40,18 @@ export type GameReleaseSummary = {
   created_at: DateTime;
 };
 
+export type ManualRegistryPublication = {
+  release: GameReleaseSummary;
+  registry_source_name: string;
+  registry_git_url: string;
+  registry_branch: string;
+  release_file_path: string;
+  release_file_content: string;
+  upstream_file_path: string;
+  upstream_file_content: string;
+  suggested_pr_title: string;
+};
+
 export type RemoteSyncInfo = {
   instance_id: string;
   base_url: string;

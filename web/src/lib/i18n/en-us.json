@@ -722,9 +722,15 @@
       },
       "publish": {
         "title": "Publish release",
-        "description": "Publish the archived game snapshot to one registry source.",
+        "description": "Generate the registry files for one archived release, then open a manual PR to the target registry repository.",
         "source": "Registry source",
         "sourcePlaceholder": "Choose one source"
+      },
+      "manualPr": {
+        "title": "Manual PR information",
+        "description": "The platform no longer pushes to the registry git repository automatically. Add the files below to the target repository and open a PR manually.",
+        "target": "Target repository: {{repo}} (branch: {{branch}})",
+        "prTitle": "Suggested PR title: {{title}}"
       },
       "actions": {
         "rotateToken": {
@@ -733,7 +739,7 @@
         },
         "publish": {
           "title": "Publish release",
-          "success": "Game release published successfully",
+          "success": "Manual registry PR information generated successfully",
           "fail": "Failed to publish game release"
         }
       },

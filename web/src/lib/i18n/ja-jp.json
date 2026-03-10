@@ -722,9 +722,15 @@
       },
       "publish": {
         "title": "release を公開",
-        "description": "アーカイブ済みのゲームスナップショットを 1 つの registry ソースへ公開します。",
+        "description": "アーカイブ済みゲームの registry 用ファイルを生成し、利用者が対象 registry リポジトリへ手動で PR を作成します。",
         "source": "Registry ソース",
         "sourcePlaceholder": "ソースを選択してください"
+      },
+      "manualPr": {
+        "title": "手動 PR 情報",
+        "description": "プラットフォームは registry git リポジトリへ自動 push しません。下記のファイルを対象リポジトリへ追加し、手動で PR を作成してください。",
+        "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
+        "prTitle": "推奨 PR タイトル: {{title}}"
       },
       "actions": {
         "rotateToken": {
@@ -733,7 +739,7 @@
         },
         "publish": {
           "title": "release を公開",
-          "success": "ゲーム release の公開に成功しました",
+          "success": "手動 PR 用の情報を生成しました",
           "fail": "ゲーム release の公開に失敗しました"
         }
       },

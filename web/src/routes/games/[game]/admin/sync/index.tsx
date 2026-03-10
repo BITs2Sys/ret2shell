@@ -7,6 +7,7 @@ import {
 } from "@api/sync";
 import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { HostType } from "@models/game";
+import type { ManualRegistryPublication } from "@models/sync";
 import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -23,6 +24,7 @@ export default function () {
   const releases = useGameSyncReleases({ game_id: gameId, enabled: () => gameId() > 0 });
   const sources = useGameSyncSources({ game_id: gameId, enabled: () => gameId() > 0 });
   const [selectedSourceId, setSelectedSourceId] = createSignal<string>("");
+  const [manualPublication, setManualPublication] = createSignal<ManualRegistryPublication | null>(null);
 
   createEffect(() => {
     if (selectedSourceId() || !sources.data?.length) {
@@ -35,7 +37,8 @@ export default function () {
   });
 
   const publishMutation = usePublishGameSyncMutation({
-    onSuccess: () => {
+    onSuccess: (publication) => {
+      setManualPublication(publication);
       releases.refetch();
       syncStatus.refetch();
     },
@@ -127,6 +130,43 @@ export default function () {
               </Button>
             </div>
           </Card>
+
+          <Show when={manualPublication()}>
+            {(publication) => (
+              <Card contentClass="p-4 flex flex-col space-y-3">
+                <div class="flex flex-row items-center space-x-2 font-bold">
+                  <span class="shrink-0 icon-[fluent--document-text-20-regular] w-5 h-5" />
+                  <span>{t("game.sync.manualPr.title")}</span>
+                </div>
+                <p class="opacity-80 text-sm">{t("game.sync.manualPr.description")}</p>
+                <div class="text-sm flex flex-col gap-1">
+                  <span>
+                    {t("game.sync.manualPr.target", {
+                      repo: publication().registry_git_url,
+                      branch: publication().registry_branch,
+                    })}
+                  </span>
+                  <span>
+                    {t("game.sync.manualPr.prTitle", {
+                      title: publication().suggested_pr_title,
+                    })}
+                  </span>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <span class="font-bold text-sm">{publication().release_file_path}</span>
+                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto">
+                    {publication().release_file_content}
+                  </pre>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <span class="font-bold text-sm">{publication().upstream_file_path}</span>
+                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto">
+                    {publication().upstream_file_content}
+                  </pre>
+                </div>
+              </Card>
+            )}
+          </Show>
 
           <Card contentClass="p-4 flex flex-col space-y-3">
             <div class="flex flex-row items-center space-x-2 font-bold">

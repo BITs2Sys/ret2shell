@@ -1,4 +1,9 @@
-import type { DirectDiscoverResponse, GameReleaseSummary, SyncRegistrySource } from "@models/sync";
+import type {
+  DirectDiscoverResponse,
+  GameReleaseSummary,
+  ManualRegistryPublication,
+  SyncRegistrySource,
+} from "@models/sync";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
@@ -212,11 +217,11 @@ export function useRotateGameSyncTokenMutation(
 export async function publishGameSyncRelease(game_id: number, registry_source_id: number) {
   return await api
     .post(`${api_root}/game/${game_id}/sync/publish`, { json: { registry_source_id } })
-    .json<GameReleaseSummary>();
+    .json<ManualRegistryPublication>();
 }
 
 export function usePublishGameSyncMutation(
-  props: { onSuccess?: (release: GameReleaseSummary) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (publication: ManualRegistryPublication) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
     mutationFn: ({ game_id, registry_source_id }: { game_id: number; registry_source_id: number }) =>

@@ -722,9 +722,15 @@
       },
       "publish": {
         "title": "發佈 release",
-        "description": "將目前已封存的賽事快照發佈到某個 registry 來源。",
+        "description": "為目前已封存的賽事產生 registry 檔案，然後由使用者手動向目標 registry 倉庫發起 PR。",
         "source": "Registry 來源",
         "sourcePlaceholder": "請選擇一個來源"
+      },
+      "manualPr": {
+        "title": "手動 PR 資訊",
+        "description": "平台不再自動向 registry git 倉庫推送內容。請將下面的檔案加入目標倉庫，並手動發起 PR。",
+        "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建議 PR 標題：{{title}}"
       },
       "actions": {
         "rotateToken": {
@@ -733,7 +739,7 @@
         },
         "publish": {
           "title": "發佈 release",
-          "success": "賽事 release 發佈成功",
+          "success": "已成功產生手動 PR 所需資訊",
           "fail": "賽事 release 發佈失敗"
         }
       },

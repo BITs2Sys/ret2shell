@@ -6,10 +6,10 @@ use r2s_config::bucket;
 use r2s_database::game_registry_source;
 use serde::{Deserialize, Serialize};
 use tokio::{
-  fs::{create_dir_all, read_to_string, remove_dir_all, write},
+  fs::{create_dir_all, read_to_string, remove_dir_all},
   process::Command,
 };
-use tracing::{info, warn};
+use tracing::warn;
 
 use super::source_cache_dir;
 
@@ -38,7 +38,7 @@ struct UpstreamAdvertisement {
   protocol_version: i32,
 }
 
-pub struct PublishRegistryRelease<'a> {
+pub struct RegistryPublicationRequest<'a> {
   pub game_key: &'a str,
   pub release_id: &'a str,
   pub manifest_body: &'a str,
@@ -46,6 +46,18 @@ pub struct PublishRegistryRelease<'a> {
   pub base_url: &'a str,
   pub sync_token: &'a str,
   pub published_at: DateTime<Utc>,
+}
+
+#[derive(Serialize)]
+pub struct ManualRegistryPublication {
+  pub registry_source_name: String,
+  pub registry_git_url: String,
+  pub registry_branch: String,
+  pub release_file_path: String,
+  pub release_file_content: String,
+  pub upstream_file_path: String,
+  pub upstream_file_content: String,
+  pub suggested_pr_title: String,
 }
 
 pub async fn fetch_registry_source(
@@ -126,94 +138,57 @@ pub async fn remove_registry_source_cache(
   Ok(())
 }
 
-pub async fn publish_release_to_registry(
-  bucket_config: &Option<bucket::Config>, source: &game_registry_source::Model,
-  release: PublishRegistryRelease<'_>,
-) -> anyhow::Result<()> {
+pub fn build_manual_registry_publication(
+  source: &game_registry_source::Model, release: RegistryPublicationRequest<'_>,
+) -> anyhow::Result<ManualRegistryPublication> {
   if !source.publish_enabled {
     bail!("registry source {} is not publish-enabled", source.name);
   }
 
-  let cache_dir = fetch_registry_source(bucket_config, source).await?;
-  let release_dir = cache_dir
-    .join("games")
-    .join(release.game_key)
-    .join("releases");
-  let upstream_dir = cache_dir
-    .join("games")
-    .join(release.game_key)
-    .join("upstreams")
-    .join(release.instance_id);
-  create_dir_all(&release_dir).await?;
-  create_dir_all(&upstream_dir).await?;
+  let upstream_body = build_upstream_advertisement_body(&release)?;
+  Ok(ManualRegistryPublication {
+    registry_source_name: source.name.clone(),
+    registry_git_url: source.git_url.clone(),
+    registry_branch: source.branch.clone(),
+    release_file_path: format!(
+      "games/{}/releases/{}.toml",
+      release.game_key, release.release_id
+    ),
+    release_file_content: release.manifest_body.to_owned(),
+    upstream_file_path: format!(
+      "games/{}/upstreams/{}/{}.toml",
+      release.game_key,
+      release.instance_id,
+      release.published_at.timestamp_millis()
+    ),
+    upstream_file_content: upstream_body,
+    suggested_pr_title: format!(
+      ":sparkles: publish release {}@{}",
+      release.game_key,
+      short_release_id(release.release_id)
+    ),
+  })
+}
 
-  let release_path = release_dir.join(format!("{}.toml", release.release_id));
-  if release_path.exists() {
-    let existing = read_to_string(&release_path).await?;
-    if existing != release.manifest_body {
-      bail!(
-        "release file {} already exists with different content",
-        release_path.display()
-      );
-    }
-  } else {
-    write(&release_path, release.manifest_body).await?;
-  }
-
-  let upstream_body = r2s_config::toml::to_string_pretty(&UpstreamAdvertisement {
-    spec_version: 1,
-    kind: "upstream".to_owned(),
-    status: "active".to_owned(),
-    game_key: release.game_key.to_owned(),
-    release_id: release.release_id.to_owned(),
-    instance_id: release.instance_id.to_owned(),
-    role: "first_party".to_owned(),
-    published_at: release.published_at,
-    base_url: release.base_url.to_owned(),
-    auth_mode: "sync_token".to_owned(),
-    sync_token: release.sync_token.to_owned(),
-    protocol_version: 1,
-  })?;
-  let upstream_path =
-    upstream_dir.join(format!("{}.toml", release.published_at.timestamp_millis()));
-  write(&upstream_path, upstream_body).await?;
-
-  let status = git_status_porcelain(&cache_dir).await?;
-  if status.trim().is_empty() {
-    info!(source=%source.name, game_key=%release.game_key, release_id=%release.release_id, "registry source already up to date");
-    return Ok(());
-  }
-
-  run_git(Some(&cache_dir), &["add".to_owned(), "--all".to_owned()]).await?;
-  run_git_with_env(
-    Some(&cache_dir),
-    &[
-      "commit".to_owned(),
-      "--author".to_owned(),
-      "platform <platform@private.ret.sh.cn>".to_owned(),
-      "-m".to_owned(),
-      format!(
-        ":sparkles: publish release {}@{}",
-        release.game_key,
-        short_release_id(release.release_id)
-      ),
-    ],
-    &[
-      ("GIT_COMMITTER_NAME", "platform"),
-      ("GIT_COMMITTER_EMAIL", "platform@private.ret.sh.cn"),
-    ],
-  )
-  .await?;
-  run_git(
-    Some(&cache_dir),
-    &[
-      "push".to_owned(),
-      "origin".to_owned(),
-      format!("HEAD:{}", source.branch),
-    ],
-  )
-  .await?;
-  Ok(())
+fn build_upstream_advertisement_body(
+  release: &RegistryPublicationRequest<'_>,
+) -> anyhow::Result<String> {
+  Ok(r2s_config::toml::to_string_pretty(
+    &UpstreamAdvertisement {
+      spec_version: 1,
+      kind: "upstream".to_owned(),
+      status: "active".to_owned(),
+      game_key: release.game_key.to_owned(),
+      release_id: release.release_id.to_owned(),
+      instance_id: release.instance_id.to_owned(),
+      role: "first_party".to_owned(),
+      published_at: release.published_at,
+      base_url: release.base_url.to_owned(),
+      auth_mode: "sync_token".to_owned(),
+      sync_token: release.sync_token.to_owned(),
+      protocol_version: 1,
+    },
+  )?)
 }
 
 async fn validate_registry_checkout(path: &Path) -> anyhow::Result<()> {
@@ -237,18 +212,6 @@ fn validate_registry_metadata_body(body: &str) -> anyhow::Result<()> {
     bail!("invalid registry kind {}", metadata.kind);
   }
   Ok(())
-}
-
-async fn git_status_porcelain(path: &Path) -> anyhow::Result<String> {
-  run_git(
-    Some(path),
-    &[
-      "status".to_owned(),
-      "--porcelain".to_owned(),
-      "-u".to_owned(),
-    ],
-  )
-  .await
 }
 
 async fn run_git(current_dir: Option<&Path>, args: &[String]) -> anyhow::Result<String> {
