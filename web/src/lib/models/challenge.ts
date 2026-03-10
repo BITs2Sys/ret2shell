@@ -10,6 +10,7 @@ export type Challenge = {
   tag: { name: string; primary: boolean }[];
   score_rule: { initial: number; minimum: number; decay: number };
   score: number;
+  display_order?: number;
   bucket: string | null;
   release_at: DateTime | null;
   archive_at: DateTime | null;

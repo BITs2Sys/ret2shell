@@ -145,6 +145,8 @@ pub struct Model {
   pub weight: i32,
   pub bucket: Option<String>,
   pub token: Option<String>,
+  pub sync_key: Option<String>,
+  pub sync_token: Option<String>,
   #[sea_orm(column_type = "JsonBinary")]
   pub timeline_presets: Option<TimelinePresets>,
   #[serde(default = "Option::default")]
@@ -160,6 +162,7 @@ impl Model {
     Self {
       bucket: None,
       token: None,
+      sync_token: None,
       node_selector: None,
       traffic: None,
       lifecycle: None,
@@ -248,6 +251,15 @@ where
   C: ConnectionTrait, {
   Entity::find()
     .filter(Column::Bucket.eq(bucket))
+    .one(db)
+    .await
+}
+
+pub async fn get_by_sync_key<C>(db: &C, sync_key: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::SyncKey.eq(sync_key))
     .one(db)
     .await
 }
@@ -408,6 +420,8 @@ mod tests {
       weight: 10,
       bucket: Some("bucket".to_owned()),
       token: Some("token".to_owned()),
+      sync_key: Some("game_key".to_owned()),
+      sync_token: Some("sync_token".to_owned()),
       timeline_presets: None,
       node_selector: Some("node-a".to_owned()),
       traffic: Some("traffic script".to_owned()),
@@ -424,6 +438,8 @@ mod tests {
     assert_eq!(desensitized.name, game.name);
     assert_eq!(desensitized.bucket, None);
     assert_eq!(desensitized.token, None);
+    assert_eq!(desensitized.sync_key, game.sync_key);
+    assert_eq!(desensitized.sync_token, None);
     assert_eq!(desensitized.node_selector, None);
     assert_eq!(desensitized.traffic, None);
     assert_eq!(desensitized.lifecycle, None);

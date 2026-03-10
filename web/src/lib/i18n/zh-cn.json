@@ -299,7 +299,53 @@
       "title": "替换协议"
     },
     "sync": {
-      "title": "资源同步"
+      "title": "资源同步",
+      "sources": {
+        "title": "Registry 源",
+        "description": "管理用于发布比赛 release、以及后续发现同步内容的 registry 仓库。",
+        "empty": "当前没有配置 registry 源",
+        "form": {
+          "name": "源名称",
+          "gitUrl": "Git 地址",
+          "branch": "分支",
+          "priority": "优先级",
+          "enabled": "启用",
+          "publishEnabled": "允许发布",
+          "privateSource": "私有源"
+        },
+        "actions": {
+          "fetch": {
+            "title": "拉取",
+            "success": "Registry 源拉取成功",
+            "fail": "Registry 源拉取失败"
+          }
+        },
+        "badges": {
+          "enabled": "源状态：{{enabled}}",
+          "publishEnabled": "发布：{{enabled}}"
+        },
+        "state": {
+          "enabled": "启用",
+          "disabled": "禁用"
+        },
+        "lastFetched": "最近拉取：{{value}}",
+        "errors": {
+          "fetch": {
+            "title": "获取 registry 源失败"
+          }
+        }
+      },
+      "phase1": {
+        "title": "第一阶段脚手架",
+        "message": "当前阶段会先准备同步工作目录、数据模型，以及远端镜像只读保护能力。",
+        "completedTitle": "当前已就绪内容",
+        "completedMessage": "这个页面将用于后续 registry 与上下游同步流程。第一阶段主要完成数据库基础设施与远端镜像只读保护。"
+      },
+      "errors": {
+        "fetchStatus": {
+          "title": "获取赛事同步状态失败"
+        }
+      }
     },
     "email": {
       "title": "平台发信邮箱",
@@ -638,6 +684,51 @@
       "errors": {
         "fetchRepo": {
           "title": "获取题目仓库失败"
+        }
+      }
+    },
+    "sync": {
+      "title": "赛事同步",
+      "readonly": {
+        "title": "远端镜像已锁定",
+        "message": "该赛事来自远端同步，当前处于只读状态。如需本地修改，请先解除远端镜像锁定。",
+        "source": "第一方上游：{{source}}"
+      },
+      "identity": {
+        "title": "同步身份",
+        "syncKey": "同步键",
+        "syncToken": "同步令牌"
+      },
+      "publish": {
+        "title": "发布 release",
+        "description": "将当前已归档的赛事快照发布到某个 registry 源。",
+        "source": "Registry 源",
+        "sourcePlaceholder": "请选择一个源"
+      },
+      "actions": {
+        "rotateToken": {
+          "title": "轮换同步令牌",
+          "fail": "轮换同步令牌失败"
+        },
+        "publish": {
+          "title": "发布 release",
+          "success": "赛事 release 发布成功",
+          "fail": "赛事 release 发布失败"
+        }
+      },
+      "releases": {
+        "title": "已发布 release",
+        "empty": "还没有发布任何 release",
+        "snapshot": "快照提交：{{value}}",
+        "publishedAt": "发布时间：{{value}}"
+      },
+      "trainingHint": "当前阶段不会把训练场作为 registry first-party 发布目标。",
+      "errors": {
+        "fetchSources": {
+          "title": "获取可用 registry 源失败"
+        },
+        "fetchReleases": {
+          "title": "获取赛事 release 列表失败"
         }
       }
     },

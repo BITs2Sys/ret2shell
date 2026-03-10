@@ -435,14 +435,7 @@ impl Git {
   pub async fn commit(
     &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
   ) -> Result<(), BucketError> {
-    let output = Command::new("git")
-      .current_dir(&self.path)
-      .arg("status")
-      .arg("-u")
-      .arg("--porcelain")
-      .output()
-      .await?;
-    let git_status = String::from_utf8(output.stdout)?;
+    let git_status = self.status_porcelain().await?;
     if git_status.trim().is_empty() {
       return Ok(());
     }
@@ -756,6 +749,66 @@ impl Git {
       Ok(String::from_utf8(output.stdout)?.trim().to_string())
     } else {
       warn!(stdio=?output, "failed to get HEAD from git repository");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn status_porcelain(&self) -> Result<String, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("status")
+      .arg("-u")
+      .arg("--porcelain")
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(String::from_utf8(output.stdout)?)
+    } else {
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn is_clean(&self) -> Result<bool, BucketError> {
+    Ok(self.status_porcelain().await?.trim().is_empty())
+  }
+
+  pub async fn get_ref(&self, ref_name: impl AsRef<str>) -> Result<Option<String>, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("rev-parse")
+      .arg("--verify")
+      .arg(ref_name.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(Some(String::from_utf8(output.stdout)?.trim().to_string()))
+    } else {
+      let stderr = String::from_utf8(output.stderr)?;
+      if stderr.contains("Needed a single revision") || stderr.contains("unknown revision") {
+        Ok(None)
+      } else {
+        Err(BucketError::GitCommandFailed(stderr))
+      }
+    }
+  }
+
+  pub async fn set_ref(
+    &self, ref_name: impl AsRef<str>, new_oid: impl AsRef<str>,
+  ) -> Result<(), BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("update-ref")
+      .arg(ref_name.as_ref())
+      .arg(new_oid.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(())
+    } else {
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
