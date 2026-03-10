@@ -1,14 +1,17 @@
 import {
   type SyncRegistrySourcePayload,
+  useCancelSyncJobMutation,
   useCreateSyncSourceMutation,
   useDeleteSyncSourceMutation,
   useDiscoverDirectSyncMutation,
   useFetchSyncSourceMutation,
   useImportDirectSyncMutation,
+  useResumeSyncJobMutation,
+  useSyncJobs,
   useSyncSources,
   useUpdateSyncSourceMutation,
 } from "@api/sync";
-import type { DirectDiscoverResponse, SyncRegistrySource } from "@models/sync";
+import type { DirectDiscoverResponse, SyncJob, SyncRegistrySource } from "@models/sync";
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -16,7 +19,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
-import { createMemo, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 const EMPTY_FORM: SyncRegistrySourcePayload = {
   name: "",
@@ -31,6 +34,7 @@ const EMPTY_FORM: SyncRegistrySourcePayload = {
 export default function () {
   const navigate = useNavigate();
   const sources = useSyncSources();
+  const jobs = useSyncJobs();
   const [editingId, setEditingId] = createSignal<number | null>(null);
   const [form, setForm] = createSignal<SyncRegistrySourcePayload>({ ...EMPTY_FORM });
   const [discoverBaseUrl, setDiscoverBaseUrl] = createSignal("");
@@ -38,6 +42,7 @@ export default function () {
   const [discoverGameKey, setDiscoverGameKey] = createSignal("");
   const [discoverReleaseId, setDiscoverReleaseId] = createSignal("");
   const [discoverResult, setDiscoverResult] = createSignal<DirectDiscoverResponse | null>(null);
+  const [currentJobId, setCurrentJobId] = createSignal<number | null>(null);
 
   const createMutation = useCreateSyncSourceMutation({
     onSuccess: () => {
@@ -71,8 +76,28 @@ export default function () {
   });
   const importMutation = useImportDirectSyncMutation({
     onSuccess: (data) => {
-      navigate(`/games/${data.game_id}/admin/sync`);
+      setCurrentJobId(data.id);
+      jobs.refetch();
     },
+  });
+  const resumeJobMutation = useResumeSyncJobMutation({
+    onSuccess: () => {
+      jobs.refetch();
+    },
+  });
+  const cancelJobMutation = useCancelSyncJobMutation({
+    onSuccess: () => {
+      jobs.refetch();
+    },
+  });
+
+  createEffect(() => {
+    const interval = window.setInterval(() => {
+      if (jobs.data?.some((job) => job.status === "pending" || job.status === "running")) {
+        jobs.refetch();
+      }
+    }, 2000);
+    onCleanup(() => window.clearInterval(interval));
   });
 
   const isEditing = createMemo(() => editingId() != null);
@@ -132,6 +157,12 @@ export default function () {
       game_key: discoverGameKey().trim(),
       release_id: discoverReleaseId().trim(),
     });
+  }
+
+  function openImportedGame(job: SyncJob) {
+    if (job.game_id != null) {
+      navigate(`/games/${job.game_id}/admin/sync`);
+    }
   }
 
   return (
@@ -327,6 +358,80 @@ export default function () {
               </div>
             )}
           </Show>
+        </Card>
+
+        <Card contentClass="p-4 flex flex-col space-y-3">
+          <div class="flex flex-row items-center justify-between gap-2">
+            <div class="flex flex-row items-center space-x-2 font-bold">
+              <span class="shrink-0 icon-[fluent--history-20-regular] w-5 h-5" />
+              <span>{t("platform.sync.jobs.title")}</span>
+            </div>
+            <Button size="sm" ghost onClick={() => jobs.refetch()}>
+              {t("platform.sync.jobs.actions.refresh.title")}
+            </Button>
+          </div>
+          <For each={jobs.data || []} fallback={<span class="opacity-70">{t("platform.sync.jobs.empty")}</span>}>
+            {(job) => (
+              <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-2">
+                <div class="flex flex-row justify-between gap-2 items-start">
+                  <div class="flex flex-col min-w-0">
+                    <span class="font-mono">#{job.id}</span>
+                    <span class="text-sm opacity-80 break-all">
+                      {job.game_key || "-"} / {job.release_id || "-"}
+                    </span>
+                    <span class="text-sm opacity-70">
+                      {t("platform.sync.jobs.stage", {
+                        status: job.status,
+                        stage: job.stage,
+                      })}
+                    </span>
+                  </div>
+                  <div class="flex flex-row gap-2">
+                    <Show when={job.game_id != null && job.status === "completed"}>
+                      <Button size="sm" onClick={() => openImportedGame(job)}>
+                        {t("platform.sync.jobs.actions.openGame.title")}
+                      </Button>
+                    </Show>
+                    <Show when={job.status === "failed" || job.status === "cancelled"}>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setCurrentJobId(job.id);
+                          resumeJobMutation.mutate({ job_id: job.id });
+                        }}
+                        loading={resumeJobMutation.isPending && currentJobId() === job.id}
+                        disabled={resumeJobMutation.isPending}
+                      >
+                        {t("platform.sync.jobs.actions.resume.title")}
+                      </Button>
+                    </Show>
+                    <Show when={job.status === "pending" || job.status === "running"}>
+                      <Button
+                        size="sm"
+                        level="warning"
+                        onClick={() => {
+                          setCurrentJobId(job.id);
+                          cancelJobMutation.mutate({ job_id: job.id });
+                        }}
+                        loading={cancelJobMutation.isPending && currentJobId() === job.id}
+                        disabled={cancelJobMutation.isPending}
+                      >
+                        {t("platform.sync.jobs.actions.cancel.title")}
+                      </Button>
+                    </Show>
+                  </div>
+                </div>
+                <Show when={job.upstream_base_url}>
+                  <span class="text-sm opacity-70 break-all">{job.upstream_base_url}</span>
+                </Show>
+                <Show when={job.error_message}>
+                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto text-error">
+                    {job.error_message}
+                  </pre>
+                </Show>
+              </div>
+            )}
+          </For>
         </Card>
 
         <For

@@ -356,6 +356,34 @@
           "releaseId": "Release ID"
         }
       },
+      "jobs": {
+        "title": "同步任务",
+        "empty": "当前还没有同步任务",
+        "stage": "状态：{{status}} | 阶段：{{stage}}",
+        "actions": {
+          "refresh": {
+            "title": "刷新"
+          },
+          "resume": {
+            "title": "恢复",
+            "success": "同步任务恢复成功",
+            "fail": "同步任务恢复失败"
+          },
+          "cancel": {
+            "title": "取消",
+            "success": "同步任务已取消",
+            "fail": "取消同步任务失败"
+          },
+          "openGame": {
+            "title": "打开赛事"
+          }
+        },
+        "errors": {
+          "fetch": {
+            "title": "获取同步任务失败"
+          }
+        }
+      },
       "phase1": {
         "title": "第一阶段脚手架",
         "message": "当前阶段会先准备同步工作目录、数据模型，以及远端镜像只读保护能力。",

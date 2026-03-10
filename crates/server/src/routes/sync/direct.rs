@@ -13,11 +13,12 @@ use futures::TryStreamExt;
 use heck::ToSnakeCase;
 use r2s_bucket::{Bucket, git::Git};
 use r2s_captcha::sha256sum_str;
-use r2s_database::{challenge, game, game_release, game_remote_sync, hint, media};
+use r2s_database::{challenge, game, game_release, game_remote_sync, game_sync_job, hint, media};
 use r2s_media::Media;
 use r2s_migrator::Database;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 use tokio::{
   fs::{create_dir_all, read_dir, remove_dir_all, rename},
   process::Command,
@@ -38,7 +39,7 @@ pub(super) struct DirectDiscoverRequest {
   pub release_id: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(super) struct DirectImportRequest {
   pub base_url: String,
   pub sync_token: Option<String>,
@@ -46,28 +47,78 @@ pub(super) struct DirectImportRequest {
   pub release_id: String,
 }
 
-#[derive(Serialize)]
-pub(super) struct DirectImportResponse {
-  pub game_id: i64,
-  pub game_key: String,
-  pub release_id: String,
-  pub bucket: String,
+#[derive(Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SyncJobStatusView {
+  Pending,
+  Running,
+  Paused,
+  Failed,
+  Completed,
+  Cancelled,
 }
 
-#[derive(Serialize, Deserialize)]
+impl From<game_sync_job::SyncJobStatus> for SyncJobStatusView {
+  fn from(value: game_sync_job::SyncJobStatus) -> Self {
+    match value {
+      game_sync_job::SyncJobStatus::Pending => Self::Pending,
+      game_sync_job::SyncJobStatus::Running => Self::Running,
+      game_sync_job::SyncJobStatus::Paused => Self::Paused,
+      game_sync_job::SyncJobStatus::Failed => Self::Failed,
+      game_sync_job::SyncJobStatus::Completed => Self::Completed,
+      game_sync_job::SyncJobStatus::Cancelled => Self::Cancelled,
+    }
+  }
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobResponse {
+  pub id: i64,
+  pub status: SyncJobStatusView,
+  pub stage: String,
+  pub game_id: Option<i64>,
+  pub game_key: Option<String>,
+  pub release_id: Option<String>,
+  pub upstream_base_url: Option<String>,
+  pub error_message: Option<String>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub created_at: chrono::DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub updated_at: chrono::DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
+  pub finished_at: Option<chrono::DateTime<Utc>>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
+struct DirectImportCheckpoint {
+  discovered: Option<DirectImportDiscovered>,
+  bucket_name: Option<String>,
+  repo_fetched: bool,
+  media_fetched: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct DirectImportDiscovered {
+  remote_info: RemoteSyncInfo,
+  release: RemoteSyncReleaseDetail,
+  manifest: manifest::ReleaseManifest,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub(super) struct RemoteSyncInfo {
   pub instance_id: String,
   pub base_url: String,
   pub protocol_version: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(super) struct RemoteSyncGameSummary {
   pub game_key: String,
   pub release_count: usize,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(super) struct RemoteSyncReleaseSummary {
   pub game_key: String,
   pub release_id: String,
@@ -77,7 +128,7 @@ pub(super) struct RemoteSyncReleaseSummary {
   pub published_at: i64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(super) struct RemoteSyncReleaseDetail {
   pub game_key: String,
   pub release_id: String,
@@ -153,20 +204,90 @@ pub(super) async fn discover_remote_source(
   Ok(Json(response))
 }
 
+pub(super) async fn list_sync_jobs(
+  State(ref db): State<Database>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let jobs = game_sync_job::get_list(&db.conn).await?;
+  Ok(Json(
+    jobs
+      .into_iter()
+      .map(SyncJobResponse::from)
+      .collect::<Vec<_>>(),
+  ))
+}
+
+pub(super) async fn get_sync_job(
+  State(ref db): State<Database>, axum::extract::Path(job_id): axum::extract::Path<i64>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let job = game_sync_job::get(&db.conn, job_id)
+    .await?
+    .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+  Ok(Json(SyncJobResponse::from(job)))
+}
+
+pub(super) async fn cancel_sync_job(
+  State(ref db): State<Database>, axum::extract::Path(job_id): axum::extract::Path<i64>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let job = game_sync_job::get(&db.conn, job_id)
+    .await?
+    .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+  if matches!(
+    job.status,
+    game_sync_job::SyncJobStatus::Completed | game_sync_job::SyncJobStatus::Failed
+  ) {
+    return Err(ResponseError::Conflict(
+      "this sync job can no longer be cancelled".to_owned(),
+    ));
+  }
+  let job = update_job(
+    db,
+    job,
+    game_sync_job::SyncJobStatus::Cancelled,
+    None,
+    None,
+    Some(Utc::now()),
+    None,
+  )
+  .await?;
+  Ok(Json(SyncJobResponse::from(job)))
+}
+
+pub(super) async fn resume_sync_job(
+  State(state): State<GlobalState>, axum::extract::Path(job_id): axum::extract::Path<i64>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let job = game_sync_job::get(&state.db.conn, job_id)
+    .await?
+    .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+  if !matches!(
+    job.status,
+    game_sync_job::SyncJobStatus::Failed
+      | game_sync_job::SyncJobStatus::Paused
+      | game_sync_job::SyncJobStatus::Cancelled
+  ) {
+    return Err(ResponseError::Conflict(
+      "only failed, paused, or cancelled sync jobs can be resumed".to_owned(),
+    ));
+  }
+  let job = update_job(
+    &state.db,
+    job,
+    game_sync_job::SyncJobStatus::Pending,
+    Some("queued".to_owned()),
+    None,
+    None,
+    None,
+  )
+  .await?;
+  spawn_direct_import_job(state.clone(), job.id);
+  Ok(Json(SyncJobResponse::from(job)))
+}
+
 pub(super) async fn import_remote_release(
   State(state): State<GlobalState>, Extension(token): Extension<Token>,
   Json(req): Json<DirectImportRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let base_url = normalize_base_url(&req.base_url)?;
-  let sync_token = normalized_sync_token(req.sync_token.as_deref()).map(str::to_owned);
-  let game_key = req.game_key.trim();
-  let release_id = req.release_id.trim();
-  if game_key.is_empty() || release_id.is_empty() {
-    return Err(ResponseError::BadRequest(
-      "game key and release id are required".to_owned(),
-    ));
-  }
-  if game::get_by_sync_key(&state.db.conn, game_key)
+  let request = normalize_direct_import_request(req)?;
+  if game::get_by_sync_key(&state.db.conn, &request.game_key)
     .await?
     .is_some()
   {
@@ -174,9 +295,293 @@ pub(super) async fn import_remote_release(
       "a local game with the same sync key already exists".to_owned(),
     ));
   }
+  ensure_no_active_import_job(&state.db, &request.game_key, &request.release_id).await?;
 
-  let remote_info: RemoteSyncInfo =
-    fetch_remote_json(&state.requestor, &base_url, "/info", sync_token.as_deref()).await?;
+  let now = Utc::now();
+  let job = game_sync_job::create(
+    &state.db.conn,
+    game_sync_job::Model {
+      id: 0,
+      kind: game_sync_job::SyncJobKind::Import,
+      mode: game_sync_job::SyncJobMode::Direct,
+      status: game_sync_job::SyncJobStatus::Pending,
+      stage: "queued".to_owned(),
+      game_id: None,
+      game_key: Some(request.game_key.clone()),
+      release_id: Some(request.release_id.clone()),
+      registry_source_id: None,
+      upstream_instance_id: None,
+      upstream_base_url: Some(request.base_url.clone()),
+      request_body: game_sync_job::JsonObject(serde_json::to_value(&request)?),
+      checkpoint: game_sync_job::JsonObject(json!({})),
+      error_message: None,
+      created_by: token.id,
+      created_at: now,
+      updated_at: now,
+      finished_at: None,
+    },
+  )
+  .await?;
+  spawn_direct_import_job(state.clone(), job.id);
+  Ok(Json(SyncJobResponse::from(job)))
+}
+
+fn spawn_direct_import_job(state: GlobalState, job_id: i64) {
+  tokio::spawn(async move {
+    if let Err(err) = run_direct_import_job(state.clone(), job_id).await
+      && let Ok(Some(job)) = game_sync_job::get(&state.db.conn, job_id).await
+      && job.status != game_sync_job::SyncJobStatus::Cancelled
+    {
+      let _ = update_job(
+        &state.db,
+        job,
+        game_sync_job::SyncJobStatus::Failed,
+        None,
+        None,
+        Some(Utc::now()),
+        Some(err.to_string()),
+      )
+      .await;
+    }
+  });
+}
+
+async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), ResponseError> {
+  let mut job = game_sync_job::get(&state.db.conn, job_id)
+    .await?
+    .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+  if job.status == game_sync_job::SyncJobStatus::Cancelled {
+    return Ok(());
+  }
+  let request: DirectImportRequest =
+    serde_json::from_value(job.request_body.0.clone()).map_err(ResponseError::from)?;
+  let mut checkpoint = decode_checkpoint(&job.checkpoint.0)?;
+  let workspace = sync::job_workspace_dir(&state.config.bucket, &job_id.to_string())
+    .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+  let repo_dir = workspace.join("repo");
+  create_dir_all(&workspace).await?;
+
+  if checkpoint.discovered.is_none() {
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("discover".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    let discovered = discover_release_for_import(&state.requestor, &request).await?;
+    checkpoint.bucket_name = Some(pick_local_bucket_name(&state.bucket, &request.game_key));
+    checkpoint.discovered = Some(discovered);
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("discover".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+  }
+
+  if job_cancelled(&state.db, job_id).await? {
+    return Ok(());
+  }
+
+  let discovered = checkpoint
+    .discovered
+    .clone()
+    .ok_or(ResponseError::InternalServerError(
+      "sync checkpoint lost discovered release metadata".to_owned(),
+    ))?;
+
+  if !checkpoint.repo_fetched || !repo_dir.exists() {
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    fetch_release_repository(
+      &repo_dir,
+      &request.base_url,
+      normalized_sync_token(request.sync_token.as_deref()),
+      &request.game_key,
+      &request.release_id,
+      &discovered.release.snapshot_commit,
+    )
+    .await?;
+    checkpoint.repo_fetched = true;
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+  }
+
+  if job_cancelled(&state.db, job_id).await? {
+    return Ok(());
+  }
+
+  if !checkpoint.media_fetched {
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_media".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    download_release_media(
+      &state.requestor,
+      &state.db,
+      &state.media,
+      &request.base_url,
+      normalized_sync_token(request.sync_token.as_deref()),
+      &discovered.manifest.assets.media_hashes,
+      job.created_by,
+    )
+    .await?;
+    checkpoint.media_fetched = true;
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_media".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+  }
+
+  if job_cancelled(&state.db, job_id).await? {
+    return Ok(());
+  }
+
+  let bucket_name = checkpoint
+    .bucket_name
+    .clone()
+    .ok_or(ResponseError::InternalServerError(
+      "sync checkpoint lost local bucket information".to_owned(),
+    ))?;
+  let final_repo_path = state.bucket.path().join(&bucket_name);
+  if final_repo_path.exists() && job.game_id.is_none() {
+    remove_dir_all(&final_repo_path).await.ok();
+  }
+  if !repo_dir.exists() {
+    checkpoint.repo_fetched = false;
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo".to_owned()),
+      Some(&checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    fetch_release_repository(
+      &repo_dir,
+      &request.base_url,
+      normalized_sync_token(request.sync_token.as_deref()),
+      &request.game_key,
+      &request.release_id,
+      &discovered.release.snapshot_commit,
+    )
+    .await?;
+    checkpoint.repo_fetched = true;
+  }
+
+  job = update_job(
+    &state.db,
+    job,
+    game_sync_job::SyncJobStatus::Running,
+    Some("finalize".to_owned()),
+    Some(&checkpoint),
+    None,
+    None,
+  )
+  .await?;
+
+  rename(&repo_dir, &final_repo_path).await.map_err(|err| {
+    ResponseError::InternalServerError(format!("failed to finalize imported repository: {err}"))
+  })?;
+  let finalize_result = finalize_import(
+    &state,
+    job.created_by,
+    &bucket_name,
+    &discovered.remote_info,
+    discovered.release,
+    discovered.manifest,
+  )
+  .await;
+  match finalize_result {
+    Ok((game, _release)) => {
+      remove_dir_all(&workspace).await.ok();
+      let _job = update_job(
+        &state.db,
+        job,
+        game_sync_job::SyncJobStatus::Completed,
+        Some("completed".to_owned()),
+        Some(&checkpoint),
+        Some(Utc::now()),
+        None,
+      )
+      .await?;
+      let completed_job = game_sync_job::get(&state.db.conn, job_id)
+        .await?
+        .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+      let _ = update_job(
+        &state.db,
+        completed_job,
+        game_sync_job::SyncJobStatus::Completed,
+        Some("completed".to_owned()),
+        Some(&checkpoint),
+        Some(Utc::now()),
+        None,
+      )
+      .await?;
+      let mut final_job = game_sync_job::get(&state.db.conn, job_id)
+        .await?
+        .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
+      final_job.game_id = Some(game.id);
+      game_sync_job::update(&state.db.conn, final_job).await?;
+      Ok(())
+    }
+    Err(err) => {
+      if final_repo_path.exists() {
+        rename(&final_repo_path, &repo_dir).await.ok();
+      }
+      Err(err)
+    }
+  }
+}
+
+async fn discover_release_for_import(
+  client: &HTTPClient, request: &DirectImportRequest,
+) -> Result<DirectImportDiscovered, ResponseError> {
+  let remote_info: RemoteSyncInfo = fetch_remote_json(
+    client,
+    &request.base_url,
+    "/info",
+    normalized_sync_token(request.sync_token.as_deref()),
+  )
+  .await?;
   if remote_info.protocol_version != 1 {
     return Err(ResponseError::PreconditionFailed(format!(
       "unsupported remote sync protocol version {}",
@@ -184,10 +589,13 @@ pub(super) async fn import_remote_release(
     )));
   }
   let release: RemoteSyncReleaseDetail = fetch_remote_json(
-    &state.requestor,
-    &base_url,
-    &format!("/games/{game_key}/releases/{release_id}"),
-    sync_token.as_deref(),
+    client,
+    &request.base_url,
+    &format!(
+      "/games/{}/releases/{}",
+      request.game_key, request.release_id
+    ),
+    normalized_sync_token(request.sync_token.as_deref()),
   )
   .await?;
   let manifest: manifest::ReleaseManifest = r2s_config::toml::from_str(&release.manifest_body)
@@ -197,75 +605,105 @@ pub(super) async fn import_remote_release(
       "remote release manifest hash does not match the manifest body".to_owned(),
     ));
   }
-  validate_release_detail(game_key, release_id, &release, &manifest)?;
+  validate_release_detail(&request.game_key, &request.release_id, &release, &manifest)?;
   if manifest.game.host_type != "game" {
     return Err(ResponseError::PreconditionFailed(
       "only archived games are supported by direct sync import in this phase".to_owned(),
     ));
   }
-
-  let job_id = nanoid::nanoid!();
-  let workspace = sync::job_workspace_dir(&state.config.bucket, &job_id)
-    .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
-  let repo_dir = workspace.join("repo");
-  create_dir_all(&workspace).await?;
-
-  if let Err(err) = fetch_release_repository(
-    &repo_dir,
-    &base_url,
-    sync_token.as_deref(),
-    game_key,
-    release_id,
-    &release.snapshot_commit,
-  )
-  .await
-  {
-    remove_dir_all(&workspace).await.ok();
-    return Err(err);
-  }
-
-  if let Err(err) = download_release_media(
-    &state.requestor,
-    &state.db,
-    &state.media,
-    &base_url,
-    sync_token.as_deref(),
-    &manifest.assets.media_hashes,
-    token.id,
-  )
-  .await
-  {
-    remove_dir_all(&workspace).await.ok();
-    return Err(err);
-  }
-
-  let bucket_name = pick_local_bucket_name(&state.bucket, game_key);
-  let final_repo_path = state.bucket.path().join(&bucket_name);
-  rename(&repo_dir, &final_repo_path).await.map_err(|err| {
-    ResponseError::InternalServerError(format!("failed to finalize imported repository: {err}"))
-  })?;
-
-  let imported = finalize_import(
-    &state,
-    token.id,
-    &bucket_name,
-    &remote_info,
+  Ok(DirectImportDiscovered {
+    remote_info,
     release,
     manifest,
-  )
-  .await;
-  remove_dir_all(&workspace).await.ok();
+  })
+}
 
-  match imported {
-    Ok((game, _release)) => Ok(Json(DirectImportResponse {
-      game_id: game.id,
-      game_key: game.sync_key.unwrap_or_else(|| game_key.to_owned()),
-      release_id: release_id.to_owned(),
-      bucket: game.bucket.unwrap_or(bucket_name),
-    })),
-    Err(err) => {
-      remove_dir_all(final_repo_path).await.ok();
-      Err(err)
+fn normalize_direct_import_request(
+  req: DirectImportRequest,
+) -> Result<DirectImportRequest, ResponseError> {
+  let base_url = normalize_base_url(&req.base_url)?;
+  let game_key = req.game_key.trim().to_owned();
+  let release_id = req.release_id.trim().to_owned();
+  if game_key.is_empty() || release_id.is_empty() {
+    return Err(ResponseError::BadRequest(
+      "game key and release id are required".to_owned(),
+    ));
+  }
+  Ok(DirectImportRequest {
+    base_url,
+    sync_token: normalized_sync_token(req.sync_token.as_deref()).map(str::to_owned),
+    game_key,
+    release_id,
+  })
+}
+
+async fn ensure_no_active_import_job(
+  db: &Database, game_key: &str, release_id: &str,
+) -> Result<(), ResponseError> {
+  for job in game_sync_job::get_list(&db.conn).await? {
+    if job.kind != game_sync_job::SyncJobKind::Import
+      || job.mode != game_sync_job::SyncJobMode::Direct
+    {
+      continue;
+    }
+    if job.game_key.as_deref() != Some(game_key) || job.release_id.as_deref() != Some(release_id) {
+      continue;
+    }
+    if matches!(
+      job.status,
+      game_sync_job::SyncJobStatus::Pending | game_sync_job::SyncJobStatus::Running
+    ) {
+      return Err(ResponseError::Conflict(
+        "another direct import job for the same release is already running".to_owned(),
+      ));
+    }
+  }
+  Ok(())
+}
+
+async fn job_cancelled(db: &Database, job_id: i64) -> Result<bool, ResponseError> {
+  Ok(
+    game_sync_job::get(&db.conn, job_id)
+      .await?
+      .is_some_and(|job| job.status == game_sync_job::SyncJobStatus::Cancelled),
+  )
+}
+
+fn decode_checkpoint(value: &Value) -> Result<DirectImportCheckpoint, ResponseError> {
+  serde_json::from_value(value.clone()).map_err(ResponseError::from)
+}
+
+async fn update_job(
+  db: &Database, mut job: game_sync_job::Model, status: game_sync_job::SyncJobStatus,
+  stage: Option<String>, checkpoint: Option<&DirectImportCheckpoint>,
+  finished_at: Option<chrono::DateTime<Utc>>, error_message: Option<String>,
+) -> Result<game_sync_job::Model, ResponseError> {
+  job.status = status;
+  if let Some(stage) = stage {
+    job.stage = stage;
+  }
+  if let Some(checkpoint) = checkpoint {
+    job.checkpoint = game_sync_job::JsonObject(serde_json::to_value(checkpoint)?);
+  }
+  job.finished_at = finished_at;
+  job.error_message = error_message;
+  Ok(game_sync_job::update(&db.conn, job).await?)
+}
+
+impl From<game_sync_job::Model> for SyncJobResponse {
+  fn from(value: game_sync_job::Model) -> Self {
+    Self {
+      id: value.id,
+      status: value.status.into(),
+      stage: value.stage,
+      game_id: value.game_id,
+      game_key: value.game_key,
+      release_id: value.release_id,
+      upstream_base_url: value.upstream_base_url,
+      error_message: value.error_message,
+      created_at: value.created_at,
+      updated_at: value.updated_at,
+      finished_at: value.finished_at,
     }
   }
 }

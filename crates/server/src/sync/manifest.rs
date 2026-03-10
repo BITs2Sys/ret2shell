@@ -28,7 +28,7 @@ pub struct BuiltReleaseManifest {
   pub manifest_body: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ReleaseManifest {
   pub spec_version: i32,
   pub kind: String,
@@ -43,7 +43,7 @@ pub struct ReleaseManifest {
   pub assets: ManifestAssets,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GameManifest {
   pub name: String,
   pub brief: String,
@@ -68,7 +68,7 @@ pub struct GameManifest {
   pub show_hints_after_archive: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChallengeManifest {
   pub key: String,
   pub order: i32,
@@ -80,7 +80,7 @@ pub struct ChallengeManifest {
   pub archive_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct ManifestAssets {
   pub media_hashes: Vec<String>,
 }

@@ -356,6 +356,34 @@
           "releaseId": "Release ID"
         }
       },
+      "jobs": {
+        "title": "Sync jobs",
+        "empty": "No sync jobs yet",
+        "stage": "Status: {{status}} | stage: {{stage}}",
+        "actions": {
+          "refresh": {
+            "title": "Refresh"
+          },
+          "resume": {
+            "title": "Resume",
+            "success": "Sync job resumed successfully",
+            "fail": "Failed to resume sync job"
+          },
+          "cancel": {
+            "title": "Cancel",
+            "success": "Sync job cancelled successfully",
+            "fail": "Failed to cancel sync job"
+          },
+          "openGame": {
+            "title": "Open game"
+          }
+        },
+        "errors": {
+          "fetch": {
+            "title": "Failed to fetch sync jobs"
+          }
+        }
+      },
       "phase1": {
         "title": "Phase 1 scaffold",
         "message": "The sync workspace, data model, and read-only mirror guard rails are being prepared in this phase.",

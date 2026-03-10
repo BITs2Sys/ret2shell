@@ -356,6 +356,34 @@
           "releaseId": "Release ID"
         }
       },
+      "jobs": {
+        "title": "同步任務",
+        "empty": "目前還沒有同步任務",
+        "stage": "狀態：{{status}} | 階段：{{stage}}",
+        "actions": {
+          "refresh": {
+            "title": "重新整理"
+          },
+          "resume": {
+            "title": "恢復",
+            "success": "同步任務恢復成功",
+            "fail": "同步任務恢復失敗"
+          },
+          "cancel": {
+            "title": "取消",
+            "success": "同步任務已取消",
+            "fail": "取消同步任務失敗"
+          },
+          "openGame": {
+            "title": "開啟賽事"
+          }
+        },
+        "errors": {
+          "fetch": {
+            "title": "取得同步任務失敗"
+          }
+        }
+      },
       "phase1": {
         "title": "第一階段腳手架",
         "message": "目前階段會先準備同步工作目錄、資料模型，以及遠端鏡像唯讀保護能力。",

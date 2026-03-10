@@ -89,3 +89,19 @@ export type DirectDiscoverResponse = {
   releases: RemoteSyncReleaseSummary[] | null;
   release: RemoteSyncReleaseDetail | null;
 };
+
+export type SyncJobStatus = "pending" | "running" | "paused" | "failed" | "completed" | "cancelled";
+
+export type SyncJob = {
+  id: number;
+  status: SyncJobStatus;
+  stage: string;
+  game_id: number | null;
+  game_key: string | null;
+  release_id: string | null;
+  upstream_base_url: string | null;
+  error_message: string | null;
+  created_at: DateTime;
+  updated_at: DateTime;
+  finished_at: DateTime | null;
+};

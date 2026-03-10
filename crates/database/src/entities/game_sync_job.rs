@@ -3,7 +3,7 @@ use chrono::{
   serde::{ts_seconds, ts_seconds_option},
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{FromJsonQueryResult, entity::prelude::*};
+use sea_orm::{ActiveValue, FromJsonQueryResult, IntoActiveModel, QueryOrder, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -154,3 +154,40 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).one(db).await
+}
+
+pub async fn get_list<C>(db: &C) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .order_by_desc(Column::CreatedAt)
+    .order_by_desc(Column::Id)
+    .all(db)
+    .await
+}
+
+pub async fn create<C>(db: &C, job: Model) -> Result<Model, DbErr>
+where
+  C: ConnectionTrait, {
+  let job = ActiveModel {
+    id: ActiveValue::NotSet,
+    ..job.into_active_model().reset_all()
+  };
+  job.insert(db).await
+}
+
+pub async fn update<C>(db: &C, job: Model) -> Result<Model, DbErr>
+where
+  C: ConnectionTrait, {
+  let job = ActiveModel {
+    id: ActiveValue::Unchanged(job.id),
+    updated_at: ActiveValue::Set(Utc::now()),
+    ..job.into_active_model().reset_all()
+  };
+  job.update(db).await
+}

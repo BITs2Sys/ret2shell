@@ -3,6 +3,7 @@ import type {
   GameReleaseSummary,
   GameSyncStatus,
   ManualRegistryPublication,
+  SyncJob,
   SyncRegistrySource,
 } from "@models/sync";
 import { t } from "@storage/theme";
@@ -32,13 +33,6 @@ export type DirectImportPayload = {
   sync_token?: string | null;
   game_key: string;
   release_id: string;
-};
-
-export type DirectImportResponse = {
-  game_id: number;
-  game_key: string;
-  release_id: string;
-  bucket: string;
 };
 
 export async function getSyncSources() {
@@ -278,11 +272,11 @@ export function useDiscoverDirectSyncMutation(
 }
 
 export async function importDirectSyncRelease(payload: DirectImportPayload) {
-  return await api.post(`${api_root}/sync/direct/import`, { json: payload }).json<DirectImportResponse>();
+  return await api.post(`${api_root}/sync/direct/import`, { json: payload }).json<SyncJob>();
 }
 
 export function useImportDirectSyncMutation(
-  props: { onSuccess?: (response: DirectImportResponse) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (response: SyncJob) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
     mutationFn: importDirectSyncRelease,
@@ -292,6 +286,66 @@ export function useImportDirectSyncMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("platform.sync.direct.import.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function getSyncJobs() {
+  return await api.get(`${api_root}/sync/direct/job`).json<SyncJob[]>();
+}
+
+export function useSyncJobs(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
+  const keys = createMemo(() => ["sync", "job"]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: getSyncJobs,
+      enabled: props.enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.jobs.errors.fetch.title"));
+        return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export async function resumeSyncJob(job_id: number) {
+  return await api.post(`${api_root}/sync/direct/job/${job_id}/resume`, { json: {} }).json<SyncJob>();
+}
+
+export function useResumeSyncJobMutation(
+  props: { onSuccess?: (job: SyncJob) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ job_id }: { job_id: number }) => resumeSyncJob(job_id),
+    onSuccess: (data) => {
+      toastSuccess(t("platform.sync.jobs.actions.resume.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.jobs.actions.resume.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function cancelSyncJob(job_id: number) {
+  return await api.post(`${api_root}/sync/direct/job/${job_id}/cancel`, { json: {} }).json<SyncJob>();
+}
+
+export function useCancelSyncJobMutation(
+  props: { onSuccess?: (job: SyncJob) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ job_id }: { job_id: number }) => cancelSyncJob(job_id),
+    onSuccess: (data) => {
+      toastSuccess(t("platform.sync.jobs.actions.cancel.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.jobs.actions.cancel.fail"));
       props.onError?.(err);
     },
   }));

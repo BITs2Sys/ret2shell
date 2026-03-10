@@ -43,6 +43,16 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/import",
           axum::routing::post(direct::import_remote_release),
         )
+        .route("/job", get(direct::list_sync_jobs))
+        .route("/job/{job}", get(direct::get_sync_job))
+        .route(
+          "/job/{job}/resume",
+          axum::routing::post(direct::resume_sync_job),
+        )
+        .route(
+          "/job/{job}/cancel",
+          axum::routing::post(direct::cancel_sync_job),
+        )
         .route_layer(middleware::from_fn(auth::permission_required_any!(
           Permission::Host,
           Permission::DevOps
