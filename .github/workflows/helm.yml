@@ -26,14 +26,16 @@ jobs:
     name: Lint and Package
     runs-on: [self-hosted, linux, x64]
     timeout-minutes: 20
-    env:
-      HELM_RENDER_DIR: ${{ runner.temp }}/helm-render-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
     defaults:
       run:
         shell: bash -leo pipefail {0}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set Helm temp paths
+        run: |
+          echo "HELM_RENDER_DIR=${RUNNER_TEMP}/helm-render-${GITHUB_JOB}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
