@@ -335,6 +335,22 @@
           }
         }
       },
+      "direct": {
+        "title": "Direct upstream discovery",
+        "description": "Probe another Ret2Shell instance directly without using a registry source.",
+        "action": "Discover remote",
+        "games": "Remote games",
+        "releases": "Remote releases",
+        "releaseCount": "{{count}} release(s)",
+        "info": "Remote base URL: {{baseUrl}} | protocol v{{version}}",
+        "fail": "Failed to discover remote sync source",
+        "form": {
+          "baseUrl": "Remote base URL",
+          "syncToken": "Sync token",
+          "gameKey": "Game key",
+          "releaseId": "Release ID"
+        }
+      },
       "phase1": {
         "title": "Phase 1 scaffold",
         "message": "The sync workspace, data model, and read-only mirror guard rails are being prepared in this phase.",

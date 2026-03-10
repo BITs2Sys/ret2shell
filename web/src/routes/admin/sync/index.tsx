@@ -2,11 +2,12 @@ import {
   type SyncRegistrySourcePayload,
   useCreateSyncSourceMutation,
   useDeleteSyncSourceMutation,
+  useDiscoverDirectSyncMutation,
   useFetchSyncSourceMutation,
   useSyncSources,
   useUpdateSyncSourceMutation,
 } from "@api/sync";
-import type { SyncRegistrySource } from "@models/sync";
+import type { DirectDiscoverResponse, SyncRegistrySource } from "@models/sync";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -29,6 +30,11 @@ export default function () {
   const sources = useSyncSources();
   const [editingId, setEditingId] = createSignal<number | null>(null);
   const [form, setForm] = createSignal<SyncRegistrySourcePayload>({ ...EMPTY_FORM });
+  const [discoverBaseUrl, setDiscoverBaseUrl] = createSignal("");
+  const [discoverSyncToken, setDiscoverSyncToken] = createSignal("");
+  const [discoverGameKey, setDiscoverGameKey] = createSignal("");
+  const [discoverReleaseId, setDiscoverReleaseId] = createSignal("");
+  const [discoverResult, setDiscoverResult] = createSignal<DirectDiscoverResponse | null>(null);
 
   const createMutation = useCreateSyncSourceMutation({
     onSuccess: () => {
@@ -53,6 +59,11 @@ export default function () {
   const fetchMutation = useFetchSyncSourceMutation({
     onSuccess: () => {
       sources.refetch();
+    },
+  });
+  const discoverMutation = useDiscoverDirectSyncMutation({
+    onSuccess: (data) => {
+      setDiscoverResult(data);
     },
   });
 
@@ -92,6 +103,15 @@ export default function () {
     } else {
       createMutation.mutate(form());
     }
+  }
+
+  function onDiscover() {
+    discoverMutation.mutate({
+      base_url: discoverBaseUrl(),
+      sync_token: discoverSyncToken() || null,
+      game_key: discoverGameKey() || null,
+      release_id: discoverReleaseId() || null,
+    });
   }
 
   return (
@@ -167,6 +187,103 @@ export default function () {
               {isEditing() ? t("general.actions.save.title") : t("general.actions.create.title")}
             </Button>
           </div>
+        </Card>
+
+        <Card contentClass="p-4 flex flex-col space-y-3">
+          <div class="flex flex-row items-center space-x-2 font-bold">
+            <span class="shrink-0 icon-[fluent--globe-arrow-up-20-regular] w-5 h-5" />
+            <span>{t("platform.sync.direct.title")}</span>
+          </div>
+          <p class="opacity-80">{t("platform.sync.direct.description")}</p>
+          <Input
+            value={discoverBaseUrl()}
+            onInput={(event) => setDiscoverBaseUrl(event.currentTarget.value)}
+            title={t("platform.sync.direct.form.baseUrl")}
+            placeholder="https://ctf.example.com"
+            icon={<span class="shrink-0 icon-[fluent--link-20-regular] w-5 h-5" />}
+          />
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
+            <Input
+              value={discoverSyncToken()}
+              onInput={(event) => setDiscoverSyncToken(event.currentTarget.value)}
+              title={t("platform.sync.direct.form.syncToken")}
+              placeholder="r2s_sync_xxxxx"
+              icon={<span class="shrink-0 icon-[fluent--key-20-regular] w-5 h-5" />}
+            />
+            <Input
+              value={discoverGameKey()}
+              onInput={(event) => setDiscoverGameKey(event.currentTarget.value)}
+              title={t("platform.sync.direct.form.gameKey")}
+              placeholder="example_game"
+              icon={<span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5" />}
+            />
+            <Input
+              value={discoverReleaseId()}
+              onInput={(event) => setDiscoverReleaseId(event.currentTarget.value)}
+              title={t("platform.sync.direct.form.releaseId")}
+              placeholder="commit id"
+              icon={<span class="shrink-0 icon-[fluent--history-20-regular] w-5 h-5" />}
+            />
+          </div>
+          <div class="flex flex-row justify-end">
+            <Button
+              level="primary"
+              onClick={onDiscover}
+              loading={discoverMutation.isPending}
+              disabled={discoverMutation.isPending}
+            >
+              {t("platform.sync.direct.action")}
+            </Button>
+          </div>
+          <Show when={discoverResult()}>
+            {(result) => (
+              <div class="flex flex-col space-y-3">
+                <div class="text-sm opacity-80">
+                  {t("platform.sync.direct.info", {
+                    baseUrl: result().info.base_url,
+                    version: result().info.protocol_version,
+                  })}
+                </div>
+                <Show when={result().games?.length}>
+                  <div class="flex flex-col space-y-2">
+                    <div class="font-bold">{t("platform.sync.direct.games")}</div>
+                    <For each={result().games || []}>
+                      {(game) => (
+                        <div class="border border-layer-content/10 rounded-lg p-3 flex flex-row justify-between gap-2">
+                          <span class="font-mono break-all">{game.game_key}</span>
+                          <span class="opacity-70 text-sm">
+                            {t("platform.sync.direct.releaseCount", { count: game.release_count })}
+                          </span>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+                <Show when={result().releases?.length}>
+                  <div class="flex flex-col space-y-2">
+                    <div class="font-bold">{t("platform.sync.direct.releases")}</div>
+                    <For each={result().releases || []}>
+                      {(release) => (
+                        <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-1">
+                          <span class="font-mono break-all">{release.release_id}</span>
+                          <span class="text-sm opacity-70">{release.first_party_base_url}</span>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+                <Show when={result().release}>
+                  {(release) => (
+                    <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-1">
+                      <span class="font-mono break-all">{release().release_id}</span>
+                      <span class="text-sm opacity-70">{release().snapshot_commit}</span>
+                      <span class="text-sm opacity-70">{release().first_party_base_url}</span>
+                    </div>
+                  )}
+                </Show>
+              </div>
+            )}
+          </Show>
         </Card>
 
         <For

@@ -1,4 +1,4 @@
-import type { GameReleaseSummary, SyncRegistrySource } from "@models/sync";
+import type { DirectDiscoverResponse, GameReleaseSummary, SyncRegistrySource } from "@models/sync";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
@@ -12,6 +12,13 @@ export type SyncRegistrySourcePayload = {
   priority: number;
   publish_enabled: boolean;
   private_source: boolean;
+};
+
+export type DirectDiscoverPayload = {
+  base_url: string;
+  sync_token?: string | null;
+  game_key?: string | null;
+  release_id?: string | null;
 };
 
 export async function getSyncSources() {
@@ -206,6 +213,23 @@ export function usePublishGameSyncMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("game.sync.actions.publish.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function discoverDirectSyncSource(payload: DirectDiscoverPayload) {
+  return await api.post(`${api_root}/sync/direct/discover`, { json: payload }).json<DirectDiscoverResponse>();
+}
+
+export function useDiscoverDirectSyncMutation(
+  props: { onSuccess?: (response: DirectDiscoverResponse) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: discoverDirectSyncSource,
+    onSuccess: (data) => props.onSuccess?.(data),
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.direct.fail"));
       props.onError?.(err);
     },
   }));

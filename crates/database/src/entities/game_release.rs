@@ -114,3 +114,24 @@ where
     .all(db)
     .await
 }
+
+pub async fn get_list<C>(db: &C) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .order_by_desc(Column::PublishedAt)
+    .order_by_desc(Column::Id)
+    .all(db)
+    .await
+}
+
+pub async fn get_list_by_game_key<C>(db: &C, game_key: &str) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::GameKey.eq(game_key))
+    .order_by_desc(Column::PublishedAt)
+    .order_by_desc(Column::Id)
+    .all(db)
+    .await
+}

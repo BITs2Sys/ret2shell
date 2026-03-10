@@ -335,6 +335,22 @@
           }
         }
       },
+      "direct": {
+        "title": "直連上游探測",
+        "description": "不經過 registry 來源，直接探測另一台 Ret2Shell 實例。",
+        "action": "探測遠端",
+        "games": "遠端賽事",
+        "releases": "遠端 release",
+        "releaseCount": "{{count}} 個 release",
+        "info": "遠端位址：{{baseUrl}} | 協議版本 v{{version}}",
+        "fail": "探測遠端同步來源失敗",
+        "form": {
+          "baseUrl": "遠端位址",
+          "syncToken": "同步令牌",
+          "gameKey": "Game Key",
+          "releaseId": "Release ID"
+        }
+      },
       "phase1": {
         "title": "第一階段腳手架",
         "message": "目前階段會先準備同步工作目錄、資料模型，以及遠端鏡像唯讀保護能力。",

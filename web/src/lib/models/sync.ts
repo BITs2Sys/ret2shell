@@ -39,3 +39,41 @@ export type GameReleaseSummary = {
   published_at: DateTime;
   created_at: DateTime;
 };
+
+export type RemoteSyncInfo = {
+  instance_id: string;
+  base_url: string;
+  protocol_version: number;
+};
+
+export type RemoteSyncGameSummary = {
+  game_key: string;
+  release_count: number;
+};
+
+export type RemoteSyncReleaseSummary = {
+  game_key: string;
+  release_id: string;
+  snapshot_commit: string;
+  first_party_instance_id: string;
+  first_party_base_url: string;
+  published_at: number;
+};
+
+export type RemoteSyncReleaseDetail = {
+  game_key: string;
+  release_id: string;
+  snapshot_commit: string;
+  manifest_sha256: string;
+  manifest_body: string;
+  first_party_instance_id: string;
+  first_party_base_url: string;
+  published_at: number;
+};
+
+export type DirectDiscoverResponse = {
+  info: RemoteSyncInfo;
+  games: RemoteSyncGameSummary[] | null;
+  releases: RemoteSyncReleaseSummary[] | null;
+  release: RemoteSyncReleaseDetail | null;
+};

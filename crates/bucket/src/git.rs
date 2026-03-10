@@ -943,12 +943,38 @@ impl Git {
 
   async fn stream_internal<T, S>(
     &self, protocol: impl AsRef<OsStr>, subcmd: impl AsRef<OsStr>, args: T,
-    mut stdin: impl AsyncRead + Unpin + Send + 'static,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError>
   where
     T: IntoIterator<Item = S>,
     S: AsRef<OsStr>, {
+    self
+      .stream_internal_with_config(
+        protocol,
+        std::iter::empty::<(&str, &str)>(),
+        subcmd,
+        args,
+        stdin,
+      )
+      .await
+  }
+
+  async fn stream_internal_with_config<T, S, C, K, V>(
+    &self, protocol: impl AsRef<OsStr>, config: C, subcmd: impl AsRef<OsStr>, args: T,
+    mut stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError>
+  where
+    T: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+    C: IntoIterator<Item = (K, V)>,
+    K: AsRef<str>,
+    V: AsRef<str>, {
     let mut cmd = Command::new("git");
+    for (key, value) in config {
+      cmd
+        .arg("-c")
+        .arg(format!("{}={}", key.as_ref(), value.as_ref()));
+    }
     cmd
       .stdin(Stdio::piped())
       .stdout(Stdio::piped())
@@ -993,11 +1019,47 @@ impl Git {
       .await
   }
 
+  pub async fn info_refs_upload_release_only(
+    &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError> {
+    self
+      .stream_internal_with_config(
+        protocol,
+        [
+          ("uploadpack.hideRefs", "refs/heads"),
+          ("uploadpack.hideRefs", "refs/remotes"),
+          ("uploadpack.hideRefs", "refs/tags"),
+        ],
+        "upload-pack",
+        ["--stateless-rpc", "--advertise-refs"],
+        stdin,
+      )
+      .await
+  }
+
   pub async fn upload_pack(
     &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError> {
     self
       .stream_internal(protocol, "upload-pack", ["--stateless-rpc"], stdin)
+      .await
+  }
+
+  pub async fn upload_pack_release_only(
+    &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError> {
+    self
+      .stream_internal_with_config(
+        protocol,
+        [
+          ("uploadpack.hideRefs", "refs/heads"),
+          ("uploadpack.hideRefs", "refs/remotes"),
+          ("uploadpack.hideRefs", "refs/tags"),
+        ],
+        "upload-pack",
+        ["--stateless-rpc"],
+        stdin,
+      )
       .await
   }
 

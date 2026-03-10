@@ -335,6 +335,22 @@
           }
         }
       },
+      "direct": {
+        "title": "直接 upstream 探索",
+        "description": "registry ソースを使わず、別の Ret2Shell インスタンスを直接探索します。",
+        "action": "リモートを探索",
+        "games": "リモートゲーム",
+        "releases": "リモート release",
+        "releaseCount": "{{count}} 件の release",
+        "info": "リモート URL: {{baseUrl}} | プロトコル v{{version}}",
+        "fail": "リモート同期ソースの探索に失敗しました",
+        "form": {
+          "baseUrl": "リモート URL",
+          "syncToken": "同期トークン",
+          "gameKey": "Game Key",
+          "releaseId": "Release ID"
+        }
+      },
       "phase1": {
         "title": "フェーズ1の基盤",
         "message": "この段階では、同期ワークスペース、データモデル、そしてリモートミラーの読み取り専用ガードを先に整備します。",
