@@ -16,6 +16,7 @@ use futures::TryStreamExt;
 use heck::ToSnakeCase;
 use r2s_bucket::{Bucket, git::Git};
 use r2s_captcha::sha256sum_str;
+use r2s_cluster::SyncImageMirrorRequest;
 use r2s_database::{challenge, game, game_release, game_remote_sync, game_sync_job, hint, media};
 use r2s_media::Media;
 use r2s_migrator::Database;
@@ -99,6 +100,7 @@ struct DirectImportCheckpoint {
   bucket_name: Option<String>,
   repo: RepoCheckpoint,
   media: MediaCheckpoint,
+  oci: OciCheckpoint,
 }
 
 #[derive(Clone, Serialize, Deserialize, Default)]
@@ -114,6 +116,13 @@ struct RepoCheckpoint {
 #[serde(default)]
 struct MediaCheckpoint {
   downloaded_hashes: BTreeSet<String>,
+  completed: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
+struct OciCheckpoint {
+  mirrored_images: BTreeSet<String>,
   completed: bool,
 }
 
@@ -413,6 +422,7 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     let discovered = discover_release_for_import(&state.requestor, &request).await?;
     checkpoint.bucket_name = Some(pick_local_bucket_name(&state.bucket, &request.game_key));
     checkpoint.media.completed = discovered.manifest.assets.media_hashes.is_empty();
+    checkpoint.oci.completed = discovered.manifest.assets.oci_images.is_empty();
     checkpoint.discovered = Some(discovered);
     job = update_job(
       &state.db,
@@ -466,6 +476,15 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
       &mut checkpoint,
     )
     .await?;
+  }
+
+  if job_cancelled(&state.db, job_id).await? {
+    return Ok(());
+  }
+
+  if !checkpoint.oci.completed {
+    job = mirror_release_oci_images_resumable(&state, &request, &discovered, job, &mut checkpoint)
+      .await?;
   }
 
   if job_cancelled(&state.db, job_id).await? {
@@ -672,6 +691,7 @@ async fn sync_repo_checkpoint_from_disk(
   Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn download_release_media_resumable(
   client: &HTTPClient, db: &Database, media_store: &Media, base_url: &str,
   sync_token: Option<&str>, media_hashes: &[String], uploader_id: i64,
@@ -769,6 +789,106 @@ async fn download_release_media_resumable(
     job,
     game_sync_job::SyncJobStatus::Running,
     Some(format!("fetch_media:{total}/{total}")),
+    Some(checkpoint),
+    None,
+    None,
+  )
+  .await
+}
+
+async fn mirror_release_oci_images_resumable(
+  state: &GlobalState, request: &DirectImportRequest, discovered: &DirectImportDiscovered,
+  mut job: game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
+) -> Result<game_sync_job::Model, ResponseError> {
+  let total = discovered.manifest.assets.oci_images.len();
+  if total == 0 {
+    checkpoint.oci.completed = true;
+    return update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_oci:0/0".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await;
+  }
+
+  let registry = state
+    .cluster
+    .registry
+    .as_ref()
+    .ok_or(ResponseError::PreconditionFailed(
+      "cluster registry is not available for internal-managed OCI sync".to_owned(),
+    ))?;
+  let bucket_name = checkpoint
+    .bucket_name
+    .as_deref()
+    .ok_or(ResponseError::InternalServerError(
+      "sync checkpoint lost local bucket information".to_owned(),
+    ))?;
+
+  for asset in &discovered.manifest.assets.oci_images {
+    let asset_key = format!("{}@{}", asset.source_repository, asset.digest);
+    if checkpoint.oci.mirrored_images.contains(&asset_key) {
+      continue;
+    }
+    if job_cancelled(&state.db, job.id).await? {
+      return Ok(job);
+    }
+
+    let done_before = checkpoint.oci.mirrored_images.len();
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some(format!("fetch_oci:{done_before}/{total}")),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+
+    let (repo_name, reference) = manifest::split_internal_tag_reference(&asset.internal_tag);
+    let destination_repository = format!("{}/{}", bucket_name, repo_name.trim_matches('/'));
+    registry
+      .mirror_sync_image(SyncImageMirrorRequest {
+        sync_base_url: &request.base_url,
+        sync_token: normalized_sync_token(request.sync_token.as_deref()),
+        game_key: &request.game_key,
+        release_id: &request.release_id,
+        source_repository: &asset.source_repository,
+        source_digest: &asset.digest,
+        destination_repository: &destination_repository,
+        destination_reference: &reference,
+      })
+      .await
+      .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+
+    checkpoint.oci.mirrored_images.insert(asset_key);
+    job = update_job(
+      &state.db,
+      job,
+      game_sync_job::SyncJobStatus::Running,
+      Some(format!(
+        "fetch_oci:{}/{}",
+        checkpoint.oci.mirrored_images.len(),
+        total
+      )),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+  }
+
+  checkpoint.oci.completed = true;
+  update_job(
+    &state.db,
+    job,
+    game_sync_job::SyncJobStatus::Running,
+    Some(format!("fetch_oci:{total}/{total}")),
     Some(checkpoint),
     None,
     None,

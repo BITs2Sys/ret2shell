@@ -3,10 +3,14 @@ use std::collections::BTreeMap;
 use axum::{
   Json,
   body::{Body, Bytes},
-  extract::{Path, Query, State},
-  http::{HeaderMap, HeaderValue, StatusCode, header::CONTENT_TYPE},
+  extract::{Path, Query, Request, State},
+  http::{
+    HeaderMap, HeaderValue, StatusCode, Uri,
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, RANGE},
+  },
   response::IntoResponse,
 };
+use base64::Engine;
 use futures::TryStreamExt;
 use r2s_bucket::{Bucket, git::to_pkt_line};
 use r2s_config::GlobalConfig;
@@ -42,6 +46,10 @@ pub fn router(_state: &GlobalState) -> axum::Router<GlobalState> {
     .route(
       "/games/{game_key}/releases/{release_id}/repo/git-upload-pack",
       axum::routing::post(post_sync_release_upload_pack),
+    )
+    .route(
+      "/games/{game_key}/releases/{release_id}/registry/v2/{*path}",
+      axum::routing::get(proxy_sync_registry).head(proxy_sync_registry),
     )
     .route("/media/{hash}", axum::routing::get(get_sync_media))
 }
@@ -304,6 +312,90 @@ pub(super) async fn get_sync_media(
   Ok((StatusCode::OK, response_headers, Body::from_stream(stream)))
 }
 
+pub(super) async fn proxy_sync_registry(
+  State(config): State<GlobalConfig>, State(client): State<crate::traits::HTTPClient>,
+  State(ref db): State<Database>,
+  Path((game_key, release_id, path)): Path<(String, String, String)>, headers: HeaderMap,
+  mut req: Request,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (game, release) = get_accessible_release(
+    &db.conn,
+    &game_key,
+    &release_id,
+    bearer_token(&headers).as_deref(),
+  )
+  .await?;
+  let manifest: crate::sync::manifest::ReleaseManifest =
+    r2s_config::toml::from_str(&release.manifest_body).map_err(|err| {
+      ResponseError::InternalServerError(format!("invalid stored release manifest: {err}"))
+    })?;
+  let (source_repository, target_kind, reference) = parse_sync_registry_path(&path)?;
+  let oci_asset = manifest
+    .assets
+    .oci_images
+    .iter()
+    .find(|asset| asset.source_repository == source_repository)
+    .ok_or(ResponseError::NotFound("oci asset".to_owned()))?;
+  let local_repository = format!(
+    "{}/{}",
+    game
+      .bucket
+      .as_deref()
+      .ok_or(ResponseError::PreconditionFailed(
+        "game bucket not found".to_owned(),
+      ))?,
+    crate::sync::manifest::split_internal_tag_reference(&oci_asset.internal_tag).0
+  );
+  let registry_config = config
+    .cluster
+    .clone()
+    .and_then(|cluster| cluster.registry)
+    .ok_or(ResponseError::PreconditionFailed(
+      "internal registry is not enabled".to_owned(),
+    ))?;
+  let uri = format!(
+    "{}://{}/v2/{}/{}/{}",
+    if registry_config.insecure {
+      "http"
+    } else {
+      "https"
+    },
+    registry_config.server.trim_matches('/'),
+    local_repository.trim_matches('/'),
+    target_kind,
+    reference,
+  );
+  *req.uri_mut() = Uri::try_from(uri)
+    .map_err(|err| ResponseError::BadRequest(format!("invalid relay uri: {err}")))?;
+  req.headers_mut().remove(AUTHORIZATION);
+  req.headers_mut().remove("host");
+  let accept = headers.get(ACCEPT).cloned();
+  let range = headers.get(RANGE).cloned();
+  req.headers_mut().clear();
+  if let Some(accept) = accept {
+    req.headers_mut().insert(ACCEPT, accept);
+  }
+  if let Some(range) = range {
+    req.headers_mut().insert(RANGE, range);
+  }
+  if let Some(username) = registry_config.username
+    && let Some(password) = registry_config.password
+  {
+    let auth = base64::engine::general_purpose::STANDARD.encode(format!("{username}:{password}"));
+    req.headers_mut().insert(
+      AUTHORIZATION,
+      HeaderValue::from_str(&format!("Basic {auth}")).map_err(|err| {
+        ResponseError::InternalServerError(format!("invalid registry auth header: {err}"))
+      })?,
+    );
+  }
+  let response = client
+    .request(req)
+    .await
+    .map_err(|err| ResponseError::BadRequest(format!("registry relay failed: {err}")))?;
+  Ok(response.into_response())
+}
+
 async fn get_accessible_release(
   db: &sea_orm::DatabaseConnection, game_key: &str, release_id: &str, token: Option<&str>,
 ) -> Result<(game::Model, game_release::Model), ResponseError> {
@@ -360,6 +452,57 @@ async fn media_is_accessible(
 fn bearer_token(headers: &HeaderMap) -> Option<String> {
   let authorization = headers.get("Authorization")?.to_str().ok()?;
   authorization.strip_prefix("Bearer ").map(str::to_owned)
+}
+
+fn parse_sync_registry_path(path: &str) -> Result<(String, &'static str, String), ResponseError> {
+  if let Some((repository, reference)) = path.split_once("/manifests/") {
+    return Ok((
+      repository.trim_matches('/').to_owned(),
+      "manifests",
+      reference.to_owned(),
+    ));
+  }
+  if let Some((repository, reference)) = path.split_once("/blobs/") {
+    return Ok((
+      repository.trim_matches('/').to_owned(),
+      "blobs",
+      reference.to_owned(),
+    ));
+  }
+  Err(ResponseError::BadRequest(
+    "unsupported sync registry path".to_owned(),
+  ))
+}
+
+#[allow(clippy::items_after_test_module)]
+#[cfg(test)]
+mod tests {
+  use super::parse_sync_registry_path;
+
+  #[test]
+  fn parse_sync_registry_path_supports_manifests_and_blobs() {
+    assert_eq!(
+      parse_sync_registry_path("game_bucket/web/manifests/sha256:abc").expect("manifest path"),
+      (
+        "game_bucket/web".to_owned(),
+        "manifests",
+        "sha256:abc".to_owned()
+      )
+    );
+    assert_eq!(
+      parse_sync_registry_path("game_bucket/web/blobs/sha256:def").expect("blob path"),
+      (
+        "game_bucket/web".to_owned(),
+        "blobs",
+        "sha256:def".to_owned()
+      )
+    );
+  }
+
+  #[test]
+  fn parse_sync_registry_path_rejects_unknown_shapes() {
+    assert!(parse_sync_registry_path("game_bucket/web/tags/list").is_err());
+  }
 }
 
 fn check_git_protocol_safe(protocol: &str) -> bool {

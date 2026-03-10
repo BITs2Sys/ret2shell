@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use anyhow::{Context, bail};
+use anyhow::Context;
 use chrono::{
   DateTime, Utc,
   serde::{ts_seconds, ts_seconds_option},
@@ -8,7 +8,8 @@ use chrono::{
 use once_cell::sync::Lazy;
 use r2s_bucket::game::{GameBucket, GameDocument};
 use r2s_captcha::sha256sum_str;
-use r2s_config::cluster::ChallengeEnv;
+use r2s_cluster::Registry;
+use r2s_config::cluster::ChallengeImage;
 use r2s_database::{challenge, game};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -83,6 +84,16 @@ pub struct ChallengeManifest {
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct ManifestAssets {
   pub media_hashes: Vec<String>,
+  #[serde(default)]
+  pub oci_images: Vec<OciImageAsset>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct OciImageAsset {
+  pub internal_managed: bool,
+  pub internal_tag: String,
+  pub source_repository: String,
+  pub digest: String,
 }
 
 pub fn release_ref(release_id: &str) -> String {
@@ -91,11 +102,11 @@ pub fn release_ref(release_id: &str) -> String {
 
 pub async fn build_release_manifest(
   game: &game::Model, game_bucket: &GameBucket, challenges: &[challenge::Model], game_key: &str,
-  first_party_instance_id: &str, published_at: DateTime<Utc>,
+  first_party_instance_id: &str, published_at: DateTime<Utc>, internal_registry: Option<&Registry>,
 ) -> anyhow::Result<BuiltReleaseManifest> {
   let snapshot_commit = game_bucket.git.get_head().await?;
   let release_id = snapshot_commit.clone();
-  let assets = build_assets(game, game_bucket, challenges).await?;
+  let assets = build_assets(game, game_bucket, challenges, internal_registry).await?;
   let manifest = ReleaseManifest {
     spec_version: 1,
     kind: "release".to_owned(),
@@ -155,8 +166,10 @@ pub async fn build_release_manifest(
 
 async fn build_assets(
   game: &game::Model, game_bucket: &GameBucket, challenges: &[challenge::Model],
+  internal_registry: Option<&Registry>,
 ) -> anyhow::Result<ManifestAssets> {
   let mut media_hashes = BTreeSet::new();
+  let mut oci_images = BTreeSet::new();
   collect_hash_from_value(&mut media_hashes, game.cover.as_deref());
   collect_hash_from_value(&mut media_hashes, game.logo.as_deref());
 
@@ -185,22 +198,83 @@ async fn build_assets(
       collect_hashes_from_text(&mut media_hashes, &hint.content);
     }
     if let Some(env) = challenge_bucket.env().await? {
-      ensure_publishable_env(&env, challenge.id)?;
+      for image in env.images {
+        if let Some(asset) = build_oci_asset(game, challenge.id, &image, internal_registry).await? {
+          oci_images.insert((
+            asset.source_repository.clone(),
+            asset.internal_tag.clone(),
+            asset.digest.clone(),
+          ));
+        }
+      }
     }
   }
 
   Ok(ManifestAssets {
     media_hashes: media_hashes.into_iter().collect(),
+    oci_images: oci_images
+      .into_iter()
+      .map(|(source_repository, internal_tag, digest)| OciImageAsset {
+        internal_managed: true,
+        internal_tag,
+        source_repository,
+        digest,
+      })
+      .collect(),
   })
 }
 
-fn ensure_publishable_env(env: &ChallengeEnv, challenge_id: i64) -> anyhow::Result<()> {
-  if env.images.iter().any(|image| image.internal_managed) {
-    bail!(
-      "challenge {challenge_id} uses internal-managed images; Phase 6 registry asset publication is not implemented yet"
-    );
+async fn build_oci_asset(
+  game: &game::Model, challenge_id: i64, image: &ChallengeImage,
+  internal_registry: Option<&Registry>,
+) -> anyhow::Result<Option<OciImageAsset>> {
+  if !image.internal_managed {
+    return Ok(None);
   }
-  Ok(())
+  let internal_tag = image
+    .internal_tag
+    .as_deref()
+    .map(str::trim)
+    .filter(|tag| !tag.is_empty())
+    .ok_or_else(|| {
+      anyhow::anyhow!("challenge {challenge_id} has internal-managed image without internal_tag")
+    })?;
+  let (repo_name, reference) = split_internal_tag_reference(internal_tag);
+  let bucket = game
+    .bucket
+    .as_deref()
+    .ok_or_else(|| anyhow::anyhow!("game bucket missing while building OCI assets"))?;
+  let source_repository = format!(
+    "{}/{}",
+    bucket.trim_matches('/'),
+    repo_name.trim_matches('/')
+  );
+  let digest = internal_registry
+    .ok_or_else(|| {
+      anyhow::anyhow!(
+        "challenge {challenge_id} uses internal-managed images but cluster registry is not available"
+      )
+    })?
+    .inspect_image_digest(&source_repository, &reference)
+    .await?;
+  Ok(Some(OciImageAsset {
+    internal_managed: true,
+    internal_tag: internal_tag.to_owned(),
+    source_repository,
+    digest,
+  }))
+}
+
+pub fn split_internal_tag_reference(internal_tag: &str) -> (String, String) {
+  let last_slash = internal_tag.rfind('/').unwrap_or(0);
+  let last_colon = internal_tag.rfind(':');
+  match last_colon {
+    Some(index) if index >= last_slash => (
+      internal_tag[..index].to_owned(),
+      internal_tag[index + 1..].to_owned(),
+    ),
+    _ => (internal_tag.to_owned(), "latest".to_owned()),
+  }
 }
 
 fn collect_hash_from_value(media_hashes: &mut BTreeSet<String>, value: Option<&str>) {
@@ -235,11 +309,9 @@ fn asset_kind(value: Option<&str>) -> Option<String> {
 mod tests {
   use std::collections::BTreeSet;
 
-  use r2s_config::cluster::ChallengeImage;
-
   use super::{
-    asset_kind, collect_hash_from_value, collect_hashes_from_text, ensure_publishable_env,
-    release_ref,
+    asset_kind, collect_hash_from_value, collect_hashes_from_text, release_ref,
+    split_internal_tag_reference,
   };
 
   #[test]
@@ -288,37 +360,19 @@ mod tests {
     );
   }
 
-  #[allow(deprecated)]
   #[test]
-  fn ensure_publishable_env_rejects_internal_managed_images() {
-    let err = ensure_publishable_env(
-      &r2s_config::cluster::ChallengeEnv {
-        internet: false,
-        restricted: None,
-        images: vec![ChallengeImage {
-          name: "web".to_owned(),
-          tag: "registry.example.com/game/web:latest".to_owned(),
-          internal_managed: true,
-          internal_tag: Some("web:latest".to_owned()),
-          cpu: 1.0,
-          cpu_req: 0.5,
-          mem: "256Mi".to_owned(),
-          mem_req: "128Mi".to_owned(),
-          storage: None,
-          storage_req: Some("64Mi".to_owned()),
-          port: None,
-          service_type: None,
-          protocol: None,
-          app_protocol: None,
-          description: None,
-          restricted: None,
-        }],
-        pull_secret: None,
-      },
-      42,
-    )
-    .expect_err("internal managed images should fail publication");
-
-    assert!(format!("{err:#}").contains("internal-managed images"));
+  fn split_internal_tag_reference_extracts_repo_and_tag() {
+    assert_eq!(
+      split_internal_tag_reference("sample-web:latest"),
+      ("sample-web".to_owned(), "latest".to_owned())
+    );
+    assert_eq!(
+      split_internal_tag_reference("nested/sample-web:v1"),
+      ("nested/sample-web".to_owned(), "v1".to_owned())
+    );
+    assert_eq!(
+      split_internal_tag_reference("sample-web"),
+      ("sample-web".to_owned(), "latest".to_owned())
+    );
   }
 }

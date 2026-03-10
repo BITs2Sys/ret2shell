@@ -2,6 +2,7 @@ use axum::{Extension, Json, extract::State, response::IntoResponse};
 use chrono::Utc;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
+use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::{game, game_registry_source, game_release, game_remote_sync};
 use r2s_migrator::Database;
@@ -293,12 +294,8 @@ pub(super) async fn advertise_remote_sync_upstream(
       release_id: &release.release_id,
       instance_id: &instance_id,
       role: "third_party",
-      status: "active",
-      base_url: Some(&base_url),
-      auth_mode: Some("sync_token"),
-      sync_token: Some(&sync_token),
-      protocol_version: Some(1),
-      reason: None,
+      base_url: &base_url,
+      sync_token: &sync_token,
       published_at: Utc::now(),
     },
   )
@@ -316,8 +313,8 @@ pub(super) async fn advertise_remote_sync_upstream(
 }
 
 pub(super) async fn publish_game_release(
-  State(config): State<GlobalConfig>, State(ref db): State<Database>,
-  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  State(config): State<GlobalConfig>, State(cluster): State<Cluster>,
+  State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Json(req): Json<PublishGameReleaseRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_game_sync_writable(&db.conn, &game).await?;
@@ -393,6 +390,7 @@ pub(super) async fn publish_game_release(
     current_game.sync_key.as_deref().unwrap_or(&bucket_name),
     &instance_id,
     published_at,
+    cluster.registry.as_ref(),
   )
   .await
   .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
