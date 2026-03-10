@@ -720,6 +720,15 @@
         "syncKey": "同步键",
         "syncToken": "同步令牌"
       },
+      "remote": {
+        "title": "远端镜像状态",
+        "state": "当前状态：{{state}}",
+        "stateMirrorLocked": "镜像锁定",
+        "stateDetached": "已解除锁定",
+        "release": "当前 release：{{value}}",
+        "source": "第一方来源：{{value}}",
+        "detachDescription": "解除镜像锁定后，本地将允许继续编辑，同时当前实例也不再会被其他平台接受为该赛事的 third-party upstream。"
+      },
       "publish": {
         "title": "发布 release",
         "description": "为当前归档赛事生成 registry 文件，然后由用户手动向目标 registry 仓库发起 PR。",
@@ -736,6 +745,11 @@
         "rotateToken": {
           "title": "轮换同步令牌",
           "fail": "轮换同步令牌失败"
+        },
+        "detach": {
+          "title": "解除镜像锁定",
+          "success": "远端镜像已成功解除锁定",
+          "fail": "解除远端镜像锁定失败"
         },
         "publish": {
           "title": "发布 release",

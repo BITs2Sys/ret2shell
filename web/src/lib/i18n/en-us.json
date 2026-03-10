@@ -720,6 +720,15 @@
         "syncKey": "Sync key",
         "syncToken": "Sync token"
       },
+      "remote": {
+        "title": "Remote mirror state",
+        "state": "Current state: {{state}}",
+        "stateMirrorLocked": "mirror locked",
+        "stateDetached": "detached",
+        "release": "Current release: {{value}}",
+        "source": "First-party source: {{value}}",
+        "detachDescription": "Detaching the mirror unlocks local editing, and this instance will no longer be accepted as a third-party upstream for this game."
+      },
       "publish": {
         "title": "Publish release",
         "description": "Generate the registry files for one archived release, then open a manual PR to the target registry repository.",
@@ -736,6 +745,11 @@
         "rotateToken": {
           "title": "Rotate sync token",
           "fail": "Failed to rotate sync token"
+        },
+        "detach": {
+          "title": "Detach mirror",
+          "success": "Remote mirror detached successfully",
+          "fail": "Failed to detach remote mirror"
         },
         "publish": {
           "title": "Publish release",

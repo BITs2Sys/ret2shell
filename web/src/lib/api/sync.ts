@@ -1,6 +1,7 @@
 import type {
   DirectDiscoverResponse,
   GameReleaseSummary,
+  GameSyncStatus,
   ManualRegistryPublication,
   SyncRegistrySource,
 } from "@models/sync";
@@ -198,6 +199,12 @@ export async function rotateGameSyncToken(game_id: number) {
   return await api.post(`${api_root}/game/${game_id}/sync/sync-token`, { json: {} }).json<{ sync_token: string }>();
 }
 
+export async function detachGameSync(game_id: number, reason?: string) {
+  return await api
+    .post(`${api_root}/game/${game_id}/sync/detach`, { json: { reason: reason || null } })
+    .json<GameSyncStatus>();
+}
+
 export function useRotateGameSyncTokenMutation(
   props: { onSuccess?: (syncToken: string) => void; onError?: (err: Error) => void } = {}
 ) {
@@ -209,6 +216,22 @@ export function useRotateGameSyncTokenMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("game.sync.actions.rotateToken.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export function useDetachGameSyncMutation(
+  props: { onSuccess?: (status: GameSyncStatus) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ game_id, reason }: { game_id: number; reason?: string }) => detachGameSync(game_id, reason),
+    onSuccess: (data) => {
+      toastSuccess(t("game.sync.actions.detach.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("game.sync.actions.detach.fail"));
       props.onError?.(err);
     },
   }));

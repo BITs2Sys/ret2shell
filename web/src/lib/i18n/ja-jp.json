@@ -720,6 +720,15 @@
         "syncKey": "同期キー",
         "syncToken": "同期トークン"
       },
+      "remote": {
+        "title": "リモートミラー状態",
+        "state": "現在の状態: {{state}}",
+        "stateMirrorLocked": "ミラー locked",
+        "stateDetached": "detached",
+        "release": "現在の release: {{value}}",
+        "source": "ファーストパーティ source: {{value}}",
+        "detachDescription": "ミラーを切り離すとローカル編集が可能になりますが、このインスタンスは今後このゲームの third-party upstream として受け入れられなくなります。"
+      },
       "publish": {
         "title": "release を公開",
         "description": "アーカイブ済みゲームの registry 用ファイルを生成し、利用者が対象 registry リポジトリへ手動で PR を作成します。",
@@ -736,6 +745,11 @@
         "rotateToken": {
           "title": "同期トークンを再生成",
           "fail": "同期トークンの再生成に失敗しました"
+        },
+        "detach": {
+          "title": "ミラーを切り離す",
+          "success": "リモートミラーを切り離しました",
+          "fail": "リモートミラーの切り離しに失敗しました"
         },
         "publish": {
           "title": "release を公開",

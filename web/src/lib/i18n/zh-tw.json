@@ -720,6 +720,15 @@
         "syncKey": "同步鍵",
         "syncToken": "同步令牌"
       },
+      "remote": {
+        "title": "遠端鏡像狀態",
+        "state": "目前狀態：{{state}}",
+        "stateMirrorLocked": "鏡像鎖定",
+        "stateDetached": "已解除鎖定",
+        "release": "目前 release：{{value}}",
+        "source": "第一方來源：{{value}}",
+        "detachDescription": "解除鏡像鎖定後，本地將允許繼續編輯，同時目前實例也不再會被其他平台接受為該賽事的 third-party upstream。"
+      },
       "publish": {
         "title": "發佈 release",
         "description": "為目前已封存的賽事產生 registry 檔案，然後由使用者手動向目標 registry 倉庫發起 PR。",
@@ -736,6 +745,11 @@
         "rotateToken": {
           "title": "輪換同步令牌",
           "fail": "輪換同步令牌失敗"
+        },
+        "detach": {
+          "title": "解除鏡像鎖定",
+          "success": "遠端鏡像已成功解除鎖定",
+          "fail": "解除遠端鏡像鎖定失敗"
         },
         "publish": {
           "title": "發佈 release",

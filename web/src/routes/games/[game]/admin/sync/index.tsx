@@ -1,5 +1,6 @@
 import { useGame, useGameSyncStatus } from "@api/game";
 import {
+  useDetachGameSyncMutation,
   useGameSyncReleases,
   useGameSyncSources,
   usePublishGameSyncMutation,
@@ -49,6 +50,11 @@ export default function () {
       game.refetch();
     },
   });
+  const detachMutation = useDetachGameSyncMutation({
+    onSuccess: () => {
+      syncStatus.refetch();
+    },
+  });
 
   const publishableSources = createMemo(
     () => sources.data?.filter((source) => source.publish_enabled && source.enabled) || []
@@ -94,6 +100,52 @@ export default function () {
               </Button>
             </div>
           </Card>
+
+          <Show when={syncStatus.data?.remote_state}>
+            <Card contentClass="p-4 flex flex-col space-y-3">
+              <div class="flex flex-row items-center space-x-2 font-bold">
+                <span class="shrink-0 icon-[fluent--shield-lock-20-regular] w-5 h-5" />
+                <span>{t("game.sync.remote.title")}</span>
+              </div>
+              <div class="flex flex-col gap-1 text-sm">
+                <span>
+                  {t("game.sync.remote.state", {
+                    state:
+                      syncStatus.data?.remote_state === "mirror_locked"
+                        ? t("game.sync.remote.stateMirrorLocked")
+                        : t("game.sync.remote.stateDetached"),
+                  })}
+                </span>
+                <Show when={syncStatus.data?.remote_release_id}>
+                  <span>
+                    {t("game.sync.remote.release", {
+                      value: syncStatus.data?.remote_release_id || "-",
+                    })}
+                  </span>
+                </Show>
+                <Show when={syncStatus.data?.remote_first_party_base_url}>
+                  <span>
+                    {t("game.sync.remote.source", {
+                      value: syncStatus.data?.remote_first_party_base_url || "-",
+                    })}
+                  </span>
+                </Show>
+              </div>
+              <Show when={syncStatus.data?.remote_state === "mirror_locked"}>
+                <p class="opacity-80 text-sm">{t("game.sync.remote.detachDescription")}</p>
+                <div class="flex flex-row justify-end">
+                  <Button
+                    level="warning"
+                    onClick={() => detachMutation.mutate({ game_id: gameId() })}
+                    loading={detachMutation.isPending}
+                    disabled={detachMutation.isPending}
+                  >
+                    {t("game.sync.actions.detach.title")}
+                  </Button>
+                </div>
+              </Show>
+            </Card>
+          </Show>
 
           <Card contentClass="p-4 flex flex-col space-y-3">
             <div class="flex flex-row items-center space-x-2 font-bold">

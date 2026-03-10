@@ -8,6 +8,7 @@ use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+  middleware::auth::Token,
   routes::game::ensure_game_sync_writable,
   sync::{self, manifest, registry},
   traits::ResponseError,
@@ -90,6 +91,11 @@ pub(super) struct PublishGameReleaseRequest {
   pub registry_source_id: i64,
 }
 
+#[derive(Deserialize)]
+pub(super) struct DetachRemoteSyncRequest {
+  pub reason: Option<String>,
+}
+
 #[derive(Serialize)]
 pub(super) struct SyncTokenResponse {
   pub sync_token: String,
@@ -135,6 +141,36 @@ pub(super) async fn rotate_game_sync_token(
   .await?;
   cache.at("game").del(game.id).await.ok();
   Ok(Json(SyncTokenResponse { sync_token }))
+}
+
+pub(super) async fn detach_remote_sync_game(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(token): Extension<Token>, Json(_req): Json<DetachRemoteSyncRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let _ = _req.reason.as_deref();
+  let remote_sync =
+    game_remote_sync::get(&db.conn, game.id)
+      .await?
+      .ok_or(ResponseError::PreconditionFailed(
+        "this game is not a remote mirror".to_owned(),
+      ))?;
+  if remote_sync.state != game_remote_sync::RemoteGameState::MirrorLocked {
+    return Err(ResponseError::PreconditionFailed(
+      "this remote mirror has already been detached".to_owned(),
+    ));
+  }
+
+  game_remote_sync::update(
+    &db.conn,
+    game_remote_sync::Model {
+      state: game_remote_sync::RemoteGameState::Detached,
+      detached_at: Some(Utc::now()),
+      detached_by: Some(token.id),
+      ..remote_sync
+    },
+  )
+  .await?;
+  Ok(Json(build_sync_status(&db.conn, &game).await?))
 }
 
 pub(super) async fn publish_game_release(

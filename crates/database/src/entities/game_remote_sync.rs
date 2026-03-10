@@ -99,3 +99,13 @@ where
   };
   remote_sync.insert(db).await
 }
+
+pub async fn update<C>(db: &C, remote_sync: Model) -> Result<Model, DbErr>
+where
+  C: ConnectionTrait, {
+  let remote_sync = ActiveModel {
+    game_id: ActiveValue::Unchanged(remote_sync.game_id),
+    ..remote_sync.into_active_model().reset_all()
+  };
+  remote_sync.update(db).await
+}
