@@ -221,7 +221,7 @@ pub(super) async fn publish_game_release(
       "server configuration not found".to_owned(),
     ))?
     .external_origin();
-  registry::publish_release_to_registry(
+  let publish_result = registry::publish_release_to_registry(
     &config.bucket,
     &source,
     registry::PublishRegistryRelease {
@@ -234,8 +234,18 @@ pub(super) async fn publish_game_release(
       published_at,
     },
   )
-  .await
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+  .await;
+  game_registry_source::update(
+    &db.conn,
+    game_registry_source::Model {
+      last_fetched_at: publish_result.as_ref().ok().map(|_| Utc::now()),
+      last_error: publish_result.as_ref().err().map(|err| err.to_string()),
+      updated_at: Utc::now(),
+      ..source.clone()
+    },
+  )
+  .await?;
+  publish_result.map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
 
   let release =
     match game_release::get_by_game_and_release(&db.conn, current_game.id, &manifest.release_id)

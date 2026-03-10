@@ -235,7 +235,12 @@ fn asset_kind(value: Option<&str>) -> Option<String> {
 mod tests {
   use std::collections::BTreeSet;
 
-  use super::{collect_hash_from_value, collect_hashes_from_text};
+  use r2s_config::cluster::ChallengeImage;
+
+  use super::{
+    asset_kind, collect_hash_from_value, collect_hashes_from_text, ensure_publishable_env,
+    release_ref,
+  };
 
   #[test]
   fn collect_hashes_from_markdown_media_paths() {
@@ -255,5 +260,65 @@ mod tests {
       Some("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
     );
     assert_eq!(hashes.len(), 1);
+  }
+
+  #[test]
+  fn asset_kind_detects_media_hash_and_urls() {
+    assert_eq!(
+      asset_kind(Some(
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      )),
+      Some("media_hash".to_owned())
+    );
+    assert_eq!(
+      asset_kind(Some("https://example.com/cover.png")),
+      Some("external_url".to_owned())
+    );
+    assert_eq!(
+      asset_kind(Some("assets/cover.png")),
+      Some("repo_path".to_owned())
+    );
+  }
+
+  #[test]
+  fn release_ref_uses_release_namespace() {
+    assert_eq!(
+      release_ref("deadbeef"),
+      "refs/ret2shell/releases/deadbeef".to_owned()
+    );
+  }
+
+  #[allow(deprecated)]
+  #[test]
+  fn ensure_publishable_env_rejects_internal_managed_images() {
+    let err = ensure_publishable_env(
+      &r2s_config::cluster::ChallengeEnv {
+        internet: false,
+        restricted: None,
+        images: vec![ChallengeImage {
+          name: "web".to_owned(),
+          tag: "registry.example.com/game/web:latest".to_owned(),
+          internal_managed: true,
+          internal_tag: Some("web:latest".to_owned()),
+          cpu: 1.0,
+          cpu_req: 0.5,
+          mem: "256Mi".to_owned(),
+          mem_req: "128Mi".to_owned(),
+          storage: None,
+          storage_req: Some("64Mi".to_owned()),
+          port: None,
+          service_type: None,
+          protocol: None,
+          app_protocol: None,
+          description: None,
+          restricted: None,
+        }],
+        pull_secret: None,
+      },
+      42,
+    )
+    .expect_err("internal managed images should fail publication");
+
+    assert!(format!("{err:#}").contains("internal-managed images"));
   }
 }

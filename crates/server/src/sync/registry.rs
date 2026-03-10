@@ -52,11 +52,13 @@ pub async fn fetch_registry_source(
   bucket_config: &Option<bucket::Config>, source: &game_registry_source::Model,
 ) -> anyhow::Result<PathBuf> {
   let cache_dir = source_cache_dir(bucket_config, source.id)?;
+  let mut freshly_cloned = false;
   if cache_dir.exists() && !cache_dir.join(".git").exists() {
     remove_dir_all(&cache_dir).await.ok();
   }
 
   if !cache_dir.exists() {
+    freshly_cloned = true;
     if let Some(parent) = cache_dir.parent() {
       create_dir_all(parent).await?;
     }
@@ -105,7 +107,12 @@ pub async fn fetch_registry_source(
     .await?;
   }
 
-  validate_registry_checkout(&cache_dir).await?;
+  if let Err(err) = validate_registry_checkout(&cache_dir).await {
+    if freshly_cloned {
+      remove_dir_all(&cache_dir).await.ok();
+    }
+    return Err(err);
+  }
   Ok(cache_dir)
 }
 
@@ -214,8 +221,12 @@ async fn validate_registry_checkout(path: &Path) -> anyhow::Result<()> {
   let body = read_to_string(&metadata_path)
     .await
     .with_context(|| format!("registry metadata not found at {}", metadata_path.display()))?;
-  let metadata: RegistryMetadata = r2s_config::toml::from_str(&body)
-    .with_context(|| format!("invalid registry metadata at {}", metadata_path.display()))?;
+  validate_registry_metadata_body(&body)
+    .with_context(|| format!("invalid registry metadata at {}", metadata_path.display()))
+}
+
+fn validate_registry_metadata_body(body: &str) -> anyhow::Result<()> {
+  let metadata: RegistryMetadata = r2s_config::toml::from_str(body)?;
   if metadata.spec_version != 1 {
     bail!(
       "unsupported registry spec version {}",
@@ -276,11 +287,48 @@ fn short_release_id(release_id: &str) -> &str {
 
 #[cfg(test)]
 mod tests {
-  use super::short_release_id;
+  use super::{short_release_id, validate_registry_metadata_body};
 
   #[test]
   fn short_release_id_keeps_short_values() {
     assert_eq!(short_release_id("abc"), "abc");
     assert_eq!(short_release_id("1234567890abcdef"), "1234567890ab");
+  }
+
+  #[test]
+  fn validate_registry_metadata_body_accepts_v1_registry() {
+    validate_registry_metadata_body(
+      r#"
+spec_version = 1
+kind = "ret2shell-game-registry"
+"#,
+    )
+    .expect("valid registry metadata should pass");
+  }
+
+  #[test]
+  fn validate_registry_metadata_body_rejects_invalid_kind() {
+    let err = validate_registry_metadata_body(
+      r#"
+spec_version = 1
+kind = "something-else"
+"#,
+    )
+    .expect_err("invalid registry kind should fail");
+
+    assert!(format!("{err:#}").contains("invalid registry kind"));
+  }
+
+  #[test]
+  fn validate_registry_metadata_body_rejects_unsupported_version() {
+    let err = validate_registry_metadata_body(
+      r#"
+spec_version = 2
+kind = "ret2shell-game-registry"
+"#,
+    )
+    .expect_err("unsupported registry spec version should fail");
+
+    assert!(format!("{err:#}").contains("unsupported registry spec version"));
   }
 }

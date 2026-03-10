@@ -2,7 +2,9 @@ use chrono::{
   DateTime, Utc,
   serde::{ts_seconds, ts_seconds_option},
 };
-use sea_orm::{ActiveValue, IntoActiveModel, QueryOrder, entity::prelude::*};
+use sea_orm::{
+  ActiveValue, ColumnTrait, IntoActiveModel, QueryFilter, QueryOrder, entity::prelude::*,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -44,6 +46,24 @@ where
     .order_by_desc(Column::Priority)
     .order_by_asc(Column::Name)
     .all(db)
+    .await
+}
+
+pub async fn get_by_name<C>(db: &C, name: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find().filter(Column::Name.eq(name)).one(db).await
+}
+
+pub async fn get_by_git_url_and_branch<C>(
+  db: &C, git_url: &str, branch: &str,
+) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::GitUrl.eq(git_url))
+    .filter(Column::Branch.eq(branch))
+    .one(db)
     .await
 }
 
