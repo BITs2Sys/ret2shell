@@ -804,9 +804,21 @@
         "source": "Registry 來源",
         "sourcePlaceholder": "請選擇一個來源"
       },
+      "revoke": {
+        "title": "撤銷 third-party upstream",
+        "description": "當鏡像已經解除鎖定後，可以產生撤銷記錄，提醒其他平台不要再把目前實例當作這個賽事的 third-party upstream。",
+        "source": "Registry 來源",
+        "sourcePlaceholder": "請選擇一個來源"
+      },
       "manualUpstream": {
         "title": "手動 upstream PR 資訊",
         "description": "請將下面的 upstream 廣告檔案加入目標 registry 倉庫，並手動發起 PR。",
+        "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建議 PR 標題：{{title}}"
+      },
+      "manualRevoke": {
+        "title": "手動撤銷 PR 資訊",
+        "description": "請將下面的撤銷記錄檔案加入目標 registry 倉庫，並手動發起 PR。",
         "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
         "prTitle": "建議 PR 標題：{{title}}"
       },
@@ -824,6 +836,11 @@
           "title": "登記 upstream",
           "success": "已成功產生 third-party upstream 手動 PR 資訊",
           "fail": "產生 third-party upstream 手動 PR 資訊失敗"
+        },
+        "revoke": {
+          "title": "產生撤銷記錄",
+          "success": "已成功產生 third-party upstream 撤銷手動 PR 資訊",
+          "fail": "產生 third-party upstream 撤銷手動 PR 資訊失敗"
         },
         "publish": {
           "title": "發佈 release",

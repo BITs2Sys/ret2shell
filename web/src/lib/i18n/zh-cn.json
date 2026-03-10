@@ -804,9 +804,21 @@
         "source": "Registry 源",
         "sourcePlaceholder": "请选择一个源"
       },
+      "revoke": {
+        "title": "撤销 third-party upstream",
+        "description": "当镜像已经解除锁定后，可以生成撤销记录，提醒其他平台不要再把当前实例当作这个赛事的 third-party upstream。",
+        "source": "Registry 源",
+        "sourcePlaceholder": "请选择一个源"
+      },
       "manualUpstream": {
         "title": "手动 upstream PR 信息",
         "description": "请将下面的 upstream 广告文件加入目标 registry 仓库，并手动发起 PR。",
+        "target": "目标仓库：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建议 PR 标题：{{title}}"
+      },
+      "manualRevoke": {
+        "title": "手动撤销 PR 信息",
+        "description": "请将下面的撤销记录文件加入目标 registry 仓库，并手动发起 PR。",
         "target": "目标仓库：{{repo}}（分支：{{branch}}）",
         "prTitle": "建议 PR 标题：{{title}}"
       },
@@ -824,6 +836,11 @@
           "title": "登记 upstream",
           "success": "已成功生成 third-party upstream 手动 PR 信息",
           "fail": "生成 third-party upstream 手动 PR 信息失败"
+        },
+        "revoke": {
+          "title": "生成撤销记录",
+          "success": "已成功生成 third-party upstream 撤销手动 PR 信息",
+          "fail": "生成 third-party upstream 撤销手动 PR 信息失败"
         },
         "publish": {
           "title": "发布 release",

@@ -804,9 +804,21 @@
         "source": "Registry source",
         "sourcePlaceholder": "Choose one source"
       },
+      "revoke": {
+        "title": "Revoke third-party upstream",
+        "description": "After detaching a mirror, generate a revocation record so other platforms stop using this instance as a third-party upstream.",
+        "source": "Registry source",
+        "sourcePlaceholder": "Choose one source"
+      },
       "manualUpstream": {
         "title": "Manual upstream PR information",
         "description": "Add the upstream advertisement file below to the target registry repository and open a PR manually.",
+        "target": "Target repository: {{repo}} (branch: {{branch}})",
+        "prTitle": "Suggested PR title: {{title}}"
+      },
+      "manualRevoke": {
+        "title": "Manual revocation PR information",
+        "description": "Add the revocation record below to the target registry repository and open a PR manually.",
         "target": "Target repository: {{repo}} (branch: {{branch}})",
         "prTitle": "Suggested PR title: {{title}}"
       },
@@ -824,6 +836,11 @@
           "title": "Advertise upstream",
           "success": "Manual third-party upstream PR information generated successfully",
           "fail": "Failed to generate third-party upstream PR information"
+        },
+        "revoke": {
+          "title": "Generate revocation",
+          "success": "Manual third-party upstream revocation PR information generated successfully",
+          "fail": "Failed to generate third-party upstream revocation PR information"
         },
         "publish": {
           "title": "Publish release",

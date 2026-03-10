@@ -804,9 +804,21 @@
         "source": "Registry ソース",
         "sourcePlaceholder": "ソースを選択してください"
       },
+      "revoke": {
+        "title": "third-party upstream を取り消す",
+        "description": "ミラーを切り離した後、他のプラットフォームがこのインスタンスを third-party upstream として使わないよう、撤回レコードを生成できます。",
+        "source": "Registry ソース",
+        "sourcePlaceholder": "ソースを選択してください"
+      },
       "manualUpstream": {
         "title": "手動 upstream PR 情報",
         "description": "下記の upstream 広告ファイルを対象 registry リポジトリへ追加し、手動で PR を作成してください。",
+        "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
+        "prTitle": "推奨 PR タイトル: {{title}}"
+      },
+      "manualRevoke": {
+        "title": "手動撤回 PR 情報",
+        "description": "下記の撤回レコードを対象 registry リポジトリへ追加し、手動で PR を作成してください。",
         "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
         "prTitle": "推奨 PR タイトル: {{title}}"
       },
@@ -824,6 +836,11 @@
           "title": "upstream を登録",
           "success": "third-party upstream 用の手動 PR 情報を生成しました",
           "fail": "third-party upstream 用の手動 PR 情報の生成に失敗しました"
+        },
+        "revoke": {
+          "title": "撤回レコードを生成",
+          "success": "third-party upstream 撤回用の手動 PR 情報を生成しました",
+          "fail": "third-party upstream 撤回用の手動 PR 情報の生成に失敗しました"
         },
         "publish": {
           "title": "release を公開",

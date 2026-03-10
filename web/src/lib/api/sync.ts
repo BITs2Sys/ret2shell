@@ -348,6 +348,12 @@ export async function advertiseGameSyncUpstream(game_id: number, registry_source
     .json<ManualRegistryUpstreamPublication>();
 }
 
+export async function revokeGameSyncUpstream(game_id: number, registry_source_id: number) {
+  return await api
+    .post(`${api_root}/game/${game_id}/sync/revoke`, { json: { registry_source_id } })
+    .json<ManualRegistryUpstreamPublication>();
+}
+
 export function usePublishGameSyncMutation(
   props: { onSuccess?: (publication: ManualRegistryPublication) => void; onError?: (err: Error) => void } = {}
 ) {
@@ -377,6 +383,23 @@ export function useAdvertiseGameSyncMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("game.sync.actions.advertise.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export function useRevokeGameSyncMutation(
+  props: { onSuccess?: (publication: ManualRegistryUpstreamPublication) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ game_id, registry_source_id }: { game_id: number; registry_source_id: number }) =>
+      revokeGameSyncUpstream(game_id, registry_source_id),
+    onSuccess: (data) => {
+      toastSuccess(t("game.sync.actions.revoke.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("game.sync.actions.revoke.fail"));
       props.onError?.(err);
     },
   }));
