@@ -356,6 +356,35 @@
           "releaseId": "Release ID"
         }
       },
+      "catalog": {
+        "title": "Registry カタログ取り込み",
+        "description": "取得済みの registry ソースを閲覧し、release と upstream を選んで取り込みジョブを開始します。",
+        "source": "Registry ソース",
+        "sourcePlaceholder": "ソースを選択してください",
+        "games": "ゲーム一覧",
+        "releases": "Release 一覧",
+        "upstreams": "Upstream 一覧",
+        "releaseCount": "{{count}} 件の release",
+        "emptyGames": "このソースにはゲームがありません",
+        "emptyReleases": "選択したゲームに利用可能な release がありません",
+        "emptyUpstreams": "選択した release に有効な upstream がありません",
+        "import": {
+          "title": "registry から取り込む",
+          "success": "registry 取り込みジョブを作成しました",
+          "fail": "registry 取り込みジョブの作成に失敗しました"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "registry ゲーム一覧の取得に失敗しました"
+          },
+          "fetchReleases": {
+            "title": "registry release 一覧の取得に失敗しました"
+          },
+          "fetchDetail": {
+            "title": "registry release 詳細の取得に失敗しました"
+          }
+        }
+      },
       "jobs": {
         "title": "同期ジョブ",
         "empty": "まだ同期ジョブはありません",

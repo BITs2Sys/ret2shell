@@ -278,7 +278,7 @@ pub(super) async fn resume_sync_job(
     None,
   )
   .await?;
-  spawn_direct_import_job(state.clone(), job.id);
+  spawn_import_job(state.clone(), job.id);
   Ok(Json(SyncJobResponse::from(job)))
 }
 
@@ -286,6 +286,25 @@ pub(super) async fn import_remote_release(
   State(state): State<GlobalState>, Extension(token): Extension<Token>,
   Json(req): Json<DirectImportRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let job = create_import_job(
+    &state,
+    token.id,
+    game_sync_job::SyncJobMode::Direct,
+    None,
+    None,
+    None,
+    req,
+  )
+  .await?;
+  spawn_import_job(state.clone(), job.id);
+  Ok(Json(SyncJobResponse::from(job)))
+}
+
+pub(super) async fn create_import_job(
+  state: &GlobalState, created_by: i64, mode: game_sync_job::SyncJobMode,
+  registry_source_id: Option<i64>, upstream_instance_id: Option<String>,
+  upstream_base_url: Option<String>, req: DirectImportRequest,
+) -> Result<game_sync_job::Model, ResponseError> {
   let request = normalize_direct_import_request(req)?;
   if game::get_by_sync_key(&state.db.conn, &request.game_key)
     .await?
@@ -298,35 +317,35 @@ pub(super) async fn import_remote_release(
   ensure_no_active_import_job(&state.db, &request.game_key, &request.release_id).await?;
 
   let now = Utc::now();
-  let job = game_sync_job::create(
-    &state.db.conn,
-    game_sync_job::Model {
-      id: 0,
-      kind: game_sync_job::SyncJobKind::Import,
-      mode: game_sync_job::SyncJobMode::Direct,
-      status: game_sync_job::SyncJobStatus::Pending,
-      stage: "queued".to_owned(),
-      game_id: None,
-      game_key: Some(request.game_key.clone()),
-      release_id: Some(request.release_id.clone()),
-      registry_source_id: None,
-      upstream_instance_id: None,
-      upstream_base_url: Some(request.base_url.clone()),
-      request_body: game_sync_job::JsonObject(serde_json::to_value(&request)?),
-      checkpoint: game_sync_job::JsonObject(json!({})),
-      error_message: None,
-      created_by: token.id,
-      created_at: now,
-      updated_at: now,
-      finished_at: None,
-    },
+  Ok(
+    game_sync_job::create(
+      &state.db.conn,
+      game_sync_job::Model {
+        id: 0,
+        kind: game_sync_job::SyncJobKind::Import,
+        mode,
+        status: game_sync_job::SyncJobStatus::Pending,
+        stage: "queued".to_owned(),
+        game_id: None,
+        game_key: Some(request.game_key.clone()),
+        release_id: Some(request.release_id.clone()),
+        registry_source_id,
+        upstream_instance_id,
+        upstream_base_url: upstream_base_url.or_else(|| Some(request.base_url.clone())),
+        request_body: game_sync_job::JsonObject(serde_json::to_value(&request)?),
+        checkpoint: game_sync_job::JsonObject(json!({})),
+        error_message: None,
+        created_by,
+        created_at: now,
+        updated_at: now,
+        finished_at: None,
+      },
+    )
+    .await?,
   )
-  .await?;
-  spawn_direct_import_job(state.clone(), job.id);
-  Ok(Json(SyncJobResponse::from(job)))
 }
 
-fn spawn_direct_import_job(state: GlobalState, job_id: i64) {
+pub(super) fn spawn_import_job(state: GlobalState, job_id: i64) {
   tokio::spawn(async move {
     if let Err(err) = run_direct_import_job(state.clone(), job_id).await
       && let Ok(Some(job)) = game_sync_job::get(&state.db.conn, job_id).await
@@ -641,9 +660,7 @@ async fn ensure_no_active_import_job(
   db: &Database, game_key: &str, release_id: &str,
 ) -> Result<(), ResponseError> {
   for job in game_sync_job::get_list(&db.conn).await? {
-    if job.kind != game_sync_job::SyncJobKind::Import
-      || job.mode != game_sync_job::SyncJobMode::Direct
-    {
+    if job.kind != game_sync_job::SyncJobKind::Import {
       continue;
     }
     if job.game_key.as_deref() != Some(game_key) || job.release_id.as_deref() != Some(release_id) {
@@ -654,7 +671,7 @@ async fn ensure_no_active_import_job(
       game_sync_job::SyncJobStatus::Pending | game_sync_job::SyncJobStatus::Running
     ) {
       return Err(ResponseError::Conflict(
-        "another direct import job for the same release is already running".to_owned(),
+        "another import job for the same release is already running".to_owned(),
       ));
     }
   }

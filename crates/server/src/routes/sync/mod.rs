@@ -3,6 +3,7 @@ use r2s_database::user::Permission;
 
 use crate::{middleware::auth, traits::GlobalState};
 
+mod catalog;
 mod direct;
 mod serve;
 mod source;
@@ -30,6 +31,28 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           Permission::Basic,
           Permission::Verified,
           Permission::DevOps
+        ))),
+    )
+    .nest(
+      "/catalog",
+      Router::new()
+        .route("/games", get(catalog::list_catalog_games))
+        .route("/games/{game_key}", get(catalog::list_catalog_releases))
+        .route(
+          "/games/{game_key}/releases/{release_id}",
+          get(catalog::get_catalog_release_detail),
+        )
+        .route(
+          "/import",
+          axum::routing::post(catalog::import_catalog_release),
+        )
+        .route_layer(middleware::from_fn(auth::permission_required_any!(
+          Permission::Host,
+          Permission::DevOps
+        )))
+        .route_layer(middleware::from_fn(auth::permission_required_all!(
+          Permission::Basic,
+          Permission::Verified
         ))),
     )
     .nest(

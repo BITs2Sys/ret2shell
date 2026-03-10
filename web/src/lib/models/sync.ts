@@ -52,6 +52,37 @@ export type ManualRegistryPublication = {
   suggested_pr_title: string;
 };
 
+export type CatalogGame = {
+  game_key: string;
+  release_count: number;
+};
+
+export type CatalogRelease = {
+  game_key: string;
+  release_id: string;
+  snapshot_commit: string;
+  first_party_instance_id: string;
+  first_party_base_url: string;
+  published_at: DateTime;
+};
+
+export type CatalogUpstream = {
+  instance_id: string;
+  role: string;
+  base_url: string;
+  auth_mode: string;
+  protocol_version: number;
+  published_at: DateTime;
+};
+
+export type CatalogReleaseDetail = {
+  game_key: string;
+  release_id: string;
+  snapshot_commit: string;
+  manifest_sha256: string;
+  upstreams: CatalogUpstream[];
+};
+
 export type RemoteSyncInfo = {
   instance_id: string;
   base_url: string;

@@ -356,6 +356,35 @@
           "releaseId": "Release ID"
         }
       },
+      "catalog": {
+        "title": "Registry 目录导入",
+        "description": "浏览某个已拉取的 registry 源，查看 release，选择 upstream，并创建导入任务。",
+        "source": "Registry 源",
+        "sourcePlaceholder": "请选择一个源",
+        "games": "赛事列表",
+        "releases": "Release 列表",
+        "upstreams": "上游列表",
+        "releaseCount": "{{count}} 个 release",
+        "emptyGames": "该源中没有发现赛事",
+        "emptyReleases": "当前选中赛事没有可用 release",
+        "emptyUpstreams": "当前 release 没有可用的活动 upstream",
+        "import": {
+          "title": "从 registry 导入",
+          "success": "已成功创建 registry 导入任务",
+          "fail": "创建 registry 导入任务失败"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "获取 registry 赛事列表失败"
+          },
+          "fetchReleases": {
+            "title": "获取 registry release 列表失败"
+          },
+          "fetchDetail": {
+            "title": "获取 registry release 详情失败"
+          }
+        }
+      },
       "jobs": {
         "title": "同步任务",
         "empty": "当前还没有同步任务",

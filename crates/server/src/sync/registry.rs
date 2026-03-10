@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+  collections::BTreeMap,
+  path::{Path, PathBuf},
+};
 
 use anyhow::{Context, anyhow, bail};
 use chrono::{DateTime, Utc, serde::ts_seconds};
@@ -6,7 +9,7 @@ use r2s_config::bucket;
 use r2s_database::game_registry_source;
 use serde::{Deserialize, Serialize};
 use tokio::{
-  fs::{create_dir_all, read_to_string, remove_dir_all},
+  fs::{create_dir_all, read_dir, read_to_string, remove_dir_all},
   process::Command,
 };
 use tracing::warn;
@@ -36,6 +39,57 @@ struct UpstreamAdvertisement {
   auth_mode: String,
   sync_token: String,
   protocol_version: i32,
+}
+
+#[derive(Clone, Deserialize)]
+struct UpstreamAdvertisementRecord {
+  spec_version: i32,
+  kind: String,
+  status: String,
+  game_key: String,
+  release_id: String,
+  instance_id: String,
+  role: String,
+  #[serde(with = "ts_seconds")]
+  published_at: DateTime<Utc>,
+  base_url: Option<String>,
+  auth_mode: Option<String>,
+  sync_token: Option<String>,
+  protocol_version: Option<i32>,
+}
+
+#[derive(Clone)]
+pub struct RegistryCatalogGame {
+  pub game_key: String,
+  pub release_count: usize,
+}
+
+#[derive(Clone)]
+pub struct RegistryCatalogRelease {
+  pub game_key: String,
+  pub release_id: String,
+  pub snapshot_commit: String,
+  pub first_party_instance_id: String,
+  pub first_party_base_url: String,
+  pub published_at: DateTime<Utc>,
+}
+
+#[derive(Clone)]
+pub struct RegistryCatalogUpstream {
+  pub instance_id: String,
+  pub role: String,
+  pub base_url: String,
+  pub auth_mode: String,
+  pub sync_token: String,
+  pub protocol_version: i32,
+  pub published_at: DateTime<Utc>,
+}
+
+#[derive(Clone)]
+pub struct RegistryCatalogReleaseDetail {
+  pub manifest: crate::sync::manifest::ReleaseManifest,
+  pub manifest_sha256: String,
+  pub upstreams: Vec<RegistryCatalogUpstream>,
 }
 
 pub struct RegistryPublicationRequest<'a> {
@@ -136,6 +190,110 @@ pub async fn remove_registry_source_cache(
     remove_dir_all(cache_dir).await?;
   }
   Ok(())
+}
+
+pub async fn list_catalog_games(
+  bucket_config: &Option<bucket::Config>, source: &game_registry_source::Model,
+) -> anyhow::Result<Vec<RegistryCatalogGame>> {
+  let cache_dir = fetch_registry_source(bucket_config, source).await?;
+  let games_dir = cache_dir.join("games");
+  let mut result = Vec::new();
+  let mut entries = match read_dir(&games_dir).await {
+    Ok(entries) => entries,
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(vec![]),
+    Err(err) => return Err(err.into()),
+  };
+  while let Some(entry) = entries.next_entry().await? {
+    if !entry.file_type().await?.is_dir() {
+      continue;
+    }
+    let game_key = entry.file_name().to_string_lossy().to_string();
+    let releases = list_catalog_releases_from_cache(&cache_dir, &game_key).await?;
+    if releases.is_empty() {
+      continue;
+    }
+    result.push(RegistryCatalogGame {
+      game_key,
+      release_count: releases.len(),
+    });
+  }
+  result.sort_by(|left, right| left.game_key.cmp(&right.game_key));
+  Ok(result)
+}
+
+pub async fn list_catalog_releases(
+  bucket_config: &Option<bucket::Config>, source: &game_registry_source::Model, game_key: &str,
+) -> anyhow::Result<Vec<RegistryCatalogRelease>> {
+  let cache_dir = fetch_registry_source(bucket_config, source).await?;
+  list_catalog_releases_from_cache(&cache_dir, game_key).await
+}
+
+async fn list_catalog_releases_from_cache(
+  cache_dir: &Path, game_key: &str,
+) -> anyhow::Result<Vec<RegistryCatalogRelease>> {
+  let release_dir = cache_dir.join("games").join(game_key).join("releases");
+  let mut result = Vec::new();
+  let mut entries = match read_dir(&release_dir).await {
+    Ok(entries) => entries,
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(vec![]),
+    Err(err) => return Err(err.into()),
+  };
+  while let Some(entry) = entries.next_entry().await? {
+    if !entry.file_type().await?.is_file() {
+      continue;
+    }
+    let body = read_to_string(entry.path()).await?;
+    let manifest: crate::sync::manifest::ReleaseManifest = r2s_config::toml::from_str(&body)?;
+    if manifest.kind != "release" || manifest.game_key != game_key {
+      continue;
+    }
+    let upstreams =
+      load_release_upstreams(cache_dir, &manifest.game_key, &manifest.release_id).await?;
+    let first_party_base_url = upstreams
+      .iter()
+      .find(|upstream| upstream.role == "first_party")
+      .map(|upstream| upstream.base_url.clone())
+      .unwrap_or_else(|| format!("instance:{}", manifest.first_party_instance_id));
+    result.push(RegistryCatalogRelease {
+      game_key: manifest.game_key,
+      release_id: manifest.release_id,
+      snapshot_commit: manifest.snapshot_commit,
+      first_party_instance_id: manifest.first_party_instance_id,
+      first_party_base_url,
+      published_at: manifest.published_at,
+    });
+  }
+  result.sort_by(|left, right| right.published_at.cmp(&left.published_at));
+  Ok(result)
+}
+
+pub async fn get_catalog_release_detail(
+  bucket_config: &Option<bucket::Config>, source: &game_registry_source::Model, game_key: &str,
+  release_id: &str,
+) -> anyhow::Result<RegistryCatalogReleaseDetail> {
+  let cache_dir = fetch_registry_source(bucket_config, source).await?;
+  let release_path = cache_dir
+    .join("games")
+    .join(game_key)
+    .join("releases")
+    .join(format!("{release_id}.toml"));
+  let manifest_body = read_to_string(&release_path)
+    .await
+    .with_context(|| format!("release file not found at {}", release_path.display()))?;
+  let manifest: crate::sync::manifest::ReleaseManifest = r2s_config::toml::from_str(&manifest_body)
+    .with_context(|| format!("invalid release manifest at {}", release_path.display()))?;
+  if manifest.kind != "release"
+    || manifest.game_key != game_key
+    || manifest.release_id != release_id
+  {
+    bail!("release manifest does not match the requested game key or release id");
+  }
+
+  Ok(RegistryCatalogReleaseDetail {
+    manifest,
+    manifest_sha256: r2s_captcha::sha256sum_str(&manifest_body),
+    upstreams: load_release_upstreams(&cache_dir, game_key, release_id).await?,
+  })
 }
 
 pub fn build_manual_registry_publication(
@@ -246,6 +404,70 @@ async fn run_git_with_env(
 fn short_release_id(release_id: &str) -> &str {
   let short_len = release_id.len().min(12);
   &release_id[..short_len]
+}
+
+async fn load_release_upstreams(
+  cache_dir: &Path, game_key: &str, release_id: &str,
+) -> anyhow::Result<Vec<RegistryCatalogUpstream>> {
+  let upstream_root = cache_dir.join("games").join(game_key).join("upstreams");
+  let mut latest_by_instance = BTreeMap::<String, UpstreamAdvertisementRecord>::new();
+  let mut instances = match read_dir(&upstream_root).await {
+    Ok(entries) => entries,
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(vec![]),
+    Err(err) => return Err(err.into()),
+  };
+  while let Some(instance_dir) = instances.next_entry().await? {
+    if !instance_dir.file_type().await?.is_dir() {
+      continue;
+    }
+    let mut files = read_dir(instance_dir.path()).await?;
+    while let Some(file) = files.next_entry().await? {
+      if !file.file_type().await?.is_file() {
+        continue;
+      }
+      let body = read_to_string(file.path()).await?;
+      let record: UpstreamAdvertisementRecord = match r2s_config::toml::from_str(&body) {
+        Ok(record) => record,
+        Err(_) => continue,
+      };
+      if record.spec_version != 1
+        || record.kind != "upstream"
+        || record.game_key != game_key
+        || record.release_id != release_id
+      {
+        continue;
+      }
+      let replace = latest_by_instance
+        .get(&record.instance_id)
+        .is_none_or(|current| current.published_at < record.published_at);
+      if replace {
+        latest_by_instance.insert(record.instance_id.clone(), record);
+      }
+    }
+  }
+
+  let mut result = latest_by_instance
+    .into_values()
+    .filter(|record| record.status == "active")
+    .filter_map(|record| {
+      Some(RegistryCatalogUpstream {
+        instance_id: record.instance_id,
+        role: record.role,
+        base_url: record.base_url?,
+        auth_mode: record.auth_mode.unwrap_or_else(|| "sync_token".to_owned()),
+        sync_token: record.sync_token?,
+        protocol_version: record.protocol_version.unwrap_or(1),
+        published_at: record.published_at,
+      })
+    })
+    .collect::<Vec<_>>();
+  result.sort_by(|left, right| {
+    left
+      .role
+      .cmp(&right.role)
+      .then_with(|| right.published_at.cmp(&left.published_at))
+  });
+  Ok(result)
 }
 
 #[cfg(test)]

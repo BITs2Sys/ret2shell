@@ -356,6 +356,35 @@
           "releaseId": "Release ID"
         }
       },
+      "catalog": {
+        "title": "Registry 目錄導入",
+        "description": "瀏覽某個已拉取的 registry 來源，查看 release，選擇 upstream，並建立導入任務。",
+        "source": "Registry 來源",
+        "sourcePlaceholder": "請選擇一個來源",
+        "games": "賽事列表",
+        "releases": "Release 列表",
+        "upstreams": "上游列表",
+        "releaseCount": "{{count}} 個 release",
+        "emptyGames": "此來源中沒有發現賽事",
+        "emptyReleases": "目前選中賽事沒有可用 release",
+        "emptyUpstreams": "目前 release 沒有可用的活動 upstream",
+        "import": {
+          "title": "從 registry 導入",
+          "success": "已成功建立 registry 導入任務",
+          "fail": "建立 registry 導入任務失敗"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "取得 registry 賽事列表失敗"
+          },
+          "fetchReleases": {
+            "title": "取得 registry release 列表失敗"
+          },
+          "fetchDetail": {
+            "title": "取得 registry release 詳情失敗"
+          }
+        }
+      },
       "jobs": {
         "title": "同步任務",
         "empty": "目前還沒有同步任務",

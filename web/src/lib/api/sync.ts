@@ -1,4 +1,7 @@
 import type {
+  CatalogGame,
+  CatalogRelease,
+  CatalogReleaseDetail,
   DirectDiscoverResponse,
   GameReleaseSummary,
   GameSyncStatus,
@@ -35,8 +38,109 @@ export type DirectImportPayload = {
   release_id: string;
 };
 
+export type CatalogImportPayload = {
+  source_id: number;
+  game_key: string;
+  release_id: string;
+  upstream_instance_id: string;
+};
+
 export async function getSyncSources() {
   return await api.get(`${api_root}/sync/source`).json<SyncRegistrySource[]>();
+}
+
+export async function getCatalogGames(source_id: number) {
+  return await api.get(`${api_root}/sync/catalog/games`, { searchParams: { source_id } }).json<CatalogGame[]>();
+}
+
+export function useCatalogGames({
+  source_id,
+  enabled,
+  onError,
+}: {
+  source_id: () => number | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["sync", "catalog", "games", source_id()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getCatalogGames(source_id()!),
+      enabled: enabled?.() && source_id() != null,
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.catalog.errors.fetchGames.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export async function getCatalogReleases(source_id: number, game_key: string) {
+  return await api
+    .get(`${api_root}/sync/catalog/games/${game_key}`, { searchParams: { source_id } })
+    .json<CatalogRelease[]>();
+}
+
+export function useCatalogReleases({
+  source_id,
+  game_key,
+  enabled,
+  onError,
+}: {
+  source_id: () => number | null;
+  game_key: () => string | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["sync", "catalog", "releases", source_id(), game_key()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getCatalogReleases(source_id()!, game_key()!),
+      enabled: enabled?.() && source_id() != null && !!game_key(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.catalog.errors.fetchReleases.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export async function getCatalogReleaseDetail(source_id: number, game_key: string, release_id: string) {
+  return await api
+    .get(`${api_root}/sync/catalog/games/${game_key}/releases/${release_id}`, { searchParams: { source_id } })
+    .json<CatalogReleaseDetail>();
+}
+
+export function useCatalogReleaseDetail({
+  source_id,
+  game_key,
+  release_id,
+  enabled,
+  onError,
+}: {
+  source_id: () => number | null;
+  game_key: () => string | null;
+  release_id: () => string | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["sync", "catalog", "release", source_id(), game_key(), release_id()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getCatalogReleaseDetail(source_id()!, game_key()!, release_id()!),
+      enabled: enabled?.() && source_id() != null && !!game_key() && !!release_id(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.catalog.errors.fetchDetail.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export function useSyncSources(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
@@ -275,6 +379,10 @@ export async function importDirectSyncRelease(payload: DirectImportPayload) {
   return await api.post(`${api_root}/sync/direct/import`, { json: payload }).json<SyncJob>();
 }
 
+export async function importCatalogSyncRelease(payload: CatalogImportPayload) {
+  return await api.post(`${api_root}/sync/catalog/import`, { json: payload }).json<SyncJob>();
+}
+
 export function useImportDirectSyncMutation(
   props: { onSuccess?: (response: SyncJob) => void; onError?: (err: Error) => void } = {}
 ) {
@@ -286,6 +394,22 @@ export function useImportDirectSyncMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("platform.sync.direct.import.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export function useImportCatalogSyncMutation(
+  props: { onSuccess?: (response: SyncJob) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: importCatalogSyncRelease,
+    onSuccess: (data) => {
+      toastSuccess(t("platform.sync.catalog.import.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.catalog.import.fail"));
       props.onError?.(err);
     },
   }));

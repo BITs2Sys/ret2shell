@@ -356,6 +356,35 @@
           "releaseId": "Release ID"
         }
       },
+      "catalog": {
+        "title": "Registry catalog import",
+        "description": "Browse one fetched registry source, inspect releases, choose an upstream, and start an import job.",
+        "source": "Registry source",
+        "sourcePlaceholder": "Choose one source",
+        "games": "Games",
+        "releases": "Releases",
+        "upstreams": "Upstreams",
+        "releaseCount": "{{count}} release(s)",
+        "emptyGames": "No games found in this source",
+        "emptyReleases": "No releases available for the selected game",
+        "emptyUpstreams": "No active upstreams available for the selected release",
+        "import": {
+          "title": "Import from registry",
+          "success": "Registry import job created successfully",
+          "fail": "Failed to create registry import job"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "Failed to fetch registry games"
+          },
+          "fetchReleases": {
+            "title": "Failed to fetch registry releases"
+          },
+          "fetchDetail": {
+            "title": "Failed to fetch registry release detail"
+          }
+        }
+      },
       "jobs": {
         "title": "Sync jobs",
         "empty": "No sync jobs yet",
