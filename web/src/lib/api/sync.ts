@@ -6,6 +6,7 @@ import type {
   GameReleaseSummary,
   GameSyncStatus,
   ManualRegistryPublication,
+  ManualRegistryUpstreamPublication,
   SyncJob,
   SyncRegistrySource,
 } from "@models/sync";
@@ -341,6 +342,12 @@ export async function publishGameSyncRelease(game_id: number, registry_source_id
     .json<ManualRegistryPublication>();
 }
 
+export async function advertiseGameSyncUpstream(game_id: number, registry_source_id: number) {
+  return await api
+    .post(`${api_root}/game/${game_id}/sync/advertise`, { json: { registry_source_id } })
+    .json<ManualRegistryUpstreamPublication>();
+}
+
 export function usePublishGameSyncMutation(
   props: { onSuccess?: (publication: ManualRegistryPublication) => void; onError?: (err: Error) => void } = {}
 ) {
@@ -353,6 +360,23 @@ export function usePublishGameSyncMutation(
     },
     onError: (err: Error) => {
       handleHttpError(err, t("game.sync.actions.publish.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export function useAdvertiseGameSyncMutation(
+  props: { onSuccess?: (publication: ManualRegistryUpstreamPublication) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ game_id, registry_source_id }: { game_id: number; registry_source_id: number }) =>
+      advertiseGameSyncUpstream(game_id, registry_source_id),
+    onSuccess: (data) => {
+      toastSuccess(t("game.sync.actions.advertise.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("game.sync.actions.advertise.fail"));
       props.onError?.(err);
     },
   }));

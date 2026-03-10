@@ -97,6 +97,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/sync/releases", get(sync::get_game_sync_releases))
         .route("/sync/sync-token", post(sync::rotate_game_sync_token))
         .route("/sync/detach", post(sync::detach_remote_sync_game))
+        .route(
+          "/sync/advertise",
+          post(sync::advertise_remote_sync_upstream),
+        )
         .route("/sync/publish", post(sync::publish_game_release))
         .route("/doc/{doc}", patch(core::update_game_doc))
         .route("/introduction", patch(core::update_game_intro_compat))

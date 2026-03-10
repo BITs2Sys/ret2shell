@@ -798,6 +798,18 @@
         "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
         "prTitle": "建議 PR 標題：{{title}}"
       },
+      "advertise": {
+        "title": "登記 third-party upstream",
+        "description": "當這個鏡像保持鎖定且未被修改時，可以將目前實例作為 third-party upstream 加入 registry。",
+        "source": "Registry 來源",
+        "sourcePlaceholder": "請選擇一個來源"
+      },
+      "manualUpstream": {
+        "title": "手動 upstream PR 資訊",
+        "description": "請將下面的 upstream 廣告檔案加入目標 registry 倉庫，並手動發起 PR。",
+        "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建議 PR 標題：{{title}}"
+      },
       "actions": {
         "rotateToken": {
           "title": "輪換同步令牌",
@@ -807,6 +819,11 @@
           "title": "解除鏡像鎖定",
           "success": "遠端鏡像已成功解除鎖定",
           "fail": "解除遠端鏡像鎖定失敗"
+        },
+        "advertise": {
+          "title": "登記 upstream",
+          "success": "已成功產生 third-party upstream 手動 PR 資訊",
+          "fail": "產生 third-party upstream 手動 PR 資訊失敗"
         },
         "publish": {
           "title": "發佈 release",

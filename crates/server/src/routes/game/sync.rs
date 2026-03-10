@@ -86,8 +86,24 @@ pub(super) struct ManualRegistryPublicationResponse {
   pub suggested_pr_title: String,
 }
 
+#[derive(Serialize)]
+pub(super) struct ManualRegistryUpstreamPublicationResponse {
+  pub release: GameReleaseResponse,
+  pub registry_source_name: String,
+  pub registry_git_url: String,
+  pub registry_branch: String,
+  pub upstream_file_path: String,
+  pub upstream_file_content: String,
+  pub suggested_pr_title: String,
+}
+
 #[derive(Deserialize)]
 pub(super) struct PublishGameReleaseRequest {
+  pub registry_source_id: i64,
+}
+
+#[derive(Deserialize)]
+pub(super) struct AdvertiseUpstreamRequest {
   pub registry_source_id: i64,
 }
 
@@ -171,6 +187,128 @@ pub(super) async fn detach_remote_sync_game(
   )
   .await?;
   Ok(Json(build_sync_status(&db.conn, &game).await?))
+}
+
+pub(super) async fn advertise_remote_sync_upstream(
+  State(config): State<GlobalConfig>, State(ref db): State<Database>,
+  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+  Json(req): Json<AdvertiseUpstreamRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if game.access_policy.sync == 2 {
+    return Err(ResponseError::PreconditionFailed(
+      "this game has disabled sync publication".to_owned(),
+    ));
+  }
+
+  let source = game_registry_source::get(&db.conn, req.registry_source_id)
+    .await?
+    .ok_or(ResponseError::NotFound(
+      "registry source not found".to_owned(),
+    ))?;
+  if !source.enabled {
+    return Err(ResponseError::PreconditionFailed(
+      "registry source is disabled".to_owned(),
+    ));
+  }
+  if game.access_policy.sync == 1 && !source.private_source {
+    return Err(ResponseError::PreconditionFailed(
+      "restricted sync games may only advertise to private registry sources".to_owned(),
+    ));
+  }
+
+  let remote_sync =
+    game_remote_sync::get(&db.conn, game.id)
+      .await?
+      .ok_or(ResponseError::PreconditionFailed(
+        "this game is not a remote mirror".to_owned(),
+      ))?;
+  if remote_sync.state != game_remote_sync::RemoteGameState::MirrorLocked {
+    return Err(ResponseError::PreconditionFailed(
+      "only locked remote mirrors may advertise themselves as third-party upstreams".to_owned(),
+    ));
+  }
+
+  let release =
+    game_release::get_by_game_and_release(&db.conn, game.id, &remote_sync.current_release_id)
+      .await?
+      .ok_or(ResponseError::PreconditionFailed(
+        "current remote release record not found".to_owned(),
+      ))?;
+  if release.origin_role != game_release::OriginRole::Mirror {
+    return Err(ResponseError::PreconditionFailed(
+      "only mirrored releases may be advertised as third-party upstreams".to_owned(),
+    ));
+  }
+
+  let bucket_name = game
+    .bucket
+    .clone()
+    .ok_or(ResponseError::PreconditionFailed(
+      "game bucket not found".to_owned(),
+    ))?;
+  let game_bucket = bucket.at(&bucket_name).await?;
+  let release_ref = manifest::release_ref(&remote_sync.current_release_id);
+  let release_ref_oid = game_bucket.git.get_ref(&release_ref).await?;
+  if release_ref_oid.as_deref() != Some(remote_sync.snapshot_commit.as_str()) {
+    return Err(ResponseError::Conflict(
+      "current release ref is missing or no longer matches the mirrored snapshot".to_owned(),
+    ));
+  }
+
+  let source_release = registry::get_catalog_release_detail(
+    &config.bucket,
+    &source,
+    &release.game_key,
+    &release.release_id,
+  )
+  .await
+  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+  if source_release.manifest_sha256 != release.manifest_sha256 {
+    return Err(ResponseError::Conflict(
+      "the selected registry source contains a different release manifest for this release"
+        .to_owned(),
+    ));
+  }
+
+  let instance_id = sync::instance_id(&config.bucket)
+    .await
+    .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+  let base_url = config
+    .server
+    .as_ref()
+    .ok_or(ResponseError::PreconditionFailed(
+      "server configuration not found".to_owned(),
+    ))?
+    .external_origin();
+  let sync_token = game
+    .sync_token
+    .clone()
+    .ok_or(ResponseError::PreconditionFailed(
+      "game sync token missing".to_owned(),
+    ))?;
+  let publication = registry::build_manual_registry_upstream_publication(
+    &source,
+    registry::RegistryUpstreamPublicationRequest {
+      game_key: &release.game_key,
+      release_id: &release.release_id,
+      instance_id: &instance_id,
+      role: "third_party",
+      base_url: &base_url,
+      sync_token: &sync_token,
+      published_at: Utc::now(),
+    },
+  )
+  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+
+  Ok(Json(ManualRegistryUpstreamPublicationResponse {
+    release: GameReleaseResponse::from(release),
+    registry_source_name: publication.registry_source_name,
+    registry_git_url: publication.registry_git_url,
+    registry_branch: publication.registry_branch,
+    upstream_file_path: publication.upstream_file_path,
+    upstream_file_content: publication.upstream_file_content,
+    suggested_pr_title: publication.suggested_pr_title,
+  }))
 }
 
 pub(super) async fn publish_game_release(

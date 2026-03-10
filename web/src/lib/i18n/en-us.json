@@ -798,6 +798,18 @@
         "target": "Target repository: {{repo}} (branch: {{branch}})",
         "prTitle": "Suggested PR title: {{title}}"
       },
+      "advertise": {
+        "title": "Advertise third-party upstream",
+        "description": "If this mirror remains locked and unchanged, you can add this instance to a registry as a third-party upstream.",
+        "source": "Registry source",
+        "sourcePlaceholder": "Choose one source"
+      },
+      "manualUpstream": {
+        "title": "Manual upstream PR information",
+        "description": "Add the upstream advertisement file below to the target registry repository and open a PR manually.",
+        "target": "Target repository: {{repo}} (branch: {{branch}})",
+        "prTitle": "Suggested PR title: {{title}}"
+      },
       "actions": {
         "rotateToken": {
           "title": "Rotate sync token",
@@ -807,6 +819,11 @@
           "title": "Detach mirror",
           "success": "Remote mirror detached successfully",
           "fail": "Failed to detach remote mirror"
+        },
+        "advertise": {
+          "title": "Advertise upstream",
+          "success": "Manual third-party upstream PR information generated successfully",
+          "fail": "Failed to generate third-party upstream PR information"
         },
         "publish": {
           "title": "Publish release",

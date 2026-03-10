@@ -798,6 +798,18 @@
         "target": "目标仓库：{{repo}}（分支：{{branch}}）",
         "prTitle": "建议 PR 标题：{{title}}"
       },
+      "advertise": {
+        "title": "登记 third-party upstream",
+        "description": "当这个镜像保持锁定且未被修改时，可以将当前实例作为 third-party upstream 添加到 registry。",
+        "source": "Registry 源",
+        "sourcePlaceholder": "请选择一个源"
+      },
+      "manualUpstream": {
+        "title": "手动 upstream PR 信息",
+        "description": "请将下面的 upstream 广告文件加入目标 registry 仓库，并手动发起 PR。",
+        "target": "目标仓库：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建议 PR 标题：{{title}}"
+      },
       "actions": {
         "rotateToken": {
           "title": "轮换同步令牌",
@@ -807,6 +819,11 @@
           "title": "解除镜像锁定",
           "success": "远端镜像已成功解除锁定",
           "fail": "解除远端镜像锁定失败"
+        },
+        "advertise": {
+          "title": "登记 upstream",
+          "success": "已成功生成 third-party upstream 手动 PR 信息",
+          "fail": "生成 third-party upstream 手动 PR 信息失败"
         },
         "publish": {
           "title": "发布 release",

@@ -41,6 +41,16 @@ struct UpstreamAdvertisement {
   protocol_version: i32,
 }
 
+pub struct RegistryUpstreamPublicationRequest<'a> {
+  pub game_key: &'a str,
+  pub release_id: &'a str,
+  pub instance_id: &'a str,
+  pub role: &'a str,
+  pub base_url: &'a str,
+  pub sync_token: &'a str,
+  pub published_at: DateTime<Utc>,
+}
+
 #[derive(Clone, Deserialize)]
 struct UpstreamAdvertisementRecord {
   spec_version: i32,
@@ -109,6 +119,16 @@ pub struct ManualRegistryPublication {
   pub registry_branch: String,
   pub release_file_path: String,
   pub release_file_content: String,
+  pub upstream_file_path: String,
+  pub upstream_file_content: String,
+  pub suggested_pr_title: String,
+}
+
+#[derive(Serialize)]
+pub struct ManualRegistryUpstreamPublication {
+  pub registry_source_name: String,
+  pub registry_git_url: String,
+  pub registry_branch: String,
   pub upstream_file_path: String,
   pub upstream_file_content: String,
   pub suggested_pr_title: String,
@@ -303,7 +323,15 @@ pub fn build_manual_registry_publication(
     bail!("registry source {} is not publish-enabled", source.name);
   }
 
-  let upstream_body = build_upstream_advertisement_body(&release)?;
+  let upstream_body = build_upstream_advertisement_body(&RegistryUpstreamPublicationRequest {
+    game_key: release.game_key,
+    release_id: release.release_id,
+    instance_id: release.instance_id,
+    role: "first_party",
+    base_url: release.base_url,
+    sync_token: release.sync_token,
+    published_at: release.published_at,
+  })?;
   Ok(ManualRegistryPublication {
     registry_source_name: source.name.clone(),
     registry_git_url: source.git_url.clone(),
@@ -328,8 +356,36 @@ pub fn build_manual_registry_publication(
   })
 }
 
+pub fn build_manual_registry_upstream_publication(
+  source: &game_registry_source::Model, release: RegistryUpstreamPublicationRequest<'_>,
+) -> anyhow::Result<ManualRegistryUpstreamPublication> {
+  if !source.publish_enabled {
+    bail!("registry source {} is not publish-enabled", source.name);
+  }
+
+  let upstream_body = build_upstream_advertisement_body(&release)?;
+  Ok(ManualRegistryUpstreamPublication {
+    registry_source_name: source.name.clone(),
+    registry_git_url: source.git_url.clone(),
+    registry_branch: source.branch.clone(),
+    upstream_file_path: format!(
+      "games/{}/upstreams/{}/{}.toml",
+      release.game_key,
+      release.instance_id,
+      release.published_at.timestamp_millis()
+    ),
+    upstream_file_content: upstream_body,
+    suggested_pr_title: format!(
+      ":sparkles: add {} upstream {}@{}",
+      release.role,
+      release.game_key,
+      short_release_id(release.release_id)
+    ),
+  })
+}
+
 fn build_upstream_advertisement_body(
-  release: &RegistryPublicationRequest<'_>,
+  release: &RegistryUpstreamPublicationRequest<'_>,
 ) -> anyhow::Result<String> {
   Ok(r2s_config::toml::to_string_pretty(
     &UpstreamAdvertisement {
@@ -339,7 +395,7 @@ fn build_upstream_advertisement_body(
       game_key: release.game_key.to_owned(),
       release_id: release.release_id.to_owned(),
       instance_id: release.instance_id.to_owned(),
-      role: "first_party".to_owned(),
+      role: release.role.to_owned(),
       published_at: release.published_at,
       base_url: release.base_url.to_owned(),
       auth_mode: "sync_token".to_owned(),
@@ -472,7 +528,13 @@ async fn load_release_upstreams(
 
 #[cfg(test)]
 mod tests {
-  use super::{short_release_id, validate_registry_metadata_body};
+  use chrono::{DateTime, Utc};
+  use r2s_database::game_registry_source;
+
+  use super::{
+    RegistryUpstreamPublicationRequest, build_manual_registry_upstream_publication,
+    short_release_id, validate_registry_metadata_body,
+  };
 
   #[test]
   fn short_release_id_keeps_short_values() {
@@ -515,5 +577,46 @@ kind = "ret2shell-game-registry"
     .expect_err("unsupported registry spec version should fail");
 
     assert!(format!("{err:#}").contains("unsupported registry spec version"));
+  }
+
+  #[test]
+  fn build_manual_registry_upstream_publication_uses_requested_role() {
+    let publication = build_manual_registry_upstream_publication(
+      &game_registry_source::Model {
+        id: 1,
+        name: "official".to_owned(),
+        git_url: "https://example.com/registry.git".to_owned(),
+        branch: "main".to_owned(),
+        enabled: true,
+        priority: 0,
+        publish_enabled: true,
+        private_source: false,
+        last_fetched_at: None,
+        last_error: None,
+        created_at: DateTime::<Utc>::UNIX_EPOCH,
+        updated_at: DateTime::<Utc>::UNIX_EPOCH,
+      },
+      RegistryUpstreamPublicationRequest {
+        game_key: "game_key",
+        release_id: "deadbeefcafebabe",
+        instance_id: "instance-id",
+        role: "third_party",
+        base_url: "https://mirror.example.com",
+        sync_token: "sync-token",
+        published_at: DateTime::<Utc>::UNIX_EPOCH,
+      },
+    )
+    .expect("manual upstream publication should build");
+
+    assert!(
+      publication
+        .upstream_file_content
+        .contains("role = \"third_party\"")
+    );
+    assert!(
+      publication
+        .upstream_file_path
+        .contains("games/game_key/upstreams/instance-id/")
+    );
   }
 }

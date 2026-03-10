@@ -52,6 +52,16 @@ export type ManualRegistryPublication = {
   suggested_pr_title: string;
 };
 
+export type ManualRegistryUpstreamPublication = {
+  release: GameReleaseSummary;
+  registry_source_name: string;
+  registry_git_url: string;
+  registry_branch: string;
+  upstream_file_path: string;
+  upstream_file_content: string;
+  suggested_pr_title: string;
+};
+
 export type CatalogGame = {
   game_key: string;
   release_count: number;

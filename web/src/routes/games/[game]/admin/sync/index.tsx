@@ -1,5 +1,6 @@
 import { useGame, useGameSyncStatus } from "@api/game";
 import {
+  useAdvertiseGameSyncMutation,
   useDetachGameSyncMutation,
   useGameSyncReleases,
   useGameSyncSources,
@@ -8,7 +9,7 @@ import {
 } from "@api/sync";
 import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { HostType } from "@models/game";
-import type { ManualRegistryPublication } from "@models/sync";
+import type { ManualRegistryPublication, ManualRegistryUpstreamPublication } from "@models/sync";
 import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -25,7 +26,10 @@ export default function () {
   const releases = useGameSyncReleases({ game_id: gameId, enabled: () => gameId() > 0 });
   const sources = useGameSyncSources({ game_id: gameId, enabled: () => gameId() > 0 });
   const [selectedSourceId, setSelectedSourceId] = createSignal<string>("");
+  const [selectedAdvertiseSourceId, setSelectedAdvertiseSourceId] = createSignal<string>("");
   const [manualPublication, setManualPublication] = createSignal<ManualRegistryPublication | null>(null);
+  const [manualUpstreamPublication, setManualUpstreamPublication] =
+    createSignal<ManualRegistryUpstreamPublication | null>(null);
 
   createEffect(() => {
     if (selectedSourceId() || !sources.data?.length) {
@@ -34,6 +38,16 @@ export default function () {
     const defaultSource = sources.data.find((source) => source.publish_enabled && source.enabled) ?? sources.data[0];
     if (defaultSource) {
       setSelectedSourceId(defaultSource.id.toString());
+    }
+  });
+
+  createEffect(() => {
+    if (selectedAdvertiseSourceId() || !sources.data?.length) {
+      return;
+    }
+    const defaultSource = sources.data.find((source) => source.publish_enabled && source.enabled) ?? sources.data[0];
+    if (defaultSource) {
+      setSelectedAdvertiseSourceId(defaultSource.id.toString());
     }
   });
 
@@ -52,6 +66,12 @@ export default function () {
   });
   const detachMutation = useDetachGameSyncMutation({
     onSuccess: () => {
+      syncStatus.refetch();
+    },
+  });
+  const advertiseMutation = useAdvertiseGameSyncMutation({
+    onSuccess: (publication) => {
+      setManualUpstreamPublication(publication);
       syncStatus.refetch();
     },
   });
@@ -147,6 +167,44 @@ export default function () {
             </Card>
           </Show>
 
+          <Show when={syncStatus.data?.remote_state === "mirror_locked"}>
+            <Card contentClass="p-4 flex flex-col space-y-3">
+              <div class="flex flex-row items-center space-x-2 font-bold">
+                <span class="shrink-0 icon-[fluent--share-screen-person-20-regular] w-5 h-5" />
+                <span>{t("game.sync.advertise.title")}</span>
+              </div>
+              <p class="opacity-80 text-sm">{t("game.sync.advertise.description")}</p>
+              <Select
+                label={t("game.sync.advertise.source")}
+                placeholder={t("game.sync.advertise.sourcePlaceholder")}
+                items={publishableSources().map((source) => ({
+                  label: `${source.name} (${source.branch})`,
+                  value: source.id.toString(),
+                }))}
+                value={selectedAdvertiseSourceId() ? [selectedAdvertiseSourceId()] : []}
+                onValueChange={(details) => {
+                  setSelectedAdvertiseSourceId(details.value[0] || "");
+                }}
+                disabled={!publishableSources().length}
+              />
+              <div class="flex flex-row justify-end">
+                <Button
+                  level="primary"
+                  onClick={() =>
+                    advertiseMutation.mutate({
+                      game_id: gameId(),
+                      registry_source_id: Number.parseInt(selectedAdvertiseSourceId() || "0", 10),
+                    })
+                  }
+                  loading={advertiseMutation.isPending}
+                  disabled={!selectedAdvertiseSourceId() || advertiseMutation.isPending}
+                >
+                  {t("game.sync.actions.advertise.title")}
+                </Button>
+              </div>
+            </Card>
+          </Show>
+
           <Card contentClass="p-4 flex flex-col space-y-3">
             <div class="flex flex-row items-center space-x-2 font-bold">
               <span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />
@@ -209,6 +267,37 @@ export default function () {
                   <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto">
                     {publication().release_file_content}
                   </pre>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <span class="font-bold text-sm">{publication().upstream_file_path}</span>
+                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto">
+                    {publication().upstream_file_content}
+                  </pre>
+                </div>
+              </Card>
+            )}
+          </Show>
+
+          <Show when={manualUpstreamPublication()}>
+            {(publication) => (
+              <Card contentClass="p-4 flex flex-col space-y-3">
+                <div class="flex flex-row items-center space-x-2 font-bold">
+                  <span class="shrink-0 icon-[fluent--document-text-20-regular] w-5 h-5" />
+                  <span>{t("game.sync.manualUpstream.title")}</span>
+                </div>
+                <p class="opacity-80 text-sm">{t("game.sync.manualUpstream.description")}</p>
+                <div class="text-sm flex flex-col gap-1">
+                  <span>
+                    {t("game.sync.manualUpstream.target", {
+                      repo: publication().registry_git_url,
+                      branch: publication().registry_branch,
+                    })}
+                  </span>
+                  <span>
+                    {t("game.sync.manualUpstream.prTitle", {
+                      title: publication().suggested_pr_title,
+                    })}
+                  </span>
                 </div>
                 <div class="flex flex-col gap-2">
                   <span class="font-bold text-sm">{publication().upstream_file_path}</span>
