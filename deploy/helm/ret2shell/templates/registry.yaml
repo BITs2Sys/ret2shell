@@ -24,6 +24,13 @@ data:
       addr: :{{ .Values.registry.service.port }}
       headers:
         X-Content-Type-Options: [nosniff]
+      {{- if .Values.registry.metrics.enabled }}
+      debug:
+        addr: :{{ .Values.registry.metrics.port }}
+        prometheus:
+          enabled: true
+          path: /metrics
+      {{- end }}
     health:
       storagedriver:
         enabled: true
@@ -39,6 +46,7 @@ metadata:
   labels:
     {{- include "ret2shell.commonLabels" . | nindent 4 }}
     app.kubernetes.io/component: registry
+    ret2shell.io/service-role: primary
   {{- with .Values.registry.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -49,6 +57,11 @@ spec:
     - name: registry
       port: {{ .Values.registry.service.port }}
       targetPort: registry
+    {{- if .Values.registry.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.registry.metrics.port }}
+      targetPort: metrics
+    {{- end }}
   selector:
     {{- include "ret2shell.componentLabels" (dict "component" "registry" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
 
@@ -62,6 +75,7 @@ metadata:
   labels:
     {{- include "ret2shell.commonLabels" . | nindent 4 }}
     app.kubernetes.io/component: registry
+    ret2shell.io/service-role: external
   {{- with .Values.registry.externalAccess.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -111,9 +125,13 @@ metadata:
     {{- include "ret2shell.commonLabels" . | nindent 4 }}
     app.kubernetes.io/component: registry
 spec:
-  replicas: 1
+  replicas: {{ .Values.registry.replicaCount }}
   strategy:
-    type: Recreate
+    type: {{ .Values.registry.updateStrategy.type }}
+    {{- if and (eq .Values.registry.updateStrategy.type "RollingUpdate") .Values.registry.updateStrategy.rollingUpdate }}
+    rollingUpdate:
+      {{- toYaml .Values.registry.updateStrategy.rollingUpdate | nindent 6 }}
+    {{- end }}
   selector:
     matchLabels:
       {{- include "ret2shell.componentLabels" (dict "component" "registry" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
@@ -121,12 +139,22 @@ spec:
     metadata:
       labels:
         {{- include "ret2shell.componentLabels" (dict "component" "registry" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 8 }}
+        {{- with .Values.registry.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.registry.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- range . }}
         - name: {{ . }}
         {{- end }}
+      {{- end }}
+      {{- with .Values.registry.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       containers:
         - name: registry
@@ -138,6 +166,10 @@ spec:
           ports:
             - name: registry
               containerPort: {{ .Values.registry.service.port }}
+            {{- if .Values.registry.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.registry.metrics.port }}
+            {{- end }}
           readinessProbe:
             httpGet:
               path: /v2/
@@ -188,4 +220,63 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.registry.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+{{- if .Values.registry.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ret2shell.registryName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: registry
+spec:
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "registry" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  {{- with .Values.registry.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .Values.registry.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.registry.metrics.enabled .Values.registry.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ret2shell.registryName" . }}
+  namespace: {{ default .Release.Namespace .Values.registry.metrics.serviceMonitor.namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: registry
+    {{- with .Values.registry.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.registry.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: registry
+      ret2shell.io/service-role: primary
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.registry.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.registry.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
 {{- end }}

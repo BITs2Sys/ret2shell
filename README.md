@@ -18,7 +18,7 @@ All the components could be deploy anywhere, so you can deploy ret2shell as you 
 > [!WARNING]
 > The new helm charts is work-in-progress.
 
-For a general usage, you could see [k8s single-node deployment](./deploy/k8s-deprecated/README.md) for details.
+For a general usage, you could see [k8s deployment](./deploy/k8s/README.md) for details.
 
 ## Development
 

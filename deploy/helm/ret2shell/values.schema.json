@@ -158,6 +158,19 @@
           "type": "string",
           "enum": ["internal", "external"]
         },
+        "architecture": {
+          "type": "string",
+          "enum": ["standalone", "replication"]
+        },
+        "replica": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
         "external": {
           "type": "object",
           "properties": {
@@ -199,6 +212,10 @@
           "type": "string",
           "enum": ["internal", "external"]
         },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1
+        },
         "external": {
           "type": "object",
           "properties": {
@@ -239,6 +256,10 @@
         "mode": {
           "type": "string",
           "enum": ["disabled", "internal", "external"]
+        },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1
         },
         "externalAccess": {
           "type": "object",

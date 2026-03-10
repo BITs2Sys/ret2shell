@@ -1,0 +1,286 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Publish Release
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release metadata
+        id: vars
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          cargo_version="$(python - <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path("Cargo.toml").read_text(encoding="utf-8")
+          match = re.search(r'^\s*version\s*=\s*"([^"]+)"', text, re.MULTILINE)
+          if not match:
+              raise SystemExit("workspace version not found in Cargo.toml")
+          print(match.group(1))
+          PY
+          )"
+
+          if [ "$cargo_version" != "$RELEASE_VERSION" ]; then
+            echo "tag $RELEASE_VERSION does not match Cargo.toml version $cargo_version" >&2
+            exit 1
+          fi
+
+          previous_tag="$(git describe --tags --abbrev=0 "${RELEASE_VERSION}^" 2>/dev/null || true)"
+          previous_display="${previous_tag:-n/a}"
+          prerelease=false
+
+          if [[ "$RELEASE_VERSION" == *-* ]]; then
+            prerelease=true
+          fi
+
+          commit_sha="$(git rev-parse --short=8 HEAD)"
+          image_repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/ret2shell"
+
+          {
+            echo "release_version=$RELEASE_VERSION"
+            echo "cargo_version=$cargo_version"
+            echo "previous_tag=$previous_tag"
+            echo "previous_display=$previous_display"
+            echo "prerelease=$prerelease"
+            echo "commit_sha=$commit_sha"
+            echo "image_repo=$image_repo"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Prepare release chart
+        id: chart
+        env:
+          CHART_DIR: ${{ runner.temp }}/release-chart/ret2shell
+          RELEASE_VERSION: ${{ steps.vars.outputs.release_version }}
+        run: |
+          chart_root="${RUNNER_TEMP}/release-chart"
+          rm -rf "$chart_root"
+          mkdir -p "$chart_root"
+          cp -R deploy/helm/ret2shell "$CHART_DIR"
+
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          version = os.environ["RELEASE_VERSION"]
+          chart_dir = Path(os.environ["CHART_DIR"])
+
+          chart_file = chart_dir / "Chart.yaml"
+          chart_text = chart_file.read_text(encoding="utf-8")
+          chart_text = re.sub(r'(?m)^version:\s*.*$', f'version: {version}', chart_text, count=1)
+          chart_text = re.sub(r'(?m)^appVersion:\s*.*$', f'appVersion: "{version}"', chart_text, count=1)
+          chart_file.write_text(chart_text, encoding="utf-8")
+
+          values_file = chart_dir / "values.yaml"
+          lines = values_file.read_text(encoding="utf-8").splitlines()
+          in_platform = False
+          in_image = False
+          updated = False
+
+          for index, line in enumerate(lines):
+              stripped = line.strip()
+              if not line.startswith(" "):
+                  in_platform = stripped == "platform:"
+                  in_image = False
+                  continue
+              if in_platform and line.startswith("  ") and not line.startswith("    "):
+                  in_image = stripped == "image:"
+                  continue
+              if in_platform and in_image and line.startswith("    tag:"):
+                  lines[index] = f'    tag: "{version}"'
+                  updated = True
+                  break
+
+          if not updated:
+              raise SystemExit("platform.image.tag not found in values.yaml")
+
+          values_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+          {
+            echo "chart_dir=$CHART_DIR"
+            echo "chart_dist=${RUNNER_TEMP}/helm-dist"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Lint release chart
+        run: helm lint '${{ steps.chart.outputs.chart_dir }}' --namespace ret2shell-platform
+
+      - name: Render release chart
+        run: |
+          helm template ret2shell '${{ steps.chart.outputs.chart_dir }}' --namespace ret2shell-platform > /tmp/ret2shell-default.yaml
+          for values in '${{ steps.chart.outputs.chart_dir }}'/examples/*.yaml; do
+            name="$(basename "$values" .yaml)"
+            helm template ret2shell '${{ steps.chart.outputs.chart_dir }}' --namespace ret2shell-platform -f "$values" > "/tmp/${name}.yaml"
+          done
+
+      - name: Verify fixed namespace guard
+        run: |
+          if helm template ret2shell '${{ steps.chart.outputs.chart_dir }}' --namespace default >/tmp/ret2shell-wrong-ns.out 2>/tmp/ret2shell-wrong-ns.err; then
+            echo "chart unexpectedly rendered outside ret2shell-platform" >&2
+            exit 1
+          fi
+
+          grep -q "ret2shell chart must be installed into namespace ret2shell-platform" /tmp/ret2shell-wrong-ns.err
+
+      - name: Package release chart
+        id: package-chart
+        env:
+          DIST_DIR: ${{ runner.temp }}/helm-dist
+          RELEASE_VERSION: ${{ steps.vars.outputs.release_version }}
+        run: |
+          rm -rf "$DIST_DIR"
+          mkdir -p "$DIST_DIR"
+          helm package '${{ steps.chart.outputs.chart_dir }}' --destination "$DIST_DIR"
+
+          chart_package="$(python - <<'PY'
+          from pathlib import Path
+          import os
+
+          files = sorted(Path(os.environ["DIST_DIR"]).glob("*.tgz"))
+          if len(files) != 1:
+              raise SystemExit(f"expected one chart package, found {len(files)}")
+          print(files[0])
+          PY
+          )"
+          chart_filename="$(basename "$chart_package")"
+          chart_digest_file="${chart_package}.sha256"
+          sha256sum "$chart_package" > "$chart_digest_file"
+
+          {
+            echo "chart_package=$chart_package"
+            echo "chart_filename=$chart_filename"
+            echo "chart_digest_file=$chart_digest_file"
+            echo "chart_download_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${RELEASE_VERSION}/${chart_filename}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Prepare image metadata
+        id: image-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.vars.outputs.image_repo }}
+          tags: |
+            type=raw,value=${{ steps.vars.outputs.release_version }}
+            type=raw,value=latest,enable=${{ steps.vars.outputs.prerelease != 'true' }}
+          labels: |
+            org.opencontainers.image.title=ret2shell
+            org.opencontainers.image.description=Ret2Shell platform container image
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.vars.outputs.release_version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Build and push container image
+        id: build-image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Containerfile
+          build-args: |
+            R2S_GIT_VERSION=${{ steps.vars.outputs.commit_sha }}
+          labels: ${{ steps.image-meta.outputs.labels }}
+          push: true
+          tags: ${{ steps.image-meta.outputs.tags }}
+
+      - name: Write release notes
+        id: notes
+        env:
+          CHART_DIGEST_FILE: ${{ steps.package-chart.outputs.chart_digest_file }}
+          CHART_DOWNLOAD_URL: ${{ steps.package-chart.outputs.chart_download_url }}
+          CHART_FILENAME: ${{ steps.package-chart.outputs.chart_filename }}
+          IMAGE_DIGEST: ${{ steps.build-image.outputs.digest }}
+          IMAGE_REPO: ${{ steps.vars.outputs.image_repo }}
+          PREVIOUS_VERSION: ${{ steps.vars.outputs.previous_display }}
+          PRERELEASE: ${{ steps.vars.outputs.prerelease }}
+          RELEASE_VERSION: ${{ steps.vars.outputs.release_version }}
+        run: |
+          notes_file="${RUNNER_TEMP}/release-notes.md"
+          chart_digest_name="$(basename "$CHART_DIGEST_FILE")"
+
+          {
+            echo "## Version Changes"
+            echo
+            echo "| Component | Previous | Current |"
+            echo "| --- | --- | --- |"
+            echo "| Release tag | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
+            echo "| Application version | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
+            echo "| Helm chart package | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
+            echo "| Helm chart appVersion | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
+            echo "| Helm default image tag | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
+            echo
+            echo "## Helm Chart"
+            echo
+            echo "- Asset: \`${CHART_FILENAME}\`"
+            echo "- SHA256: \`${chart_digest_name}\`"
+            echo "- Download: ${CHART_DOWNLOAD_URL}"
+            echo
+            echo "Packaged charts rewrite \`version\`, \`appVersion\`, and \`platform.image.tag\` to the release tag."
+            echo
+            echo '```bash'
+            echo "helm install ret2shell ${CHART_DOWNLOAD_URL} -n ret2shell-platform --create-namespace"
+            echo '```'
+            echo
+            echo "## Container Image"
+            echo
+            echo "- Image: \`${IMAGE_REPO}:${RELEASE_VERSION}\`"
+            if [ "$PRERELEASE" != "true" ]; then
+              echo "- Stable alias: \`${IMAGE_REPO}:latest\`"
+            fi
+            echo "- Digest: \`${IMAGE_DIGEST}\`"
+            echo
+            echo '```bash'
+            echo "docker pull ${IMAGE_REPO}:${RELEASE_VERSION}"
+            echo '```'
+          } > "$notes_file"
+
+          echo "notes_file=$notes_file" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ steps.notes.outputs.notes_file }}
+          fail_on_unmatched_files: true
+          files: |
+            ${{ steps.package-chart.outputs.chart_package }}
+            ${{ steps.package-chart.outputs.chart_digest_file }}
+          generate_release_notes: true
+          name: ${{ steps.vars.outputs.release_version }}
+          overwrite_files: true
+          prerelease: ${{ steps.vars.outputs.prerelease == 'true' }}
+          tag_name: ${{ steps.vars.outputs.release_version }}

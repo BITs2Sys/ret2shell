@@ -1,5 +1,8 @@
 # Kubernetes deployment for small clusters
 
+> [!WARNING]
+> This layout is deprecated. Use [deploy/k8s](../k8s/README.md) for new installations.
+
 This directory contains the Kubernetes deployment files for the application.
 
 We use nodePort with external nginx to proxy streams.

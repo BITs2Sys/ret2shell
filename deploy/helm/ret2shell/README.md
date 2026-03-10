@@ -33,10 +33,32 @@ Useful switches:
 - `platform.exposure.type=ingress|nodePort`
 - `postgresql.mode=internal|external`
 - `valkey.mode=internal|external`
+- `valkey.architecture=standalone|replication`
 - `nats.mode=internal|external`
+- `nats.replicaCount=<n>` enables bundled NATS clustering when `n > 1`
 - `registry.mode=disabled|internal|external`
+- `registry.replicaCount=<n>` scales the bundled registry when shared storage is available
 - `victoriaLogs.mode=disabled|internal|external`
 - `platform.rbac.useClusterAdmin=true|false`
+
+Operational knobs now available on the bundled dependencies include:
+
+- `*.podAnnotations`, `*.podLabels`, `*.priorityClassName`, `*.topologySpreadConstraints`
+- `*.podDisruptionBudget.*`
+- `postgresql.metrics.*`
+- `valkey.metrics.*`
+- `valkey.replica.replicaCount`
+- `nats.metrics.*`
+- `registry.metrics.*`
+- `victoriaLogs.serviceMonitor.*`
+
+Notes:
+
+- `postgresql` stays single-instance in this v1 chart, but now exposes richer pod and metrics configuration.
+- `valkey.architecture=replication` runs a single StatefulSet with pod `0` as the primary and the remaining pods as replicas.
+- `valkey.persistence.existingClaim` must stay empty when `valkey.architecture=replication`.
+- `nats.persistence.existingClaim` must stay empty when `nats.replicaCount > 1`.
+- `registry.replicaCount > 1` requires RWX/shared storage or an equivalent shared backend claim.
 
 Example renders:
 
