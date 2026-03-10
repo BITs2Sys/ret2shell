@@ -12,12 +12,13 @@ import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Show, untrack } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 
 export default function (props: { gameId: number }) {
   const game = useGame({ id: () => props.gameId });
   const [repoName, setRepoName] = createSignal<string>(game.data?.name || "");
   const [loading, setLoading] = createSignal(false);
+  const [indexing, setIndexing] = createSignal(false);
 
   const [searchParams] = useSearchParams();
   const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[/]+|[/]+$/g, "") || ".";
@@ -32,23 +33,65 @@ export default function (props: { gameId: number }) {
   });
 
   createEffect(() => {
-    if (game.data && path()) {
-      untrack(async () => {
+    const currentGame = game.data;
+    const currentPath = path();
+    if (currentGame && currentPath) {
+      let disposed = false;
+      let retryTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+      const loadRepo = async () => {
+        if (disposed) {
+          return;
+        }
+
         setLoading(true);
         try {
-          const result = await getGameRepo(game.data!.id, `${path()}/`);
+          const result = await getGameRepo(currentGame.id, `${currentPath}/`);
+          if (disposed) {
+            return;
+          }
+
           setObjects(
-            result.sort((a, b) => {
+            result.objects.sort((a, b) => {
               if (a.type === b.type) {
                 return a.path.localeCompare(b.path);
               }
               return b.type.localeCompare(a.type);
             })
           );
+          setIndexing(result.indexing);
+          if (result.indexing) {
+            retryTimer = window.setTimeout(() => {
+              retryTimer = undefined;
+              void loadRepo();
+            }, 1000);
+          }
         } catch (err) {
+          if (disposed) {
+            return;
+          }
+
+          setObjects([]);
+          setIndexing(false);
           handleHttpError(err as Error, t("game.git.errors.fetchRepo.title"));
+        } finally {
+          if (!disposed) {
+            setLoading(false);
+          }
         }
-        setLoading(false);
+      };
+
+      untrack(() => {
+        setObjects([]);
+        setIndexing(false);
+        void loadRepo();
+      });
+
+      onCleanup(() => {
+        disposed = true;
+        if (retryTimer) {
+          window.clearTimeout(retryTimer);
+        }
       });
     }
   });
@@ -90,7 +133,7 @@ export default function (props: { gameId: number }) {
           )}
         </For>
         <div class="flex-1" />
-        <Show when={loading()}>
+        <Show when={loading() || indexing()}>
           <Spin width={20} height={20} />
           <span>{t("general.loading.short")}</span>
         </Show>
@@ -107,12 +150,15 @@ export default function (props: { gameId: number }) {
                 ghost
                 justify="start"
                 href={`/games/${game.data?.id}/admin/git?path=${object.path}`}
-                class={clsx("overflow-hidden relative", loading() && object.path === path() && "bg-layer-content/5!")}
-                disabled={loading() || object.type === "blob"}
+                class={clsx(
+                  "overflow-hidden relative",
+                  (loading() || indexing()) && object.path === path() && "bg-layer-content/5!"
+                )}
+                disabled={loading() || indexing() || object.type === "blob"}
                 title={object.subject || ""}
               >
                 <Show
-                  when={loading() && object.path === path()}
+                  when={(loading() || indexing()) && object.path === path()}
                   fallback={
                     <span
                       class={clsx(

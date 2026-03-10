@@ -23,8 +23,6 @@ data/*
 
 # configuration files
 /config/config.toml
-/config/license
-/config/*.bin
 
 ret2shell.tar.gz
 kubeconfig.yaml

@@ -17,6 +17,7 @@ use crate::BucketError;
 
 const GIT_LOG_RECORD_SEPARATOR: u8 = 0x1E;
 const GIT_LOG_FIELD_SEPARATOR: u8 = 0x1F;
+const REPO_ROOT_PATH: &str = ".";
 
 #[derive(Clone, Debug)]
 pub struct Git {
@@ -48,6 +49,21 @@ pub struct ObjectInfo {
   author: Option<String>,
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct RepoPathIndex {
+  entries: HashMap<String, Vec<ObjectInfo>>,
+}
+
+impl RepoPathIndex {
+  pub fn list(&self, path: &str) -> Vec<ObjectInfo> {
+    self
+      .entries
+      .get(repo_index_path(path))
+      .cloned()
+      .unwrap_or_default()
+  }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DiffEntry {
   pub status: String,
@@ -63,42 +79,60 @@ struct ObjectCommitInfo {
   date: i64,
 }
 
-fn next_non_empty_token<'a, I>(tokens: &mut I) -> Option<&'a [u8]>
-where
-  I: Iterator<Item = &'a [u8]>, {
-  tokens.find(|token| !token.is_empty())
+fn parse_ls_tree_record(record: &[u8]) -> Result<ObjectInfo, BucketError> {
+  let header_end = record
+    .iter()
+    .position(|byte| *byte == b'\t')
+    .ok_or_else(|| {
+      BucketError::GitCommandFailed("failed to parse ls-tree object path".to_string())
+    })?;
+  let header = &record[..header_end];
+  let object_path = &record[header_end + 1..];
+  if object_path.is_empty() {
+    return Err(BucketError::GitCommandFailed(
+      "failed to parse ls-tree object path".to_string(),
+    ));
+  }
+
+  let mut header_fields = header.split(|byte| *byte == b' ');
+  header_fields.next().ok_or_else(|| {
+    BucketError::GitCommandFailed("failed to parse ls-tree object mode".to_string())
+  })?;
+  let object_type = header_fields.next().ok_or_else(|| {
+    BucketError::GitCommandFailed("failed to parse ls-tree object type".to_string())
+  })?;
+  let object_id = header_fields.next().ok_or_else(|| {
+    BucketError::GitCommandFailed("failed to parse ls-tree object id".to_string())
+  })?;
+
+  Ok(ObjectInfo {
+    path: String::from_utf8(object_path.to_vec())?,
+    commit: String::from_utf8(object_id.to_vec())?,
+    r#type: String::from_utf8(object_type.to_vec())?,
+    last_modified: None,
+    subject: None,
+    author: None,
+  })
 }
 
 fn parse_ls_tree_objects(output: &[u8]) -> Result<Vec<ObjectInfo>, BucketError> {
-  let mut tokens = output.split(|byte| *byte == 0);
-  let mut objects = Vec::new();
-
-  loop {
-    let Some(object_type) = next_non_empty_token(&mut tokens) else {
-      break;
-    };
-    let object_id = next_non_empty_token(&mut tokens).ok_or_else(|| {
-      BucketError::GitCommandFailed("failed to parse ls-tree object id".to_string())
-    })?;
-    let object_path = next_non_empty_token(&mut tokens).ok_or_else(|| {
-      BucketError::GitCommandFailed("failed to parse ls-tree object path".to_string())
-    })?;
-
-    objects.push(ObjectInfo {
-      path: String::from_utf8(object_path.to_vec())?,
-      commit: String::from_utf8(object_id.to_vec())?,
-      r#type: String::from_utf8(object_type.to_vec())?,
-      last_modified: None,
-      subject: None,
-      author: None,
-    });
-  }
-
-  Ok(objects)
+  output
+    .split(|byte| *byte == 0)
+    .filter(|record| !record.is_empty())
+    .map(parse_ls_tree_record)
+    .collect()
 }
 
 fn parse_git_path(path: &Path) -> String {
   path.to_string_lossy().replace('\\', "/")
+}
+
+fn repo_index_path(path: &str) -> &str {
+  if path.is_empty() {
+    REPO_ROOT_PATH
+  } else {
+    path
+  }
 }
 
 fn repo_relative_path(repo_root: &Path, path: &Path) -> Result<String, BucketError> {
@@ -110,6 +144,43 @@ fn repo_relative_path(repo_root: &Path, path: &Path) -> Result<String, BucketErr
     .strip_prefix(repo_root)
     .map_err(|_| BucketError::PathTraversal)?;
   Ok(parse_git_path(relative))
+}
+
+fn entry_paths_for_changed_path(changed_path: &str) -> Vec<String> {
+  let mut current = String::new();
+  let mut entries = Vec::new();
+
+  for segment in changed_path
+    .split('/')
+    .filter(|segment| !segment.is_empty())
+  {
+    if !current.is_empty() {
+      current.push('/');
+    }
+    current.push_str(segment);
+    entries.push(current.clone());
+  }
+
+  entries
+}
+
+fn group_objects_by_parent_path(objects: Vec<ObjectInfo>) -> RepoPathIndex {
+  let mut entries = HashMap::new();
+  entries
+    .entry(REPO_ROOT_PATH.to_owned())
+    .or_insert_with(Vec::new);
+
+  for object in objects {
+    let parent = object
+      .path
+      .rsplit_once('/')
+      .map(|(parent, _)| parent)
+      .unwrap_or(REPO_ROOT_PATH)
+      .to_owned();
+    entries.entry(parent).or_insert_with(Vec::new).push(object);
+  }
+
+  RepoPathIndex { entries }
 }
 
 fn listed_entry_for_changed_path(base_path: &str, changed_path: &str) -> Option<String> {
@@ -210,6 +281,57 @@ fn populate_object_commits(
       remaining -= 1;
       if remaining == 0 {
         return Ok(());
+      }
+    }
+  }
+
+  if remaining == 0 {
+    Ok(())
+  } else {
+    Err(BucketError::GitCommandFailed(format!(
+      "failed to resolve last commit for {remaining} object(s)"
+    )))
+  }
+}
+
+fn populate_path_index_commits(
+  output: &[u8], objects: &mut [ObjectInfo],
+) -> Result<(), BucketError> {
+  let path_to_index: HashMap<_, _> = objects
+    .iter()
+    .enumerate()
+    .map(|(index, object)| (object.path.clone(), index))
+    .collect();
+  let mut remaining = objects.len();
+
+  for record in output.split(|byte| *byte == GIT_LOG_RECORD_SEPARATOR) {
+    if record.is_empty() {
+      continue;
+    }
+
+    let (commit, body) = parse_commit_record(record)?;
+    for changed_path in body
+      .split(|byte| *byte == 0)
+      .filter(|path| !path.is_empty())
+    {
+      let changed_path = String::from_utf8(changed_path.to_vec())?;
+      for entry_path in entry_paths_for_changed_path(&changed_path) {
+        let Some(index) = path_to_index.get(&entry_path).copied() else {
+          continue;
+        };
+        let object = &mut objects[index];
+        if object.subject.is_some() {
+          continue;
+        }
+
+        object.commit = commit.abbreviated_commit.clone();
+        object.subject = Some(commit.subject.clone());
+        object.author = Some(commit.author.clone());
+        object.last_modified = Some(commit.date);
+        remaining -= 1;
+        if remaining == 0 {
+          return Ok(());
+        }
       }
     }
   }
@@ -502,24 +624,27 @@ impl Git {
     }
   }
 
-  /// List all objects in the git repository
-  pub async fn list_objects(
-    &self, sub_path: impl AsRef<str>,
-  ) -> Result<Vec<ObjectInfo>, BucketError> {
+  pub fn resolve_list_path(&self, sub_path: impl AsRef<str>) -> Result<String, BucketError> {
     let sub_path = self.path.join(sub_path.as_ref()).canonicalize()?;
-    // check path traversal
     if !sub_path.starts_with(&self.path) && sub_path != self.path {
       return Err(BucketError::PathTraversal);
     }
     let relative_path = repo_relative_path(&self.path, &sub_path)?;
+    Ok(repo_index_path(&relative_path).to_owned())
+  }
+
+  /// List all objects in the git repository
+  pub async fn list_objects(
+    &self, sub_path: impl AsRef<str>,
+  ) -> Result<Vec<ObjectInfo>, BucketError> {
+    let relative_path = self.resolve_list_path(sub_path)?;
     let mut ls_tree = Command::new("git");
     ls_tree
       .current_dir(&self.path)
       .arg("ls-tree")
       .arg("-z")
-      .arg("--format=%(objecttype)%x00%(objectname)%x00%(path)%x00")
       .arg("HEAD");
-    if !relative_path.is_empty() {
+    if relative_path != REPO_ROOT_PATH {
       ls_tree.arg("--").arg(format!(":(literal){relative_path}/"));
     }
 
@@ -555,7 +680,12 @@ impl Git {
         )?));
       }
       trace!(stdio=?output, "got batched object info from git repository");
-      populate_object_commits(&relative_path, &output.stdout, &mut result)?;
+      let base_path = if relative_path == REPO_ROOT_PATH {
+        ""
+      } else {
+        relative_path.as_str()
+      };
+      populate_object_commits(base_path, &output.stdout, &mut result)?;
 
       Ok(result)
     } else {
@@ -564,6 +694,54 @@ impl Git {
         output.stderr,
       )?))
     }
+  }
+
+  pub async fn build_path_index(&self, rev: impl AsRef<str>) -> Result<RepoPathIndex, BucketError> {
+    let rev = rev.as_ref();
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("ls-tree")
+      .arg("-r")
+      .arg("-t")
+      .arg("-z")
+      .arg(rev)
+      .output()
+      .await?;
+    if !output.status.success() {
+      warn!(stdio=?output, rev, "failed to build repo path index object list");
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+
+    trace!(stdio=?output, rev, "got repo path index objects from git repository");
+    let mut objects = parse_ls_tree_objects(&output.stdout)?;
+    if objects.is_empty() {
+      return Ok(group_objects_by_parent_path(objects));
+    }
+
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("log")
+      .arg("-m")
+      .arg("--name-only")
+      .arg("--no-renames")
+      .arg("-z")
+      .arg("--date=unix")
+      .arg("--format=%x1e%h%x1f%s%x1f%aN%x1f%at")
+      .arg(rev)
+      .output()
+      .await?;
+    if !output.status.success() {
+      warn!(stdio=?output, rev, "failed to build repo path index commit data");
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+
+    trace!(stdio=?output, rev, "got repo path index commit data from git repository");
+    populate_path_index_commits(&output.stdout, &mut objects)?;
+    Ok(group_objects_by_parent_path(objects))
   }
 
   pub async fn get_head(&self) -> Result<String, BucketError> {
@@ -816,7 +994,9 @@ mod tests {
     time::{SystemTime, UNIX_EPOCH},
   };
 
-  use super::{Git, listed_entry_for_changed_path, parse_ls_tree_objects};
+  use super::{
+    Git, entry_paths_for_changed_path, listed_entry_for_changed_path, parse_ls_tree_objects,
+  };
 
   fn temp_repo_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -855,9 +1035,11 @@ mod tests {
 
   #[test]
   fn parse_ls_tree_objects_handles_nul_records() {
-    let objects =
-      parse_ls_tree_objects(b"blob\0abc123\0dir/file.txt\0\0tree\0def456\0dir/subdir\0\0")
-        .expect("parse ls-tree objects");
+    let objects = parse_ls_tree_objects(
+      b"100644 blob abc123\tdir/file.txt\0\
+        040000 tree def456\tdir/subdir\0",
+    )
+    .expect("parse ls-tree objects");
     assert_eq!(objects.len(), 2);
     assert_eq!(objects[0].path, "dir/file.txt");
     assert_eq!(objects[0].commit, "abc123");
@@ -882,6 +1064,23 @@ mod tests {
     assert_eq!(
       listed_entry_for_changed_path("challenges", "writeups/.gitkeep"),
       None
+    );
+  }
+
+  #[test]
+  fn entry_paths_for_changed_path_includes_each_ancestor() {
+    assert_eq!(
+      entry_paths_for_changed_path("challenges/world/static/simple"),
+      vec![
+        "challenges".to_owned(),
+        "challenges/world".to_owned(),
+        "challenges/world/static".to_owned(),
+        "challenges/world/static/simple".to_owned(),
+      ]
+    );
+    assert_eq!(
+      entry_paths_for_changed_path("README.md"),
+      vec!["README.md".to_owned()]
     );
   }
 
@@ -980,6 +1179,66 @@ mod tests {
 
     assert_eq!(alpha.subject.as_deref(), Some("merge"));
     assert_eq!(alpha.author.as_deref(), Some("Tester"));
+
+    fs::remove_dir_all(repo).expect("remove temp repo");
+  }
+
+  #[tokio::test]
+  async fn build_path_index_lists_nested_directories_without_git_calls_per_request() {
+    let repo = temp_repo_path("git-build-path-index");
+    fs::create_dir_all(repo.join("challenges/alpha/static")).expect("create challenge dirs");
+
+    run_git(&repo, &["init"]);
+    fs::write(repo.join("README.md"), "root\n").expect("write root readme");
+    fs::write(repo.join("challenges/alpha/README.md"), "alpha\n").expect("write alpha readme");
+    fs::write(repo.join("challenges/alpha/static/logo.txt"), "logo\n").expect("write nested asset");
+    commit_all(&repo, "create challenge tree", "1700000000 +0000");
+
+    fs::write(
+      repo.join("challenges/alpha/static/logo.txt"),
+      "logo updated\n",
+    )
+    .expect("update nested asset");
+    commit_all(&repo, "update nested asset", "1700000060 +0000");
+
+    let git = Git::try_open(&repo).await.expect("open git repo");
+    let index = git
+      .build_path_index("HEAD")
+      .await
+      .expect("build path index");
+
+    let root = index.list(".");
+    let challenges = root
+      .iter()
+      .find(|object| object.path == "challenges")
+      .expect("root challenges entry");
+    assert_eq!(challenges.subject.as_deref(), Some("update nested asset"));
+
+    let challenge_entries = index.list("challenges");
+    let alpha = challenge_entries
+      .iter()
+      .find(|object| object.path == "challenges/alpha")
+      .expect("alpha dir entry");
+    assert_eq!(alpha.subject.as_deref(), Some("update nested asset"));
+
+    let alpha_entries = index.list("challenges/alpha");
+    let readme = alpha_entries
+      .iter()
+      .find(|object| object.path == "challenges/alpha/README.md")
+      .expect("alpha readme entry");
+    assert_eq!(readme.subject.as_deref(), Some("create challenge tree"));
+    let static_dir = alpha_entries
+      .iter()
+      .find(|object| object.path == "challenges/alpha/static")
+      .expect("alpha static dir entry");
+    assert_eq!(static_dir.subject.as_deref(), Some("update nested asset"));
+
+    let static_entries = index.list("challenges/alpha/static");
+    let asset = static_entries
+      .iter()
+      .find(|object| object.path == "challenges/alpha/static/logo.txt")
+      .expect("nested asset entry");
+    assert_eq!(asset.subject.as_deref(), Some("update nested asset"));
 
     fs::remove_dir_all(repo).expect("remove temp repo");
   }

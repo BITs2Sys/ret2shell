@@ -31,7 +31,10 @@ use super::{
     GitHookSession, strip_git_hook_ansi,
   },
 };
-use crate::traits::{GlobalState, ResponseError};
+use crate::{
+  traits::{GlobalState, ResponseError},
+  utility::game_repo::schedule_game_repo_index_refresh,
+};
 
 const ZERO_OID: &str = "0000000000000000000000000000000000000000";
 
@@ -342,6 +345,7 @@ async fn execute_post_receive(
       .await
       .ok();
   }
+  schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 
   logger
     .success("Repository synchronization completed successfully.")

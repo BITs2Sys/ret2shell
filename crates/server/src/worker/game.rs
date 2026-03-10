@@ -18,7 +18,12 @@ use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
-use crate::traits::{GlobalState, ResponseError};
+use crate::{
+  traits::{GlobalState, ResponseError},
+  utility::game_repo::schedule_next_missing_game_repo_index_refresh,
+};
+
+const GAME_REPO_INDEX_REFRESH_INTERVAL_SECS: u64 = 30;
 
 pub async fn spawn_game_workers(state: GlobalState) {
   let queue = state.queue.clone();
@@ -36,6 +41,21 @@ pub async fn spawn_game_workers(state: GlobalState) {
     bucket,
   ));
   tokio::spawn(score_maintenance_worker(queue, database));
+  tokio::spawn(game_repo_index_worker(state));
+}
+
+async fn game_repo_index_worker(state: GlobalState) {
+  info!(
+    interval_secs = GAME_REPO_INDEX_REFRESH_INTERVAL_SECS,
+    "game repo index worker started"
+  );
+  let mut ticker = tokio::time::interval(std::time::Duration::from_secs(
+    GAME_REPO_INDEX_REFRESH_INTERVAL_SECS,
+  ));
+  loop {
+    ticker.tick().await;
+    schedule_next_missing_game_repo_index_refresh(&state).await;
+  }
 }
 
 async fn score_maintenance_worker(queue: Queue, db: Database) {

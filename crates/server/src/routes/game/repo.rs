@@ -11,15 +11,14 @@ use axum::{
     HeaderMap, StatusCode,
     header::{CACHE_CONTROL, CONTENT_TYPE},
   },
-  response::IntoResponse,
+  response::{IntoResponse, Response},
 };
 use futures::TryStreamExt;
 use nanoid::nanoid;
 use r2s_bucket::{
   Bucket,
-  git::{ObjectInfo, to_pkt_line},
+  git::{ObjectInfo, RepoPathIndex, to_pkt_line},
 };
-use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_database::game;
 use regex::Regex;
@@ -36,9 +35,8 @@ use super::hook::{
 use crate::{
   middleware::auth::Token,
   traits::{GlobalState, ResponseError},
+  utility::game_repo::{game_repo_index_cache_key, schedule_game_repo_index_refresh},
 };
-
-const GAME_REPO_CACHE_TTL: i64 = 60 * 5;
 
 #[derive(Deserialize)]
 pub(super) struct GameRepoGitQuery {
@@ -55,38 +53,28 @@ fn normalize_game_repo_path(path: Option<String>) -> String {
   }
 }
 
-fn game_repo_cache_key(game_id: i64, head: &str, path: &str) -> String {
-  format!("{game_id}:{head}:{path}")
-}
-
 pub(super) async fn get_game_repo_git(
-  State(ref bucket): State<Bucket>, State(ref cache): State<Cache>,
-  Extension(game): Extension<game::Model>, Query(query): Query<GameRepoGitQuery>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let game_bucket = bucket
-    .at(
-      game
-        .bucket
-        .clone()
-        .ok_or(ResponseError::PreconditionFailed(
-          "game bucket not found".to_owned(),
-        ))?,
-    )
-    .await?;
+  State(state): State<GlobalState>, Extension(game): Extension<game::Model>,
+  Query(query): Query<GameRepoGitQuery>,
+) -> Result<Response, ResponseError> {
+  let bucket_name = game
+    .bucket
+    .clone()
+    .ok_or(ResponseError::PreconditionFailed(
+      "game bucket not found".to_owned(),
+    ))?;
+  let game_bucket = state.bucket.at(&bucket_name).await?;
   let path = normalize_game_repo_path(query.path);
+  let resolved_path = game_bucket.git.resolve_list_path(&path)?;
   let head = game_bucket.git.get_head().await?;
-  let cache = cache.at("game-repo");
-  let cache_key = game_repo_cache_key(game.id, &head, &path);
-  if let Some(objects) = cache.get::<Vec<ObjectInfo>>(&cache_key).await? {
-    return Ok(Json(objects));
+  let cache = state.cache.at("game-repo-index");
+  let cache_key = game_repo_index_cache_key(game.id, &head);
+  if let Some(index) = cache.get::<RepoPathIndex>(&cache_key).await? {
+    return Ok(Json(index.list(&resolved_path)).into_response());
   }
 
-  let objects = game_bucket.git.list_objects(&path).await?;
-  cache
-    .set_ex(&cache_key, &objects, GAME_REPO_CACHE_TTL)
-    .await?;
-
-  Ok(Json(objects))
+  schedule_game_repo_index_refresh(&state, game.id, &bucket_name).await;
+  Ok((StatusCode::ACCEPTED, Json(Vec::<ObjectInfo>::new())).into_response())
 }
 
 #[derive(Clone, Deserialize)]
@@ -492,10 +480,10 @@ mod tests {
   use r2s_config::{GlobalConfig, server};
 
   use super::{
-    InfoRefsQuery, check_git_protocol_safe, game_repo_cache_key, get_protocol, internal_api_origin,
+    InfoRefsQuery, check_git_protocol_safe, get_protocol, internal_api_origin,
     normalize_game_repo_path, prepare_git_rpc_headers, shell_quote,
   };
-  use crate::traits::ResponseError;
+  use crate::{traits::ResponseError, utility::game_repo::game_repo_index_cache_key};
 
   fn config_with_host(host: &str) -> GlobalConfig {
     GlobalConfig {
@@ -549,11 +537,8 @@ mod tests {
   }
 
   #[test]
-  fn game_repo_cache_key_uses_game_head_and_path() {
-    assert_eq!(
-      game_repo_cache_key(42, "deadbeef", "challenges/world"),
-      "42:deadbeef:challenges/world"
-    );
+  fn game_repo_index_cache_key_uses_game_and_head() {
+    assert_eq!(game_repo_index_cache_key(42, "deadbeef"), "42:deadbeef");
   }
 
   #[test]

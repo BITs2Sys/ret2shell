@@ -1129,13 +1129,15 @@ export function useDeleteGameNodeSelectorMutation(
 }
 
 export async function getGameRepo(game_id: number, path: string) {
-  return await api
-    .get(`${api_root}/game/${game_id}/repo`, {
-      searchParams: {
-        path,
-      },
-    })
-    .json<ObjectInfo[]>();
+  const response = await api.get(`${api_root}/game/${game_id}/repo`, {
+    searchParams: {
+      path,
+    },
+  });
+  return {
+    objects: await response.json<ObjectInfo[]>(),
+    indexing: response.status === 202,
+  };
 }
 
 export function useGameRepo({

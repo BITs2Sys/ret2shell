@@ -47,6 +47,7 @@ jobs:
           echo "Building: $image"
           docker build \
             --build-arg "R2S_GIT_VERSION=${{ env.commit_sha }}" \
+            --load \
             -t "$image" \
             -f Containerfile .
 

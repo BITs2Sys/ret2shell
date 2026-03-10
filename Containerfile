@@ -3,8 +3,7 @@ FROM rust:1.93-alpine AS server
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld
 
-COPY ./.cargo /var/lib/ret2shell/.cargo
-COPY ./config /var/lib/ret2shell/config
+COPY ./.cargo/config.toml /var/lib/ret2shell/.cargo/config.toml
 COPY ./Cargo.toml /var/lib/ret2shell/Cargo.toml
 COPY ./crates /var/lib/ret2shell/crates
 WORKDIR /var/lib/ret2shell
