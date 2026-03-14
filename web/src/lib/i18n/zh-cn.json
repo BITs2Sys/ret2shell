@@ -368,6 +368,10 @@
         "emptyGames": "该源中没有发现赛事",
         "emptyReleases": "当前选中赛事没有可用 release",
         "emptyUpstreams": "当前 release 没有可用的活动 upstream",
+        "conflicts": {
+          "title": "存在冲突的 registry 条目",
+          "description": "其他已获取的发现源也发布了相同的 game key 与 release ID，但其快照或 manifest 内容不同。"
+        },
         "import": {
           "title": "从 registry 导入",
           "success": "已成功创建 registry 导入任务",

@@ -1,14 +1,18 @@
-use std::path::{Path, PathBuf};
+use std::{
+  collections::BTreeMap,
+  path::{Path, PathBuf},
+  time::{Duration, SystemTime},
+};
 
 use anyhow::{Context, anyhow};
 use chrono::Utc;
 use r2s_config::bucket;
-use r2s_database::{challenge, game, game_registry_source};
+use r2s_database::{challenge, game, game_registry_source, game_sync_job};
 use r2s_migrator::Database;
 use rand::Rng;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter, QueryOrder};
-use tokio::fs::{create_dir_all, read_to_string, write};
-use tracing::info;
+use tokio::fs::{create_dir_all, read_dir, read_to_string, remove_dir_all, remove_file, write};
+use tracing::{info, warn};
 
 const SYNC_DIR: &str = ".sync";
 const LOCKS_DIR: &str = "locks";
@@ -20,6 +24,9 @@ const INSTANCE_ID_FILE: &str = "instance-id";
 const DEFAULT_SOURCE_NAME: &str = "ret2shell-official";
 const DEFAULT_SOURCE_URL: &str = "https://github.com/ret2shell/game-registry";
 const DEFAULT_SOURCE_BRANCH: &str = "main";
+const CLEANUP_INTERVAL: Duration = Duration::from_secs(60 * 60);
+const JOB_RETENTION_DAYS: i64 = 7;
+const MEDIA_PART_RETENTION: Duration = Duration::from_secs(60 * 60 * 24 * 7);
 
 pub mod manifest;
 pub mod registry;
@@ -82,6 +89,35 @@ pub fn job_workspace_dir(config: &Option<bucket::Config>, job_id: &str) -> anyho
   Ok(sync_root(config)?.join(JOBS_DIR).join(job_id))
 }
 
+pub fn mirror_cache_dir(
+  config: &Option<bucket::Config>, instance_id: &str, game_key: &str,
+) -> anyhow::Result<PathBuf> {
+  Ok(
+    sync_root(config)?
+      .join(MIRRORS_DIR)
+      .join(sanitize_cache_component(instance_id))
+      .join(format!("{}.git", sanitize_cache_component(game_key))),
+  )
+}
+
+pub fn mirror_lock_path(
+  config: &Option<bucket::Config>, instance_id: &str, game_key: &str,
+) -> anyhow::Result<PathBuf> {
+  Ok(sync_root(config)?.join(LOCKS_DIR).join(format!(
+    "mirror-{}-{}.lock",
+    sanitize_cache_component(instance_id),
+    sanitize_cache_component(game_key)
+  )))
+}
+
+pub fn media_part_path(config: &Option<bucket::Config>, hash: &str) -> anyhow::Result<PathBuf> {
+  Ok(
+    sync_root(config)?
+      .join(MEDIA_PART_DIR)
+      .join(format!("{hash}.part")),
+  )
+}
+
 pub fn target_lock_path(
   config: &Option<bucket::Config>, bucket_name: &str,
 ) -> anyhow::Result<PathBuf> {
@@ -90,6 +126,98 @@ pub fn target_lock_path(
       .join(LOCKS_DIR)
       .join(format!("{bucket_name}.lock")),
   )
+}
+
+pub fn spawn_cleanup_worker(db: Database, config: Option<bucket::Config>) {
+  tokio::spawn(async move {
+    loop {
+      if let Err(err) = cleanup_workspace(&db, &config).await {
+        warn!(error=?err, "failed to clean sync workspace");
+      }
+      tokio::time::sleep(CLEANUP_INTERVAL).await;
+    }
+  });
+}
+
+fn sanitize_cache_component(value: &str) -> String {
+  let sanitized = value
+    .chars()
+    .map(|ch| {
+      if ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_' | '.') {
+        ch
+      } else {
+        '_'
+      }
+    })
+    .collect::<String>();
+  let sanitized = sanitized.trim_matches('_');
+  if sanitized.is_empty() {
+    "unknown".to_owned()
+  } else {
+    sanitized.to_owned()
+  }
+}
+
+async fn cleanup_workspace(db: &Database, config: &Option<bucket::Config>) -> anyhow::Result<()> {
+  let root = sync_root(config)?;
+  cleanup_job_workspaces(db, &root).await?;
+  cleanup_media_parts(&root).await?;
+  Ok(())
+}
+
+async fn cleanup_job_workspaces(db: &Database, root: &Path) -> anyhow::Result<()> {
+  let finished_before = Utc::now() - chrono::Duration::days(JOB_RETENTION_DAYS);
+  let jobs_by_id = game_sync_job::get_list(&db.conn)
+    .await?
+    .into_iter()
+    .map(|job| (job.id.to_string(), job))
+    .collect::<BTreeMap<_, _>>();
+  let job_root = root.join(JOBS_DIR);
+  let mut entries = match read_dir(&job_root).await {
+    Ok(entries) => entries,
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+    Err(err) => return Err(err.into()),
+  };
+  while let Some(entry) = entries.next_entry().await? {
+    if !entry.file_type().await?.is_dir() {
+      continue;
+    }
+    let job_key = entry.file_name().to_string_lossy().to_string();
+    let should_keep = jobs_by_id.get(&job_key).is_some_and(|job| {
+      job
+        .finished_at
+        .map(|finished_at| finished_at >= finished_before)
+        .unwrap_or(true)
+    });
+    if !should_keep {
+      remove_dir_all(entry.path()).await.ok();
+    }
+  }
+  Ok(())
+}
+
+async fn cleanup_media_parts(root: &Path) -> anyhow::Result<()> {
+  let cutoff = SystemTime::now() - MEDIA_PART_RETENTION;
+  let media_part_root = root.join(MEDIA_PART_DIR);
+  let mut entries = match read_dir(&media_part_root).await {
+    Ok(entries) => entries,
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+    Err(err) => return Err(err.into()),
+  };
+  while let Some(entry) = entries.next_entry().await? {
+    if !entry.file_type().await?.is_file() {
+      continue;
+    }
+    let modified = entry
+      .metadata()
+      .await?
+      .modified()
+      .unwrap_or(SystemTime::UNIX_EPOCH);
+    if modified < cutoff {
+      remove_file(entry.path()).await.ok();
+    }
+  }
+  Ok(())
 }
 
 fn generate_instance_id() -> String {
@@ -223,7 +351,7 @@ async fn ensure_default_registry_source(db: &Database) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-  use super::generate_instance_id;
+  use super::{generate_instance_id, sanitize_cache_component};
 
   #[test]
   fn generated_instance_id_looks_like_uuid_v4() {
@@ -235,5 +363,14 @@ mod tests {
     assert_eq!(&id[23..24], "-");
     assert_eq!(&id[14..15], "4");
     assert!(matches!(&id[19..20], "8" | "9" | "a" | "b"));
+  }
+
+  #[test]
+  fn sanitize_cache_component_replaces_path_separators() {
+    assert_eq!(
+      sanitize_cache_component("official/source"),
+      "official_source"
+    );
+    assert_eq!(sanitize_cache_component(" "), "unknown");
   }
 }

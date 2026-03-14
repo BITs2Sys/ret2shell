@@ -368,6 +368,10 @@
         "emptyGames": "このソースにはゲームがありません",
         "emptyReleases": "選択したゲームに利用可能な release がありません",
         "emptyUpstreams": "選択した release に有効な upstream がありません",
+        "conflicts": {
+          "title": "競合する registry エントリ",
+          "description": "他の取得済み discovery ソースにも同じ game key と release ID がありますが、snapshot または manifest の内容が一致しません。"
+        },
         "import": {
           "title": "registry から取り込む",
           "success": "registry 取り込みジョブを作成しました",

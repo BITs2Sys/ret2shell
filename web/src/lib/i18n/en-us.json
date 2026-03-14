@@ -368,6 +368,10 @@
         "emptyGames": "No games found in this source",
         "emptyReleases": "No releases available for the selected game",
         "emptyUpstreams": "No active upstreams available for the selected release",
+        "conflicts": {
+          "title": "Conflicting registry entries",
+          "description": "Other fetched discovery sources publish the same game key and release ID with different snapshot or manifest content."
+        },
         "import": {
           "title": "Import from registry",
           "success": "Registry import job created successfully",

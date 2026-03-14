@@ -54,6 +54,15 @@ pub(super) struct CatalogReleaseDetailResponse {
   pub snapshot_commit: String,
   pub manifest_sha256: String,
   pub upstreams: Vec<CatalogUpstreamResponse>,
+  pub conflicts: Vec<CatalogReleaseConflictResponse>,
+}
+
+#[derive(Serialize)]
+pub(super) struct CatalogReleaseConflictResponse {
+  pub source_id: i64,
+  pub source_name: String,
+  pub manifest_sha256: String,
+  pub snapshot_commit: String,
 }
 
 #[derive(Deserialize)]
@@ -109,10 +118,22 @@ pub(super) async fn get_catalog_release_detail(
   Query(query): Query<SourceQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let source = load_source(&state, query.source_id).await?;
+  let all_sources = game_registry_source::get_list(&state.db.conn).await?;
   let detail =
     registry::get_catalog_release_detail(&state.config.bucket, &source, &game_key, &release_id)
       .await
       .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+  let conflicts = registry::list_catalog_release_conflicts(
+    &state.config.bucket,
+    &all_sources,
+    source.id,
+    &game_key,
+    &release_id,
+    &detail.manifest_sha256,
+    &detail.manifest.snapshot_commit,
+  )
+  .await
+  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
   Ok(Json(CatalogReleaseDetailResponse {
     game_key: detail.manifest.game_key,
     release_id: detail.manifest.release_id,
@@ -128,6 +149,15 @@ pub(super) async fn get_catalog_release_detail(
         auth_mode: upstream.auth_mode,
         protocol_version: upstream.protocol_version,
         published_at: upstream.published_at,
+      })
+      .collect(),
+    conflicts: conflicts
+      .into_iter()
+      .map(|conflict| CatalogReleaseConflictResponse {
+        source_id: conflict.source_id,
+        source_name: conflict.source_name,
+        manifest_sha256: conflict.manifest_sha256,
+        snapshot_commit: conflict.snapshot_commit,
       })
       .collect(),
   }))

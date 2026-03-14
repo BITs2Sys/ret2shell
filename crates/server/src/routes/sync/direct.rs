@@ -1,6 +1,6 @@
 use std::{
   collections::{BTreeMap, BTreeSet},
-  fs::OpenOptions,
+  fs::OpenOptions as StdOpenOptions,
   io::ErrorKind,
   path::{Path, PathBuf},
 };
@@ -9,7 +9,10 @@ use axum::{
   Extension, Json,
   body::{Body, to_bytes},
   extract::State,
-  http::{HeaderValue, Method, Request, Uri, header::AUTHORIZATION},
+  http::{
+    HeaderValue, Method, Request, Uri,
+    header::{AUTHORIZATION, RANGE},
+  },
   response::IntoResponse,
 };
 use chrono::{DateTime, Utc};
@@ -19,21 +22,24 @@ use heck::ToSnakeCase;
 use r2s_bucket::{Bucket, git::Git};
 use r2s_captcha::sha256sum_str;
 use r2s_cluster::SyncImageMirrorRequest;
-use r2s_database::{challenge, game, game_release, game_remote_sync, game_sync_job, hint, media};
+use r2s_database::{
+  challenge, game, game_registry_source, game_release, game_remote_sync, game_sync_job, hint, media,
+};
 use r2s_media::Media;
 use r2s_migrator::Database;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use tokio::{
-  fs::{create_dir_all, read_dir, remove_dir_all, rename},
+  fs::{File, OpenOptions, create_dir_all, read_dir, remove_dir_all, remove_file, rename},
+  io::{AsyncSeekExt, AsyncWriteExt},
   process::Command,
 };
 use tokio_util::io::StreamReader;
 
 use crate::{
   middleware::auth::Token,
-  sync::{self, manifest},
+  sync::{self, manifest, registry},
   traits::{GlobalState, HTTPClient, ResponseError},
 };
 
@@ -139,24 +145,67 @@ impl ImportTargetLock {
   ) -> Result<Self, ResponseError> {
     let path = sync::target_lock_path(config, bucket_name)
       .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
-    if let Some(parent) = path.parent() {
-      create_dir_all(parent).await?;
-    }
-    match OpenOptions::new().write(true).create_new(true).open(&path) {
-      Ok(_) => Ok(Self { path }),
-      Err(err) if err.kind() == ErrorKind::AlreadyExists => Err(ResponseError::Conflict(
-        "another import or sync finalization is already targeting this game bucket".to_owned(),
-      )),
-      Err(err) => Err(ResponseError::InternalServerError(format!(
-        "failed to lock sync target bucket: {err}"
-      ))),
-    }
+    acquire_lock_file(
+      path,
+      "another import or sync finalization is already targeting this game bucket",
+      "failed to lock sync target bucket",
+    )
+    .await
+    .map(|path| Self { path })
   }
 }
 
 impl Drop for ImportTargetLock {
   fn drop(&mut self) {
     std::fs::remove_file(&self.path).ok();
+  }
+}
+
+#[derive(Debug)]
+struct MirrorCacheLock {
+  path: PathBuf,
+}
+
+impl MirrorCacheLock {
+  async fn acquire(
+    config: &Option<r2s_config::bucket::Config>, instance_id: &str, game_key: &str,
+  ) -> Result<Self, ResponseError> {
+    let path = sync::mirror_lock_path(config, instance_id, game_key)
+      .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+    acquire_lock_file(
+      path,
+      "another sync job is already refreshing the shared mirror cache for this release",
+      "failed to lock shared mirror cache",
+    )
+    .await
+    .map(|path| Self { path })
+  }
+}
+
+impl Drop for MirrorCacheLock {
+  fn drop(&mut self) {
+    std::fs::remove_file(&self.path).ok();
+  }
+}
+
+async fn acquire_lock_file(
+  path: PathBuf, busy_message: &str, error_context: &str,
+) -> Result<PathBuf, ResponseError> {
+  if let Some(parent) = path.parent() {
+    create_dir_all(parent).await?;
+  }
+  match StdOpenOptions::new()
+    .write(true)
+    .create_new(true)
+    .open(&path)
+  {
+    Ok(_) => Ok(path),
+    Err(err) if err.kind() == ErrorKind::AlreadyExists => {
+      Err(ResponseError::Conflict(busy_message.to_owned()))
+    }
+    Err(err) => Err(ResponseError::InternalServerError(format!(
+      "{error_context}: {err}"
+    ))),
   }
 }
 
@@ -430,6 +479,63 @@ async fn load_import_target_game(
     ))
 }
 
+async fn maybe_refresh_registry_import_request(
+  state: &GlobalState, mut job: game_sync_job::Model, request: &mut DirectImportRequest,
+) -> Result<game_sync_job::Model, ResponseError> {
+  if job.mode != game_sync_job::SyncJobMode::Registry {
+    return Ok(job);
+  }
+  let Some(source_id) = job.registry_source_id else {
+    return Ok(job);
+  };
+  let source = game_registry_source::get(&state.db.conn, source_id)
+    .await?
+    .ok_or(ResponseError::NotFound(
+      "registry discovery source not found".to_owned(),
+    ))?;
+  let detail = registry::get_catalog_release_detail(
+    &state.config.bucket,
+    &source,
+    &request.game_key,
+    &request.release_id,
+  )
+  .await
+  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+  let chosen_upstream = detail
+    .upstreams
+    .iter()
+    .find(|upstream| {
+      job.upstream_instance_id.as_deref() == Some(upstream.instance_id.as_str())
+        || job.upstream_base_url.as_deref() == Some(upstream.base_url.as_str())
+    })
+    .or_else(|| detail.upstreams.first())
+    .ok_or(ResponseError::PreconditionFailed(
+      "no active upstream is currently available for this registry release".to_owned(),
+    ))?;
+
+  let next_request = DirectImportRequest {
+    base_url: chosen_upstream.base_url.clone(),
+    sync_token: Some(chosen_upstream.sync_token.clone()),
+    game_key: request.game_key.clone(),
+    release_id: request.release_id.clone(),
+  };
+  let needs_update = request.base_url != next_request.base_url
+    || request.sync_token != next_request.sync_token
+    || job.upstream_instance_id.as_deref() != Some(chosen_upstream.instance_id.as_str())
+    || job.upstream_base_url.as_deref() != Some(chosen_upstream.base_url.as_str());
+  if !needs_update {
+    *request = next_request;
+    return Ok(job);
+  }
+
+  *request = next_request.clone();
+  let status = job.status.clone();
+  job.request_body = game_sync_job::JsonObject(serde_json::to_value(&next_request)?);
+  job.upstream_instance_id = Some(chosen_upstream.instance_id.clone());
+  job.upstream_base_url = Some(chosen_upstream.base_url.clone());
+  update_job(&state.db, job, status, None, None, None, None).await
+}
+
 pub(super) fn spawn_import_job(state: GlobalState, job_id: i64) {
   tokio::spawn(async move {
     if let Err(err) = run_direct_import_job(state.clone(), job_id).await
@@ -457,9 +563,10 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
   if job.status == game_sync_job::SyncJobStatus::Cancelled {
     return Ok(());
   }
-  let request: DirectImportRequest =
+  let mut request: DirectImportRequest =
     serde_json::from_value(job.request_body.0.clone()).map_err(ResponseError::from)?;
   let mut checkpoint = decode_checkpoint(&job.checkpoint.0)?;
+  job = maybe_refresh_registry_import_request(&state, job, &mut request).await?;
   let workspace = sync::job_workspace_dir(&state.config.bucket, &job_id.to_string())
     .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
   let repo_dir = workspace.join("repo");
@@ -515,10 +622,12 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
   if !checkpoint.repo.verified_snapshot || !repo_dir.exists() {
     ensure_repo_snapshot(
       &state.db,
+      &state.config.bucket,
       &mut job,
       &mut checkpoint,
       &repo_dir,
       &request,
+      &discovered.remote_info.instance_id,
       &discovered.release.snapshot_commit,
     )
     .await?;
@@ -532,6 +641,7 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     job = download_release_media_resumable(
       &state.requestor,
       &state.db,
+      &state.config.bucket,
       &state.media,
       &request.base_url,
       normalized_sync_token(request.sync_token.as_deref()),
@@ -585,10 +695,12 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     checkpoint.repo = RepoCheckpoint::default();
     ensure_repo_snapshot(
       &state.db,
+      &state.config.bucket,
       &mut job,
       &mut checkpoint,
       &repo_dir,
       &request,
+      &discovered.remote_info.instance_id,
       &discovered.release.snapshot_commit,
     )
     .await?;
@@ -713,11 +825,22 @@ async fn recover_existing_target_repo_state(
   Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn ensure_repo_snapshot(
-  db: &Database, job: &mut game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
-  repo_dir: &Path, request: &DirectImportRequest, snapshot_commit: &str,
+  db: &Database, bucket_config: &Option<r2s_config::bucket::Config>,
+  job: &mut game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint, repo_dir: &Path,
+  request: &DirectImportRequest, remote_instance_id: &str, snapshot_commit: &str,
 ) -> Result<(), ResponseError> {
   sync_repo_checkpoint_from_disk(repo_dir, snapshot_commit, &mut checkpoint.repo).await?;
+  let mirror_dir = ensure_shared_mirror_cache(
+    bucket_config,
+    db,
+    job,
+    checkpoint,
+    request,
+    remote_instance_id,
+  )
+  .await?;
   if !checkpoint.repo.initialized {
     *job = update_job(
       db,
@@ -729,11 +852,19 @@ async fn ensure_repo_snapshot(
       None,
     )
     .await?;
+    if repo_dir.exists() {
+      remove_dir_all(repo_dir).await.ok();
+    }
     let repo_dir_str = repo_dir.to_string_lossy().to_string();
     run_git(
       None,
-      normalized_sync_token(request.sync_token.as_deref()),
-      &["init".to_owned(), repo_dir_str],
+      None,
+      &[
+        "clone".to_owned(),
+        "--no-checkout".to_owned(),
+        mirror_dir.to_string_lossy().to_string(),
+        repo_dir_str,
+      ],
     )
     .await?;
     checkpoint.repo.initialized = true;
@@ -749,18 +880,26 @@ async fn ensure_repo_snapshot(
       None,
     )
     .await?;
-    let repo_url = format!(
-      "{}/api/sync/v1/games/{}/releases/{}/repo",
-      request.base_url, request.game_key, request.release_id
-    );
+    run_git(
+      Some(repo_dir),
+      None,
+      &[
+        "remote".to_owned(),
+        "set-url".to_owned(),
+        "origin".to_owned(),
+        mirror_dir.to_string_lossy().to_string(),
+      ],
+    )
+    .await?;
     let release_ref = manifest::release_ref(&request.release_id);
     run_git(
       Some(repo_dir),
-      normalized_sync_token(request.sync_token.as_deref()),
+      None,
       &[
         "fetch".to_owned(),
+        "--force".to_owned(),
         "--no-tags".to_owned(),
-        repo_url,
+        "origin".to_owned(),
         format!("{release_ref}:{release_ref}"),
       ],
     )
@@ -780,7 +919,7 @@ async fn ensure_repo_snapshot(
     .await?;
     run_git(
       Some(repo_dir),
-      normalized_sync_token(request.sync_token.as_deref()),
+      None,
       &[
         "checkout".to_owned(),
         "--detach".to_owned(),
@@ -823,6 +962,73 @@ async fn ensure_repo_snapshot(
   Ok(())
 }
 
+async fn ensure_shared_mirror_cache(
+  bucket_config: &Option<r2s_config::bucket::Config>, db: &Database,
+  job: &mut game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
+  request: &DirectImportRequest, remote_instance_id: &str,
+) -> Result<PathBuf, ResponseError> {
+  let _mirror_lock =
+    MirrorCacheLock::acquire(bucket_config, remote_instance_id, &request.game_key).await?;
+  let mirror_dir = sync::mirror_cache_dir(bucket_config, remote_instance_id, &request.game_key)
+    .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+  if let Some(parent) = mirror_dir.parent() {
+    create_dir_all(parent).await?;
+  }
+  if mirror_dir.exists() && !mirror_dir.join("HEAD").exists() {
+    remove_dir_all(&mirror_dir).await.ok();
+  }
+  if !mirror_dir.exists() {
+    *job = update_job(
+      db,
+      job.clone(),
+      game_sync_job::SyncJobStatus::Running,
+      Some("fetch_repo:init".to_owned()),
+      Some(checkpoint),
+      None,
+      None,
+    )
+    .await?;
+    run_git(
+      None,
+      None,
+      &[
+        "init".to_owned(),
+        "--bare".to_owned(),
+        mirror_dir.to_string_lossy().to_string(),
+      ],
+    )
+    .await?;
+  }
+  *job = update_job(
+    db,
+    job.clone(),
+    game_sync_job::SyncJobStatus::Running,
+    Some("fetch_repo:fetch".to_owned()),
+    Some(checkpoint),
+    None,
+    None,
+  )
+  .await?;
+  let repo_url = format!(
+    "{}/api/sync/v1/games/{}/releases/{}/repo",
+    request.base_url, request.game_key, request.release_id
+  );
+  let release_ref = manifest::release_ref(&request.release_id);
+  run_git(
+    Some(&mirror_dir),
+    normalized_sync_token(request.sync_token.as_deref()),
+    &[
+      "fetch".to_owned(),
+      "--force".to_owned(),
+      "--no-tags".to_owned(),
+      repo_url,
+      format!("{release_ref}:{release_ref}"),
+    ],
+  )
+  .await?;
+  Ok(mirror_dir)
+}
+
 async fn sync_repo_checkpoint_from_disk(
   repo_dir: &Path, snapshot_commit: &str, repo: &mut RepoCheckpoint,
 ) -> Result<(), ResponseError> {
@@ -844,9 +1050,9 @@ async fn sync_repo_checkpoint_from_disk(
 
 #[allow(clippy::too_many_arguments)]
 async fn download_release_media_resumable(
-  client: &HTTPClient, db: &Database, media_store: &Media, base_url: &str,
-  sync_token: Option<&str>, media_hashes: &[String], uploader_id: i64,
-  mut job: game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
+  client: &HTTPClient, db: &Database, bucket_config: &Option<r2s_config::bucket::Config>,
+  media_store: &Media, base_url: &str, sync_token: Option<&str>, media_hashes: &[String],
+  uploader_id: i64, mut job: game_sync_job::Model, checkpoint: &mut DirectImportCheckpoint,
 ) -> Result<game_sync_job::Model, ResponseError> {
   let total = media_hashes.len();
   if total == 0 {
@@ -887,8 +1093,27 @@ async fn download_release_media_resumable(
     )
     .await?;
 
-    let (status, body) =
-      fetch_remote_body(client, base_url, &format!("/media/{hash}"), sync_token).await?;
+    let part_path = sync::media_part_path(bucket_config, hash)
+      .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+    if let Some(parent) = part_path.parent() {
+      create_dir_all(parent).await?;
+    }
+    let existing_size = if part_path.exists() {
+      tokio::fs::metadata(&part_path)
+        .await
+        .map(|metadata| metadata.len())
+        .unwrap_or(0)
+    } else {
+      0
+    };
+    let (status, body) = fetch_remote_body(
+      client,
+      base_url,
+      &format!("/media/{hash}"),
+      sync_token,
+      (existing_size > 0).then_some(existing_size),
+    )
+    .await?;
     if !status.is_success() {
       let body = to_bytes(body, usize::MAX).await.map_err(|err| {
         ResponseError::BadRequest(format!("failed to read remote media response: {err}"))
@@ -898,9 +1123,25 @@ async fn download_release_media_resumable(
         String::from_utf8_lossy(&body)
       )));
     }
-    let reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
-    let model = media_store.save(reader).await?;
+    let append = existing_size > 0 && status == axum::http::StatusCode::PARTIAL_CONTENT;
+    let mut part_file = OpenOptions::new()
+      .create(true)
+      .write(true)
+      .append(append)
+      .truncate(!append)
+      .open(&part_path)
+      .await?;
+    if append {
+      part_file.seek(std::io::SeekFrom::End(0)).await?;
+    }
+    let mut reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
+    tokio::io::copy(&mut reader, &mut part_file).await?;
+    part_file.flush().await?;
+    drop(part_file);
+
+    let model = media_store.save(File::open(&part_path).await?).await?;
     if model.hash != *hash {
+      media_store.delete(&model.hash).await.ok();
       return Err(ResponseError::Conflict(format!(
         "downloaded media hash mismatch: expected {hash}, got {}",
         model.hash
@@ -917,6 +1158,7 @@ async fn download_release_media_resumable(
       )
       .await?;
     }
+    remove_file(&part_path).await.ok();
     checkpoint.media.downloaded_hashes.insert(hash.clone());
     job = update_job(
       db,
@@ -1471,7 +1713,7 @@ fn build_imported_game(
 }
 
 async fn fetch_remote_body(
-  client: &HTTPClient, base_url: &str, path: &str, token: Option<&str>,
+  client: &HTTPClient, base_url: &str, path: &str, token: Option<&str>, range_start: Option<u64>,
 ) -> Result<(axum::http::StatusCode, Body), ResponseError> {
   let uri = Uri::try_from(format!("{base_url}/api/sync/v1{path}"))
     .map_err(|err| ResponseError::BadRequest(format!("invalid remote sync uri: {err}")))?;
@@ -1482,6 +1724,9 @@ async fn fetch_remote_body(
       HeaderValue::from_str(&format!("Bearer {token}"))
         .map_err(|err| ResponseError::BadRequest(format!("invalid sync token header: {err}")))?,
     );
+  }
+  if let Some(range_start) = range_start {
+    request = request.header(RANGE, format!("bytes={range_start}-"));
   }
   let request = request.body(Body::empty()).map_err(|err| {
     ResponseError::InternalServerError(format!("failed to build sync request: {err}"))
@@ -1496,7 +1741,7 @@ async fn fetch_remote_body(
 async fn fetch_remote_json<T: serde::de::DeserializeOwned>(
   client: &HTTPClient, base_url: &str, path: &str, token: Option<&str>,
 ) -> Result<T, ResponseError> {
-  let (status, body) = fetch_remote_body(client, base_url, path, token).await?;
+  let (status, body) = fetch_remote_body(client, base_url, path, token, None).await?;
   let body = to_bytes(body, usize::MAX).await.map_err(|err| {
     ResponseError::BadRequest(format!("failed to read remote sync response: {err}"))
   })?;

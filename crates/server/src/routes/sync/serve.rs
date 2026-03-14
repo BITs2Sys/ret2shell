@@ -6,7 +6,7 @@ use axum::{
   extract::{Path, Query, Request, State},
   http::{
     HeaderMap, HeaderValue, StatusCode, Uri,
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, RANGE},
+    header::{ACCEPT, ACCEPT_RANGES, AUTHORIZATION, CONTENT_RANGE, CONTENT_TYPE, RANGE},
   },
   response::IntoResponse,
 };
@@ -18,6 +18,7 @@ use r2s_database::{game, game_release, game_remote_sync, media};
 use r2s_media::Media;
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
+use tokio::io::{AsyncReadExt, AsyncSeekExt};
 use tokio_stream::StreamExt;
 use tokio_util::io::{ReaderStream, StreamReader};
 use tracing::error;
@@ -309,8 +310,8 @@ pub(super) async fn get_sync_media(
   if model.is_none() {
     return Err(ResponseError::NotFound("media".to_owned()));
   }
-  let file = media_store.get(&hash).await?;
-  let stream = ReaderStream::new(file);
+  let mut file = media_store.get(&hash).await?;
+  let total_size = file.metadata().await?.len();
   let mut response_headers = HeaderMap::new();
   response_headers.insert(
     CONTENT_TYPE,
@@ -319,6 +320,33 @@ pub(super) async fn get_sync_media(
       .parse::<HeaderValue>()
       .map_err(|_| ResponseError::InternalServerError("failed to parse mime type".to_owned()))?,
   );
+  response_headers.insert(ACCEPT_RANGES, HeaderValue::from_static("bytes"));
+  if let Some(range_start) = parse_range_start(headers.get(RANGE))? {
+    if range_start >= total_size {
+      return Err(ResponseError::BadRequest(
+        "requested media range is outside the file".to_owned(),
+      ));
+    }
+    file.seek(std::io::SeekFrom::Start(range_start)).await?;
+    response_headers.insert(
+      CONTENT_RANGE,
+      HeaderValue::from_str(&format!(
+        "bytes {range_start}-{}/{}",
+        total_size - 1,
+        total_size
+      ))
+      .map_err(|err| {
+        ResponseError::InternalServerError(format!("invalid content range header: {err}"))
+      })?,
+    );
+    let stream = ReaderStream::new(file.take(total_size - range_start));
+    return Ok((
+      StatusCode::PARTIAL_CONTENT,
+      response_headers,
+      Body::from_stream(stream),
+    ));
+  }
+  let stream = ReaderStream::new(file);
   Ok((StatusCode::OK, response_headers, Body::from_stream(stream)))
 }
 
@@ -484,6 +512,26 @@ fn bearer_token(headers: &HeaderMap) -> Option<String> {
   authorization.strip_prefix("Bearer ").map(str::to_owned)
 }
 
+fn parse_range_start(range: Option<&HeaderValue>) -> Result<Option<u64>, ResponseError> {
+  let Some(range) = range else {
+    return Ok(None);
+  };
+  let range = range
+    .to_str()
+    .map_err(|_| ResponseError::BadRequest("invalid media range header".to_owned()))?;
+  let Some(start) = range
+    .strip_prefix("bytes=")
+    .and_then(|value| value.strip_suffix('-'))
+  else {
+    return Err(ResponseError::BadRequest(
+      "invalid media range header".to_owned(),
+    ));
+  };
+  Ok(Some(start.parse::<u64>().map_err(|_| {
+    ResponseError::BadRequest("invalid media range header".to_owned())
+  })?))
+}
+
 fn parse_sync_registry_path(path: &str) -> Result<(String, &'static str, String), ResponseError> {
   if let Some((repository, reference)) = path.split_once("/manifests/") {
     return Ok((
@@ -507,7 +555,9 @@ fn parse_sync_registry_path(path: &str) -> Result<(String, &'static str, String)
 #[allow(clippy::items_after_test_module)]
 #[cfg(test)]
 mod tests {
-  use super::parse_sync_registry_path;
+  use axum::http::HeaderValue;
+
+  use super::{parse_range_start, parse_sync_registry_path};
 
   #[test]
   fn parse_sync_registry_path_supports_manifests_and_blobs() {
@@ -532,6 +582,19 @@ mod tests {
   #[test]
   fn parse_sync_registry_path_rejects_unknown_shapes() {
     assert!(parse_sync_registry_path("game_bucket/web/tags/list").is_err());
+  }
+
+  #[test]
+  fn parse_range_start_accepts_simple_byte_ranges() {
+    assert_eq!(
+      parse_range_start(Some(&HeaderValue::from_static("bytes=128-"))).expect("valid range"),
+      Some(128)
+    );
+  }
+
+  #[test]
+  fn parse_range_start_rejects_invalid_shapes() {
+    assert!(parse_range_start(Some(&HeaderValue::from_static("items=1-2"))).is_err());
   }
 }
 

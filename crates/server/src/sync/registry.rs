@@ -102,6 +102,14 @@ pub struct RegistryCatalogReleaseDetail {
   pub upstreams: Vec<RegistryCatalogUpstream>,
 }
 
+#[derive(Clone)]
+pub struct RegistryCatalogConflict {
+  pub source_id: i64,
+  pub source_name: String,
+  pub manifest_sha256: String,
+  pub snapshot_commit: String,
+}
+
 pub struct RegistryPublicationRequest<'a> {
   pub game_key: &'a str,
   pub release_id: &'a str,
@@ -284,6 +292,46 @@ pub async fn get_catalog_release_detail(
   release_id: &str,
 ) -> anyhow::Result<RegistryCatalogReleaseDetail> {
   let cache_dir = fetch_registry_source(bucket_config, source).await?;
+  get_catalog_release_detail_from_cache(&cache_dir, game_key, release_id).await
+}
+
+pub async fn list_catalog_release_conflicts(
+  bucket_config: &Option<bucket::Config>, sources: &[game_registry_source::Model],
+  selected_source_id: i64, game_key: &str, release_id: &str, manifest_sha256: &str,
+  snapshot_commit: &str,
+) -> anyhow::Result<Vec<RegistryCatalogConflict>> {
+  let mut conflicts = Vec::new();
+  for source in sources {
+    if !source.enabled || source.id == selected_source_id {
+      continue;
+    }
+    let cache_dir = source_cache_dir(bucket_config, source.id)?;
+    if !cache_dir.exists() {
+      continue;
+    }
+    let Ok(detail) = get_catalog_release_detail_from_cache(&cache_dir, game_key, release_id).await
+    else {
+      continue;
+    };
+    if detail.manifest_sha256 == manifest_sha256
+      && detail.manifest.snapshot_commit == snapshot_commit
+    {
+      continue;
+    }
+    conflicts.push(RegistryCatalogConflict {
+      source_id: source.id,
+      source_name: source.name.clone(),
+      manifest_sha256: detail.manifest_sha256,
+      snapshot_commit: detail.manifest.snapshot_commit,
+    });
+  }
+  conflicts.sort_by(|left, right| left.source_name.cmp(&right.source_name));
+  Ok(conflicts)
+}
+
+async fn get_catalog_release_detail_from_cache(
+  cache_dir: &Path, game_key: &str, release_id: &str,
+) -> anyhow::Result<RegistryCatalogReleaseDetail> {
   let release_path = cache_dir
     .join("games")
     .join(game_key)
@@ -304,7 +352,7 @@ pub async fn get_catalog_release_detail(
   Ok(RegistryCatalogReleaseDetail {
     manifest,
     manifest_sha256: r2s_captcha::sha256sum_str(&manifest_body),
-    upstreams: load_release_upstreams(&cache_dir, game_key, release_id).await?,
+    upstreams: load_release_upstreams(cache_dir, game_key, release_id).await?,
   })
 }
 

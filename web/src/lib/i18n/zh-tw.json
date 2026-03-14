@@ -368,6 +368,10 @@
         "emptyGames": "此來源中沒有發現賽事",
         "emptyReleases": "目前選中賽事沒有可用 release",
         "emptyUpstreams": "目前 release 沒有可用的活動 upstream",
+        "conflicts": {
+          "title": "存在衝突的 registry 條目",
+          "description": "其他已拉取的發現源也發佈了相同的 game key 與 release ID，但其快照或 manifest 內容不同。"
+        },
         "import": {
           "title": "從 registry 導入",
           "success": "已成功建立 registry 導入任務",

@@ -115,6 +115,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     media,
     version: R2S_VERSION.to_string(),
   };
+  sync::spawn_cleanup_worker(state.db.clone(), state.config.bucket.clone());
   info!("modules loaded, constructing router...");
 
   let router = routes::initialize(config.server.clone(), state.clone()).await?;

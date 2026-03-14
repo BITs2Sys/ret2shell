@@ -75,12 +75,20 @@ export type CatalogUpstream = {
   published_at: DateTime;
 };
 
+export type CatalogReleaseConflict = {
+  source_id: number;
+  source_name: string;
+  manifest_sha256: string;
+  snapshot_commit: string;
+};
+
 export type CatalogReleaseDetail = {
   game_key: string;
   release_id: string;
   snapshot_commit: string;
   manifest_sha256: string;
   upstreams: CatalogUpstream[];
+  conflicts: CatalogReleaseConflict[];
 };
 
 export type RemoteSyncInfo = {

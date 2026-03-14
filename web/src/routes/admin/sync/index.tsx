@@ -404,6 +404,21 @@ export default function () {
               </For>
             </div>
           </div>
+          <Show when={catalogDetail.data?.conflicts?.length}>
+            <Card level="warning" contentClass="p-3 flex flex-col gap-2">
+              <div class="font-bold">{t("platform.sync.catalog.conflicts.title")}</div>
+              <span class="text-sm opacity-80">{t("platform.sync.catalog.conflicts.description")}</span>
+              <For each={catalogDetail.data?.conflicts || []}>
+                {(conflict) => (
+                  <div class="rounded-lg border border-warning/30 bg-warning/5 p-3 flex flex-col gap-1 text-sm">
+                    <span class="font-bold">{conflict.source_name}</span>
+                    <span class="font-mono break-all">{conflict.snapshot_commit}</span>
+                    <span class="font-mono break-all opacity-80">{conflict.manifest_sha256}</span>
+                  </div>
+                )}
+              </For>
+            </Card>
+          </Show>
           <div class="flex flex-row justify-end">
             <Button
               level="primary"
