@@ -844,7 +844,7 @@ Recommended rules:
 Recommended transport design:
 
 - the upstream sync API should expose a sync-aware registry relay or sync-aware registry auth flow for `assets.oci_images`
-- the relay should validate `sync_token`, `game_key`, `release_id`, and the requested `source_repository`
+- the relay should validate `sync_token`, `game_key`, `release_id`, `source_repository`, and the full manifest/blob digest closure reachable from each declared root digest
 - the importer should pull from the upstream through that sync-aware path, then push into the local registry namespace using local trusted credentials
 - existing Ret2Shell registry proxy behavior remains the underlying transport, but sync must use a release-scoped authorization path instead of ordinary game-admin login state
 

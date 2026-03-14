@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use axum::{
   Json,
-  body::{Body, Bytes},
+  body::{Body, Bytes, to_bytes},
   extract::{Path, Query, Request, State},
   http::{
     HeaderMap, HeaderValue, StatusCode, Uri,
@@ -18,6 +18,7 @@ use r2s_database::{game, game_release, game_remote_sync, media};
 use r2s_media::Media;
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tokio::io::{AsyncReadExt, AsyncSeekExt};
 use tokio_stream::StreamExt;
 use tokio_util::io::{ReaderStream, StreamReader};
@@ -384,6 +385,15 @@ pub(super) async fn proxy_sync_registry(
       ))?,
     crate::sync::manifest::split_internal_tag_reference(&oci_asset.internal_tag).0
   );
+  ensure_registry_reference_allowed(
+    &client,
+    &config,
+    &local_repository,
+    &oci_asset.digest,
+    target_kind,
+    &reference,
+  )
+  .await?;
   let registry_config = config
     .cluster
     .clone()
@@ -530,6 +540,143 @@ fn parse_range_start(range: Option<&HeaderValue>) -> Result<Option<u64>, Respons
   Ok(Some(start.parse::<u64>().map_err(|_| {
     ResponseError::BadRequest("invalid media range header".to_owned())
   })?))
+}
+
+async fn ensure_registry_reference_allowed(
+  client: &crate::traits::HTTPClient, config: &GlobalConfig, repository: &str, root_digest: &str,
+  target_kind: &str, reference: &str,
+) -> Result<(), ResponseError> {
+  let allowed =
+    collect_allowed_registry_references(client, config, repository, root_digest).await?;
+  let is_allowed = match target_kind {
+    "manifests" => allowed.manifests.contains(reference),
+    "blobs" => allowed.blobs.contains(reference),
+    _ => false,
+  };
+  if !is_allowed {
+    return Err(ResponseError::Forbidden(
+      "requested OCI object is not declared by this release".to_owned(),
+    ));
+  }
+  Ok(())
+}
+
+struct AllowedRegistryReferences {
+  manifests: std::collections::BTreeSet<String>,
+  blobs: std::collections::BTreeSet<String>,
+}
+
+async fn collect_allowed_registry_references(
+  client: &crate::traits::HTTPClient, config: &GlobalConfig, repository: &str, root_digest: &str,
+) -> Result<AllowedRegistryReferences, ResponseError> {
+  let mut manifests = std::collections::BTreeSet::new();
+  let mut blobs = std::collections::BTreeSet::new();
+  let mut stack = vec![root_digest.to_owned()];
+  while let Some(digest) = stack.pop() {
+    if !manifests.insert(digest.clone()) {
+      continue;
+    }
+    let manifest = fetch_local_registry_manifest(client, config, repository, &digest).await?;
+    for child in manifest_child_digests(&manifest) {
+      if !manifests.contains(&child) {
+        stack.push(child);
+      }
+    }
+    blobs.extend(manifest_blob_digests(&manifest));
+  }
+  Ok(AllowedRegistryReferences { manifests, blobs })
+}
+
+async fn fetch_local_registry_manifest(
+  client: &crate::traits::HTTPClient, config: &GlobalConfig, repository: &str, digest: &str,
+) -> Result<Value, ResponseError> {
+  let registry_config = config
+    .cluster
+    .clone()
+    .and_then(|cluster| cluster.registry)
+    .ok_or(ResponseError::PreconditionFailed(
+      "internal registry is not enabled".to_owned(),
+    ))?;
+  let uri = Uri::try_from(format!(
+    "{}://{}/v2/{}/manifests/{}",
+    if registry_config.insecure {
+      "http"
+    } else {
+      "https"
+    },
+    registry_config.server.trim_matches('/'),
+    repository.trim_matches('/'),
+    digest
+  ))
+  .map_err(|err| ResponseError::BadRequest(format!("invalid local registry uri: {err}")))?;
+  let mut request = Request::builder()
+    .method(axum::http::Method::GET)
+    .uri(uri)
+    .header(
+      ACCEPT,
+      "application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json",
+    );
+  if let Some(username) = registry_config.username
+    && let Some(password) = registry_config.password
+  {
+    let auth = base64::engine::general_purpose::STANDARD.encode(format!("{username}:{password}"));
+    request = request.header(AUTHORIZATION, format!("Basic {auth}"));
+  }
+  let response = client
+    .request(request.body(Body::empty()).map_err(|err| {
+      ResponseError::InternalServerError(format!("failed to build registry request: {err}"))
+    })?)
+    .await
+    .map_err(|err| ResponseError::BadRequest(format!("local registry lookup failed: {err}")))?;
+  if !response.status().is_success() {
+    return Err(ResponseError::Forbidden(format!(
+      "requested OCI manifest is not available for sync: {}",
+      response.status()
+    )));
+  }
+  let body = to_bytes(Body::new(response.into_body()), usize::MAX)
+    .await
+    .map_err(|err| {
+      ResponseError::InternalServerError(format!("failed to read registry manifest: {err}"))
+    })?;
+  serde_json::from_slice(&body).map_err(|err| {
+    ResponseError::InternalServerError(format!("invalid registry manifest body: {err}"))
+  })
+}
+
+fn manifest_child_digests(manifest: &Value) -> Vec<String> {
+  manifest
+    .get("manifests")
+    .and_then(Value::as_array)
+    .into_iter()
+    .flatten()
+    .filter_map(|entry| {
+      entry
+        .get("digest")
+        .and_then(Value::as_str)
+        .map(str::to_owned)
+    })
+    .collect()
+}
+
+fn manifest_blob_digests(manifest: &Value) -> Vec<String> {
+  let mut digests = Vec::new();
+  if let Some(digest) = manifest
+    .get("config")
+    .and_then(|config| config.get("digest"))
+    .and_then(Value::as_str)
+  {
+    digests.push(digest.to_owned());
+  }
+  if let Some(layers) = manifest.get("layers").and_then(Value::as_array) {
+    digests.extend(layers.iter().filter_map(|layer| {
+      layer
+        .get("digest")
+        .and_then(Value::as_str)
+        .map(str::to_owned)
+    }));
+  }
+  digests
 }
 
 fn parse_sync_registry_path(path: &str) -> Result<(String, &'static str, String), ResponseError> {

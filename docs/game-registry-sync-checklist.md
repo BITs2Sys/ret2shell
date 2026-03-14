@@ -381,7 +381,7 @@ Recommended routes:
 Rules:
 
 - the relay validates `sync_token` instead of ordinary web login state
-- the relay only allows repositories declared by `assets.oci_images`
+- the relay only allows manifest and blob digests reachable from the release-declared `assets.oci_images` roots
 - the relay maps those requests to the upstream Ret2Shell registry proxy/backend
 - the importer pushes into its own local registry namespace using local trusted credentials
 
