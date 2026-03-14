@@ -11,6 +11,7 @@ use tokio::fs::{create_dir_all, read_to_string, write};
 use tracing::info;
 
 const SYNC_DIR: &str = ".sync";
+const LOCKS_DIR: &str = "locks";
 const SOURCES_DIR: &str = "sources";
 const MIRRORS_DIR: &str = "mirrors";
 const JOBS_DIR: &str = "jobs";
@@ -25,6 +26,7 @@ pub mod registry;
 
 pub async fn initialize(db: &Database, config: &Option<bucket::Config>) -> anyhow::Result<()> {
   let root = sync_root(config)?;
+  create_dir_all(root.join(LOCKS_DIR)).await?;
   create_dir_all(root.join(SOURCES_DIR)).await?;
   create_dir_all(root.join(MIRRORS_DIR)).await?;
   create_dir_all(root.join(JOBS_DIR)).await?;
@@ -78,6 +80,16 @@ pub fn source_cache_dir(
 
 pub fn job_workspace_dir(config: &Option<bucket::Config>, job_id: &str) -> anyhow::Result<PathBuf> {
   Ok(sync_root(config)?.join(JOBS_DIR).join(job_id))
+}
+
+pub fn target_lock_path(
+  config: &Option<bucket::Config>, bucket_name: &str,
+) -> anyhow::Result<PathBuf> {
+  Ok(
+    sync_root(config)?
+      .join(LOCKS_DIR)
+      .join(format!("{bucket_name}.lock")),
+  )
 }
 
 fn generate_instance_id() -> String {

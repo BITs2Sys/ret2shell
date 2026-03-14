@@ -1,6 +1,8 @@
 use std::{
   collections::{BTreeMap, BTreeSet},
-  path::Path,
+  fs::OpenOptions,
+  io::ErrorKind,
+  path::{Path, PathBuf},
 };
 
 use axum::{
@@ -124,6 +126,38 @@ struct MediaCheckpoint {
 struct OciCheckpoint {
   mirrored_images: BTreeSet<String>,
   completed: bool,
+}
+
+#[derive(Debug)]
+struct ImportTargetLock {
+  path: PathBuf,
+}
+
+impl ImportTargetLock {
+  async fn acquire(
+    config: &Option<r2s_config::bucket::Config>, bucket_name: &str,
+  ) -> Result<Self, ResponseError> {
+    let path = sync::target_lock_path(config, bucket_name)
+      .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
+    if let Some(parent) = path.parent() {
+      create_dir_all(parent).await?;
+    }
+    match OpenOptions::new().write(true).create_new(true).open(&path) {
+      Ok(_) => Ok(Self { path }),
+      Err(err) if err.kind() == ErrorKind::AlreadyExists => Err(ResponseError::Conflict(
+        "another import or sync finalization is already targeting this game bucket".to_owned(),
+      )),
+      Err(err) => Err(ResponseError::InternalServerError(format!(
+        "failed to lock sync target bucket: {err}"
+      ))),
+    }
+  }
+}
+
+impl Drop for ImportTargetLock {
+  fn drop(&mut self) {
+    std::fs::remove_file(&self.path).ok();
+  }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -497,9 +531,20 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     .ok_or(ResponseError::InternalServerError(
       "sync checkpoint lost local bucket information".to_owned(),
     ))?;
+  let _target_lock = ImportTargetLock::acquire(&state.config.bucket, &bucket_name).await?;
   let final_repo_path = state.bucket.path().join(&bucket_name);
   if final_repo_path.exists() && job.game_id.is_none() {
-    remove_dir_all(&final_repo_path).await.ok();
+    if repo_dir.exists() {
+      return Err(ResponseError::Conflict(
+        "import finalization found both staged and live repositories for the same game bucket"
+          .to_owned(),
+      ));
+    }
+    rename(&final_repo_path, &repo_dir).await.map_err(|err| {
+      ResponseError::InternalServerError(format!(
+        "failed to recover staged repository from previous finalization attempt: {err}"
+      ))
+    })?;
   }
   if !repo_dir.exists() {
     checkpoint.repo = RepoCheckpoint::default();
@@ -524,6 +569,13 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     None,
   )
   .await?;
+
+  if final_repo_path.exists() {
+    return Err(ResponseError::Conflict(
+      "target game bucket already exists and can not be replaced during import finalization"
+        .to_owned(),
+    ));
+  }
 
   rename(&repo_dir, &final_repo_path).await.map_err(|err| {
     ResponseError::InternalServerError(format!("failed to finalize imported repository: {err}"))

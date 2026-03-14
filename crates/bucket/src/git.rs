@@ -1020,16 +1020,13 @@ impl Git {
   }
 
   pub async fn info_refs_upload_release_only(
-    &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
+    &self, protocol: impl AsRef<OsStr>, release_ref: &str,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError> {
     self
       .stream_internal_with_config(
         protocol,
-        [
-          ("uploadpack.hideRefs", "refs/heads"),
-          ("uploadpack.hideRefs", "refs/remotes"),
-          ("uploadpack.hideRefs", "refs/tags"),
-        ],
+        release_only_uploadpack_config(release_ref),
         "upload-pack",
         ["--stateless-rpc", "--advertise-refs"],
         stdin,
@@ -1046,16 +1043,13 @@ impl Git {
   }
 
   pub async fn upload_pack_release_only(
-    &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
+    &self, protocol: impl AsRef<OsStr>, release_ref: &str,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError> {
     self
       .stream_internal_with_config(
         protocol,
-        [
-          ("uploadpack.hideRefs", "refs/heads"),
-          ("uploadpack.hideRefs", "refs/remotes"),
-          ("uploadpack.hideRefs", "refs/tags"),
-        ],
+        release_only_uploadpack_config(release_ref),
         "upload-pack",
         ["--stateless-rpc"],
         stdin,
@@ -1070,6 +1064,17 @@ impl Git {
       .stream_internal(protocol, "receive-pack", ["--stateless-rpc"], stdin)
       .await
   }
+}
+
+fn release_only_uploadpack_config(release_ref: &str) -> Vec<(String, String)> {
+  vec![
+    ("uploadpack.hideRefs".to_owned(), "HEAD".to_owned()),
+    ("uploadpack.hideRefs".to_owned(), "refs".to_owned()),
+    (
+      "uploadpack.hideRefs".to_owned(),
+      format!("!{}", release_ref.trim_matches('/')),
+    ),
+  ]
 }
 
 // covert a message to PKT-LINE format
@@ -1111,7 +1116,24 @@ mod tests {
 
   use super::{
     Git, entry_paths_for_changed_path, listed_entry_for_changed_path, parse_ls_tree_objects,
+    release_only_uploadpack_config,
   };
+
+  #[test]
+  fn release_only_uploadpack_config_hides_all_other_refs() {
+    let config = release_only_uploadpack_config("refs/ret2shell/releases/deadbeef");
+    assert_eq!(
+      config,
+      vec![
+        ("uploadpack.hideRefs".to_owned(), "HEAD".to_owned()),
+        ("uploadpack.hideRefs".to_owned(), "refs".to_owned()),
+        (
+          "uploadpack.hideRefs".to_owned(),
+          "!refs/ret2shell/releases/deadbeef".to_owned(),
+        ),
+      ]
+    );
+  }
 
   fn temp_repo_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()

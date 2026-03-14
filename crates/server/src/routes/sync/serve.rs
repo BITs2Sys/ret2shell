@@ -206,7 +206,7 @@ pub(super) async fn get_sync_release_info_refs(
   if service != "upload-pack" {
     return Err(ResponseError::BadRequest("invalid git service".to_owned()));
   }
-  let (game, _) = get_accessible_release(
+  let (game, release) = get_accessible_release(
     &db.conn,
     &game_key,
     &release_id,
@@ -224,10 +224,15 @@ pub(super) async fn get_sync_release_info_refs(
         ))?,
     )
     .await?;
+  ensure_release_ref_is_available(&game_bucket, &release).await?;
   let stream_reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
   let stdout = game_bucket
     .git
-    .info_refs_upload_release_only(protocol, stream_reader)
+    .info_refs_upload_release_only(
+      protocol,
+      &crate::sync::manifest::release_ref(&release.release_id),
+      stream_reader,
+    )
     .await
     .map_err(|err| {
       error!(error=?err, "failed to run sync git info refs");
@@ -251,7 +256,7 @@ pub(super) async fn post_sync_release_upload_pack(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Path((game_key, release_id)): Path<(String, String)>, headers: HeaderMap, body: Body,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let (game, _) = get_accessible_release(
+  let (game, release) = get_accessible_release(
     &db.conn,
     &game_key,
     &release_id,
@@ -269,10 +274,15 @@ pub(super) async fn post_sync_release_upload_pack(
         ))?,
     )
     .await?;
+  ensure_release_ref_is_available(&game_bucket, &release).await?;
   let stream_reader = StreamReader::new(body.into_data_stream().map_err(std::io::Error::other));
   let stdout = game_bucket
     .git
-    .upload_pack_release_only(protocol, stream_reader)
+    .upload_pack_release_only(
+      protocol,
+      &crate::sync::manifest::release_ref(&release.release_id),
+      stream_reader,
+    )
     .await
     .map_err(|err| {
       error!(error=?err, "failed to run sync git upload pack");
@@ -405,12 +415,32 @@ async fn get_accessible_release(
   let release = game_release::get_by_game_and_release(db, game.id, release_id)
     .await?
     .ok_or(ResponseError::NotFound("game release not found".to_owned()))?;
+  if let Some(remote_sync) = game_remote_sync::get(db, game.id).await?
+    && remote_sync.state == game_remote_sync::RemoteGameState::Detached
+  {
+    return Err(ResponseError::Conflict(
+      "detached mirrors can no longer serve sync traffic".to_owned(),
+    ));
+  }
   if !release_visible_to_token(db, &game, token).await? {
     return Err(ResponseError::Forbidden(
       "game release is not accessible through sync".to_owned(),
     ));
   }
   Ok((game, release))
+}
+
+async fn ensure_release_ref_is_available(
+  game_bucket: &r2s_bucket::game::GameBucket, release: &game_release::Model,
+) -> Result<(), ResponseError> {
+  let release_ref = crate::sync::manifest::release_ref(&release.release_id);
+  let release_ref_oid = game_bucket.git.get_ref(&release_ref).await?;
+  if release_ref_oid.as_deref() != Some(release.snapshot_commit.as_str()) {
+    return Err(ResponseError::Conflict(
+      "requested release ref is missing or no longer matches the recorded snapshot".to_owned(),
+    ));
+  }
+  Ok(())
 }
 
 async fn release_visible_to_token(
