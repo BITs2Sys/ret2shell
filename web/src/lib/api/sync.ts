@@ -5,8 +5,8 @@ import type {
   DirectDiscoverResponse,
   GameReleaseSummary,
   GameSyncStatus,
-  ManualRegistryPublication,
-  ManualRegistryUpstreamPublication,
+  RegistryPublicationMetadata,
+  RegistryUpstreamMetadata,
   SyncJob,
   SyncRegistrySource,
 } from "@models/sync";
@@ -21,8 +21,6 @@ export type SyncRegistrySourcePayload = {
   branch: string;
   enabled: boolean;
   priority: number;
-  publish_enabled: boolean;
-  private_source: boolean;
 };
 
 export type DirectDiscoverPayload = {
@@ -242,10 +240,6 @@ export async function getGameSyncReleases(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/sync/releases`).json<GameReleaseSummary[]>();
 }
 
-export async function getGameSyncSources(game_id: number) {
-  return await api.get(`${api_root}/game/${game_id}/sync/sources`).json<SyncRegistrySource[]>();
-}
-
 export function useGameSyncReleases({
   game_id,
   enabled,
@@ -263,30 +257,6 @@ export function useGameSyncReleases({
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("game.sync.errors.fetchReleases.title"));
-        return onError?.(err) ?? false;
-      },
-    }),
-    () => inflyClient
-  );
-}
-
-export function useGameSyncSources({
-  game_id,
-  enabled,
-  onError,
-}: {
-  game_id: () => number;
-  enabled?: () => boolean;
-  onError?: (err: Error) => boolean;
-}) {
-  const keys = createMemo(() => ["game", game_id(), "sync-source"]);
-  return useQuery(
-    () => ({
-      queryKey: keys(),
-      queryFn: async () => await getGameSyncSources(game_id()),
-      enabled: enabled?.(),
-      throwOnError: (err: Error) => {
-        handleHttpError(err, t("game.sync.errors.fetchSources.title"));
         return onError?.(err) ?? false;
       },
     }),
@@ -336,24 +306,19 @@ export function useDetachGameSyncMutation(
   }));
 }
 
-export async function publishGameSyncRelease(game_id: number, registry_source_id: number) {
-  return await api
-    .post(`${api_root}/game/${game_id}/sync/publish`, { json: { registry_source_id } })
-    .json<ManualRegistryPublication>();
+export async function publishGameSyncRelease(game_id: number) {
+  return await api.post(`${api_root}/game/${game_id}/sync/publish`, { json: {} }).json<RegistryPublicationMetadata>();
 }
 
-export async function advertiseGameSyncUpstream(game_id: number, registry_source_id: number) {
-  return await api
-    .post(`${api_root}/game/${game_id}/sync/advertise`, { json: { registry_source_id } })
-    .json<ManualRegistryUpstreamPublication>();
+export async function advertiseGameSyncUpstream(game_id: number) {
+  return await api.post(`${api_root}/game/${game_id}/sync/advertise`, { json: {} }).json<RegistryUpstreamMetadata>();
 }
 
 export function usePublishGameSyncMutation(
-  props: { onSuccess?: (publication: ManualRegistryPublication) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (publication: RegistryPublicationMetadata) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: ({ game_id, registry_source_id }: { game_id: number; registry_source_id: number }) =>
-      publishGameSyncRelease(game_id, registry_source_id),
+    mutationFn: ({ game_id }: { game_id: number }) => publishGameSyncRelease(game_id),
     onSuccess: (data) => {
       toastSuccess(t("game.sync.actions.publish.success"));
       props.onSuccess?.(data);
@@ -366,11 +331,10 @@ export function usePublishGameSyncMutation(
 }
 
 export function useAdvertiseGameSyncMutation(
-  props: { onSuccess?: (publication: ManualRegistryUpstreamPublication) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (publication: RegistryUpstreamMetadata) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: ({ game_id, registry_source_id }: { game_id: number; registry_source_id: number }) =>
-      advertiseGameSyncUpstream(game_id, registry_source_id),
+    mutationFn: ({ game_id }: { game_id: number }) => advertiseGameSyncUpstream(game_id),
     onSuccess: (data) => {
       toastSuccess(t("game.sync.actions.advertise.success"));
       props.onSuccess?.(data);

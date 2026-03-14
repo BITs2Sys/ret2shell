@@ -113,25 +113,17 @@ pub struct RegistryPublicationRequest<'a> {
 }
 
 #[derive(Serialize)]
-pub struct ManualRegistryPublication {
-  pub registry_source_name: String,
-  pub registry_git_url: String,
-  pub registry_branch: String,
+pub struct RegistryPublicationMetadataBundle {
   pub release_file_path: String,
   pub release_file_content: String,
   pub upstream_file_path: String,
   pub upstream_file_content: String,
-  pub suggested_pr_title: String,
 }
 
 #[derive(Serialize)]
-pub struct ManualRegistryUpstreamPublication {
-  pub registry_source_name: String,
-  pub registry_git_url: String,
-  pub registry_branch: String,
+pub struct RegistryUpstreamMetadataBundle {
   pub upstream_file_path: String,
   pub upstream_file_content: String,
-  pub suggested_pr_title: String,
 }
 
 pub async fn fetch_registry_source(
@@ -316,13 +308,9 @@ pub async fn get_catalog_release_detail(
   })
 }
 
-pub fn build_manual_registry_publication(
-  source: &game_registry_source::Model, release: RegistryPublicationRequest<'_>,
-) -> anyhow::Result<ManualRegistryPublication> {
-  if !source.publish_enabled {
-    bail!("registry source {} is not publish-enabled", source.name);
-  }
-
+pub fn build_registry_publication_metadata(
+  release: RegistryPublicationRequest<'_>,
+) -> anyhow::Result<RegistryPublicationMetadataBundle> {
   let upstream_body = build_upstream_advertisement_body(&RegistryUpstreamPublicationRequest {
     game_key: release.game_key,
     release_id: release.release_id,
@@ -332,10 +320,7 @@ pub fn build_manual_registry_publication(
     sync_token: release.sync_token,
     published_at: release.published_at,
   })?;
-  Ok(ManualRegistryPublication {
-    registry_source_name: source.name.clone(),
-    registry_git_url: source.git_url.clone(),
-    registry_branch: source.branch.clone(),
+  Ok(RegistryPublicationMetadataBundle {
     release_file_path: format!(
       "games/{}/releases/{}.toml",
       release.game_key, release.release_id
@@ -348,26 +333,14 @@ pub fn build_manual_registry_publication(
       release.published_at.timestamp_millis()
     ),
     upstream_file_content: upstream_body,
-    suggested_pr_title: format!(
-      ":sparkles: publish release {}@{}",
-      release.game_key,
-      short_release_id(release.release_id)
-    ),
   })
 }
 
-pub fn build_manual_registry_upstream_publication(
-  source: &game_registry_source::Model, release: RegistryUpstreamPublicationRequest<'_>,
-) -> anyhow::Result<ManualRegistryUpstreamPublication> {
-  if !source.publish_enabled {
-    bail!("registry source {} is not publish-enabled", source.name);
-  }
-
+pub fn build_registry_upstream_metadata(
+  release: RegistryUpstreamPublicationRequest<'_>,
+) -> anyhow::Result<RegistryUpstreamMetadataBundle> {
   let upstream_body = build_upstream_advertisement_body(&release)?;
-  Ok(ManualRegistryUpstreamPublication {
-    registry_source_name: source.name.clone(),
-    registry_git_url: source.git_url.clone(),
-    registry_branch: source.branch.clone(),
+  Ok(RegistryUpstreamMetadataBundle {
     upstream_file_path: format!(
       "games/{}/upstreams/{}/{}.toml",
       release.game_key,
@@ -375,12 +348,6 @@ pub fn build_manual_registry_upstream_publication(
       release.published_at.timestamp_millis()
     ),
     upstream_file_content: upstream_body,
-    suggested_pr_title: format!(
-      ":sparkles: add {} upstream {}@{}",
-      release.role,
-      release.game_key,
-      short_release_id(release.release_id)
-    ),
   })
 }
 
@@ -451,15 +418,10 @@ async fn run_git_with_env(
     warn!(
       ?args,
       ?stderr,
-      "git command failed while handling registry source"
+      "git command failed while handling registry discovery source"
     );
     Err(anyhow!(stderr))
   }
-}
-
-fn short_release_id(release_id: &str) -> &str {
-  let short_len = release_id.len().min(12);
-  &release_id[..short_len]
 }
 
 async fn load_release_upstreams(
@@ -529,18 +491,11 @@ async fn load_release_upstreams(
 #[cfg(test)]
 mod tests {
   use chrono::{DateTime, Utc};
-  use r2s_database::game_registry_source;
 
   use super::{
-    RegistryUpstreamPublicationRequest, build_manual_registry_upstream_publication,
-    short_release_id, validate_registry_metadata_body,
+    RegistryUpstreamPublicationRequest, build_registry_upstream_metadata,
+    validate_registry_metadata_body,
   };
-
-  #[test]
-  fn short_release_id_keeps_short_values() {
-    assert_eq!(short_release_id("abc"), "abc");
-    assert_eq!(short_release_id("1234567890abcdef"), "1234567890ab");
-  }
 
   #[test]
   fn validate_registry_metadata_body_accepts_v1_registry() {
@@ -580,33 +535,17 @@ kind = "ret2shell-game-registry"
   }
 
   #[test]
-  fn build_manual_registry_upstream_publication_uses_requested_role() {
-    let publication = build_manual_registry_upstream_publication(
-      &game_registry_source::Model {
-        id: 1,
-        name: "official".to_owned(),
-        git_url: "https://example.com/registry.git".to_owned(),
-        branch: "main".to_owned(),
-        enabled: true,
-        priority: 0,
-        publish_enabled: true,
-        private_source: false,
-        last_fetched_at: None,
-        last_error: None,
-        created_at: DateTime::<Utc>::UNIX_EPOCH,
-        updated_at: DateTime::<Utc>::UNIX_EPOCH,
-      },
-      RegistryUpstreamPublicationRequest {
-        game_key: "game_key",
-        release_id: "deadbeefcafebabe",
-        instance_id: "instance-id",
-        role: "third_party",
-        base_url: "https://mirror.example.com",
-        sync_token: "sync-token",
-        published_at: DateTime::<Utc>::UNIX_EPOCH,
-      },
-    )
-    .expect("manual upstream publication should build");
+  fn build_registry_upstream_metadata_uses_requested_role() {
+    let publication = build_registry_upstream_metadata(RegistryUpstreamPublicationRequest {
+      game_key: "game_key",
+      release_id: "deadbeefcafebabe",
+      instance_id: "instance-id",
+      role: "third_party",
+      base_url: "https://mirror.example.com",
+      sync_token: "sync-token",
+      published_at: DateTime::<Utc>::UNIX_EPOCH,
+    })
+    .expect("registry upstream metadata should build");
 
     assert!(
       publication

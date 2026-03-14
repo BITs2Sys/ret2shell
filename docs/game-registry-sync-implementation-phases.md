@@ -59,7 +59,7 @@ Primary frontend files:
 - any game marked as `mirror_locked` rejects local mutation requests consistently
 - the UI clearly shows that mirrored games are read-only
 
-## Phase 2 - First-Party Release Publication
+## Phase 2 - First-Party Publication Metadata
 
 ### Backend
 
@@ -68,39 +68,34 @@ Primary frontend files:
 - implement `sync_token` rotation endpoint
 - implement release manifest builder from repo + DB + media references
 - create release refs under `refs/ret2shell/releases/<release_id>`
-- implement registry source CRUD and fetch/validate logic
-- implement first-party publish job and registry commit/push flow
+- implement first-party publication metadata generation
+- keep registry commit/push outside the platform boundary
 
 Primary backend files:
 
 - `crates/server/src/routes/game/mod.rs`
 - `crates/server/src/routes/game/sync.rs` or equivalent nested module
-- `crates/server/src/routes/sync/source.rs`
 - `crates/server/src/sync/manifest.rs`
-- `crates/server/src/sync/publish.rs`
 - `crates/server/src/sync/registry.rs`
 
 ### Frontend
 
 - add `web/src/lib/api/sync.ts`
-- turn `/admin/sync` into a working registry-source management page
 - add `/games/[game]/admin/sync/index.tsx`
 - add a game admin sidebar entry for sync
-- show publish button, release list, and sync token rotation on the game sync page
+- show publication metadata button, release list, and sync token rotation on the game sync page
 
 Primary frontend files:
 
 - `web/src/lib/api/sync.ts`
-- `web/src/routes/admin/sync/index.tsx`
 - `web/src/routes/games/[game]/admin/_blocks/sidebar.tsx`
 - `web/src/routes/games/[game]/admin/sync/index.tsx`
 
 ### Exit Criteria
 
-- an archived local game can publish a release to a configured registry source
-- the publish operation stores a local release record and release ref
+- an archived local game can generate a first-party registry publication metadata bundle
+- the metadata generation operation stores a local release record and release ref
 - the game sync page shows the current release history and sync token controls
-- registry source CRUD and fetch work from the UI
 
 ## Phase 3 - Remote Serving and Direct Instance-to-Instance Import
 
@@ -155,33 +150,34 @@ Primary frontend files:
 - detaching the mirror unlocks local edits
 - releases that contain `internal_managed` challenge images may still be deferred until Phase 6, but the job flow must already detect and report that requirement explicitly
 
-## Phase 4 - Registry-Backed Import and Third-Party Upstreams
+## Phase 4 - Registry-Backed Import and Third-Party Metadata Export
 
 ### Backend
 
+- add read-only registry discovery source CRUD and fetch/validate logic
 - implement registry catalog parsing from fetched source clones
 - add local catalog endpoints for registry browsing
 - allow import jobs in `registry` mode
 - allow choosing one upstream from registry-discovered candidates
-- add third-party upstream advertisement publication
+- add third-party upstream advertisement metadata generation
 - enforce live third-party validation:
   - reject detached mirrors
   - reject stale release refs
   - reject non-matching release IDs
-- optionally publish revocation records after detach when registry access is available
 
 Primary backend files:
 
+- `crates/server/src/routes/sync/source.rs`
 - `crates/server/src/routes/sync/catalog.rs`
 - `crates/server/src/sync/registry.rs`
 - `crates/server/src/sync/import.rs`
-- `crates/server/src/sync/publish.rs`
 
 ### Frontend
 
+- add registry discovery source management to `/admin/sync`
 - add registry browser to `/admin/sync`
 - add release detail and upstream selection UI
-- add a `publish as third-party upstream` option at import completion time
+- add a `generate third-party upstream metadata` option at import completion time or on the game sync page
 - add explicit detach confirmation messaging explaining downstream consequences
 
 Primary frontend files:
@@ -192,8 +188,8 @@ Primary frontend files:
 
 ### Exit Criteria
 
-- one instance can browse a registry source, choose a release, choose an upstream, and import successfully
-- a locked mirror can advertise itself as a third-party upstream
+- one instance can browse a registry discovery source, choose a release, choose an upstream, and import successfully
+- a locked mirror can generate third-party upstream advertisement metadata
 - a detached mirror is rejected as a third-party upstream by live validation
 
 ## Phase 5 - Recovery, Conflict Handling, and UX Hardening
@@ -262,4 +258,4 @@ At that point the platform already supports:
 - resumable repo/media sync
 - safe detach behavior
 
-Registry-backed discovery and third-party upstream advertisement can then be added on top without reopening the core import model.
+Registry-backed discovery and third-party upstream metadata export can then be added on top without reopening the core import model.

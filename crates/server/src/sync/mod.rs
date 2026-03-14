@@ -196,7 +196,7 @@ async fn ensure_default_registry_source(db: &Database) -> anyhow::Result<()> {
       branch: DEFAULT_SOURCE_BRANCH.to_owned(),
       enabled: true,
       priority: 0,
-      publish_enabled: true,
+      publish_enabled: false,
       private_source: false,
       last_fetched_at: None,
       last_error: None,

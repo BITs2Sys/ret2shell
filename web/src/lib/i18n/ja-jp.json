@@ -301,9 +301,9 @@
     "sync": {
       "title": "リソースの同期",
       "sources": {
-        "title": "Registry ソース",
-        "description": "ゲーム release の公開と今後の同期探索に使う registry リポジトリを管理します。",
-        "empty": "registry ソースがまだ設定されていません",
+        "title": "Registry discovery ソース",
+        "description": "カタログ閲覧と取り込みに使う、読み取り専用の registry リポジトリを管理します。",
+        "empty": "registry discovery ソースがまだ設定されていません",
         "form": {
           "name": "ソース名",
           "gitUrl": "Git URL",
@@ -316,8 +316,8 @@
         "actions": {
           "fetch": {
             "title": "取得",
-            "success": "registry ソースの取得に成功しました",
-            "fail": "registry ソースの取得に失敗しました"
+            "success": "registry discovery ソースの取得に成功しました",
+            "fail": "registry discovery ソースの取得に失敗しました"
           }
         },
         "badges": {
@@ -331,13 +331,13 @@
         "lastFetched": "最終取得: {{value}}",
         "errors": {
           "fetch": {
-            "title": "registry ソースの取得に失敗しました"
+            "title": "registry discovery ソースの取得に失敗しました"
           }
         }
       },
       "direct": {
         "title": "直接 upstream 探索",
-        "description": "registry ソースを使わず、別の Ret2Shell インスタンスを直接探索します。",
+        "description": "registry discovery ソースを使わず、別の Ret2Shell インスタンスを直接探索します。",
         "action": "リモートを探索",
         "import": {
           "title": "release を取り込む",
@@ -358,8 +358,8 @@
       },
       "catalog": {
         "title": "Registry カタログ取り込み",
-        "description": "取得済みの registry ソースを閲覧し、release と upstream を選んで取り込みジョブを開始します。",
-        "source": "Registry ソース",
+        "description": "取得済みの registry discovery ソースを閲覧し、release と upstream を選んで取り込みジョブを開始します。",
+        "source": "Registry discovery ソース",
         "sourcePlaceholder": "ソースを選択してください",
         "games": "ゲーム一覧",
         "releases": "Release 一覧",
@@ -787,26 +787,26 @@
         "detachDescription": "ミラーを切り離すとローカル編集が可能になりますが、このインスタンスは今後このゲームの third-party upstream として受け入れられなくなります。"
       },
       "publish": {
-        "title": "release を公開",
-        "description": "アーカイブ済みゲームの registry 用ファイルを生成し、利用者が対象 registry リポジトリへ手動で PR を作成します。",
-        "source": "Registry ソース",
-        "sourcePlaceholder": "ソースを選択してください"
+        "title": "first-party 公開メタデータを生成",
+        "description": "外部公開に使う release と upstream のメタデータファイルを生成します。",
+        "source": "外部ワークフロー",
+        "sourcePlaceholder": "Ret2Shell では対象を選択しません"
       },
       "manualPr": {
-        "title": "手動 PR 情報",
-        "description": "プラットフォームは registry git リポジトリへ自動 push しません。下記のファイルを対象リポジトリへ追加し、手動で PR を作成してください。",
+        "title": "公開メタデータ",
+        "description": "下記のファイルを任意の互換 registry ワークフローで利用してください。Ret2Shell 自体は対象リポジトリや push 方法を管理しません。",
         "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
         "prTitle": "推奨 PR タイトル: {{title}}"
       },
       "advertise": {
-        "title": "third-party upstream を登録",
-        "description": "このミラーが locked のままで変更されていなければ、このインスタンスを third-party upstream として registry に追加できます。",
-        "source": "Registry ソース",
-        "sourcePlaceholder": "ソースを選択してください"
+        "title": "third-party upstream メタデータを生成",
+        "description": "このミラーが locked のままで変更されていなければ、外部公開用の upstream 広告ファイルを生成できます。",
+        "source": "外部ワークフロー",
+        "sourcePlaceholder": "Ret2Shell では対象を選択しません"
       },
       "manualUpstream": {
-        "title": "手動 upstream PR 情報",
-        "description": "下記の upstream 広告ファイルを対象 registry リポジトリへ追加し、手動で PR を作成してください。",
+        "title": "third-party upstream メタデータ",
+        "description": "下記のファイルを任意の互換 registry ワークフローで利用してください。",
         "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
         "prTitle": "推奨 PR タイトル: {{title}}"
       },
@@ -821,26 +821,26 @@
           "fail": "リモートミラーの切り離しに失敗しました"
         },
         "advertise": {
-          "title": "upstream を登録",
-          "success": "third-party upstream 用の手動 PR 情報を生成しました",
-          "fail": "third-party upstream 用の手動 PR 情報の生成に失敗しました"
+          "title": "upstream メタデータを生成",
+          "success": "third-party upstream メタデータを生成しました",
+          "fail": "third-party upstream メタデータの生成に失敗しました"
         },
         "publish": {
-          "title": "release を公開",
-          "success": "手動 PR 用の情報を生成しました",
-          "fail": "ゲーム release の公開に失敗しました"
+          "title": "release メタデータを生成",
+          "success": "公開メタデータを生成しました",
+          "fail": "ゲーム release 公開メタデータの生成に失敗しました"
         }
       },
       "releases": {
-        "title": "公開済み release",
-        "empty": "まだ release は公開されていません",
+        "title": "ローカル release 記録",
+        "empty": "ローカル release 記録はまだありません",
         "snapshot": "スナップショットコミット: {{value}}",
         "publishedAt": "公開日時: {{value}}"
       },
-      "trainingHint": "このフェーズでは training は registry の first-party 公開対象ではありません。",
+      "trainingHint": "このフェーズでは training は first-party registry 公開メタデータの生成対象ではありません。",
       "errors": {
         "fetchSources": {
-          "title": "利用可能な registry ソースの取得に失敗しました"
+          "title": "利用可能な registry discovery ソースの取得に失敗しました"
         },
         "fetchReleases": {
           "title": "ゲーム release 一覧の取得に失敗しました"

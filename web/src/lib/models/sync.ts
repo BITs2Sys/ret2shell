@@ -18,8 +18,6 @@ export type SyncRegistrySource = {
   branch: string;
   enabled: boolean;
   priority: number;
-  publish_enabled: boolean;
-  private_source: boolean;
   last_fetched_at: DateTime | null;
   last_error: string | null;
   created_at: DateTime;
@@ -40,26 +38,18 @@ export type GameReleaseSummary = {
   created_at: DateTime;
 };
 
-export type ManualRegistryPublication = {
+export type RegistryPublicationMetadata = {
   release: GameReleaseSummary;
-  registry_source_name: string;
-  registry_git_url: string;
-  registry_branch: string;
   release_file_path: string;
   release_file_content: string;
   upstream_file_path: string;
   upstream_file_content: string;
-  suggested_pr_title: string;
 };
 
-export type ManualRegistryUpstreamPublication = {
+export type RegistryUpstreamMetadata = {
   release: GameReleaseSummary;
-  registry_source_name: string;
-  registry_git_url: string;
-  registry_branch: string;
   upstream_file_path: string;
   upstream_file_content: string;
-  suggested_pr_title: string;
 };
 
 export type CatalogGame = {

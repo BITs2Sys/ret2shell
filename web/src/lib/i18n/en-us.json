@@ -301,9 +301,9 @@
     "sync": {
       "title": "Sync resources",
       "sources": {
-        "title": "Registry sources",
-        "description": "Manage registry repositories used for game release publication and later discovery.",
-        "empty": "No registry source configured",
+        "title": "Registry discovery sources",
+        "description": "Manage read-only registry repositories used for catalog discovery and import.",
+        "empty": "No registry discovery source configured",
         "form": {
           "name": "Source name",
           "gitUrl": "Git URL",
@@ -316,8 +316,8 @@
         "actions": {
           "fetch": {
             "title": "Fetch",
-            "success": "Registry source fetched successfully",
-            "fail": "Failed to fetch registry source"
+            "success": "Registry discovery source fetched successfully",
+            "fail": "Failed to fetch registry discovery source"
           }
         },
         "badges": {
@@ -331,13 +331,13 @@
         "lastFetched": "Last fetched: {{value}}",
         "errors": {
           "fetch": {
-            "title": "Failed to fetch registry sources"
+            "title": "Failed to fetch registry discovery sources"
           }
         }
       },
       "direct": {
         "title": "Direct upstream discovery",
-        "description": "Probe another Ret2Shell instance directly without using a registry source.",
+        "description": "Probe another Ret2Shell instance directly without using a registry discovery source.",
         "action": "Discover remote",
         "import": {
           "title": "Import release",
@@ -358,8 +358,8 @@
       },
       "catalog": {
         "title": "Registry catalog import",
-        "description": "Browse one fetched registry source, inspect releases, choose an upstream, and start an import job.",
-        "source": "Registry source",
+        "description": "Browse one fetched registry discovery source, inspect releases, choose an upstream, and start an import job.",
+        "source": "Registry discovery source",
         "sourcePlaceholder": "Choose one source",
         "games": "Games",
         "releases": "Releases",
@@ -787,26 +787,26 @@
         "detachDescription": "Detaching the mirror unlocks local editing, and this instance will no longer be accepted as a third-party upstream for this game."
       },
       "publish": {
-        "title": "Publish release",
-        "description": "Generate the registry files for one archived release, then open a manual PR to the target registry repository.",
-        "source": "Registry source",
-        "sourcePlaceholder": "Choose one source"
+        "title": "Generate first-party metadata",
+        "description": "Generate the release and upstream metadata files needed for external publication.",
+        "source": "External workflow",
+        "sourcePlaceholder": "Ret2Shell does not choose a target"
       },
       "manualPr": {
-        "title": "Manual PR information",
-        "description": "The platform no longer pushes to the registry git repository automatically. Add the files below to the target repository and open a PR manually.",
+        "title": "Publication metadata bundle",
+        "description": "Use the files below in any compatible external registry workflow. Ret2Shell does not choose the target repository or push strategy.",
         "target": "Target repository: {{repo}} (branch: {{branch}})",
         "prTitle": "Suggested PR title: {{title}}"
       },
       "advertise": {
-        "title": "Advertise third-party upstream",
-        "description": "If this mirror remains locked and unchanged, you can add this instance to a registry as a third-party upstream.",
-        "source": "Registry source",
-        "sourcePlaceholder": "Choose one source"
+        "title": "Generate third-party upstream metadata",
+        "description": "If this mirror remains locked and unchanged, generate an upstream advertisement file for external publication.",
+        "source": "External workflow",
+        "sourcePlaceholder": "Ret2Shell does not choose a target"
       },
       "manualUpstream": {
-        "title": "Manual upstream PR information",
-        "description": "Add the upstream advertisement file below to the target registry repository and open a PR manually.",
+        "title": "Third-party upstream metadata bundle",
+        "description": "Use the file below in any compatible external registry workflow.",
         "target": "Target repository: {{repo}} (branch: {{branch}})",
         "prTitle": "Suggested PR title: {{title}}"
       },
@@ -821,26 +821,26 @@
           "fail": "Failed to detach remote mirror"
         },
         "advertise": {
-          "title": "Advertise upstream",
-          "success": "Manual third-party upstream PR information generated successfully",
-          "fail": "Failed to generate third-party upstream PR information"
+          "title": "Generate upstream metadata",
+          "success": "Third-party upstream metadata generated successfully",
+          "fail": "Failed to generate third-party upstream metadata"
         },
         "publish": {
-          "title": "Publish release",
-          "success": "Manual registry PR information generated successfully",
-          "fail": "Failed to publish game release"
+          "title": "Generate release metadata",
+          "success": "Release publication metadata generated successfully",
+          "fail": "Failed to generate release publication metadata"
         }
       },
       "releases": {
-        "title": "Published releases",
-        "empty": "No release has been published yet",
+        "title": "Local release records",
+        "empty": "No local release records yet",
         "snapshot": "Snapshot commit: {{value}}",
         "publishedAt": "Published at: {{value}}"
       },
-      "trainingHint": "Training instances are not first-party publish targets for registry sync in this phase.",
+      "trainingHint": "Training instances do not generate first-party registry publication metadata in this phase.",
       "errors": {
         "fetchSources": {
-          "title": "Failed to fetch available registry sources"
+          "title": "Failed to fetch available registry discovery sources"
         },
         "fetchReleases": {
           "title": "Failed to fetch game releases"

@@ -151,7 +151,7 @@ pub(super) async fn import_catalog_release(
     .into_iter()
     .find(|upstream| upstream.instance_id == req.upstream_instance_id)
     .ok_or(ResponseError::PreconditionFailed(
-      "selected upstream is not available in the registry source".to_owned(),
+      "selected upstream is not available in the registry discovery source".to_owned(),
     ))?;
   let job = direct::create_import_job(
     &state,
@@ -178,6 +178,6 @@ async fn load_source(
   game_registry_source::get(&state.db.conn, source_id)
     .await?
     .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
+      "registry discovery source not found".to_owned(),
     ))
 }

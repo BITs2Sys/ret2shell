@@ -301,9 +301,9 @@
     "sync": {
       "title": "資源同步",
       "sources": {
-        "title": "Registry 來源",
-        "description": "管理用於發佈賽事 release 與後續發現同步內容的 registry 倉庫。",
-        "empty": "目前沒有設定 registry 來源",
+        "title": "Registry 發現源",
+        "description": "管理用於目錄發現與導入的唯讀 registry 倉庫。",
+        "empty": "目前沒有設定 registry 發現源",
         "form": {
           "name": "來源名稱",
           "gitUrl": "Git 位址",
@@ -316,8 +316,8 @@
         "actions": {
           "fetch": {
             "title": "拉取",
-            "success": "Registry 來源拉取成功",
-            "fail": "Registry 來源拉取失敗"
+            "success": "Registry 發現源拉取成功",
+            "fail": "Registry 發現源拉取失敗"
           }
         },
         "badges": {
@@ -331,13 +331,13 @@
         "lastFetched": "最近拉取：{{value}}",
         "errors": {
           "fetch": {
-            "title": "取得 registry 來源失敗"
+            "title": "取得 registry 發現源失敗"
           }
         }
       },
       "direct": {
         "title": "直連上游探測",
-        "description": "不經過 registry 來源，直接探測另一台 Ret2Shell 實例。",
+        "description": "不經過 registry 發現源，直接探測另一台 Ret2Shell 實例。",
         "action": "探測遠端",
         "import": {
           "title": "導入 release",
@@ -358,8 +358,8 @@
       },
       "catalog": {
         "title": "Registry 目錄導入",
-        "description": "瀏覽某個已拉取的 registry 來源，查看 release，選擇 upstream，並建立導入任務。",
-        "source": "Registry 來源",
+        "description": "瀏覽某個已拉取的 registry 發現源，查看 release，選擇 upstream，並建立導入任務。",
+        "source": "Registry 發現源",
         "sourcePlaceholder": "請選擇一個來源",
         "games": "賽事列表",
         "releases": "Release 列表",
@@ -787,26 +787,26 @@
         "detachDescription": "解除鏡像鎖定後，本地將允許繼續編輯，同時目前實例也不再會被其他平台接受為該賽事的 third-party upstream。"
       },
       "publish": {
-        "title": "發佈 release",
-        "description": "為目前已封存的賽事產生 registry 檔案，然後由使用者手動向目標 registry 倉庫發起 PR。",
-        "source": "Registry 來源",
-        "sourcePlaceholder": "請選擇一個來源"
+        "title": "產生 first-party 發佈元資料",
+        "description": "為目前已封存的賽事產生供外部發佈使用的 release 與 upstream 元資料檔案。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 內不選擇目標"
       },
       "manualPr": {
-        "title": "手動 PR 資訊",
-        "description": "平台不再自動向 registry git 倉庫推送內容。請將下面的檔案加入目標倉庫，並手動發起 PR。",
+        "title": "發佈元資料",
+        "description": "請將下面的檔案接入任意相容的外部 registry 工作流。Ret2Shell 不感知目標倉庫，也不會執行 push。",
         "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
         "prTitle": "建議 PR 標題：{{title}}"
       },
       "advertise": {
-        "title": "登記 third-party upstream",
-        "description": "當這個鏡像保持鎖定且未被修改時，可以將目前實例作為 third-party upstream 加入 registry。",
-        "source": "Registry 來源",
-        "sourcePlaceholder": "請選擇一個來源"
+        "title": "產生 third-party upstream 元資料",
+        "description": "當這個鏡像保持鎖定且未被修改時，可以產生供外部發佈的 upstream 廣告檔案。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 內不選擇目標"
       },
       "manualUpstream": {
-        "title": "手動 upstream PR 資訊",
-        "description": "請將下面的 upstream 廣告檔案加入目標 registry 倉庫，並手動發起 PR。",
+        "title": "third-party upstream 元資料",
+        "description": "請將下面的檔案接入任意相容的外部 registry 工作流。",
         "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
         "prTitle": "建議 PR 標題：{{title}}"
       },
@@ -821,26 +821,26 @@
           "fail": "解除遠端鏡像鎖定失敗"
         },
         "advertise": {
-          "title": "登記 upstream",
-          "success": "已成功產生 third-party upstream 手動 PR 資訊",
-          "fail": "產生 third-party upstream 手動 PR 資訊失敗"
+          "title": "產生 upstream 元資料",
+          "success": "已成功產生 third-party upstream 元資料",
+          "fail": "產生 third-party upstream 元資料失敗"
         },
         "publish": {
-          "title": "發佈 release",
-          "success": "已成功產生手動 PR 所需資訊",
-          "fail": "賽事 release 發佈失敗"
+          "title": "產生 release 元資料",
+          "success": "已成功產生發佈元資料",
+          "fail": "產生賽事 release 發佈元資料失敗"
         }
       },
       "releases": {
-        "title": "已發佈 release",
-        "empty": "尚未發佈任何 release",
+        "title": "本地 release 記錄",
+        "empty": "尚未有本地 release 記錄",
         "snapshot": "快照提交：{{value}}",
         "publishedAt": "發佈時間：{{value}}"
       },
-      "trainingHint": "目前階段不會把訓練場作為 registry first-party 發佈目標。",
+      "trainingHint": "目前階段不會為訓練場產生 first-party registry 發佈元資料。",
       "errors": {
         "fetchSources": {
-          "title": "取得可用 registry 來源失敗"
+          "title": "取得可用 registry 發現源失敗"
         },
         "fetchReleases": {
           "title": "取得賽事 release 列表失敗"

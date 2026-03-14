@@ -11,9 +11,9 @@ This document proposes a registry-driven, git-based game synchronization design 
 
 The design must satisfy the following product goals:
 
-1. Define a `ret2shell game registry` format distributed by ordinary git remotes, with `https://github.com/ret2shell/game-registry` as the default source.
-2. Allow operators to add and remove registry sources.
-3. Allow a finished and archived game to publish a release record to a registry source.
+1. Define a `ret2shell game registry` format distributed by ordinary git remotes, with `https://github.com/ret2shell/game-registry` as the default discovery source.
+2. Allow operators to add and remove read-only registry discovery sources for catalog browsing.
+3. Allow a finished and archived game to generate the canonical registry metadata needed for external publication, without committing or pushing to a registry repo directly.
 4. Allow other Ret2Shell instances to sync one archived game from a registry entry or directly from another instance.
 5. Allow the operator to choose which upstream instance to download from.
 6. Do not reuse the existing game event token for synchronization; add a dedicated sync token.
@@ -30,6 +30,7 @@ This phase does **not** attempt to synchronize the following data classes:
 - scoreboards and rank results
 - submissions, solves, audits, notifications, chats, pods, runtime instances
 - local admin identities, local institute IDs, local article IDs, or any other instance-local numeric IDs
+- external registry publication destinations, git credentials, commit/push workflow, or registry-side revocation automation
 
 The design is focused on synchronizing archived game content and related assets, not on replaying an old competition database.
 
@@ -99,7 +100,7 @@ A `third-party upstream` is another Ret2Shell instance that has synchronized the
 
 The design has four cooperating parts:
 
-1. A git-backed `game registry` repo that stores release metadata and upstream advertisements.
+1. An externally managed git-backed `game registry` repo that stores release metadata and upstream advertisements.
 2. A per-instance `release serving` layer that exposes archived releases by `game_key` and `release_id`.
 3. A resumable `sync job` pipeline that downloads a repo snapshot, media objects, and portable metadata before a final transactional import.
 4. An `immutability model` that keeps synchronized mirrors byte-identical until they are explicitly detached.
@@ -108,9 +109,11 @@ The most important rule is:
 
 > Git is the source of truth for the released repo snapshot, media hashes are the source of truth for portable media blobs, and local numeric database IDs are always recreated on the target instance.
 
-## 6. Registry Source Model
+## 6. Registry Discovery Sources and Publication Boundary
 
-Each Ret2Shell instance should support a local list of registry sources.
+Each Ret2Shell instance may support a local list of read-only registry discovery sources.
+
+In the rest of this document, a `registry source` means a discovery input used for browsing and import, not a publication target.
 
 Suggested source fields:
 
@@ -122,10 +125,8 @@ Suggested source fields:
 | `branch` | branch to track, default `main` |
 | `enabled` | whether the source participates in discovery |
 | `priority` | source ordering for conflict display |
-| `publish_enabled` | whether this source can receive publishes |
-| `private_source` | whether restricted sync tokens may be written there |
 | `last_fetched_at` | last successful fetch time |
-| `last_error` | last fetch/push error |
+| `last_error` | last fetch or parse error |
 
 Default source:
 
@@ -140,6 +141,10 @@ Adding a source means:
 3. validate the registry format version
 
 Removing a source only removes local configuration and local cache; it does not modify the remote git repo.
+
+For publication, Ret2Shell should not store or choose a target registry repo, branch, or credential.
+
+Instead, the platform should return deterministic relative file paths and canonical file contents for the metadata that needs to be published, and leave the actual git commit/push workflow to external operators or CI automation.
 
 ## 7. Registry Repository Format
 
@@ -174,7 +179,7 @@ games/
 Where:
 
 - `releases/<release_id>.toml` is immutable release metadata
-- `upstreams/<instance_id>/<published_at>.toml` is an append-only upstream advertisement or revocation record
+- `upstreams/<instance_id>/<published_at>.toml` is an append-only upstream advertisement record
 
 ### 7.3 Top-level registry metadata
 
@@ -258,7 +263,7 @@ Notes:
 
 ### 7.5 Upstream advertisement format
 
-Upstream advertisements are mutable by append-only replacement.
+Upstream advertisements are append-only records.
 
 Example first-party advertisement:
 
@@ -294,25 +299,15 @@ sync_token = "r2s_sync_yyyyy"
 protocol_version = 1
 ```
 
-Example revocation record:
-
-```toml
-spec_version = 1
-kind = "upstream"
-status = "revoked"
-game_key = "example_game_661f5423"
-release_id = "8e0d3f0d1c7f2db6f4e1b2f5d0cc9c65a76a4d8a"
-instance_id = "6d124f1a-1854-4f63-95da-bf487ec26f48"
-role = "third_party"
-published_at = 1713703600
-reason = "mirror_detached"
-```
-
 Separating release files from upstream files is important because:
 
 - release manifests must stay immutable
 - `sync_token` rotation must not mutate old release files
-- upstream availability or revocation must be publishable as new records
+- upstream access facts may need a new advertisement body without rewriting old release files
+
+Ret2Shell does **not** emit registry revocation records in v1.
+
+If a mirror is detached or becomes unavailable, the registry entry may stay stale until external registry tooling updates it, but consumers must still rely on the live upstream handshake before accepting the mirror.
 
 ### 7.6 Registry conflict rules
 
@@ -408,24 +403,28 @@ This is used for:
 
 ### 9.4 New `game_registry_source` table
 
-Stores local registry source configuration.
+Stores local read-only registry discovery source configuration.
+
+These records are not publication targets and are never mutated remotely by the platform.
 
 ### 9.5 New `game_sync_job` table
 
-Stores resumable import/export jobs.
+Stores resumable import jobs.
+
+Publication metadata generation is synchronous in v1 and does not mutate registry repos or enqueue long-running publish jobs.
 
 Suggested fields:
 
 | Field | Meaning |
 | --- | --- |
 | `id` | job ID |
-| `kind` | `publish` or `sync` |
+| `mode` | `registry` or `direct` |
 | `status` | `pending`, `running`, `paused`, `failed`, `completed`, `cancelled` |
 | `stage` | current stage name |
 | `game_id` | local target game if already created |
 | `game_key` | target game key |
 | `release_id` | target release |
-| `registry_source_id` | selected registry source if any |
+| `registry_source_id` | selected discovery source if any |
 | `upstream_instance_id` | chosen source instance |
 | `upstream_base_url` | chosen source URL |
 | `checkpoint` | structured resume cursor |
@@ -494,15 +493,15 @@ Rules:
 1. `sync_token` must never be accepted by any write endpoint.
 2. `sync_token` must never grant access to player/team/submission data.
 3. Rotating `sync_token` must not affect the current event/device token.
-4. Registry-published upstream advertisements may include `sync_token` only because it is read-only and release-scoped by policy.
+4. Externally published upstream advertisements may include `sync_token` only because it is read-only and release-scoped by policy.
 
 Recommended mapping to the existing `access_policy.sync` field:
 
-- `0`: public sync allowed; publication to the default public registry is allowed
-- `1`: restricted sync; direct sync or private registry publication only
-- `2`: sync disabled; no release publication or remote serving
+- `0`: public sync allowed; generated publication metadata may be published through public or private channels
+- `1`: restricted sync; generated publication metadata must only be published through controlled/private channels
+- `2`: sync disabled; no release metadata generation or remote serving
 
-For `sync = 1`, the default public registry should reject publication because it would expose a restricted sync capability.
+For `sync = 1`, Ret2Shell may still generate metadata, but the external publication workflow must not expose that metadata through a public registry.
 
 ## 12. Upstream Sync Protocol
 
@@ -574,7 +573,7 @@ This is the main protection against stale registry advertisements.
 
 ### 13.1 Preconditions
 
-A game may publish a release only when all of the following are true:
+A game may generate first-party publication metadata only when all of the following are true:
 
 1. `host_type == Game`
 2. the game is archived
@@ -584,7 +583,7 @@ A game may publish a release only when all of the following are true:
 
 ### 13.2 Publication steps
 
-The publish job should do the following:
+The publication metadata action should do the following:
 
 1. Acquire a per-game publish lock.
 2. Resolve `game_key`:
@@ -599,10 +598,12 @@ The publish job should do the following:
    - referenced media hashes
 6. Create or update the local `game_release` record.
 7. Create or update the git ref `refs/ret2shell/releases/<release_id>`.
-8. Write two append-only files into the selected registry source working tree:
+8. Produce two append-only files in the response bundle:
    - `games/<game_key>/releases/<release_id>.toml`
    - `games/<game_key>/upstreams/<instance_id>/<published_at>.toml`
-9. Commit and push the registry repo.
+9. Return the canonical file paths and file contents to the operator or external automation.
+
+Ret2Shell does not choose a target registry repo, branch, review flow, or push strategy.
 
 The publish operation is idempotent because:
 
@@ -618,7 +619,7 @@ In implementation terms, the safer design is:
 - immutable release file for snapshot facts
 - append-only upstream advertisement for mutable access facts
 
-Both files are written in the same registry commit, so the operator still experiences one publish action, but token rotation remains possible later.
+Both files are returned together as one metadata bundle, so the operator still experiences one publication action, but token rotation remains possible later and the actual git commit/push stays outside Ret2Shell.
 
 ## 14. One-Click Sync Flow
 
@@ -626,11 +627,11 @@ Both files are written in the same registry commit, so the operator still experi
 
 The operator chooses:
 
-- the registry source, or direct upstream mode
+- direct upstream mode, or a release discovered from a read-only registry source
 - the `game_key`
 - the `release_id`
 - the upstream instance to download from
-- whether to publish itself as a third-party upstream after success
+- whether to export third-party upstream metadata after success
 
 ### 14.2 Job stages
 
@@ -642,7 +643,7 @@ Recommended stages:
 4. `fetch_media`
 5. `prepare_import`
 6. `finalize`
-7. `publish_third_party` (optional)
+7. `export_third_party_metadata` (optional)
 
 ### 14.3 Stage details
 
@@ -706,13 +707,13 @@ Recommended behavior:
 
 If finalization fails, the previously visible local game state must remain unchanged.
 
-#### Stage 7: publish third-party upstream
+#### Stage 7: export third-party upstream metadata
 
 If the operator requested it:
 
 - verify again that the local mirror is still `mirror_locked`
 - verify the local release ref exists and matches the imported `release_id`
-- publish a third-party upstream advertisement to the chosen registry source
+- return a third-party upstream advertisement metadata bundle for external publication
 
 ## 15. Direct Sync Without Registry
 
@@ -887,7 +888,7 @@ Once detached, this instance must reject future sync requests for that game as a
 Enforcement rules:
 
 - live upstream handshake returns `409 Conflict`
-- optional registry revocation record is published when possible
+- no registry-side revocation is required; stale advertisements are tolerated because live validation is authoritative
 
 The registry is therefore only a discovery index. Final trust always comes from live upstream validation.
 
@@ -910,8 +911,8 @@ Recommended sync workspace:
 
 ```text
 <sync.path>/
-  registries/
-    <source-id>.git/
+  sources/
+    <source-id>/
   mirrors/
     <instance-id>/<game_key>.git/
   jobs/
@@ -930,17 +931,11 @@ Recommended sync workspace:
 - media failure: retry only missing hashes
 - finalization failure: keep the old live game state untouched and leave the job resumable
 
-### 19.4 Publish retry behavior
+### 19.4 Publication metadata replay behavior
 
-Registry publication should use the same append-only model.
+Ret2Shell emits deterministic append-only file bodies and relative paths.
 
-If `git push` fails because the remote moved:
-
-1. fetch remote changes
-2. rebase or replay the append-only local files
-3. retry the push
-
-Because the files are per-release and per-upstream append-only, merge conflicts should be rare.
+If an external git workflow fails or needs rebasing, the operator or CI pipeline can reuse the same generated metadata bundle without asking Ret2Shell to mutate any registry repo.
 
 ## 20. Upstream Selection Rules
 
@@ -983,23 +978,27 @@ Future improvements such as signed release manifests or signed upstream advertis
 - add resumable sync jobs
 - add locked mirror state and detach operation
 
-### Phase 2: Registry source management and first-party publication
+### Phase 2: First-party publication metadata
 
-- add registry source CRUD
 - implement registry repo format
-- implement release publication to a registry source
+- implement first-party publication metadata generation
+- keep registry commit/push outside the platform boundary
 
-### Phase 3: Third-party upstreams
+### Phase 3: Third-party upstream serving
 
-- allow successful mirrors to publish third-party upstream advertisements
 - enforce live mirror validation and rejection after detach
 
-### Phase 4: UX polish and conflict handling
+### Phase 4: Registry-backed import and third-party metadata export
 
-- registry conflict display
-- upstream health display
+- add read-only registry discovery source CRUD
+- implement registry catalog browsing and import
+- allow successful mirrors to export third-party upstream advertisement metadata
+- add upstream health display and registry conflict handling UX
+
+### Phase 5: UX polish and recovery hardening
+
 - sync retry and resume UX
-- optional revocation publish automation
+- richer error reporting and recovery actions
 
 ## 23. Final Recommendation
 
@@ -1007,12 +1006,12 @@ The cleanest v1 design is:
 
 1. Use `game_key` as the global identity, initially derived from the original `bucket`.
 2. Add a dedicated `sync_token` and never reuse the existing event token.
-3. Store immutable release manifests and append-only upstream advertisements in a git-backed registry repo.
+3. Store immutable release manifests and append-only upstream advertisements in a git-backed registry repo, but let Ret2Shell only generate the required file paths and contents instead of pushing them directly.
 4. Serve released repo snapshots by git smart HTTP using per-release refs.
 5. Synchronize media by content hash, not by DB ID.
 6. If any challenge image is `internal_managed`, synchronize the required OCI images through a sync-aware docker registry proxy/auth path and rebuild local pull references from `internal_tag`.
 7. Rebuild local DB rows from stable keys (`game_key`, challenge bucket names, media hashes, display order), never from upstream numeric IDs.
 8. Keep synchronized games in `mirror_locked` state until the operator explicitly detaches them.
-9. Reject third-party upstream serving immediately after detach, and optionally publish a revocation record.
+9. Reject third-party upstream serving immediately after detach, without requiring registry-side revocation automation.
 
 This design keeps the sync path aligned with the existing git bucket architecture, avoids ID portability problems, supports interruption and recovery, and gives the registry a simple conflict-resistant format.

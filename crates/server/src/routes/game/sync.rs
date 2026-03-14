@@ -75,38 +75,43 @@ pub(super) struct GameReleaseResponse {
 }
 
 #[derive(Serialize)]
-pub(super) struct ManualRegistryPublicationResponse {
+pub(super) struct RegistrySourceResponse {
+  pub id: i64,
+  pub name: String,
+  pub git_url: String,
+  pub branch: String,
+  pub enabled: bool,
+  pub priority: i32,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
+  pub last_fetched_at: Option<chrono::DateTime<Utc>>,
+  pub last_error: Option<String>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub created_at: chrono::DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub updated_at: chrono::DateTime<Utc>,
+}
+
+#[derive(Serialize)]
+pub(super) struct RegistryPublicationMetadataResponse {
   pub release: GameReleaseResponse,
-  pub registry_source_name: String,
-  pub registry_git_url: String,
-  pub registry_branch: String,
   pub release_file_path: String,
   pub release_file_content: String,
   pub upstream_file_path: String,
   pub upstream_file_content: String,
-  pub suggested_pr_title: String,
 }
 
 #[derive(Serialize)]
-pub(super) struct ManualRegistryUpstreamPublicationResponse {
+pub(super) struct RegistryUpstreamMetadataResponse {
   pub release: GameReleaseResponse,
-  pub registry_source_name: String,
-  pub registry_git_url: String,
-  pub registry_branch: String,
   pub upstream_file_path: String,
   pub upstream_file_content: String,
-  pub suggested_pr_title: String,
 }
 
-#[derive(Deserialize)]
-pub(super) struct PublishGameReleaseRequest {
-  pub registry_source_id: i64,
-}
+#[derive(Default, Deserialize)]
+pub(super) struct PublishGameReleaseRequest {}
 
-#[derive(Deserialize)]
-pub(super) struct AdvertiseUpstreamRequest {
-  pub registry_source_id: i64,
-}
+#[derive(Default, Deserialize)]
+pub(super) struct AdvertiseUpstreamRequest {}
 
 #[derive(Deserialize)]
 pub(super) struct DetachRemoteSyncRequest {
@@ -139,7 +144,13 @@ pub(super) async fn get_game_sync_releases(
 pub(super) async fn get_game_sync_sources(
   State(ref db): State<Database>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(game_registry_source::get_list(&db.conn).await?))
+  Ok(Json(
+    game_registry_source::get_list(&db.conn)
+      .await?
+      .into_iter()
+      .map(RegistrySourceResponse::from)
+      .collect::<Vec<_>>(),
+  ))
 }
 
 pub(super) async fn rotate_game_sync_token(
@@ -193,27 +204,11 @@ pub(super) async fn detach_remote_sync_game(
 pub(super) async fn advertise_remote_sync_upstream(
   State(config): State<GlobalConfig>, State(ref db): State<Database>,
   State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Json(req): Json<AdvertiseUpstreamRequest>,
+  Json(_req): Json<AdvertiseUpstreamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if game.access_policy.sync == 2 {
     return Err(ResponseError::PreconditionFailed(
-      "this game has disabled sync publication".to_owned(),
-    ));
-  }
-
-  let source = game_registry_source::get(&db.conn, req.registry_source_id)
-    .await?
-    .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
-    ))?;
-  if !source.enabled {
-    return Err(ResponseError::PreconditionFailed(
-      "registry source is disabled".to_owned(),
-    ));
-  }
-  if game.access_policy.sync == 1 && !source.private_source {
-    return Err(ResponseError::PreconditionFailed(
-      "restricted sync games may only advertise to private registry sources".to_owned(),
+      "this game has disabled sync metadata generation".to_owned(),
     ));
   }
 
@@ -256,21 +251,6 @@ pub(super) async fn advertise_remote_sync_upstream(
     ));
   }
 
-  let source_release = registry::get_catalog_release_detail(
-    &config.bucket,
-    &source,
-    &release.game_key,
-    &release.release_id,
-  )
-  .await
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
-  if source_release.manifest_sha256 != release.manifest_sha256 {
-    return Err(ResponseError::Conflict(
-      "the selected registry source contains a different release manifest for this release"
-        .to_owned(),
-    ));
-  }
-
   let instance_id = sync::instance_id(&config.bucket)
     .await
     .map_err(|err| ResponseError::InternalServerError(err.to_string()))?;
@@ -287,9 +267,8 @@ pub(super) async fn advertise_remote_sync_upstream(
     .ok_or(ResponseError::PreconditionFailed(
       "game sync token missing".to_owned(),
     ))?;
-  let publication = registry::build_manual_registry_upstream_publication(
-    &source,
-    registry::RegistryUpstreamPublicationRequest {
+  let metadata =
+    registry::build_registry_upstream_metadata(registry::RegistryUpstreamPublicationRequest {
       game_key: &release.game_key,
       release_id: &release.release_id,
       instance_id: &instance_id,
@@ -297,40 +276,35 @@ pub(super) async fn advertise_remote_sync_upstream(
       base_url: &base_url,
       sync_token: &sync_token,
       published_at: Utc::now(),
-    },
-  )
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+    })
+    .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
 
-  Ok(Json(ManualRegistryUpstreamPublicationResponse {
+  Ok(Json(RegistryUpstreamMetadataResponse {
     release: GameReleaseResponse::from(release),
-    registry_source_name: publication.registry_source_name,
-    registry_git_url: publication.registry_git_url,
-    registry_branch: publication.registry_branch,
-    upstream_file_path: publication.upstream_file_path,
-    upstream_file_content: publication.upstream_file_content,
-    suggested_pr_title: publication.suggested_pr_title,
+    upstream_file_path: metadata.upstream_file_path,
+    upstream_file_content: metadata.upstream_file_content,
   }))
 }
 
 pub(super) async fn publish_game_release(
   State(config): State<GlobalConfig>, State(cluster): State<Cluster>,
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
-  Extension(game): Extension<game::Model>, Json(req): Json<PublishGameReleaseRequest>,
+  Extension(game): Extension<game::Model>, Json(_req): Json<PublishGameReleaseRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_game_sync_writable(&db.conn, &game).await?;
   if game.host_type != game::HostType::Game {
     return Err(ResponseError::PreconditionFailed(
-      "only archived games can be published to registry sources".to_owned(),
+      "only archived games can generate release publication metadata".to_owned(),
     ));
   }
   if !game.archived() {
     return Err(ResponseError::PreconditionFailed(
-      "the game must be archived before it can be published".to_owned(),
+      "the game must be archived before release publication metadata can be generated".to_owned(),
     ));
   }
   if game.access_policy.sync == 2 {
     return Err(ResponseError::PreconditionFailed(
-      "this game has disabled sync publication".to_owned(),
+      "this game has disabled sync metadata generation".to_owned(),
     ));
   }
 
@@ -340,21 +314,6 @@ pub(super) async fn publish_game_release(
     .ok_or(ResponseError::PreconditionFailed(
       "game bucket not found".to_owned(),
     ))?;
-  let source = game_registry_source::get(&db.conn, req.registry_source_id)
-    .await?
-    .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
-    ))?;
-  if !source.enabled {
-    return Err(ResponseError::PreconditionFailed(
-      "registry source is disabled".to_owned(),
-    ));
-  }
-  if game.access_policy.sync == 1 && !source.private_source {
-    return Err(ResponseError::PreconditionFailed(
-      "restricted sync games may only publish to private registry sources".to_owned(),
-    ));
-  }
 
   let current_game = ensure_sync_identity(&db.conn, &game).await?;
   let sync_token = current_game
@@ -410,9 +369,8 @@ pub(super) async fn publish_game_release(
       "server configuration not found".to_owned(),
     ))?
     .external_origin();
-  let manual_publication = registry::build_manual_registry_publication(
-    &source,
-    registry::RegistryPublicationRequest {
+  let metadata =
+    registry::build_registry_publication_metadata(registry::RegistryPublicationRequest {
       game_key: current_game.sync_key.as_deref().unwrap_or(&bucket_name),
       release_id: &manifest.release_id,
       manifest_body: &manifest.manifest_body,
@@ -420,9 +378,8 @@ pub(super) async fn publish_game_release(
       base_url: &base_url,
       sync_token: &sync_token,
       published_at,
-    },
-  )
-  .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
+    })
+    .map_err(|err| ResponseError::PreconditionFailed(err.to_string()))?;
 
   let release =
     match game_release::get_by_game_and_release(&db.conn, current_game.id, &manifest.release_id)
@@ -458,16 +415,12 @@ pub(super) async fn publish_game_release(
       }
     };
   cache.at("game").del(current_game.id).await.ok();
-  Ok(Json(ManualRegistryPublicationResponse {
+  Ok(Json(RegistryPublicationMetadataResponse {
     release: GameReleaseResponse::from(release),
-    registry_source_name: manual_publication.registry_source_name,
-    registry_git_url: manual_publication.registry_git_url,
-    registry_branch: manual_publication.registry_branch,
-    release_file_path: manual_publication.release_file_path,
-    release_file_content: manual_publication.release_file_content,
-    upstream_file_path: manual_publication.upstream_file_path,
-    upstream_file_content: manual_publication.upstream_file_content,
-    suggested_pr_title: manual_publication.suggested_pr_title,
+    release_file_path: metadata.release_file_path,
+    release_file_content: metadata.release_file_content,
+    upstream_file_path: metadata.upstream_file_path,
+    upstream_file_content: metadata.upstream_file_content,
   }))
 }
 
@@ -485,6 +438,23 @@ impl From<game_release::Model> for GameReleaseResponse {
       first_party_base_url: value.first_party_base_url,
       published_at: value.published_at,
       created_at: value.created_at,
+    }
+  }
+}
+
+impl From<game_registry_source::Model> for RegistrySourceResponse {
+  fn from(value: game_registry_source::Model) -> Self {
+    Self {
+      id: value.id,
+      name: value.name,
+      git_url: value.git_url,
+      branch: value.branch,
+      enabled: value.enabled,
+      priority: value.priority,
+      last_fetched_at: value.last_fetched_at,
+      last_error: value.last_error,
+      created_at: value.created_at,
+      updated_at: value.updated_at,
     }
   }
 }

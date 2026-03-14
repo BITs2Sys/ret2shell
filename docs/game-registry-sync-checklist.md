@@ -143,7 +143,9 @@ Rules:
 
 ### 3.5 `game_registry_source` table
 
-Create one row per configured registry source.
+Create one row per configured read-only registry discovery source.
+
+These rows are used only for browsing/import. They are not publication targets.
 
 Recommended columns:
 
@@ -155,10 +157,8 @@ Recommended columns:
 | `branch` | text | no | default `main` |
 | `enabled` | boolean | no | discovery toggle |
 | `priority` | integer | no | display/order priority |
-| `publish_enabled` | boolean | no | can publish to this source |
-| `private_source` | boolean | no | restricted sync is allowed |
 | `last_fetched_at` | timestamptz | yes | last successful fetch |
-| `last_error` | text | yes | last fetch/push error |
+| `last_error` | text | yes | last fetch or parse error |
 | `created_at` | timestamptz | no | local creation time |
 | `updated_at` | timestamptz | no | local update time |
 
@@ -171,25 +171,26 @@ Credential policy for v1:
 
 - do not add a dedicated secret store yet
 - allow anonymous/public sources first
-- allow private sources only through already-available git credentials in the runtime environment
+- allow authenticated/private discovery sources only through already-available git credentials in the runtime environment
 
 ### 3.6 `game_sync_job` table
 
-Create one row per publish or import job.
+Create one row per import job.
+
+Publication metadata generation is synchronous in v1 and does not create long-running publish jobs.
 
 Recommended columns:
 
 | Column | Type | Null | Notes |
 | --- | --- | --- | --- |
 | `id` | bigint PK | no | local job ID |
-| `kind` | integer | no | `publish` or `import` |
 | `mode` | integer | no | `registry` or `direct` |
 | `status` | integer | no | `pending`, `running`, `paused`, `failed`, `completed`, `cancelled` |
 | `stage` | text | no | current stage label |
 | `game_id` | bigint FK | yes | local target game if it exists |
 | `game_key` | text | yes | target release game key |
 | `release_id` | text | yes | target release |
-| `registry_source_id` | bigint FK | yes | selected source |
+| `registry_source_id` | bigint FK | yes | selected discovery source |
 | `upstream_instance_id` | text | yes | chosen source instance |
 | `upstream_base_url` | text | yes | chosen source URL |
 | `request_body` | jsonb | no | original job request |
@@ -204,7 +205,7 @@ Rules:
 
 - use `checkpoint` instead of creating a second job-item table in v1
 - enforce one active import job per `game_key` in service logic
-- enforce one active publish job per `game_id` in service logic
+- publication metadata generation does not use this table in v1
 
 ## 4. Entity and Model Checklist
 
@@ -227,17 +228,17 @@ Frontend model fields to expose:
 
 - on `Game`: `sync_key`, `sync_token` (admin only), `remote_sync_state`, `remote_release_id`, `remote_first_party_base_url`
 - on `Challenge`: `display_order`
-- new sync models: registry source, release summary, upstream summary, sync job, sync stage status
+- new sync models: registry discovery source, release summary, upstream summary, sync job, sync stage status, publication metadata bundle
 
 ## 5. Local Admin API Checklist
 
 These are authenticated local APIs used by the Ret2Shell web UI.
 
-### 5.1 Registry source management
+### 5.1 Registry discovery source management
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/sync/source` | list registry sources |
+| `GET` | `/api/sync/source` | list registry discovery sources |
 | `POST` | `/api/sync/source` | create source |
 | `PATCH` | `/api/sync/source/{source}` | update source |
 | `DELETE` | `/api/sync/source/{source}` | remove source |
@@ -250,8 +251,6 @@ Request fields for `POST` and `PATCH`:
 - `branch`
 - `enabled`
 - `priority`
-- `publish_enabled`
-- `private_source`
 
 ### 5.2 Registry catalog browsing
 
@@ -295,8 +294,7 @@ Import request body:
   "game_key": "example_game_661f5423",
   "release_id": "8e0d3f0d1c7f2db6f4e1b2f5d0cc9c65a76a4d8a",
   "upstream_instance_id": "2f9e6b4f-dc7e-4ef6-8c8f-78a1d08c81a1",
-  "upstream_base_url": "https://ctf.example.edu",
-  "publish_as_third_party": true
+  "upstream_base_url": "https://ctf.example.edu"
 }
 ```
 
@@ -306,25 +304,21 @@ Import request body:
 | --- | --- | --- |
 | `GET` | `/api/game/{game}/sync` | get local sync status |
 | `GET` | `/api/game/{game}/sync/releases` | list local release records |
-| `POST` | `/api/game/{game}/sync/publish` | publish first-party release |
+| `POST` | `/api/game/{game}/sync/publish` | generate first-party registry publication metadata |
 | `POST` | `/api/game/{game}/sync/sync-token` | rotate sync token |
-| `POST` | `/api/game/{game}/sync/advertise` | publish third-party upstream advertisement |
+| `POST` | `/api/game/{game}/sync/advertise` | generate third-party upstream advertisement metadata |
 | `POST` | `/api/game/{game}/sync/detach` | detach locked mirror |
 
 `POST /api/game/{game}/sync/publish` body:
 
 ```json
-{
-  "registry_source_id": 1
-}
+{}
 ```
 
 `POST /api/game/{game}/sync/advertise` body:
 
 ```json
-{
-  "registry_source_id": 1
-}
+{}
 ```
 
 `POST /api/game/{game}/sync/detach` body:
@@ -334,6 +328,10 @@ Import request body:
   "reason": "Need to customize the imported archive locally"
 }
 ```
+
+`POST /api/game/{game}/sync/publish` and `POST /api/game/{game}/sync/advertise` return relative registry file paths plus canonical file contents.
+
+They do **not** commit or push to any registry repo.
 
 ## 6. Remote Serving API Checklist
 
@@ -406,11 +404,12 @@ Use these permission rules.
 
 | Action | Permission |
 | --- | --- |
-| manage registry sources | `Permission::DevOps` |
-| fetch registry source | `Permission::DevOps` |
+| manage registry discovery sources | `Permission::DevOps` |
+| fetch registry discovery source | `Permission::DevOps` |
 | create import job | `Permission::Host` or `Permission::DevOps` |
 | resume/cancel import job | job creator, `Permission::Host`, or `Permission::DevOps` |
-| publish local game release | existing game admin guard or `Permission::Host` |
+| generate local game release publication metadata | existing game admin guard or `Permission::Host` |
+| generate third-party upstream advertisement metadata | existing game admin guard or `Permission::Host` |
 | rotate `sync_token` | existing game admin guard or `Permission::Host` |
 | detach mirror | existing game admin guard or `Permission::Host` |
 | remote release serving | `sync_token` or public sync policy |
@@ -434,7 +433,6 @@ Add reusable sync services under a non-route module, for example:
 - `crates/server/src/sync/registry.rs`
 - `crates/server/src/sync/job.rs`
 - `crates/server/src/sync/import.rs`
-- `crates/server/src/sync/publish.rs`
 - `crates/server/src/sync/path.rs`
 - `crates/server/src/sync/auth.rs`
 - `crates/server/src/sync/registry_proxy.rs`
@@ -463,11 +461,11 @@ Add:
 
 This module should cover:
 
-- registry source CRUD
+- registry discovery source CRUD
 - registry catalog browsing
 - direct discovery
 - import job lifecycle
-- game-scoped publish/advertise/detach/status APIs
+- game-scoped publication metadata/advertise/detach/status APIs
 
 ### 9.2 New frontend models
 
@@ -490,19 +488,19 @@ Suggested exported types:
 Use these locations:
 
 - reuse `web/src/routes/admin/sync/index.tsx` for platform-wide sync operations
-- add `web/src/routes/games/[game]/admin/sync/index.tsx` for game-scoped publish/detach controls
+- add `web/src/routes/games/[game]/admin/sync/index.tsx` for game-scoped metadata export/detach controls
 - add a sidebar entry in `web/src/routes/games/[game]/admin/_blocks/sidebar.tsx`
 
 Recommended page split:
 
 - `/admin/sync`:
-  - sources
+  - discovery sources
   - registry browser
   - direct sync form
   - job monitor
 - `/games/[game]/admin/sync`:
   - local release list
-  - publish button
+  - publication metadata button
   - rotate sync token button
   - mirror status
   - detach action
@@ -520,8 +518,8 @@ Add read-only banners or disabled controls to at least:
 
 Update `web/src/lib/i18n/index.ts` with keys for:
 
-- registry source management
-- release publish status
+- registry discovery source management
+- release publication metadata status
 - upstream selection
 - import job stages
 - mirror locked banner
@@ -529,7 +527,7 @@ Update `web/src/lib/i18n/index.ts` with keys for:
 
 ## 10. Validation Checklist
 
-Before allowing publish:
+Before allowing publication metadata generation:
 
 - game is archived
 - game is not a training game
@@ -546,7 +544,7 @@ Before allowing import finalization:
 - all required OCI assets are locally available when any challenge image is `internal_managed`
 - no other active import job owns the same `game_key`
 
-Before allowing third-party advertisement:
+Before allowing third-party advertisement metadata generation:
 
 - local game has `game_remote_sync.state = mirror_locked`
 - local release ref for `release_id` exists
@@ -562,7 +560,8 @@ Backend tests to add:
 
 - migration backfill for `sync_key`, `sync_token`, and `display_order`
 - manifest build/parse round-trip
-- registry source parser and conflict detection
+- first-party and third-party publication metadata bundle generation
+- registry discovery source parser and conflict detection
 - remote serving auth matrix for `access_policy.sync`
 - import job resume from failed `fetch_repo` and failed `fetch_media`
 - sync-aware registry relay auth matrix for releases with `assets.oci_images`
@@ -572,16 +571,17 @@ Backend tests to add:
 
 Frontend tests to add where practical:
 
-- source list rendering and form validation
+- discovery source list rendering and form validation
 - import wizard request serialization
 - job stage rendering
+- publication metadata bundle rendering
 - lock banner visibility and disabled controls for mirrored games
 
 ## 12. Minimum Acceptance Criteria
 
 The checklist is complete for the first usable version when all of the following are true:
 
-1. A local archived game can publish a release to a configured registry source.
+1. A local archived game can generate a first-party registry publication metadata bundle without direct registry git access.
 2. Another instance can import that release directly from the first instance without using the registry.
 3. Another instance can also import the same release from the registry after selecting an upstream.
 4. Imported games are marked `mirror_locked` and block all local mutation paths.

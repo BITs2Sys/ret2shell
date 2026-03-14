@@ -12,6 +12,40 @@ use serde::{Deserialize, Serialize};
 
 use crate::{sync::registry, traits::ResponseError};
 
+#[derive(Serialize)]
+pub(super) struct RegistrySourceResponse {
+  pub id: i64,
+  pub name: String,
+  pub git_url: String,
+  pub branch: String,
+  pub enabled: bool,
+  pub priority: i32,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
+  pub last_fetched_at: Option<chrono::DateTime<Utc>>,
+  pub last_error: Option<String>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub created_at: chrono::DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds")]
+  pub updated_at: chrono::DateTime<Utc>,
+}
+
+impl From<game_registry_source::Model> for RegistrySourceResponse {
+  fn from(value: game_registry_source::Model) -> Self {
+    Self {
+      id: value.id,
+      name: value.name,
+      git_url: value.git_url,
+      branch: value.branch,
+      enabled: value.enabled,
+      priority: value.priority,
+      last_fetched_at: value.last_fetched_at,
+      last_error: value.last_error,
+      created_at: value.created_at,
+      updated_at: value.updated_at,
+    }
+  }
+}
+
 #[derive(Deserialize)]
 pub(super) struct RegistrySourceRequest {
   pub name: String,
@@ -19,8 +53,6 @@ pub(super) struct RegistrySourceRequest {
   pub branch: String,
   pub enabled: bool,
   pub priority: i32,
-  pub publish_enabled: bool,
-  pub private_source: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -30,8 +62,6 @@ struct NormalizedRegistrySourceRequest {
   branch: String,
   enabled: bool,
   priority: i32,
-  publish_enabled: bool,
-  private_source: bool,
 }
 
 impl RegistrySourceRequest {
@@ -41,17 +71,17 @@ impl RegistrySourceRequest {
     let branch = self.branch.trim().to_owned();
     if name.is_empty() {
       return Err(ResponseError::BadRequest(
-        "registry source name can not be empty".to_owned(),
+        "registry discovery source name can not be empty".to_owned(),
       ));
     }
     if git_url.is_empty() {
       return Err(ResponseError::BadRequest(
-        "registry source git url can not be empty".to_owned(),
+        "registry discovery source git url can not be empty".to_owned(),
       ));
     }
     if branch.is_empty() {
       return Err(ResponseError::BadRequest(
-        "registry source branch can not be empty".to_owned(),
+        "registry discovery source branch can not be empty".to_owned(),
       ));
     }
     Ok(NormalizedRegistrySourceRequest {
@@ -60,8 +90,6 @@ impl RegistrySourceRequest {
       branch,
       enabled: self.enabled,
       priority: self.priority,
-      publish_enabled: self.publish_enabled,
-      private_source: self.private_source,
     })
   }
 }
@@ -69,7 +97,13 @@ impl RegistrySourceRequest {
 pub(super) async fn list_registry_sources(
   State(ref db): State<Database>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(game_registry_source::get_list(&db.conn).await?))
+  Ok(Json(
+    game_registry_source::get_list(&db.conn)
+      .await?
+      .into_iter()
+      .map(RegistrySourceResponse::from)
+      .collect::<Vec<_>>(),
+  ))
 }
 
 pub(super) async fn create_registry_source(
@@ -87,8 +121,8 @@ pub(super) async fn create_registry_source(
       branch: req.branch,
       enabled: req.enabled,
       priority: req.priority,
-      publish_enabled: req.publish_enabled,
-      private_source: req.private_source,
+      publish_enabled: false,
+      private_source: false,
       last_fetched_at: None,
       last_error: None,
       created_at: now,
@@ -96,7 +130,7 @@ pub(super) async fn create_registry_source(
     },
   )
   .await?;
-  Ok(Json(source))
+  Ok(Json(RegistrySourceResponse::from(source)))
 }
 
 pub(super) async fn update_registry_source(
@@ -107,7 +141,7 @@ pub(super) async fn update_registry_source(
   let previous = game_registry_source::get(&db.conn, source_id)
     .await?
     .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
+      "registry discovery source not found".to_owned(),
     ))?;
   ensure_registry_source_unique(&db.conn, &req, Some(previous.id)).await?;
   let should_reset_cache = previous.git_url != req.git_url || previous.branch != req.branch;
@@ -125,8 +159,8 @@ pub(super) async fn update_registry_source(
       branch: req.branch,
       enabled: req.enabled,
       priority: req.priority,
-      publish_enabled: req.publish_enabled,
-      private_source: req.private_source,
+      publish_enabled: previous.publish_enabled,
+      private_source: previous.private_source,
       last_fetched_at: if should_reset_cache {
         None
       } else {
@@ -142,7 +176,7 @@ pub(super) async fn update_registry_source(
     },
   )
   .await?;
-  Ok(Json(source))
+  Ok(Json(RegistrySourceResponse::from(source)))
 }
 
 pub(super) async fn delete_registry_source(
@@ -152,7 +186,7 @@ pub(super) async fn delete_registry_source(
   let existing = game_registry_source::get(&db.conn, source_id)
     .await?
     .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
+      "registry discovery source not found".to_owned(),
     ))?;
   registry::remove_registry_source_cache(&config.bucket, source_id)
     .await
@@ -168,7 +202,7 @@ pub(super) async fn fetch_registry_source(
   let source = game_registry_source::get(&db.conn, source_id)
     .await?
     .ok_or(ResponseError::NotFound(
-      "registry source not found".to_owned(),
+      "registry discovery source not found".to_owned(),
     ))?;
   let fetch_result = registry::fetch_registry_source(&config.bucket, &source).await;
   let updated_source = game_registry_source::update(
@@ -182,7 +216,7 @@ pub(super) async fn fetch_registry_source(
   )
   .await?;
   match fetch_result {
-    Ok(_) => Ok(Json(updated_source)),
+    Ok(_) => Ok(Json(RegistrySourceResponse::from(updated_source))),
     Err(err) => Err(ResponseError::PreconditionFailed(err.to_string())),
   }
 }
@@ -194,7 +228,7 @@ async fn ensure_registry_source_unique(
     && Some(existing.id) != current_id
   {
     return Err(ResponseError::Conflict(
-      "another registry source already uses the same name".to_owned(),
+      "another registry discovery source already uses the same name".to_owned(),
     ));
   }
   if let Some(existing) =
@@ -202,7 +236,7 @@ async fn ensure_registry_source_unique(
     && Some(existing.id) != current_id
   {
     return Err(ResponseError::Conflict(
-      "another registry source already uses the same git url and branch".to_owned(),
+      "another registry discovery source already uses the same git url and branch".to_owned(),
     ));
   }
   Ok(())
@@ -220,8 +254,6 @@ mod tests {
       branch: "  main  ".to_owned(),
       enabled: true,
       priority: 0,
-      publish_enabled: true,
-      private_source: false,
     }
     .normalize()
     .expect("normalize source request");
@@ -234,8 +266,6 @@ mod tests {
         branch: "main".to_owned(),
         enabled: true,
         priority: 0,
-        publish_enabled: true,
-        private_source: false,
       }
     );
   }
@@ -248,12 +278,10 @@ mod tests {
       branch: " ".to_owned(),
       enabled: true,
       priority: 0,
-      publish_enabled: false,
-      private_source: false,
     }
     .normalize()
     .expect_err("empty source request should fail");
 
-    assert!(format!("{err}").contains("registry source name"));
+    assert!(format!("{err}").contains("registry discovery source name"));
   }
 }

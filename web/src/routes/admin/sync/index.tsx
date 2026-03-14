@@ -32,8 +32,6 @@ const EMPTY_FORM: SyncRegistrySourcePayload = {
   branch: "main",
   enabled: true,
   priority: 0,
-  publish_enabled: false,
-  private_source: false,
 };
 
 export default function () {
@@ -159,8 +157,6 @@ export default function () {
       branch: source.branch,
       enabled: source.enabled,
       priority: source.priority,
-      publish_enabled: source.publish_enabled,
-      private_source: source.private_source,
     });
   }
 
@@ -247,7 +243,7 @@ export default function () {
             placeholder="https://github.com/ret2shell/game-registry"
             icon={<span class="shrink-0 icon-[fluent--link-20-regular] w-5 h-5" />}
           />
-          <div class="grid grid-cols-1 lg:grid-cols-4 gap-2">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
             <Input
               type="number"
               value={form().priority}
@@ -258,18 +254,6 @@ export default function () {
             />
             <Checkbox checked={form().enabled} onChange={() => updateForm("enabled", !form().enabled)}>
               <span class="flex-1 text-start">{t("platform.sync.sources.form.enabled")}</span>
-            </Checkbox>
-            <Checkbox
-              checked={form().publish_enabled}
-              onChange={() => updateForm("publish_enabled", !form().publish_enabled)}
-            >
-              <span class="flex-1 text-start">{t("platform.sync.sources.form.publishEnabled")}</span>
-            </Checkbox>
-            <Checkbox
-              checked={form().private_source}
-              onChange={() => updateForm("private_source", !form().private_source)}
-            >
-              <span class="flex-1 text-start">{t("platform.sync.sources.form.privateSource")}</span>
             </Checkbox>
           </div>
           <div class="flex flex-row justify-end space-x-2">
@@ -629,7 +613,7 @@ export default function () {
                   </Button>
                 </div>
               </div>
-              <div class="grid grid-cols-1 lg:grid-cols-4 gap-2 text-sm opacity-80">
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 text-sm opacity-80">
                 <span>
                   {t("platform.sync.sources.form.branch")}: {source.branch}
                 </span>
@@ -639,13 +623,6 @@ export default function () {
                 <span>
                   {t("platform.sync.sources.badges.enabled", {
                     enabled: source.enabled
-                      ? t("platform.sync.sources.state.enabled")
-                      : t("platform.sync.sources.state.disabled"),
-                  })}
-                </span>
-                <span>
-                  {t("platform.sync.sources.badges.publishEnabled", {
-                    enabled: source.publish_enabled
                       ? t("platform.sync.sources.state.enabled")
                       : t("platform.sync.sources.state.disabled"),
                   })}
