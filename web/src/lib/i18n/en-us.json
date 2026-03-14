@@ -389,6 +389,31 @@
         "title": "Sync jobs",
         "empty": "No sync jobs yet",
         "stage": "Status: {{status}} | stage: {{stage}}",
+        "status": {
+          "pending": "pending",
+          "running": "running",
+          "paused": "paused",
+          "failed": "failed",
+          "completed": "completed",
+          "cancelled": "cancelled"
+        },
+        "stages": {
+          "queued": "queued",
+          "discover": "discovering release metadata",
+          "fetchRepoInit": "initializing repo workspace",
+          "fetchRepoFetch": "fetching release ref",
+          "fetchRepoCheckout": "checking out release snapshot",
+          "fetchRepoVerify": "verifying fetched snapshot",
+          "fetchRepoDone": "repo snapshot ready",
+          "fetchMedia": "fetching media {{done}}/{{total}}",
+          "fetchOci": "mirroring OCI assets {{done}}/{{total}}",
+          "finalizeMoveRepo": "swapping staged repo into place",
+          "completed": "completed"
+        },
+        "upstream": "Upstream: {{value}}",
+        "createdAt": "Created at: {{value}}",
+        "updatedAt": "Updated at: {{value}}",
+        "finishedAt": "Finished at: {{value}}",
         "actions": {
           "refresh": {
             "title": "Refresh"
@@ -784,7 +809,11 @@
         "stateDetached": "detached",
         "release": "Current release: {{value}}",
         "source": "First-party source: {{value}}",
-        "detachDescription": "Detaching the mirror unlocks local editing, and this instance will no longer be accepted as a third-party upstream for this game."
+        "releaseSummary": "Current mirror record: {{origin}} | published at {{publishedAt}}",
+        "detachDescription": "Detaching the mirror unlocks local editing, and this instance will no longer be accepted as a third-party upstream for this game.",
+        "detachReason": "Detach reason",
+        "detachReasonPlaceholder": "Optional note for why this mirror is being detached",
+        "detachReasonHelp": "This note is stored with the detach request for audit context when provided."
       },
       "publish": {
         "title": "Generate first-party metadata",
@@ -817,6 +846,7 @@
         },
         "detach": {
           "title": "Detach mirror",
+          "confirm": "Confirm detach",
           "success": "Remote mirror detached successfully",
           "fail": "Failed to detach remote mirror"
         },
@@ -834,7 +864,13 @@
       "releases": {
         "title": "Local release records",
         "empty": "No local release records yet",
+        "current": "Current mirror release",
         "snapshot": "Snapshot commit: {{value}}",
+        "origin": "Origin: {{value}}",
+        "originFirstParty": "first-party",
+        "originMirror": "mirror",
+        "firstPartySource": "First-party source: {{value}}",
+        "firstPartyInstance": "First-party instance: {{value}}",
         "publishedAt": "Published at: {{value}}"
       },
       "trainingHint": "Training instances do not generate first-party registry publication metadata in this phase.",

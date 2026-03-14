@@ -389,6 +389,31 @@
         "title": "同期ジョブ",
         "empty": "まだ同期ジョブはありません",
         "stage": "状態: {{status}} | ステージ: {{stage}}",
+        "status": {
+          "pending": "待機中",
+          "running": "実行中",
+          "paused": "一時停止",
+          "failed": "失敗",
+          "completed": "完了",
+          "cancelled": "キャンセル済み"
+        },
+        "stages": {
+          "queued": "キュー待ち",
+          "discover": "release メタデータを確認中",
+          "fetchRepoInit": "リポジトリ作業領域を初期化中",
+          "fetchRepoFetch": "release ref を取得中",
+          "fetchRepoCheckout": "release スナップショットを checkout 中",
+          "fetchRepoVerify": "取得したスナップショットを検証中",
+          "fetchRepoDone": "リポジトリスナップショットの準備完了",
+          "fetchMedia": "メディア取得 {{done}}/{{total}}",
+          "fetchOci": "OCI アセット同期 {{done}}/{{total}}",
+          "finalizeMoveRepo": "退避済みリポジトリを本配置へ切り替え中",
+          "completed": "完了"
+        },
+        "upstream": "Upstream: {{value}}",
+        "createdAt": "作成日時: {{value}}",
+        "updatedAt": "更新日時: {{value}}",
+        "finishedAt": "完了日時: {{value}}",
         "actions": {
           "refresh": {
             "title": "更新"
@@ -784,7 +809,11 @@
         "stateDetached": "detached",
         "release": "現在の release: {{value}}",
         "source": "ファーストパーティ source: {{value}}",
-        "detachDescription": "ミラーを切り離すとローカル編集が可能になりますが、このインスタンスは今後このゲームの third-party upstream として受け入れられなくなります。"
+        "releaseSummary": "現在のミラー記録: {{origin}} | 公開日時 {{publishedAt}}",
+        "detachDescription": "ミラーを切り離すとローカル編集が可能になりますが、このインスタンスは今後このゲームの third-party upstream として受け入れられなくなります。",
+        "detachReason": "切り離し理由",
+        "detachReasonPlaceholder": "任意: このミラーを切り離す理由を入力",
+        "detachReasonHelp": "入力した場合、この説明は監査用の文脈として切り離し操作と一緒に保存されます。"
       },
       "publish": {
         "title": "first-party 公開メタデータを生成",
@@ -817,6 +846,7 @@
         },
         "detach": {
           "title": "ミラーを切り離す",
+          "confirm": "切り離しを確定",
           "success": "リモートミラーを切り離しました",
           "fail": "リモートミラーの切り離しに失敗しました"
         },
@@ -834,7 +864,13 @@
       "releases": {
         "title": "ローカル release 記録",
         "empty": "ローカル release 記録はまだありません",
+        "current": "現在のミラー release",
         "snapshot": "スナップショットコミット: {{value}}",
+        "origin": "由来: {{value}}",
+        "originFirstParty": "ファーストパーティ",
+        "originMirror": "ミラー",
+        "firstPartySource": "ファーストパーティ source: {{value}}",
+        "firstPartyInstance": "ファーストパーティ instance: {{value}}",
         "publishedAt": "公開日時: {{value}}"
       },
       "trainingHint": "このフェーズでは training は first-party registry 公開メタデータの生成対象ではありません。",

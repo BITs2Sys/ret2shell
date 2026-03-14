@@ -389,6 +389,31 @@
         "title": "同步任務",
         "empty": "目前還沒有同步任務",
         "stage": "狀態：{{status}} | 階段：{{stage}}",
+        "status": {
+          "pending": "等待中",
+          "running": "執行中",
+          "paused": "已暫停",
+          "failed": "失敗",
+          "completed": "已完成",
+          "cancelled": "已取消"
+        },
+        "stages": {
+          "queued": "已排隊",
+          "discover": "正在發現 release 元資料",
+          "fetchRepoInit": "初始化倉庫工作目錄",
+          "fetchRepoFetch": "拉取 release 引用",
+          "fetchRepoCheckout": "檢出 release 快照",
+          "fetchRepoVerify": "校驗快照一致性",
+          "fetchRepoDone": "倉庫快照已就緒",
+          "fetchMedia": "拉取媒體 {{done}}/{{total}}",
+          "fetchOci": "鏡像同步 OCI 資產 {{done}}/{{total}}",
+          "finalizeMoveRepo": "切換已暫存倉庫",
+          "completed": "已完成"
+        },
+        "upstream": "上游：{{value}}",
+        "createdAt": "建立時間：{{value}}",
+        "updatedAt": "更新時間：{{value}}",
+        "finishedAt": "完成時間：{{value}}",
         "actions": {
           "refresh": {
             "title": "重新整理"
@@ -784,7 +809,11 @@
         "stateDetached": "已解除鎖定",
         "release": "目前 release：{{value}}",
         "source": "第一方來源：{{value}}",
-        "detachDescription": "解除鏡像鎖定後，本地將允許繼續編輯，同時目前實例也不再會被其他平台接受為該賽事的 third-party upstream。"
+        "releaseSummary": "目前鏡像記錄：{{origin}} | 發佈時間 {{publishedAt}}",
+        "detachDescription": "解除鏡像鎖定後，本地將允許繼續編輯，同時目前實例也不再會被其他平台接受為該賽事的 third-party upstream。",
+        "detachReason": "解除原因",
+        "detachReasonPlaceholder": "可選：說明為什麼要解除這個鏡像鎖定",
+        "detachReasonHelp": "如有填寫，該說明會隨解除操作一起記錄，方便審計與追溯。"
       },
       "publish": {
         "title": "產生 first-party 發佈元資料",
@@ -817,6 +846,7 @@
         },
         "detach": {
           "title": "解除鏡像鎖定",
+          "confirm": "確認解除",
           "success": "遠端鏡像已成功解除鎖定",
           "fail": "解除遠端鏡像鎖定失敗"
         },
@@ -834,7 +864,13 @@
       "releases": {
         "title": "本地 release 記錄",
         "empty": "尚未有本地 release 記錄",
+        "current": "目前鏡像 release",
         "snapshot": "快照提交：{{value}}",
+        "origin": "來源角色：{{value}}",
+        "originFirstParty": "第一方",
+        "originMirror": "鏡像",
+        "firstPartySource": "第一方來源：{{value}}",
+        "firstPartyInstance": "第一方實例：{{value}}",
         "publishedAt": "發佈時間：{{value}}"
       },
       "trainingHint": "目前階段不會為訓練場產生 first-party registry 發佈元資料。",

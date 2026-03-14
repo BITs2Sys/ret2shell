@@ -198,6 +198,49 @@ export default function () {
     }
   }
 
+  function jobStatusLabel(status: SyncJob["status"]) {
+    return t(`platform.sync.jobs.status.${status}`);
+  }
+
+  function jobStageLabel(stage: string) {
+    const fetchMedia = stage.match(/^fetch_media:(\d+)\/(\d+)$/);
+    if (fetchMedia) {
+      return t("platform.sync.jobs.stages.fetchMedia", {
+        done: fetchMedia[1],
+        total: fetchMedia[2],
+      });
+    }
+    const fetchOci = stage.match(/^fetch_oci:(\d+)\/(\d+)$/);
+    if (fetchOci) {
+      return t("platform.sync.jobs.stages.fetchOci", {
+        done: fetchOci[1],
+        total: fetchOci[2],
+      });
+    }
+    switch (stage) {
+      case "queued":
+        return t("platform.sync.jobs.stages.queued");
+      case "discover":
+        return t("platform.sync.jobs.stages.discover");
+      case "fetch_repo:init":
+        return t("platform.sync.jobs.stages.fetchRepoInit");
+      case "fetch_repo:fetch":
+        return t("platform.sync.jobs.stages.fetchRepoFetch");
+      case "fetch_repo:checkout":
+        return t("platform.sync.jobs.stages.fetchRepoCheckout");
+      case "fetch_repo:verify":
+        return t("platform.sync.jobs.stages.fetchRepoVerify");
+      case "fetch_repo:done":
+        return t("platform.sync.jobs.stages.fetchRepoDone");
+      case "finalize:move_repo":
+        return t("platform.sync.jobs.stages.finalizeMoveRepo");
+      case "completed":
+        return t("platform.sync.jobs.stages.completed");
+      default:
+        return stage;
+    }
+  }
+
   function onImportCatalog() {
     if (catalogSourceId() == null || !catalogGameKey() || !catalogReleaseId() || !catalogUpstreamInstanceId()) {
       return;
@@ -520,8 +563,8 @@ export default function () {
                     </span>
                     <span class="text-sm opacity-70">
                       {t("platform.sync.jobs.stage", {
-                        status: job.status,
-                        stage: job.stage,
+                        status: jobStatusLabel(job.status),
+                        stage: jobStageLabel(job.stage),
                       })}
                     </span>
                   </div>
@@ -561,7 +604,26 @@ export default function () {
                   </div>
                 </div>
                 <Show when={job.upstream_base_url}>
-                  <span class="text-sm opacity-70 break-all">{job.upstream_base_url}</span>
+                  <span class="text-sm opacity-70 break-all">
+                    {t("platform.sync.jobs.upstream", { value: job.upstream_base_url || "-" })}
+                  </span>
+                </Show>
+                <span class="text-sm opacity-70">
+                  {t("platform.sync.jobs.createdAt", {
+                    value: job.created_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                  })}
+                </span>
+                <span class="text-sm opacity-70">
+                  {t("platform.sync.jobs.updatedAt", {
+                    value: job.updated_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                  })}
+                </span>
+                <Show when={job.finished_at}>
+                  <span class="text-sm opacity-70">
+                    {t("platform.sync.jobs.finishedAt", {
+                      value: job.finished_at?.toFormat("yyyy-MM-dd HH:mm:ss") || "-",
+                    })}
+                  </span>
                 </Show>
                 <Show when={job.error_message}>
                   <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto text-error">

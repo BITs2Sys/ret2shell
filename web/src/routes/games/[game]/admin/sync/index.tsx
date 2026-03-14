@@ -14,6 +14,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
+import Input from "@widgets/input";
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 export default function () {
@@ -24,6 +25,8 @@ export default function () {
   const releases = useGameSyncReleases({ game_id: gameId, enabled: () => gameId() > 0 });
   const [publicationMetadata, setPublicationMetadata] = createSignal<RegistryPublicationMetadata | null>(null);
   const [upstreamMetadata, setUpstreamMetadata] = createSignal<RegistryUpstreamMetadata | null>(null);
+  const [detachConfirmOpen, setDetachConfirmOpen] = createSignal(false);
+  const [detachReason, setDetachReason] = createSignal("");
 
   const publishMutation = usePublishGameSyncMutation({
     onSuccess: (metadata) => {
@@ -40,6 +43,8 @@ export default function () {
   });
   const detachMutation = useDetachGameSyncMutation({
     onSuccess: () => {
+      setDetachConfirmOpen(false);
+      setDetachReason("");
       syncStatus.refetch();
     },
   });
@@ -52,6 +57,9 @@ export default function () {
 
   const canPublish = createMemo(
     () => !!game.data && game.data.host_type === HostType.Game && !syncStatus.data?.readonly
+  );
+  const currentMirrorRelease = createMemo(() =>
+    (releases.data || []).find((release) => release.release_id === syncStatus.data?.remote_release_id)
   );
 
   return (
@@ -116,19 +124,58 @@ export default function () {
                     })}
                   </span>
                 </Show>
+                <Show when={currentMirrorRelease()}>
+                  {(release) => (
+                    <span>
+                      {t("game.sync.remote.releaseSummary", {
+                        origin:
+                          release().origin_role === "first_party"
+                            ? t("game.sync.releases.originFirstParty")
+                            : t("game.sync.releases.originMirror"),
+                        publishedAt: release().published_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                      })}
+                    </span>
+                  )}
+                </Show>
               </div>
               <Show when={syncStatus.data?.remote_state === "mirror_locked"}>
                 <p class="opacity-80 text-sm">{t("game.sync.remote.detachDescription")}</p>
-                <div class="flex flex-row justify-end">
-                  <Button
-                    level="warning"
-                    onClick={() => detachMutation.mutate({ game_id: gameId() })}
-                    loading={detachMutation.isPending}
-                    disabled={detachMutation.isPending}
-                  >
-                    {t("game.sync.actions.detach.title")}
-                  </Button>
-                </div>
+                <Show
+                  when={detachConfirmOpen()}
+                  fallback={
+                    <div class="flex flex-row justify-end">
+                      <Button level="warning" onClick={() => setDetachConfirmOpen(true)}>
+                        {t("game.sync.actions.detach.title")}
+                      </Button>
+                    </div>
+                  }
+                >
+                  <div class="rounded-lg border border-warning/30 bg-warning/5 p-3 flex flex-col gap-3">
+                    <Input
+                      value={detachReason()}
+                      onInput={(event) => setDetachReason(event.currentTarget.value)}
+                      title={t("game.sync.remote.detachReason")}
+                      placeholder={t("game.sync.remote.detachReasonPlaceholder")}
+                      icon={<span class="shrink-0 icon-[fluent--note-edit-20-regular] w-5 h-5" />}
+                    />
+                    <span class="text-sm opacity-70">{t("game.sync.remote.detachReasonHelp")}</span>
+                    <div class="flex flex-row justify-end gap-2">
+                      <Button ghost onClick={() => setDetachConfirmOpen(false)}>
+                        {t("general.actions.cancel.title")}
+                      </Button>
+                      <Button
+                        level="warning"
+                        onClick={() =>
+                          detachMutation.mutate({ game_id: gameId(), reason: detachReason().trim() || undefined })
+                        }
+                        loading={detachMutation.isPending}
+                        disabled={detachMutation.isPending}
+                      >
+                        {t("game.sync.actions.detach.confirm")}
+                      </Button>
+                    </div>
+                  </div>
+                </Show>
               </Show>
             </Card>
           </Show>
@@ -220,10 +267,36 @@ export default function () {
             </div>
             <For each={releases.data || []} fallback={<span class="opacity-70">{t("game.sync.releases.empty")}</span>}>
               {(release) => (
-                <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col space-y-1">
-                  <div class="font-mono break-all">{release.release_id}</div>
+                <div
+                  class="border border-layer-content/10 rounded-lg p-3 flex flex-col space-y-1"
+                  classList={{
+                    "border-primary/40 bg-primary/5": release.release_id === syncStatus.data?.remote_release_id,
+                  }}
+                >
+                  <div class="flex flex-row items-start justify-between gap-2">
+                    <div class="font-mono break-all">{release.release_id}</div>
+                    <Show when={release.release_id === syncStatus.data?.remote_release_id}>
+                      <span class="text-xs rounded-full border border-primary/30 bg-primary/10 px-2 py-1 shrink-0">
+                        {t("game.sync.releases.current")}
+                      </span>
+                    </Show>
+                  </div>
                   <div class="text-sm opacity-80">
                     {t("game.sync.releases.snapshot", { value: release.snapshot_commit })}
+                  </div>
+                  <div class="text-sm opacity-80">
+                    {t("game.sync.releases.origin", {
+                      value:
+                        release.origin_role === "first_party"
+                          ? t("game.sync.releases.originFirstParty")
+                          : t("game.sync.releases.originMirror"),
+                    })}
+                  </div>
+                  <div class="text-sm opacity-80 break-all">
+                    {t("game.sync.releases.firstPartySource", { value: release.first_party_base_url })}
+                  </div>
+                  <div class="text-sm opacity-80 break-all">
+                    {t("game.sync.releases.firstPartyInstance", { value: release.first_party_instance_id })}
                   </div>
                   <div class="text-sm opacity-80">
                     {t("game.sync.releases.publishedAt", {
