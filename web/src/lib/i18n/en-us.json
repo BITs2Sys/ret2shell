@@ -2132,6 +2132,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "Commercial services allowed",
+        "copyleft": "Strong copyleft",
+        "description": "Ret2Shell uses a GPL-3.0-derived strong copyleft license. The GPL baseline remains in place, with limited extra restrictions on paid user access and similar user-facing monetization.",
+        "gplBase": "GPL-3.0-derived",
+        "noUserFees": "No paid access tiers",
+        "view": "Read full license"
+      },
       "thanks": "Thank you for using my software",
       "title": "About"
     },
@@ -2297,6 +2305,9 @@
   "admin": {
     "title": "Admin",
     "platformTitle": "Platform Management"
+  },
+  "license": {
+    "title": "Ret2Shell Public License"
   },
   "traffic": {
     "title": "Traffic",

@@ -215,6 +215,7 @@ export type PlatformLicense = {
   name: string;
   url: string;
   notice: string;
+  content: string;
 };
 
 export async function getPlatformLicense() {

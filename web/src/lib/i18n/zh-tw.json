@@ -2132,6 +2132,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "允許商業服務",
+        "copyleft": "強 Copyleft",
+        "description": "Ret2Shell 使用以 GPL-3.0 為基礎的強 Copyleft 許可證，在保留 GPL 基線權利與義務的同時，對付費訪問分層和類似的面向用戶收費商業化施加有限額外限制。",
+        "gplBase": "基於 GPL-3.0",
+        "noUserFees": "禁止付費訪問分層",
+        "view": "查看完整許可證"
+      },
       "thanks": "感謝使用我的作品",
       "title": "關於"
     },
@@ -2297,6 +2305,9 @@
   "admin": {
     "title": "管理",
     "platformTitle": "平臺管理"
+  },
+  "license": {
+    "title": "Ret2Shell 公共授權"
   },
   "traffic": {
     "title": "環境路由",

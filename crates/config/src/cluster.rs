@@ -110,7 +110,7 @@ pub struct ChallengeImage {
   #[serde(default = "default_storage_req")]
   pub storage_req: Option<String>,
   pub port: Option<u16>,
-  #[deprecated(since = "3.10.3", note = "use protocol and app_protocol instead")]
+  #[deprecated(since = "3.10.2", note = "use protocol and app_protocol instead")]
   pub service_type: Option<ServiceType>,
   pub protocol: Option<Protocol>,
   pub app_protocol: Option<AppProtocol>,

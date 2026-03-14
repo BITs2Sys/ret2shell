@@ -25,7 +25,7 @@ jobs:
             script: release-image.sh
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # fetch depth 0 to fetch all history for git-restore-mtime-action
           fetch-depth: 0

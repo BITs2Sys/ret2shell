@@ -22,6 +22,35 @@ metadata:
   labels:
     {{- include "ret2shell.commonLabels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
+    ret2shell.io/service-role: client
+  {{- with .Values.postgresql.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: {{ .Values.postgresql.service.port }}
+      targetPort: postgres
+    {{- if .Values.postgresql.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.postgresql.metrics.port }}
+      targetPort: metrics
+    {{- end }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "postgresql" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.postgresqlHeadlessName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+    ret2shell.io/service-role: headless
 spec:
   clusterIP: None
   ports:
@@ -41,7 +70,7 @@ metadata:
     {{- include "ret2shell.commonLabels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
 spec:
-  serviceName: {{ include "ret2shell.postgresqlName" . }}
+  serviceName: {{ include "ret2shell.postgresqlHeadlessName" . }}
   replicas: 1
   selector:
     matchLabels:
@@ -50,12 +79,22 @@ spec:
     metadata:
       labels:
         {{- include "ret2shell.componentLabels" (dict "component" "postgresql" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 8 }}
+        {{- with .Values.postgresql.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.postgresql.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- range . }}
         - name: {{ . }}
         {{- end }}
+      {{- end }}
+      {{- with .Values.postgresql.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       containers:
         - name: postgresql
@@ -103,6 +142,43 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if .Values.postgresql.metrics.enabled }}
+        - name: metrics
+          image: {{ include "ret2shell.image" .Values.postgresql.metrics.image }}
+          imagePullPolicy: {{ .Values.postgresql.metrics.image.pullPolicy }}
+          env:
+            - name: DATA_SOURCE_URI
+              value: 127.0.0.1:{{ .Values.postgresql.service.port }}/postgres?sslmode=disable
+            - name: DATA_SOURCE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ret2shell.postgresqlName" . }}
+                  key: username
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ret2shell.postgresqlName" . }}
+                  key: password
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.postgresql.metrics.port }}
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          {{- with .Values.postgresql.metrics.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
       {{- if .Values.postgresql.persistence.existingClaim }}
       volumes:
         - name: data
@@ -125,6 +201,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.postgresql.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   {{- if and .Values.postgresql.persistence.enabled (not .Values.postgresql.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
@@ -143,4 +223,59 @@ spec:
         storageClassName: {{ $sc }}
         {{- end }}
   {{- end }}
+
+{{- if .Values.postgresql.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ret2shell.postgresqlName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "postgresql" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  {{- with .Values.postgresql.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .Values.postgresql.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.postgresql.metrics.enabled .Values.postgresql.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ret2shell.postgresqlName" . }}
+  namespace: {{ default .Release.Namespace .Values.postgresql.metrics.serviceMonitor.namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+    {{- with .Values.postgresql.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.postgresql.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+      ret2shell.io/service-role: client
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.postgresql.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.postgresql.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
 {{- end }}

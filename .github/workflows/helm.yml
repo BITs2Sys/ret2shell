@@ -31,7 +31,11 @@ jobs:
         shell: bash -leo pipefail {0}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
+      - name: Set Helm temp paths
+        run: |
+          echo "HELM_RENDER_DIR=${RUNNER_TEMP}/helm-render-${GITHUB_JOB}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -41,19 +45,25 @@ jobs:
 
       - name: Render chart
         run: |
-          helm template ret2shell deploy/helm/ret2shell --namespace ret2shell-platform > /tmp/ret2shell-default.yaml
+          rm -rf "$HELM_RENDER_DIR"
+          mkdir -p "$HELM_RENDER_DIR"
+          helm template ret2shell deploy/helm/ret2shell --namespace ret2shell-platform > "$HELM_RENDER_DIR/ret2shell-default.yaml"
           for values in deploy/helm/ret2shell/examples/*.yaml; do
             name="$(basename "$values" .yaml)"
-            helm template ret2shell deploy/helm/ret2shell --namespace ret2shell-platform -f "$values" > "/tmp/${name}.yaml"
+            helm template ret2shell deploy/helm/ret2shell --namespace ret2shell-platform -f "$values" > "$HELM_RENDER_DIR/${name}.yaml"
           done
 
       - name: Verify fixed namespace guard
         run: |
-          if helm template ret2shell deploy/helm/ret2shell --namespace default >/tmp/ret2shell-wrong-ns.out 2>/tmp/ret2shell-wrong-ns.err; then
+          mkdir -p "$HELM_RENDER_DIR"
+          wrong_ns_out="$HELM_RENDER_DIR/ret2shell-wrong-ns.out"
+          wrong_ns_err="$HELM_RENDER_DIR/ret2shell-wrong-ns.err"
+
+          if helm template ret2shell deploy/helm/ret2shell --namespace default >"$wrong_ns_out" 2>"$wrong_ns_err"; then
             echo "chart unexpectedly rendered outside ret2shell-platform" >&2
             exit 1
           fi
-          grep -q "ret2shell chart must be installed into namespace ret2shell-platform" /tmp/ret2shell-wrong-ns.err
+          grep -q "ret2shell chart must be installed into namespace ret2shell-platform" "$wrong_ns_err"
 
       - name: Package chart
         run: |
@@ -64,7 +74,7 @@ jobs:
       - name: Upload artifact
         if: ${{ github.event_name != 'pull_request' }}
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: helm-chart
           path: |

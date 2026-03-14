@@ -2132,6 +2132,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "商用サービス可",
+        "copyleft": "強いコピーレフト",
+        "description": "Ret2Shell は GPL-3.0 を土台にした強いコピーレフトライセンスを採用しており、GPL の基本的な権利と義務を維持したまま、有料アクセス層などのユーザー向け収益化に限定的な追加制限を設けています。",
+        "gplBase": "GPL-3.0 ベース",
+        "noUserFees": "有料アクセス層なし",
+        "view": "ライセンス全文を見る"
+      },
       "thanks": "私の作品を使用していただきありがとうございます",
       "title": "について"
     },
@@ -2297,6 +2305,9 @@
   "admin": {
     "title": "管理",
     "platformTitle": "プラットフォーム管理"
+  },
+  "license": {
+    "title": "Ret2Shell Public License"
   },
   "traffic": {
     "title": "環境ルーティング",

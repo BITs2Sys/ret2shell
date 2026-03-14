@@ -285,15 +285,19 @@ struct PlatformLicenseInfo {
   name: &'static str,
   url: &'static str,
   notice: &'static str,
+  content: &'static str,
 }
+
+const R2S_PUBLIC_LICENSE_TEXT: &str = include_str!("../../../../../LICENSE");
 
 async fn get_license(
   State(_state): State<GlobalState>,
 ) -> Result<impl IntoResponse, ResponseError> {
   Ok(Json(PlatformLicenseInfo {
-    spdx_id: "AGPL-3.0",
-    name: "GNU Affero General Public License v3.0",
-    url: "https://www.gnu.org/licenses/agpl-3.0.html",
-    notice: "Ret2Shell is free software released under AGPL-3.0. If you modify and run it for users over a network, you must offer the corresponding source code.",
+    spdx_id: "LicenseRef-Ret2Shell-Public-2.0",
+    name: "Ret2Shell Public License 2.0",
+    url: "/license",
+    notice: "Ret2Shell is released under the Ret2Shell Public License 2.0, a GPL-3.0-derived copyleft license with limited user-facing monetization restrictions.",
+    content: R2S_PUBLIC_LICENSE_TEXT,
   }))
 }

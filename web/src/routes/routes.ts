@@ -301,6 +301,10 @@ export const routes = {
       ],
     },
     {
+      path: "/license",
+      component: lazy(() => import("./admin/license/index")),
+    },
+    {
       path: "/users",
       component: lazy(() => import("./users/layout")),
       children: [

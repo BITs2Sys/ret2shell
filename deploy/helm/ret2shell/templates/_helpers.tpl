@@ -76,12 +76,24 @@ ret2shell-platform-headless
 ret2shell-postgresql
 {{- end -}}
 
+{{- define "ret2shell.postgresqlHeadlessName" -}}
+ret2shell-postgresql-headless
+{{- end -}}
+
 {{- define "ret2shell.valkeyName" -}}
 ret2shell-valkey
 {{- end -}}
 
+{{- define "ret2shell.valkeyHeadlessName" -}}
+ret2shell-valkey-headless
+{{- end -}}
+
 {{- define "ret2shell.natsName" -}}
 ret2shell-nats
+{{- end -}}
+
+{{- define "ret2shell.natsHeadlessName" -}}
+ret2shell-nats-headless
 {{- end -}}
 
 {{- define "ret2shell.registryName" -}}
@@ -90,6 +102,10 @@ ret2shell-registry
 
 {{- define "ret2shell.victoriaLogsName" -}}
 ret2shell-victoria-logs
+{{- end -}}
+
+{{- define "ret2shell.victoriaLogsHeadlessName" -}}
+ret2shell-victoria-logs-headless
 {{- end -}}
 
 {{- define "ret2shell.storageClass" -}}

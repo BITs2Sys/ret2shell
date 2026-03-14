@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getPlatformLicense, getVersion, usePlatformInfo } from "@api/platform";
+import { getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
@@ -122,7 +122,7 @@ export default function (props: { children?: JSX.Element }) {
         });
       }
       console.log(
-        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, licensed under AGPL-3.0.\n\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n\n%cIf you modify and run Ret2Shell over a network, remember to provide the corresponding source code as required by AGPL-3.0.\n`,
+        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, licensed under the Ret2Shell Public License 2.0, a GPL-3.0-derived copyleft license with limited user-facing monetization restrictions.\n\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n\n%cSee /license for details.\n`,
         "color: #0078D6; font-weight: bold; font-size: 1.5rem;",
         "color: currentColor; font-weight: bold; font-size: 1.5rem;",
         "color: #808080; font-weight: bold; font-size: 1.5rem;",
@@ -136,9 +136,6 @@ export default function (props: { children?: JSX.Element }) {
         "color: #808080;",
         "color: currentColor;"
       );
-
-      const resp = await getPlatformLicense();
-      setPlatformStore({ license: resp });
     } catch (err) {
       setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
       if (err instanceof HTTPError && err.response?.status === 503) {

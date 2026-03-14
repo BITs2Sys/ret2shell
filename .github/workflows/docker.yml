@@ -1,10 +1,6 @@
 name: Docker
 
 on:
-  push:
-    tags:
-      - "*"
-
   workflow_dispatch:
     inputs:
       image:
@@ -23,7 +19,7 @@ jobs:
       commit_sha: unknown
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # fetch depth 0 to fetch all history for git-restore-mtime-action
           fetch-depth: 0
@@ -62,7 +58,7 @@ jobs:
 
       - name: Upload artifact
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.export.outputs.output_fn }}
           path: |

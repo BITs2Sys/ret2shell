@@ -14,9 +14,9 @@ use r2s_server::{R2S_VERSION, down, greet, run_post_receive, up};
   long_about = r#"
 Ret 2 Shell Challenge API Platform
 
-Ret2Shell is free software released under AGPL-3.0.
-If you modify and run it for users over a network, you must offer the
-corresponding source code.
+Ret2Shell is released under the Ret2Shell Public License 2.0,
+a GPL-3.0-derived copyleft license with limited user-facing
+monetization restrictions.
 
 If you have any problems, please contact tech support <support@ret.sh.cn>.
     "#
