@@ -744,6 +744,8 @@ The target instance should keep the mirrored repo byte-identical to the upstream
 
 Do **not** rewrite repo files in place after download.
 
+If a local game is already a `mirror_locked` remote mirror for the same `game_key`, a newer release may replace that mirror in place, but only through a staged repo swap and one transactional metadata update.
+
 That is important because:
 
 - the repo must remain valid for third-party serving

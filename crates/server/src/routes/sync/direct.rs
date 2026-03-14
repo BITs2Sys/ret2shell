@@ -368,14 +368,7 @@ pub(super) async fn create_import_job(
   upstream_base_url: Option<String>, req: DirectImportRequest,
 ) -> Result<game_sync_job::Model, ResponseError> {
   let request = normalize_direct_import_request(req)?;
-  if game::get_by_sync_key(&state.db.conn, &request.game_key)
-    .await?
-    .is_some()
-  {
-    return Err(ResponseError::Conflict(
-      "a local game with the same sync key already exists".to_owned(),
-    ));
-  }
+  let existing_target = resolve_import_target_game(&state.db, &request.game_key).await?;
   ensure_no_active_import_job(&state.db, &request.game_key, &request.release_id).await?;
 
   let now = Utc::now();
@@ -388,7 +381,7 @@ pub(super) async fn create_import_job(
         mode,
         status: game_sync_job::SyncJobStatus::Pending,
         stage: "queued".to_owned(),
-        game_id: None,
+        game_id: existing_target.as_ref().map(|game| game.id),
         game_key: Some(request.game_key.clone()),
         release_id: Some(request.release_id.clone()),
         registry_source_id,
@@ -405,6 +398,36 @@ pub(super) async fn create_import_job(
     )
     .await?,
   )
+}
+
+async fn resolve_import_target_game(
+  db: &Database, game_key: &str,
+) -> Result<Option<game::Model>, ResponseError> {
+  let Some(existing_game) = game::get_by_sync_key(&db.conn, game_key).await? else {
+    return Ok(None);
+  };
+  let Some(remote_sync) = game_remote_sync::get(&db.conn, existing_game.id).await? else {
+    return Err(ResponseError::Conflict(
+      "a local game with the same sync key already exists and is not a managed remote mirror"
+        .to_owned(),
+    ));
+  };
+  if remote_sync.state != game_remote_sync::RemoteGameState::MirrorLocked {
+    return Err(ResponseError::Conflict(
+      "only locked remote mirrors can be upgraded or re-synced in place".to_owned(),
+    ));
+  }
+  Ok(Some(existing_game))
+}
+
+async fn load_import_target_game(
+  db: &Database, game_id: i64,
+) -> Result<game::Model, ResponseError> {
+  game::get(&db.conn, game_id)
+    .await?
+    .ok_or(ResponseError::NotFound(
+      "sync target game not found".to_owned(),
+    ))
 }
 
 pub(super) fn spawn_import_job(state: GlobalState, job_id: i64) {
@@ -454,7 +477,15 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     )
     .await?;
     let discovered = discover_release_for_import(&state.requestor, &request).await?;
-    checkpoint.bucket_name = Some(pick_local_bucket_name(&state.bucket, &request.game_key));
+    checkpoint.bucket_name = Some(match job.game_id {
+      Some(game_id) => load_import_target_game(&state.db, game_id)
+        .await?
+        .bucket
+        .ok_or(ResponseError::PreconditionFailed(
+          "existing sync target does not have a game bucket".to_owned(),
+        ))?,
+      None => pick_local_bucket_name(&state.bucket, &request.game_key),
+    });
     checkpoint.media.completed = discovered.manifest.assets.media_hashes.is_empty();
     checkpoint.oci.completed = discovered.manifest.assets.oci_images.is_empty();
     checkpoint.discovered = Some(discovered);
@@ -533,6 +564,10 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
     ))?;
   let _target_lock = ImportTargetLock::acquire(&state.config.bucket, &bucket_name).await?;
   let final_repo_path = state.bucket.path().join(&bucket_name);
+  let live_backup_path = workspace.join("repo-live-backup");
+  if job.game_id.is_some() {
+    recover_existing_target_repo_state(&final_repo_path, &live_backup_path, &repo_dir).await?;
+  }
   if final_repo_path.exists() && job.game_id.is_none() {
     if repo_dir.exists() {
       return Err(ResponseError::Conflict(
@@ -570,27 +605,56 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
   )
   .await?;
 
-  if final_repo_path.exists() {
+  if final_repo_path.exists() && job.game_id.is_none() {
     return Err(ResponseError::Conflict(
       "target game bucket already exists and can not be replaced during import finalization"
         .to_owned(),
     ));
   }
 
+  if job.game_id.is_some() && final_repo_path.exists() {
+    rename(&final_repo_path, &live_backup_path)
+      .await
+      .map_err(|err| {
+        ResponseError::InternalServerError(format!(
+          "failed to stage existing repository for mirror upgrade: {err}"
+        ))
+      })?;
+  }
+
   rename(&repo_dir, &final_repo_path).await.map_err(|err| {
     ResponseError::InternalServerError(format!("failed to finalize imported repository: {err}"))
   })?;
-  let finalize_result = finalize_import(
-    &state,
-    job.created_by,
-    &bucket_name,
-    &discovered.remote_info,
-    discovered.release,
-    discovered.manifest,
-  )
-  .await;
+  let finalize_result = match job.game_id {
+    Some(game_id) => {
+      finalize_import_into_existing(
+        &state,
+        job.created_by,
+        game_id,
+        &bucket_name,
+        &discovered.remote_info,
+        discovered.release,
+        discovered.manifest,
+      )
+      .await
+    }
+    None => {
+      finalize_import(
+        &state,
+        job.created_by,
+        &bucket_name,
+        &discovered.remote_info,
+        discovered.release,
+        discovered.manifest,
+      )
+      .await
+    }
+  };
   match finalize_result {
     Ok((game, _release)) => {
+      if live_backup_path.exists() {
+        remove_dir_all(&live_backup_path).await.ok();
+      }
       remove_dir_all(&workspace).await.ok();
       job.game_id = Some(game.id);
       let _job = update_job(
@@ -609,9 +673,44 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
       if final_repo_path.exists() {
         rename(&final_repo_path, &repo_dir).await.ok();
       }
+      if live_backup_path.exists() {
+        rename(&live_backup_path, &final_repo_path).await.ok();
+      }
       Err(err)
     }
   }
+}
+
+async fn recover_existing_target_repo_state(
+  final_repo_path: &Path, live_backup_path: &Path, repo_dir: &Path,
+) -> Result<(), ResponseError> {
+  if !live_backup_path.exists() {
+    return Ok(());
+  }
+  if repo_dir.exists() {
+    return Err(ResponseError::Conflict(
+      "sync workspace contains both staged and backup repositories for the same mirror upgrade"
+        .to_owned(),
+    ));
+  }
+  if !final_repo_path.exists() {
+    return Err(ResponseError::Conflict(
+      "mirror upgrade backup exists but the live repository is missing".to_owned(),
+    ));
+  }
+  rename(final_repo_path, repo_dir).await.map_err(|err| {
+    ResponseError::InternalServerError(format!(
+      "failed to recover staged repository after interrupted mirror upgrade: {err}"
+    ))
+  })?;
+  rename(live_backup_path, final_repo_path)
+    .await
+    .map_err(|err| {
+      ResponseError::InternalServerError(format!(
+        "failed to restore live repository after interrupted mirror upgrade: {err}"
+      ))
+    })?;
+  Ok(())
 }
 
 async fn ensure_repo_snapshot(
@@ -1118,6 +1217,115 @@ async fn finalize_import(
   .await?;
 
   game_remote_sync::create(
+    &txn,
+    game_remote_sync::Model {
+      game_id: game.id,
+      state: game_remote_sync::RemoteGameState::MirrorLocked,
+      current_release_id: manifest.release_id.clone(),
+      snapshot_commit: manifest.snapshot_commit.clone(),
+      manifest_sha256: release.manifest_sha256,
+      manifest_body: release.manifest_body,
+      first_party_instance_id: release.first_party_instance_id,
+      first_party_base_url: release.first_party_base_url,
+      selected_upstream_instance_id: remote_info.instance_id.clone(),
+      selected_upstream_base_url: remote_info.base_url.clone(),
+      last_synced_at: Utc::now(),
+      detached_at: None,
+      detached_by: None,
+    },
+  )
+  .await?;
+
+  txn.commit().await?;
+  Ok((game, local_release))
+}
+
+async fn finalize_import_into_existing(
+  state: &GlobalState, importer_id: i64, game_id: i64, bucket_name: &str,
+  remote_info: &RemoteSyncInfo, release: RemoteSyncReleaseDetail,
+  manifest: manifest::ReleaseManifest,
+) -> Result<(game::Model, game_release::Model), ResponseError> {
+  let txn = state.db.conn.begin().await?;
+  let published_at = DateTime::from_timestamp(release.published_at, 0).ok_or(
+    ResponseError::PreconditionFailed("invalid release published timestamp".to_owned()),
+  )?;
+  let current_game = game::get(&txn, game_id)
+    .await?
+    .ok_or(ResponseError::NotFound(
+      "sync target game not found".to_owned(),
+    ))?;
+  let current_remote_sync =
+    game_remote_sync::get(&txn, game_id)
+      .await?
+      .ok_or(ResponseError::Conflict(
+        "existing sync target is missing its remote mirror state".to_owned(),
+      ))?;
+  if current_remote_sync.state != game_remote_sync::RemoteGameState::MirrorLocked {
+    return Err(ResponseError::Conflict(
+      "only locked remote mirrors can be upgraded or re-synced in place".to_owned(),
+    ));
+  }
+  if current_game.sync_key.as_deref() != Some(manifest.game_key.as_str()) {
+    return Err(ResponseError::Conflict(
+      "existing sync target no longer matches the requested game key".to_owned(),
+    ));
+  }
+
+  let mut imported_game = build_imported_game(importer_id, bucket_name, &manifest);
+  let mut admins = current_game.admins.0.clone();
+  if !admins.contains(&importer_id) {
+    admins.push(importer_id);
+  }
+  imported_game.id = current_game.id;
+  imported_game.bucket = current_game.bucket.clone();
+  imported_game.token = current_game.token.clone();
+  imported_game.sync_key = current_game
+    .sync_key
+    .clone()
+    .or_else(|| Some(manifest.game_key.clone()));
+  imported_game.sync_token = current_game.sync_token.clone().or(imported_game.sync_token);
+  imported_game.admins = game::Admins(admins);
+  imported_game.hidden = current_game.hidden;
+  let game = game::update(&txn, imported_game).await?;
+
+  for existing_challenge in challenge::get_full_list(&txn, game.id).await? {
+    challenge::delete(&txn, existing_challenge.id).await?;
+  }
+  import_challenges(&txn, &state.bucket, bucket_name, &game, &manifest).await?;
+
+  let local_release =
+    match game_release::get_by_game_and_release(&txn, game.id, &manifest.release_id).await? {
+      Some(existing) => {
+        if existing.manifest_sha256 != release.manifest_sha256 {
+          return Err(ResponseError::Conflict(
+            "this release id is already recorded with different manifest content".to_owned(),
+          ));
+        }
+        existing
+      }
+      None => {
+        game_release::create(
+          &txn,
+          game_release::Model {
+            id: 0,
+            game_id: game.id,
+            game_key: manifest.game_key.clone(),
+            release_id: manifest.release_id.clone(),
+            snapshot_commit: manifest.snapshot_commit.clone(),
+            manifest_sha256: release.manifest_sha256.clone(),
+            manifest_body: release.manifest_body.clone(),
+            origin_role: game_release::OriginRole::Mirror,
+            first_party_instance_id: release.first_party_instance_id.clone(),
+            first_party_base_url: release.first_party_base_url.clone(),
+            published_at,
+            created_at: Utc::now(),
+          },
+        )
+        .await?
+      }
+    };
+
+  game_remote_sync::update(
     &txn,
     game_remote_sync::Model {
       game_id: game.id,

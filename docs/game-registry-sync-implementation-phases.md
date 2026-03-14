@@ -189,6 +189,7 @@ Primary frontend files:
 ### Exit Criteria
 
 - one instance can browse a registry discovery source, choose a release, choose an upstream, and import successfully
+- an existing locked mirror can be upgraded in place without creating a second local game
 - a locked mirror can generate third-party upstream advertisement metadata
 - a detached mirror is rejected as a third-party upstream by live validation
 

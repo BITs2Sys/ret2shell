@@ -550,6 +550,11 @@ Before allowing third-party advertisement metadata generation:
 - local release ref for `release_id` exists
 - local release ref points to the mirrored `snapshot_commit`
 
+Before allowing in-place mirror upgrade:
+
+- an existing local game with the same `sync_key` must already be a `mirror_locked` remote mirror
+- the staged repo swap must be recoverable if finalization fails midway
+
 Before allowing detach:
 
 - target game currently has `game_remote_sync.state = mirror_locked`
@@ -566,6 +571,7 @@ Backend tests to add:
 - import job resume from failed `fetch_repo` and failed `fetch_media`
 - sync-aware registry relay auth matrix for releases with `assets.oci_images`
 - import job resume from failed internal-managed OCI image mirroring
+- in-place mirror upgrade keeps the same local game ID and refreshes release/challenge data atomically
 - locked mirror mutation rejection across game, challenge, hint, attachment, and repo write routes
 - third-party upstream rejection after detach
 
