@@ -134,7 +134,8 @@ pub(super) async fn list_sync_games(
     let Some(game) = game::get(&db.conn, release.game_id).await? else {
       continue;
     };
-    if !release_visible_to_token(&db.conn, &game, token.as_deref()).await? {
+    let remote_sync = game_remote_sync::get(&db.conn, game.id).await?;
+    if !release_visible_to_token(&game, &release, remote_sync.as_ref(), token.as_deref()) {
       continue;
     }
     *games.entry(release.game_key).or_default() += 1;
@@ -160,7 +161,8 @@ pub(super) async fn list_sync_game_releases(
     let Some(game) = game::get(&db.conn, release.game_id).await? else {
       continue;
     };
-    if !release_visible_to_token(&db.conn, &game, token.as_deref()).await? {
+    let remote_sync = game_remote_sync::get(&db.conn, game.id).await?;
+    if !release_visible_to_token(&game, &release, remote_sync.as_ref(), token.as_deref()) {
       continue;
     }
     result.push(SyncReleaseSummaryResponse {
@@ -453,19 +455,45 @@ async fn get_accessible_release(
   let release = game_release::get_by_game_and_release(db, game.id, release_id)
     .await?
     .ok_or(ResponseError::NotFound("game release not found".to_owned()))?;
-  if let Some(remote_sync) = game_remote_sync::get(db, game.id).await?
-    && remote_sync.state == game_remote_sync::RemoteGameState::Detached
-  {
-    return Err(ResponseError::Conflict(
-      "detached mirrors can no longer serve sync traffic".to_owned(),
-    ));
-  }
-  if !release_visible_to_token(db, &game, token).await? {
+  let remote_sync = game_remote_sync::get(db, game.id).await?;
+  ensure_release_live_for_sync_serving(&release, remote_sync.as_ref())?;
+  if !release_visible_to_token(&game, &release, remote_sync.as_ref(), token) {
     return Err(ResponseError::Forbidden(
       "game release is not accessible through sync".to_owned(),
     ));
   }
   Ok((game, release))
+}
+
+fn ensure_release_live_for_sync_serving(
+  release: &game_release::Model, remote_sync: Option<&game_remote_sync::Model>,
+) -> Result<(), ResponseError> {
+  let Some(remote_sync) = remote_sync else {
+    return Ok(());
+  };
+  if remote_sync.state != game_remote_sync::RemoteGameState::MirrorLocked {
+    return Err(ResponseError::Conflict(
+      "detached mirrors can no longer serve sync traffic".to_owned(),
+    ));
+  }
+  if !release_matches_live_remote_mirror(release, remote_sync) {
+    return Err(ResponseError::Conflict(
+      "requested release is no longer the live mirrored release".to_owned(),
+    ));
+  }
+  Ok(())
+}
+
+fn release_matches_live_remote_mirror(
+  release: &game_release::Model, remote_sync: &game_remote_sync::Model,
+) -> bool {
+  remote_sync.state == game_remote_sync::RemoteGameState::MirrorLocked
+    && release.origin_role == game_release::OriginRole::Mirror
+    && release.release_id == remote_sync.current_release_id
+    && release.snapshot_commit == remote_sync.snapshot_commit
+    && release.manifest_sha256 == remote_sync.manifest_sha256
+    && release.first_party_instance_id == remote_sync.first_party_instance_id
+    && release.first_party_base_url == remote_sync.first_party_base_url
 }
 
 async fn ensure_release_ref_is_available(
@@ -481,22 +509,23 @@ async fn ensure_release_ref_is_available(
   Ok(())
 }
 
-async fn release_visible_to_token(
-  db: &sea_orm::DatabaseConnection, game: &game::Model, token: Option<&str>,
-) -> Result<bool, ResponseError> {
+fn release_visible_to_token(
+  game: &game::Model, release: &game_release::Model, remote_sync: Option<&game_remote_sync::Model>,
+  token: Option<&str>,
+) -> bool {
   if game.access_policy.sync == 2 {
-    return Ok(false);
+    return false;
   }
-  if let Some(remote_sync) = game_remote_sync::get(db, game.id).await?
-    && remote_sync.state == game_remote_sync::RemoteGameState::Detached
+  if let Some(remote_sync) = remote_sync
+    && !release_matches_live_remote_mirror(release, remote_sync)
   {
-    return Ok(false);
+    return false;
   }
-  Ok(match game.access_policy.sync {
+  match game.access_policy.sync {
     0 => true,
     1 => token.is_some_and(|token| game.sync_token.as_deref() == Some(token)),
     _ => false,
-  })
+  }
 }
 
 async fn media_is_accessible(
@@ -510,7 +539,8 @@ async fn media_is_accessible(
     let Some(game) = game::get(db, release.game_id).await? else {
       continue;
     };
-    if release_visible_to_token(db, &game, token).await? {
+    let remote_sync = game_remote_sync::get(db, game.id).await?;
+    if release_visible_to_token(&game, &release, remote_sync.as_ref(), token) {
       return Ok(true);
     }
   }
@@ -703,8 +733,49 @@ fn parse_sync_registry_path(path: &str) -> Result<(String, &'static str, String)
 #[cfg(test)]
 mod tests {
   use axum::http::HeaderValue;
+  use chrono::Utc;
+  use r2s_database::{game_release, game_remote_sync};
 
-  use super::{parse_range_start, parse_sync_registry_path};
+  use super::{
+    ensure_release_live_for_sync_serving, parse_range_start, parse_sync_registry_path,
+    release_matches_live_remote_mirror,
+  };
+  use crate::traits::ResponseError;
+
+  fn sample_release() -> game_release::Model {
+    game_release::Model {
+      id: 1,
+      game_id: 42,
+      game_key: "game-key".to_owned(),
+      release_id: "release-1".to_owned(),
+      snapshot_commit: "commit-1".to_owned(),
+      manifest_sha256: "sha256-manifest".to_owned(),
+      manifest_body: "kind = \"release\"".to_owned(),
+      origin_role: game_release::OriginRole::Mirror,
+      first_party_instance_id: "instance-a".to_owned(),
+      first_party_base_url: "https://source.example".to_owned(),
+      published_at: Utc::now(),
+      created_at: Utc::now(),
+    }
+  }
+
+  fn sample_remote_sync() -> game_remote_sync::Model {
+    game_remote_sync::Model {
+      game_id: 42,
+      state: game_remote_sync::RemoteGameState::MirrorLocked,
+      current_release_id: "release-1".to_owned(),
+      snapshot_commit: "commit-1".to_owned(),
+      manifest_sha256: "sha256-manifest".to_owned(),
+      manifest_body: "kind = \"release\"".to_owned(),
+      first_party_instance_id: "instance-a".to_owned(),
+      first_party_base_url: "https://source.example".to_owned(),
+      selected_upstream_instance_id: "instance-b".to_owned(),
+      selected_upstream_base_url: "https://mirror.example".to_owned(),
+      last_synced_at: Utc::now(),
+      detached_at: None,
+      detached_by: None,
+    }
+  }
 
   #[test]
   fn parse_sync_registry_path_supports_manifests_and_blobs() {
@@ -742,6 +813,42 @@ mod tests {
   #[test]
   fn parse_range_start_rejects_invalid_shapes() {
     assert!(parse_range_start(Some(&HeaderValue::from_static("items=1-2"))).is_err());
+  }
+
+  #[test]
+  fn release_matches_live_remote_mirror_accepts_matching_locked_release() {
+    assert!(release_matches_live_remote_mirror(
+      &sample_release(),
+      &sample_remote_sync()
+    ));
+  }
+
+  #[test]
+  fn release_matches_live_remote_mirror_rejects_stale_release_id() {
+    let mut release = sample_release();
+    release.release_id = "release-0".to_owned();
+    assert!(!release_matches_live_remote_mirror(
+      &release,
+      &sample_remote_sync()
+    ));
+  }
+
+  #[test]
+  fn ensure_release_live_for_sync_serving_rejects_detached_mirrors() {
+    let mut remote_sync = sample_remote_sync();
+    remote_sync.state = game_remote_sync::RemoteGameState::Detached;
+    let err = ensure_release_live_for_sync_serving(&sample_release(), Some(&remote_sync))
+      .expect_err("detached mirrors must be rejected");
+    assert!(matches!(err, ResponseError::Conflict(_)));
+  }
+
+  #[test]
+  fn ensure_release_live_for_sync_serving_rejects_stale_mirror_release() {
+    let mut release = sample_release();
+    release.release_id = "release-0".to_owned();
+    let err = ensure_release_live_for_sync_serving(&release, Some(&sample_remote_sync()))
+      .expect_err("stale mirror releases must be rejected");
+    assert!(matches!(err, ResponseError::Conflict(_)));
   }
 }
 
