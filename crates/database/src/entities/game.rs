@@ -208,6 +208,12 @@ pub enum Relation {
   Introduction,
   #[sea_orm(has_many = "super::challenge::Entity")]
   Challenge,
+  #[sea_orm(has_many = "super::game_release::Entity")]
+  GameRelease,
+  #[sea_orm(has_many = "super::game_remote_sync::Entity")]
+  GameRemoteSync,
+  #[sea_orm(has_many = "super::game_sync_job::Entity")]
+  GameSyncJob,
   #[sea_orm(has_many = "super::notification::Entity")]
   Notification,
   #[sea_orm(has_many = "super::team::Entity")]
@@ -223,6 +229,24 @@ impl Related<super::article::Entity> for Entity {
 impl Related<super::challenge::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::Challenge.def()
+  }
+}
+
+impl Related<super::game_release::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::GameRelease.def()
+  }
+}
+
+impl Related<super::game_remote_sync::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::GameRemoteSync.def()
+  }
+}
+
+impl Related<super::game_sync_job::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::GameSyncJob.def()
   }
 }
 
