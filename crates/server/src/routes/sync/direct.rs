@@ -83,22 +83,97 @@ impl From<game_sync_job::SyncJobStatus> for SyncJobStatusView {
   }
 }
 
+#[derive(Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SyncJobModeView {
+  Registry,
+  Direct,
+}
+
+impl From<game_sync_job::SyncJobMode> for SyncJobModeView {
+  fn from(value: game_sync_job::SyncJobMode) -> Self {
+    match value {
+      game_sync_job::SyncJobMode::Registry => Self::Registry,
+      game_sync_job::SyncJobMode::Direct => Self::Direct,
+    }
+  }
+}
+
 #[derive(Serialize)]
 pub(super) struct SyncJobResponse {
   pub id: i64,
+  pub mode: SyncJobModeView,
   pub status: SyncJobStatusView,
   pub stage: String,
   pub game_id: Option<i64>,
   pub game_key: Option<String>,
   pub release_id: Option<String>,
+  pub registry_source_id: Option<i64>,
+  pub upstream_instance_id: Option<String>,
   pub upstream_base_url: Option<String>,
   pub error_message: Option<String>,
+  pub can_resume: bool,
+  pub can_cancel: bool,
   #[serde(with = "chrono::serde::ts_seconds")]
   pub created_at: chrono::DateTime<Utc>,
   #[serde(with = "chrono::serde::ts_seconds")]
   pub updated_at: chrono::DateTime<Utc>,
   #[serde(with = "chrono::serde::ts_seconds_option")]
   pub finished_at: Option<chrono::DateTime<Utc>>,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobRequestView {
+  pub base_url: String,
+  pub has_sync_token: bool,
+  pub game_key: String,
+  pub release_id: String,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobDiscoveredView {
+  pub remote_instance_id: String,
+  pub remote_base_url: String,
+  pub protocol_version: i32,
+  pub snapshot_commit: String,
+  pub manifest_sha256: String,
+  pub first_party_instance_id: String,
+  pub first_party_base_url: String,
+  pub published_at: i64,
+  pub media_total: usize,
+  pub oci_total: usize,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobRepoCheckpointView {
+  pub initialized: bool,
+  pub fetched_release_ref: bool,
+  pub checked_out_snapshot: bool,
+  pub verified_snapshot: bool,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobAssetCheckpointView {
+  pub done: usize,
+  pub total: usize,
+  pub completed: bool,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobCheckpointView {
+  pub bucket_name: Option<String>,
+  pub discovered: Option<SyncJobDiscoveredView>,
+  pub repo: SyncJobRepoCheckpointView,
+  pub media: SyncJobAssetCheckpointView,
+  pub oci: SyncJobAssetCheckpointView,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncJobDetailResponse {
+  #[serde(flatten)]
+  pub job: SyncJobResponse,
+  pub request: SyncJobRequestView,
+  pub checkpoint: SyncJobCheckpointView,
 }
 
 #[derive(Clone, Serialize, Deserialize, Default)]
@@ -333,7 +408,7 @@ pub(super) async fn get_sync_job(
   let job = game_sync_job::get(&db.conn, job_id)
     .await?
     .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
-  Ok(Json(SyncJobResponse::from(job)))
+  Ok(Json(SyncJobDetailResponse::try_from(job)?))
 }
 
 pub(super) async fn cancel_sync_job(
@@ -342,12 +417,9 @@ pub(super) async fn cancel_sync_job(
   let job = game_sync_job::get(&db.conn, job_id)
     .await?
     .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
-  if matches!(
-    job.status,
-    game_sync_job::SyncJobStatus::Completed | game_sync_job::SyncJobStatus::Failed
-  ) {
+  if !can_cancel_job(job.status.clone()) {
     return Err(ResponseError::Conflict(
-      "this sync job can no longer be cancelled".to_owned(),
+      "only pending, running, or paused sync jobs can be cancelled".to_owned(),
     ));
   }
   let job = update_job(
@@ -370,7 +442,7 @@ pub(super) async fn resume_sync_job(
     .await?
     .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
   if !matches!(
-    job.status,
+    job.status.clone(),
     game_sync_job::SyncJobStatus::Failed
       | game_sync_job::SyncJobStatus::Paused
       | game_sync_job::SyncJobStatus::Cancelled
@@ -378,6 +450,9 @@ pub(super) async fn resume_sync_job(
     return Err(ResponseError::Conflict(
       "only failed, paused, or cancelled sync jobs can be resumed".to_owned(),
     ));
+  }
+  if let Some(game_key) = job.game_key.as_deref() {
+    ensure_no_active_import_job(&state.db, game_key, Some(job.id)).await?;
   }
   let job = update_job(
     &state.db,
@@ -418,7 +493,7 @@ pub(super) async fn create_import_job(
 ) -> Result<game_sync_job::Model, ResponseError> {
   let request = normalize_direct_import_request(req)?;
   let existing_target = resolve_import_target_game(&state.db, &request.game_key).await?;
-  ensure_no_active_import_job(&state.db, &request.game_key, &request.release_id).await?;
+  ensure_no_active_import_job(&state.db, &request.game_key, None).await?;
 
   let now = Utc::now();
   Ok(
@@ -540,7 +615,7 @@ pub(super) fn spawn_import_job(state: GlobalState, job_id: i64) {
   tokio::spawn(async move {
     if let Err(err) = run_direct_import_job(state.clone(), job_id).await
       && let Ok(Some(job)) = game_sync_job::get(&state.db.conn, job_id).await
-      && job.status != game_sync_job::SyncJobStatus::Cancelled
+      && job.status.clone() != game_sync_job::SyncJobStatus::Cancelled
     {
       let _ = update_job(
         &state.db,
@@ -560,7 +635,7 @@ async fn run_direct_import_job(state: GlobalState, job_id: i64) -> Result<(), Re
   let mut job = game_sync_job::get(&state.db.conn, job_id)
     .await?
     .ok_or(ResponseError::NotFound("sync job not found".to_owned()))?;
-  if job.status == game_sync_job::SyncJobStatus::Cancelled {
+  if job.status.clone() == game_sync_job::SyncJobStatus::Cancelled {
     return Ok(());
   }
   let mut request: DirectImportRequest =
@@ -1355,21 +1430,26 @@ fn normalize_direct_import_request(
 }
 
 async fn ensure_no_active_import_job(
-  db: &Database, game_key: &str, release_id: &str,
+  db: &Database, game_key: &str, exclude_job_id: Option<i64>,
 ) -> Result<(), ResponseError> {
   for job in game_sync_job::get_list(&db.conn).await? {
     if job.kind != game_sync_job::SyncJobKind::Import {
       continue;
     }
-    if job.game_key.as_deref() != Some(game_key) || job.release_id.as_deref() != Some(release_id) {
+    if exclude_job_id.is_some_and(|job_id| job.id == job_id) {
+      continue;
+    }
+    if job.game_key.as_deref() != Some(game_key) {
       continue;
     }
     if matches!(
-      job.status,
-      game_sync_job::SyncJobStatus::Pending | game_sync_job::SyncJobStatus::Running
+      job.status.clone(),
+      game_sync_job::SyncJobStatus::Pending
+        | game_sync_job::SyncJobStatus::Running
+        | game_sync_job::SyncJobStatus::Paused
     ) {
       return Err(ResponseError::Conflict(
-        "another import job for the same release is already running".to_owned(),
+        "another import job for the same game is already active".to_owned(),
       ));
     }
   }
@@ -1380,7 +1460,7 @@ async fn job_cancelled(db: &Database, job_id: i64) -> Result<bool, ResponseError
   Ok(
     game_sync_job::get(&db.conn, job_id)
       .await?
-      .is_some_and(|job| job.status == game_sync_job::SyncJobStatus::Cancelled),
+      .is_some_and(|job| job.status.clone() == game_sync_job::SyncJobStatus::Cancelled),
   )
 }
 
@@ -1407,20 +1487,119 @@ async fn update_job(
 
 impl From<game_sync_job::Model> for SyncJobResponse {
   fn from(value: game_sync_job::Model) -> Self {
+    let status = value.status.clone();
     Self {
       id: value.id,
-      status: value.status.into(),
+      mode: value.mode.into(),
+      status: status.clone().into(),
       stage: value.stage,
       game_id: value.game_id,
       game_key: value.game_key,
       release_id: value.release_id,
+      registry_source_id: value.registry_source_id,
+      upstream_instance_id: value.upstream_instance_id,
       upstream_base_url: value.upstream_base_url,
       error_message: value.error_message,
+      can_resume: can_resume_job(status.clone()),
+      can_cancel: can_cancel_job(status),
       created_at: value.created_at,
       updated_at: value.updated_at,
       finished_at: value.finished_at,
     }
   }
+}
+
+impl From<DirectImportRequest> for SyncJobRequestView {
+  fn from(value: DirectImportRequest) -> Self {
+    Self {
+      base_url: value.base_url,
+      has_sync_token: value.sync_token.is_some(),
+      game_key: value.game_key,
+      release_id: value.release_id,
+    }
+  }
+}
+
+impl From<RepoCheckpoint> for SyncJobRepoCheckpointView {
+  fn from(value: RepoCheckpoint) -> Self {
+    Self {
+      initialized: value.initialized,
+      fetched_release_ref: value.fetched_release_ref,
+      checked_out_snapshot: value.checked_out_snapshot,
+      verified_snapshot: value.verified_snapshot,
+    }
+  }
+}
+
+impl From<DirectImportCheckpoint> for SyncJobCheckpointView {
+  fn from(value: DirectImportCheckpoint) -> Self {
+    let discovered = value.discovered.map(|discovered| SyncJobDiscoveredView {
+      remote_instance_id: discovered.remote_info.instance_id,
+      remote_base_url: discovered.remote_info.base_url,
+      protocol_version: discovered.remote_info.protocol_version,
+      snapshot_commit: discovered.release.snapshot_commit,
+      manifest_sha256: discovered.release.manifest_sha256,
+      first_party_instance_id: discovered.release.first_party_instance_id,
+      first_party_base_url: discovered.release.first_party_base_url,
+      published_at: discovered.release.published_at,
+      media_total: discovered.manifest.assets.media_hashes.len(),
+      oci_total: discovered.manifest.assets.oci_images.len(),
+    });
+    let media_total = discovered
+      .as_ref()
+      .map_or(value.media.downloaded_hashes.len(), |item| item.media_total);
+    let oci_total = discovered
+      .as_ref()
+      .map_or(value.oci.mirrored_images.len(), |item| item.oci_total);
+    Self {
+      bucket_name: value.bucket_name,
+      discovered,
+      repo: value.repo.into(),
+      media: SyncJobAssetCheckpointView {
+        done: value.media.downloaded_hashes.len(),
+        total: media_total,
+        completed: value.media.completed,
+      },
+      oci: SyncJobAssetCheckpointView {
+        done: value.oci.mirrored_images.len(),
+        total: oci_total,
+        completed: value.oci.completed,
+      },
+    }
+  }
+}
+
+impl TryFrom<game_sync_job::Model> for SyncJobDetailResponse {
+  type Error = ResponseError;
+
+  fn try_from(value: game_sync_job::Model) -> Result<Self, Self::Error> {
+    let request: DirectImportRequest =
+      serde_json::from_value(value.request_body.0.clone()).map_err(ResponseError::from)?;
+    let checkpoint = decode_checkpoint(&value.checkpoint.0)?;
+    Ok(Self {
+      job: value.into(),
+      request: request.into(),
+      checkpoint: checkpoint.into(),
+    })
+  }
+}
+
+fn can_resume_job(status: game_sync_job::SyncJobStatus) -> bool {
+  matches!(
+    status,
+    game_sync_job::SyncJobStatus::Failed
+      | game_sync_job::SyncJobStatus::Paused
+      | game_sync_job::SyncJobStatus::Cancelled
+  )
+}
+
+fn can_cancel_job(status: game_sync_job::SyncJobStatus) -> bool {
+  matches!(
+    status,
+    game_sync_job::SyncJobStatus::Pending
+      | game_sync_job::SyncJobStatus::Running
+      | game_sync_job::SyncJobStatus::Paused
+  )
 }
 
 async fn finalize_import(

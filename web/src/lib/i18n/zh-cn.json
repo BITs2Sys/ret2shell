@@ -422,6 +422,9 @@
           "refresh": {
             "title": "刷新"
           },
+          "retry": {
+            "title": "重试"
+          },
           "resume": {
             "title": "恢复",
             "success": "同步任务恢复成功",
@@ -436,9 +439,37 @@
             "title": "打开赛事"
           }
         },
+        "request": {
+          "tokenPresent": "已携带",
+          "tokenMissing": "未携带"
+        },
+        "detail": {
+          "title": "任务详情",
+          "loading": "正在加载所选任务详情...",
+          "empty": "请选择一个任务以查看其检查点与当前请求",
+          "summary": "概要",
+          "request": "当前请求",
+          "checkpoint": "检查点",
+          "bucket": "目标 bucket：{{value}}",
+          "repo": "仓库",
+          "media": "媒体",
+          "oci": "OCI 资产",
+          "discovered": "已发现的 release",
+          "noDiscovery": "当前还没有 discovery 结果",
+          "upstreamInstance": "上游实例：{{value}}",
+          "remote": "远端：{{value}}",
+          "snapshot": "快照：{{value}}",
+          "manifest": "Manifest SHA256：{{value}}",
+          "firstParty": "第一方源：{{value}}",
+          "publishedAt": "发布时间：{{value}}",
+          "protocolVersion": "协议版本：{{value}}"
+        },
         "errors": {
           "fetch": {
             "title": "获取同步任务失败"
+          },
+          "fetchDetail": {
+            "title": "获取同步任务详情失败"
           }
         }
       },

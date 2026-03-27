@@ -50,6 +50,10 @@ pub fn router(_state: &GlobalState) -> axum::Router<GlobalState> {
       axum::routing::post(post_sync_release_upload_pack),
     )
     .route(
+      "/games/{game_key}/releases/{release_id}/registry/catalog",
+      axum::routing::get(get_sync_registry_catalog),
+    )
+    .route(
       "/games/{game_key}/releases/{release_id}/registry/v2/{*path}",
       axum::routing::get(proxy_sync_registry).head(proxy_sync_registry),
     )
@@ -91,6 +95,13 @@ pub(super) struct SyncReleaseDetailResponse {
   pub first_party_base_url: String,
   #[serde(with = "chrono::serde::ts_seconds")]
   pub published_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Serialize)]
+pub(super) struct SyncRegistryCatalogResponse {
+  pub game_key: String,
+  pub release_id: String,
+  pub oci_images: Vec<crate::sync::manifest::OciImageAsset>,
 }
 
 #[derive(Clone, Deserialize)]
@@ -353,6 +364,25 @@ pub(super) async fn get_sync_media(
   Ok((StatusCode::OK, response_headers, Body::from_stream(stream)))
 }
 
+pub(super) async fn get_sync_registry_catalog(
+  State(ref db): State<Database>, Path((game_key, release_id)): Path<(String, String)>,
+  headers: HeaderMap,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (_game, release) = get_accessible_release(
+    &db.conn,
+    &game_key,
+    &release_id,
+    bearer_token(&headers).as_deref(),
+  )
+  .await?;
+  let manifest = parse_stored_release_manifest(&release)?;
+  Ok(Json(SyncRegistryCatalogResponse {
+    game_key: release.game_key,
+    release_id: release.release_id,
+    oci_images: manifest.assets.oci_images,
+  }))
+}
+
 pub(super) async fn proxy_sync_registry(
   State(config): State<GlobalConfig>, State(client): State<crate::traits::HTTPClient>,
   State(ref db): State<Database>,
@@ -366,10 +396,7 @@ pub(super) async fn proxy_sync_registry(
     bearer_token(&headers).as_deref(),
   )
   .await?;
-  let manifest: crate::sync::manifest::ReleaseManifest =
-    r2s_config::toml::from_str(&release.manifest_body).map_err(|err| {
-      ResponseError::InternalServerError(format!("invalid stored release manifest: {err}"))
-    })?;
+  let manifest = parse_stored_release_manifest(&release)?;
   let (source_repository, target_kind, reference) = parse_sync_registry_path(&path)?;
   let oci_asset = manifest
     .assets
@@ -463,6 +490,14 @@ async fn get_accessible_release(
     ));
   }
   Ok((game, release))
+}
+
+fn parse_stored_release_manifest(
+  release: &game_release::Model,
+) -> Result<crate::sync::manifest::ReleaseManifest, ResponseError> {
+  r2s_config::toml::from_str(&release.manifest_body).map_err(|err| {
+    ResponseError::InternalServerError(format!("invalid stored release manifest: {err}"))
+  })
 }
 
 fn ensure_release_live_for_sync_serving(

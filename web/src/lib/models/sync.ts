@@ -131,16 +131,69 @@ export type DirectDiscoverResponse = {
 
 export type SyncJobStatus = "pending" | "running" | "paused" | "failed" | "completed" | "cancelled";
 
+export type SyncJobMode = "registry" | "direct";
+
 export type SyncJob = {
   id: number;
+  mode: SyncJobMode;
   status: SyncJobStatus;
   stage: string;
   game_id: number | null;
   game_key: string | null;
   release_id: string | null;
+  registry_source_id: number | null;
+  upstream_instance_id: string | null;
   upstream_base_url: string | null;
   error_message: string | null;
+  can_resume: boolean;
+  can_cancel: boolean;
   created_at: DateTime;
   updated_at: DateTime;
   finished_at: DateTime | null;
+};
+
+export type SyncJobRequest = {
+  base_url: string;
+  has_sync_token: boolean;
+  game_key: string;
+  release_id: string;
+};
+
+export type SyncJobDiscovered = {
+  remote_instance_id: string;
+  remote_base_url: string;
+  protocol_version: number;
+  snapshot_commit: string;
+  manifest_sha256: string;
+  first_party_instance_id: string;
+  first_party_base_url: string;
+  published_at: DateTime;
+  media_total: number;
+  oci_total: number;
+};
+
+export type SyncJobRepoCheckpoint = {
+  initialized: boolean;
+  fetched_release_ref: boolean;
+  checked_out_snapshot: boolean;
+  verified_snapshot: boolean;
+};
+
+export type SyncJobAssetCheckpoint = {
+  done: number;
+  total: number;
+  completed: boolean;
+};
+
+export type SyncJobCheckpoint = {
+  bucket_name: string | null;
+  discovered: SyncJobDiscovered | null;
+  repo: SyncJobRepoCheckpoint;
+  media: SyncJobAssetCheckpoint;
+  oci: SyncJobAssetCheckpoint;
+};
+
+export type SyncJobDetail = SyncJob & {
+  request: SyncJobRequest;
+  checkpoint: SyncJobCheckpoint;
 };

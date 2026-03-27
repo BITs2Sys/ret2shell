@@ -422,6 +422,9 @@
           "refresh": {
             "title": "重新整理"
           },
+          "retry": {
+            "title": "重試"
+          },
           "resume": {
             "title": "恢復",
             "success": "同步任務恢復成功",
@@ -436,9 +439,37 @@
             "title": "開啟賽事"
           }
         },
+        "request": {
+          "tokenPresent": "已攜帶",
+          "tokenMissing": "未攜帶"
+        },
+        "detail": {
+          "title": "任務詳情",
+          "loading": "正在載入所選任務詳情...",
+          "empty": "請選擇一個任務以查看其檢查點與目前請求",
+          "summary": "摘要",
+          "request": "目前請求",
+          "checkpoint": "檢查點",
+          "bucket": "目標 bucket：{{value}}",
+          "repo": "倉庫",
+          "media": "媒體",
+          "oci": "OCI 資產",
+          "discovered": "已發現的 release",
+          "noDiscovery": "目前還沒有 discovery 結果",
+          "upstreamInstance": "上游實例：{{value}}",
+          "remote": "遠端：{{value}}",
+          "snapshot": "快照：{{value}}",
+          "manifest": "Manifest SHA256：{{value}}",
+          "firstParty": "第一方來源：{{value}}",
+          "publishedAt": "發佈時間：{{value}}",
+          "protocolVersion": "協議版本：{{value}}"
+        },
         "errors": {
           "fetch": {
             "title": "取得同步任務失敗"
+          },
+          "fetchDetail": {
+            "title": "取得同步任務詳情失敗"
           }
         }
       },

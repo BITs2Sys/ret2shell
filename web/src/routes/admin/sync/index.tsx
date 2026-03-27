@@ -11,11 +11,12 @@ import {
   useImportCatalogSyncMutation,
   useImportDirectSyncMutation,
   useResumeSyncJobMutation,
+  useSyncJob,
   useSyncJobs,
   useSyncSources,
   useUpdateSyncSourceMutation,
 } from "@api/sync";
-import type { DirectDiscoverResponse, SyncJob, SyncRegistrySource } from "@models/sync";
+import type { DirectDiscoverResponse, SyncJob, SyncJobDetail, SyncRegistrySource } from "@models/sync";
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -49,7 +50,8 @@ export default function () {
   const [catalogGameKey, setCatalogGameKey] = createSignal<string | null>(null);
   const [catalogReleaseId, setCatalogReleaseId] = createSignal<string | null>(null);
   const [catalogUpstreamInstanceId, setCatalogUpstreamInstanceId] = createSignal<string | null>(null);
-  const [currentJobId, setCurrentJobId] = createSignal<number | null>(null);
+  const [selectedJobId, setSelectedJobId] = createSignal<number | null>(null);
+  const [actionJobId, setActionJobId] = createSignal<number | null>(null);
   const catalogGames = useCatalogGames({ source_id: catalogSourceId, enabled: () => catalogSourceId() != null });
   const catalogReleases = useCatalogReleases({
     source_id: catalogSourceId,
@@ -61,6 +63,10 @@ export default function () {
     game_key: catalogGameKey,
     release_id: catalogReleaseId,
     enabled: () => catalogSourceId() != null && !!catalogGameKey() && !!catalogReleaseId(),
+  });
+  const selectedJob = useSyncJob({
+    job_id: selectedJobId,
+    enabled: () => selectedJobId() != null,
   });
 
   const createMutation = useCreateSyncSourceMutation({
@@ -95,24 +101,28 @@ export default function () {
   });
   const importMutation = useImportDirectSyncMutation({
     onSuccess: (data) => {
-      setCurrentJobId(data.id);
+      setSelectedJobId(data.id);
       jobs.refetch();
     },
   });
   const importCatalogMutation = useImportCatalogSyncMutation({
     onSuccess: (data) => {
-      setCurrentJobId(data.id);
+      setSelectedJobId(data.id);
       jobs.refetch();
     },
   });
   const resumeJobMutation = useResumeSyncJobMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setSelectedJobId(data.id);
       jobs.refetch();
+      selectedJob.refetch();
     },
   });
   const cancelJobMutation = useCancelSyncJobMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setSelectedJobId(data.id);
       jobs.refetch();
+      selectedJob.refetch();
     },
   });
 
@@ -120,9 +130,25 @@ export default function () {
     const interval = window.setInterval(() => {
       if (jobs.data?.some((job) => job.status === "pending" || job.status === "running")) {
         jobs.refetch();
+        if (selectedJobId() != null) {
+          selectedJob.refetch();
+        }
       }
     }, 2000);
     onCleanup(() => window.clearInterval(interval));
+  });
+
+  createEffect(() => {
+    const currentJobs = jobs.data || [];
+    if (!currentJobs.length) {
+      if (selectedJobId() != null) {
+        setSelectedJobId(null);
+      }
+      return;
+    }
+    if (selectedJobId() == null || !currentJobs.some((job) => job.id === selectedJobId())) {
+      setSelectedJobId(currentJobs[0].id);
+    }
   });
 
   createEffect(() => {
@@ -198,8 +224,45 @@ export default function () {
     }
   }
 
+  function runResumeJob(job: SyncJob) {
+    setActionJobId(job.id);
+    resumeJobMutation.mutate({ job_id: job.id });
+  }
+
+  function runCancelJob(job: SyncJob) {
+    setActionJobId(job.id);
+    cancelJobMutation.mutate({ job_id: job.id });
+  }
+
   function jobStatusLabel(status: SyncJob["status"]) {
     return t(`platform.sync.jobs.status.${status}`);
+  }
+
+  function jobModeLabel(mode: SyncJob["mode"]) {
+    switch (mode) {
+      case "direct":
+        return t("platform.sync.direct.title");
+      case "registry":
+        return t("platform.sync.catalog.title");
+    }
+  }
+
+  function jobResumeLabel(job: Pick<SyncJob, "status">) {
+    return job.status === "failed"
+      ? t("platform.sync.jobs.actions.retry.title")
+      : t("platform.sync.jobs.actions.resume.title");
+  }
+
+  function syncTokenLabel(hasToken: boolean) {
+    return hasToken ? t("platform.sync.jobs.request.tokenPresent") : t("platform.sync.jobs.request.tokenMissing");
+  }
+
+  function progressLabel(done: number, total: number) {
+    return `${done}/${total}`;
+  }
+
+  function selectedJobActionState(job: Pick<SyncJob, "id">) {
+    return actionJobId() === job.id;
   }
 
   function jobStageLabel(stage: string) {
@@ -567,87 +630,304 @@ export default function () {
               {t("platform.sync.jobs.actions.refresh.title")}
             </Button>
           </div>
-          <For each={jobs.data || []} fallback={<span class="opacity-70">{t("platform.sync.jobs.empty")}</span>}>
-            {(job) => (
-              <div class="border border-layer-content/10 rounded-lg p-3 flex flex-col gap-2">
-                <div class="flex flex-row justify-between gap-2 items-start">
-                  <div class="flex flex-col min-w-0">
-                    <span class="font-mono">#{job.id}</span>
-                    <span class="text-sm opacity-80 break-all">
-                      {job.game_key || "-"} / {job.release_id || "-"}
-                    </span>
-                    <span class="text-sm opacity-70">
-                      {t("platform.sync.jobs.stage", {
-                        status: jobStatusLabel(job.status),
-                        stage: jobStageLabel(job.stage),
+          <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-3">
+            <div class="flex flex-col gap-2">
+              <For each={jobs.data || []} fallback={<span class="opacity-70">{t("platform.sync.jobs.empty")}</span>}>
+                {(job) => (
+                  <div
+                    class={`border rounded-lg p-3 flex flex-col gap-2 transition-colors ${selectedJobId() === job.id ? "border-primary/50 bg-primary/5" : "border-layer-content/10"}`}
+                  >
+                    <div class="flex flex-row justify-between gap-2 items-start">
+                      <div class="flex flex-col min-w-0">
+                        <div class="flex flex-row items-center gap-2 flex-wrap">
+                          <span class="font-mono">#{job.id}</span>
+                          <span class="text-xs uppercase opacity-60">{jobModeLabel(job.mode)}</span>
+                        </div>
+                        <span class="text-sm opacity-80 break-all">
+                          {job.game_key || "-"} / {job.release_id || "-"}
+                        </span>
+                        <span class="text-sm opacity-70">
+                          {t("platform.sync.jobs.stage", {
+                            status: jobStatusLabel(job.status),
+                            stage: jobStageLabel(job.stage),
+                          })}
+                        </span>
+                      </div>
+                      <div class="flex flex-row gap-2">
+                        <Button size="sm" ghost onClick={() => setSelectedJobId(job.id)}>
+                          {t("general.actions.open.title")}
+                        </Button>
+                        <Show when={job.can_resume}>
+                          <Button
+                            size="sm"
+                            onClick={() => runResumeJob(job)}
+                            loading={resumeJobMutation.isPending && selectedJobActionState(job)}
+                            disabled={resumeJobMutation.isPending || cancelJobMutation.isPending}
+                          >
+                            {jobResumeLabel(job)}
+                          </Button>
+                        </Show>
+                        <Show when={job.can_cancel}>
+                          <Button
+                            size="sm"
+                            level="warning"
+                            onClick={() => runCancelJob(job)}
+                            loading={cancelJobMutation.isPending && selectedJobActionState(job)}
+                            disabled={resumeJobMutation.isPending || cancelJobMutation.isPending}
+                          >
+                            {t("platform.sync.jobs.actions.cancel.title")}
+                          </Button>
+                        </Show>
+                        <Show when={job.game_id != null && job.status === "completed"}>
+                          <Button size="sm" onClick={() => openImportedGame(job)}>
+                            {t("platform.sync.jobs.actions.openGame.title")}
+                          </Button>
+                        </Show>
+                      </div>
+                    </div>
+                    <Show when={job.upstream_base_url}>
+                      <span class="text-sm opacity-70 break-all">
+                        {t("platform.sync.jobs.upstream", { value: job.upstream_base_url || "-" })}
+                      </span>
+                    </Show>
+                    <Show when={job.error_message}>
+                      <span class="text-xs text-error whitespace-pre-wrap break-all line-clamp-2">
+                        {job.error_message}
+                      </span>
+                    </Show>
+                    <span class="text-xs opacity-70">
+                      {t("platform.sync.jobs.updatedAt", {
+                        value: job.updated_at.toFormat("yyyy-MM-dd HH:mm:ss"),
                       })}
                     </span>
                   </div>
-                  <div class="flex flex-row gap-2">
-                    <Show when={job.game_id != null && job.status === "completed"}>
-                      <Button size="sm" onClick={() => openImportedGame(job)}>
-                        {t("platform.sync.jobs.actions.openGame.title")}
-                      </Button>
-                    </Show>
-                    <Show when={job.status === "failed" || job.status === "cancelled"}>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setCurrentJobId(job.id);
-                          resumeJobMutation.mutate({ job_id: job.id });
-                        }}
-                        loading={resumeJobMutation.isPending && currentJobId() === job.id}
-                        disabled={resumeJobMutation.isPending}
-                      >
-                        {t("platform.sync.jobs.actions.resume.title")}
-                      </Button>
-                    </Show>
-                    <Show when={job.status === "pending" || job.status === "running"}>
-                      <Button
-                        size="sm"
-                        level="warning"
-                        onClick={() => {
-                          setCurrentJobId(job.id);
-                          cancelJobMutation.mutate({ job_id: job.id });
-                        }}
-                        loading={cancelJobMutation.isPending && currentJobId() === job.id}
-                        disabled={cancelJobMutation.isPending}
-                      >
-                        {t("platform.sync.jobs.actions.cancel.title")}
-                      </Button>
-                    </Show>
-                  </div>
+                )}
+              </For>
+            </div>
+
+            <div class="border border-layer-content/10 rounded-lg p-4 flex flex-col gap-3 min-h-64">
+              <div class="flex flex-row items-start justify-between gap-3">
+                <div class="flex flex-col min-w-0">
+                  <span class="font-bold">{t("platform.sync.jobs.detail.title")}</span>
+                  <Show when={selectedJob.data}>
+                    {(job) => (
+                      <span class="text-sm opacity-70">
+                        {t("platform.sync.jobs.stage", {
+                          status: jobStatusLabel(job().status),
+                          stage: jobStageLabel(job().stage),
+                        })}
+                      </span>
+                    )}
+                  </Show>
                 </div>
-                <Show when={job.upstream_base_url}>
-                  <span class="text-sm opacity-70 break-all">
-                    {t("platform.sync.jobs.upstream", { value: job.upstream_base_url || "-" })}
-                  </span>
-                </Show>
-                <span class="text-sm opacity-70">
-                  {t("platform.sync.jobs.createdAt", {
-                    value: job.created_at.toFormat("yyyy-MM-dd HH:mm:ss"),
-                  })}
-                </span>
-                <span class="text-sm opacity-70">
-                  {t("platform.sync.jobs.updatedAt", {
-                    value: job.updated_at.toFormat("yyyy-MM-dd HH:mm:ss"),
-                  })}
-                </span>
-                <Show when={job.finished_at}>
-                  <span class="text-sm opacity-70">
-                    {t("platform.sync.jobs.finishedAt", {
-                      value: job.finished_at?.toFormat("yyyy-MM-dd HH:mm:ss") || "-",
-                    })}
-                  </span>
-                </Show>
-                <Show when={job.error_message}>
-                  <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto text-error">
-                    {job.error_message}
-                  </pre>
+                <Show when={selectedJob.data}>
+                  {(job) => (
+                    <div class="flex flex-row gap-2">
+                      <Show when={job().can_resume}>
+                        <Button
+                          size="sm"
+                          onClick={() => runResumeJob(job())}
+                          loading={resumeJobMutation.isPending && selectedJobActionState(job())}
+                          disabled={resumeJobMutation.isPending || cancelJobMutation.isPending}
+                        >
+                          {jobResumeLabel(job())}
+                        </Button>
+                      </Show>
+                      <Show when={job().can_cancel}>
+                        <Button
+                          size="sm"
+                          level="warning"
+                          onClick={() => runCancelJob(job())}
+                          loading={cancelJobMutation.isPending && selectedJobActionState(job())}
+                          disabled={resumeJobMutation.isPending || cancelJobMutation.isPending}
+                        >
+                          {t("platform.sync.jobs.actions.cancel.title")}
+                        </Button>
+                      </Show>
+                      <Show when={job().game_id != null && job().status === "completed"}>
+                        <Button size="sm" onClick={() => openImportedGame(job())}>
+                          {t("platform.sync.jobs.actions.openGame.title")}
+                        </Button>
+                      </Show>
+                    </div>
+                  )}
                 </Show>
               </div>
-            )}
-          </For>
+
+              <Show
+                when={selectedJob.data as SyncJobDetail | undefined}
+                fallback={
+                  <span class="opacity-70">
+                    {selectedJobId() == null
+                      ? t("platform.sync.jobs.detail.empty")
+                      : t("platform.sync.jobs.detail.loading")}
+                  </span>
+                }
+              >
+                {(detail) => (
+                  <>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-2">
+                        <span class="font-bold text-sm">{t("platform.sync.jobs.detail.summary")}</span>
+                        <span class="font-mono">#{detail().id}</span>
+                        <span class="text-sm opacity-70">{jobModeLabel(detail().mode)}</span>
+                        <span class="text-sm opacity-70 break-all">
+                          {detail().game_key || "-"} / {detail().release_id || "-"}
+                        </span>
+                        <Show when={detail().registry_source_id != null}>
+                          <span class="text-sm opacity-70">
+                            {t("platform.sync.catalog.source")}: #{detail().registry_source_id}
+                          </span>
+                        </Show>
+                        <Show when={detail().upstream_instance_id}>
+                          <span class="text-sm opacity-70 break-all">
+                            {t("platform.sync.jobs.detail.upstreamInstance", {
+                              value: detail().upstream_instance_id || "-",
+                            })}
+                          </span>
+                        </Show>
+                        <Show when={detail().upstream_base_url}>
+                          <span class="text-sm opacity-70 break-all">
+                            {t("platform.sync.jobs.upstream", { value: detail().upstream_base_url || "-" })}
+                          </span>
+                        </Show>
+                        <span class="text-sm opacity-70">
+                          {t("platform.sync.jobs.createdAt", {
+                            value: detail().created_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                          })}
+                        </span>
+                        <span class="text-sm opacity-70">
+                          {t("platform.sync.jobs.updatedAt", {
+                            value: detail().updated_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                          })}
+                        </span>
+                        <Show when={detail().finished_at}>
+                          <span class="text-sm opacity-70">
+                            {t("platform.sync.jobs.finishedAt", {
+                              value: detail().finished_at?.toFormat("yyyy-MM-dd HH:mm:ss") || "-",
+                            })}
+                          </span>
+                        </Show>
+                      </div>
+
+                      <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-2">
+                        <span class="font-bold text-sm">{t("platform.sync.jobs.detail.request")}</span>
+                        <span class="text-sm opacity-70 break-all">
+                          {t("platform.sync.direct.form.baseUrl")}: {detail().request.base_url}
+                        </span>
+                        <span class="text-sm opacity-70">
+                          {t("platform.sync.direct.form.syncToken")}: {syncTokenLabel(detail().request.has_sync_token)}
+                        </span>
+                        <span class="text-sm opacity-70 break-all">
+                          {t("platform.sync.direct.form.gameKey")}:{" "}
+                          <span class="font-mono">{detail().request.game_key}</span>
+                        </span>
+                        <span class="text-sm opacity-70 break-all">
+                          {t("platform.sync.direct.form.releaseId")}:{" "}
+                          <span class="font-mono">{detail().request.release_id}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-3">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="font-bold text-sm">{t("platform.sync.jobs.detail.checkpoint")}</span>
+                        <Show when={detail().checkpoint.bucket_name}>
+                          <span class="text-sm opacity-70 break-all">
+                            {t("platform.sync.jobs.detail.bucket", { value: detail().checkpoint.bucket_name || "-" })}
+                          </span>
+                        </Show>
+                      </div>
+
+                      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                        <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-2">
+                          <span class="font-bold text-sm">{t("platform.sync.jobs.detail.repo")}</span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.repo.initialized ? "✓" : "○"} {jobStageLabel("fetch_repo:init")}
+                          </span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.repo.fetched_release_ref ? "✓" : "○"}{" "}
+                            {jobStageLabel("fetch_repo:fetch")}
+                          </span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.repo.checked_out_snapshot ? "✓" : "○"}{" "}
+                            {jobStageLabel("fetch_repo:checkout")}
+                          </span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.repo.verified_snapshot ? "✓" : "○"}{" "}
+                            {jobStageLabel("fetch_repo:verify")}
+                          </span>
+                        </div>
+
+                        <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-2">
+                          <span class="font-bold text-sm">{t("platform.sync.jobs.detail.media")}</span>
+                          <span class="text-2xl font-mono">
+                            {progressLabel(detail().checkpoint.media.done, detail().checkpoint.media.total)}
+                          </span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.media.completed ? "✓" : "○"}{" "}
+                            {jobStageLabel(
+                              `fetch_media:${detail().checkpoint.media.done}/${detail().checkpoint.media.total}`
+                            )}
+                          </span>
+                        </div>
+
+                        <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-2">
+                          <span class="font-bold text-sm">{t("platform.sync.jobs.detail.oci")}</span>
+                          <span class="text-2xl font-mono">
+                            {progressLabel(detail().checkpoint.oci.done, detail().checkpoint.oci.total)}
+                          </span>
+                          <span class="text-sm opacity-80">
+                            {detail().checkpoint.oci.completed ? "✓" : "○"}{" "}
+                            {jobStageLabel(
+                              `fetch_oci:${detail().checkpoint.oci.done}/${detail().checkpoint.oci.total}`
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Show
+                        when={detail().checkpoint.discovered}
+                        fallback={<span class="text-sm opacity-70">{t("platform.sync.jobs.detail.noDiscovery")}</span>}
+                      >
+                        {(discovered) => (
+                          <div class="rounded-lg border border-layer-content/10 p-3 flex flex-col gap-1">
+                            <span class="font-bold text-sm">{t("platform.sync.jobs.detail.discovered")}</span>
+                            <span class="text-sm opacity-70 break-all">
+                              {t("platform.sync.jobs.detail.remote", { value: discovered().remote_base_url })}
+                            </span>
+                            <span class="text-sm opacity-70 break-all">
+                              {t("platform.sync.jobs.detail.snapshot", { value: discovered().snapshot_commit })}
+                            </span>
+                            <span class="text-sm opacity-70 break-all">
+                              {t("platform.sync.jobs.detail.manifest", { value: discovered().manifest_sha256 })}
+                            </span>
+                            <span class="text-sm opacity-70 break-all">
+                              {t("platform.sync.jobs.detail.firstParty", { value: discovered().first_party_base_url })}
+                            </span>
+                            <span class="text-sm opacity-70">
+                              {t("platform.sync.jobs.detail.publishedAt", {
+                                value: discovered().published_at.toFormat("yyyy-MM-dd HH:mm:ss"),
+                              })}
+                            </span>
+                            <span class="text-sm opacity-70">
+                              {t("platform.sync.jobs.detail.protocolVersion", { value: discovered().protocol_version })}
+                            </span>
+                          </div>
+                        )}
+                      </Show>
+
+                      <Show when={detail().error_message}>
+                        <pre class="whitespace-pre-wrap break-all rounded-lg border border-layer-content/10 p-3 text-xs overflow-x-auto text-error">
+                          {detail().error_message}
+                        </pre>
+                      </Show>
+                    </div>
+                  </>
+                )}
+              </Show>
+            </div>
+          </div>
         </Card>
 
         <For

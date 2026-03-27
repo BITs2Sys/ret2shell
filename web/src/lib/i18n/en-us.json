@@ -422,6 +422,9 @@
           "refresh": {
             "title": "Refresh"
           },
+          "retry": {
+            "title": "Retry"
+          },
           "resume": {
             "title": "Resume",
             "success": "Sync job resumed successfully",
@@ -436,9 +439,37 @@
             "title": "Open game"
           }
         },
+        "request": {
+          "tokenPresent": "attached",
+          "tokenMissing": "not attached"
+        },
+        "detail": {
+          "title": "Job detail",
+          "loading": "Loading selected job details...",
+          "empty": "Select one job to inspect its checkpoint and current request",
+          "summary": "Summary",
+          "request": "Current request",
+          "checkpoint": "Checkpoint",
+          "bucket": "Bucket: {{value}}",
+          "repo": "Repository",
+          "media": "Media",
+          "oci": "OCI assets",
+          "discovered": "Discovered release",
+          "noDiscovery": "Discovery has not completed yet",
+          "upstreamInstance": "Upstream instance: {{value}}",
+          "remote": "Remote: {{value}}",
+          "snapshot": "Snapshot: {{value}}",
+          "manifest": "Manifest SHA256: {{value}}",
+          "firstParty": "First-party: {{value}}",
+          "publishedAt": "Published at: {{value}}",
+          "protocolVersion": "Protocol version: {{value}}"
+        },
         "errors": {
           "fetch": {
             "title": "Failed to fetch sync jobs"
+          },
+          "fetchDetail": {
+            "title": "Failed to fetch sync job detail"
           }
         }
       },

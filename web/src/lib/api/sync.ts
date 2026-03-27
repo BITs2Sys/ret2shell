@@ -8,6 +8,7 @@ import type {
   RegistryPublicationMetadata,
   RegistryUpstreamMetadata,
   SyncJob,
+  SyncJobDetail,
   SyncRegistrySource,
 } from "@models/sync";
 import { t } from "@storage/theme";
@@ -417,6 +418,34 @@ export function useSyncJobs(props: { enabled?: () => boolean; onError?: (err: Er
       throwOnError: (err: Error) => {
         handleHttpError(err, t("platform.sync.jobs.errors.fetch.title"));
         return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export async function getSyncJob(job_id: number) {
+  return await api.get(`${api_root}/sync/direct/job/${job_id}`).json<SyncJobDetail>();
+}
+
+export function useSyncJob({
+  job_id,
+  enabled,
+  onError,
+}: {
+  job_id: () => number | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["sync", "job", job_id()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getSyncJob(job_id()!),
+      enabled: enabled?.() && job_id() != null,
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.jobs.errors.fetchDetail.title"));
+        return onError?.(err) ?? false;
       },
     }),
     () => inflyClient
