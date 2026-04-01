@@ -68,9 +68,10 @@ export function FormBare(
   });
   async function onSubmit(result: ChallengeForm) {
     await props.onDone(result);
-    inflyClient.invalidateQueries({
+    await inflyClient.invalidateQueries({
       queryKey: ["game", props.gameId, "challenge"],
     });
+    draft.discardDraft();
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">

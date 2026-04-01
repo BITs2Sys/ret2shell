@@ -48,9 +48,9 @@ export default function () {
     weight: () => 3,
   });
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
-      info.refetch();
+    onSuccess: async () => {
+      await Promise.all([config.refetch(), info.refetch()]);
+      draft.discardDraft();
     },
   });
   async function onSubmit(result: PlatformConfigForm) {

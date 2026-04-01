@@ -78,8 +78,9 @@ export default function () {
   const resendEmailMutation = useResendEmailMutation();
 
   const updateMutation = useChangeProfileMutation({
-    onSuccess: () => {
-      profile.refetch();
+    onSuccess: async () => {
+      await profile.refetch();
+      draft.discardDraft();
     },
   });
 

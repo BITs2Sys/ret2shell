@@ -44,7 +44,7 @@ type TeamAdminUpdateForm = {
   institute_id: string;
 };
 
-function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (team: Team) => void }) {
+function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (team: Team) => Promise<void> }) {
   const navigate = useNavigate();
   const institutes = useInstitutes();
   const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>({
@@ -85,8 +85,9 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
   });
 
   const updateMutation = useUpdateTeamInfoMutation({
-    onSuccess: (team) => {
-      props.onDone?.(team);
+    onSuccess: async (team) => {
+      await props.onDone?.(team);
+      draft.discardDraft();
     },
   });
 
@@ -262,7 +263,7 @@ type TeamSelfUpdateForm = {
   institute_id: string;
 };
 
-function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; onLeft?: () => void }) {
+function SelfManagement(props: { gameId: number; onDone?: (team: Team) => Promise<void>; onLeft?: () => void }) {
   const game = useGame({ id: () => props.gameId, enabled: () => !!props.gameId });
   const institutes = useInstitutes();
   const team = useSelfTeam({ game_id: () => props.gameId });
@@ -312,8 +313,9 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
   });
 
   const updateMutation = useUpdateSelfTeamMutation({
-    onSuccess: (team) => {
-      props.onDone?.(team);
+    onSuccess: async (team) => {
+      await props.onDone?.(team);
+      draft.discardDraft();
     },
   });
 
@@ -655,9 +657,8 @@ export default function () {
             <Show when={isSelfTeam()}>
               <SelfManagement
                 gameId={gameId()}
-                onDone={() => {
-                  selfTeam.refetch();
-                  team.refetch();
+                onDone={async () => {
+                  await Promise.all([selfTeam.refetch(), team.refetch()]);
                 }}
                 onLeft={() => {
                   navigate(`/games/${gameId()}`);
@@ -668,11 +669,8 @@ export default function () {
               <AdminManagement
                 gameId={gameId()}
                 team={team.data ?? null}
-                onDone={() => {
-                  team.refetch();
-                  members.refetch();
-                  solves.refetch();
-                  extras.refetch();
+                onDone={async () => {
+                  await Promise.all([team.refetch(), members.refetch(), solves.refetch(), extras.refetch()]);
                 }}
               />
             </Show>

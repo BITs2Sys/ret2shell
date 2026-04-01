@@ -25,7 +25,12 @@ export default function () {
     limit: config.data?.media.limit ?? 100,
     anti_theft: config.data?.media.anti_theft ?? false,
   }));
-  const mutation = useUpdatePlatformConfigMutation();
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
+    },
+  });
   const draft = useFormDraft({
     form,
     key: () => buildFormDraftKey("admin", "media"),

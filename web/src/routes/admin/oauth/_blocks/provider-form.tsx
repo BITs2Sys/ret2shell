@@ -66,7 +66,7 @@ export default function ProviderForm(props: {
   const [avatarUploading, setAvatarUploading] = createSignal(false);
   const hasAvatar = createMemo(() => !!getValue(form, "avatar"));
   async function onSubmit(result: FormType) {
-    props.onDone?.({
+    await props.onDone?.({
       id: oauthProvider.data?.item.id || 0,
       name: result.name,
       provider: result.provider,
@@ -74,6 +74,7 @@ export default function ProviderForm(props: {
       script: result.script,
       portal: result.portal,
     });
+    draft.discardDraft();
   }
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {

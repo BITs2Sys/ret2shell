@@ -27,8 +27,9 @@ export default function () {
     validator: config.data?.captcha.validator ?? "none",
   }));
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
     },
   });
   const draft = useFormDraft({

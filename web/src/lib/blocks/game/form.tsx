@@ -33,7 +33,11 @@ export type GameForm = {
   outer_hammer_url?: string;
 };
 
-export default function GameEdit(props: { onDone: (result: GameForm) => void; gameId?: number; training?: boolean }) {
+export default function GameEdit(props: {
+  onDone: (result: GameForm) => Promise<void>;
+  gameId?: number;
+  training?: boolean;
+}) {
   const game = useGame({ id: () => props.gameId ?? -1, enabled: () => !!props.gameId });
   const [form, { Form, Field }] = createForm<GameForm>({
     initialValues: {
@@ -78,8 +82,14 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
     remoteValues,
     enabled: () => !!props.gameId && !!game.data,
   });
+
+  async function onSubmit(result: GameForm) {
+    await props.onDone(result);
+    draft.discardDraft();
+  }
+
   return (
-    <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+    <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.form.title")}</span>

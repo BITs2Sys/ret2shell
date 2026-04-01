@@ -35,8 +35,9 @@ export default function () {
     verify_email_subject: config.data ? config.data.email.verify_email_subject : null,
   }));
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
     },
   });
   const draft = useFormDraft({

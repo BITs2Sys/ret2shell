@@ -42,7 +42,7 @@ export type UserForm = {
   permDevOps: boolean;
 };
 
-export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
+export default function (compProps: { onDone?: (result: User) => Promise<void>; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
   const [form, { Form, Field }] = createForm<UserForm>({
     initialValues: {
@@ -141,7 +141,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
     );
   });
 
-  function onSubmit(result: UserForm) {
+  async function onSubmit(result: UserForm) {
     const permissions: Permission[] = [];
     if (result.permBasic) permissions.push(Permission.Basic);
     if (result.permVerified) permissions.push(Permission.Verified);
@@ -154,7 +154,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
     if (result.permStat) permissions.push(Permission.Statistics);
     if (result.permDevOps) permissions.push(Permission.DevOps);
 
-    compProps.onDone?.({
+    await compProps.onDone?.({
       ...compProps.editSource,
       account: result.account,
       nickname: result.nickname,
@@ -166,6 +166,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       banned: result.banned,
       permissions,
     } as User);
+    draft.discardDraft();
   }
   return (
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1 space-y-2 items-center">

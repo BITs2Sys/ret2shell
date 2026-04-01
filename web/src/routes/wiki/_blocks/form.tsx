@@ -49,11 +49,13 @@ export default function (props: { onDone: (article: Article) => void; editSource
 
   const createWikiMutation = useCreateWikiMutation({
     onSuccess: (saved) => {
+      draft.discardDraft();
       props.onDone(saved);
     },
   });
   const updateWikiMutation = useUpdateWikiMutation({
     onSuccess: (saved) => {
+      draft.discardDraft();
       props.onDone(saved);
     },
   });

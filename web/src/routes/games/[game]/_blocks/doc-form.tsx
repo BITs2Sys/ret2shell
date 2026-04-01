@@ -57,6 +57,7 @@ export default function GameDocForm(props: {
       await inflyClient.invalidateQueries({
         queryKey: ["game", props.gameId, "doc", props.docType],
       });
+      draft.discardDraft();
     } catch (err) {
       handleHttpError(err as Error, t("general.actions.save.status.fail"));
     }

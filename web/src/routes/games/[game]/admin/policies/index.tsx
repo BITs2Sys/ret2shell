@@ -11,7 +11,7 @@ import FormDraftReset from "@widgets/form-draft-reset";
 import { createMemo } from "solid-js";
 
 export function PoliciesEdit(props: {
-  onDone: (result: ArchivePolicy) => void;
+  onDone: (result: ArchivePolicy) => Promise<void>;
   editSource?: ArchivePolicy;
   draftKey?: string;
   loading?: boolean;
@@ -36,8 +36,14 @@ export function PoliciesEdit(props: {
     remoteValues,
     enabled: () => !!props.editSource,
   });
+
+  async function onSubmit(result: ArchivePolicy) {
+    await props.onDone(result);
+    draft.discardDraft();
+  }
+
   return (
-    <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+    <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.policies.title")}</span>
@@ -89,21 +95,18 @@ export default function () {
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
   const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
 
-  const updateMutation = useUpdateGameMutation({
-    onSuccess: () => {
-      game.refetch();
-    },
-  });
+  const updateMutation = useUpdateGameMutation();
 
   async function onSubmit(result: ArchivePolicy) {
     if (!game.data) return;
-    updateMutation.mutate({
+    await updateMutation.mutateAsync({
       id: game.data.id,
       game: {
         ...game.data,
         archive_policy: result,
       },
     });
+    await game.refetch();
   }
   return (
     <>

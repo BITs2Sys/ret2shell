@@ -23,11 +23,13 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
   const article = useBulletin({ id: () => props.articleId!, enabled: () => !!props.articleId });
   const createBulletinMutation = useCreateBulletinMutation({
     onSuccess: (data) => {
+      draft.discardDraft();
       props.onDone(data);
     },
   });
   const updateBulletinMutation = useUpdateBulletinMutation({
     onSuccess: (data) => {
+      draft.discardDraft();
       props.onDone(data);
     },
   });

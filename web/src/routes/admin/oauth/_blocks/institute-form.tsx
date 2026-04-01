@@ -16,7 +16,7 @@ type FormType = {
 };
 
 export default function InstituteForm(props: {
-  onDone?: (result: Institute) => void;
+  onDone?: (result: Institute) => Promise<void>;
   editSource?: Institute;
   loading?: boolean;
 }) {
@@ -39,8 +39,8 @@ export default function InstituteForm(props: {
     remoteValues,
     enabled: () => !!props.editSource,
   });
-  function onSubmit(result: FormType) {
-    props.onDone?.({
+  async function onSubmit(result: FormType) {
+    await props.onDone?.({
       id: props.editSource?.id || 0,
       name: result.name,
       description: null,
@@ -48,6 +48,7 @@ export default function InstituteForm(props: {
       provider: result.provider || null,
       token: result.token || null,
     });
+    draft.discardDraft();
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-96 space-y-2 relative">
