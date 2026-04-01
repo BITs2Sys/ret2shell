@@ -1,13 +1,15 @@
 import { useGame } from "@api/game";
 import { createForm, maxRange, minRange, required, setValues } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
 import TimePicker from "@widgets/timepicker";
 import { DateTime } from "luxon";
-import { createEffect, Show, untrack } from "solid-js";
+import { createMemo, Show } from "solid-js";
 
 export type GameForm = {
   name: string;
@@ -48,24 +50,33 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
       outer_hammer_url: game.data?.hammer_policy?.outer_url || "",
     },
   });
-  createEffect(() => {
-    if (game.data) {
-      untrack(() => {
-        setValues(form, {
-          ...game.data,
-          start_at: game.data?.start_at.toSeconds(),
-          end_at: game.data?.end_at.toSeconds(),
-          register_at: game.data?.register_at.toSeconds(),
-          archive_at: game.data?.archive_at.toSeconds(),
-          first_blood_award: game.data?.award_rates?.[0] || game.data?.award_rate,
-          second_blood_award: Math.floor(game.data?.award_rates?.[1] || ((game.data?.award_rate || 0) * 2) / 3),
-          third_blood_award: Math.floor(game.data?.award_rates?.[2] || (game.data?.award_rate || 0) / 3),
-          enable_hammer: game.data?.hammer_policy?.enabled || false,
-          outer_hammer_label: game.data?.hammer_policy?.outer_label || "",
-          outer_hammer_url: game.data?.hammer_policy?.outer_url || "",
-        });
-      });
-    }
+  const remoteValues = createMemo<GameForm>(() => ({
+    name: game.data?.name || "",
+    brief: game.data?.brief || "",
+    start_at: game.data?.start_at?.toSeconds(),
+    end_at: game.data?.end_at?.toSeconds(),
+    register_at: game.data?.register_at?.toSeconds(),
+    archive_at: game.data?.archive_at?.toSeconds(),
+    hidden: game.data?.hidden || false,
+    offline: game.data?.offline || false,
+    frozen: game.data?.frozen || false,
+    team_size: game.data?.team_size,
+    enable_audit: game.data?.enable_audit || false,
+    can_register_after_started: game.data?.can_register_after_started || false,
+    award_rate: game.data?.award_rate,
+    first_blood_award: game.data?.award_rates?.[0] || game.data?.award_rate || 0,
+    second_blood_award: Math.floor(game.data?.award_rates?.[1] || ((game.data?.award_rate || 0) * 2) / 3),
+    third_blood_award: Math.floor(game.data?.award_rates?.[2] || (game.data?.award_rate || 0) / 3),
+    enable_hammer: game.data?.hammer_policy?.enabled || false,
+    outer_hammer_label: game.data?.hammer_policy?.outer_label || "",
+    outer_hammer_url: game.data?.hammer_policy?.outer_url || "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () =>
+      props.gameId ? buildFormDraftKey("games", props.gameId, props.training ? "training-form" : "form") : undefined,
+    remoteValues,
+    enabled: () => !!props.gameId && !!game.data,
   });
   return (
     <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
@@ -364,9 +375,17 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
           )}
         </Field>
       </Show>
-      <Button type="submit" level="primary" class="mt-4!" loading={game.isLoading} disabled={game.isLoading}>
-        {t("general.actions.save.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button type="submit" level="primary" class="flex-1" loading={game.isLoading} disabled={game.isLoading}>
+          {t("general.actions.save.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={game.isLoading}
+          disabled={game.isLoading}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }
