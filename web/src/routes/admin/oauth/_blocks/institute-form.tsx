@@ -40,8 +40,6 @@ export default function InstituteForm(props: {
   });
 
   function onSubmit(result: FormType) {
-    console.log("Form Result:", result);
-
     props.onDone?.({
       id: props.editSource?.id || 0,
       name: result.name,
