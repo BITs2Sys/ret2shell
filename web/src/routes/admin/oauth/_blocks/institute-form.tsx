@@ -26,6 +26,7 @@ export default function InstituteForm(props: {
       token: props.editSource?.token || undefined,
     },
   });
+
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {
@@ -37,7 +38,10 @@ export default function InstituteForm(props: {
       });
     }
   });
+
   function onSubmit(result: FormType) {
+    console.log("Form Result:", result);
+
     props.onDone?.({
       id: props.editSource?.id || 0,
       name: result.name,
@@ -47,55 +51,56 @@ export default function InstituteForm(props: {
       token: result.token || null,
     });
   }
+
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-96 space-y-2 relative">
       <Field name="name" validate={[required(t("institute.form.name.required"))]}>
-        {(field, props) => (
+        {(field, fieldProps) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
             title={t("institute.form.name.label")}
             placeholder={t("institute.form.name.placeholder")}
-            {...props}
+            {...fieldProps}
             value={field.value}
             error={field.error}
             required
           />
         )}
       </Field>
+
       <Field name="provider">
         {(field, fieldProps) => (
           <Select
-            name={field.name}
+            inputProps={fieldProps}
             label={t("institute.form.provider.label")}
             class="flex-1"
             error={field.error}
             placeholder={t("institute.form.provider.placeholder")}
             items={
-              oauthProviders.data?.map((service) => {
-                return {
-                  value: service.provider,
-                  label: service.name,
-                  icon: "icon-[fluent--hat-graduation-20-regular]",
-                };
-              }) || []
+              oauthProviders.data?.map((service) => ({
+                value: service.provider,
+                label: service.name,
+                icon: "icon-[fluent--hat-graduation-20-regular]",
+              })) || []
             }
-            value={field.value ? [field.value as string] : undefined}
-            inputProps={fieldProps}
+            value={field.value ? [field.value] : []}
           />
         )}
       </Field>
+
       <Field name="token">
-        {(field, props) => (
+        {(field, fieldProps) => (
           <Input
             icon={<span class="shrink-0 icon-[fluent--key-20-regular] w-5 h-5" />}
             title={t("institute.form.token.label")}
             placeholder={t("institute.form.token.placeholder")}
-            {...props}
+            {...fieldProps}
             value={field.value}
             error={field.error}
           />
         )}
       </Field>
+
       <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
         {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
