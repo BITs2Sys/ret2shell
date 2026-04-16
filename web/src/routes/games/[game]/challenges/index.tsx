@@ -69,12 +69,13 @@ export default function () {
 
   createEffect(() => {
     if (isGameInArchived(game.data)) {
-      addToast({
-        level: "warning",
-        description: t("game.gotoTraining"),
-        duration: 5000,
-      });
-      navigate(`/games/${gameId()}`);
+      navigate(`/training/${gameId()}${location.search}`, { replace: true });
+      // addToast({
+      //   level: "warning",
+      //   description: t("game.gotoTraining"),
+      //   duration: 5000,
+      // });
+      // navigate(`/games/${gameId()}`);
     }
   });
 
