@@ -26,7 +26,7 @@ export default function (props: { children?: JSX.Element }) {
 
   createEffect(() => {
     if (game.data && game.data.host_type !== HostType.Game) {
-      navigate(`/training/${game.data.id}`);
+      navigate(`/training/${game.data.id}${window.location.search}`, { replace: true });
     }
   });
 
