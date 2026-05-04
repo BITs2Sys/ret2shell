@@ -31,7 +31,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     password::{hash_password, verify_password},
-    string::account_str,
+    validation::{validate_email, validate_nickname, validate_password, validate_register_request},
   },
 };
 
@@ -451,81 +451,6 @@ struct RegisterRequest {
   pub captcha_answer: String,
 }
 
-fn validate_register_request(
-  account: &str, nickname: &str, email: &str, password: &str,
-) -> Result<(), ResponseError> {
-  validate_account(account)?;
-  validate_nickname(nickname)?;
-  validate_email(email)?;
-  validate_password(password)?;
-  Ok(())
-}
-
-fn validate_account(account: &str) -> Result<(), ResponseError> {
-  let len = account.chars().count();
-  if len < 4 {
-    return Err(ResponseError::BadRequest(
-      "account must be at least 4 characters".to_owned(),
-    ));
-  }
-  if len > 32 {
-    return Err(ResponseError::BadRequest(
-      "account must be at most 32 characters".to_owned(),
-    ));
-  }
-  if account_str(account) != account {
-    return Err(ResponseError::BadRequest(
-      "account contains invalid characters".to_owned(),
-    ));
-  }
-  Ok(())
-}
-
-fn validate_nickname(nickname: &str) -> Result<(), ResponseError> {
-  let len = nickname.chars().count();
-  if len < 2 {
-    return Err(ResponseError::BadRequest(
-      "nickname must be at least 2 characters".to_owned(),
-    ));
-  }
-  if len > 32 {
-    return Err(ResponseError::BadRequest(
-      "nickname must be at most 32 characters".to_owned(),
-    ));
-  }
-  Ok(())
-}
-
-fn validate_email(email: &str) -> Result<(), ResponseError> {
-  let Some((local, domain)) = email.split_once('@') else {
-    return Err(ResponseError::BadRequest("invalid email".to_owned()));
-  };
-  if local.is_empty()
-    || domain.is_empty()
-    || domain.contains('@')
-    || email.chars().any(char::is_whitespace)
-    || !domain
-      .split('.')
-      .all(|label| !label.is_empty() && !label.starts_with('-') && !label.ends_with('-'))
-    || !domain.contains('.')
-  {
-    return Err(ResponseError::BadRequest("invalid email".to_owned()));
-  }
-  Ok(())
-}
-
-fn validate_password(password: &str) -> Result<(), ResponseError> {
-  let len = password.chars().count();
-  if !(8..=40).contains(&len)
-    || !password.chars().any(|c| c.is_ascii_lowercase())
-    || !password.chars().any(|c| c.is_ascii_uppercase())
-    || !password.chars().any(|c| c.is_ascii_digit())
-  {
-    return Err(ResponseError::BadRequest("password is too weak".to_owned()));
-  }
-  Ok(())
-}
-
 async fn register(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
   Extension(config): Extension<config::Model>, Extension(token_tracker): Extension<TokenTracker>,
@@ -779,6 +704,7 @@ async fn reset_password(
     }
   };
 
+  validate_password(&body.password)?;
   let password = hash_password(&body.password)?;
   user::update_password(&db.conn, user.id, password).await?;
   let mut prev_token: Option<String>;
@@ -814,6 +740,7 @@ async fn change_password(
   let password_hash = user.password.unwrap_or_default();
   match verify_password(&body.old_password, &password_hash)? {
     true => {
+      validate_password(&body.new_password)?;
       let password = hash_password(&body.new_password)?;
       user::update_password(&db.conn, user.id, password).await?;
       while let Some(token_str) = cache
@@ -874,6 +801,8 @@ async fn change_profile(
       return Err(ResponseError::BadRequest("email is required".to_owned()));
     }
   };
+  validate_nickname(&body.nickname)?;
+  validate_email(&email)?;
   if email_changed
     && user::get_by_account_or_email(&db.conn, &email)
       .await?
@@ -904,7 +833,7 @@ async fn change_profile(
       cache,
       queue,
       &config,
-      &body.account,
+      &user.account,
       &email,
       EmailType::Verify,
       &trace.header_value().to_str().unwrap_or("UNKNOWN"),
@@ -1002,7 +931,7 @@ async fn delete_self(
 
 #[cfg(test)]
 mod tests {
-  use super::{
+  use crate::utility::validation::{
     validate_account, validate_email, validate_nickname, validate_password,
     validate_register_request,
   };
