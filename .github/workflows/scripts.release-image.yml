@@ -32,5 +32,11 @@ jobs:
 
       - uses: chetan/git-restore-mtime-action@v2
 
+      - name: Install fish
+        if: ${{ matrix.steps.shell == 'fish' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fish
+
       - name: Test ${{ matrix.steps.script }}
         run: ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'
