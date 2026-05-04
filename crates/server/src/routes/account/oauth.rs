@@ -15,7 +15,7 @@ use r2s_database::{
   config,
   user::{self, Permission, Permissions},
 };
-use r2s_engine::{DiagnosticKind, DiagnosticMarker, Engine};
+use r2s_engine::{DiagnosticMarker, Engine};
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
 use r2s_queue::Queue;
@@ -33,6 +33,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     password::hash_password,
+    script::has_diagnostic_error,
     validation::{validate_oauth_provider_model, validate_register_request},
   },
 };
@@ -86,12 +87,6 @@ struct OAuthProviderResponse {
   lint: Vec<DiagnosticMarker>,
 }
 
-fn has_lint_error(lint: &[DiagnosticMarker]) -> bool {
-  lint
-    .iter()
-    .any(|marker| matches!(&marker.kind, DiagnosticKind::Error))
-}
-
 async fn get_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>, Path(service): Path<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -114,7 +109,7 @@ async fn create_oauth_provider(
 ) -> Result<impl IntoResponse, ResponseError> {
   validate_oauth_provider_model(&provider)?;
   let lint = oauth.lint(&provider.script).await?;
-  if has_lint_error(&lint) {
+  if has_diagnostic_error(&lint) {
     return Ok(Json(OAuthProviderResponse {
       item: provider,
       lint,
@@ -140,7 +135,7 @@ async fn update_oauth_provider(
     id: original_provider.id,
     ..provider
   };
-  if has_lint_error(&lint) {
+  if has_diagnostic_error(&lint) {
     return Ok(Json(OAuthProviderResponse {
       item: provider,
       lint,

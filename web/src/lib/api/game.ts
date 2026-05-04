@@ -13,7 +13,8 @@ import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError, type SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+import { hasDiagnosticErrors } from "../utils/diagnostics";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastError, toastSuccess } from ".";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -1010,7 +1011,11 @@ export function useUpdateGameTrafficMutation(
   return useMutation(() => ({
     mutationFn: (params: { game_id: number; traffic: string }) => updateGameTraffic(params.game_id, params.traffic),
     onSuccess: (data) => {
-      toastSuccess(t("general.actions.save.status.success"));
+      if (hasDiagnosticErrors(data.lint)) {
+        toastError(t("general.actions.save.status.fail"));
+      } else {
+        toastSuccess(t("general.actions.save.status.success"));
+      }
       props.onSuccess?.(data);
     },
     onError: (err: Error) => {
@@ -1057,7 +1062,11 @@ export function useUpdateGameLifecycleMutation(
     mutationFn: (params: { game_id: number; lifecycle: string }) =>
       updateGameLifecycle(params.game_id, params.lifecycle),
     onSuccess: (data) => {
-      toastSuccess(t("general.actions.save.status.success"));
+      if (hasDiagnosticErrors(data.lint)) {
+        toastError(t("general.actions.save.status.fail"));
+      } else {
+        toastSuccess(t("general.actions.save.status.success"));
+      }
       props.onSuccess?.(data);
     },
     onError: (err: Error) => {

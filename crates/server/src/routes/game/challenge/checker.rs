@@ -9,7 +9,9 @@ use r2s_database::{challenge, game};
 use r2s_engine::{DiagnosticMarker, Engine};
 use serde::{Deserialize, Serialize};
 
-use crate::{middleware::auth::Token, traits::ResponseError};
+use crate::{
+  middleware::auth::Token, traits::ResponseError, utility::script::has_diagnostic_error,
+};
 
 #[derive(Serialize)]
 pub(super) struct CheckerResponse {
@@ -53,8 +55,14 @@ pub(super) async fn update_checker_script(
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  let lint = checker.lint_script(&req.content).await?;
+  if has_diagnostic_error(&lint) {
+    return Ok(Json(CheckerResponse {
+      script: req.content,
+      lint,
+    }));
+  }
   challenge_bucket.set_checker(req.content).await?;
-  let lint = checker.lint(&challenge_bucket).await?;
   checker.expire(&engine, &challenge_bucket).await;
   game_bucket
     .commit(

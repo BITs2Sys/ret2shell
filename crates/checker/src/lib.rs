@@ -120,6 +120,12 @@ impl Checker {
       .checker()
       .await
       .map_err(|_err| EngineError::MissingCheckerScript(bucket.name.clone()))?;
+    self.lint_script(script).await
+  }
+
+  pub async fn lint_script(
+    &self, script: impl AsRef<str>,
+  ) -> Result<Vec<DiagnosticMarker>, EngineError> {
     Engine::lint(Self::default_modules(), script, &["check", "environ"]).await
   }
 

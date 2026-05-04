@@ -29,6 +29,7 @@ use crate::{
   traits::ResponseError,
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
+    script::has_diagnostic_error,
     validation::validate_challenge_model,
   },
 };
@@ -223,7 +224,12 @@ pub(super) async fn up_challenge(
     },
   )
   .await?;
-  checker.lint(&challenge_bucket).await?;
+  let lint = checker.lint(&challenge_bucket).await?;
+  if has_diagnostic_error(&lint) {
+    return Err(ResponseError::PreconditionFailed(
+      "checker script contains compile errors".to_owned(),
+    ));
+  }
   txn.commit().await?;
   info!("challenge is maken public (up) by user");
 

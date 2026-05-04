@@ -1,5 +1,6 @@
 import { useDeleteGameLifecycleMutation, useGame, useUpdateGameLifecycleMutation } from "@api/game";
 import { type LifecyclePreset, lifecyclePresetEntries, lifecyclePresetMap } from "@lib/lifecycle/presets";
+import { hasDiagnosticErrors } from "@lib/utils/diagnostics";
 import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -43,7 +44,9 @@ export default function Lifecycle() {
   const updateLifecycleMutation = useUpdateGameLifecycleMutation({
     onSuccess: (resp) => {
       setLint(resp.lint ?? []);
-      game.refetch();
+      if (!hasDiagnosticErrors(resp.lint)) {
+        game.refetch();
+      }
     },
   });
   const deleteLifecycleMutation = useDeleteGameLifecycleMutation({

@@ -5,6 +5,7 @@ import {
   useUpdateGlobalTrafficScriptMutation,
 } from "@api/cluster";
 import { usePlatformConfig } from "@api/platform";
+import { hasDiagnosticErrors } from "@lib/utils/diagnostics";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -55,7 +56,9 @@ export default function Traffic() {
   const updateTrafficMutation = useUpdateGlobalTrafficScriptMutation({
     onSuccess: (v) => {
       setLint(v.lint ?? []);
-      onSuccess();
+      if (!hasDiagnosticErrors(v.lint)) {
+        onSuccess();
+      }
     },
   });
   const deleteTrafficMutation = useDeleteGlobalTrafficScriptMutation({ onSuccess });

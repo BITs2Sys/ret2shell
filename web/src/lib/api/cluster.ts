@@ -3,7 +3,8 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import type { ConfigMapList, NodeList } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+import { hasDiagnosticErrors } from "../utils/diagnostics";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastError, toastSuccess } from ".";
 
 export async function getClusterConfig() {
   return await api.get(`${api_root}/cluster/config`).json<ConfigMapList>();
@@ -95,7 +96,11 @@ export function useUpdateGlobalTrafficScriptMutation(
   return useMutation(() => ({
     mutationFn: ({ traffic }: { traffic: string }) => updateGlobalTrafficScript(traffic),
     onSuccess: (resp) => {
-      toastSuccess(t("general.actions.save.status.success"));
+      if (hasDiagnosticErrors(resp.lint)) {
+        toastError(t("general.actions.save.status.fail"));
+      } else {
+        toastSuccess(t("general.actions.save.status.success"));
+      }
       props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
@@ -137,7 +142,11 @@ export function useUpdateGlobalLifecycleScriptMutation(
   return useMutation(() => ({
     mutationFn: ({ lifecycle }: { lifecycle: string }) => updateGlobalLifecycleScript(lifecycle),
     onSuccess: (resp) => {
-      toastSuccess(t("general.actions.save.status.success"));
+      if (hasDiagnosticErrors(resp.lint)) {
+        toastError(t("general.actions.save.status.fail"));
+      } else {
+        toastSuccess(t("general.actions.save.status.success"));
+      }
       props.onSuccess?.(resp);
     },
     onError: (err: Error) => {

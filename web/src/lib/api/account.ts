@@ -1,3 +1,4 @@
+import { hasDiagnosticErrors } from "@lib/utils/diagnostics";
 import { sleep } from "@lib/utils/timeout";
 import type { Captcha } from "@models/captcha";
 import type { Institute } from "@models/institute";
@@ -19,9 +20,7 @@ export type OAuthProviderResponse = {
   lint: DiagnosticMarker[];
 };
 
-export function hasDiagnosticErrors(lint?: DiagnosticMarker[] | null) {
-  return lint?.some((marker) => marker.kind === "error") ?? false;
-}
+export { hasDiagnosticErrors };
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();

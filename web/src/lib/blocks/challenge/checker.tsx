@@ -1,5 +1,6 @@
 import { inflyClient } from "@api";
 import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
+import { hasDiagnosticErrors } from "@lib/utils/diagnostics";
 import { generateRandomMotto } from "@lib/utils/random-motto";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -101,9 +102,11 @@ export default function (props: ChallengeWidgetProps) {
   const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
     onSuccess: (resp) => {
       setLint(resp.lint);
-      inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId, "checkerScript"],
-      });
+      if (!hasDiagnosticErrors(resp.lint)) {
+        inflyClient.invalidateQueries({
+          queryKey: ["game", props.gameId, "challenge", props.challengeId, "checkerScript"],
+        });
+      }
     },
   });
 

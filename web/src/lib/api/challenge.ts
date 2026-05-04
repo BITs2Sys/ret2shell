@@ -10,16 +10,13 @@ import { createMemo } from "solid-js";
 import type { Extra } from "../models/extra";
 import type { CommitHistory } from "../models/git";
 import type { Hint } from "../models/hint";
-import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+import { hasDiagnosticErrors } from "../utils/diagnostics";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastError, toastSuccess } from ".";
 
 export type ChallengeCheckerScriptResponse = {
   script: string;
   lint: DiagnosticMarker[];
 };
-
-function hasDiagnosticErrors(lint?: DiagnosticMarker[] | null) {
-  return lint?.some((marker) => marker.kind === "error") ?? false;
-}
 
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
   return (
@@ -615,7 +612,9 @@ export function useUpdateChallengeCheckerScriptMutation(props: {
     mutationFn: (req: { game_id: number; challenge_id: number; content: string }) =>
       updateChallengeCheckerScript(req.game_id, req.challenge_id, req.content),
     onSuccess: (resp) => {
-      if (!hasDiagnosticErrors(resp.lint)) {
+      if (hasDiagnosticErrors(resp.lint)) {
+        toastError(t("general.actions.save.status.fail"));
+      } else {
         toastSuccess(t("general.actions.save.status.success"));
       }
       props.onSuccess?.(resp);
