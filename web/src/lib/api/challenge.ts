@@ -12,6 +12,11 @@ import type { CommitHistory } from "../models/git";
 import type { Hint } from "../models/hint";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
+export type ChallengeCheckerScriptResponse = {
+  script: string;
+  lint: DiagnosticMarker[];
+};
+
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
   return (
     await api.get(`${api_root}/game/${game_id}/challenge`, {
@@ -559,10 +564,7 @@ export async function getChallengeCheckerScript(game_id: number, challenge_id: n
         })
       ),
     })
-    .json<{
-      script: string;
-      lint?: DiagnosticMarker[];
-    }>();
+    .json<ChallengeCheckerScriptResponse>();
 }
 
 export function useChallengeCheckerScript({
@@ -592,27 +594,25 @@ export function useChallengeCheckerScript({
 }
 
 export async function updateChallengeCheckerScript(game_id: number, challenge_id: number, content: string) {
-  return await safeJson(
-    api
-      .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
-        json: {
-          content,
-        },
-      })
-      .json<void>()
-  );
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
+      json: {
+        content,
+      },
+    })
+    .json<ChallengeCheckerScriptResponse>();
 }
 
 export function useUpdateChallengeCheckerScriptMutation(props: {
-  onSuccess?: () => void;
+  onSuccess?: (resp: ChallengeCheckerScriptResponse) => void;
   onError?: (err: Error) => void;
 }) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge_id: number; content: string }) =>
       updateChallengeCheckerScript(req.game_id, req.challenge_id, req.content),
-    onSuccess: () => {
+    onSuccess: (resp) => {
       toastSuccess(t("general.actions.save.status.success"));
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));

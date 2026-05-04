@@ -15,7 +15,7 @@ use r2s_database::{
   config,
   user::{self, Permission, Permissions},
 };
-use r2s_engine::Engine;
+use r2s_engine::{DiagnosticMarker, Engine};
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
 use r2s_queue::Queue;
@@ -29,9 +29,12 @@ use crate::{
     auth::{Token, TokenTracker, captcha_protected, permission_required_all},
     data,
   },
-  routes::account::{EmailType, send_email, validate_register_request},
+  routes::account::{EmailType, send_email},
   traits::{GlobalState, ResponseError},
-  utility::password::hash_password,
+  utility::{
+    password::hash_password,
+    validation::{validate_oauth_provider_model, validate_register_request},
+  },
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -80,7 +83,7 @@ async fn get_oauth_providers(
 #[derive(Serialize)]
 struct OAuthProviderResponse {
   item: r2s_database::oauth_provider::Model,
-  lint: Option<String>,
+  lint: Vec<DiagnosticMarker>,
 }
 
 async fn get_oauth_provider(
@@ -89,10 +92,10 @@ async fn get_oauth_provider(
   let provider = r2s_database::oauth_provider::get_by_provider(&db.conn, &service).await?;
   match provider {
     Some(provider) => {
-      let lint = oauth.lint(&provider.script).await;
+      let lint = oauth.lint(&provider.script).await?;
       Ok(Json(OAuthProviderResponse {
         item: provider,
-        lint: lint.err().map(|e| e.to_string()),
+        lint,
       }))
     }
     None => Err(ResponseError::NotFound("oauth provider".to_owned())),
@@ -103,11 +106,12 @@ async fn create_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>,
   Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_oauth_provider_model(&provider)?;
+  let lint = oauth.lint(&provider.script).await?;
   let provider = r2s_database::oauth_provider::create(&db.conn, provider).await?;
-  let lint = oauth.lint(&provider.script).await;
   Ok(Json(OAuthProviderResponse {
     item: provider,
-    lint: lint.err().map(|e| e.to_string()),
+    lint,
   }))
 }
 
@@ -115,21 +119,22 @@ async fn update_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>, State(engine): State<Engine>,
   Path(service): Path<String>, Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_oauth_provider_model(&provider)?;
+  let original_provider = r2s_database::oauth_provider::get_by_provider(&db.conn, &service)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("oauth provider".to_owned()))?;
+  let lint = oauth.lint(&provider.script).await?;
+  let provider = r2s_database::oauth_provider::Model {
+    id: original_provider.id,
+    ..provider
+  };
   let txn = db.conn.begin().await?;
-  let original_provider =
-    match r2s_database::oauth_provider::get_by_provider(&txn, &service).await? {
-      Some(m) => m,
-      None => {
-        return Err(ResponseError::NotFound("oauth provider".to_owned()));
-      }
-    };
   let provider = r2s_database::oauth_provider::update(&txn, original_provider.id, provider).await?;
-  let lint = oauth.lint(&provider.script).await;
   oauth.expire(&engine, provider.provider.as_str()).await;
   txn.commit().await?;
   Ok(Json(OAuthProviderResponse {
     item: provider,
-    lint: lint.err().map(|e| e.to_string()),
+    lint,
   }))
 }
 

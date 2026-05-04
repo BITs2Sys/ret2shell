@@ -23,7 +23,10 @@ use tracing::{debug, error, warn};
 use crate::{
   middleware::auth,
   traits::{GlobalState, ResponseError},
-  utility::file::send_file,
+  utility::{
+    file::send_file,
+    pagination::{DEFAULT_LOG_LIMIT, MAX_LOG_LIMIT, limit},
+  },
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
@@ -255,11 +258,10 @@ async fn get_logs(
       result.push_str(&format!(" AND span.user-account:{}", account));
     }
     result.push_str(" | sort by (_time) desc");
-    if let Some(limit) = req.limit {
-      result.push_str(&format!(" | limit {}", limit));
-    } else {
-      result.push_str(" | limit 1000");
-    }
+    result.push_str(&format!(
+      " | limit {}",
+      limit(req.limit, DEFAULT_LOG_LIMIT, MAX_LOG_LIMIT)
+    ));
     result
   };
   // escape result with url encode

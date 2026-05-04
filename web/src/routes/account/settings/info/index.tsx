@@ -3,7 +3,7 @@ import { useAccountProfile, useChangeProfileMutation, useResendEmailMutation } f
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import { Permission } from "@models/user";
-import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, email, getValue, maxLength, minLength, required, setValue, setValues } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -120,7 +120,14 @@ export default function () {
                 value={accountStore.account!}
                 disabled
               />
-              <Field name="nickname" validate={[required(t("account.form.nickname.required"))]}>
+              <Field
+                name="nickname"
+                validate={[
+                  required(t("account.form.nickname.required")),
+                  minLength(2, t("account.form.nickname.minLength")),
+                  maxLength(32, t("account.form.nickname.maxLength")),
+                ]}
+              >
                 {(field, props) => (
                   <Input
                     icon={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}

@@ -216,6 +216,13 @@ impl IntoResponse for ResponseError {
             format!("failed to convert data type from bucket: {e:?}")
           )
         }
+        r2s_bucket::BucketError::PathTraversal => {
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "bucket path traversal detected".to_owned(),
+            "path traversal detected"
+          )
+        }
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "bucket internal error".to_owned(),

@@ -14,6 +14,11 @@ import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson } from ".";
 
+export type OAuthProviderResponse = {
+  item: OAuthProvider;
+  lint: DiagnosticMarker[];
+};
+
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();
 }
@@ -396,9 +401,7 @@ export function useOAuthProviders(props: { enabled?: () => boolean; onError?: (e
 }
 
 export async function getOAuthProvider(service: string) {
-  return await api
-    .get(`${api_root}/account/oauth/provider/${service}`)
-    .json<{ item: OAuthProvider; lint: DiagnosticMarker[] | null }>();
+  return await api.get(`${api_root}/account/oauth/provider/${service}`).json<OAuthProviderResponse>();
 }
 
 export function useOAuthProvider({
@@ -428,21 +431,21 @@ export function useOAuthProvider({
 }
 
 export async function updateOAuthProvider(service: string, req: OAuthProvider) {
-  return await api
-    .patch(`${api_root}/account/oauth/provider/${service}`, { json: req })
-    .json<{ item: OAuthProvider; lint: string | null }>();
+  return await api.patch(`${api_root}/account/oauth/provider/${service}`, { json: req }).json<OAuthProviderResponse>();
 }
 
-export function useUpdateOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+export function useUpdateOAuthProviderMutation(
+  props: { onSuccess?: (resp: OAuthProviderResponse) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: ({ service, req }: { service: string; req: OAuthProvider }) => updateOAuthProvider(service, req),
-    onSuccess: () => {
+    onSuccess: (resp) => {
       addToast({
         level: "success",
         description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));
@@ -474,21 +477,21 @@ export function useDeleteOAuthProviderMutation(props: { onSuccess?: () => void; 
 }
 
 export async function createOAuthProvider(req: OAuthProvider) {
-  return await api
-    .post(`${api_root}/account/oauth/provider`, { json: req })
-    .json<{ item: OAuthProvider; lint: string | null }>();
+  return await api.post(`${api_root}/account/oauth/provider`, { json: req }).json<OAuthProviderResponse>();
 }
 
-export function useCreateOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+export function useCreateOAuthProviderMutation(
+  props: { onSuccess?: (resp: OAuthProviderResponse) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: createOAuthProvider,
-    onSuccess: () => {
+    onSuccess: (resp) => {
       addToast({
         level: "success",
         description: t("general.actions.create.status.success"),
         duration: 5000,
       });
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.create.status.fail"));

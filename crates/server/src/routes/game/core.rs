@@ -30,6 +30,10 @@ use tracing::{info, warn};
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
+  utility::{
+    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+    validation::validate_game_model,
+  },
 };
 
 const GAME_DOC_CACHE_TTL: i64 = 60 * 5;
@@ -222,8 +226,8 @@ pub(super) async fn get_game_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let results = game::get_page(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     query.host_type,
     query.weight,
     token.permissions.0.contains(&Permission::Host)
@@ -259,6 +263,7 @@ pub(super) async fn create_game(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_game_model(&model)?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
   model.bucket = Some(game_bucket.name.clone());
@@ -295,6 +300,7 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_game_model(&model)?;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,

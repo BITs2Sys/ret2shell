@@ -54,6 +54,7 @@ pub(super) async fn update_checker_script(
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
   challenge_bucket.set_checker(req.content).await?;
+  let lint = checker.lint(&challenge_bucket).await?;
   checker.expire(&engine, &challenge_bucket).await;
   game_bucket
     .commit(
@@ -65,5 +66,8 @@ pub(super) async fn update_checker_script(
       format!("{}@private.ret.sh.cn", token.account),
     )
     .await?;
-  Ok(())
+  Ok(Json(CheckerResponse {
+    script: challenge_bucket.checker().await?,
+    lint,
+  }))
 }

@@ -215,6 +215,12 @@ pub(super) async fn delete_challenge_hint(
   let txn = db.conn.begin().await?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  let hint_model = hint::get(&txn, query.id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("hint not found".to_owned()))?;
+  if hint_model.challenge_id != challenge.id {
+    return Err(ResponseError::NotFound("hint not found".to_owned()));
+  }
   hint::delete(&txn, query.id).await?;
   sync_challenge_hint_with_bucket(&challenge_bucket, &txn, &challenge).await?;
   txn.commit().await?;

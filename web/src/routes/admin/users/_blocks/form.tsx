@@ -4,7 +4,17 @@ import { uploadMedia } from "@api/media";
 import { useDeleteUserMutation, useUserIpList, useUserOAuthList } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToString, type User } from "@models/user";
-import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import {
+  createForm,
+  email,
+  getValue,
+  maxLength,
+  minLength,
+  pattern,
+  required,
+  setValue,
+  setValues,
+} from "@modular-forms/solid";
 import { A } from "@solidjs/router";
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
@@ -217,7 +227,15 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
         <div class="flex flex-row space-x-4 items-center">
           <div class="flex flex-col space-y-2 flex-1">
             <div class="flex flex-row space-x-2">
-              <Field name="account" validate={[required(t("account.form.account.required"))]}>
+              <Field
+                name="account"
+                validate={[
+                  required(t("account.form.account.required")),
+                  minLength(4, t("account.form.account.minimumLength")),
+                  maxLength(32, t("account.form.account.maximumLength")),
+                  pattern(/^[0-9a-zA-Z_]*$/, t("account.form.account.invalid")),
+                ]}
+              >
                 {(field, props) => (
                   <Input
                     class="flex-1"
@@ -231,7 +249,14 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                   />
                 )}
               </Field>
-              <Field name="nickname" validate={[required(t("account.form.nickname.required"))]}>
+              <Field
+                name="nickname"
+                validate={[
+                  required(t("account.form.nickname.required")),
+                  minLength(2, t("account.form.nickname.minLength")),
+                  maxLength(32, t("account.form.nickname.maxLength")),
+                ]}
+              >
                 {(field, props) => (
                   <Input
                     class="flex-1"

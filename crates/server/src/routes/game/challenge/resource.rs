@@ -27,6 +27,10 @@ use tracing::{info, warn};
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
+  utility::{
+    pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
+    validation::validate_challenge_model,
+  },
 };
 
 #[derive(Deserialize)]
@@ -61,8 +65,8 @@ pub(super) async fn get_challenge_list(
       1,
     )));
   }
-  let page = query.page.unwrap_or(1);
-  let page_size = query.page_size.unwrap_or(15);
+  let page = page(query.page);
+  let page_size = page_size(query.page_size, DEFAULT_PAGE_SIZE);
   let result = challenge::get_page(&db.conn, page, page_size, game.id, is_admin).await?;
   Ok(Json((
     if is_admin {
@@ -94,6 +98,7 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_challenge_model(&challenge)?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket
     .at_mut(
@@ -140,6 +145,7 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_challenge_model(&challenge)?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
   let score_changed = prev_challenge.score_rule != challenge.score_rule;
@@ -369,8 +375,8 @@ pub(super) async fn get_challenge_submissions(
 ) -> Result<impl IntoResponse, ResponseError> {
   let solves = submission::get_page_ex(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(10),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_SUBMISSION_PAGE_SIZE),
     query.only_solved.unwrap_or(false),
     true,
     Some(game.id),

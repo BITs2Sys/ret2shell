@@ -46,7 +46,7 @@ pub(super) async fn get_challenge_solves_status(
   if let Some(id) = query.id {
     let submission = submission::get(&db.conn, id).await?;
     if let Some(submission) = submission.clone() {
-      if submission.user_id != token.id {
+      if submission.user_id != token.id || submission.challenge_id != challenge.id {
         return Err(ResponseError::NotFound("submission not found".to_owned()));
       }
       return Ok(Json(submission).into_response());

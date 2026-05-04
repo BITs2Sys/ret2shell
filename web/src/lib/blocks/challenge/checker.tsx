@@ -3,7 +3,7 @@ import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } fr
 import { generateRandomMotto } from "@lib/utils/random-motto";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
-import { EditorBare } from "@widgets/editor";
+import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Select from "@widgets/select";
 import { createEffect, createMemo, createSignal, untrack } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
@@ -82,6 +82,7 @@ export default function (props: ChallengeWidgetProps) {
     return Tmpl.withContext(checkerCtx).execute(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
+  const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
 
   const scriptRemote = useChallengeCheckerScript({
     game_id: () => props.gameId,
@@ -92,14 +93,16 @@ export default function (props: ChallengeWidgetProps) {
     if (scriptRemote.data) {
       untrack(() => {
         setScript(scriptRemote.data?.script || "");
+        setLint(scriptRemote.data?.lint ?? []);
       });
     }
   });
 
   const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
-    onSuccess: () => {
+    onSuccess: (resp) => {
+      setLint(resp.lint);
       inflyClient.invalidateQueries({
-        queryKey: ["game", props.gameId, "challenge", props.challengeId],
+        queryKey: ["game", props.gameId, "challenge", props.challengeId, "checkerScript"],
       });
     },
   });
@@ -185,18 +188,18 @@ export default function (props: ChallengeWidgetProps) {
         lineNumbers
         lang="rune"
         value={script()}
-        lints={scriptRemote.data?.lint ?? []}
+        lints={lint()}
         onValueChanged={(e) => {
           setScript(e);
         }}
       />
       <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
         <span class="text-primary icon-[fluent--info-16-regular]" />
-        <span class="text-primary">{scriptRemote.data?.lint?.filter((v) => v.kind === "info").length ?? 0}</span>
+        <span class="text-primary">{lint().filter((v) => v.kind === "info").length}</span>
         <span class="text-warning icon-[fluent--warning-16-regular]" />
-        <span class="text-warning">{scriptRemote.data?.lint?.filter((v) => v.kind === "warning").length ?? 0}</span>
+        <span class="text-warning">{lint().filter((v) => v.kind === "warning").length}</span>
         <span class="text-error icon-[fluent--warning-16-regular]" />
-        <span class="text-error">{scriptRemote.data?.lint?.filter((v) => v.kind === "error").length ?? 0}</span>
+        <span class="text-error">{lint().filter((v) => v.kind === "error").length}</span>
         <div class="flex-1" />
         <a href="https://rune-rs.github.io/" class="text-primary hover:underline">
           Rune Grammar <span class="icon-[fluent--open-12-regular]" />

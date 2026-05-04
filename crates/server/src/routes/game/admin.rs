@@ -10,7 +10,10 @@ use r2s_event::EventManager;
 use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 
-use crate::traits::ResponseError;
+use crate::{
+  traits::ResponseError,
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+};
 
 #[derive(Serialize)]
 pub(super) struct ConnectedDevice {
@@ -89,8 +92,8 @@ pub(super) async fn get_submissions(
 ) -> Result<impl IntoResponse, ResponseError> {
   let submissions = submission::get_page_ex(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     false,
     true,
     Some(game.id),
@@ -108,8 +111,8 @@ pub(super) async fn get_audit_messages(
 ) -> Result<impl IntoResponse, ResponseError> {
   let submissions = audit::get_page_ex(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     Some(game.id),
     None,
     None,
@@ -121,9 +124,12 @@ pub(super) async fn get_audit_messages(
 }
 
 pub(super) async fn update_audit(
-  State(ref db): State<Database>, Extension(prev_model): Extension<audit::Model>,
-  Json(model): Json<audit::Model>,
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(prev_model): Extension<audit::Model>, Json(model): Json<audit::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  if game.id != prev_model.game_id {
+    return Err(ResponseError::NotFound("audit not found".to_owned()));
+  }
   let model = audit::update(
     &db.conn,
     prev_model.id,
