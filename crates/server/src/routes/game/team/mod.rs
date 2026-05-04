@@ -20,10 +20,14 @@ use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
 
-use super::{is_game_admin, worker};
+use super::worker;
 use crate::{
-  middleware::{auth, data},
+  middleware::{auth, auth::is_game_admin, data},
   traits::{GlobalState, ResponseError},
+  utility::{
+    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+    validation::validate_team_form,
+  },
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -66,6 +70,19 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     )
 }
 
+fn ensure_team_in_game(game: &game::Model, team: &team::Model) -> Result<(), ResponseError> {
+  if game.id != team.game_id {
+    warn!(
+      game_id=%game.id,
+      team_id=%team.id,
+      team_game_id=%team.game_id,
+      "team does not belong to game",
+    );
+    return Err(ResponseError::NotFound("team not found".to_owned()));
+  }
+  Ok(())
+}
+
 async fn get_self_team(
   State(ref db): State<Database>, team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -95,6 +112,7 @@ async fn update_self_team(
     team.name = token.nickname.clone();
   }
   team.tag = req.tag;
+  validate_team_form(&team.name, team.tag.as_deref())?;
   if game.archived() {
     warn!("user try to update team in archived game");
     return Err(ResponseError::PreconditionFailed(
@@ -167,9 +185,7 @@ async fn get_team_info(
   Extension(team): Extension<team::Model>, Extension(token): Extension<auth::Token>,
   Query(query): Query<TeamInfoQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if game.id != team.game_id {
-    return Err(ResponseError::NotFound("team not found".to_owned()));
-  }
+  ensure_team_in_game(&game, &team)?;
   let result = if query.ex.unwrap_or(false) {
     team::get_ex(&db.conn, team.id)
       .await?
@@ -185,8 +201,10 @@ async fn get_team_info(
 }
 
 async fn get_team_solves(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   Ok(Json(
     submission::get_list_ex(
       &db.conn,
@@ -206,6 +224,7 @@ async fn get_team_rank(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
   Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   if team.state < team::State::Hidden {
     warn!("user try to get rank of invalid team");
     return Err(ResponseError::PreconditionFailed(
@@ -227,6 +246,7 @@ async fn get_team_members(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
   Extension(team): Extension<team::Model>, Extension(token): Extension<auth::Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   let result = team::get_members(&db.conn, team.id).await?;
   if auth::is_game_admin!(token, game) {
     Ok(Json(result))
@@ -263,8 +283,8 @@ async fn get_team_list(
   let (teams, total) = team::get_page(
     &db.conn,
     game.id,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     min_state,
     query.institute_id,
     query.filter,
@@ -284,6 +304,7 @@ async fn get_team_extra(
   State(ref db): State<Database>, Extension(token): Extension<auth::Token>,
   Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   let resp = extra::get_list_ex(&db.conn, team.id).await?;
   if is_game_admin!(&token, &game) {
     Ok(Json(resp))
@@ -343,6 +364,7 @@ async fn create_team(
       "can not join multiple teams".to_owned(),
     ));
   }
+  validate_team_form(&req.name, req.tag.as_deref())?;
   let state = if game.enable_audit {
     if auditor.audit_content(&req.name) {
       team::State::Pending
@@ -451,6 +473,8 @@ async fn update_team_info(
   Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
   Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
+  validate_team_form(&req.name, req.tag.as_deref())?;
   let result = team::update(
     &db.conn,
     team::Model {
@@ -515,16 +539,19 @@ async fn update_team_info(
 }
 
 async fn delete_team(
-  State(ref db): State<Database>, Extension(team): Extension<team::Model>,
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   team::delete(&db.conn, team.id).await?;
   Ok(())
 }
 
 async fn create_team_extra(
-  State(db): State<Database>, Extension(team): Extension<team::Model>,
-  Json(req): Json<extra::Model>,
+  State(db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>, Json(req): Json<extra::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   let result = extra::create(
     &db.conn,
     extra::Model {
@@ -546,9 +573,10 @@ struct DeleteTeamExtraQuery {
 }
 
 async fn delete_team_extra(
-  State(db): State<Database>, Extension(team): Extension<team::Model>,
-  Query(req): Query<DeleteTeamExtraQuery>,
+  State(db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(team): Extension<team::Model>, Query(req): Query<DeleteTeamExtraQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  ensure_team_in_game(&game, &team)?;
   let extra = extra::get(&db.conn, req.id).await?;
   if extra.is_none() || extra.is_some_and(|e| e.team_id != team.id) {
     return Err(ResponseError::NotFound("extra not found".to_owned()));

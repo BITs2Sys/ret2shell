@@ -388,7 +388,7 @@
         "label": "China MIIT ICP record"
       },
       "hideMaker": {
-        "disabled": "Your license does not allow hiding this item",
+        "disabled": "This option is currently unavailable",
         "label": "Hide developer information tags"
       },
       "zenGame": {
@@ -563,6 +563,9 @@
           "required": "Content cannot be empty"
         }
       }
+    },
+    "rules": {
+      "title": "Game rules"
     },
     "scoreboard": {
       "title": "Scoreboard",
@@ -867,6 +870,9 @@
       },
       "regenerateToken": {
         "title": "Failed to generate game token"
+      },
+      "fetchDoc": {
+        "title": "Failed to fetch game document"
       },
       "fetchIntroduction": {
         "title": "Failed to fetch game introduction"
@@ -1922,6 +1928,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "Commercial services allowed",
+        "copyleft": "Strong copyleft",
+        "description": "Ret2Shell uses a GPL-3.0-derived strong copyleft license. The GPL baseline remains in place, with limited extra restrictions on paid user access and similar user-facing monetization.",
+        "gplBase": "GPL-3.0-derived",
+        "noUserFees": "No paid access tiers",
+        "view": "Read full license"
+      },
       "thanks": "Thank you for using my software",
       "title": "About"
     },
@@ -2088,6 +2102,9 @@
     "title": "Admin",
     "platformTitle": "Platform Management"
   },
+  "license": {
+    "title": "Ret2Shell Public License"
+  },
   "traffic": {
     "title": "Traffic",
     "nodeSelector": "Node selector",
@@ -2095,6 +2112,15 @@
       "title": "Script presets",
       "singleNodeDirectScript": "Single node direct connection",
       "multiNodeDirectScript": "Multi-node direct connection"
+    }
+  },
+  "lifecycle": {
+    "title": "Lifecycle",
+    "functions": "Functions: on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "Script presets",
+      "webhookExample": "Webhook example",
+      "reservedBlank": "Reserved blank"
     }
   },
   "cluster": {

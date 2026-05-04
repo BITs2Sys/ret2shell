@@ -62,7 +62,6 @@ r2s-database = { workspace = true }
 r2s-email    = { workspace = true }
 r2s-engine   = { workspace = true }
 r2s-event    = { workspace = true }
-r2s-license  = { workspace = true }
 r2s-media    = { workspace = true }
 r2s-migrator = { workspace = true }
 r2s-oauth    = { workspace = true }

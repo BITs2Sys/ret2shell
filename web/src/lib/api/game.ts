@@ -1,4 +1,3 @@
-import type { Article } from "@models/article";
 import type { Audit } from "@models/audit";
 import type { Chat, ChatSession } from "@models/chat";
 import type { RegistryConfig } from "@models/config";
@@ -8,13 +7,13 @@ import type { Instance } from "@models/instance";
 import type { Submission } from "@models/submission";
 import { type Team, TeamState } from "@models/team";
 import type { User } from "@models/user";
-import { t } from "@storage/theme";
+import { t, themeStore } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError, type SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -130,7 +129,7 @@ export function useUpdateGameMutation(
 }
 
 export async function deleteGame(id: number) {
-  return await api.delete(`${api_root}/game/${id}`).json<null>();
+  return await safeJson(api.delete(`${api_root}/game/${id}`).json<null>());
 }
 
 export function useDeleteGameMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -147,28 +146,31 @@ export function useDeleteGameMutation(props: { onSuccess?: () => void; onError?:
   }));
 }
 
-export async function getGameIntroduction(id: number) {
-  return await api.get(`${api_root}/game/${id}/introduction`).json<Article>();
+export type GameDocType = "readme" | "training" | "rules";
+
+export async function getGameDoc(id: number, type: GameDocType) {
+  return await api.get(`${api_root}/game/${id}/doc/${type}`).json<string>();
 }
 
-export function useGameIntroduction({
+export function useGameDoc({
   id,
+  type,
   enabled,
   onError,
 }: {
   id: () => number;
+  type: () => GameDocType;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  const keys = createMemo(() => ["game", id(), "introduction"]);
+  const keys = createMemo(() => ["game", id(), "doc", type(), themeStore.locale]);
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () => await getGameIntroduction(id()),
+      queryFn: async () => await getGameDoc(id(), type()),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
-        if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
-        handleHttpError(err, t("game.errors.fetchIntroduction.title"));
+        handleHttpError(err, t("game.errors.fetchDoc.title"));
         return onError?.(err) ?? false;
       },
     }),
@@ -176,17 +178,22 @@ export function useGameIntroduction({
   );
 }
 
-export async function updateGameIntroduction(id: number, article: Article) {
-  return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>();
+export async function updateGameDoc(id: number, type: GameDocType, content: string) {
+  return await api.patch(`${api_root}/game/${id}/doc/${type}`, { json: content }).json<string>();
 }
 
-export function useUpdateGameIntroductionMutation(
-  props: { onSuccess?: (article: Article) => void; onError?: (err: Error) => void } = {}
+export function useUpdateGameDocMutation(
+  props: {
+    onSuccess?: (content: string, params: { id: number; type: GameDocType; content: string }) => void;
+    onError?: (err: Error) => void;
+  } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: (params: { id: number; article: Article }) => updateGameIntroduction(params.id, params.article),
-    onSuccess: (data: Article) => {
-      props.onSuccess?.(data);
+    mutationFn: (params: { id: number; type: GameDocType; content: string }) =>
+      updateGameDoc(params.id, params.type, params.content),
+    onSuccess: (data: string, params) => {
+      toastSuccess(t("general.actions.save.status.success"));
+      props.onSuccess?.(data, params);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));
@@ -558,17 +565,19 @@ export async function sendGameAdminChatMessage(
   team_id: number,
   content: string
 ) {
-  return await api
-    .post(`${api_root}/game/${game_id}/chat/admin/session`, {
-      searchParams: {
-        challenge_id,
-        team_id,
-      },
-      json: {
-        content,
-      },
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .post(`${api_root}/game/${game_id}/chat/admin/session`, {
+        searchParams: {
+          challenge_id,
+          team_id,
+        },
+        json: {
+          content,
+        },
+      })
+      .json<void>()
+  );
 }
 
 export function useSendGameAdminChatMessageMutation(
@@ -618,13 +627,15 @@ export function useGamePlayerChatMessages({
 }
 
 export async function sendGamePlayerChatMessage(game_id: number, challenge_id: number, content: string) {
-  return await api
-    .post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
-      json: {
-        content,
-      },
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
+        json: {
+          content,
+        },
+      })
+      .json<void>()
+  );
 }
 
 export function useSendGamePlayerChatMessageMutation(
@@ -935,7 +946,7 @@ export function useRegistryRepositories({
 }
 
 export async function refreshRegistry(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/registry/refresh`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/registry/refresh`).json<void>());
 }
 
 export function useRefreshRegistryMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1010,7 +1021,7 @@ export function useUpdateGameTrafficMutation(
 }
 
 export async function deleteGameTraffic(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/traffic`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/traffic`).json<void>());
 }
 
 export function useDeleteGameTrafficMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1027,14 +1038,63 @@ export function useDeleteGameTrafficMutation(props: { onSuccess?: () => void; on
   }));
 }
 
-export async function updateGameNodeSelector(game_id: number, node_selector: string) {
+export async function updateGameLifecycle(game_id: number, lifecycle: string) {
   return await api
-    .patch(`${api_root}/game/${game_id}/node-selector`, {
+    .patch(`${api_root}/game/${game_id}/lifecycle`, {
       json: {
-        node_selector,
+        lifecycle,
       },
     })
-    .json<void>();
+    .json<{
+      lint: DiagnosticMarker[] | null;
+    }>();
+}
+
+export function useUpdateGameLifecycleMutation(
+  props: { onSuccess?: (result: { lint: DiagnosticMarker[] | null }) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (params: { game_id: number; lifecycle: string }) =>
+      updateGameLifecycle(params.game_id, params.lifecycle),
+    onSuccess: (data) => {
+      toastSuccess(t("general.actions.save.status.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("general.actions.save.status.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function deleteGameLifecycle(game_id: number) {
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/lifecycle`).json<void>());
+}
+
+export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+  return useMutation(() => ({
+    mutationFn: ({ game_id }: { game_id: number }) => deleteGameLifecycle(game_id),
+    onSuccess: () => {
+      toastSuccess(t("general.actions.delete.status.success"));
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("general.actions.delete.status.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function updateGameNodeSelector(game_id: number, node_selector: string) {
+  return await safeJson(
+    api
+      .patch(`${api_root}/game/${game_id}/node-selector`, {
+        json: {
+          node_selector,
+        },
+      })
+      .json<void>()
+  );
 }
 
 export function useUpdateGameNodeSelectorMutation(
@@ -1055,7 +1115,7 @@ export function useUpdateGameNodeSelectorMutation(
 }
 
 export async function deleteGameNodeSelector(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/node-selector`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/node-selector`).json<void>());
 }
 
 export function useDeleteGameNodeSelectorMutation(
@@ -1075,13 +1135,15 @@ export function useDeleteGameNodeSelectorMutation(
 }
 
 export async function getGameRepo(game_id: number, path: string) {
-  return await api
-    .get(`${api_root}/game/${game_id}/repo`, {
-      searchParams: {
-        path,
-      },
-    })
-    .json<ObjectInfo[]>();
+  const response = await api.get(`${api_root}/game/${game_id}/repo`, {
+    searchParams: {
+      path,
+    },
+  });
+  return {
+    objects: await response.json<ObjectInfo[]>(),
+    indexing: response.status === 202,
+  };
 }
 
 export function useGameRepo({

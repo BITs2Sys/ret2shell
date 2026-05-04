@@ -9,7 +9,7 @@ use r2s_cache::Cache;
 use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::cluster;
 use r2s_database::{config, user::Permission};
-use r2s_engine::DiagnosticMarker;
+use r2s_engine::{DiagnosticMarker, Engine};
 use r2s_event::{
   Event,
   events::{DevopsEvent, DevopsEventType, EventContainer},
@@ -23,6 +23,7 @@ mod registry;
 
 use crate::{
   middleware::auth::{self, Token},
+  routes::game::lifecycle,
   traits::{GlobalState, ResponseError},
 };
 
@@ -46,6 +47,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/traffic",
           patch(update_traffic_script).delete(delete_traffic_script),
         )
+        .route(
+          "/lifecycle",
+          patch(update_lifecycle_script).delete(delete_lifecycle_script),
+        )
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::DevOps
         ))),
@@ -58,13 +63,19 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     )))
 }
 
-async fn cluster_maintain_worker(_state: GlobalState, cluster: Cluster, queue: Queue) {
+async fn cluster_maintain_worker(state: GlobalState, cluster: Cluster, queue: Queue) {
   info!("cluster maintain worker started");
   let mut overloaded = false;
   loop {
     tokio::time::sleep(std::time::Duration::from_secs(30)).await;
     match cluster.at(CHALLENGE_NS).delete_outdated_envs().await {
-      Ok((o, running, pending)) => {
+      Ok(result) => {
+        if !result.deleted.is_empty() {
+          lifecycle::spawn_timeout_stop_hooks(state.clone(), result.deleted);
+        }
+        let o = result.overloaded;
+        let running = result.running;
+        let pending = result.pending;
         if o {
           warn!(?running, ?pending, "cluster is overloaded");
           let event = EventContainer {
@@ -175,14 +186,20 @@ struct TrafficScriptRequest {
   traffic: String,
 }
 
+#[derive(Deserialize)]
+struct LifecycleScriptRequest {
+  lifecycle: String,
+}
+
 #[derive(Serialize)]
-struct TrafficScriptResponse {
+struct ScriptResponse {
   pub lint: Vec<DiagnosticMarker>,
 }
 
 async fn update_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>, Json(req): Json<TrafficScriptRequest>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
+  Json(req): Json<TrafficScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -201,15 +218,15 @@ async fn update_traffic_script(
     },
   )
   .await?;
-  traffic_mapper.expire("default").await;
+  traffic_mapper.expire(&engine, "default").await;
   cache.at("platform").del("config").await?;
   info!("default traffic script updated");
-  Ok(Json(TrafficScriptResponse { lint }))
+  Ok(Json(ScriptResponse { lint }))
 }
 
 async fn delete_traffic_script(
   State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
-  Extension(config): Extension<config::Model>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let traffic_mapper = cluster
     .traffic
@@ -226,10 +243,65 @@ async fn delete_traffic_script(
     },
   )
   .await?;
-  traffic_mapper.expire("default").await;
+  traffic_mapper.expire(&engine, "default").await;
   cache.at("platform").del("config").await?;
 
   info!("default traffic script deleted");
+
+  Ok(())
+}
+
+async fn update_lifecycle_script(
+  State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
+  Json(req): Json<LifecycleScriptRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let lifecycle_mapper = cluster
+    .lifecycle
+    .clone()
+    .ok_or(ResponseError::NotFound("lifecycle".to_string()))?;
+  let lint = lifecycle_mapper.lint(&req.lifecycle).await?;
+
+  config::update(
+    &db.conn,
+    config::Model {
+      cluster: Some(cluster::Config {
+        lifecycle: Some(req.lifecycle.clone()),
+        ..config.cluster.unwrap_or_default()
+      }),
+      ..config
+    },
+  )
+  .await?;
+  lifecycle_mapper.expire(&engine, "default").await;
+  cache.at("platform").del("config").await?;
+  info!("default lifecycle script updated");
+  Ok(Json(ScriptResponse { lint }))
+}
+
+async fn delete_lifecycle_script(
+  State(ref cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
+  State(engine): State<Engine>, Extension(config): Extension<config::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let lifecycle_mapper = cluster
+    .lifecycle
+    .clone()
+    .ok_or(ResponseError::NotFound("lifecycle".to_string()))?;
+  config::update(
+    &db.conn,
+    config::Model {
+      cluster: Some(cluster::Config {
+        lifecycle: None,
+        ..config.cluster.unwrap_or_default()
+      }),
+      ..config
+    },
+  )
+  .await?;
+  lifecycle_mapper.expire(&engine, "default").await;
+  cache.at("platform").del("config").await?;
+
+  info!("default lifecycle script deleted");
 
   Ok(())
 }

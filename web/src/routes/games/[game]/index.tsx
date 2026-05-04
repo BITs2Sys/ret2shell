@@ -1,6 +1,6 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
-import { useGame, useGameIntroduction, useUpdateGameIntroductionMutation, useUpdateGameMutation } from "@api/game";
+import { useGame, useGameDoc, useUpdateGameDocMutation, useUpdateGameMutation } from "@api/game";
 import { uploadMedia } from "@api/media";
 import { useSelfTeam, useTeamRank } from "@api/team";
 import LogoAnimate from "@assets/animates/logo-animate";
@@ -9,7 +9,6 @@ import EditFlag from "@assets/icons/edit-flag";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
-import type { Article as ArticleModel } from "@models/article";
 import { stringifyState, TeamState } from "@models/team";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -31,7 +30,7 @@ import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
 import { DateTime } from "luxon";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
-import IntroForm from "./_blocks/intro-form";
+import GameDocForm from "./_blocks/doc-form";
 
 function BannedWarning() {
   const [close, setClose] = createSignal(false);
@@ -100,8 +99,9 @@ export default function () {
 
   onCleanup(() => clearInterval(updateTimer));
 
-  const introduction = useGameIntroduction({
+  const readme = useGameDoc({
     id: gameId,
+    type: () => "readme",
     enabled: () => gameId() > 0,
   });
 
@@ -200,8 +200,12 @@ export default function () {
     }
   }
 
-  async function onUpdateIntroduction(result: ArticleModel) {
-    updateIntroductionMutation.mutate({ id: gameId(), article: result });
+  async function onUpdateReadme(content: string) {
+    await updateReadmeMutation.mutateAsync({
+      id: gameId(),
+      type: "readme",
+      content,
+    });
   }
 
   const updateGameMutation = useUpdateGameMutation({
@@ -209,11 +213,9 @@ export default function () {
       void game.refetch();
     },
   });
-  const updateIntroductionMutation = useUpdateGameIntroductionMutation({
+  const updateReadmeMutation = useUpdateGameDocMutation({
     onSuccess: () => {
       setSearchParams({ edit: null });
-      void game.refetch();
-      void introduction.refetch();
     },
   });
 
@@ -461,18 +463,13 @@ export default function () {
         <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
           <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">{t("game.introduction.title")}</h1>
           <Switch>
-            <Match when={inEdit()}>
-              <IntroForm onDone={onUpdateIntroduction} />
+            <Match when={inEdit() && isAdmin()}>
+              <GameDocForm gameId={gameId()} docType="readme" onDone={onUpdateReadme} />
             </Match>
-            <Match when={introduction.data && !introduction.isLoading}>
-              <Article
-                class="self-center"
-                content={introduction.data?.content || ""}
-                extra={true}
-                headingAnchors={true}
-              />
+            <Match when={!readme.isLoading && (readme.data?.length ?? 0) > 0}>
+              <Article class="self-center" content={readme.data || ""} extra={true} headingAnchors={true} />
             </Match>
-            <Match when={introduction.isLoading}>
+            <Match when={readme.isLoading}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <Spin width={32} height={32} />
                 <span>{randomTips()}</span>

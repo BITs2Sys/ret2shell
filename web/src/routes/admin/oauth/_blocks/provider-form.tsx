@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { useOAuthProvider } from "@api/account";
+import { type OAuthProviderResponse, useOAuthProvider } from "@api/account";
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
@@ -17,7 +17,7 @@ import {
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
-import Editor from "@widgets/editor";
+import Editor, { type DiagnosticMarker } from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { createEffect, createSignal, Show, untrack } from "solid-js";
@@ -40,7 +40,7 @@ const presetMap = {
 };
 
 export default function ProviderForm(props: {
-  onDone?: (result: OAuthProvider) => Promise<void>;
+  onDone?: (result: OAuthProvider) => Promise<OAuthProviderResponse | undefined>;
   provider?: string;
   loading?: boolean;
 }) {
@@ -60,6 +60,7 @@ export default function ProviderForm(props: {
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
+  const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
 
   createEffect(() => {
     if (oauthProvider.data) {
@@ -72,11 +73,12 @@ export default function ProviderForm(props: {
           script: item?.script || "",
           portal: item?.portal || "",
         });
+        setLint(oauthProvider.data?.lint ?? []);
       });
     }
   });
   async function onSubmit(result: FormType) {
-    props.onDone?.({
+    const resp = await props.onDone?.({
       id: oauthProvider.data?.item.id || 0,
       name: result.name,
       provider: result.provider,
@@ -84,6 +86,9 @@ export default function ProviderForm(props: {
       script: result.script,
       portal: result.portal,
     });
+    if (resp?.lint) {
+      setLint(resp.lint);
+    }
   }
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
@@ -251,7 +256,7 @@ export default function ProviderForm(props: {
             class="h-96"
             lang="rune"
             name="script"
-            lints={oauthProvider.data?.lint ?? undefined}
+            lints={lint()}
             value={field.value}
             error={field.error}
           />

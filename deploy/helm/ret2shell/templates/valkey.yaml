@@ -1,0 +1,318 @@
+{{- if and (eq .Values.valkey.mode "internal") (eq .Values.valkey.architecture "replication") .Values.valkey.persistence.existingClaim }}
+{{- fail "valkey.persistence.existingClaim is not supported when valkey.architecture=replication; use volumeClaimTemplates instead" }}
+{{- end }}
+{{- if eq .Values.valkey.mode "internal" }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+type: Opaque
+stringData:
+  password: {{ .Values.valkey.auth.password | quote }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+data:
+  valkey.conf: |
+    bind 0.0.0.0
+    protected-mode no
+    port {{ .Values.valkey.service.port }}
+    appendonly yes
+    save ""
+    dir /data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+    ret2shell.io/service-role: primary
+  {{- with .Values.valkey.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: valkey
+      port: {{ .Values.valkey.service.port }}
+      targetPort: valkey
+    {{- if .Values.valkey.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.valkey.metrics.port }}
+      targetPort: metrics
+    {{- end }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "valkey" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ include "ret2shell.valkeyName" . }}-0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.valkeyHeadlessName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+    ret2shell.io/service-role: headless
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: valkey
+      port: {{ .Values.valkey.service.port }}
+      targetPort: valkey
+    {{- if .Values.valkey.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.valkey.metrics.port }}
+      targetPort: metrics
+    {{- end }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "valkey" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+spec:
+  serviceName: {{ include "ret2shell.valkeyHeadlessName" . }}
+  replicas: {{ ternary (add 1 (int .Values.valkey.replica.replicaCount)) 1 (eq .Values.valkey.architecture "replication") }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "valkey" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ret2shell.componentLabels" (dict "component" "valkey" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 8 }}
+        {{- with .Values.valkey.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.valkey.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.valkey.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: valkey
+          image: {{ include "ret2shell.image" .Values.valkey.image }}
+          imagePullPolicy: {{ .Values.valkey.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              ordinal="${HOSTNAME##*-}"
+              master_host="{{ include "ret2shell.valkeyName" . }}-0.{{ include "ret2shell.valkeyHeadlessName" . }}.${POD_NAMESPACE}.svc.cluster.local"
+
+              if [ {{ .Values.valkey.architecture | quote }} = "replication" ] && [ "$ordinal" != "0" ]; then
+                if [ -n "${VALKEY_PASSWORD:-}" ]; then
+                  exec valkey-server /etc/valkey/valkey.conf --requirepass "$VALKEY_PASSWORD" --masterauth "$VALKEY_PASSWORD" --replicaof "$master_host" "{{ .Values.valkey.service.port }}"
+                fi
+                exec valkey-server /etc/valkey/valkey.conf --replicaof "$master_host" "{{ .Values.valkey.service.port }}"
+              fi
+
+              if [ -n "${VALKEY_PASSWORD:-}" ]; then
+                exec valkey-server /etc/valkey/valkey.conf --requirepass "$VALKEY_PASSWORD"
+              fi
+              exec valkey-server /etc/valkey/valkey.conf
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.valkey.auth.enabled }}
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ret2shell.valkeyName" . }}
+                  key: password
+            {{- end }}
+          ports:
+            - name: valkey
+              containerPort: {{ .Values.valkey.service.port }}
+          readinessProbe:
+            tcpSocket:
+              port: valkey
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: valkey
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /etc/valkey/valkey.conf
+              subPath: valkey.conf
+            - name: data
+              mountPath: /data
+          {{- with .Values.valkey.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- if .Values.valkey.metrics.enabled }}
+        - name: metrics
+          image: {{ include "ret2shell.image" .Values.valkey.metrics.image }}
+          imagePullPolicy: {{ .Values.valkey.metrics.image.pullPolicy }}
+          env:
+            - name: REDIS_ADDR
+              value: redis://127.0.0.1:{{ .Values.valkey.service.port }}
+            {{- if .Values.valkey.auth.enabled }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ret2shell.valkeyName" . }}
+                  key: password
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.valkey.metrics.port }}
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          {{- with .Values.valkey.metrics.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "ret2shell.valkeyName" . }}
+        {{- if .Values.valkey.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.valkey.persistence.existingClaim }}
+        {{- else if not .Values.valkey.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.valkey.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.valkey.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.valkey.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.valkey.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if and .Values.valkey.persistence.enabled (not .Values.valkey.persistence.existingClaim) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "ret2shell.commonLabels" . | nindent 10 }}
+          app.kubernetes.io/component: valkey
+      spec:
+        accessModes:
+          - {{ .Values.valkey.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.valkey.persistence.size }}
+        {{- $sc := include "ret2shell.storageClass" (dict "root" . "local" .Values.valkey.persistence.storageClass) }}
+        {{- if $sc }}
+        storageClassName: {{ $sc }}
+        {{- end }}
+  {{- end }}
+
+{{- if .Values.valkey.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+spec:
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "valkey" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  {{- with .Values.valkey.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .Values.valkey.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.valkey.metrics.enabled .Values.valkey.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ret2shell.valkeyName" . }}
+  namespace: {{ default .Release.Namespace .Values.valkey.metrics.serviceMonitor.namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+    {{- with .Values.valkey.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.valkey.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: valkey
+      ret2shell.io/service-role: headless
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.valkey.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.valkey.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
+{{- end }}

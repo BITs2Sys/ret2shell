@@ -20,6 +20,10 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
+  utility::{
+    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+    validation::{validate_account, validate_email, validate_nickname},
+  },
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -58,8 +62,8 @@ async fn get_user_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let results = user::get_page(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     query.order,
     query.filter,
     token.permissions.0.contains(&user::Permission::User),
@@ -120,6 +124,20 @@ async fn update_user(
   Extension(user): Extension<user::Model>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>, Json(data): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  validate_account(&data.account)?;
+  validate_nickname(&data.nickname)?;
+  let email = data
+    .email
+    .clone()
+    .ok_or_else(|| ResponseError::BadRequest("email is required".to_owned()))?;
+  validate_email(&email)?;
+  for identity in [&data.account, &email] {
+    if let Some(existing) = user::get_by_account_or_email(&db.conn, identity).await?
+      && existing.id != user.id
+    {
+      return Err(ResponseError::Conflict("account already exists".to_owned()));
+    }
+  }
   let user = user::update(
     &db.conn,
     user::Model {

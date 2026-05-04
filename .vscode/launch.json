@@ -215,62 +215,6 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'r2s-license'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--lib",
-                    "--package=r2s-license"
-                ],
-                "filter": {
-                    "name": "r2s-license",
-                    "kind": "lib"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug executable 'r2s-license'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=r2s-license",
-                    "--package=r2s-license"
-                ],
-                "filter": {
-                    "name": "r2s-license",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'r2s-license'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=r2s-license",
-                    "--package=r2s-license"
-                ],
-                "filter": {
-                    "name": "r2s-license",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
             "name": "Debug unit tests in library 'r2s-media'",
             "cargo": {
                 "args": [

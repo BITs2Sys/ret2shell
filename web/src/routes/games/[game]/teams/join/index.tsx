@@ -1,4 +1,4 @@
-import { useGame } from "@api/game";
+import { useGame, useGameDoc } from "@api/game";
 import { useJoinTeamMutation } from "@api/team";
 import { createForm, required, setValue } from "@modular-forms/solid";
 import { setTeamCoverStore } from "@routes/games/[game]/_blocks/team-cover";
@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameParticipateState, isGameCanParticipate } from "@storage/game";
 import { Title } from "@storage/header";
-import { t, themeStore } from "@storage/theme";
+import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
@@ -14,7 +14,7 @@ import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, Show } from "solid-js";
 
 type TeamJoinForm = {
   token: string;
@@ -76,15 +76,10 @@ export default function () {
       token: data.token,
     });
   }
-  const [content, setContent] = createSignal(null as null | string);
-  const comps = import.meta.glob("../../_blocks/contents/*.md");
-  createEffect(() => {
-    if (themeStore.locale) {
-      untrack(async () => {
-        const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
-        setContent(((await match()) as { default: string }).default);
-      });
-    }
+  const rules = useGameDoc({
+    id: gameId,
+    type: () => "rules",
+    enabled: () => gameId() > 0,
   });
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
@@ -136,7 +131,7 @@ export default function () {
                   >
                     <div class="w-full">
                       <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("team.form.acceptRules.title")}</h2>
-                      <Article class="self-center" content={content() || ""} noExtraPaddings />
+                      <Article class="self-center" content={rules.data || ""} noExtraPaddings />
                     </div>
                     <div class="flex space-x-2">
                       <Button

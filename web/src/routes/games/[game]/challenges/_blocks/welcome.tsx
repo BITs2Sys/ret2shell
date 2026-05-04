@@ -1,19 +1,19 @@
-import { fullTheme, themeStore } from "@storage/theme";
+import { useGameDoc } from "@api/game";
+import { useParams } from "@solidjs/router";
+import { fullTheme } from "@storage/theme";
 import Article from "@widgets/article";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createSignal, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 export default function () {
-  const [content, setContent] = createSignal(null as null | string);
-  const comps = import.meta.glob("../../_blocks/contents/*.md");
-  createEffect(() => {
-    if (themeStore.locale) {
-      untrack(async () => {
-        const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
-        setContent(((await match()) as { default: string }).default);
-      });
-    }
+  const params = useParams();
+  const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || 0);
+  const rules = useGameDoc({
+    id: gameId,
+    type: () => "rules",
+    enabled: () => gameId() > 0,
   });
+
   return (
     <div class="flex-1 w-full relative">
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
@@ -28,7 +28,7 @@ export default function () {
           defer
         >
           <div class="flex flex-col">
-            <Article class="self-center" content={content() || ""} />
+            <Article class="self-center" content={rules.data || ""} />
           </div>
         </OverlayScrollbarsComponent>
       </div>

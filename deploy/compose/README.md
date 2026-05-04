@@ -8,7 +8,7 @@ Deployment example using [Docker Compose](https://docs.docker.com/compose/).
 >
 > If you want to start server binary independently, you can comment out the `platform` and `nginx` service in the compose file and expose ports under other services as the comments suggest.
 
-Directory [config/](config/) must contains `config.toml` and `license` (mount to `/etc/ret2shell/` as stated at [/crates/config/src/lib.rs](../../crates//config/src/lib.rs)), for `platform` service. You need to change the configuration file (example given at [/config/config.sample.toml](../../config/config.sample.toml)) to fit your compose configuration. For further description of this directory, please refer to [config/README.md](config/README.md).
+Directory [config/](config/) must contain `config.toml` (mount to `/etc/ret2shell/` as stated at [/crates/config/src/lib.rs](../../crates//config/src/lib.rs)) for the `platform` service. You need to change the configuration file (example given at [/config/config.sample.toml](../../config/config.sample.toml)) to fit your compose configuration. For further description of this directory, please refer to [config/README.md](config/README.md).
 
 Directory [static/](static/) contains frontend static files (mount to `/var/www/html/`), for `nginx` service.
 

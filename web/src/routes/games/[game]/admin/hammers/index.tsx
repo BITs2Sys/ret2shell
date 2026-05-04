@@ -3,7 +3,8 @@ import { useGame, useGameAdminChatMessages, useSendGameAdminChatMessageMutation 
 import { useTeamInfo, useTeamSolves } from "@api/team";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
-import { ChatBlock, mergeChats } from "@blocks/challenge/hammer";
+import { ChatBlock } from "@blocks/challenge/hammer";
+import { mergeChats } from "@blocks/challenge/hammer.utils";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
@@ -16,7 +17,8 @@ import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 
 export default function () {
   const params = useParams();
@@ -54,7 +56,7 @@ export default function () {
     enabled: () => enabledSession(),
   });
 
-  const [prevChats, setPrevChats] = createSignal([] as Chat[]);
+  const [chats, setChats] = createStore<Chat[]>([]);
   const [chat, setChat] = createSignal("");
   const sendMutation = useSendGameAdminChatMessageMutation({
     onSuccess: () => {
@@ -75,21 +77,39 @@ export default function () {
   }
   let chatBottomEl: HTMLDivElement;
 
-  const chats = createMemo(() => {
-    if (!enabledSession()) return;
-    if (!chatsQuery.data) return;
-    return untrack(() => {
-      const solvedAt = solves.data?.find((x) => x.challenge_id === challengeId())?.created_at ?? null;
-      const [changed, merged] = mergeChats(gameId(), challengeId()!, teamId()!, prevChats(), chatsQuery.data, solvedAt);
-      if (changed) {
-        setPrevChats(merged);
-        setTimeout(() => {
-          chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
-        }, 700);
-      }
-      // console.log(merged);
-      return merged;
-    });
+  createEffect(() => {
+    const currentChallengeId = challengeId();
+    const currentTeamId = teamId();
+
+    if (!enabledSession() || !chatsQuery.data || !currentChallengeId || !currentTeamId) {
+      setChats(reconcile([]));
+      return;
+    }
+
+    setChats(
+      reconcile(
+        mergeChats(
+          gameId(),
+          currentChallengeId,
+          currentTeamId,
+          chatsQuery.data,
+          solves.data?.find((item) => item.challenge_id === currentChallengeId)?.created_at ?? null
+        ),
+        { key: "id" }
+      )
+    );
+  });
+
+  const chatSignature = createMemo(() => chats.map((item) => `${item.id}:${item.checked ? 1 : 0}`).join("|"));
+
+  createEffect(() => {
+    if (!chatSignature()) return;
+
+    const timeout = setTimeout(() => {
+      chatBottomEl?.scrollIntoView({ behavior: "smooth" });
+    }, 700);
+
+    onCleanup(() => clearTimeout(timeout));
   });
 
   const [editorExpanded, setEditorExpanded] = createSignal(false);
@@ -157,11 +177,11 @@ export default function () {
                   sendAt={game.data?.start_at ?? DateTime.now()}
                   isChecked
                 />
-                <For each={chats() ?? []}>
+                <For each={chats}>
                   {(chat, index) => (
                     <ChatBlock
                       avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
-                      showAvatar={index() === 0 || (chats() ?? []).at(index() - 1)?.user_id !== chat.user_id}
+                      showAvatar={index() === 0 || chats.at(index() - 1)?.user_id !== chat.user_id}
                       roleLabel={
                         chat.id === 0
                           ? ">_<"

@@ -93,8 +93,12 @@ async fn create_notification(
 }
 
 async fn delete_notification(
-  State(ref db): State<Database>, Extension(notification): Extension<notification::Model>,
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  Extension(notification): Extension<notification::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  if game.id != notification.game_id {
+    return Err(ResponseError::NotFound("notification not found".to_owned()));
+  }
   notification::delete(&db.conn, notification.id).await?;
   Ok(())
 }

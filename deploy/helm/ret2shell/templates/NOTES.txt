@@ -1,0 +1,14 @@
+Ret2Shell chart rendered successfully.
+
+- Install namespace must be `ret2shell-platform`
+- Challenge namespace is fixed to `ret2shell-challenge`
+- Platform exposure mode: `{{ .Values.platform.exposure.type }}`
+
+Common install command:
+
+  helm install {{ .Release.Name }} {{ .Chart.Name }} -n ret2shell-platform --create-namespace
+
+After install, verify:
+
+  kubectl -n ret2shell-platform get pods
+  kubectl -n ret2shell-platform get svc

@@ -14,7 +14,7 @@ jobs:
   # Only test the release-image script
   image:
     name: ${{ matrix.steps.script }}
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -25,14 +25,18 @@ jobs:
             script: release-image.sh
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # fetch depth 0 to fetch all history for git-restore-mtime-action
           fetch-depth: 0
 
       - uses: chetan/git-restore-mtime-action@v2
 
-      - name: Test ${{ matrix.steps.script }}
+      - name: Install fish
+        if: ${{ matrix.steps.shell == 'fish' }}
         run: |
-          base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
-          ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'
+          sudo apt-get update
+          sudo apt-get install -y fish
+
+      - name: Test ${{ matrix.steps.script }}
+        run: ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'

@@ -27,6 +27,3 @@ echo "Installing devtools..."
 if [ ! -f 'config/config.toml' ]; then
   cp config/config.sample.toml config/config.toml || eprintln "Failed to create config/config.toml."
 fi
-
-# pre-generate license
-$ctx_dir/gen-license.sh || eprintln "Failed to generate license."

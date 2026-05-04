@@ -2,6 +2,7 @@ import { luxonReplacer, luxonReviver } from "@models/utils";
 import { base64 } from "@scure/base";
 import { accountStore, resetUser, storeToken } from "@storage/account";
 import { platformStore } from "@storage/platform";
+import { themeStore } from "@storage/theme";
 import { experimental_createQueryPersister } from "@tanstack/query-persist-client-core";
 import { QueryClient } from "@tanstack/solid-query";
 import ky from "ky";
@@ -14,7 +15,7 @@ const Ret2StreamTable = "SUCaeck4xrsbgtPwnGY56qpm9vWDIZAKVjlf.HFd,E17Tz0iNQ2yJML
 const OriginalStreamTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 const api = ky.extend({
-  parseJson: (text) => JSON.parse(text, luxonReviver) as unknown,
+  parseJson: (text, _context) => JSON.parse(text, luxonReviver) as unknown,
   stringifyJson: (data) => {
     let result = JSON.stringify(data, luxonReplacer);
     if (platformStore.enable_ret2codec) {
@@ -30,21 +31,26 @@ const api = ky.extend({
     return result;
   },
   hooks: {
-    beforeRequest: [
-      (request) => {
+    init: [
+      (options) => {
+        if (!(options.headers instanceof Headers)) {
+          options.headers = new Headers(options.headers as unknown as HeadersInit);
+        }
         const token = accountStore.token;
         if (token) {
-          request.headers.set("Authorization", `Bearer ${token}`);
+          options.headers.set("Authorization", `Bearer ${token}`);
         }
 
-        if (platformStore.enable_ret2codec && request.headers.get("Content-Type") === "application/json") {
-          request.headers.set("X-Original-Content-Type", request.headers.get("Content-Type") || "application/json");
-          request.headers.set("Content-Type", "application/x-ret2stream");
+        options.headers.set("Accept-Language", themeStore.locale.replace("_", "-"));
+
+        if (platformStore.enable_ret2codec && options.json !== undefined) {
+          options.headers.set("X-Original-Content-Type", "application/json");
+          options.headers.set("Content-Type", "application/x-ret2stream");
         }
       },
     ],
     afterResponse: [
-      (_request, _options, response) => {
+      ({ response }) => {
         if (response.status === 401) {
           resetUser();
         }
@@ -60,6 +66,18 @@ const api = ky.extend({
 });
 
 export default api;
+
+export async function safeJson<T>(promise: Promise<T>): Promise<T | undefined> {
+  try {
+    return await promise;
+  } catch (error) {
+    if (error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input")) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
 
 export const inflyClient = new QueryClient({
   defaultOptions: {

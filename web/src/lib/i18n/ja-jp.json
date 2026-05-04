@@ -388,7 +388,7 @@
         "label": "中国工業情報技術省ICP登録番号"
       },
       "hideMaker": {
-        "disabled": "あなたのライセンスではこの項目を非表示にすることはできません",
+        "disabled": "この項目は現在利用できません",
         "label": "開発者情報を非表示にする"
       },
       "zenGame": {
@@ -563,6 +563,9 @@
           "required": "内容は必須です"
         }
       }
+    },
+    "rules": {
+      "title": "大会ルール"
     },
     "scoreboard": {
       "title": "ポイントボード",
@@ -867,6 +870,9 @@
       },
       "regenerateToken": {
         "title": "管理キーの生成に失敗しました"
+      },
+      "fetchDoc": {
+        "title": "大会ドキュメントの取得に失敗しました"
       },
       "fetchIntroduction": {
         "title": "試合の紹介を取得できませんでした"
@@ -1922,6 +1928,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "商用サービス可",
+        "copyleft": "強いコピーレフト",
+        "description": "Ret2Shell は GPL-3.0 を土台にした強いコピーレフトライセンスを採用しており、GPL の基本的な権利と義務を維持したまま、有料アクセス層などのユーザー向け収益化に限定的な追加制限を設けています。",
+        "gplBase": "GPL-3.0 ベース",
+        "noUserFees": "有料アクセス層なし",
+        "view": "ライセンス全文を見る"
+      },
       "thanks": "私の作品を使用していただきありがとうございます",
       "title": "について"
     },
@@ -2088,6 +2102,9 @@
     "title": "管理",
     "platformTitle": "プラットフォーム管理"
   },
+  "license": {
+    "title": "Ret2Shell Public License"
+  },
   "traffic": {
     "title": "環境ルーティング",
     "nodeSelector": "ノードセレクター",
@@ -2095,6 +2112,15 @@
       "title": "スクリプトプリセット",
       "singleNodeDirectScript": "単一ノード直結",
       "multiNodeDirectScript": "マルチノード直結"
+    }
+  },
+  "lifecycle": {
+    "title": "ライフサイクル",
+    "functions": "関数: on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "スクリプトプリセット",
+      "webhookExample": "Webhook サンプル",
+      "reservedBlank": "空の予約枠"
     }
   },
   "cluster": {

@@ -1,0 +1,380 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "type": "object",
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "const": 1
+        },
+        "exposure": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["ingress", "nodePort"]
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "className": {
+              "type": "string"
+            },
+            "hosts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "paths": {
+                    "type": "array"
+                  }
+                },
+                "required": ["host", "paths"]
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "serviceAccount": {
+                "properties": {
+                  "create": {
+                    "const": false
+                  }
+                },
+                "required": ["create"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "serviceAccount": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "exposure": {
+                "properties": {
+                  "type": {
+                    "const": "ingress"
+                  }
+                },
+                "required": ["type"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "ingress": {
+                "properties": {
+                  "hosts": {
+                    "minItems": 1
+                  }
+                },
+                "required": ["hosts"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "postgresql": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["internal", "external"]
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "host": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["host"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "valkey": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["internal", "external"]
+        },
+        "architecture": {
+          "type": "string",
+          "enum": ["standalone", "replication"]
+        },
+        "replica": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "url": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nats": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["internal", "external"]
+        },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "host": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["host"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "registry": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["disabled", "internal", "external"]
+        },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "externalAccess": {
+          "type": "object",
+          "properties": {
+            "serviceType": {
+              "type": "string",
+              "enum": ["NodePort", "LoadBalancer"]
+            },
+            "host": {
+              "type": "string"
+            }
+          }
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "server": {
+              "type": "string"
+            },
+            "external": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "internal"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "externalAccess": {
+                "properties": {
+                  "host": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["host"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "server": {
+                    "minLength": 1
+                  },
+                  "external": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["server", "external"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "victoriaLogs": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["disabled", "internal", "external"]
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "url": {
+                    "minLength": 1
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

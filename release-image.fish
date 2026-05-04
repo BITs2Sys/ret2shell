@@ -31,11 +31,5 @@ end
 echo -e "Building image with \033[1;36m$buildkit\033[0m"
 echo -e '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n'
 
-# check required files
-if not test -f "config/pub.bin"
-    print_error "File \033[1;33mconfig/pub.bin\033[0m is required, but not found"
-    exit 1
-end
-
 # build image
 $buildkit build $build_args --build-arg R2S_GIT_VERSION=$git_v -t ret2shell:latest -f Containerfile .

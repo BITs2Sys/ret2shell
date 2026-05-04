@@ -1,6 +1,6 @@
 use k8s_openapi::api::core::v1::{Pod, Service};
 use kube::ResourceExt;
-use r2s_engine::{DiagnosticMarker, Engine, EngineError, GLOBAL_ENGINE};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError};
 use rune::{Any, ContextError, Module, Value, alloc::clone::TryClone, runtime::Object};
 use serde::{Deserialize, Serialize};
 
@@ -107,10 +107,8 @@ impl TrafficMapper {
     ]
   }
 
-  pub async fn expire(&self, key: impl AsRef<str>) {
-    GLOBAL_ENGINE
-      .expire(format!("traffic-{}", key.as_ref()))
-      .await
+  pub async fn expire(&self, engine: &Engine, key: impl AsRef<str>) {
+    engine.expire(format!("traffic-{}", key.as_ref())).await
   }
 
   /// linter for rune scripts
@@ -120,17 +118,17 @@ impl TrafficMapper {
   }
 
   pub async fn preload(
-    &self, key: impl AsRef<str>, script: impl AsRef<str>,
+    &self, engine: &Engine, key: impl AsRef<str>, script: impl AsRef<str>,
   ) -> Result<(), EngineError> {
     let key = key.as_ref();
     let key = format!("traffic-{}", key);
-    GLOBAL_ENGINE
+    engine
       .preload(Self::default_modules(), key, script, None)
       .await
   }
 
   pub async fn expose(
-    &self, key: impl AsRef<str>, pod: Pod, service: Service,
+    &self, engine: &Engine, key: impl AsRef<str>, pod: Pod, service: Service,
   ) -> Result<Vec<MappedPort>, ClusterError> {
     let key = format!("traffic-{}", key.as_ref());
 
@@ -141,7 +139,7 @@ impl TrafficMapper {
       .node_name
       .ok_or(ClusterError::MissingField("pod::node_name".to_owned()))?;
 
-    let output = GLOBAL_ENGINE
+    let output = engine
       .execute(key, "expose", (node_name, service_info))
       .await?;
 

@@ -42,11 +42,5 @@ fi
 echo "Building image with ${x1b}[1;36m$buildkit${x1b}[0m"
 echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" && echo
 
-# check required files
-if [ ! -f "config/pub.bin" ]; then
-    print_error "File ${x1b}[1;33mconfig/pub.bin${x1b}[0m is required, but not found"
-    exit 1
-fi
-
 # build image
 $buildkit build $build_args --build-arg R2S_GIT_VERSION=$git_v -t ret2shell:latest -f Containerfile .

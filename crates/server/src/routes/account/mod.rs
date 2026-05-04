@@ -29,7 +29,10 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::password::{hash_password, verify_password},
+  utility::{
+    password::{hash_password, verify_password},
+    validation::{validate_email, validate_nickname, validate_password, validate_register_request},
+  },
 };
 
 mod captcha;
@@ -298,7 +301,6 @@ async fn login(
   Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  debug!(?body, "login request");
   if token.id > 0 {
     return Err(ResponseError::Conflict(
       "you have already logged in".to_owned(),
@@ -463,6 +465,7 @@ async fn register(
   {
     captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
   }
+  validate_register_request(&body.account, &body.nickname, &body.email, &body.password)?;
 
   // if user::get_user_by_account(db, &body.email).await.is_ok() {
   //     return Err((StatusCode::CONFLICT, "account already exists"));
@@ -701,6 +704,7 @@ async fn reset_password(
     }
   };
 
+  validate_password(&body.password)?;
   let password = hash_password(&body.password)?;
   user::update_password(&db.conn, user.id, password).await?;
   let mut prev_token: Option<String>;
@@ -736,6 +740,7 @@ async fn change_password(
   let password_hash = user.password.unwrap_or_default();
   match verify_password(&body.old_password, &password_hash)? {
     true => {
+      validate_password(&body.new_password)?;
       let password = hash_password(&body.new_password)?;
       user::update_password(&db.conn, user.id, password).await?;
       while let Some(token_str) = cache
@@ -796,6 +801,8 @@ async fn change_profile(
       return Err(ResponseError::BadRequest("email is required".to_owned()));
     }
   };
+  validate_nickname(&body.nickname)?;
+  validate_email(&email)?;
   if email_changed
     && user::get_by_account_or_email(&db.conn, &email)
       .await?
@@ -826,7 +833,7 @@ async fn change_profile(
       cache,
       queue,
       &config,
-      &body.account,
+      &user.account,
       &email,
       EmailType::Verify,
       &trace.header_value().to_str().unwrap_or("UNKNOWN"),
@@ -920,4 +927,46 @@ async fn delete_self(
 
   txn.commit().await?;
   Ok(StatusCode::OK)
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::utility::validation::{
+    validate_account, validate_email, validate_nickname, validate_password,
+    validate_register_request,
+  };
+
+  #[test]
+  fn register_validation_accepts_frontend_valid_fields() {
+    assert!(
+      validate_register_request(
+        "Valid_User_01",
+        "测试用户",
+        "user@example.com",
+        "StrongPass1"
+      )
+      .is_ok()
+    );
+  }
+
+  #[test]
+  fn register_validation_rejects_invalid_accounts_after_filtering() {
+    assert!(validate_account("abc").is_err());
+    assert!(validate_account("a".repeat(33).as_str()).is_err());
+    assert!(validate_account("bad-user").is_err());
+    assert!(validate_account("bad user").is_err());
+    assert!(validate_account("测试_user").is_err());
+  }
+
+  #[test]
+  fn register_validation_rejects_invalid_nickname_email_and_password() {
+    assert!(validate_nickname("a").is_err());
+    assert!(validate_nickname("a".repeat(33).as_str()).is_err());
+    assert!(validate_email("not-an-email").is_err());
+    assert!(validate_email("user@example").is_err());
+    assert!(validate_password("weakpass1").is_err());
+    assert!(validate_password("WEAKPASS1").is_err());
+    assert!(validate_password("WeakPass").is_err());
+    assert!(validate_password("Aa1".repeat(14).as_str()).is_err());
+  }
 }

@@ -46,6 +46,12 @@ mod wiki;
 
 mod web;
 
+pub async fn run_post_receive(
+  session_id: &str, auth_key: &str, base_url: &str, repo_path: &std::path::Path,
+) -> anyhow::Result<()> {
+  game::hook::run_post_receive(session_id, auth_key, base_url, repo_path).await
+}
+
 pub async fn initialize(
   config: Option<server::Config>, state: GlobalState,
 ) -> anyhow::Result<Router> {
@@ -82,6 +88,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .nest("/calendar", calendar::router(state))
     .nest("/event", event::router(state))
     .nest("/game", game::router(state))
+    .nest("/internal", game::repo_sync::router())
     .nest("/cluster", cluster::router(state))
     .nest("/media", media::router(state))
     .nest("/platform", platform::router(state))

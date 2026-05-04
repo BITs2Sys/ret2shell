@@ -2,6 +2,7 @@ import { useLoginMutation, useOAuthProviders } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Captcha from "@blocks/captcha";
 import { mediaPath } from "@lib/utils/media";
+import { checkSameOrigin } from "@lib/utils/url";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -39,7 +40,7 @@ export default function () {
     onSuccess: () => {
       const redirectUrl = location.query.redirect;
       if (redirectUrl) {
-        const url = Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl;
+        const url = checkSameOrigin(Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl);
         if (/^(\w+):\/\//.test(url)) {
           navigate("/", { replace: true });
           window.location.replace(url);

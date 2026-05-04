@@ -1,6 +1,6 @@
 import { handleHttpError } from "@api";
 import { getProfile } from "@api/account";
-import { getPlatformLicense, getVersion, usePlatformInfo } from "@api/platform";
+import { getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
 import { hashToHexSync } from "@lib/utils/hash";
 import { Permission } from "@models/user";
@@ -146,7 +146,7 @@ export default function (props: { children?: JSX.Element }) {
         });
       }
       console.log(
-        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, All rights reserved.\n\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact <support@ret.sh.cn>.\n`,
+        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - ${new Date().getFullYear()} %cRet 2 Shell%c, licensed under the Ret2Shell Public License 2.0, a GPL-3.0-derived copyleft license with limited user-facing monetization restrictions.\n\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n\n%cSee /license for details.\n`,
         "color: #0078D6; font-weight: bold; font-size: 1.5rem;",
         "color: currentColor; font-weight: bold; font-size: 1.5rem;",
         "color: #808080; font-weight: bold; font-size: 1.5rem;",
@@ -157,12 +157,9 @@ export default function (props: { children?: JSX.Element }) {
         "color: #808080",
         "color: #808080;text-decoration: underline;",
         "color: #808080;",
-        "color: currentColor;",
+        "color: #808080;",
         "color: currentColor;"
       );
-
-      const resp = await getPlatformLicense();
-      setPlatformStore({ license: resp });
     } catch (err) {
       setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
       if (err instanceof HTTPError && err.response?.status === 503) {

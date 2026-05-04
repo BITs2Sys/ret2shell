@@ -1,0 +1,38 @@
+platform:
+  exposure:
+    type: nodePort
+  service:
+    nodePort: 30307
+  config:
+    server:
+      externalDomain: 203.0.113.10:30307
+      externalHttps: false
+
+postgresql:
+  mode: external
+  external:
+    host: postgresql.example.com
+    port: 5432
+    database: ret2shell
+    username: ret2shell
+    password: replace-me
+    sslMode: disable
+
+valkey:
+  mode: external
+  external:
+    url: redis://:replace-me@valkey.example.com:6379/0
+
+nats:
+  mode: external
+  external:
+    host: nats.example.com
+    port: 4222
+    token: replace-me
+    tls: false
+
+registry:
+  mode: disabled
+
+victoriaLogs:
+  mode: disabled

@@ -54,6 +54,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
       award_rates: [0, 0, 0],
       node_selector: null,
       traffic: null,
+      lifecycle: null,
       bucket: null,
     };
     createGameMutation.mutate(req);

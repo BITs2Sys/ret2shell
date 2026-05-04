@@ -9,16 +9,12 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use futures::future::join_all;
-use r2s_cache::Cache;
-use r2s_config::GlobalConfig;
 use r2s_database::{
   challenge, config,
   game::{self, HostType},
   institute, ip, submission,
   user::{self, Permission},
 };
-use r2s_license::{License, LicenseLevel};
-use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
@@ -26,21 +22,24 @@ use tracing::{debug, error, warn};
 
 use crate::{
   middleware::auth,
-  traits::{GlobalState, HTTPClient, ResponseError},
-  utility::file::send_file,
+  traits::{GlobalState, ResponseError},
+  utility::{
+    file::send_file,
+    pagination::{DEFAULT_LOG_LIMIT, MAX_LOG_LIMIT, limit},
+  },
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
-  Router::new()
+  Router::<GlobalState>::new()
     .merge(
-      Router::new()
+      Router::<GlobalState>::new()
         .route("/config", get(get_config).patch(update_config))
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::DevOps
         ))),
     )
     .merge(
-      Router::new()
+      Router::<GlobalState>::new()
         .route("/statistics", get(get_platform_statistics))
         .route("/logs/query", get(get_logs))
         .route("/logs", get(get_logs_list))
@@ -56,42 +55,38 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 }
 
 async fn get_config(
-  Extension(config): Extension<config::Model>,
+  State(_state): State<GlobalState>, Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   Ok(Json(config))
 }
 
 async fn update_config(
-  State(ref db): State<Database>, State(ref cache): State<Cache>, Json(config): Json<config::Model>,
+  State(state): State<GlobalState>, Json(config): Json<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let result = config::update(&db.conn, config).await?;
-  cache.at("platform").del("config").await?;
+  let result = config::update(&state.db.conn, config).await?;
+  state.cache.at("platform").del("config").await?;
   Ok(Json(result))
 }
 
 async fn get_platform_info(
-  State(ref license): State<License>, Extension(config): Extension<config::Model>,
+  State(_state): State<GlobalState>, Extension(config): Extension<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let mut server_config = config.server.clone().unwrap_or_default();
-  if license.level < LicenseLevel::Enterprise {
-    server_config.hide_maker = Some(false);
-  }
-  Ok(Json(server_config.desensitize()))
+  Ok(Json(
+    config.server.clone().unwrap_or_default().desensitize(),
+  ))
 }
 
 async fn get_auth_config(
-  State(config): State<GlobalConfig>,
+  State(state): State<GlobalState>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let auth_config = config.auth.ok_or(ResponseError::InternalServerError(
+  let auth_config = state.config.auth.ok_or(ResponseError::InternalServerError(
     "missing auth config".to_owned(),
   ))?;
   Ok(Json(auth_config.desensitize()))
 }
 
-async fn get_version(
-  State(ref version): State<String>,
-) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(version.clone()))
+async fn get_version(State(state): State<GlobalState>) -> Result<impl IntoResponse, ResponseError> {
+  Ok(Json(state.version))
 }
 
 #[derive(Serialize)]
@@ -124,8 +119,9 @@ struct Statistics {
 }
 
 async fn get_platform_statistics(
-  State(ref db): State<Database>,
+  State(state): State<GlobalState>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let db = &state.db;
   let institutes = institute::get_list(&db.conn).await?;
   let users = UserStatistics {
     total: user::count(&db.conn, true, None, None, true).await?,
@@ -167,10 +163,11 @@ struct LogListRequest {
 }
 
 async fn get_logs_list(
-  State(config): State<GlobalConfig>, Query(req): Query<LogListRequest>,
+  State(state): State<GlobalState>, Query(req): Query<LogListRequest>,
 ) -> Result<Response, ResponseError> {
   let log_dir = PathBuf::from_str(
-    &config
+    &state
+      .config
       .logging
       .ok_or(ResponseError::InternalServerError(
         "missing log config".to_owned(),
@@ -220,9 +217,9 @@ struct LogQuery {
 }
 
 async fn get_logs(
-  State(config): State<GlobalConfig>, State(client): State<HTTPClient>, Query(req): Query<LogQuery>,
+  State(state): State<GlobalState>, Query(req): Query<LogQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let log_config = if let Some(c) = config.logging {
+  let log_config = if let Some(c) = state.config.logging {
     c
   } else {
     error!("missing log config");
@@ -261,11 +258,10 @@ async fn get_logs(
       result.push_str(&format!(" AND span.user-account:{}", account));
     }
     result.push_str(" | sort by (_time) desc");
-    if let Some(limit) = req.limit {
-      result.push_str(&format!(" | limit {}", limit));
-    } else {
-      result.push_str(" | limit 1000");
-    }
+    result.push_str(&format!(
+      " | limit {}",
+      limit(req.limit, DEFAULT_LOG_LIMIT, MAX_LOG_LIMIT)
+    ));
     result
   };
   // escape result with url encode
@@ -273,7 +269,8 @@ async fn get_logs(
 
   let final_url = format!("{victoria_url}/select/logsql/query?timeout=5s&query={query}");
   debug!(url=%final_url, "proxying to victoria");
-  let resp = client
+  let resp = state
+    .requestor
     .get(final_url.parse().unwrap())
     .await
     .map_err(|err| {
@@ -284,8 +281,25 @@ async fn get_logs(
   Ok(resp.into_response())
 }
 
+#[derive(Serialize)]
+struct PlatformLicenseInfo {
+  spdx_id: &'static str,
+  name: &'static str,
+  url: &'static str,
+  notice: &'static str,
+  content: &'static str,
+}
+
+const R2S_PUBLIC_LICENSE_TEXT: &str = include_str!("../../../../../LICENSE");
+
 async fn get_license(
-  State(ref license): State<License>,
+  State(_state): State<GlobalState>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  Ok(Json(license.clone()))
+  Ok(Json(PlatformLicenseInfo {
+    spdx_id: "LicenseRef-Ret2Shell-Public-2.0",
+    name: "Ret2Shell Public License 2.0",
+    url: "/license",
+    notice: "Ret2Shell is released under the Ret2Shell Public License 2.0, a GPL-3.0-derived copyleft license with limited user-facing monetization restrictions.",
+    content: R2S_PUBLIC_LICENSE_TEXT,
+  }))
 }

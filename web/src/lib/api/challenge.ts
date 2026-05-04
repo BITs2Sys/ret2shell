@@ -10,7 +10,12 @@ import { createMemo } from "solid-js";
 import type { Extra } from "../models/extra";
 import type { CommitHistory } from "../models/git";
 import type { Hint } from "../models/hint";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+
+export type ChallengeCheckerScriptResponse = {
+  script: string;
+  lint: DiagnosticMarker[];
+};
 
 export async function getChallengeList(game_id: number, page?: number, page_size?: number) {
   return (
@@ -168,7 +173,7 @@ export function useDownChallengeMutation(
 }
 
 export async function deleteChallenge(game_id: number, challenge_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>());
 }
 
 export function useDeleteChallengeMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -270,13 +275,15 @@ export function useCreateChallengeHintMutation(props: {
 }
 
 export async function deleteChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
-  return await api
-    .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
-      searchParams: {
-        id: hint_id,
-      },
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+        searchParams: {
+          id: hint_id,
+        },
+      })
+      .json<void>()
+  );
 }
 
 export function useDeleteChallengeHintMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -355,14 +362,16 @@ export async function deleteChallengeAttachment(
   folder: "static" | "mapped" | "checker",
   file: string
 ) {
-  return await api
-    .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/file`, {
-      searchParams: {
-        folder,
-        file,
-      },
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/file`, {
+        searchParams: {
+          folder,
+          file,
+        },
+      })
+      .json<void>()
+  );
 }
 
 export function useDeleteChallengeAttachmentMutation(props: {
@@ -417,7 +426,10 @@ function inferProtocolByServiceType(serviceType: ChallengeImage["service_type"])
 }
 
 function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
-  if ((image.protocol == null || image.protocol === undefined) && (image.app_protocol == null || image.app_protocol === undefined)) {
+  if (
+    (image.protocol == null || image.protocol === undefined) &&
+    (image.app_protocol == null || image.app_protocol === undefined)
+  ) {
     const next = inferProtocolByServiceType(image.service_type);
     return {
       ...image,
@@ -501,11 +513,13 @@ export function useChallengeInstance({
 }
 
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
-  return await api
-    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
-      json: normalizeChallengeEnv(env),
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
+        json: normalizeChallengeEnv(env),
+      })
+      .json<void>()
+  );
 }
 
 export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -524,7 +538,7 @@ export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; o
 }
 
 export async function deleteChallengeEnv(game_id: number, challenge_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>());
 }
 
 export function useDeleteChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -550,10 +564,7 @@ export async function getChallengeCheckerScript(game_id: number, challenge_id: n
         })
       ),
     })
-    .json<{
-      script: string;
-      lint?: DiagnosticMarker[];
-    }>();
+    .json<ChallengeCheckerScriptResponse>();
 }
 
 export function useChallengeCheckerScript({
@@ -589,19 +600,19 @@ export async function updateChallengeCheckerScript(game_id: number, challenge_id
         content,
       },
     })
-    .json<void>();
+    .json<ChallengeCheckerScriptResponse>();
 }
 
 export function useUpdateChallengeCheckerScriptMutation(props: {
-  onSuccess?: () => void;
+  onSuccess?: (resp: ChallengeCheckerScriptResponse) => void;
   onError?: (err: Error) => void;
 }) {
   return useMutation(() => ({
     mutationFn: (req: { game_id: number; challenge_id: number; content: string }) =>
       updateChallengeCheckerScript(req.game_id, req.challenge_id, req.content),
-    onSuccess: () => {
+    onSuccess: (resp) => {
       toastSuccess(t("general.actions.save.status.success"));
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));
@@ -674,7 +685,7 @@ export function useChallengeSubmissions({
 
 export async function startChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
+  return await safeJson(api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>());
 }
 
 export function useStartChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -693,7 +704,7 @@ export function useStartChallengeInstanceMutation(props: { onSuccess?: () => voi
 
 export async function delayChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`, {}).json<void>();
+  return await safeJson(api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`, {}).json<void>());
 }
 
 export function useDelayChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -712,7 +723,7 @@ export function useDelayChallengeInstanceMutation(props: { onSuccess?: () => voi
 
 export async function stopChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>());
 }
 
 export function useStopChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {

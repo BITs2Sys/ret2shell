@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use r2s_bucket::challenge::ChallengeBucket;
 use r2s_database::{challenge, submission, team, user};
-use r2s_engine::{DiagnosticMarker, Engine, EngineError, GLOBAL_ENGINE};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError};
 use rune::{Any, ContextError, Module, Value, runtime::Object};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -123,16 +123,14 @@ impl Checker {
     Engine::lint(Self::default_modules(), script, &["check", "environ"]).await
   }
 
-  pub async fn expire(&self, bucket: &ChallengeBucket) {
-    GLOBAL_ENGINE
-      .expire(format!("challenge-{}", bucket.hash()))
-      .await;
+  pub async fn expire(&self, engine: &Engine, bucket: &ChallengeBucket) {
+    engine.expire(format!("challenge-{}", bucket.hash())).await;
   }
 
   pub async fn preload(
-    &self, challenge: &challenge::Model, bucket: &ChallengeBucket,
+    &self, engine: &Engine, challenge: &challenge::Model, bucket: &ChallengeBucket,
   ) -> Result<(), EngineError> {
-    GLOBAL_ENGINE
+    engine
       .preload(
         Self::default_modules(),
         format!("challenge-{}", bucket.hash()),
@@ -152,8 +150,8 @@ impl Checker {
   /// (correct: bool, msg: String, Option<(peer_team: Option<i64>, reason:
   /// String)>)
   pub async fn check(
-    &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
-    submission: &submission::Model,
+    &self, engine: &Engine, bucket: &ChallengeBucket, user: &user::Model,
+    team: &Option<team::Model>, submission: &submission::Model,
   ) -> Result<(bool, String, Option<AuditMessage>), EngineError> {
     let key = format!("challenge-{}", bucket.hash());
     debug!(?user, "loading user");
@@ -166,7 +164,7 @@ impl Checker {
       None => RuneTeam::default(),
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
-    let output = GLOBAL_ENGINE
+    let output = engine
       .execute(
         key,
         "check",
@@ -207,7 +205,8 @@ impl Checker {
   }
 
   pub async fn environ(
-    &self, bucket: &ChallengeBucket, user: &user::Model, team: &Option<team::Model>,
+    &self, engine: &Engine, bucket: &ChallengeBucket, user: &user::Model,
+    team: &Option<team::Model>,
   ) -> Result<HashMap<String, String>, EngineError> {
     let key = format!("challenge-{}", bucket.hash());
     let user_object = RuneUser::from(user);
@@ -217,7 +216,7 @@ impl Checker {
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
     debug!("calling environ");
-    let output = GLOBAL_ENGINE
+    let output = engine
       .execute(key, "environ", (bucket, user_object, team_object))
       .await?;
     debug!(?output, function = "environ", "checker finished");

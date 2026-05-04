@@ -1,8 +1,8 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import solidPlugin from "vite-plugin-solid";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development" || process.env.NODE_ENV === "development";
@@ -31,6 +31,18 @@ export default defineConfig(({ mode }) => {
           }
         },
       },
+      {
+        name: "ace-esm-resolver-compat",
+        enforce: "pre",
+        transform(code, id) {
+          if (!id.includes("/ace-builds/esm-resolver.js") && !id.includes("\\ace-builds\\esm-resolver.js")) {
+            return;
+          }
+          // Ace documents `esm-resolver` for Vite/Rollup, but the published file
+          // still references a bare global `ace` instead of `globalThis.ace`.
+          return code.replace(/\bace\./g, "globalThis.ace.");
+        },
+      },
     ],
     server: {
       port: 5173,
@@ -46,6 +58,10 @@ export default defineConfig(({ mode }) => {
       target: "es2022",
       minify: isProd,
       sourcemap: isDev,
+    },
+    test: {
+      environment: "node",
+      include: ["src/**/*.test.ts"],
     },
     resolve: {
       alias: {

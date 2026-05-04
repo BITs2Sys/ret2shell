@@ -12,8 +12,8 @@ use r2s_checker::Checker;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::DbErr;
+use r2s_engine::Engine;
 use r2s_event::EventManager;
-use r2s_license::License;
 use r2s_media::Media;
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
@@ -31,10 +31,10 @@ pub struct GlobalState {
   pub cache: Cache,
   pub auditor: Auditor,
   pub bucket: Bucket,
+  pub engine: Engine,
   pub queue: Queue,
   pub oauth: OAuth,
   pub cluster: Cluster,
-  pub license: License,
   pub media: Media,
   pub checker: Checker,
   pub event: EventManager,
@@ -214,6 +214,13 @@ impl IntoResponse for ResponseError {
             StatusCode::INTERNAL_SERVER_ERROR,
             "failed to read string from bucket, data maybe binary".to_owned(),
             format!("failed to convert data type from bucket: {e:?}")
+          )
+        }
+        r2s_bucket::BucketError::PathTraversal => {
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "bucket path traversal detected".to_owned(),
+            "path traversal detected"
           )
         }
         _ => log_with_resp!(

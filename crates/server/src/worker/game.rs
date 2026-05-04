@@ -8,6 +8,7 @@ use r2s_database::{
   team::{self, TeamScoreHistory, TeamScoreHistoryList},
   user,
 };
+use r2s_engine::Engine;
 use r2s_event::{
   Event,
   events::{EventContainer, SubmissionEvent, SubmissionEventType},
@@ -17,7 +18,12 @@ use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
-use crate::traits::{GlobalState, ResponseError};
+use crate::{
+  traits::{GlobalState, ResponseError},
+  utility::game_repo::schedule_next_missing_game_repo_index_refresh,
+};
+
+const GAME_REPO_INDEX_REFRESH_INTERVAL_SECS: u64 = 30;
 
 pub async fn spawn_game_workers(state: GlobalState) {
   let queue = state.queue.clone();
@@ -25,14 +31,31 @@ pub async fn spawn_game_workers(state: GlobalState) {
   let checker = state.checker.clone();
   let bucket = state.bucket.clone();
   let cache = state.cache.clone();
+  let engine = state.engine.clone();
   tokio::spawn(submission_worker(
     queue.clone(),
     database.clone(),
     cache,
+    engine,
     checker,
     bucket,
   ));
   tokio::spawn(score_maintenance_worker(queue, database));
+  tokio::spawn(game_repo_index_worker(state));
+}
+
+async fn game_repo_index_worker(state: GlobalState) {
+  info!(
+    interval_secs = GAME_REPO_INDEX_REFRESH_INTERVAL_SECS,
+    "game repo index worker started"
+  );
+  let mut ticker = tokio::time::interval(std::time::Duration::from_secs(
+    GAME_REPO_INDEX_REFRESH_INTERVAL_SECS,
+  ));
+  loop {
+    ticker.tick().await;
+    schedule_next_missing_game_repo_index_refresh(&state).await;
+  }
 }
 
 async fn score_maintenance_worker(queue: Queue, db: Database) {
@@ -152,7 +175,7 @@ async fn score_maintenance_worker_exec(
 }
 
 async fn submission_worker(
-  queue: Queue, db: Database, cache: Cache, checker: Checker, bucket: Bucket,
+  queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker, bucket: Bucket,
 ) {
   let messages = queue
     .subscribe("check")
@@ -226,6 +249,7 @@ async fn submission_worker(
         queue.clone(),
         db.clone(),
         cache.clone(),
+        engine.clone(),
         checker.clone(),
         bucket.clone(),
         &submission,
@@ -269,8 +293,9 @@ fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
   0
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn submission_worker_exec(
-  queue: Queue, db: Database, cache: Cache, checker: Checker, bucket: Bucket,
+  queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker, bucket: Bucket,
   submission: &submission::Model, trace: impl AsRef<str>,
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
@@ -343,9 +368,11 @@ async fn submission_worker_exec(
     .await?;
 
   // stage 2: invoke checker to check the submission
-  checker.preload(&challenge, &challenge_bucket).await?;
+  checker
+    .preload(&engine, &challenge, &challenge_bucket)
+    .await?;
   let (solved, result, audit) = checker
-    .check(&challenge_bucket, &user, &team, submission)
+    .check(&engine, &challenge_bucket, &user, &team, submission)
     .await?;
   let submission = submission::update(
     &txn,

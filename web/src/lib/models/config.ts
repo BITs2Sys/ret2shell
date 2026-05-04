@@ -40,6 +40,7 @@ export type ClusterConfig = {
   node_selector: string | null;
   proxy_image: string | null;
   traffic: string | null;
+  lifecycle: string | null;
   enable_capture: boolean | null;
   capture_directory: string | null;
   registry: RegistryConfig | null;

@@ -5,6 +5,7 @@ import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { fullTheme, t } from "@storage/theme";
 import Divider from "@widgets/divider";
+import Link from "@widgets/link";
 import Tag from "@widgets/tag";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show } from "solid-js";
@@ -50,6 +51,28 @@ export default function () {
                     </div>
                   </div>
                   <Divider class="w-full" />
+                  <div class="w-full flex flex-col items-center space-y-3">
+                    <h3 class="font-bold">{t("license.title")}</h3>
+                    <p class="max-w-2xl text-center text-sm opacity-60">{t("magic.about.license.description")}</p>
+                    <div class="flex flex-row flex-wrap justify-center">
+                      <Tag level="info" class="m-1">
+                        {t("magic.about.license.gplBase")}
+                      </Tag>
+                      <Tag level="success" class="m-1">
+                        {t("magic.about.license.copyleft")}
+                      </Tag>
+                      <Tag level="warning" class="m-1">
+                        {t("magic.about.license.commercial")}
+                      </Tag>
+                      <Tag level="error" class="m-1">
+                        {t("magic.about.license.noUserFees")}
+                      </Tag>
+                    </div>
+                    <Link href="/license" ghost size="sm" class="space-x-2">
+                      <span class="shrink-0 icon-[fluent--open-20-regular] w-4 h-4" />
+                      <span>{t("magic.about.license.view")}</span>
+                    </Link>
+                  </div>
                   <h3 class="font-bold">Developers</h3>
                   <div class="flex flex-row flex-wrap justify-center">
                     <Tag level="success" class="m-1">

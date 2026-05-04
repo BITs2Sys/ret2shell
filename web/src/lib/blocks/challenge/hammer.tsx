@@ -15,9 +15,11 @@ import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 
 import type { ChallengeWidgetProps } from ".";
+import { mergeChats } from "./hammer.utils";
 
 export function ChatBlock(props: {
   avatar?: string;
@@ -65,68 +67,8 @@ export function ChatBlock(props: {
   );
 }
 
-export function mergeChats(
-  gameId: number,
-  challengeId: number,
-  teamId: number,
-  a: Chat[],
-  b: Chat[],
-  solvedAt: DateTime | null
-): [boolean, Chat[]] {
-  if (solvedAt) {
-    b.push({
-      id: 0,
-      user_id: 0,
-      user_name: "Ciallo～(∠・ω< )⌒☆",
-      avatar: undefined,
-      content: `${t("challenge.hammer.solved")} ٩(๑•ω•๑)۶`,
-      created_at: solvedAt,
-      is_admin: true,
-      challenge_id: challengeId,
-      team_id: teamId,
-      checked: true,
-      game_id: gameId,
-    });
-  }
-  const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId).sort((x, y) => x.id - y.id);
-  const bb = b.sort((x, y) => x.id - y.id).filter((x) => aa.findIndex((v) => v.id === x.id) === -1);
-
-  let i = 0;
-  const iLen = aa.length;
-  let j = 0;
-  const jLen = bb.length;
-
-  let changed = false;
-
-  while (i < iLen && j < jLen) {
-    const aChat = aa[i];
-    const bChat = bb[j];
-    if (aChat.id === bChat.id && aChat.checked === bChat.checked) {
-      i++;
-      j++;
-    } else if (aChat.id === bChat.id) {
-      aa[i] = bChat;
-      changed = true;
-      i++;
-      j++;
-    } else if (aChat.id > bChat.id) {
-      aa.push(bChat);
-      changed = true;
-      j++;
-    } else {
-      i++;
-    }
-  }
-  while (j < jLen) {
-    aa.push(bb[j]);
-    changed = true;
-    j++;
-  }
-  return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
-}
-
 export default function (props: ChallengeWidgetProps) {
-  const [prevChats, setPrevChats] = createSignal([] as Chat[]);
+  const [chats, setChats] = createStore<Chat[]>([]);
   const [chat, setChat] = createSignal("");
 
   const game = useGame({ id: () => props.gameId });
@@ -152,21 +94,24 @@ export default function (props: ChallengeWidgetProps) {
     enabled: () => !props.training && !isAdminOfGame(game.data),
   });
 
-  const chats = createMemo(() => {
-    if (chatsQuery.data && solvesQuery.data) {
-      return untrack(() => {
-        const [changed, merged] = mergeChats(
+  createEffect(() => {
+    if (!chatsQuery.data || !solvesQuery.data) {
+      setChats(reconcile([]));
+      return;
+    }
+
+    setChats(
+      reconcile(
+        mergeChats(
           props.gameId,
           props.challengeId,
           team.data?.id ?? 0,
-          prevChats(),
           chatsQuery.data,
-          solvesQuery.data?.find((v) => v.challenge_id === props.challengeId)?.created_at || null
-        );
-        if (changed) setPrevChats(merged);
-        return merged;
-      });
-    }
+          solvesQuery.data.find((v) => v.challenge_id === props.challengeId)?.created_at ?? null
+        ),
+        { key: "id" }
+      )
+    );
   });
 
   const interval = setInterval(() => chatsQuery.refetch(), 5000);
@@ -176,9 +121,9 @@ export default function (props: ChallengeWidgetProps) {
   const availableMsg = createMemo(() => {
     // every player could send up to 3 messages before admin reply
     let count = 0;
-    for (let i = (chats()?.length ?? 0) - 1; i >= 0; i--) {
-      if (chats()?.at(i)?.user_id === accountStore.id) count++;
-      if (chats()?.at(i)?.is_admin && chats()?.at(i)?.user_id !== 0) break;
+    for (let i = chats.length - 1; i >= 0; i--) {
+      if (chats.at(i)?.user_id === accountStore.id) count++;
+      if (chats.at(i)?.is_admin && chats.at(i)?.user_id !== 0) break;
     }
     return 3 - count;
   });
@@ -259,11 +204,11 @@ export default function (props: ChallengeWidgetProps) {
             />
           </Match>
         </Switch>
-        <For each={chats() ?? []}>
+        <For each={chats}>
           {(chat, index) => (
             <ChatBlock
               avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
-              showAvatar={index() === 0 || chats()?.at(index() - 1)?.user_id !== chat.user_id}
+              showAvatar={index() === 0 || chats.at(index() - 1)?.user_id !== chat.user_id}
               roleLabel={
                 chat.id === 0
                   ? ">_<"

@@ -1,5 +1,5 @@
 import { useChallenge, useChallenges, useCreateChallengeMutation } from "@api/challenge";
-import { useGame, useUpdateGameMutation } from "@api/game";
+import { useGame, useUpdateGameDocMutation, useUpdateGameMutation } from "@api/game";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
@@ -9,8 +9,10 @@ import { SubmissionList } from "@blocks/game/lists";
 import GameStatistics from "@blocks/game/statistics";
 import type { Challenge as ChallengeModel } from "@models/challenge";
 import { Permission } from "@models/user";
+import GameDocForm from "@routes/games/[game]/_blocks/doc-form";
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { isAdminOfGame } from "@storage/game";
 import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -40,6 +42,7 @@ export default function () {
   }
   const [searchParams, setSearchParams] = useSearchParams();
   const inCreate = createMemo(() => searchParams.create === "true");
+  const inDocEdit = createMemo(() => searchParams.docEdit === "true");
 
   const selectedChallengeId = createMemo(
     () => Number.parseInt((searchParams.challenge as string) || "NaN", 10) || null
@@ -49,6 +52,7 @@ export default function () {
   const inMonitor = createMemo(() => searchParams.monitor === "true");
 
   const game = useGame({ id: () => gameId(), enabled: () => gameId() > 0 });
+  const isAdmin = createMemo(() => isAdminOfGame(game.data));
   const challenge = useChallenge({
     game_id: () => gameId(),
     challenge_id: () => selectedChallengeId() || 0,
@@ -102,6 +106,11 @@ export default function () {
       game.refetch();
     },
   });
+  const updateTrainingDocMutation = useUpdateGameDocMutation({
+    onSuccess: () => {
+      setSearchParams({ docEdit: null });
+    },
+  });
 
   async function onEditGame(result: GameForm) {
     // console.log("onEditGame", result, game.data);
@@ -126,12 +135,20 @@ export default function () {
     });
   }
 
+  async function onEditTrainingDoc(content: string) {
+    await updateTrainingDocMutation.mutateAsync({
+      id: gameId(),
+      type: "training",
+      content,
+    });
+  }
+
   return (
     <>
       <Title page={game.data?.name} route={`/training/${gameId()}`} />
       <div class="flex-1 flex flex-col w-0">
         <Tabs training gameId={gameId()} challengeId={selectedChallengeId() ?? 0} />
-        <Switch fallback={<Intro />}>
+        <Switch>
           <Match when={inEdit()}>
             <div class="flex-1 w-full relative">
               <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
@@ -151,6 +168,26 @@ export default function () {
                     <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
                       <AdministratorsManagement gameId={gameId()} />
                     </div>
+                  </div>
+                </OverlayScrollbarsComponent>
+              </div>
+            </div>
+          </Match>
+          <Match when={inDocEdit() && isAdmin()}>
+            <div class="flex-1 w-full relative">
+              <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                <OverlayScrollbarsComponent
+                  options={{
+                    scrollbars: {
+                      theme: `os-theme-${fullTheme()}`,
+                      autoHide: "scroll",
+                    },
+                  }}
+                  class="relative w-full h-full print:h-auto print:overflow-auto"
+                  defer
+                >
+                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                    <GameDocForm gameId={gameId()} docType="training" onDone={onEditTrainingDoc} />
                   </div>
                 </OverlayScrollbarsComponent>
               </div>
@@ -213,6 +250,9 @@ export default function () {
           </Match>
           <Match when={challenge.data}>
             <Challenge training archived gameId={gameId()} challengeId={selectedChallengeId()!} />
+          </Match>
+          <Match when={true}>
+            <Intro editable={isAdmin()} onEdit={() => setSearchParams({ docEdit: "true" })} />
           </Match>
         </Switch>
       </div>

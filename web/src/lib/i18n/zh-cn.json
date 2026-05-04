@@ -388,7 +388,7 @@
         "label": "中国工信部 ICP 备案号"
       },
       "hideMaker": {
-        "disabled": "你的许可证不允许隐藏此项",
+        "disabled": "该选项当前不可用",
         "label": "隐藏开发者信息"
       },
       "zenGame": {
@@ -563,6 +563,9 @@
           "required": "内容不能为空"
         }
       }
+    },
+    "rules": {
+      "title": "比赛规则"
     },
     "scoreboard": {
       "title": "积分板",
@@ -867,6 +870,9 @@
       },
       "regenerateToken": {
         "title": "生成管理密钥失败"
+      },
+      "fetchDoc": {
+        "title": "获取赛事文档失败"
       },
       "fetchIntroduction": {
         "title": "获取比赛介绍失败"
@@ -1922,6 +1928,14 @@
   },
   "magic": {
     "about": {
+      "license": {
+        "commercial": "允许商业服务",
+        "copyleft": "强 Copyleft",
+        "description": "Ret2Shell 使用以 GPL-3.0 为基础的强 Copyleft 许可证，在保留 GPL 基线权利与义务的同时，对付费访问分层和类似的面向用户收费商业化施加有限额外限制。",
+        "gplBase": "基于 GPL-3.0",
+        "noUserFees": "禁止付费访问分层",
+        "view": "查看完整许可证"
+      },
       "thanks": "感谢使用我的作品",
       "title": "关于"
     },
@@ -2088,6 +2102,9 @@
     "title": "管理",
     "platformTitle": "平台管理"
   },
+  "license": {
+    "title": "Ret2Shell 公共许可证"
+  },
   "traffic": {
     "title": "环境路由",
     "nodeSelector": "节点选择器",
@@ -2095,6 +2112,15 @@
       "title": "脚本预设",
       "singleNodeDirectScript": "单节点直连",
       "multiNodeDirectScript": "多节点直连"
+    }
+  },
+  "lifecycle": {
+    "title": "生命周期",
+    "functions": "函数：on_start(ctx) / on_delay(ctx) / on_stop(ctx)",
+    "preset": {
+      "title": "脚本预设",
+      "webhookExample": "Webhook 示例",
+      "reservedBlank": "空置预留"
     }
   },
   "cluster": {

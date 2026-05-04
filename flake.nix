@@ -11,10 +11,6 @@
       url = "github:wrvsrx/pnpm2nix-nzbr/adapt-to-v9";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    public-key = {
-      url = "file+file:///dev/null";
-      flake = false;
-    };
   };
 
   outputs =
@@ -22,7 +18,6 @@
       self,
       nixpkgs,
       rust-overlay,
-      public-key,
       pnpm2nix,
     }:
     let
@@ -88,9 +83,6 @@
             cargoLock.lockFile = ./Cargo.lock;
             cargoBuildFlags = [ "--bin=r2s-server" ];
             doCheck = false;
-            prePatch = lib.throwIf (builtins.readFile public-key == "") "Public key is empty" ''
-              cp ${public-key} ./config/pub.bin
-            '';
             env.R2S_GIT_VERSION = version;
             nativeBuildInputs = with pkgs; [
               pkg-config

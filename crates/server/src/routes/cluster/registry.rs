@@ -122,12 +122,12 @@ async fn proxy_to_registry(
     let resp = axum::response::Response::builder()
       .status(200)
       .body("OK".to_string())
-      .unwrap();
+      .unwrap_or_default();
     return Ok(resp.into_response());
   }
 
   if !token.permissions.0.contains(&Permission::DevOps) {
-    let repo = match path.strip_prefix("/v2/").unwrap().split('/').next() {
+    let repo = match path.trim_start_matches("v2/").split('/').next() {
       Some(repo) => repo,
       None => {
         return Err(ResponseError::BadRequest(

@@ -1,0 +1,292 @@
+{{- if and (eq .Values.nats.mode "internal") (gt (int .Values.nats.replicaCount) 1) .Values.nats.persistence.existingClaim }}
+{{- fail "nats.persistence.existingClaim is not supported when nats.replicaCount>1; use volumeClaimTemplates instead" }}
+{{- end }}
+{{- if eq .Values.nats.mode "internal" }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "ret2shell.natsName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+type: Opaque
+stringData:
+  token: {{ .Values.nats.auth.token | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.natsName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+    ret2shell.io/service-role: client
+  {{- with .Values.nats.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: client
+      port: {{ .Values.nats.service.port }}
+      targetPort: client
+    {{- if .Values.nats.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.nats.metrics.port }}
+      targetPort: metrics
+    {{- end }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "nats" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.natsHeadlessName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+    ret2shell.io/service-role: headless
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: client
+      port: {{ .Values.nats.service.port }}
+      targetPort: client
+    - name: cluster
+      port: {{ .Values.nats.service.clusterPort }}
+      targetPort: cluster
+    {{- if .Values.nats.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.nats.metrics.port }}
+      targetPort: metrics
+    {{- end }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "nats" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ret2shell.natsName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+spec:
+  podManagementPolicy: Parallel
+  serviceName: {{ include "ret2shell.natsHeadlessName" . }}
+  replicas: {{ .Values.nats.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "nats" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ret2shell.componentLabels" (dict "component" "nats" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 8 }}
+        {{- with .Values.nats.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nats.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nats.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: nats
+          image: {{ include "ret2shell.image" .Values.nats.image }}
+          imagePullPolicy: {{ .Values.nats.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              replicas={{ .Values.nats.replicaCount }}
+              ordinal="${HOSTNAME##*-}"
+              routes=""
+              if [ "$replicas" -gt 1 ]; then
+                for i in $(seq 0 $((replicas - 1))); do
+                  if [ "$i" -ne "$ordinal" ]; then
+                    routes="${routes}nats://{{ include "ret2shell.natsName" . }}-${i}.{{ include "ret2shell.natsHeadlessName" . }}.${POD_NAMESPACE}.svc.cluster.local:{{ .Values.nats.service.clusterPort }},"
+                  fi
+                done
+                routes="${routes%,}"
+              fi
+
+              cat >/tmp/nats.conf <<EOF
+              server_name: "$HOSTNAME"
+              port: {{ .Values.nats.service.port }}
+              jetstream {
+                store_dir: {{ .Values.nats.jetstream.storeDir | quote }}
+              }
+              {{- if .Values.nats.auth.enabled }}
+              authorization {
+                token: "$NATS_AUTH_TOKEN"
+              }
+              {{- end }}
+              {{- if .Values.nats.metrics.enabled }}
+              http: 0.0.0.0:{{ .Values.nats.metrics.port }}
+              {{- end }}
+              {{- if gt (int .Values.nats.replicaCount) 1 }}
+              cluster {
+                name: {{ include "ret2shell.natsName" . | quote }}
+                port: {{ .Values.nats.service.clusterPort }}
+                routes = [${routes}]
+              }
+              {{- end }}
+              EOF
+
+              exec nats-server -c /tmp/nats.conf
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.nats.auth.enabled }}
+            - name: NATS_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ret2shell.natsName" . }}
+                  key: token
+            {{- end }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.nats.service.port }}
+            - name: cluster
+              containerPort: {{ .Values.nats.service.clusterPort }}
+            {{- if .Values.nats.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.nats.metrics.port }}
+            {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: client
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: client
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.nats.jetstream.storeDir }}
+          {{- with .Values.nats.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.nats.persistence.existingClaim }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.nats.persistence.existingClaim }}
+      {{- else if not .Values.nats.persistence.enabled }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.nats.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nats.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nats.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nats.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if and .Values.nats.persistence.enabled (not .Values.nats.persistence.existingClaim) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "ret2shell.commonLabels" . | nindent 10 }}
+          app.kubernetes.io/component: nats
+      spec:
+        accessModes:
+          - {{ .Values.nats.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.nats.persistence.size }}
+        {{- $sc := include "ret2shell.storageClass" (dict "root" . "local" .Values.nats.persistence.storageClass) }}
+        {{- if $sc }}
+        storageClassName: {{ $sc }}
+        {{- end }}
+  {{- end }}
+
+{{- if .Values.nats.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ret2shell.natsName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+spec:
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "nats" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  {{- with .Values.nats.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .Values.nats.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.nats.metrics.enabled .Values.nats.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ret2shell.natsName" . }}
+  namespace: {{ default .Release.Namespace .Values.nats.metrics.serviceMonitor.namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+    {{- with .Values.nats.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.nats.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "ret2shell.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nats
+      ret2shell.io/service-role: client
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.nats.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.nats.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
+{{- end }}

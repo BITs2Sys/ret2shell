@@ -22,7 +22,46 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
+  utility::pagination::{DEFAULT_CHAT_PAGE_SIZE, page, page_size},
 };
+
+fn ensure_challenge_in_game(
+  game: &game::Model, challenge: &challenge::Model,
+) -> Result<(), ResponseError> {
+  if game.id != challenge.game_id {
+    warn!(
+      game_id=%game.id,
+      challenge_id=%challenge.id,
+      challenge_game_id=%challenge.game_id,
+      "challenge does not belong to game",
+    );
+    return Err(ResponseError::NotFound("challenge not found".to_owned()));
+  }
+  Ok(())
+}
+
+async fn get_chat_session_resources(
+  db: &Database, game: &game::Model, team_id: i64, challenge_id: i64,
+) -> Result<(team::Model, challenge::Model), ResponseError> {
+  let team = team::get(&db.conn, team_id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
+  if game.id != team.game_id {
+    warn!(
+      game_id=%game.id,
+      team_id=%team.id,
+      team_game_id=%team.game_id,
+      "chat session team does not belong to game",
+    );
+    return Err(ResponseError::NotFound("team not found".to_owned()));
+  }
+
+  let challenge = challenge::get(&db.conn, challenge_id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("challenge not found".to_owned()))?;
+  ensure_challenge_in_game(game, &challenge)?;
+  Ok((team, challenge))
+}
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   Router::new()
@@ -80,12 +119,21 @@ async fn admin_get_chat_list(
       "hammer is not enabled".into(),
     ));
   }
+  if let Some(challenge_id) = query.challenge_id {
+    let _ = challenge::get(&db.conn, challenge_id)
+      .await?
+      .ok_or_else(|| ResponseError::NotFound("challenge not found".to_owned()))
+      .and_then(|challenge| {
+        ensure_challenge_in_game(&game, &challenge)?;
+        Ok(challenge)
+      })?;
+  }
   let chats = chat::get_sessions(
     &db.conn,
     game.id,
     query.challenge_id,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(30),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_CHAT_PAGE_SIZE),
   )
   .await?;
   Ok(Json(chats))
@@ -100,6 +148,7 @@ async fn player_get_chat_session(
       "hammer is not enabled".into(),
     ));
   }
+  ensure_challenge_in_game(&game, &challenge)?;
   let team = team.ok_or_else(|| {
     warn!("user want to access chat session without participate game");
     ResponseError::Forbidden("team not found".into())
@@ -123,6 +172,7 @@ async fn player_send_chat(
       "hammer is not enabled".into(),
     ));
   }
+  ensure_challenge_in_game(&game, &challenge)?;
   let team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
   let chats = chat::get_list(&db.conn, team.id, challenge.id).await?;
   let mut sent_count = 3;
@@ -198,6 +248,7 @@ async fn admin_get_chat_session(
       "hammer is not enabled".into(),
     ));
   }
+  let _ = get_chat_session_resources(db, &game, query.team_id, query.challenge_id).await?;
   let chats = chat::get_list(&db.conn, query.team_id, query.challenge_id).await?;
   if chats.first().is_some_and(|c| !c.is_admin && !c.checked) {
     chat::mark_checked(&db.conn, query.team_id, query.challenge_id).await?;
@@ -215,11 +266,13 @@ async fn admin_send_chat(
       "hammer is not enabled".into(),
     ));
   }
+  let (team, challenge) =
+    get_chat_session_resources(db, &game, query.team_id, query.challenge_id).await?;
   chat::create(
     &db.conn,
     chat::Model {
-      team_id: query.team_id,
-      challenge_id: query.challenge_id,
+      team_id: team.id,
+      challenge_id: challenge.id,
       user_id: token.id,
       content: chat.content,
       game_id: game.id,

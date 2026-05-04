@@ -158,6 +158,25 @@ export default function SideBar() {
           <span>{t("traffic.title")}</span>
         </Link>
       </li>
+      <li class="w-full">
+        <Link
+          activeMatch="exact"
+          class="w-full"
+          ghost
+          href="/admin/lifecycle"
+          justify="start"
+          disabled={!accountStore.permissions.includes(Permission.DevOps)}
+        >
+          <span class="shrink-0 icon-[fluent--script-20-regular] w-5 h-5" />
+          <span>{t("lifecycle.title")}</span>
+        </Link>
+      </li>
+      <li class="w-full">
+        <Link activeMatch="exact" class="w-full" ghost href="/license" justify="start">
+          <span class="shrink-0 icon-[fluent--book-20-regular] w-5 h-5" />
+          <span>{t("license.title")}</span>
+        </Link>
+      </li>
       <Divider />
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/magic/about" justify="start">

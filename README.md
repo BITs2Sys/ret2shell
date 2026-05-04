@@ -4,21 +4,22 @@
   </a>
   <p><em>A feature-riches CTF challenge platform</em></p>
 
-[![MSRV 1.93.0+](https://img.shields.io/badge/MSRV-1.93.0+-blue)](https://releases.rs/docs/1.93.0/)
+[![MSRV 1.94.0+](https://img.shields.io/badge/MSRV-1.94.0+-blue)](https://releases.rs/docs/1.94.0/)
 [![Solid.js 1.9+](https://img.shields.io/badge/Solid.js-1.9+-orange)](https://www.solidjs.com/)
 
 </div>
+
+## Support
+
+QQ Group: 1104642385
+
+Telegram: https://t.me/ret2shell 
 
 ## Deployment
 
 Ret2Shell is single binary with requirements of `redis/valkey 8+`, `postgres 18+`, `nats 2+` and optional `VictoriaLog` and `registry`.
 
 All the components could be deploy anywhere, so you can deploy ret2shell as you like.
-
-> [!WARNING]
-> The new helm charts is work-in-progress.
-
-For a general usage, you could see [k8s single-node deployment](./deploy/k8s-deprecated/README.md) for details.
 
 ## Development
 
@@ -52,23 +53,9 @@ corepack enable pnpm
 
 ### 2. Setup Development Environment
 
-#### Generate license
+#### License notice
 
-Ret2Shell server binary has public key `pub.bin` (in [config/](config/)) integrated. It will check the `license` file (in [config/](config/)) which is signed by the paired private key, at the startup.
-
-To generate a new CA with `priv.bin` and `pub.bin`, please run:
-
-```bash
-cargo run --bin r2s-license -- init -p config
-```
-
-Then you could generate a new license file with the CA:
-
-```bash
-cargo run --bin r2s-license -- new --ca ./config/priv.bin --path ./config/ --issuer Developer --website localhost --level enterprise --date 2077-01-01
-```
-
-Change `--issuer` to your organization name, `--website` to your domain, and `--date` to the expiration date.
+Ret2Shell is distributed under a GPL-3.0-derived custom copyleft license that incorporates GPL-3.0 in Appendix A and adds user-facing monetization restrictions. See [LICENSE](LICENSE) for the binding license text and [COMMERCIAL_POLICY.md](COMMERCIAL_POLICY.md) for plain-language guidance.
 
 #### Setup frontend
 
@@ -155,6 +142,8 @@ You can also build the docker image:
 
 ## License
 
-Copyright (c) Ret2Shell Team. All rights reserved.
+Ret2Shell is licensed under:
 
-Please refer to [LICENSE](LICENSE) for more information.
+- [LICENSE](LICENSE): the binding license text.
+- [COMMERCIAL_POLICY.md](COMMERCIAL_POLICY.md): English guidance and interpretation notes.
+- [COMMERCIAL_POLICY.zh-cn.md](COMMERCIAL_POLICY.zh-cn.md): Simplified Chinese translation of the policy guide.

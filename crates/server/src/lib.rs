@@ -22,7 +22,6 @@ mod traits;
 mod utility;
 mod worker;
 
-const PUB_KEY: &[u8] = include_bytes!("../../../config/pub.bin");
 include!(concat!(env!("OUT_DIR"), "/constants.rs"));
 
 /// Show greet information.
@@ -38,22 +37,16 @@ pub fn greet() {
   );
 }
 
+pub use routes::run_post_receive;
+
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let guards = logger::initialize(&config.logging).await?;
   info!(">> server initialization started <<");
-  let license = match r2s_license::check_license(PUB_KEY) {
-    Ok(license) => license,
-    Err(err) => {
-      error!("license check failed: {}", err.to_string().red());
-      error!("please contact tech support <support@ret.sh.cn>.");
-      return Err(err.into());
-    }
-  };
-
+  info!("Ret2Shell is distributed under the Ret2Shell Public License 2.0.");
   info!(
-    "[{:?}] Licensed to {} ({}), will expire at {}",
-    license.level, license.issuer, license.website, license.date
+    "It is a GPL-3.0-derived copyleft license with limited user-facing monetization restrictions."
   );
+  info!("See LICENSE and COMMERCIAL_POLICY.md for details.");
 
   match crypto::aws_lc_rs::default_provider().install_default() {
     Ok(_) => info!("using `AWS Libcrypto` as default crypto backend."),
@@ -74,7 +67,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   info!("loading module: < Auditor >");
   let auditor = r2s_auditor::initialize(&config.auditor).await?;
   info!("loading module: < Engine >");
-  r2s_engine::initialize().await;
+  let engine = r2s_engine::initialize();
   info!("loading module: < Database >");
   let (db, migrated) = r2s_migrator::initialize(&config.database).await?;
   info!("loading module: < Cache >");
@@ -111,10 +104,10 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     cache,
     auditor,
     bucket,
+    engine,
     event,
     queue,
     oauth,
-    license,
     cluster,
     checker,
     media,

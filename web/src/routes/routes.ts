@@ -133,6 +133,10 @@ export const routes = {
                   component: lazy(() => import("./games/[game]/admin/edit/index")),
                 },
                 {
+                  path: "/rules",
+                  component: lazy(() => import("./games/[game]/admin/rules/index")),
+                },
+                {
                   path: "/policies",
                   component: lazy(() => import("./games/[game]/admin/policies/index")),
                 },
@@ -163,6 +167,10 @@ export const routes = {
                 {
                   path: "/traffic",
                   component: lazy(() => import("./games/[game]/admin/traffic/index")),
+                },
+                {
+                  path: "/lifecycle",
+                  component: lazy(() => import("./games/[game]/admin/lifecycle/index")),
                 },
                 {
                   path: "/captures",
@@ -286,7 +294,15 @@ export const routes = {
           path: "/traffic",
           component: lazy(() => import("./admin/traffic/index")),
         },
+        {
+          path: "/lifecycle",
+          component: lazy(() => import("./admin/lifecycle/index")),
+        },
       ],
+    },
+    {
+      path: "/license",
+      component: lazy(() => import("./admin/license/index")),
     },
     {
       path: "/users",

@@ -1,0 +1,256 @@
+{{- if not .Values.platform.config.existingSecret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "ret2shell.platformConfigSecretName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+type: Opaque
+stringData:
+  config.toml: |
+    {{- include "ret2shell.platformConfigToml" . | nindent 4 }}
+{{- end }}
+
+{{- if not .Values.platform.blocked.existingConfigMap }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ret2shell.platformBlockedConfigMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+data:
+  blocked.txt: |
+    {{- .Values.platform.blocked.content | nindent 4 }}
+{{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.platformHeadlessName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+spec:
+  clusterIP: None
+  ports:
+    - name: http
+      port: {{ .Values.platform.service.port }}
+      targetPort: http
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "platform" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.platformName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+  {{- with .Values.platform.service.clusterIPAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ .Values.platform.service.port }}
+      targetPort: http
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "platform" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+
+{{- if eq .Values.platform.exposure.type "nodePort" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ret2shell.platformName" . }}-nodeport
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+  {{- with .Values.platform.service.nodePortAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: {{ .Values.platform.service.port }}
+      targetPort: http
+      nodePort: {{ .Values.platform.service.nodePort }}
+  selector:
+    {{- include "ret2shell.componentLabels" (dict "component" "platform" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+{{- end }}
+
+{{- if eq .Values.platform.exposure.type "ingress" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ret2shell.platformName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+  {{- with .Values.platform.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.platform.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    {{- range .Values.platform.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "ret2shell.platformName" $ }}
+                port:
+                  number: {{ $.Values.platform.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- with .Values.platform.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ret2shell.platformName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ret2shell.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+spec:
+  serviceName: {{ include "ret2shell.platformHeadlessName" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ret2shell.componentLabels" (dict "component" "platform" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ret2shell.componentLabels" (dict "component" "platform" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 8 }}
+        {{- with .Values.platform.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{- if .Values.platform.config.existingSecret }} {{ .Values.platform.config.existingSecret | sha256sum }} {{- else }} {{ include "ret2shell.platformConfigToml" . | sha256sum }} {{- end }}
+        checksum/blocked: {{- if .Values.platform.blocked.existingConfigMap }} {{ .Values.platform.blocked.existingConfigMap | sha256sum }} {{- else }} {{ .Values.platform.blocked.content | sha256sum }} {{- end }}
+        {{- with .Values.platform.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "ret2shell.platformServiceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.platform.serviceAccount.automountServiceAccountToken }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: platform
+          image: {{ include "ret2shell.image" .Values.platform.image }}
+          imagePullPolicy: {{ .Values.platform.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.platform.service.port }}
+          readinessProbe:
+            httpGet:
+              path: /api/ping
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          startupProbe:
+            httpGet:
+              path: /api/ping
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/ret2shell
+            - name: config
+              mountPath: /etc/ret2shell/config.toml
+              subPath: config.toml
+              readOnly: true
+            - name: blocked
+              mountPath: /etc/ret2shell/blocked.txt
+              subPath: blocked.txt
+              readOnly: true
+          {{- with .Values.platform.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          secret:
+            secretName: {{ include "ret2shell.platformConfigSecretName" . }}
+        - name: blocked
+          configMap:
+            name: {{ include "ret2shell.platformBlockedConfigMapName" . }}
+        {{- if .Values.platform.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.platform.persistence.existingClaim }}
+        {{- else if not .Values.platform.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.platform.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.platform.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.platform.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if and .Values.platform.persistence.enabled (not .Values.platform.persistence.existingClaim) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "ret2shell.commonLabels" . | nindent 10 }}
+          app.kubernetes.io/component: platform
+      spec:
+        accessModes:
+          - {{ .Values.platform.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.platform.persistence.size }}
+        {{- $sc := include "ret2shell.storageClass" (dict "root" . "local" .Values.platform.persistence.storageClass) }}
+        {{- if $sc }}
+        storageClassName: {{ $sc }}
+        {{- end }}
+  {{- end }}

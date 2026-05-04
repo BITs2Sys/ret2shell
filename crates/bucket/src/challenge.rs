@@ -251,10 +251,13 @@ impl ChallengeBucket {
     if !self.locked {
       return Err(BucketError::NeedLocking);
     }
-    if !matches!(dest.as_ref(), "mapped" | "checker" | "static") {
+    if !matches!(dest.as_ref(), "mapped" | "checker" | "src" | "static") {
       return Err(BucketError::PathDoesNotExist(dest.as_ref().to_owned()));
     }
-    let dest_path = self.path.join(dest.as_ref()).join(name.as_ref());
+    let dest_path = self.ensure_prefix(
+      dest.as_ref(),
+      format!("{}/{}", dest.as_ref(), name.as_ref()),
+    )?;
     tokio::fs::remove_file(dest_path).await?;
     Ok(())
   }
@@ -415,6 +418,25 @@ fn to_file_name(file: &str) -> String {
 mod tests {
   use super::*;
 
+  fn test_bucket() -> ChallengeBucket {
+    let root = std::env::temp_dir().join(format!(
+      "r2s-challenge-bucket-test-{}-{}",
+      std::process::id(),
+      std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos()
+    ));
+    std::fs::create_dir_all(root.join("static")).unwrap();
+    std::fs::write(root.join("static").join("ok.txt"), "ok").unwrap();
+    std::fs::write(root.join("secret.txt"), "secret").unwrap();
+    ChallengeBucket {
+      name: "test".to_owned(),
+      path: root,
+      locked: true,
+    }
+  }
+
   #[test]
   fn test_to_file_name() {
     assert_eq!(to_file_name("hello world"), "hello_world");
@@ -431,5 +453,16 @@ mod tests {
     assert_eq!(to_file_name("hello world\r"), "hello_world");
     assert_eq!(to_file_name("hello world\x7f"), "hello_world");
     assert_eq!(to_file_name("hello world.zip"), "hello_world.zip");
+  }
+
+  #[test]
+  fn ensure_prefix_rejects_path_traversal() {
+    let bucket = test_bucket();
+    assert!(bucket.ensure_prefix("static", "static/ok.txt").is_ok());
+    assert!(matches!(
+      bucket.ensure_prefix("static", "static/../secret.txt"),
+      Err(BucketError::PathTraversal)
+    ));
+    std::fs::remove_dir_all(bucket.path).ok();
   }
 }

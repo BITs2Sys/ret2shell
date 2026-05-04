@@ -1,10 +1,6 @@
 name: Docker
 
 on:
-  push:
-    tags:
-      - "*"
-
   workflow_dispatch:
     inputs:
       image:
@@ -16,14 +12,14 @@ jobs:
   # Build and export the docker image
   build:
     name: Build
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     env:
       # These environment variables will be set by `setup-env.sh`
       app_v: unknown
       commit_sha: unknown
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # fetch depth 0 to fetch all history for git-restore-mtime-action
           fetch-depth: 0
@@ -38,7 +34,6 @@ jobs:
       - name: Build on version ${{ env.app_v }}-${{ env.commit_sha }}
         id: build
         run: |
-          base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
           image="$(echo ${{ inputs.image }} | tr -d '[:space:]')"
           if [ -z "$image" ]; then
             image='ret2shell:${{ env.app_v }}'
@@ -48,6 +43,7 @@ jobs:
           echo "Building: $image"
           docker build \
             --build-arg "R2S_GIT_VERSION=${{ env.commit_sha }}" \
+            --load \
             -t "$image" \
             -f Containerfile .
 
@@ -62,7 +58,7 @@ jobs:
 
       - name: Upload artifact
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.export.outputs.output_fn }}
           path: |

@@ -85,7 +85,6 @@ async fn extract_bearer_token(
   } else {
     Token::default()
   };
-  debug!(?token, decoded=?token_obj, "user requested with token");
 
   let last_time = token_obj.exp - Utc::now().timestamp();
 
@@ -351,7 +350,7 @@ pub(crate) use captcha_protected;
 ///
 /// Usage:
 ///
-/// ```
+/// ```ignore
 /// Router::new()
 ///     .route(...)
 ///     .route_layer(axum::middleware::from_fn(permission_required_all!(Permission::Basic, ...)))
@@ -388,7 +387,7 @@ macro_rules! permission_required_all {
 ///
 /// Usage:
 ///
-/// ```
+/// ```ignore
 /// Router::new()
 ///     .route(...)
 ///     .route_layer(axum::middleware::from_fn(permission_required_any!(Permission::Basic, ...)))

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import type { ConfigMapList, NodeList } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getClusterConfig() {
   return await api.get(`${api_root}/cluster/config`).json<ConfigMapList>();
@@ -106,7 +106,7 @@ export function useUpdateGlobalTrafficScriptMutation(
 }
 
 export async function deleteGlobalTrafficScript() {
-  return await api.delete(`${api_root}/cluster/traffic`).json<void>();
+  return await safeJson(api.delete(`${api_root}/cluster/traffic`).json<void>());
 }
 
 export function useDeleteGlobalTrafficScriptMutation(
@@ -125,8 +125,50 @@ export function useDeleteGlobalTrafficScriptMutation(
   }));
 }
 
+export async function updateGlobalLifecycleScript(lifecycle: string) {
+  return await api.patch(`${api_root}/cluster/lifecycle`, { json: { lifecycle } }).json<{
+    lint: DiagnosticMarker[] | null;
+  }>();
+}
+
+export function useUpdateGlobalLifecycleScriptMutation(
+  props: { onSuccess?: (resp: { lint: DiagnosticMarker[] | null }) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ lifecycle }: { lifecycle: string }) => updateGlobalLifecycleScript(lifecycle),
+    onSuccess: (resp) => {
+      toastSuccess(t("general.actions.save.status.success"));
+      props.onSuccess?.(resp);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("general.actions.save.status.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function deleteGlobalLifecycleScript() {
+  return await safeJson(api.delete(`${api_root}/cluster/lifecycle`).json<void>());
+}
+
+export function useDeleteGlobalLifecycleScriptMutation(
+  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: deleteGlobalLifecycleScript,
+    onSuccess: () => {
+      toastSuccess(t("general.actions.delete.status.success"));
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("general.actions.delete.status.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
 export async function updateDefaultNodeSelector(node_selector: string) {
-  return await api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } }).json<void>();
+  return await safeJson(api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } }).json<void>());
 }
 
 export function useUpdateDefaultNodeSelectorMutation(
@@ -146,7 +188,7 @@ export function useUpdateDefaultNodeSelectorMutation(
 }
 
 export async function deleteDefaultNodeSelector() {
-  return await api.delete(`${api_root}/cluster/node-selector`).json<void>();
+  return await safeJson(api.delete(`${api_root}/cluster/node-selector`).json<void>());
 }
 
 export function useDeleteDefaultNodeSelectorMutation(

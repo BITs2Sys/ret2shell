@@ -13,6 +13,7 @@ use tracing::info;
 use crate::{
   middleware::auth::{self, Token},
   traits::{GlobalState, ResponseError},
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
@@ -37,8 +38,8 @@ async fn get_bulletin_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let results = article::get_page(
     &db.conn,
-    query.page.unwrap_or(1),
-    query.page_size.unwrap_or(15),
+    page(query.page),
+    page_size(query.page_size, DEFAULT_PAGE_SIZE),
     article::AccessPolicy::Bulletin,
     false,
     false,

@@ -7,7 +7,6 @@ use std::{
 };
 
 use chrono::{DateTime, Utc};
-use once_cell::sync::Lazy;
 use rune::{
   Context, Diagnostics, Source, Unit, Value, Vm,
   runtime::{Args, RuntimeContext},
@@ -24,8 +23,6 @@ type EngineContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
 pub struct Engine {
   contexts: Arc<RwLock<HashMap<String, EngineContext>>>,
 }
-
-pub static GLOBAL_ENGINE: Lazy<Engine> = Lazy::new(Engine::default);
 
 impl Engine {
   async fn build_context<M>(modules: Vec<M>) -> Result<Context, EngineError>
@@ -167,6 +164,18 @@ impl Engine {
     Ok(result)
   }
 
+  pub async fn has_function(
+    &self, key: impl AsRef<str>, func: &'static str,
+  ) -> Result<bool, EngineError> {
+    let key = key.as_ref();
+    let contexts = self.contexts.read().await;
+    let (unit, runtime, _) = contexts
+      .get(key)
+      .ok_or_else(|| EngineError::MissingCheckerScript(key.to_string()))?;
+    let vm = Vm::new(runtime.clone(), unit.clone());
+    Ok(vm.lookup_function([func]).is_ok())
+  }
+
   pub async fn cleanup(&self) {
     let now = Utc::now();
     let mut contexts = self.contexts.write().await;
@@ -178,6 +187,13 @@ impl Engine {
     debug!(count = contexts.len(), "cleanup complete");
   }
 
+  pub fn spawn_cleanup_worker(&self) {
+    let engine = self.clone();
+    tokio::spawn(async move {
+      engine.cleanup_worker().await;
+    });
+  }
+
   pub async fn cleanup_worker(&self) {
     let mut interval = tokio::time::interval(std::time::Duration::from_secs(3600));
     loop {
@@ -187,6 +203,8 @@ impl Engine {
   }
 }
 
-pub async fn initialize() {
-  tokio::spawn(GLOBAL_ENGINE.cleanup_worker());
+pub fn initialize() -> Engine {
+  let engine = Engine::default();
+  engine.spawn_cleanup_worker();
+  engine
 }

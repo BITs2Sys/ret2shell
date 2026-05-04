@@ -1,9 +1,11 @@
 //! String utils
 //!
-//! Currently contains deunicode function.
+//! Currently contains deunicode and leet helpers.
 
 use std::collections::HashMap;
 
+use deunicode::deunicode_with_tofu;
+use heck::ToSnakeCase;
 use once_cell::sync::Lazy;
 use rand::RngExt;
 
@@ -41,6 +43,24 @@ static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
   map.insert(b'Z', vec![b'Z', b'z', b'2']);
   map
 });
+
+pub fn deunicode_str(s: impl AsRef<str>, keep_case: bool) -> String {
+  let result = deunicode_with_tofu(&s.as_ref().replace(" ", "_"), "_")
+    .trim()
+    .to_owned();
+  if keep_case {
+    result.replace(" ", "")
+  } else {
+    result.to_snake_case()
+  }
+}
+
+pub fn account_str(s: impl AsRef<str>) -> String {
+  deunicode_str(s, true)
+    .chars()
+    .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+    .collect()
+}
 
 pub fn leet_str(s: impl AsRef<str>) -> String {
   let mut result = String::new();

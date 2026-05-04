@@ -1,4 +1,4 @@
-import { useGame } from "@api/game";
+import { useGame, useGameDoc } from "@api/game";
 import { useCreateTeamMutation } from "@api/team";
 import { generateRandomName } from "@lib/utils/random-names";
 import { createForm, maxLength, required, setValue } from "@modular-forms/solid";
@@ -7,7 +7,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameParticipateState, isGameCanParticipate } from "@storage/game";
 import { Title } from "@storage/header";
-import { t, themeStore } from "@storage/theme";
+import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
@@ -93,15 +93,10 @@ export default function () {
     });
   }
   const [generator, setGenerator] = createSignal<"chuunibyou" | "hacker">("hacker");
-  const [content, setContent] = createSignal(null as null | string);
-  const comps = import.meta.glob("../../_blocks/contents/*.md");
-  createEffect(() => {
-    if (themeStore.locale) {
-      untrack(async () => {
-        const match = comps[`../../_blocks/contents/welcome.${themeStore.locale}.md`];
-        setContent(((await match()) as { default: string }).default);
-      });
-    }
+  const rules = useGameDoc({
+    id: gameId,
+    type: () => "rules",
+    enabled: () => gameId() > 0,
   });
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
@@ -219,7 +214,7 @@ export default function () {
                   >
                     <div class="w-full">
                       <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("team.form.acceptRules.title")}</h2>
-                      <Article class="self-center" content={content() || ""} noExtraPaddings />
+                      <Article class="self-center" content={rules.data || ""} noExtraPaddings />
                     </div>
                     <div class="flex space-x-2">
                       <Button

@@ -12,7 +12,12 @@ import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson } from ".";
+
+export type OAuthProviderResponse = {
+  item: OAuthProvider;
+  lint: DiagnosticMarker[];
+};
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();
@@ -50,8 +55,8 @@ export type RegisterRequest = {
 } & CaptchaRequest;
 
 export async function register(req: RegisterRequest) {
-  await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/register`, { json: req }).json();
+  await sleep(500);
+  return await safeJson(api.post(`${api_root}/account/register`, { json: req }).json());
 }
 
 export function useRegisterMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -79,8 +84,8 @@ export type LoginRequest = {
 } & CaptchaRequest;
 
 export async function login(req: LoginRequest) {
-  await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/login`, { json: req }).json();
+  await sleep(500);
+  return await safeJson(api.post(`${api_root}/account/login`, { json: req }).json());
 }
 
 export function useLoginMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -103,8 +108,8 @@ export function useLoginMutation(props: { onSuccess?: () => void; onError?: (err
 }
 
 export async function logout() {
-  await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/logout`).json();
+  await sleep(500);
+  return await safeJson(api.post(`${api_root}/account/logout`).json());
 }
 
 export function useLogoutMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -123,7 +128,7 @@ export type ForgotPasswordRequest = {
 
 export async function forgotPassword(req: ForgotPasswordRequest) {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/forgot`, { json: req }).json();
+  return await safeJson(api.post(`${api_root}/account/forgot`, { json: req }).json());
 }
 
 export function useForgotPasswordMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -160,7 +165,7 @@ export type ResetPasswordRequest = {
 
 export async function resetPassword(req: ResetPasswordRequest) {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/reset`, { json: req }).json();
+  return await safeJson(api.post(`${api_root}/account/reset`, { json: req }).json());
 }
 
 export function useResetPasswordMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -188,7 +193,7 @@ export type VerifyEmailRequest = {
 
 export async function verifyEmail(req: VerifyEmailRequest) {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api.post(`${api_root}/account/verify`, { json: req }).json();
+  return await safeJson(api.post(`${api_root}/account/verify`, { json: req }).json());
 }
 
 export function useVerifyEmailMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -211,7 +216,7 @@ export function useVerifyEmailMutation(props: { onSuccess?: () => void; onError?
 
 export async function resendEmail() {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api.patch(`${api_root}/account/verify`).json();
+  return await safeJson(api.patch(`${api_root}/account/verify`).json());
 }
 
 export function useResendEmailMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -249,7 +254,7 @@ export function useAccountProfile(props: { enabled?: () => boolean; onError?: (e
 }
 
 export async function changeProfile(req: User) {
-  return await api.patch(`${api_root}/account/profile`, { json: req }).json();
+  return await safeJson(api.patch(`${api_root}/account/profile`, { json: req }).json());
 }
 
 export function useChangeProfileMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -272,11 +277,13 @@ export function useChangeProfileMutation(props: { onSuccess?: () => void; onErro
 
 export async function deleteSelf(captcha: CaptchaRequest) {
   await sleep(1000); // artificial delay to prevent brute-force
-  return await api
-    .delete(`${api_root}/account/profile`, {
-      json: captcha,
-    })
-    .json<void>();
+  return await safeJson(
+    api
+      .delete(`${api_root}/account/profile`, {
+        json: captcha,
+      })
+      .json<void>()
+  );
 }
 
 export function useDeleteSelfMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -353,7 +360,7 @@ export function useGenerateAccountCodeMutation(props: { onSuccess?: () => void; 
 
 export async function changePassword(req: { old_password: string; new_password: string }) {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api.patch(`${api_root}/account/password`, { json: req }).json();
+  return await safeJson(api.patch(`${api_root}/account/password`, { json: req }).json());
 }
 
 export function useChangePasswordMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -394,9 +401,7 @@ export function useOAuthProviders(props: { enabled?: () => boolean; onError?: (e
 }
 
 export async function getOAuthProvider(service: string) {
-  return await api
-    .get(`${api_root}/account/oauth/provider/${service}`)
-    .json<{ item: OAuthProvider; lint: DiagnosticMarker[] | null }>();
+  return await api.get(`${api_root}/account/oauth/provider/${service}`).json<OAuthProviderResponse>();
 }
 
 export function useOAuthProvider({
@@ -426,21 +431,21 @@ export function useOAuthProvider({
 }
 
 export async function updateOAuthProvider(service: string, req: OAuthProvider) {
-  return await api
-    .patch(`${api_root}/account/oauth/provider/${service}`, { json: req })
-    .json<{ item: OAuthProvider; lint: string | null }>();
+  return await api.patch(`${api_root}/account/oauth/provider/${service}`, { json: req }).json<OAuthProviderResponse>();
 }
 
-export function useUpdateOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+export function useUpdateOAuthProviderMutation(
+  props: { onSuccess?: (resp: OAuthProviderResponse) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: ({ service, req }: { service: string; req: OAuthProvider }) => updateOAuthProvider(service, req),
-    onSuccess: () => {
+    onSuccess: (resp) => {
       addToast({
         level: "success",
         description: t("general.actions.save.status.success"),
         duration: 5000,
       });
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));
@@ -450,7 +455,7 @@ export function useUpdateOAuthProviderMutation(props: { onSuccess?: () => void; 
 }
 
 export async function deleteOAuthProvider(service: string) {
-  return await api.delete(`${api_root}/account/oauth/provider/${service}`).json<void>();
+  return await safeJson(api.delete(`${api_root}/account/oauth/provider/${service}`).json<void>());
 }
 
 export function useDeleteOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -472,21 +477,21 @@ export function useDeleteOAuthProviderMutation(props: { onSuccess?: () => void; 
 }
 
 export async function createOAuthProvider(req: OAuthProvider) {
-  return await api
-    .post(`${api_root}/account/oauth/provider`, { json: req })
-    .json<{ item: OAuthProvider; lint: string | null }>();
+  return await api.post(`${api_root}/account/oauth/provider`, { json: req }).json<OAuthProviderResponse>();
 }
 
-export function useCreateOAuthProviderMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+export function useCreateOAuthProviderMutation(
+  props: { onSuccess?: (resp: OAuthProviderResponse) => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
     mutationFn: createOAuthProvider,
-    onSuccess: () => {
+    onSuccess: (resp) => {
       addToast({
         level: "success",
         description: t("general.actions.create.status.success"),
         duration: 5000,
       });
-      props.onSuccess?.();
+      props.onSuccess?.(resp);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.create.status.fail"));
@@ -546,14 +551,16 @@ export async function registerWithOAuth(
   }
 ) {
   await sleep(500); // artificial delay to prevent brute-force
-  return await api
-    .post(`${api_root}/account/oauth/register`, {
-      json: {
-        token,
-        ...req,
-      },
-    })
-    .json();
+  return await safeJson(
+    api
+      .post(`${api_root}/account/oauth/register`, {
+        json: {
+          token,
+          ...req,
+        },
+      })
+      .json()
+  );
 }
 
 export function useRegisterWithOAuthMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -576,7 +583,7 @@ export function useRegisterWithOAuthMutation(props: { onSuccess?: () => void; on
 }
 
 export async function bindWithOAuth(query: string) {
-  return await api.post(`${api_root}/account/oauth/bind${query}`).json();
+  return await safeJson(api.post(`${api_root}/account/oauth/bind${query}`).json());
 }
 
 export function useBindWithOAuthMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -598,13 +605,15 @@ export function useBindWithOAuthMutation(props: { onSuccess?: () => void; onErro
 }
 
 export async function unbindWithOAuth(id: number) {
-  return await api
-    .delete(`${api_root}/account/oauth/bind`, {
-      searchParams: {
-        id,
-      },
-    })
-    .json();
+  return await safeJson(
+    api
+      .delete(`${api_root}/account/oauth/bind`, {
+        searchParams: {
+          id,
+        },
+      })
+      .json()
+  );
 }
 
 export function useUnbindWithOAuthMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -695,7 +704,7 @@ export function useCreateInstituteMutation(props: { onSuccess?: () => void; onEr
 }
 
 export async function deleteInstitute(id: number) {
-  return await api.delete(`${api_root}/account/institute/${id}`).json<void>();
+  return await safeJson(api.delete(`${api_root}/account/institute/${id}`).json<void>());
 }
 
 export function useDeleteInstituteMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

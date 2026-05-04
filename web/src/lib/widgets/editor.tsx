@@ -63,6 +63,44 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   const [imageFile, setImageFile] = createSignal<File | null>(null);
   const [uploading, setUploading] = createSignal(false);
   const [dragging, setDragging] = createSignal(false);
+  let editorElement: HTMLPreElement;
+  let editor: ace.Ace.Editor | null = null;
+  function applyLints(lints = editorProps.lints ?? []) {
+    if (!editor) return;
+    const annotations = lints.map((lint) => ({
+      row: lint.start_line,
+      column: lint.start_column,
+      text: lint.message,
+      type: lint.kind === "error" ? "error" : lint.kind === "warning" ? "warning" : "info",
+    }));
+    editor.getSession().setAnnotations(annotations);
+    const prevMarkers = editor.session.getMarkers();
+    if (prevMarkers) {
+      const prevMarkersArr: number[] = Object.keys(prevMarkers).map((v) => Number.parseInt(v, 10));
+      for (const item of prevMarkersArr) {
+        editor.session.removeMarker(prevMarkers[item].id as number);
+      }
+    }
+    const markers = lints.map((lint) => ({
+      startRow: lint.start_line,
+      startCol: lint.start_column,
+      endRow: lint.end_line,
+      endCol: lint.end_column,
+      className:
+        lint.kind === "error" ? "ace_error-marker" : lint.kind === "warning" ? "ace_warning-marker" : "ace_info-marker",
+      type: "text" as "text" | "line" | "fullLine",
+    }));
+    for (const marker of markers) {
+      editor
+        .getSession()
+        .addMarker(
+          new ace.Range(marker.startRow, marker.startCol, marker.endRow, marker.endCol),
+          marker.className,
+          marker.type,
+          false
+        );
+    }
+  }
   async function handleUploadImage() {
     if (imageFile()) {
       setUploading(true);
@@ -75,8 +113,6 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       setUploading(false);
     }
   }
-  let editorElement: HTMLPreElement;
-  let editor: ace.Ace.Editor | null = null;
   async function initEditor() {
     const isRune = editorProps.lang === "rune";
     if (isRune) {
@@ -163,6 +199,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
         handleUploadImage();
       }
     });
+    applyLints();
   }
   createEffect(() => {
     if (editorProps.value !== editor?.getValue()) {
@@ -175,45 +212,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     }
   });
   createEffect(() => {
-    if (editorProps.lints && editor) {
-      const annotations = editorProps.lints.map((lint) => ({
-        row: lint.start_line,
-        column: lint.start_column,
-        text: lint.message,
-        type: lint.kind === "error" ? "error" : lint.kind === "warning" ? "warning" : "info",
-      }));
-      editor.getSession().setAnnotations(annotations);
-      const markers = editorProps.lints.map((lint) => ({
-        startRow: lint.start_line,
-        startCol: lint.start_column,
-        endRow: lint.end_line,
-        endCol: lint.end_column,
-        className:
-          lint.kind === "error"
-            ? "ace_error-marker"
-            : lint.kind === "warning"
-              ? "ace_warning-marker"
-              : "ace_info-marker",
-        type: "text" as "text" | "line" | "fullLine",
-      }));
-      const prevMarkers = editor.session.getMarkers();
-      if (prevMarkers) {
-        const prevMarkersArr: number[] = Object.keys(prevMarkers).map((v) => Number.parseInt(v, 10));
-        for (const item of prevMarkersArr) {
-          editor.session.removeMarker(prevMarkers[item].id as number);
-        }
-      }
-      for (const marker of markers) {
-        editor
-          .getSession()
-          .addMarker(
-            new ace.Range(marker.startRow, marker.startCol, marker.endRow, marker.endCol),
-            marker.className,
-            marker.type,
-            false
-          );
-      }
-    }
+    applyLints(editorProps.lints ?? []);
   });
 
   onMount(() => {
@@ -262,6 +261,7 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
     "onFocusIn",
     "lineNumbers",
     "commands",
+    "lints",
   ]);
   const [focused, setFocused] = createSignal(false);
   return (
