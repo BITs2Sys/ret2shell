@@ -234,12 +234,25 @@ where
   }
   if !training && only_solved {
     sql = sql
-      .filter(Column::TeamId.is_not_null())
-      .filter(team::Column::State.gte(team::State::Hidden))
-      .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
-  } else if only_solved {
-    sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
-  }
+        .filter(Column::TeamId.is_not_null())
+        .filter(team::Column::State.gte(team::State::Hidden))
+        .order_by_asc(Column::ChallengeId)
+        .order_by_asc(Column::TeamId)
+        .order_by_desc(Column::CreatedAt)
+        .distinct_on([
+            (Entity, Column::ChallengeId),
+            (Entity, Column::TeamId),
+        ]);
+} else if only_solved {
+    sql = sql
+        .order_by_asc(Column::ChallengeId)
+        .order_by_asc(Column::UserId)
+        .order_by_desc(Column::CreatedAt)
+        .distinct_on([
+            (Entity, Column::ChallengeId),
+            (Entity, Column::UserId),
+        ]);
+}
   sql = sql.column_as(challenge::Column::Score, "score");
 
   let result = sql.into_model().all(db).await?;
