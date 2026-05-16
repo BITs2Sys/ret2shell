@@ -17,6 +17,7 @@ use crate::{
 
 mod attachment;
 mod checker;
+mod fix;
 mod hint;
 mod instance;
 mod resource;
@@ -59,6 +60,10 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           get(checker::get_checker_script).patch(checker::update_checker_script),
         )
         .route(
+          "/fix",
+          patch(fix::update_fix_config).delete(fix::delete_fix_config),
+        )
+        .route(
           "/hint",
           post(hint::create_challenge_hint).delete(hint::delete_challenge_hint),
         )
@@ -78,6 +83,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/answer", get(resource::get_answer))
         .route("/file", get(attachment::get_player_attachment))
         .route("/env", get(instance::get_challenge_env_config))
+        .route("/fix", get(fix::get_fix_config))
+        .route(
+          "/fix/submit",
+          post(fix::submit_fix).route_layer(DefaultBodyLimit::max(1024 * 1024 * 1024)),
+        )
         .route(
           "/instance",
           post(instance::start_challenge_instance)

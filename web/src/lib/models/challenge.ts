@@ -39,3 +39,25 @@ export type ChallengeEnv = {
   images: ChallengeImage[];
   pull_secret: string | null;
 };
+
+export type FixConfig = {
+  enabled: boolean;
+  max_attempts: number;
+  fix_script: string;
+  upload_path: string;
+  target_container: string | null;
+  target_port: number | null;
+  tester: ChallengeImage | null;
+  tester_command: string[] | null;
+  result_env: string;
+  success_value: string;
+  timeout_secs: number;
+  pull_secret: string | null;
+};
+
+export type FixStatus = {
+  config: FixConfig | null;
+  attempts_used: number;
+  attempts_remaining: number | null;
+  solved: boolean;
+};

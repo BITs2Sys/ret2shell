@@ -1,4 +1,8 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+  collections::{BTreeMap, HashMap},
+  path::Path,
+  time::Duration,
+};
 
 use axum::extract::ws::WebSocket;
 use chrono::{DateTime, Utc};
@@ -17,12 +21,16 @@ use k8s_openapi::{
 };
 use kube::{
   Api, Client,
-  api::{DeleteParams, ListParams, LogParams, ObjectList, ObjectMeta, PartialObjectMetaExt, Patch},
+  api::{
+    AttachParams, DeleteParams, ListParams, LogParams, ObjectList, ObjectMeta,
+    PartialObjectMetaExt, Patch,
+  },
   runtime::reflector::Lookup,
 };
 use r2s_config::cluster::{
   AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, ServiceType,
 };
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio_util::{codec::Framed, sync::CancellationToken};
 use tracing::{debug, error, info, warn};
 
@@ -43,6 +51,14 @@ pub struct DeleteOutdatedEnvsResult {
   pub running: i32,
   pub pending: i32,
   pub deleted: Vec<ChallengeEnvSnapshot>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ExecOutput {
+  pub success: bool,
+  pub stdout: String,
+  pub stderr: String,
+  pub reason: Option<String>,
 }
 
 #[derive(Clone)]
@@ -70,6 +86,10 @@ macro_rules! check_enabled {
       Err(super::traits::ClusterError::ClusterDisabled)
     }
   };
+}
+
+fn shell_quote(value: &str) -> String {
+  format!("'{}'", value.replace('\'', "'\"'\"'"))
 }
 
 impl Cluster {
@@ -515,11 +535,33 @@ impl Cluster {
       .ok_or(ClusterError::MissingField("user".to_string()))?;
     let traffic = labels
       .get("ret.sh.cn/traffic")
+      .cloned()
       .ok_or(ClusterError::MissingField("traffic".to_string()))?;
     let pod_name = format!(
       "ret2shell-{challenge_id}-{user_id}-{}",
       Utc::now().timestamp()
     );
+    self
+      .create_env_pod_service(
+        pod_name,
+        "ret.sh.cn/traffic",
+        &traffic,
+        labels,
+        annotations,
+        envs,
+        env_config,
+        node_selector,
+        need_expose,
+      )
+      .await
+  }
+
+  #[allow(clippy::too_many_arguments)]
+  async fn create_env_pod_service(
+    &self, pod_name: String, traffic_label: &str, traffic: &str, labels: BTreeMap<String, String>,
+    annotations: BTreeMap<String, String>, envs: HashMap<String, String>, env_config: ChallengeEnv,
+    node_selector: Option<String>, need_expose: bool,
+  ) -> Result<ChallengeEnvSnapshot, ClusterError> {
     let node_selector = if let Some(node_selector) = node_selector {
       let mut n = BTreeMap::new();
       n.insert("ret.sh.cn/workload".to_owned(), node_selector);
@@ -642,9 +684,8 @@ impl Cluster {
         ..Default::default()
       },
       spec: Some(k8s_openapi::api::core::v1::ServiceSpec {
-        // use ret.sh.cn/traffic as selector
         selector: Some(
-          [("ret.sh.cn/traffic".to_owned(), traffic.clone())]
+          [(traffic_label.to_owned(), traffic.to_owned())]
             .iter()
             .map(|(k, v)| (k.to_owned(), v.to_owned()))
             .collect(),
@@ -695,6 +736,263 @@ impl Cluster {
         Err(err)
       }
     }
+  }
+
+  #[allow(clippy::too_many_arguments)]
+  pub async fn create_fix_target_env(
+    &self, submission_id: i64, labels: BTreeMap<String, String>,
+    annotations: BTreeMap<String, String>, envs: HashMap<String, String>, env_config: ChallengeEnv,
+    node_selector: Option<String>,
+  ) -> Result<ChallengeEnvSnapshot, ClusterError> {
+    let traffic = labels
+      .get("ret.sh.cn/fix-traffic")
+      .cloned()
+      .ok_or(ClusterError::MissingField("fix-traffic".to_string()))?;
+    let pod_name = format!("ret2shell-fix-target-{submission_id}");
+    self
+      .create_env_pod_service(
+        pod_name,
+        "ret.sh.cn/fix-traffic",
+        &traffic,
+        labels,
+        annotations,
+        envs,
+        env_config,
+        node_selector,
+        false,
+      )
+      .await
+  }
+
+  #[allow(clippy::too_many_arguments)]
+  pub async fn create_fix_tester_pod(
+    &self, name: &str, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
+    envs: HashMap<String, String>, tester: ChallengeImage, pull_secret: Option<String>,
+    command: Option<Vec<String>>, node_selector: Option<String>,
+  ) -> Result<Pod, ClusterError> {
+    let node_selector = if let Some(node_selector) = node_selector {
+      let mut n = BTreeMap::new();
+      n.insert("ret.sh.cn/workload".to_owned(), node_selector);
+      Some(n)
+    } else {
+      None
+    };
+    let pod = Pod {
+      metadata: ObjectMeta {
+        name: Some(name.to_owned()),
+        labels: Some(labels),
+        annotations: Some(annotations),
+        ..Default::default()
+      },
+      spec: Some(PodSpec {
+        enable_service_links: Some(false),
+        restart_policy: Some("Never".to_owned()),
+        image_pull_secrets: pull_secret.map(|secret| vec![LocalObjectReference { name: secret }]),
+        containers: vec![Container {
+          name: tester.name.clone(),
+          image: Some(tester.tag.clone()),
+          image_pull_policy: Some(String::from("Always")),
+          command,
+          env: Some(
+            envs
+              .into_iter()
+              .map(|v| EnvVar {
+                name: v.0,
+                value: Some(v.1),
+                value_from: None,
+              })
+              .collect(),
+          ),
+          resources: Some(ResourceRequirements {
+            requests: Some(
+              [
+                ("cpu", tester.cpu_req.to_string()),
+                ("memory", tester.mem_req.clone()),
+                (
+                  "ephemeral-storage",
+                  tester.storage_req.clone().unwrap_or("64Mi".to_owned()),
+                ),
+              ]
+              .iter()
+              .cloned()
+              .map(|(k, v)| (k.to_owned(), Quantity(v)))
+              .collect(),
+            ),
+            limits: Some(
+              [
+                ("cpu", tester.cpu.to_string()),
+                ("memory", tester.mem.clone()),
+                (
+                  "ephemeral-storage",
+                  tester.storage.clone().unwrap_or("512Mi".to_owned()),
+                ),
+              ]
+              .iter()
+              .cloned()
+              .map(|(k, v)| (k.to_owned(), Quantity(v)))
+              .collect(),
+            ),
+            ..Default::default()
+          }),
+          ..Default::default()
+        }],
+        node_selector,
+        ..Default::default()
+      }),
+      ..Default::default()
+    };
+    self.create_pod(pod).await
+  }
+
+  pub async fn wait_pod_running(&self, name: &str, timeout: Duration) -> Result<Pod, ClusterError> {
+    let started = std::time::Instant::now();
+    loop {
+      let pod = self.get_pod(name).await?;
+      if pod
+        .status
+        .as_ref()
+        .and_then(|status| status.phase.as_deref())
+        == Some("Running")
+      {
+        return Ok(pod);
+      }
+      if started.elapsed() > timeout {
+        return Err(ClusterError::Timeout(format!("pod {name} is not running")));
+      }
+      tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+  }
+
+  pub async fn wait_pod_finished(
+    &self, name: &str, timeout: Duration,
+  ) -> Result<Pod, ClusterError> {
+    let started = std::time::Instant::now();
+    loop {
+      let pod = self.get_pod(name).await?;
+      if matches!(
+        pod
+          .status
+          .as_ref()
+          .and_then(|status| status.phase.as_deref()),
+        Some("Succeeded" | "Failed")
+      ) {
+        return Ok(pod);
+      }
+      if started.elapsed() > timeout {
+        return Err(ClusterError::Timeout(format!("pod {name} is not finished")));
+      }
+      tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+  }
+
+  pub async fn pod_logs_string(
+    &self, pod: String, container: Option<String>,
+  ) -> Result<String, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "get pod logs")?);
+    Ok(
+      api
+        .logs(
+          &pod,
+          &LogParams {
+            container,
+            ..LogParams::default()
+          },
+        )
+        .await?,
+    )
+  }
+
+  pub async fn upload_file_to_pod(
+    &self, pod: &str, container: Option<&str>, source: impl AsRef<Path>, dest: &str,
+  ) -> Result<ExecOutput, ClusterError> {
+    let parent = dest
+      .rsplit_once('/')
+      .map(|(parent, _)| parent)
+      .unwrap_or(".");
+    let command = vec![
+      "/bin/sh".to_owned(),
+      "-c".to_owned(),
+      format!(
+        "mkdir -p {} && cat > {}",
+        shell_quote(parent),
+        shell_quote(dest)
+      ),
+    ];
+    self
+      .exec_pod(
+        pod,
+        container,
+        command,
+        Some(source.as_ref()),
+        Duration::from_secs(60),
+      )
+      .await
+  }
+
+  pub async fn exec_pod(
+    &self, pod: &str, container: Option<&str>, command: Vec<String>, stdin: Option<&Path>,
+    timeout: Duration,
+  ) -> Result<ExecOutput, ClusterError> {
+    let client = check_enabled!(self.client)?;
+    let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "exec pod")?);
+    let mut attach = AttachParams::default()
+      .stdin(stdin.is_some())
+      .stdout(true)
+      .stderr(true)
+      .max_stdout_buf_size(1024 * 1024)
+      .max_stderr_buf_size(1024 * 1024);
+    if let Some(container) = container {
+      attach = attach.container(container);
+    }
+    let mut attached = api.exec(pod, command, &attach).await?;
+    let mut stdout = attached.stdout();
+    let mut stderr = attached.stderr();
+    let status = attached
+      .take_status()
+      .ok_or(ClusterError::MissingField("exec status".to_owned()))?;
+
+    if let Some(source) = stdin {
+      let mut stdin_writer = attached
+        .stdin()
+        .ok_or(ClusterError::MissingField("exec stdin".to_owned()))?;
+      let mut file = tokio::fs::File::open(source).await?;
+      tokio::io::copy(&mut file, &mut stdin_writer).await?;
+      stdin_writer.shutdown().await?;
+    }
+
+    let result = tokio::time::timeout(timeout, async {
+      let mut stdout_buf = Vec::new();
+      if let Some(reader) = stdout.as_mut() {
+        reader.read_to_end(&mut stdout_buf).await?;
+      }
+      let mut stderr_buf = Vec::new();
+      if let Some(reader) = stderr.as_mut() {
+        reader.read_to_end(&mut stderr_buf).await?;
+      }
+      let status = status.await;
+      attached
+        .join()
+        .await
+        .map_err(|err| ClusterError::RemoteCommandError(err.to_string()))?;
+      let (success, reason) = status
+        .map(|status| {
+          (
+            status.status.as_deref() == Some("Success"),
+            status.reason.or(status.message),
+          )
+        })
+        .unwrap_or((false, Some("missing exec status".to_owned())));
+      Ok::<_, ClusterError>(ExecOutput {
+        success,
+        stdout: String::from_utf8_lossy(&stdout_buf).to_string(),
+        stderr: String::from_utf8_lossy(&stderr_buf).to_string(),
+        reason,
+      })
+    })
+    .await
+    .map_err(|_| ClusterError::Timeout(format!("exec in pod {pod} timed out")))??;
+    Ok(result)
   }
 
   pub async fn get_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {

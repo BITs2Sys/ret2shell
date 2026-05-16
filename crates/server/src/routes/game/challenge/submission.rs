@@ -4,6 +4,7 @@ use axum::{
   response::IntoResponse,
 };
 use chrono::Utc;
+use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_database::{
   challenge, game, submission, team,
@@ -102,11 +103,22 @@ pub(super) struct SubmitRequest {
 
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn submit_flag(
-  State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
-  Extension(challenge): Extension<challenge::Model>, Json(req): Json<SubmitRequest>,
+  State(ref db): State<Database>, State(ref bucket): State<Bucket>, State(cache): State<Cache>,
+  State(ref queue): State<Queue>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(trace): Extension<RequestId>,
+  team_ext: Extension<Option<team::Model>>, Extension(challenge): Extension<challenge::Model>,
+  Json(req): Json<SubmitRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let challenge_bucket = super::get_challenge_bucket(bucket, &game, &challenge).await?;
+  if challenge_bucket
+    .fix()
+    .await?
+    .is_some_and(|config| config.enabled)
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "this is a fix challenge, please upload a fixed artifact".to_owned(),
+    ));
+  }
   let team = extract_team!(game, team_ext, token);
   let team = if team.is_some()
     && game.in_progress()

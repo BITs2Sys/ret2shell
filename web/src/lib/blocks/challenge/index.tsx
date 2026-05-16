@@ -1,6 +1,7 @@
 import { inflyClient } from "@api";
 import {
   useChallenge,
+  useChallengeFix,
   useDeleteChallengeMutation,
   useDownChallengeMutation,
   useUpChallengeMutation,
@@ -20,6 +21,7 @@ import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
 import Checker from "./checker";
 import Files from "./files";
+import Fix from "./fix";
 import Hammer from "./hammer";
 import Hints from "./hints";
 import Instances from "./instances";
@@ -41,6 +43,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
     terminal: Terminal,
     hints: Hints,
     files: Files,
+    fix: Fix,
     hammer: Hammer,
     answer: Answer,
     statistics: Statistics,
@@ -64,6 +67,10 @@ function BottomPanel(props: ChallengeWidgetProps) {
   };
 
   const challenge = useChallenge({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const fix = useChallengeFix({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
@@ -129,6 +136,12 @@ function BottomPanel(props: ChallengeWidgetProps) {
             <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("challenge.answer.title")}</span>
           </Button>
+          <Show when={isAdminOfGame(game.data) || fix.data?.config?.enabled}>
+            <Button onClick={() => setSearchParams({ tab: "fix" })} ghost={page() !== "fix"}>
+              <span class="shrink-0 icon-[fluent--wrench-20-regular] w-5 h-5" />
+              <span>{t("challenge.fix.title")}</span>
+            </Button>
+          </Show>
           <Show when={isAdminOfGame(game.data)}>
             <Divider direction="vertical" class="h-8" />
             <Button onClick={() => setSearchParams({ tab: "statistics" })} ghost={page() !== "statistics"}>

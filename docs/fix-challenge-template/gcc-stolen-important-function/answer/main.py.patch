@@ -1,0 +1,17 @@
+diff --git a/src/main.py b/src/main.py
+--- a/src/main.py
++++ b/src/main.py
+@@
+ def check(code: str):
++    # The original checker only rejected function-like declarations at the first
++    # root node. GCC attributes can still place a data object named `main` into
++    # an executable section. Reject the dangerous extension before passing code
++    # to GCC.
++    blocked_tokens = ("__attribute__", "__asm__", "asm(", "section(")
++    if any(token in code for token in blocked_tokens):
++        err("Invalid source")
++        exit(1)
++
+     parser = Parser(C_LANGUAGE)
+     tree = parser.parse(code.encode())
+     function_node = tree.root_node.children[0]

@@ -1143,6 +1143,39 @@
       "title": "Submissions",
       "total": "Total"
     },
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix configuration",
+      "tester": "Tester container",
+      "disabled": "Fix is not enabled for this challenge.",
+      "attempts": "Attempts {{used}} / {{total}}",
+      "solved": "The fix has been accepted.",
+      "submit": "Submit fix",
+      "form": {
+        "enabled": "Enable Fix",
+        "maxAttempts": "Max attempts",
+        "fixScript": "Fix script",
+        "uploadPath": "Upload path in target",
+        "targetContainer": "Target container",
+        "targetPort": "Target port",
+        "timeout": "Timeout seconds",
+        "resultEnv": "Result env",
+        "successValue": "Success value",
+        "pullSecret": "Tester pull secret",
+        "testerCommand": {
+          "label": "Tester command JSON",
+          "invalid": "Invalid tester command"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "Failed to fetch Fix config"
+        },
+        "submit": {
+          "title": "Failed to submit fix"
+        }
+      }
+    },
     "statistics": {
       "title": "Statistics",
       "empty": "No statistics available",

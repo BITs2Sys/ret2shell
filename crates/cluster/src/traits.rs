@@ -21,6 +21,10 @@ pub enum ClusterError {
   ProxyError(#[from] wsrx::Error),
   #[error("missing field: {0}")]
   MissingField(String),
+  #[error("timeout: {0}")]
+  Timeout(String),
+  #[error("remote command error: {0}")]
+  RemoteCommandError(String),
   #[error("network error: {0}")]
   NetworkError(#[from] reqwest::Error),
   #[error("json error: {0}")]

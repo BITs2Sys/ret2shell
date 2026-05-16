@@ -1,0 +1,23 @@
+enabled = true
+max_attempts = 3
+fix_script = "fix.sh"
+upload_path = "/tmp/ret2shell-fix/submission"
+target_port = 10001
+result_env = "R2S_FIX_RESULT"
+success_value = "success"
+timeout_secs = 120
+tester_command = [
+  "/bin/sh",
+  "-c",
+  ". /check.sh; printf '%s=%s\\n' \"$R2S_FIX_RESULT_ENV\" \"$R2S_FIX_RESULT\"",
+]
+
+[tester]
+name = "fix-tester"
+tag = "registry.example.com/ret2shell/gcc-fix-tester:latest"
+cpu = 0.5
+cpu_req = 0.01
+mem = "128Mi"
+mem_req = "32Mi"
+storage = "256Mi"
+storage_req = "64Mi"

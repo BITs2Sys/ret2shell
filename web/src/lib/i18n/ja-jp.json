@@ -1143,6 +1143,39 @@
       "title": "提出記録",
       "total": "合計"
     },
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix 設定",
+      "tester": "テスターコンテナ",
+      "disabled": "この問題では Fix が有効ではありません。",
+      "attempts": "試行 {{used}} / {{total}}",
+      "solved": "修復は受理されました。",
+      "submit": "修復を提出",
+      "form": {
+        "enabled": "Fix を有効化",
+        "maxAttempts": "最大試行回数",
+        "fixScript": "修復スクリプト",
+        "uploadPath": "ターゲット内アップロードパス",
+        "targetContainer": "ターゲットコンテナ",
+        "targetPort": "ターゲットポート",
+        "timeout": "タイムアウト秒",
+        "resultEnv": "結果環境変数",
+        "successValue": "成功値",
+        "pullSecret": "テスター pull secret",
+        "testerCommand": {
+          "label": "テスターコマンド JSON",
+          "invalid": "テスターコマンドが不正です"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "Fix 設定の取得に失敗しました"
+        },
+        "submit": {
+          "title": "修復の提出に失敗しました"
+        }
+      }
+    },
     "statistics": {
       "title": "統計",
       "empty": "統計データはありません",

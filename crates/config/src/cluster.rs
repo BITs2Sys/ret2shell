@@ -136,6 +136,58 @@ pub struct ChallengeEnv {
   pub pull_secret: Option<String>,
 }
 
+fn default_fix_max_attempts() -> i32 {
+  3
+}
+
+fn default_fix_script() -> String {
+  "fix.sh".to_owned()
+}
+
+fn default_fix_upload_path() -> String {
+  "/tmp/ret2shell-fix/submission".to_owned()
+}
+
+fn default_fix_result_env() -> String {
+  "R2S_FIX_RESULT".to_owned()
+}
+
+fn default_fix_success_value() -> String {
+  "success".to_owned()
+}
+
+fn default_fix_timeout_secs() -> u64 {
+  120
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FixConfig {
+  #[serde(default)]
+  pub enabled: bool,
+  #[serde(default = "default_fix_max_attempts")]
+  pub max_attempts: i32,
+  #[serde(default = "default_fix_script")]
+  pub fix_script: String,
+  #[serde(default = "default_fix_upload_path")]
+  pub upload_path: String,
+  #[serde(default)]
+  pub target_container: Option<String>,
+  #[serde(default)]
+  pub target_port: Option<u16>,
+  #[serde(default)]
+  pub tester: Option<ChallengeImage>,
+  #[serde(default)]
+  pub tester_command: Option<Vec<String>>,
+  #[serde(default = "default_fix_result_env")]
+  pub result_env: String,
+  #[serde(default = "default_fix_success_value")]
+  pub success_value: String,
+  #[serde(default = "default_fix_timeout_secs")]
+  pub timeout_secs: u64,
+  #[serde(default)]
+  pub pull_secret: Option<String>,
+}
+
 impl ChallengeImage {
   pub fn desensitize(self) -> Self {
     Self {
@@ -163,9 +215,44 @@ impl ChallengeEnv {
   }
 }
 
+impl Default for FixConfig {
+  fn default() -> Self {
+    Self {
+      enabled: false,
+      max_attempts: default_fix_max_attempts(),
+      fix_script: default_fix_script(),
+      upload_path: default_fix_upload_path(),
+      target_container: None,
+      target_port: None,
+      tester: None,
+      tester_command: None,
+      result_env: default_fix_result_env(),
+      success_value: default_fix_success_value(),
+      timeout_secs: default_fix_timeout_secs(),
+      pull_secret: None,
+    }
+  }
+}
+
+impl FixConfig {
+  pub fn desensitize(self) -> Self {
+    Self {
+      fix_script: String::new(),
+      upload_path: String::new(),
+      target_container: None,
+      tester: self.tester.map(|tester| tester.desensitize()),
+      tester_command: None,
+      pull_secret: None,
+      ..self
+    }
+  }
+}
+
 #[cfg(test)]
 mod tests {
-  use super::{AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, RegistryConfig};
+  use super::{
+    AppProtocol, ChallengeEnv, ChallengeImage, Config, FixConfig, Protocol, RegistryConfig,
+  };
   use crate::traits::Merge;
 
   fn registry() -> RegistryConfig {
@@ -278,5 +365,35 @@ mod tests {
     assert_eq!(desensitized.images.len(), 1);
     assert_eq!(desensitized.images[0].tag, "ret.sh.cn/shadowed:latest");
     assert_eq!(desensitized.images[0].cpu, 0.0);
+  }
+
+  #[test]
+  fn fix_config_desensitize_redacts_private_runner_details() {
+    let desensitized = FixConfig {
+      enabled: true,
+      tester: Some(image("tester")),
+      tester_command: Some(vec![
+        "/bin/sh".to_owned(),
+        "-c".to_owned(),
+        "check".to_owned(),
+      ]),
+      pull_secret: Some("registry-secret".to_owned()),
+      ..FixConfig::default()
+    }
+    .desensitize();
+
+    assert!(desensitized.enabled);
+    assert_eq!(desensitized.max_attempts, 3);
+    assert_eq!(desensitized.fix_script, "");
+    assert_eq!(desensitized.upload_path, "");
+    assert_eq!(desensitized.tester_command, None);
+    assert_eq!(desensitized.pull_secret, None);
+    assert_eq!(
+      desensitized
+        .tester
+        .as_ref()
+        .map(|tester| tester.tag.as_str()),
+      Some("ret.sh.cn/shadowed:latest")
+    );
   }
 }

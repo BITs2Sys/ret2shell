@@ -1143,6 +1143,39 @@
       "title": "提交記錄",
       "total": "總共"
     },
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix 配置",
+      "tester": "測試容器",
+      "disabled": "本題未啟用 Fix。",
+      "attempts": "次數 {{used}} / {{total}}",
+      "solved": "修復已通過。",
+      "submit": "提交修復",
+      "form": {
+        "enabled": "啟用 Fix",
+        "maxAttempts": "最大修復次數",
+        "fixScript": "修復腳本",
+        "uploadPath": "靶機內上傳路徑",
+        "targetContainer": "靶機容器",
+        "targetPort": "靶機端口",
+        "timeout": "逾時秒數",
+        "resultEnv": "結果環境變數",
+        "successValue": "成功取值",
+        "pullSecret": "測試鏡像拉取密鑰",
+        "testerCommand": {
+          "label": "測試命令 JSON",
+          "invalid": "測試命令格式錯誤"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "獲取 Fix 配置失敗"
+        },
+        "submit": {
+          "title": "提交修復失敗"
+        }
+      }
+    },
     "statistics": {
       "title": "統計",
       "empty": "暫無統計數據",
