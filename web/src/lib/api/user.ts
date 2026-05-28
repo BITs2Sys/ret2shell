@@ -5,6 +5,7 @@ import type { User } from "@models/user";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
+import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
@@ -212,6 +213,55 @@ export function useUserOAuthList({
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("user.errors.fetchOAuth.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export type ChallengeStats = {
+  challenge_id: number;
+  challenge_name: string;
+  game_id: number;
+  game_name: string;
+  team_name: string | null;
+  total_submissions: number;
+  solved_count: number;
+  last_submission_at: DateTime;
+};
+
+export async function getUserSubmissionStats(id: number, game_id?: number) {
+  return await api
+    .get(`${api_root}/user/${id}/stats`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          game_id,
+        })
+      ) as SearchParamsOption,
+    })
+    .json<ChallengeStats[]>();
+}
+
+export function useUserSubmissionStats({
+  id,
+  game_id,
+  enabled,
+  onError,
+}: {
+  id: () => number;
+  game_id?: () => number | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["user", id(), "submission-stats", game_id?.()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getUserSubmissionStats(id(), game_id?.() ?? undefined),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("user.errors.fetchSubmissions.title"));
         return onError?.(err) ?? false;
       },
     }),

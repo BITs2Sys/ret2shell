@@ -1,17 +1,19 @@
 import { handleHttpError } from "@api";
-import { getUser, getUserTeams } from "@api/user";
+import { getUser, getUserTeams, useUserSubmissionStats } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
+import Chart from "@widgets/chart";
 import LoadingTips from "@widgets/loading-tips";
+import Select from "@widgets/select";
 import clsx from "clsx";
-import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
@@ -20,8 +22,12 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
+  const [selectedGameId, setSelectedGameId] = createSignal<string | null>((searchParams.game as string) || null);
+  const [allGames, setAllGames] = createSignal(new Map<number, string>());
+
   createEffect(() => {
     if (!userId()) {
       navigate("/sigtrap/404", { replace: true });
@@ -39,6 +45,106 @@ export default function () {
       setLoading(false);
     });
   });
+
+  const submissionStats = useUserSubmissionStats({
+    id: () => userId()!,
+    game_id: () => {
+      const val = selectedGameId();
+      return val ? Number.parseInt(val, 10) : null;
+    },
+    enabled: () => !!userId(),
+  });
+
+  createEffect(() => {
+    const stats = submissionStats.data;
+    if (stats) {
+      setAllGames((prev) => {
+        const next = new Map(prev);
+        for (const stat of stats) {
+          if (stat.game_id && stat.game_name) {
+            next.set(stat.game_id, stat.game_name);
+          }
+        }
+        return next;
+      });
+    }
+  });
+
+  const gameOptions = createMemo(() => {
+    const games = new Map<number, string>();
+    for (const team of teams()) {
+      if (team.game_id && team.game_name) {
+        games.set(team.game_id, team.game_name);
+      }
+    }
+    for (const [id, name] of allGames()) {
+      games.set(id, name);
+    }
+    return [
+      { label: t("user.submissions.allGames"), value: "" },
+      ...Array.from(games.entries()).map(([id, name]) => ({
+        label: name,
+        value: id.toString(),
+      })),
+    ];
+  });
+
+  const chartOption = createMemo(() => {
+    const stats = submissionStats.data;
+    if (!stats || stats.length === 0) return null;
+    const sortedChallenges = [...stats].sort((a, b) => b.total_submissions - a.total_submissions);
+    return {
+      grid: {
+        left: "16px",
+        right: "32px",
+        bottom: "32px",
+        top: "16px",
+        containLabel: true,
+      },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          type: "shadow",
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: sortedChallenges.map((c) => c.challenge_name),
+        axisLabel: {
+          rotate: 30,
+          fontSize: 11,
+        },
+      },
+      yAxis: {
+        type: "value",
+        min: 0,
+        minInterval: 1,
+      },
+      series: [
+        {
+          name: t("user.submissions.solved"),
+          type: "bar",
+          stack: "total",
+          data: sortedChallenges.map((c) => (c.solved_count > 0 ? 1 : 0)),
+          itemStyle: {
+            color: "#17a750",
+          },
+          barMaxWidth: 48,
+        },
+        {
+          name: t("user.submissions.failed"),
+          type: "bar",
+          stack: "total",
+          data: sortedChallenges.map((c) => c.total_submissions - c.solved_count),
+          itemStyle: {
+            color: "#808080",
+          },
+          barMaxWidth: 48,
+        },
+      ],
+    };
+  });
+
   const matches = createBreakpoints(breakpoints);
   const [showSidebar, setShowSidebar] = createSignal(false);
 
@@ -48,20 +154,6 @@ export default function () {
       <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />} showLeftBar={showSidebar()}>
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
-            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
-              <span>{t("user.description.title")}</span>
-            </h3>
-            <section>
-              <Switch>
-                <Match when={loading()}>
-                  <LoadingTips />
-                </Match>
-                <Match when={true}>
-                  <Article content={user()?.description || t("user.description.empty")} />
-                </Match>
-              </Switch>
-            </section>
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t("user.joinedGames")}</span>
@@ -85,6 +177,97 @@ export default function () {
                 <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
                 <span>{t("user.moreJournal")}</span>
               </div>
+            </section>
+            <div class="h-6" />
+            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
+              <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5" />
+              <span class="flex-1">{t("user.submissions.title")}</span>
+              <Select
+                size="sm"
+                class="w-64"
+                items={gameOptions()}
+                value={selectedGameId() ? [selectedGameId()!] : []}
+                onValueChange={(e) => {
+                  setSelectedGameId(e.value[0] || null);
+                }}
+                placeholder={t("user.submissions.allGames")}
+              />
+            </h3>
+            <section class="flex flex-col">
+              <Show when={chartOption() && !submissionStats.isLoading}>
+                <div class="h-64 py-2">
+                  <Chart option={chartOption()!} />
+                </div>
+              </Show>
+              <Switch>
+                <Match when={submissionStats.isLoading}>
+                  <LoadingTips />
+                </Match>
+                <Match when={!submissionStats.data || submissionStats.data.length === 0}>
+                  <div class="h-12 flex items-center justify-center opacity-60">
+                    <span>{t("user.submissions.empty")}</span>
+                  </div>
+                </Match>
+                <Match when={true}>
+                  <div class="overflow-x-auto">
+                    <table class="table table-sm w-full">
+                      <thead>
+                        <tr class="border-b border-b-layer-content/15">
+                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.challenge")}</th>
+                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.game")}</th>
+                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.team")}</th>
+                          <th class="text-center h-10 font-normal opacity-60">{t("user.submissions.status")}</th>
+                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.time")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <For each={submissionStats.data!}>
+                          {(challenge) => (
+                            <tr class="border-b border-b-layer-content/10 hover:bg-layer-content/5">
+                              <td class="text-start py-3">
+                                <A
+                                  class="link-primary hover:underline"
+                                  href={`/games/${challenge.game_id}/challenges?challenge=${challenge.challenge_id}`}
+                                >
+                                  {challenge.challenge_name}
+                                </A>
+                              </td>
+                              <td class="text-start py-3 opacity-80">{challenge.game_name}</td>
+                              <td class="text-start py-3 opacity-80">{challenge.team_name ?? "-"}</td>
+                              <td class="text-center py-3">
+                                <Show
+                                  when={challenge.solved_count > 0}
+                                  fallback={<span class="text-error">{t("user.submissions.failed")}</span>}
+                                >
+                                  <span class="text-success">{t("user.submissions.solved")}</span>
+                                </Show>
+                              </td>
+                              <td class="text-end py-3 opacity-60">
+                                {challenge.last_submission_at.toFormat("yyyy-MM-dd HH:mm:ss")}
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </tbody>
+                    </table>
+                  </div>
+                </Match>
+              </Switch>
+            </section>
+            <div class="h-6" />
+            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
+              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
+              <span>{t("user.description.title")}</span>
+            </h3>
+            <section class="max-h-96 overflow-y-auto">
+              <Switch>
+                <Match when={loading()}>
+                  <LoadingTips />
+                </Match>
+                <Match when={true}>
+                  <Article content={user()?.description || t("user.description.empty")} noExtraPaddings compact />
+                </Match>
+              </Switch>
             </section>
           </div>
         </div>
