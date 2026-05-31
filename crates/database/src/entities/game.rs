@@ -4,9 +4,10 @@ use chrono::{DateTime, Utc, serde::ts_seconds};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
   ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel, IntoSimpleExpr, Order,
-  QueryOrder, QuerySelect, entity::prelude::*,
+  QueryOrder, QuerySelect,
+  entity::prelude::*,
+  sea_query::{BinOper, Query, SimpleExpr},
 };
-use sea_query::{BinOper, Query, SimpleExpr};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
