@@ -23,6 +23,16 @@ Whenever the version is bumped, edit these files (listed in the order they shoul
 
 After editing all seven files, run `cargo check` (or `cargo build`) to regenerate `Cargo.lock` with the new workspace version. The lock file will update automatically — no manual editing needed.
 
+## Tag Format
+
+When creating a Git tag for a release, use the plain version number **without** a `v` prefix. For example, for version `3.11.2`, the tag must be:
+
+```
+3.11.2
+```
+
+Not `v3.11.2`.
+
 ## Files That Do NOT Need Manual Changes
 
 These files read the version dynamically at build/release time and will pick up the new version automatically:
