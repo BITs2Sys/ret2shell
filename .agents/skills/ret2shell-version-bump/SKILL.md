@@ -23,7 +23,19 @@ Whenever the version is bumped, edit these files (listed in the order they shoul
 
 After editing all seven files, run `cargo check` (or `cargo build`) to regenerate `Cargo.lock` with the new workspace version. The lock file will update automatically — no manual editing needed.
 
-## Tag Format
+## Commit and Tag Format
+
+### Version bump commit
+
+The commit that bumps the version should use the `:tada:` gitmoji followed by the version number only:
+
+```
+:tada: 3.11.2
+```
+
+Do not use `:bookmark:` or a longer description for this commit.
+
+### Release tag
 
 When creating a Git tag for a release, use the plain version number **without** a `v` prefix. For example, for version `3.11.2`, the tag must be:
 
