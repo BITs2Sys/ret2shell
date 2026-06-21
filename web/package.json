@@ -53,7 +53,7 @@
     "ky": "^2.0.2",
     "lorem-ipsum": "^3.0.0",
     "luxon": "^3.7.2",
-    "nanoid": "^5.1.11",
+    "nanoid": "^5.1.15",
     "overlayscrollbars": "^2.16.0",
     "overlayscrollbars-solid": "^0.5.6",
     "passive-events-support": "^1.1.0",
@@ -68,7 +68,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "sakana-widget": "^3.0.0",
+    "sakana-widget": "^3.0.1",
     "shell-quote": "^1.8.4",
     "shiki": "^3.23.0",
     "solid-js": "^1.9.13",
@@ -79,15 +79,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
-    "@iconify-json/fluent": "^1.2.50",
+    "@iconify-json/fluent": "^1.2.51",
     "@iconify-json/fluent-emoji-flat": "^1.2.5",
     "@iconify-json/meteocons": "^1.2.4",
     "@iconify/tailwind4": "^1.2.3",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.1",
     "@types/howler": "^2.2.13",
-    "@types/luxon": "^3.7.1",
-    "@types/node": "^25.9.3",
+    "@types/luxon": "^3.7.2",
+    "@types/node": "^26.0.0",
     "@types/shell-quote": "^1.7.5",
     "kubernetes-types": "^1.30.0",
     "tailwindcss": "^4.3.1",
@@ -95,7 +95,7 @@
     "vite": "^8.0.16",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.11.12",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }
