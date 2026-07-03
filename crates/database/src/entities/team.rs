@@ -39,12 +39,23 @@ pub enum State {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+#[serde(rename_all = "snake_case")]
+pub enum TeamScoreHistoryKind {
+  #[default]
+  Solve,
+  Extra,
+  Koh,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct TeamScoreHistory {
   pub score: i32,
   #[serde(with = "ts_seconds")]
   pub changed_at: DateTime<Utc>,
   pub challenge_id: Option<i64>,
   pub blood_state: Option<i32>,
+  #[serde(default)]
+  pub kind: TeamScoreHistoryKind,
 }
 
 #[derive(Clone, Debug, PartialEq, Default, Eq, Serialize, Deserialize, FromJsonQueryResult)]

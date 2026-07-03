@@ -3,6 +3,7 @@ import {
   useChallenge,
   useChallengeAttachments,
   useChallengeEnv,
+  useChallengeKoh,
   useChallengeSolveStatus,
   useDelayChallengeInstanceMutation,
   useStartChallengeInstanceMutation,
@@ -57,6 +58,10 @@ export default function (props: ChallengeWidgetProps) {
     challenge_id: () => props.challengeId,
   });
   const env = useChallengeEnv({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const koh = useChallengeKoh({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
@@ -276,7 +281,7 @@ export default function (props: ChallengeWidgetProps) {
                 </For>
               </section>
             </Show>
-            <Show when={env.data}>
+            <Show when={env.data && !koh.data?.config?.enabled}>
               <section class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 relative py-2 gap-y-2">
                 <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
                   <h3 class="font-bold flex space-x-2 items-center flex-1">

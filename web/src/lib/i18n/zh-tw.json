@@ -1176,6 +1176,71 @@
         }
       }
     },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH 配置",
+      "disabled": "本題未啟用 KoH。",
+      "identifier": "隊伍標識",
+      "noIdentifier": "暫無隊伍標識",
+      "owner": "當前占領者",
+      "noOwner": "無人占領",
+      "owned": "你的隊伍",
+      "target": "共享靶機",
+      "scoreboard": "KoH 榜",
+      "emptyScoreboard": "暫無 KoH 得分",
+      "events": "事件",
+      "emptyEvents": "暫無 KoH 事件",
+      "status": {
+        "idle": "未啟動"
+      },
+      "mode": {
+        "agentHttp": "傳統占領",
+        "roundRankHttp": "按輪排名",
+        "gameElo": "遊戲 Elo"
+      },
+      "actions": {
+        "check": "檢查",
+        "start": "啟動 Hill",
+        "stop": "停止 Hill"
+      },
+      "form": {
+        "enabled": "啟用 KoH",
+        "mode": "KoH 模式",
+        "interval": "計分間隔（秒）",
+        "roundSecs": "每輪時間（秒）",
+        "totalRounds": "總輪次（0 為不限）",
+        "reward": "每輪滿分",
+        "rankCount": "得分隊伍數量",
+        "rankPercentages": "各名次得分占比（逗號分隔）",
+        "timeout": "檢查逾時（秒）",
+        "statusPath": "Agent 狀態路徑",
+        "statusUrl": "外部 Agent URL",
+        "apiKey": "Agent API Key",
+        "agentPort": "Agent 端口",
+        "targetPort": "靶機端口",
+        "autoStart": "自動管理共享 Hill"
+      },
+      "errors": {
+        "fetch": {
+          "title": "獲取 KoH 狀態失敗"
+        },
+        "fetchEvents": {
+          "title": "獲取 KoH 事件失敗"
+        },
+        "fetchScoreboard": {
+          "title": "獲取 KoH 榜失敗"
+        },
+        "start": {
+          "title": "啟動 KoH Hill 失敗"
+        },
+        "stop": {
+          "title": "停止 KoH Hill 失敗"
+        },
+        "check": {
+          "title": "檢查 KoH 狀態失敗"
+        }
+      }
+    },
     "statistics": {
       "title": "統計",
       "empty": "暫無統計數據",

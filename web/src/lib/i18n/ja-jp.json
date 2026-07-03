@@ -1176,6 +1176,71 @@
         }
       }
     },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH 設定",
+      "disabled": "この問題では KoH が有効ではありません。",
+      "identifier": "チーム識別子",
+      "noIdentifier": "チーム識別子はありません",
+      "owner": "現在の所有者",
+      "noOwner": "所有者なし",
+      "owned": "あなたのチーム",
+      "target": "共有ターゲット",
+      "scoreboard": "KoH ボード",
+      "emptyScoreboard": "KoH スコアはまだありません",
+      "events": "イベント",
+      "emptyEvents": "KoH イベントはまだありません",
+      "status": {
+        "idle": "未起動"
+      },
+      "mode": {
+        "agentHttp": "クラシック所有",
+        "roundRankHttp": "ラウンド順位",
+        "gameElo": "ゲーム Elo"
+      },
+      "actions": {
+        "check": "チェック",
+        "start": "Hill を起動",
+        "stop": "Hill を停止"
+      },
+      "form": {
+        "enabled": "KoH を有効化",
+        "mode": "KoH モード",
+        "interval": "採点間隔（秒）",
+        "roundSecs": "ラウンド時間（秒）",
+        "totalRounds": "総ラウンド数（0 は無制限）",
+        "reward": "ラウンド満点",
+        "rankCount": "得点対象チーム数",
+        "rankPercentages": "順位別得点率（カンマ区切り）",
+        "timeout": "チェックタイムアウト（秒）",
+        "statusPath": "Agent 状態パス",
+        "statusUrl": "外部 Agent URL",
+        "apiKey": "Agent API Key",
+        "agentPort": "Agent ポート",
+        "targetPort": "ターゲットポート",
+        "autoStart": "共有 Hill を自動管理"
+      },
+      "errors": {
+        "fetch": {
+          "title": "KoH 状態の取得に失敗しました"
+        },
+        "fetchEvents": {
+          "title": "KoH イベントの取得に失敗しました"
+        },
+        "fetchScoreboard": {
+          "title": "KoH ボードの取得に失敗しました"
+        },
+        "start": {
+          "title": "KoH Hill の起動に失敗しました"
+        },
+        "stop": {
+          "title": "KoH Hill の停止に失敗しました"
+        },
+        "check": {
+          "title": "KoH 状態チェックに失敗しました"
+        }
+      }
+    },
     "statistics": {
       "title": "統計",
       "empty": "統計データはありません",

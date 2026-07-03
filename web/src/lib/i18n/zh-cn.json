@@ -1176,6 +1176,71 @@
         }
       }
     },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH 配置",
+      "disabled": "本题未启用 KoH。",
+      "identifier": "队伍标识",
+      "noIdentifier": "暂无队伍标识",
+      "owner": "当前占领者",
+      "noOwner": "无人占领",
+      "owned": "你的队伍",
+      "target": "共享靶机",
+      "scoreboard": "KoH 榜",
+      "emptyScoreboard": "暂无 KoH 得分",
+      "events": "事件",
+      "emptyEvents": "暂无 KoH 事件",
+      "status": {
+        "idle": "未启动"
+      },
+      "mode": {
+        "agentHttp": "传统占领",
+        "roundRankHttp": "按轮排名",
+        "gameElo": "游戏 Elo"
+      },
+      "actions": {
+        "check": "检查",
+        "start": "启动 Hill",
+        "stop": "停止 Hill"
+      },
+      "form": {
+        "enabled": "启用 KoH",
+        "mode": "KoH 模式",
+        "interval": "计分间隔（秒）",
+        "roundSecs": "每轮时间（秒）",
+        "totalRounds": "总轮次（0 为不限）",
+        "reward": "每轮满分",
+        "rankCount": "得分队伍数量",
+        "rankPercentages": "各名次得分占比（逗号分隔）",
+        "timeout": "检查超时（秒）",
+        "statusPath": "Agent 状态路径",
+        "statusUrl": "外部 Agent URL",
+        "apiKey": "Agent API Key",
+        "agentPort": "Agent 端口",
+        "targetPort": "靶机端口",
+        "autoStart": "自动管理共享 Hill"
+      },
+      "errors": {
+        "fetch": {
+          "title": "获取 KoH 状态失败"
+        },
+        "fetchEvents": {
+          "title": "获取 KoH 事件失败"
+        },
+        "fetchScoreboard": {
+          "title": "获取 KoH 榜失败"
+        },
+        "start": {
+          "title": "启动 KoH Hill 失败"
+        },
+        "stop": {
+          "title": "停止 KoH Hill 失败"
+        },
+        "check": {
+          "title": "检查 KoH 状态失败"
+        }
+      }
+    },
     "statistics": {
       "title": "统计",
       "empty": "暂无统计数据",

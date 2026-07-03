@@ -1176,6 +1176,71 @@
         }
       }
     },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH configuration",
+      "disabled": "KoH is not enabled for this challenge.",
+      "identifier": "Team identifier",
+      "noIdentifier": "No team identifier",
+      "owner": "Current owner",
+      "noOwner": "No owner",
+      "owned": "Your team",
+      "target": "Shared target",
+      "scoreboard": "KoH board",
+      "emptyScoreboard": "No KoH score yet",
+      "events": "Events",
+      "emptyEvents": "No KoH events yet",
+      "status": {
+        "idle": "Not started"
+      },
+      "mode": {
+        "agentHttp": "Classic owner",
+        "roundRankHttp": "Round ranking",
+        "gameElo": "Game Elo"
+      },
+      "actions": {
+        "check": "Check",
+        "start": "Start Hill",
+        "stop": "Stop Hill"
+      },
+      "form": {
+        "enabled": "Enable KoH",
+        "mode": "KoH mode",
+        "interval": "Scoring interval (s)",
+        "roundSecs": "Round length (s)",
+        "totalRounds": "Total rounds (0 for unlimited)",
+        "reward": "Full score per round",
+        "rankCount": "Scored team count",
+        "rankPercentages": "Rank score percentages (comma-separated)",
+        "timeout": "Check timeout (s)",
+        "statusPath": "Agent status path",
+        "statusUrl": "External agent URL",
+        "apiKey": "Agent API key",
+        "agentPort": "Agent port",
+        "targetPort": "Target port",
+        "autoStart": "Manage shared Hill automatically"
+      },
+      "errors": {
+        "fetch": {
+          "title": "Failed to fetch KoH status"
+        },
+        "fetchEvents": {
+          "title": "Failed to fetch KoH events"
+        },
+        "fetchScoreboard": {
+          "title": "Failed to fetch KoH board"
+        },
+        "start": {
+          "title": "Failed to start KoH Hill"
+        },
+        "stop": {
+          "title": "Failed to stop KoH Hill"
+        },
+        "check": {
+          "title": "Failed to check KoH status"
+        }
+      }
+    },
     "statistics": {
       "title": "Statistics",
       "empty": "No statistics available",

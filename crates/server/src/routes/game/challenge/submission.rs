@@ -119,6 +119,15 @@ pub(super) async fn submit_flag(
       "this is a fix challenge, please upload a fixed artifact".to_owned(),
     ));
   }
+  if challenge_bucket
+    .koh()
+    .await?
+    .is_some_and(|config| config.enabled)
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "this is a KoH challenge, flag submission is disabled".to_owned(),
+    ));
+  }
   let team = extract_team!(game, team_ext, token);
   let team = if team.is_some()
     && game.in_progress()

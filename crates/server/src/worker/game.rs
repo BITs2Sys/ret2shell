@@ -12,7 +12,7 @@ use r2s_cluster::{CHALLENGE_NS, Cluster};
 use r2s_config::GlobalConfig;
 use r2s_database::{
   audit, challenge, extra, game, submission,
-  team::{self, TeamScoreHistory, TeamScoreHistoryList},
+  team::{self, TeamScoreHistory, TeamScoreHistoryKind, TeamScoreHistoryList},
   user,
 };
 use r2s_engine::Engine;
@@ -66,7 +66,8 @@ pub async fn spawn_game_workers(state: GlobalState) {
     config,
   ));
   tokio::spawn(score_maintenance_worker(queue, database));
-  tokio::spawn(game_repo_index_worker(state));
+  tokio::spawn(game_repo_index_worker(state.clone()));
+  tokio::spawn(super::koh::spawn(state));
 }
 
 async fn game_repo_index_worker(state: GlobalState) {
@@ -181,6 +182,7 @@ async fn score_maintenance_worker_exec(
         changed_at,
         blood_state: None,
         challenge_id: None,
+        kind: TeamScoreHistoryKind::Extra,
         score,
       });
     }
@@ -569,6 +571,7 @@ async fn submission_worker_exec(
       changed_at,
       blood_state,
       challenge_id: Some(challenge.id),
+      kind: TeamScoreHistoryKind::Solve,
       score,
     });
     team.last_active_at = changed_at;
@@ -796,6 +799,7 @@ async fn fix_worker_exec(
     changed_at,
     blood_state,
     challenge_id: Some(challenge.id),
+    kind: TeamScoreHistoryKind::Solve,
     score,
   });
   team.last_active_at = changed_at;
@@ -1104,6 +1108,7 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
       challenge_id: None,
       changed_at: Utc::now(),
       blood_state: None,
+      kind: team::TeamScoreHistoryKind::Extra,
     });
     let result = team::update(
       &txn,

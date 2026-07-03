@@ -1,0 +1,11 @@
+hidden = false
+name = "Minions in 16k"
+tag = [
+  { name = "Game", primary = true },
+  { name = "KoH", primary = false },
+]
+
+[score_rule]
+decay = 10
+initial = 100
+minimum = 100

@@ -1,0 +1,4 @@
+attack=70
+gather=45
+defend=25
+scout=10

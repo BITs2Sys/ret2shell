@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use deunicode::deunicode_with_tofu;
-use r2s_config::cluster::{ChallengeEnv, FixConfig};
+use r2s_config::cluster::{ChallengeEnv, FixConfig, KohConfig};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -179,6 +179,37 @@ impl ChallengeBucket {
       return Err(BucketError::NeedLocking);
     }
     tokio::fs::remove_file(self.path.join("fix.toml")).await?;
+    Ok(())
+  }
+
+  pub async fn set_koh(&self, config: Value) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    let config: KohConfig = serde_json::from_value(config)?;
+    write(
+      &self.path.join("koh.toml"),
+      toml::to_string_pretty(&config)?,
+    )
+    .await?;
+
+    Ok(())
+  }
+
+  pub async fn koh(&self) -> Result<Option<KohConfig>, BucketError> {
+    let path = self.path.join("koh.toml");
+    if !path.exists() {
+      return Ok(None);
+    }
+    let config = toml::from_str(&read_to_string(&path).await?)?;
+    Ok(Some(config))
+  }
+
+  pub async fn delete_koh(&self) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    tokio::fs::remove_file(self.path.join("koh.toml")).await?;
     Ok(())
   }
 

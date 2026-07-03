@@ -214,13 +214,14 @@ export default function () {
               return true;
             })
             .map((h) =>
-              h.challenge_id || showReal()
+              (h.challenge_id && h.kind !== "koh") || showReal()
                 ? [
                     h.changed_at.toMillis(),
                     showReal()
                       ? h.score
                       : t.history
                           .filter((i) => i.changed_at <= h.changed_at && i.challenge_id)
+                          .filter((i) => i.kind === undefined || i.kind === "solve")
                           .map((i) => challengeList().find((c) => c.id === i.challenge_id)?.score ?? 0)
                           .reduce((a, b) => a + b, 0),
                   ]

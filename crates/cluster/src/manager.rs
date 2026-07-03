@@ -305,6 +305,15 @@ impl Cluster {
   }
 
   async fn check_outdated_pod(&self, pod: &Pod) -> Result<bool, ClusterError> {
+    if pod
+      .metadata
+      .labels
+      .as_ref()
+      .and_then(|labels| labels.get("ret.sh.cn/koh"))
+      .is_some_and(|value| value == "true")
+    {
+      return Ok(false);
+    }
     let renew = pod
       .metadata
       .annotations
@@ -541,6 +550,32 @@ impl Cluster {
       "ret2shell-{challenge_id}-{user_id}-{}",
       Utc::now().timestamp()
     );
+    self
+      .create_env_pod_service(
+        pod_name,
+        "ret.sh.cn/traffic",
+        &traffic,
+        labels,
+        annotations,
+        envs,
+        env_config,
+        node_selector,
+        need_expose,
+      )
+      .await
+  }
+
+  #[allow(clippy::too_many_arguments)]
+  pub async fn create_koh_hill_env(
+    &self, challenge_id: i64, labels: BTreeMap<String, String>,
+    annotations: BTreeMap<String, String>, envs: HashMap<String, String>, env_config: ChallengeEnv,
+    node_selector: Option<String>, need_expose: bool,
+  ) -> Result<ChallengeEnvSnapshot, ClusterError> {
+    let traffic = labels
+      .get("ret.sh.cn/traffic")
+      .cloned()
+      .ok_or(ClusterError::MissingField("traffic".to_string()))?;
+    let pod_name = format!("ret2shell-koh-{challenge_id}");
     self
       .create_env_pod_service(
         pod_name,
@@ -1124,6 +1159,33 @@ impl Cluster {
     &self, challenge_id: i64,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
     let pods = self.get_challenge_env(challenge_id).await?;
+    let mut snapshots = Vec::new();
+    for pod in pods.iter() {
+      let service = self.capture_service_snapshot(pod).await;
+      self.delete_pod(pod.metadata.name.as_ref().unwrap()).await?;
+      self
+        .delete_service(pod.metadata.name.as_ref().unwrap())
+        .await?;
+      snapshots.push(ChallengeEnvSnapshot {
+        pod: pod.clone(),
+        service,
+      });
+    }
+    Ok(snapshots)
+  }
+
+  pub async fn get_koh_hill_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {
+    self
+      .get_pods_by_label(&format!(
+        "ret.sh.cn/koh=true,ret.sh.cn/challenge={challenge_id}"
+      ))
+      .await
+  }
+
+  pub async fn stop_koh_hill_env(
+    &self, challenge_id: i64,
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
+    let pods = self.get_koh_hill_env(challenge_id).await?;
     let mut snapshots = Vec::new();
     for pod in pods.iter() {
       let service = self.capture_service_snapshot(pod).await;

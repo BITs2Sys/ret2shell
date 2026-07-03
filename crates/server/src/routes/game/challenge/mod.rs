@@ -20,6 +20,7 @@ mod checker;
 mod fix;
 mod hint;
 mod instance;
+mod koh;
 mod resource;
 mod submission;
 
@@ -64,6 +65,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           patch(fix::update_fix_config).delete(fix::delete_fix_config),
         )
         .route(
+          "/koh/hill",
+          post(koh::start_koh_hill).delete(koh::stop_koh_hill),
+        )
+        .route("/koh/check", post(koh::check_koh_once))
+        .route(
           "/hint",
           post(hint::create_challenge_hint).delete(hint::delete_challenge_hint),
         )
@@ -84,6 +90,14 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/file", get(attachment::get_player_attachment))
         .route("/env", get(instance::get_challenge_env_config))
         .route("/fix", get(fix::get_fix_config))
+        .route(
+          "/koh",
+          get(koh::get_koh_status)
+            .patch(koh::update_koh_config)
+            .delete(koh::delete_koh_config),
+        )
+        .route("/koh/event", get(koh::get_koh_events))
+        .route("/koh/scoreboard", get(koh::get_koh_scoreboard))
         .route(
           "/fix/submit",
           post(fix::submit_fix).route_layer(DefaultBodyLimit::max(1024 * 1024 * 1024)),

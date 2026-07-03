@@ -160,6 +160,42 @@ fn default_fix_timeout_secs() -> u64 {
   120
 }
 
+fn default_koh_mode() -> KohMode {
+  KohMode::AgentHttp
+}
+
+fn default_koh_status_path() -> String {
+  "/status".to_owned()
+}
+
+fn default_koh_interval_secs() -> u64 {
+  10
+}
+
+fn default_koh_round_secs() -> u64 {
+  60
+}
+
+fn default_koh_total_rounds() -> u32 {
+  0
+}
+
+fn default_koh_reward() -> i32 {
+  1
+}
+
+fn default_koh_rank_count() -> u32 {
+  1
+}
+
+fn default_koh_rank_percentages() -> Vec<i32> {
+  vec![100]
+}
+
+fn default_koh_timeout_secs() -> u64 {
+  3
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FixConfig {
   #[serde(default)]
@@ -186,6 +222,78 @@ pub struct FixConfig {
   pub timeout_secs: u64,
   #[serde(default)]
   pub pull_secret: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum KohMode {
+  AgentHttp,
+  RoundRankHttp,
+  GameElo,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct KohEloConfig {
+  #[serde(default = "default_koh_elo_calibration_rounds")]
+  pub calibration_rounds: u32,
+  #[serde(default = "default_koh_elo_initial_rating")]
+  pub initial_rating: i32,
+  #[serde(default = "default_koh_elo_k_factor")]
+  pub k_factor: i32,
+}
+
+fn default_koh_elo_calibration_rounds() -> u32 {
+  10
+}
+
+fn default_koh_elo_initial_rating() -> i32 {
+  1000
+}
+
+fn default_koh_elo_k_factor() -> i32 {
+  32
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct KohConfig {
+  #[serde(default)]
+  pub enabled: bool,
+  #[serde(default = "default_koh_mode")]
+  pub mode: KohMode,
+  /// Owner-check interval for classic CTFd-style KoH.
+  #[serde(default = "default_koh_interval_secs")]
+  pub interval_secs: u64,
+  /// Round length for rank-based KoH. A value of 60 means one scored round per
+  /// minute.
+  #[serde(default = "default_koh_round_secs")]
+  pub round_secs: u64,
+  /// Total scored rounds for rank-based KoH. Zero means unlimited while the
+  /// challenge is active.
+  #[serde(default = "default_koh_total_rounds")]
+  pub total_rounds: u32,
+  /// Full score for a single owner tick or first place in a rank-based round.
+  #[serde(default = "default_koh_reward")]
+  pub reward: i32,
+  #[serde(default = "default_koh_rank_count")]
+  pub rank_count: u32,
+  #[serde(default = "default_koh_rank_percentages")]
+  pub rank_percentages: Vec<i32>,
+  #[serde(default)]
+  pub status_url: Option<String>,
+  #[serde(default = "default_koh_status_path")]
+  pub status_path: String,
+  #[serde(default)]
+  pub api_key: Option<String>,
+  #[serde(default)]
+  pub agent_port: Option<u16>,
+  #[serde(default)]
+  pub target_port: Option<u16>,
+  #[serde(default = "default_koh_timeout_secs")]
+  pub timeout_secs: u64,
+  #[serde(default)]
+  pub auto_start: bool,
+  #[serde(default)]
+  pub elo: Option<KohEloConfig>,
 }
 
 impl ChallengeImage {
@@ -243,6 +351,38 @@ impl FixConfig {
       tester: self.tester.map(|tester| tester.desensitize()),
       tester_command: None,
       pull_secret: None,
+      ..self
+    }
+  }
+}
+
+impl Default for KohConfig {
+  fn default() -> Self {
+    Self {
+      enabled: false,
+      mode: default_koh_mode(),
+      interval_secs: default_koh_interval_secs(),
+      round_secs: default_koh_round_secs(),
+      total_rounds: default_koh_total_rounds(),
+      reward: default_koh_reward(),
+      rank_count: default_koh_rank_count(),
+      rank_percentages: default_koh_rank_percentages(),
+      status_url: None,
+      status_path: default_koh_status_path(),
+      api_key: None,
+      agent_port: None,
+      target_port: None,
+      timeout_secs: default_koh_timeout_secs(),
+      auto_start: true,
+      elo: None,
+    }
+  }
+}
+
+impl KohConfig {
+  pub fn desensitize(self) -> Self {
+    Self {
+      api_key: None,
       ..self
     }
   }

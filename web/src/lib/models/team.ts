@@ -12,6 +12,7 @@ export type TeamScoreHistory = {
   changed_at: DateTime;
   challenge_id: number | null;
   blood_state: number | null;
+  kind?: "solve" | "extra" | "koh";
 };
 
 export type Team = {

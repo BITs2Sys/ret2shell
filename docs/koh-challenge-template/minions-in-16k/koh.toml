@@ -1,0 +1,13 @@
+enabled = true
+mode = "round_rank_http"
+interval_secs = 10
+round_secs = 60
+total_rounds = 30
+reward = 100
+rank_count = 5
+rank_percentages = [100, 80, 60, 40, 20]
+status_path = "/status"
+agent_port = 8080
+target_port = 8080
+timeout_secs = 3
+auto_start = true

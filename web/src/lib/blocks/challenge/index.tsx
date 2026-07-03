@@ -2,6 +2,7 @@ import { inflyClient } from "@api";
 import {
   useChallenge,
   useChallengeFix,
+  useChallengeKoh,
   useDeleteChallengeMutation,
   useDownChallengeMutation,
   useUpChallengeMutation,
@@ -26,6 +27,7 @@ import Hammer from "./hammer";
 import Hints from "./hints";
 import Instances from "./instances";
 import Intro from "./intro";
+import Koh from "./koh";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
@@ -44,6 +46,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
     hints: Hints,
     files: Files,
     fix: Fix,
+    koh: Koh,
     hammer: Hammer,
     answer: Answer,
     statistics: Statistics,
@@ -71,6 +74,10 @@ function BottomPanel(props: ChallengeWidgetProps) {
     challenge_id: () => props.challengeId,
   });
   const fix = useChallengeFix({
+    game_id: () => props.gameId,
+    challenge_id: () => props.challengeId,
+  });
+  const koh = useChallengeKoh({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
@@ -140,6 +147,12 @@ function BottomPanel(props: ChallengeWidgetProps) {
             <Button onClick={() => setSearchParams({ tab: "fix" })} ghost={page() !== "fix"}>
               <span class="shrink-0 icon-[fluent--wrench-20-regular] w-5 h-5" />
               <span>{t("challenge.fix.title")}</span>
+            </Button>
+          </Show>
+          <Show when={isAdminOfGame(game.data) || koh.data?.config?.enabled}>
+            <Button onClick={() => setSearchParams({ tab: "koh" })} ghost={page() !== "koh"}>
+              <span class="shrink-0 icon-[fluent--crown-20-regular] w-5 h-5" />
+              <span>{t("challenge.koh.title")}</span>
             </Button>
           </Show>
           <Show when={isAdminOfGame(game.data)}>

@@ -72,27 +72,38 @@ export default function TeamSolves(props: { game?: Game; teams: Team[]; challeng
               {(tag) => (
                 <For each={challengeMap().get(tag)!}>
                   {(challenge) => (
-                    <div
-                      class="h-12 w-24 flex items-center justify-center"
-                      title={team.history
-                        .find((h) => h.challenge_id === challenge.id)
-                        ?.changed_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                    >
-                      <Switch>
-                        <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 1}>
-                          <span class="shrink-0 icon-[fluent--number-circle-1-20-filled] w-5 h-5 text-yellow-500 -z-10" />
-                        </Match>
-                        <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 2}>
-                          <span class="shrink-0 icon-[fluent--number-circle-2-20-filled] w-5 h-5 text-gray-500 -z-10" />
-                        </Match>
-                        <Match when={team.history.find((h) => h.challenge_id === challenge.id)?.blood_state === 3}>
-                          <span class="shrink-0 icon-[fluent--number-circle-3-20-filled] w-5 h-5 text-orange-500 -z-10" />
-                        </Match>
-                        <Match when={team.history.find((h) => h.challenge_id === challenge.id)}>
-                          <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5 text-success -z-10" />
-                        </Match>
-                      </Switch>
-                    </div>
+                    (() => {
+                      const solve = () =>
+                        team.history.find(
+                          (h) => h.challenge_id === challenge.id && (h.kind === undefined || h.kind === "solve")
+                        );
+                      const koh = () => team.history.find((h) => h.challenge_id === challenge.id && h.kind === "koh");
+                      const history = () => solve() ?? koh();
+                      return (
+                        <div
+                          class="h-12 w-24 flex items-center justify-center"
+                          title={history()?.changed_at.toFormat("yyyy-MM-dd HH:mm:ss")}
+                        >
+                          <Switch>
+                            <Match when={solve()?.blood_state === 1}>
+                              <span class="shrink-0 icon-[fluent--number-circle-1-20-filled] w-5 h-5 text-yellow-500 -z-10" />
+                            </Match>
+                            <Match when={solve()?.blood_state === 2}>
+                              <span class="shrink-0 icon-[fluent--number-circle-2-20-filled] w-5 h-5 text-gray-500 -z-10" />
+                            </Match>
+                            <Match when={solve()?.blood_state === 3}>
+                              <span class="shrink-0 icon-[fluent--number-circle-3-20-filled] w-5 h-5 text-orange-500 -z-10" />
+                            </Match>
+                            <Match when={solve()}>
+                              <span class="shrink-0 icon-[fluent--flag-20-filled] w-5 h-5 text-success -z-10" />
+                            </Match>
+                            <Match when={koh()}>
+                              <span class="shrink-0 icon-[fluent--crown-20-filled] w-5 h-5 text-primary -z-10" />
+                            </Match>
+                          </Switch>
+                        </div>
+                      );
+                    })()
                   )}
                 </For>
               )}

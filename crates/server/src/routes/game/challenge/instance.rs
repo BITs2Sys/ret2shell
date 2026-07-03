@@ -118,6 +118,15 @@ pub(super) async fn start_challenge_instance(
   }
 
   let challenge_bucket = super::get_challenge_bucket(&bucket, &game, &challenge).await?;
+  if challenge_bucket
+    .koh()
+    .await?
+    .is_some_and(|config| config.enabled)
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "this is a KoH challenge, shared hill is managed by KoH".to_owned(),
+    ));
+  }
 
   if let Some(env_config) = challenge_bucket.env().await? {
     if env_config.images.is_empty() || env_config.images.iter().all(|i| i.port.is_none()) {
