@@ -126,6 +126,7 @@ pub struct Model {
   pub frozen: bool,
   pub host_type: HostType,
   pub team_size: i32,
+  pub env_limit: Option<i32>,
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
   #[sea_orm(column_type = "JsonBinary")]
@@ -174,6 +175,10 @@ impl Model {
 
   pub fn archived(&self) -> bool {
     self.host_type == HostType::Game && self.archive_at <= Utc::now()
+  }
+
+  pub fn env_limit(&self) -> i32 {
+    self.env_limit.unwrap_or(if self.team_size == 0 { 1 } else { self.team_size })
   }
 }
 
@@ -392,6 +397,7 @@ mod tests {
       frozen: false,
       host_type,
       team_size: 4,
+      env_limit: None,
       access_policy: AccessPolicy {
         restrict: false,
         institutes: vec![],

@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "Team size",
-        "placeholder": "Please enter the team size",
+        "placeholder": "Enter team size, 0 for unlimited",
         "required": "Team size cannot be empty",
         "mustBeNumber": "Team size must be a number",
         "mustBePositiveNumber": "Team size must be a positive number",
-        "minimum": "Team size cannot be less than 1",
+        "minimum": "Team size cannot be less than 0",
         "maximum": "Team size cannot be more than 99"
+      },
+      "envLimit": {
+        "label": "Env limit",
+        "placeholder": "Leave empty to fall back to team size",
+        "minimum": "Env limit cannot be less than 0",
+        "maximum": "Env limit cannot be more than 99"
       },
       "enableTeamAudit": {
         "label": "Enable team audit",
@@ -2026,6 +2032,7 @@
     },
     "solo": "Solo game",
     "collab": "{{size}}-person collab game",
+    "unlimited": "Unlimited team game",
     "list": {
       "title": "Teams",
       "selectInstitute": "Select Institute...",

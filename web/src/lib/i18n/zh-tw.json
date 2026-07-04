@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "隊伍人數",
-        "placeholder": "請輸入隊伍人數",
+        "placeholder": "請輸入隊伍人數，0 表示不限制",
         "required": "隊伍人數不能為空",
         "mustBeNumber": "隊伍人數必須是數字",
         "mustBePositiveNumber": "隊伍人數必須是正數",
-        "minimum": "人數不能少於 1",
+        "minimum": "人數不能少於 0",
         "maximum": "人數不能多於 99"
+      },
+      "envLimit": {
+        "label": "容器限制",
+        "placeholder": "留空則默認跟隨隊伍人數",
+        "minimum": "容器限制不能少於 0",
+        "maximum": "容器限制不能多於 99"
       },
       "enableTeamAudit": {
         "label": "啟用隊伍審核",
@@ -2026,6 +2032,7 @@
     },
     "solo": "單人賽",
     "collab": "{{size}} 人組隊賽",
+    "unlimited": "不限人數組隊賽",
     "list": {
       "title": "隊伍列表",
       "selectInstitute": "選擇組織...",

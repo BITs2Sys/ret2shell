@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "チーム人数",
-        "placeholder": "チーム人数を入力してください",
+        "placeholder": "チーム人数を入力してください。0 は制限なし",
         "required": "チーム人数は必須です",
         "mustBeNumber": "チーム人数は数字でなければなりません",
         "mustBePositiveNumber": "チーム人数は正の数でなければなりません",
-        "minimum": "人数は1未満であってはなりません",
+        "minimum": "人数は0未満であってはなりません",
         "maximum": "人数は99を超えてはなりません"
+      },
+      "envLimit": {
+        "label": "コンテナ制限",
+        "placeholder": "空欄の場合、チーム人数に従います",
+        "minimum": "コンテナ制限は0未満であってはなりません",
+        "maximum": "コンテナ制限は99を超えてはなりません"
       },
       "enableTeamAudit": {
         "label": "チーム審査を有効にする",
@@ -2026,6 +2032,7 @@
     },
     "solo": "シングル戦",
     "collab": "{{size}} 人チーム戦",
+    "unlimited": "人数無制限チーム戦",
     "list": {
       "title": "チーム一覧",
       "selectInstitute": "組織を選択...",

@@ -20,6 +20,7 @@ export type GameForm = {
   offline?: boolean;
   frozen?: boolean;
   team_size?: number;
+  env_limit?: number;
   enable_audit?: boolean;
   can_register_after_started?: boolean;
   award_rate?: number;
@@ -198,7 +199,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
             type="number"
             validate={[
               required(t("game.form.teamSize.required")),
-              minRange(1, t("game.form.teamSize.minimum")),
+              minRange(0, t("game.form.teamSize.minimum")),
               maxRange(99, t("game.form.teamSize.maximum")),
             ]}
           >
@@ -211,6 +212,27 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
                 title={t("game.form.teamSize.label")}
                 placeholder={t("game.form.teamSize.placeholder")}
                 type="number"
+                min={0}
+                max={99}
+              />
+            )}
+          </Field>
+          <Field
+            name="env_limit"
+            type="number"
+            validate={[minRange(0, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
+          >
+            {(field, props) => (
+              <Input
+                {...props}
+                value={field.value}
+                error={field.error}
+                class="flex-1"
+                title={t("game.form.envLimit.label")}
+                placeholder={t("game.form.envLimit.placeholder")}
+                type="number"
+                min={0}
+                max={99}
               />
             )}
           </Field>

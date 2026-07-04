@@ -444,7 +444,7 @@ async fn join_team(
     .await?
     .ok_or_else(|| ResponseError::NotFound("team".to_owned()))?;
   let members = team::get_members(&db.conn, team.id).await?;
-  if members.len() >= (game.team_size as usize) {
+  if game.team_size > 0 && members.len() >= (game.team_size as usize) {
     warn!(team_id=%team.id, team_name=%team.name, "user try to join team, but team size is full");
     return Err(ResponseError::PreconditionFailed("team is full".to_owned()));
   }
