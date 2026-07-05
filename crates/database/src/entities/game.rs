@@ -457,4 +457,37 @@ mod tests {
     assert!(!sample_game(HostType::Game, -3600, 3600, 3600).archived());
     assert!(!sample_game(HostType::Training, -7200, -3600, -60).archived());
   }
+
+  #[test]
+  fn env_limit_uses_stored_value_when_positive() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.env_limit = Some(3);
+    assert_eq!(game.env_limit(), 3);
+  }
+
+  #[test]
+  fn env_limit_falls_back_to_team_size() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 4;
+    game.env_limit = None;
+    assert_eq!(game.env_limit(), 4);
+  }
+
+  #[test]
+  fn env_limit_defaults_to_one_when_team_size_is_zero() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 0;
+    game.env_limit = None;
+    assert_eq!(game.env_limit(), 1);
+  }
+
+  #[test]
+  fn env_limit_ignores_non_positive_values() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 4;
+    game.env_limit = Some(0);
+    assert_eq!(game.env_limit(), 4);
+    game.env_limit = Some(-1);
+    assert_eq!(game.env_limit(), 4);
+  }
 }
