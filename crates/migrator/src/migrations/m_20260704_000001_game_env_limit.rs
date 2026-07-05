@@ -6,7 +6,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
   fn name(&self) -> &str {
-    "m_20250704_000001_game_env_limit"
+    "m_20260704_000001_game_env_limit"
   }
 }
 
