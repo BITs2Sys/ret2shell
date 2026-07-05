@@ -717,7 +717,7 @@
       },
       "envLimit": {
         "label": "容器限制",
-        "placeholder": "留空則默認跟隨隊伍人數",
+        "placeholder": "留空則默認跟隨隊伍人數（無限制時為 1）",
         "minimum": "容器限制不能少於 1",
         "maximum": "容器限制不能多於 99"
       },
