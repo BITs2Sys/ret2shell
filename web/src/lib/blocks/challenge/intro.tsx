@@ -83,7 +83,10 @@ export default function (props: ChallengeWidgetProps) {
     instanceStateIter = instanceStateIter % 20;
     return maintainInstancesWorker;
   }
-  const envLimit = createMemo(() => game.data?.env_limit ?? (game.data?.team_size || 1));
+  const envLimit = createMemo(() => {
+    const limit = game.data?.env_limit;
+    return limit && limit > 0 ? limit : game.data?.team_size || 1;
+  });
   const instanceCountExceeded = createMemo(() => {
     return instances.data && instances.data.length >= (isGameInProgress(game.data) && team.data ? envLimit() : 1);
   });
