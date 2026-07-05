@@ -139,7 +139,7 @@ pub fn validate_game_model(game: &game::Model) -> Result<(), ResponseError> {
     validate_range(game.team_size, "team size", 0, 99)?;
   }
   if let Some(env_limit) = game.env_limit {
-    validate_range(env_limit, "env limit", 0, 99)?;
+    validate_range(env_limit, "env limit", 1, 99)?;
   }
   validate_range(game.award_rate, "award rate", 0, 100)?;
   if let Some(award_rates) = &game.award_rates {

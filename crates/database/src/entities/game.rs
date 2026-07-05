@@ -178,7 +178,14 @@ impl Model {
   }
 
   pub fn env_limit(&self) -> i32 {
-    self.env_limit.unwrap_or(if self.team_size == 0 { 1 } else { self.team_size })
+    self
+      .env_limit
+      .filter(|&v| v > 0)
+      .unwrap_or(if self.team_size == 0 {
+        1
+      } else {
+        self.team_size
+      })
   }
 }
 

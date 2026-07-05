@@ -718,7 +718,7 @@
       "envLimit": {
         "label": "Env limit",
         "placeholder": "Leave empty to fall back to team size",
-        "minimum": "Env limit cannot be less than 0",
+        "minimum": "Env limit cannot be less than 1",
         "maximum": "Env limit cannot be more than 99"
       },
       "enableTeamAudit": {

@@ -157,7 +157,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
         <Field
           name="env_limit"
           type="number"
-          validate={[minRange(0, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
+          validate={[minRange(1, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
         >
           {(field, props) => (
             <Input
@@ -169,7 +169,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               type="number"
               error={field.error}
               class="min-w-48"
-              min={0}
+              min={1}
               max={99}
             />
           )}

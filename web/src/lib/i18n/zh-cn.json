@@ -718,7 +718,7 @@
       "envLimit": {
         "label": "容器限制",
         "placeholder": "留空则默认跟随队伍人数",
-        "minimum": "容器限制不能少于 0",
+        "minimum": "容器限制不能少于 1",
         "maximum": "容器限制不能多于 99"
       },
       "enableTeamAudit": {

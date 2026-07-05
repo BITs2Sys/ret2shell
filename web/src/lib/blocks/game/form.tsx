@@ -220,7 +220,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
           <Field
             name="env_limit"
             type="number"
-            validate={[minRange(0, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
+            validate={[minRange(1, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
           >
             {(field, props) => (
               <Input
@@ -231,7 +231,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
                 title={t("game.form.envLimit.label")}
                 placeholder={t("game.form.envLimit.placeholder")}
                 type="number"
-                min={0}
+                min={1}
                 max={99}
               />
             )}

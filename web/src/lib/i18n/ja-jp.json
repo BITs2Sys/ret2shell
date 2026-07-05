@@ -718,7 +718,7 @@
       "envLimit": {
         "label": "コンテナ制限",
         "placeholder": "空欄の場合、チーム人数に従います",
-        "minimum": "コンテナ制限は0未満であってはなりません",
+        "minimum": "コンテナ制限は1未満であってはなりません",
         "maximum": "コンテナ制限は99を超えてはなりません"
       },
       "enableTeamAudit": {
