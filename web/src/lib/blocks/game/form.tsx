@@ -37,6 +37,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
   const [form, { Form, Field }] = createForm<GameForm>({
     initialValues: {
       ...game.data,
+      env_limit: game.data?.env_limit ?? undefined,
       start_at: game.data?.start_at.toSeconds(),
       end_at: game.data?.end_at.toSeconds(),
       register_at: game.data?.register_at.toSeconds(),
@@ -54,6 +55,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
       untrack(() => {
         setValues(form, {
           ...game.data,
+          env_limit: game.data?.env_limit ?? undefined,
           start_at: game.data?.start_at.toSeconds(),
           end_at: game.data?.end_at.toSeconds(),
           register_at: game.data?.register_at.toSeconds(),
