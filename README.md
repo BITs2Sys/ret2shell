@@ -15,6 +15,10 @@ QQ Group: [1104642385](https://qm.qq.com/q/u0BUcpU6l2)
 
 Telegram: [t.me/ret2shell](https://t.me/ret2shell)
 
+## Preview
+
+![Training Ground](arts/training-dark-en-us.webp)
+
 ## 🚀 Deployment
 
 Ret2Shell is single binary with requirements of `redis/valkey 8+`, `postgres 18+`, `nats 2+` and optional `VictoriaLog` and `registry`.
