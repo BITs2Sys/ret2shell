@@ -1,0 +1,240 @@
+{
+  "challenge": {
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix 設定",
+      "tester": "テスターコンテナ",
+      "disabled": "この問題では Fix が有効ではありません。",
+      "attempts": "試行 {{used}} / {{total}}",
+      "solved": "修復は受理されました。",
+      "submit": "修復を提出",
+      "form": {
+        "enabled": "Fix を有効化",
+        "maxAttempts": "最大試行回数",
+        "fixScript": "修復スクリプト",
+        "uploadPath": "ターゲット内アップロードパス",
+        "targetContainer": "ターゲットコンテナ",
+        "targetPort": "ターゲットポート",
+        "timeout": "タイムアウト秒",
+        "resultEnv": "結果環境変数",
+        "successValue": "成功値",
+        "pullSecret": "テスター pull secret",
+        "testerCommand": {
+          "label": "テスターコマンド JSON",
+          "invalid": "テスターコマンドが不正です"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "Fix 設定の取得に失敗しました"
+        },
+        "submit": {
+          "title": "修復の提出に失敗しました"
+        }
+      }
+    },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH 設定",
+      "disabled": "この問題では KoH が有効ではありません。",
+      "identifier": "チーム識別子",
+      "noIdentifier": "チーム識別子はありません",
+      "owner": "現在の所有者",
+      "noOwner": "所有者なし",
+      "owned": "あなたのチーム",
+      "target": "共有ターゲット",
+      "scoreboard": "KoH ボード",
+      "emptyScoreboard": "KoH スコアはまだありません",
+      "events": "イベント",
+      "emptyEvents": "KoH イベントはまだありません",
+      "status": {
+        "idle": "未起動"
+      },
+      "mode": {
+        "agentHttp": "クラシック所有",
+        "roundRankHttp": "ラウンド順位",
+        "gameElo": "ゲーム Elo"
+      },
+      "actions": {
+        "check": "チェック",
+        "start": "Hill を起動",
+        "stop": "Hill を停止"
+      },
+      "form": {
+        "enabled": "KoH を有効化",
+        "mode": "KoH モード",
+        "interval": "採点間隔（秒）",
+        "roundSecs": "ラウンド時間（秒）",
+        "totalRounds": "総ラウンド数（0 は無制限）",
+        "reward": "ラウンド満点",
+        "rankCount": "得点対象チーム数",
+        "rankPercentages": "順位別得点率（カンマ区切り）",
+        "timeout": "チェックタイムアウト（秒）",
+        "statusPath": "Agent 状態パス",
+        "statusUrl": "外部 Agent URL",
+        "apiKey": "Agent API Key",
+        "agentPort": "Agent ポート",
+        "targetPort": "ターゲットポート",
+        "autoStart": "共有 Hill を自動管理"
+      },
+      "errors": {
+        "fetch": {
+          "title": "KoH 状態の取得に失敗しました"
+        },
+        "fetchEvents": {
+          "title": "KoH イベントの取得に失敗しました"
+        },
+        "fetchScoreboard": {
+          "title": "KoH ボードの取得に失敗しました"
+        },
+        "start": {
+          "title": "KoH Hill の起動に失敗しました"
+        },
+        "stop": {
+          "title": "KoH Hill の停止に失敗しました"
+        },
+        "check": {
+          "title": "KoH 状態チェックに失敗しました"
+        }
+      }
+    },
+    "isw": {
+      "title": "レンジ",
+      "admin": "レンジ設定",
+      "disabled": "これはレンジ問題ではありません。",
+      "form": {
+        "enabled": "レンジモードを有効化",
+        "rangeTemplate": "レンジテンプレート",
+        "vm": "対象 VM",
+        "guestPath": "ゲスト内フラグパス",
+        "owner": "所有者 (user:group)",
+        "mode": "ファイル権限",
+        "rotate": "ラウンドごとに更新",
+        "save": "保存"
+      },
+      "actions": {
+        "arm": "レンジを配備",
+        "reset": "レンジをリセット"
+      },
+      "status": {
+        "pending": "待機中",
+        "armed": "配備済み",
+        "error": "エラー",
+        "down": "オフライン"
+      },
+      "player": {
+        "myRange": "マイレンジ",
+        "noRange": "レンジは未割り当てです。",
+        "targets": "ターゲット",
+        "vpn": "VPN アクセス",
+        "download": "設定をダウンロード"
+      }
+    },
+    "awd": {
+      "title": "AWD",
+      "admin": "AWD 設定",
+      "machine": "チームマシン",
+      "disabled": "この問題では AWD は有効化されていません。",
+      "provisioned": "{{count}} 台のマシンを配備しました。",
+      "tornDown": "すべてのマシンを破棄しました。",
+      "form": {
+        "enabled": "AWD を有効化",
+        "roundSecs": "ラウンド長（秒）",
+        "flagPath": "マシン内のフラグパス",
+        "timeoutSecs": "実行タイムアウト（秒）",
+        "attackReward": "攻撃スコア",
+        "defenseReward": "防御スコア",
+        "slaReward": "SLA スコア",
+        "internet": "インターネット接続",
+        "privileged": "特権モード",
+        "port": "サービスポート",
+        "pullSecret": "イメージ Pull シークレット",
+        "checkCommand": {
+          "label": "SLA チェックコマンド（JSON 配列）",
+          "hint": "毎ラウンド、マシン内で実行。終了コード 0 で正常。空の場合は死活監視のみ。",
+          "invalid": "チェックコマンドが不正です"
+        }
+      },
+      "actions": {
+        "provision": "マシンを配備",
+        "teardown": "破棄"
+      },
+      "scoreboard": {
+        "title": "攻撃ログ",
+        "empty": "成功した攻撃はまだありません。"
+      },
+      "player": {
+        "title": "攻防戦",
+        "round": "ラウンド",
+        "myMachine": "マイマシン",
+        "noMachine": "あなたのチームのマシンはまだ配備されていません。",
+        "hint": "相手のマシンを攻撃し、奪取したフラグを提出欄から提出してください。自チームのサービスを健全に保つと SLA と防御スコアを獲得できます。"
+      }
+    },
+    "awdp": {
+      "title": "AWDP",
+      "admin": "AWDP 設定",
+      "disabled": "この問題では AWDP は有効化されていません。",
+      "mode": {
+        "solve": "解答",
+        "fix": "修正"
+      },
+      "form": {
+        "enabled": "AWDP を有効化",
+        "mode": "スコアリングモード",
+        "roundSecs": "ラウンド長（秒）",
+        "totalRounds": "総ラウンド数（0 で無制限）",
+        "hint": "あるラウンドで解答/修正したチームは、以降ゲーム終了までの毎ラウンドでボーナスを獲得します。報酬は解答チーム数に応じて減衰します。",
+        "save": "保存"
+      },
+      "actions": {
+        "reset": "リセット"
+      },
+      "player": {
+        "title": "攻防戦プラス",
+        "secured": "ボーナス確保済み",
+        "round": "現在のラウンド",
+        "roundSecs": "ラウンド長",
+        "solvedRound": "確保ラウンド",
+        "solveHint": "フラグを提出すると、ゲーム終了まで毎ラウンドのボーナスを確保できます。",
+        "fixHint": "合格する修正をアップロードすると、ゲーム終了まで毎ラウンドのボーナスを確保できます。"
+      }
+    }
+  },
+  "range": {
+    "title": "ISW レンジ",
+    "host": {
+      "title": "ホスト",
+      "name": "名前",
+      "address": "アドレス",
+      "port": "Agent ポート",
+      "os": "ゲスト OS",
+      "add": "ホスト追加",
+      "probe": "疎通確認",
+      "probeFail": "疎通失敗",
+      "online": "ホスト稼働中"
+    },
+    "template": {
+      "title": "レンジテンプレート",
+      "gameId": "ゲーム ID",
+      "name": "名前",
+      "topology": "トポロジ (JSON)",
+      "create": "テンプレート作成",
+      "badJson": "トポロジは有効な JSON である必要があります"
+    },
+    "instance": {
+      "title": "レンジ",
+      "templateId": "テンプレート ID",
+      "hostId": "ホスト ID",
+      "group": "グループ番号",
+      "name": "名前",
+      "create": "レンジ作成",
+      "operateId": "レンジ ID"
+    },
+    "actions": {
+      "arm": "配備",
+      "snapshot": "スナップショット",
+      "reset": "リセット"
+    }
+  }
+}

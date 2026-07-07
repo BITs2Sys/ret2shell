@@ -70,6 +70,9 @@ struct ChallengeChangeSet {
   hints: BTreeSet<String>,
   env: BTreeSet<String>,
   checker: BTreeSet<String>,
+  // BITs2CTF fork (C1): fix.toml / koh.toml / isw.toml manifests, validated on
+  // git push just like env.toml (previously silently unvalidated).
+  manifests: BTreeSet<String>,
 }
 
 #[derive(Clone)]
@@ -432,6 +435,13 @@ async fn synchronize_repository(
     {
       validate_env(&challenge_bucket).await?;
     }
+    // fork-kind manifests (awd/awdp/fix/koh/isw) must be validated on the creating
+    // push too, not only on later edits — mirror the env gating above.
+    if challenge_changes.manifests.contains(bucket_name)
+      || challenge_changes.buckets.contains(bucket_name)
+    {
+      validate_manifests(&challenge_bucket).await?;
+    }
     sync_hints_from_bucket(txn, created.id, &challenge_bucket, None).await?;
     outcome.challenge_ids.insert(created.id);
   }
@@ -466,6 +476,9 @@ async fn synchronize_repository(
 
     if challenge_changes.env.contains(&bucket_name) {
       validate_env(&challenge_bucket).await?;
+    }
+    if challenge_changes.manifests.contains(&bucket_name) {
+      validate_manifests(&challenge_bucket).await?;
     }
     if challenge_changes.checker.contains(&bucket_name) {
       lint_checker(state, &challenge_bucket, logger).await?;
@@ -651,6 +664,33 @@ async fn validate_env(challenge_bucket: &ChallengeBucket) -> anyhow::Result<()> 
   validate_env_config(&challenge_bucket.name, &env)
 }
 
+/// BITs2CTF fork (C1): validate fix/koh/isw manifests on git push (parse + the
+/// same semantic checks the REST routes apply), so a bad manifest is rejected at
+/// push time instead of failing silently at runtime.
+async fn validate_manifests(challenge_bucket: &ChallengeBucket) -> anyhow::Result<()> {
+  use super::challenge::{
+    awd::validate_awd_config, awdp::validate_awdp_config, fix::validate_fix_config,
+    isw::validate_isw_config, koh::validate_koh_config,
+  };
+  if let Some(fix) = challenge_bucket.fix().await? {
+    validate_fix_config(&fix).map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+  }
+  if let Some(koh) = challenge_bucket.koh().await? {
+    validate_koh_config(&koh).map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+  }
+  if let Some(isw) = challenge_bucket.isw().await? {
+    validate_isw_config(&isw).map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+  }
+  if let Some(awdp) = challenge_bucket.awdp().await? {
+    validate_awdp_config(&awdp)
+      .map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+  }
+  if let Some(awd) = challenge_bucket.awd().await? {
+    validate_awd_config(&awd).map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+  }
+  Ok(())
+}
+
 fn validate_env_config(bucket_name: &str, env: &ChallengeEnv) -> anyhow::Result<()> {
   let mut ports = HashSet::new();
   for image in &env.images {
@@ -764,6 +804,9 @@ fn classify_path(
     }
     Some("checker") => {
       challenge_changes.checker.insert(bucket_name);
+    }
+    Some("fix.toml") | Some("koh.toml") | Some("isw.toml") | Some("awdp.toml") | Some("awd.toml") => {
+      challenge_changes.manifests.insert(bucket_name);
     }
     _ => {}
   }

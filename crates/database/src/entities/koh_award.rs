@@ -111,6 +111,20 @@ where
     .await
 }
 
+/// Whether any award exists for a challenge (used to lock KoH tick-length config
+/// once scoring has begun).
+pub async fn exists_for_challenge<C>(db: &C, challenge_id: i64) -> Result<bool, DbErr>
+where
+  C: ConnectionTrait, {
+  Ok(
+    Entity::find()
+      .filter(Column::ChallengeId.eq(challenge_id))
+      .one(db)
+      .await?
+      .is_some(),
+  )
+}
+
 pub async fn get_list_ex<C>(db: &C, challenge_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
   C: ConnectionTrait, {

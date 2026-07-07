@@ -12,7 +12,7 @@ use r2s_database::{
   team::{self, TeamScoreHistory, TeamScoreHistoryKind},
 };
 use r2s_migrator::Database;
-use sea_orm::TransactionTrait;
+use sea_orm::{ConnectionTrait, TransactionTrait};
 use serde::Deserialize;
 use tracing::{debug, error, info, warn};
 
@@ -398,13 +398,90 @@ async fn check_round_rank_agent(
   Ok(RoundRankCheck { round, rankings })
 }
 
+// BITs2CTF fork: centralized KoH scoring helpers (A4). Every award flows through
+// `award_points`, so the extra + koh_award + team-score/history sequence lives in
+// exactly one place and cannot drift between the identifier and ranking paths.
+
+/// Recompute a team's score from its extras and push a KoH history entry.
+async fn refresh_team_score<C>(
+  db: &C, team_id: i64, challenge_id: i64, now: chrono::DateTime<Utc>,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  let Some(mut team) = team::get(db, team_id).await? else {
+    return Err(ResponseError::NotFound("KoH team not found".to_owned()));
+  };
+  let score = team::calc_score(db, team.id).await?;
+  team.score = score;
+  team.last_active_at = now;
+  team.history.0.push(TeamScoreHistory {
+    score,
+    changed_at: now,
+    challenge_id: Some(challenge_id),
+    blood_state: None,
+    kind: TeamScoreHistoryKind::Koh,
+  });
+  team::update(db, team).await?;
+  Ok(())
+}
+
+/// Create an `extra` + `koh_award` for one team and refresh its score.
+#[allow(clippy::too_many_arguments)]
+async fn award_points<C>(
+  db: &C, challenge: &challenge::Model, team_id: i64, tick: i64, rank: Option<i32>,
+  percent: Option<i32>, score: i32, reason: String, now: chrono::DateTime<Utc>,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  let extra = extra::create(
+    db,
+    extra::Model {
+      id: 0,
+      created_at: now,
+      reason,
+      score,
+      hint_id: None,
+      team_id,
+      challenge_id: Some(challenge.id),
+    },
+  )
+  .await?;
+  koh_award::create(
+    db,
+    koh_award::Model {
+      id: 0,
+      created_at: now,
+      challenge_id: challenge.id,
+      team_id,
+      tick,
+      rank,
+      percent,
+      score,
+      extra_id: extra.id,
+    },
+  )
+  .await?;
+  refresh_team_score(db, team_id, challenge.id, now).await
+}
+
+/// Reverse a prior award: delete its `extra` (which cascade-deletes the
+/// `koh_award`) and recompute the affected team's score.
+async fn revoke_award<C>(
+  db: &C, award: &koh_award::Model, challenge_id: i64, now: chrono::DateTime<Utc>,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  extra::delete(db, award.extra_id).await?;
+  refresh_team_score(db, award.team_id, challenge_id, now).await
+}
+
 async fn process_identifier(
   db: &Database, challenge: &challenge::Model, config: &KohConfig, identifier: Option<String>,
   tick: i64,
 ) -> Result<(), ResponseError> {
   let now = Utc::now();
   let txn = db.conn.begin().await?;
-  let previous_state = koh_state::get(&txn, challenge.id)
+  let previous_state = koh_state::get_for_update(&txn, challenge.id)
     .await?
     .unwrap_or_else(|| koh_state::empty(challenge.id));
   let previous_team_id = previous_state.current_team_id;
@@ -423,67 +500,64 @@ async fn process_identifier(
       Some(owner) => {
         team_id = Some(owner.team_id);
         state.current_team_id = Some(owner.team_id);
-        if config.reward > 0
-          && koh_award::get_by_tick(&txn, challenge.id, tick)
-            .await?
-            .is_none()
-        {
-          let extra = extra::create(
-            &txn,
-            extra::Model {
-              id: 0,
-              created_at: now,
-              reason: format!(
-                "KoH hold reward for challenge {}:{} at tick {}",
-                challenge.id, challenge.name, tick
-              ),
-              score: config.reward,
-              hint_id: None,
-              team_id: owner.team_id,
-              challenge_id: Some(challenge.id),
-            },
-          )
-          .await?;
-          koh_award::create(
-            &txn,
-            koh_award::Model {
-              id: 0,
-              created_at: now,
-              challenge_id: challenge.id,
-              team_id: owner.team_id,
-              tick,
-              rank: None,
-              percent: None,
-              score: config.reward,
-              extra_id: extra.id,
-            },
-          )
-          .await?;
-          let Some(mut team) = team::get(&txn, owner.team_id).await? else {
-            return Err(ResponseError::NotFound(
-              "KoH owner team not found".to_owned(),
-            ));
-          };
-          let score = team::calc_score(&txn, team.id).await?;
-          team.score = score;
-          team.last_active_at = now;
-          team.history.0.push(TeamScoreHistory {
-            score,
-            changed_at: now,
-            challenge_id: Some(challenge.id),
-            blood_state: None,
-            kind: TeamScoreHistoryKind::Koh,
-          });
-          team::update(&txn, team).await?;
-          state.last_awarded_at = Some(now);
-          status = if previous_team_id != Some(owner.team_id) {
-            "captured".to_owned()
-          } else {
-            "awarded".to_owned()
-          };
-          score_delta = config.reward;
-        } else {
+        // BITs2CTF fork (B1): the holder at tick-end gets that tick's score, one
+        // award per tick. If a different team was credited earlier in this tick
+        // (only reachable via a forced re-check), re-point the award to the
+        // current holder instead of blocking them.
+        let existing = koh_award::get_by_tick(&txn, challenge.id, tick).await?;
+        if config.reward <= 0 {
           status = "held".to_owned();
+        } else {
+          match existing {
+            Some(award) if award.team_id == owner.team_id => {
+              status = "held".to_owned();
+            }
+            Some(award) => {
+              revoke_award(&txn, &award, challenge.id, now).await?;
+              award_points(
+                &txn,
+                challenge,
+                owner.team_id,
+                tick,
+                None,
+                None,
+                config.reward,
+                format!(
+                  "KoH hold reward for challenge {}:{} at tick {}",
+                  challenge.id, challenge.name, tick
+                ),
+                now,
+              )
+              .await?;
+              state.last_awarded_at = Some(now);
+              status = "captured".to_owned();
+              score_delta = config.reward;
+            }
+            None => {
+              award_points(
+                &txn,
+                challenge,
+                owner.team_id,
+                tick,
+                None,
+                None,
+                config.reward,
+                format!(
+                  "KoH hold reward for challenge {}:{} at tick {}",
+                  challenge.id, challenge.name, tick
+                ),
+                now,
+              )
+              .await?;
+              state.last_awarded_at = Some(now);
+              status = if previous_team_id != Some(owner.team_id) {
+                "captured".to_owned()
+              } else {
+                "awarded".to_owned()
+              };
+              score_delta = config.reward;
+            }
+          }
         }
       }
       None => {
@@ -525,7 +599,7 @@ async fn process_rankings(
   let now = Utc::now();
   let round = result.round.unwrap_or(fallback_tick);
   let txn = db.conn.begin().await?;
-  let previous_state = koh_state::get(&txn, challenge.id)
+  let previous_state = koh_state::get_for_update(&txn, challenge.id)
     .await?
     .unwrap_or_else(|| koh_state::empty(challenge.id));
   let previous_team_id = previous_state.current_team_id;
@@ -603,10 +677,19 @@ async fn process_rankings(
       .copied()
       .unwrap_or_default();
     if percent <= 0 || config.reward <= 0 {
+      // BITs2CTF fork (B6): surface silent zero-score drops in the event log.
+      skipped.push(format!(
+        "rank {} scores 0 (percent {}%, reward {})",
+        entry.rank, percent, config.reward
+      ));
       continue;
     }
     let score = ((config.reward as i64 * percent as i64 + 50) / 100) as i32;
     if score <= 0 {
+      skipped.push(format!(
+        "rank {} rounds to 0 ({}% of reward {})",
+        entry.rank, percent, config.reward
+      ));
       continue;
     }
     let Some(owner) =
@@ -630,53 +713,21 @@ async fn process_rankings(
       continue;
     }
 
-    let extra = extra::create(
+    award_points(
       &txn,
-      extra::Model {
-        id: 0,
-        created_at: now,
-        reason: format!(
-          "KoH rank reward for challenge {}:{} round {} rank {} ({}%)",
-          challenge.id, challenge.name, round, entry.rank, percent
-        ),
-        score,
-        hint_id: None,
-        team_id: owner.team_id,
-        challenge_id: Some(challenge.id),
-      },
+      challenge,
+      owner.team_id,
+      round,
+      Some(entry.rank),
+      Some(percent),
+      score,
+      format!(
+        "KoH rank reward for challenge {}:{} round {} rank {} ({}%)",
+        challenge.id, challenge.name, round, entry.rank, percent
+      ),
+      now,
     )
     .await?;
-    koh_award::create(
-      &txn,
-      koh_award::Model {
-        id: 0,
-        created_at: now,
-        challenge_id: challenge.id,
-        team_id: owner.team_id,
-        tick: round,
-        rank: Some(entry.rank),
-        percent: Some(percent),
-        score,
-        extra_id: extra.id,
-      },
-    )
-    .await?;
-    let Some(mut team) = team::get(&txn, owner.team_id).await? else {
-      return Err(ResponseError::NotFound(
-        "KoH ranked team not found".to_owned(),
-      ));
-    };
-    let score_after = team::calc_score(&txn, team.id).await?;
-    team.score = score_after;
-    team.last_active_at = now;
-    team.history.0.push(TeamScoreHistory {
-      score: score_after,
-      changed_at: now,
-      challenge_id: Some(challenge.id),
-      blood_state: None,
-      kind: TeamScoreHistoryKind::Koh,
-    });
-    team::update(&txn, team).await?;
     koh_event::create(
       &txn,
       koh_event::Model {

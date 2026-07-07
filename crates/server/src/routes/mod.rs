@@ -39,6 +39,7 @@ mod event;
 mod game;
 mod media;
 mod platform;
+mod range;
 mod rpc;
 mod traffic;
 mod user;
@@ -92,6 +93,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .nest("/cluster", cluster::router(state))
     .nest("/media", media::router(state))
     .nest("/platform", platform::router(state))
+    .nest("/range", range::router(state))
     .nest("/user", user::router(state))
     .nest("/wiki", wiki::router(state))
     .nest("/rpc", rpc::router(state))

@@ -86,6 +86,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let media = r2s_media::initialize(&config.media).await?;
   info!("loading module: < Checker >");
   let checker = r2s_checker::initialize().await;
+  info!("loading module: < ISW >");
+  let isw = r2s_isw::IswManager::initialize()?;
   info!("starting workers: < Email Worker >");
   worker::email::spawn(queue.subscribe("email").await?, db.clone());
   info!("starting workers: < Event Worker >");
@@ -111,6 +113,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     cluster,
     checker,
     media,
+    isw,
     version: R2S_VERSION.to_string(),
   };
   info!("modules loaded, constructing router...");

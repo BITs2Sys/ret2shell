@@ -145,6 +145,20 @@ export default function SideBar() {
           <span>{t("cluster.title")}</span>
         </Link>
       </li>
+      {/* BITs2CTF fork: ISW range-mode admin. */}
+      <li class="w-full">
+        <Link
+          activeMatch="exact"
+          class="w-full"
+          ghost
+          href="/admin/range"
+          justify="start"
+          disabled={!accountStore.permissions.includes(Permission.DevOps)}
+        >
+          <span class="shrink-0 icon-[fluent--shield-20-regular] w-5 h-5" />
+          <span>{t("range.title")}</span>
+        </Link>
+      </li>
       <li class="w-full">
         <Link
           activeMatch="exact"

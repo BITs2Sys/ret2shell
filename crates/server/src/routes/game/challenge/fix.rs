@@ -1,7 +1,8 @@
 use axum::{
-  Extension, Json,
-  extract::{Multipart, State},
+  Extension, Json, Router,
+  extract::{DefaultBodyLimit, Multipart, State},
   response::IntoResponse,
+  routing::{get, patch, post},
 };
 use futures::TryStreamExt;
 use nanoid::nanoid;
@@ -10,6 +11,7 @@ use r2s_config::cluster::FixConfig;
 use r2s_database::{challenge, game, submission, team, user::Permission};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
+use sea_orm::{ConnectionTrait, DatabaseBackend, Statement, TransactionTrait};
 use serde::Serialize;
 use tokio::io::AsyncWriteExt;
 use tokio_util::io::StreamReader;
@@ -21,7 +23,7 @@ use crate::{
     auth::{Token, is_game_admin},
     data::extract_team,
   },
-  traits::ResponseError,
+  traits::{GlobalState, ResponseError},
   utility::fix::{
     FixSubmissionMeta, encode_fix_submission_meta, fix_upload_dir, fix_upload_path,
     is_fix_submission,
@@ -43,50 +45,111 @@ pub(super) struct FixStatus {
   pub solved: bool,
 }
 
-async fn count_fix_attempts(
-  db: &Database, game: &game::Model, challenge: &challenge::Model, team: Option<&team::Model>,
+// BITs2CTF fork (B2): count over the UNION of this user's and this team's fix
+// submissions. Previously the accounting bucket flipped between team and user
+// depending on game state, letting a player double their attempts by straddling
+// the two. Generic over the connection so it can run inside the submit txn.
+async fn count_fix_attempts<C>(
+  db: &C, game: &game::Model, challenge: &challenge::Model, team: Option<&team::Model>,
   user_id: i64,
-) -> Result<u64, ResponseError> {
-  let submissions = submission::get_list(
-    &db.conn,
+) -> Result<u64, ResponseError>
+where
+  C: ConnectionTrait, {
+  let mut ids = std::collections::HashSet::new();
+  for submission in submission::get_list(
+    db,
     false,
     true,
     Some(game.id),
     Some(challenge.id),
-    team.map(|team| team.id),
-    if team.is_none() { Some(user_id) } else { None },
-    team.is_none(),
+    None,
+    Some(user_id),
+    true,
   )
-  .await?;
-  Ok(
-    submissions
-      .into_iter()
-      .filter(|submission| is_fix_submission(submission.content.as_deref()))
-      .count() as u64,
-  )
-}
-
-async fn solved(
-  db: &Database, game: &game::Model, challenge: &challenge::Model, team: Option<&team::Model>,
-  user_id: i64,
-) -> Result<bool, ResponseError> {
-  Ok(
-    submission::count(
-      &db.conn,
+  .await?
+  {
+    if is_fix_submission(submission.content.as_deref()) {
+      ids.insert(submission.id);
+    }
+  }
+  if let Some(team) = team {
+    for submission in submission::get_list(
+      db,
+      false,
       true,
       Some(game.id),
       Some(challenge.id),
-      team.map(|team| team.id),
-      if team.is_none() { Some(user_id) } else { None },
+      Some(team.id),
       None,
-      team.is_none(),
+      false,
     )
     .await?
-      > 0,
-  )
+    {
+      if is_fix_submission(submission.content.as_deref()) {
+        ids.insert(submission.id);
+      }
+    }
+  }
+  Ok(ids.len() as u64)
 }
 
-fn validate_fix_config(config: &FixConfig) -> Result<(), ResponseError> {
+async fn solved<C>(
+  db: &C, game: &game::Model, challenge: &challenge::Model, team: Option<&team::Model>,
+  user_id: i64,
+) -> Result<bool, ResponseError>
+where
+  C: ConnectionTrait, {
+  if submission::count(
+    db,
+    true,
+    Some(game.id),
+    Some(challenge.id),
+    None,
+    Some(user_id),
+    None,
+    true,
+  )
+  .await?
+    > 0
+  {
+    return Ok(true);
+  }
+  if let Some(team) = team
+    && submission::count(
+      db,
+      true,
+      Some(game.id),
+      Some(challenge.id),
+      Some(team.id),
+      None,
+      None,
+      false,
+    )
+    .await?
+      > 0
+  {
+    return Ok(true);
+  }
+  Ok(false)
+}
+
+/// BITs2CTF fork (A5): Fix admin routes, merged above the `game_admin_required`
+/// layer by the challenge router.
+pub(crate) fn admin_router() -> Router<GlobalState> {
+  Router::new().route("/fix", patch(update_fix_config).delete(delete_fix_config))
+}
+
+/// Fix player routes (view status + submit artifact), merged below the admin layer.
+pub(crate) fn player_router() -> Router<GlobalState> {
+  Router::new()
+    .route("/fix", get(get_fix_config))
+    .route(
+      "/fix/submit",
+      post(submit_fix).route_layer(DefaultBodyLimit::max(1024 * 1024 * 1024)),
+    )
+}
+
+pub(crate) fn validate_fix_config(config: &FixConfig) -> Result<(), ResponseError> {
   if !config.enabled {
     return Ok(());
   }
@@ -136,8 +199,8 @@ pub(super) async fn get_fix_config(
   let team = extract_team!(game, team_ext, token);
   let challenge_bucket = super::get_challenge_bucket(bucket, &game, &challenge).await?;
   let config = challenge_bucket.fix().await?;
-  let attempts_used = count_fix_attempts(db, &game, &challenge, team.as_ref(), token.id).await?;
-  let solved = solved(db, &game, &challenge, team.as_ref(), token.id).await?;
+  let attempts_used = count_fix_attempts(&db.conn, &game, &challenge, team.as_ref(), token.id).await?;
+  let solved = solved(&db.conn, &game, &challenge, team.as_ref(), token.id).await?;
   let attempts_remaining = config
     .as_ref()
     .filter(|config| config.enabled)
@@ -207,11 +270,14 @@ pub(super) async fn submit_fix(
   Extension(challenge): Extension<challenge::Model>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
-  let team = if team.is_some()
+  // BITs2CTF fork (B2): count attempts against the player's real team when they
+  // have one (stable across game states). `store_team` is only nulled post-game
+  // so the stored submission isn't attributed to the team score after the game.
+  let store_team = if team.is_some()
     && game.in_progress()
     && challenge.archive_at.is_none_or(|t| t > chrono::Utc::now())
   {
-    team
+    team.clone()
   } else {
     None
   };
@@ -226,13 +292,15 @@ pub(super) async fn submit_fix(
       "this challenge is not a fix challenge".to_owned(),
     ));
   }
-  if solved(db, &game, &challenge, team.as_ref(), token.id).await? {
+  // fast fail before uploading the artifact (authoritative re-check is in the txn below).
+  if solved(&db.conn, &game, &challenge, team.as_ref(), token.id).await? {
     return Err(ResponseError::Conflict(
       "challenge already solved".to_owned(),
     ));
   }
-  let attempts_used = count_fix_attempts(db, &game, &challenge, team.as_ref(), token.id).await?;
-  if attempts_used >= fix_config.max_attempts as u64 {
+  if count_fix_attempts(&db.conn, &game, &challenge, team.as_ref(), token.id).await?
+    >= fix_config.max_attempts as u64
+  {
     return Err(ResponseError::PreconditionFailed(
       "fix attempts exhausted".to_owned(),
     ));
@@ -272,8 +340,35 @@ pub(super) async fn submit_fix(
     token: token_id,
     file_name,
   })?;
+  // BITs2CTF fork (B2): re-check + create atomically under a per-entity advisory
+  // lock so concurrent uploads cannot each pass the cap and overshoot it (TOCTOU).
+  let entity_key = team.as_ref().map(|team| team.id).unwrap_or(token.id) as i32;
+  let txn = db.conn.begin().await?;
+  txn
+    .execute(Statement::from_sql_and_values(
+      DatabaseBackend::Postgres,
+      "SELECT pg_advisory_xact_lock($1, $2)",
+      [(challenge.id as i32).into(), entity_key.into()],
+    ))
+    .await?;
+  if solved(&txn, &game, &challenge, team.as_ref(), token.id).await? {
+    txn.rollback().await.ok();
+    let _ = tokio::fs::remove_dir_all(&upload_dir).await;
+    return Err(ResponseError::Conflict(
+      "challenge already solved".to_owned(),
+    ));
+  }
+  if count_fix_attempts(&txn, &game, &challenge, team.as_ref(), token.id).await?
+    >= fix_config.max_attempts as u64
+  {
+    txn.rollback().await.ok();
+    let _ = tokio::fs::remove_dir_all(&upload_dir).await;
+    return Err(ResponseError::PreconditionFailed(
+      "fix attempts exhausted".to_owned(),
+    ));
+  }
   let submission = submission::create(
-    &db.conn,
+    &txn,
     submission::Model {
       id: 0,
       created_at: chrono::Utc::now(),
@@ -281,11 +376,12 @@ pub(super) async fn submit_fix(
       content: Some(content),
       solved: None,
       result: None,
-      team_id: team.as_ref().map(|team| team.id),
+      team_id: store_team.as_ref().map(|team| team.id),
       user_id: token.id,
     },
   )
   .await?;
+  txn.commit().await?;
   queue
     .publish(
       "fix",

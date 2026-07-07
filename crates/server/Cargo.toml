@@ -31,6 +31,7 @@ once_cell      = { workspace = true }
 owo-colors     = { workspace = true }
 rand           = { workspace = true }
 regex          = { workspace = true }
+ring           = { workspace = true }
 rustls         = { workspace = true }
 sea-orm        = { workspace = true }
 serde          = { workspace = true }
@@ -62,6 +63,7 @@ r2s-database = { workspace = true }
 r2s-email    = { workspace = true }
 r2s-engine   = { workspace = true }
 r2s-event    = { workspace = true }
+r2s-isw      = { workspace = true }
 r2s-media    = { workspace = true }
 r2s-migrator = { workspace = true }
 r2s-oauth    = { workspace = true }

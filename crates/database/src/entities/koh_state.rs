@@ -1,7 +1,7 @@
 //! `SeaORM` Entity for King of the Hill runtime state.
 
 use chrono::{DateTime, Utc, serde::ts_seconds_option};
-use sea_orm::{ActiveValue, IntoActiveModel, entity::prelude::*};
+use sea_orm::{ActiveValue, IntoActiveModel, QuerySelect, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -58,6 +58,18 @@ pub async fn get<C>(db: &C, challenge_id: i64) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait, {
   Entity::find_by_id(challenge_id).one(db).await
+}
+
+/// BITs2CTF fork (B7): row-locking read used inside a transaction so the KoH
+/// worker loop and the forced admin check serialize on the per-challenge state
+/// instead of racing (interleaved awards / state writes).
+pub async fn get_for_update<C>(db: &C, challenge_id: i64) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find_by_id(challenge_id)
+    .lock_exclusive()
+    .one(db)
+    .await
 }
 
 pub async fn put<C>(db: &C, state: Model) -> Result<Model, DbErr>

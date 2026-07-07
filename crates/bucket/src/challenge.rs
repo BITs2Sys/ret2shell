@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use deunicode::deunicode_with_tofu;
-use r2s_config::cluster::{ChallengeEnv, FixConfig, KohConfig};
+use r2s_config::cluster::{AwdConfig, AwdpConfig, ChallengeEnv, FixConfig, IswConfig, KohConfig};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -178,8 +178,12 @@ impl ChallengeBucket {
     if !self.locked {
       return Err(BucketError::NeedLocking);
     }
-    tokio::fs::remove_file(self.path.join("fix.toml")).await?;
-    Ok(())
+    // idempotent: treat "already absent" as success.
+    match tokio::fs::remove_file(self.path.join("fix.toml")).await {
+      Ok(()) => Ok(()),
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+      Err(err) => Err(err.into()),
+    }
   }
 
   pub async fn set_koh(&self, config: Value) -> Result<(), BucketError> {
@@ -209,8 +213,110 @@ impl ChallengeBucket {
     if !self.locked {
       return Err(BucketError::NeedLocking);
     }
-    tokio::fs::remove_file(self.path.join("koh.toml")).await?;
+    // idempotent: treat "already absent" as success.
+    match tokio::fs::remove_file(self.path.join("koh.toml")).await {
+      Ok(()) => Ok(()),
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+      Err(err) => Err(err.into()),
+    }
+  }
+
+  // BITs2CTF fork: ISW range-mode manifest (`isw.toml`), mirroring the env/fix/koh triad.
+  pub async fn set_isw(&self, config: Value) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    let config: IswConfig = serde_json::from_value(config)?;
+    write(
+      &self.path.join("isw.toml"),
+      toml::to_string_pretty(&config)?,
+    )
+    .await?;
+
     Ok(())
+  }
+
+  pub async fn isw(&self) -> Result<Option<IswConfig>, BucketError> {
+    let path = self.path.join("isw.toml");
+    if !path.exists() {
+      return Ok(None);
+    }
+    let config = toml::from_str(&read_to_string(&path).await?)?;
+    Ok(Some(config))
+  }
+
+  pub async fn delete_isw(&self) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    // idempotent: treat "already absent" as success (unlike the env/fix/koh deleters).
+    match tokio::fs::remove_file(self.path.join("isw.toml")).await {
+      Ok(()) => Ok(()),
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+      Err(err) => Err(err.into()),
+    }
+  }
+
+  // BITs2CTF fork: AWDP manifest (`awdp.toml`), mirroring the env/fix/koh/isw triad.
+  pub async fn set_awdp(&self, config: Value) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    let config: AwdpConfig = serde_json::from_value(config)?;
+    write(
+      &self.path.join("awdp.toml"),
+      toml::to_string_pretty(&config)?,
+    )
+    .await?;
+    Ok(())
+  }
+
+  pub async fn awdp(&self) -> Result<Option<AwdpConfig>, BucketError> {
+    let path = self.path.join("awdp.toml");
+    if !path.exists() {
+      return Ok(None);
+    }
+    Ok(Some(toml::from_str(&read_to_string(&path).await?)?))
+  }
+
+  pub async fn delete_awdp(&self) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    match tokio::fs::remove_file(self.path.join("awdp.toml")).await {
+      Ok(()) => Ok(()),
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+      Err(err) => Err(err.into()),
+    }
+  }
+
+  // BITs2CTF fork: AWD manifest (`awd.toml`).
+  pub async fn set_awd(&self, config: Value) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    let config: AwdConfig = serde_json::from_value(config)?;
+    write(&self.path.join("awd.toml"), toml::to_string_pretty(&config)?).await?;
+    Ok(())
+  }
+
+  pub async fn awd(&self) -> Result<Option<AwdConfig>, BucketError> {
+    let path = self.path.join("awd.toml");
+    if !path.exists() {
+      return Ok(None);
+    }
+    Ok(Some(toml::from_str(&read_to_string(&path).await?)?))
+  }
+
+  pub async fn delete_awd(&self) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    match tokio::fs::remove_file(self.path.join("awd.toml")).await {
+      Ok(()) => Ok(()),
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+      Err(err) => Err(err.into()),
+    }
   }
 
   pub async fn set_hints(&self, hints: Hints) -> Result<(), BucketError> {

@@ -1,0 +1,240 @@
+{
+  "challenge": {
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix configuration",
+      "tester": "Tester container",
+      "disabled": "Fix is not enabled for this challenge.",
+      "attempts": "Attempts {{used}} / {{total}}",
+      "solved": "The fix has been accepted.",
+      "submit": "Submit fix",
+      "form": {
+        "enabled": "Enable Fix",
+        "maxAttempts": "Max attempts",
+        "fixScript": "Fix script",
+        "uploadPath": "Upload path in target",
+        "targetContainer": "Target container",
+        "targetPort": "Target port",
+        "timeout": "Timeout seconds",
+        "resultEnv": "Result env",
+        "successValue": "Success value",
+        "pullSecret": "Tester pull secret",
+        "testerCommand": {
+          "label": "Tester command JSON",
+          "invalid": "Invalid tester command"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "Failed to fetch Fix config"
+        },
+        "submit": {
+          "title": "Failed to submit fix"
+        }
+      }
+    },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH configuration",
+      "disabled": "KoH is not enabled for this challenge.",
+      "identifier": "Team identifier",
+      "noIdentifier": "No team identifier",
+      "owner": "Current owner",
+      "noOwner": "No owner",
+      "owned": "Your team",
+      "target": "Shared target",
+      "scoreboard": "KoH board",
+      "emptyScoreboard": "No KoH score yet",
+      "events": "Events",
+      "emptyEvents": "No KoH events yet",
+      "status": {
+        "idle": "Not started"
+      },
+      "mode": {
+        "agentHttp": "Classic owner",
+        "roundRankHttp": "Round ranking",
+        "gameElo": "Game Elo"
+      },
+      "actions": {
+        "check": "Check",
+        "start": "Start Hill",
+        "stop": "Stop Hill"
+      },
+      "form": {
+        "enabled": "Enable KoH",
+        "mode": "KoH mode",
+        "interval": "Scoring interval (s)",
+        "roundSecs": "Round length (s)",
+        "totalRounds": "Total rounds (0 for unlimited)",
+        "reward": "Full score per round",
+        "rankCount": "Scored team count",
+        "rankPercentages": "Rank score percentages (comma-separated)",
+        "timeout": "Check timeout (s)",
+        "statusPath": "Agent status path",
+        "statusUrl": "External agent URL",
+        "apiKey": "Agent API key",
+        "agentPort": "Agent port",
+        "targetPort": "Target port",
+        "autoStart": "Manage shared Hill automatically"
+      },
+      "errors": {
+        "fetch": {
+          "title": "Failed to fetch KoH status"
+        },
+        "fetchEvents": {
+          "title": "Failed to fetch KoH events"
+        },
+        "fetchScoreboard": {
+          "title": "Failed to fetch KoH board"
+        },
+        "start": {
+          "title": "Failed to start KoH Hill"
+        },
+        "stop": {
+          "title": "Failed to stop KoH Hill"
+        },
+        "check": {
+          "title": "Failed to check KoH status"
+        }
+      }
+    },
+    "isw": {
+      "title": "Range",
+      "admin": "Range Config",
+      "disabled": "This is not a range challenge.",
+      "form": {
+        "enabled": "Enable range mode",
+        "rangeTemplate": "Range template",
+        "vm": "Target VM",
+        "guestPath": "Guest flag path",
+        "owner": "Owner (user:group)",
+        "mode": "File mode",
+        "rotate": "Rotate each round",
+        "save": "Save"
+      },
+      "actions": {
+        "arm": "Arm range",
+        "reset": "Reset range"
+      },
+      "status": {
+        "pending": "Pending",
+        "armed": "Armed",
+        "error": "Error",
+        "down": "Down"
+      },
+      "player": {
+        "myRange": "My range",
+        "noRange": "No range assigned yet.",
+        "targets": "Targets",
+        "vpn": "VPN access",
+        "download": "Download config"
+      }
+    },
+    "awd": {
+      "title": "AWD",
+      "admin": "AWD configuration",
+      "machine": "Team machine",
+      "disabled": "AWD is not enabled for this challenge.",
+      "provisioned": "Provisioned {{count}} machine(s).",
+      "tornDown": "All machines have been torn down.",
+      "form": {
+        "enabled": "Enable AWD",
+        "roundSecs": "Round length (s)",
+        "flagPath": "Flag path in machine",
+        "timeoutSecs": "Exec timeout (s)",
+        "attackReward": "Attack reward",
+        "defenseReward": "Defense reward",
+        "slaReward": "SLA reward",
+        "internet": "Internet access",
+        "privileged": "Privileged",
+        "port": "Service port",
+        "pullSecret": "Image pull secret",
+        "checkCommand": {
+          "label": "SLA check command (JSON array)",
+          "hint": "Exec'd in each machine per round; exit 0 = healthy. Empty = liveness only.",
+          "invalid": "Invalid check command"
+        }
+      },
+      "actions": {
+        "provision": "Provision machines",
+        "teardown": "Tear down"
+      },
+      "scoreboard": {
+        "title": "Attack log",
+        "empty": "No successful attacks yet."
+      },
+      "player": {
+        "title": "Attack & Defense",
+        "round": "Round",
+        "myMachine": "My machine",
+        "noMachine": "Your machine has not been provisioned yet.",
+        "hint": "Attack rivals' machines, then submit the stolen flag via the flag box. Keep your own service healthy to earn SLA + defense points."
+      }
+    },
+    "awdp": {
+      "title": "AWDP",
+      "admin": "AWDP configuration",
+      "disabled": "AWDP is not enabled for this challenge.",
+      "mode": {
+        "solve": "Solve",
+        "fix": "Fix"
+      },
+      "form": {
+        "enabled": "Enable AWDP",
+        "mode": "Scoring mode",
+        "roundSecs": "Round length (s)",
+        "totalRounds": "Total rounds (0 for unlimited)",
+        "hint": "A team that solves/fixes in a round earns its per-round bonus every subsequent round until the game ends. Reward decays with the number of solving teams.",
+        "save": "Save"
+      },
+      "actions": {
+        "reset": "Reset"
+      },
+      "player": {
+        "title": "Attack & Defense Plus",
+        "secured": "Bonus secured",
+        "round": "Current round",
+        "roundSecs": "Round length",
+        "solvedRound": "Secured at round",
+        "solveHint": "Submit the flag to secure a bonus paid every round until the game ends.",
+        "fixHint": "Upload a passing fix to secure a bonus paid every round until the game ends."
+      }
+    }
+  },
+  "range": {
+    "title": "ISW Ranges",
+    "host": {
+      "title": "Hosts",
+      "name": "Name",
+      "address": "Address",
+      "port": "Agent port",
+      "os": "Guest OS",
+      "add": "Add host",
+      "probe": "Probe",
+      "probeFail": "Probe failed",
+      "online": "Host online"
+    },
+    "template": {
+      "title": "Range templates",
+      "gameId": "Game ID",
+      "name": "Name",
+      "topology": "Topology (JSON)",
+      "create": "Create template",
+      "badJson": "Topology must be valid JSON"
+    },
+    "instance": {
+      "title": "Ranges",
+      "templateId": "Template ID",
+      "hostId": "Host ID",
+      "group": "Group index",
+      "name": "Name",
+      "create": "Create range",
+      "operateId": "Range ID"
+    },
+    "actions": {
+      "arm": "Arm",
+      "snapshot": "Snapshot",
+      "reset": "Reset"
+    }
+  }
+}

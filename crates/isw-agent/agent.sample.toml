@@ -1,0 +1,75 @@
+# Sample r2s-isw-agent configuration.
+# Copy to agent.toml on each VMware host and edit. Guest credentials live ONLY
+# here, on the host — the platform never sends them.
+#
+# Run: r2s-isw-agent --config agent.toml
+# (Install as a Windows service or a systemd unit per host.)
+
+# Address:port the agent listens on for the platform.
+listen = "0.0.0.0:8443"
+
+# Shared bearer token the platform must present (set the same value in the
+# platform's R2S_ISW_TOKEN env var, or the isw host row, later).
+token = "change-me-to-a-long-random-secret"
+
+# Optional: explicit vmrun path. Autodetected when omitted:
+#   Windows: C:\Program Files (x86)\VMware\VMware Workstation\vmrun.exe
+#   Linux:   /usr/bin/vmrun
+# vmrun_path = "C:\\Program Files (x86)\\VMware\\VMware Workstation\\vmrun.exe"
+
+# Optional: root prefix for relative [[vm]].vmx paths below.
+# range_root = "D:\\ranges\\range1"
+
+# Optional mTLS. When present the agent serves HTTPS and requires a client cert
+# signed by `ca`; omit for plain HTTP on a trusted management LAN. On the platform
+# set the matching R2S_ISW_CA / R2S_ISW_CERT / R2S_ISW_KEY env vars (PEM paths).
+# [tls]
+# cert = "C:\\isw\\agent.crt"   # server cert (chain), PEM
+# key  = "C:\\isw\\agent.key"   # server key, PKCS#8 PEM
+# ca   = "C:\\isw\\ca.crt"      # CA that signed the platform's client cert, PEM
+
+# Optional WireGuard brokering. When present, POST /v1/vpn/peer generates a client
+# keypair via `wg`, registers the peer on `interface`, and returns a client config.
+# Requires WireGuard + a configured interface on the host.
+# [vpn]
+# interface         = "wg0"
+# endpoint          = "host-a.example:51820"   # public endpoint teams dial
+# server_public_key = "<the wg0 interface public key>"
+# dns               = "10.50.0.1"              # optional
+
+# --- VM registry: one [[vm]] per guest in this host's range(s) ---
+
+[[vm]]
+logical_name = "web01"
+vmx          = "web01/web01.vmx"      # relative to range_root, or absolute
+guest_os     = "linux"
+guest_user   = "root"
+guest_pass   = "toor"
+
+[[vm]]
+logical_name = "db01"
+vmx          = "db01/db01.vmx"
+guest_os     = "linux"
+guest_user   = "root"
+guest_pass   = "toor"
+
+[[vm]]
+logical_name = "dc01"
+vmx          = "dc01/dc01.vmx"
+guest_os     = "windows"
+guest_user   = "Administrator"
+guest_pass   = "P@ssw0rd!"
+
+[[vm]]
+logical_name = "app01"
+vmx          = "app01/app01.vmx"
+guest_os     = "windows"
+guest_user   = "Administrator"
+guest_pass   = "P@ssw0rd!"
+
+[[vm]]
+logical_name = "ws01"
+vmx          = "ws01/ws01.vmx"
+guest_os     = "windows"
+guest_user   = "Administrator"
+guest_pass   = "P@ssw0rd!"

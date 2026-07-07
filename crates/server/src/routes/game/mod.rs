@@ -113,6 +113,8 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route_layer(middleware::from_fn(auth::game_admin_required))
         .route("/solve", get(participant::get_self_solves))
         .route("/instance", get(participant::get_self_instances))
+        // BITs2CTF fork: ISW player range routes (VPN config download).
+        .nest("/range", super::range::player_router(state))
         .nest("/challenge", challenge::router(state))
         .nest("/team", team::router(state))
         .nest("/notification", notification::router(state))

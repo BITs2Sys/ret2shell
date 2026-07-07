@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use axum::{
-  Extension, Json,
+  Extension, Json, Router,
   extract::{Query, State},
   response::IntoResponse,
+  routing::{get, post},
 };
 use chrono::{DateTime, Utc, serde::ts_seconds_option};
 use nanoid::nanoid;
@@ -63,9 +64,39 @@ pub(super) struct EventQuery {
   pub limit: Option<u64>,
 }
 
-fn validate_koh_config(config: &KohConfig) -> Result<(), ResponseError> {
+/// BITs2CTF fork (A5): KoH admin routes, merged above the `game_admin_required`
+/// layer by the challenge router — keeps the fork's footprint in `mod.rs` to a
+/// single `.merge()` call instead of several scattered `.route()`s.
+pub(crate) fn admin_router() -> Router<GlobalState> {
+  Router::new()
+    .route("/koh/hill", post(start_koh_hill).delete(stop_koh_hill))
+    .route("/koh/check", post(check_koh_once))
+}
+
+/// KoH player-facing routes, merged below the admin layer. Config edit is guarded
+/// by the inner `is_game_admin!` check in the handlers.
+pub(crate) fn player_router() -> Router<GlobalState> {
+  Router::new()
+    .route(
+      "/koh",
+      get(get_koh_status)
+        .patch(update_koh_config)
+        .delete(delete_koh_config),
+    )
+    .route("/koh/event", get(get_koh_events))
+    .route("/koh/scoreboard", get(get_koh_scoreboard))
+}
+
+pub(crate) fn validate_koh_config(config: &KohConfig) -> Result<(), ResponseError> {
   if !config.enabled {
     return Ok(());
+  }
+  // BITs2CTF fork: GameElo is reserved for a future rating worker and awards
+  // nothing today — reject it rather than let an admin configure a silent no-op.
+  if config.mode == KohMode::GameElo {
+    return Err(ResponseError::BadRequest(
+      "KoH game_elo mode is not implemented yet".to_owned(),
+    ));
   }
   if config.interval_secs < 1 {
     return Err(ResponseError::BadRequest(
@@ -265,7 +296,7 @@ pub(super) async fn get_koh_status(
 }
 
 pub(super) async fn update_koh_config(
-  State(ref bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref bucket): State<Bucket>, State(db): State<Database>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Json(config): Json<KohConfig>,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -276,6 +307,18 @@ pub(super) async fn update_koh_config(
   validate_koh_config(&config)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(bucket, &game, &challenge).await?;
+  // BITs2CTF fork (B5): the KoH tick namespace is derived from interval/round
+  // length; changing it after scoring has started would corrupt the
+  // (challenge, tick) award idempotency. Reject such changes once awards exist.
+  if let Some(previous) = challenge_bucket.koh().await?
+    && (previous.interval_secs != config.interval_secs
+      || previous.round_secs != config.round_secs)
+    && koh_award::exists_for_challenge(&db.conn, challenge.id).await?
+  {
+    return Err(ResponseError::PreconditionFailed(
+      "cannot change KoH interval/round length after scoring has started".to_owned(),
+    ));
+  }
   challenge_bucket
     .set_koh(serde_json::to_value(&config)?)
     .await?;

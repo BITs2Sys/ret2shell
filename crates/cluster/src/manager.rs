@@ -237,6 +237,19 @@ impl Cluster {
     Ok(service)
   }
 
+  /// The first assigned NodePort of a service, if any (used by AWD to build a
+  /// reachable `host:port` address for each team's machine). Returns `Ok(None)`
+  /// when the service exists but has no NodePort assigned yet.
+  pub async fn service_node_port(&self, name: &str) -> Result<Option<i32>, ClusterError> {
+    let service = self.get_service(name).await?;
+    Ok(
+      service
+        .spec
+        .and_then(|spec| spec.ports)
+        .and_then(|ports| ports.into_iter().find_map(|port| port.node_port)),
+    )
+  }
+
   pub async fn create_service(&self, service: Service) -> Result<Service, ClusterError> {
     let client = check_enabled!(self.client)?;
     let api: Api<Service> =
@@ -305,12 +318,14 @@ impl Cluster {
   }
 
   async fn check_outdated_pod(&self, pod: &Pod) -> Result<bool, ClusterError> {
-    if pod
-      .metadata
-      .labels
-      .as_ref()
+    // KoH hills and BITs2CTF-fork AWD machines are long-lived; never reap them.
+    let labels = pod.metadata.labels.as_ref();
+    if labels
       .and_then(|labels| labels.get("ret.sh.cn/koh"))
       .is_some_and(|value| value == "true")
+      || labels
+        .and_then(|labels| labels.get("ret.sh.cn/awd"))
+        .is_some_and(|value| value == "true")
     {
       return Ok(false);
     }
@@ -566,6 +581,34 @@ impl Cluster {
   }
 
   #[allow(clippy::too_many_arguments)]
+  /// BITs2CTF fork: create a team's own long-lived AWD machine (one pod per team
+  /// per challenge, `ret2shell-awd-{challenge}-{team}`). Exempt from the reaper via
+  /// the `ret.sh.cn/awd=true` label.
+  pub async fn create_awd_env(
+    &self, challenge_id: i64, team_id: i64, labels: BTreeMap<String, String>,
+    annotations: BTreeMap<String, String>, envs: HashMap<String, String>, env_config: ChallengeEnv,
+    node_selector: Option<String>, need_expose: bool,
+  ) -> Result<ChallengeEnvSnapshot, ClusterError> {
+    let traffic = labels
+      .get("ret.sh.cn/traffic")
+      .cloned()
+      .ok_or(ClusterError::MissingField("traffic".to_string()))?;
+    let pod_name = format!("ret2shell-awd-{challenge_id}-{team_id}");
+    self
+      .create_env_pod_service(
+        pod_name,
+        "ret.sh.cn/traffic",
+        &traffic,
+        labels,
+        annotations,
+        envs,
+        env_config,
+        node_selector,
+        need_expose,
+      )
+      .await
+  }
+
   pub async fn create_koh_hill_env(
     &self, challenge_id: i64, labels: BTreeMap<String, String>,
     annotations: BTreeMap<String, String>, envs: HashMap<String, String>, env_config: ChallengeEnv,

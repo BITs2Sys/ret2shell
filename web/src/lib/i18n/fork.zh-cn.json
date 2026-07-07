@@ -1,0 +1,240 @@
+{
+  "challenge": {
+    "fix": {
+      "title": "Fix",
+      "admin": "Fix 配置",
+      "tester": "测试容器",
+      "disabled": "本题未启用 Fix。",
+      "attempts": "次数 {{used}} / {{total}}",
+      "solved": "修复已通过。",
+      "submit": "提交修复",
+      "form": {
+        "enabled": "启用 Fix",
+        "maxAttempts": "最大修复次数",
+        "fixScript": "修复脚本",
+        "uploadPath": "靶机内上传路径",
+        "targetContainer": "靶机容器",
+        "targetPort": "靶机端口",
+        "timeout": "超时秒数",
+        "resultEnv": "结果环境变量",
+        "successValue": "成功取值",
+        "pullSecret": "测试镜像拉取密钥",
+        "testerCommand": {
+          "label": "测试命令 JSON",
+          "invalid": "测试命令格式错误"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "获取 Fix 配置失败"
+        },
+        "submit": {
+          "title": "提交修复失败"
+        }
+      }
+    },
+    "koh": {
+      "title": "KoH",
+      "admin": "KoH 配置",
+      "disabled": "本题未启用 KoH。",
+      "identifier": "队伍标识",
+      "noIdentifier": "暂无队伍标识",
+      "owner": "当前占领者",
+      "noOwner": "无人占领",
+      "owned": "你的队伍",
+      "target": "共享靶机",
+      "scoreboard": "KoH 榜",
+      "emptyScoreboard": "暂无 KoH 得分",
+      "events": "事件",
+      "emptyEvents": "暂无 KoH 事件",
+      "status": {
+        "idle": "未启动"
+      },
+      "mode": {
+        "agentHttp": "传统占领",
+        "roundRankHttp": "按轮排名",
+        "gameElo": "游戏 Elo"
+      },
+      "actions": {
+        "check": "检查",
+        "start": "启动 Hill",
+        "stop": "停止 Hill"
+      },
+      "form": {
+        "enabled": "启用 KoH",
+        "mode": "KoH 模式",
+        "interval": "计分间隔（秒）",
+        "roundSecs": "每轮时间（秒）",
+        "totalRounds": "总轮次（0 为不限）",
+        "reward": "每轮满分",
+        "rankCount": "得分队伍数量",
+        "rankPercentages": "各名次得分占比（逗号分隔）",
+        "timeout": "检查超时（秒）",
+        "statusPath": "Agent 状态路径",
+        "statusUrl": "外部 Agent URL",
+        "apiKey": "Agent API Key",
+        "agentPort": "Agent 端口",
+        "targetPort": "靶机端口",
+        "autoStart": "自动管理共享 Hill"
+      },
+      "errors": {
+        "fetch": {
+          "title": "获取 KoH 状态失败"
+        },
+        "fetchEvents": {
+          "title": "获取 KoH 事件失败"
+        },
+        "fetchScoreboard": {
+          "title": "获取 KoH 榜失败"
+        },
+        "start": {
+          "title": "启动 KoH Hill 失败"
+        },
+        "stop": {
+          "title": "停止 KoH Hill 失败"
+        },
+        "check": {
+          "title": "检查 KoH 状态失败"
+        }
+      }
+    },
+    "isw": {
+      "title": "靶场",
+      "admin": "靶场配置",
+      "disabled": "这不是靶场题目。",
+      "form": {
+        "enabled": "启用靶场模式",
+        "rangeTemplate": "靶场模板",
+        "vm": "目标虚拟机",
+        "guestPath": "靶机内 Flag 路径",
+        "owner": "属主 (user:group)",
+        "mode": "文件权限",
+        "rotate": "每轮轮换",
+        "save": "保存"
+      },
+      "actions": {
+        "arm": "布防靶场",
+        "reset": "重置靶场"
+      },
+      "status": {
+        "pending": "待布防",
+        "armed": "已布防",
+        "error": "错误",
+        "down": "离线"
+      },
+      "player": {
+        "myRange": "我的靶场",
+        "noRange": "尚未分配靶场。",
+        "targets": "目标主机",
+        "vpn": "VPN 接入",
+        "download": "下载配置"
+      }
+    },
+    "awd": {
+      "title": "AWD",
+      "admin": "AWD 配置",
+      "machine": "队伍靶机",
+      "disabled": "本题未启用 AWD。",
+      "provisioned": "已开设 {{count}} 台靶机。",
+      "tornDown": "已销毁所有靶机。",
+      "form": {
+        "enabled": "启用 AWD",
+        "roundSecs": "每轮时长（秒）",
+        "flagPath": "靶机内 flag 路径",
+        "timeoutSecs": "执行超时（秒）",
+        "attackReward": "攻击得分",
+        "defenseReward": "防御得分",
+        "slaReward": "SLA 得分",
+        "internet": "允许外网",
+        "privileged": "特权模式",
+        "port": "服务端口",
+        "pullSecret": "镜像拉取密钥",
+        "checkCommand": {
+          "label": "SLA 检查命令（JSON 数组）",
+          "hint": "每轮在靶机内执行，退出码 0 视为健康；留空则仅检查存活。",
+          "invalid": "检查命令格式错误"
+        }
+      },
+      "actions": {
+        "provision": "开设靶机",
+        "teardown": "销毁靶机"
+      },
+      "scoreboard": {
+        "title": "攻击记录",
+        "empty": "暂无成功攻击。"
+      },
+      "player": {
+        "title": "攻防对抗",
+        "round": "轮次",
+        "myMachine": "我的靶机",
+        "noMachine": "尚未为你的队伍开设靶机。",
+        "hint": "攻击对手靶机并通过提交框提交窃取到的 flag；保持自身服务健康以获得 SLA 与防御分。"
+      }
+    },
+    "awdp": {
+      "title": "AWDP",
+      "admin": "AWDP 配置",
+      "disabled": "本题未启用 AWDP。",
+      "mode": {
+        "solve": "解题",
+        "fix": "修复"
+      },
+      "form": {
+        "enabled": "启用 AWDP",
+        "mode": "计分模式",
+        "roundSecs": "每轮时长（秒）",
+        "totalRounds": "总轮数（0 表示无限）",
+        "hint": "在某轮完成解题/修复的队伍，将在此后每轮持续获得加分，直至比赛结束；奖励随解出队伍数量衰减。",
+        "save": "保存"
+      },
+      "actions": {
+        "reset": "重置"
+      },
+      "player": {
+        "title": "进阶攻防",
+        "secured": "已锁定加分",
+        "round": "当前轮次",
+        "roundSecs": "每轮时长",
+        "solvedRound": "锁定于轮次",
+        "solveHint": "提交 flag 即可锁定加分，比赛结束前每轮持续获得。",
+        "fixHint": "上传通过的修复即可锁定加分，比赛结束前每轮持续获得。"
+      }
+    }
+  },
+  "range": {
+    "title": "ISW 靶场",
+    "host": {
+      "title": "宿主机",
+      "name": "名称",
+      "address": "地址",
+      "port": "Agent 端口",
+      "os": "客户机系统",
+      "add": "添加宿主机",
+      "probe": "探测",
+      "probeFail": "探测失败",
+      "online": "宿主机在线"
+    },
+    "template": {
+      "title": "靶场模板",
+      "gameId": "比赛 ID",
+      "name": "名称",
+      "topology": "拓扑 (JSON)",
+      "create": "创建模板",
+      "badJson": "拓扑必须是合法 JSON"
+    },
+    "instance": {
+      "title": "靶场实例",
+      "templateId": "模板 ID",
+      "hostId": "宿主机 ID",
+      "group": "分组序号",
+      "name": "名称",
+      "create": "创建靶场",
+      "operateId": "靶场 ID"
+    },
+    "actions": {
+      "arm": "布防",
+      "snapshot": "快照",
+      "reset": "重置"
+    }
+  }
+}

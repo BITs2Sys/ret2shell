@@ -14,6 +14,7 @@ use r2s_config::GlobalConfig;
 use r2s_database::DbErr;
 use r2s_engine::Engine;
 use r2s_event::EventManager;
+use r2s_isw::IswManager;
 use r2s_media::Media;
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
@@ -38,6 +39,8 @@ pub struct GlobalState {
   pub media: Media,
   pub checker: Checker,
   pub event: EventManager,
+  // BITs2CTF fork: ISW range-mode manager (host-agent HTTP client factory).
+  pub isw: IswManager,
   pub version: String,
 }
 

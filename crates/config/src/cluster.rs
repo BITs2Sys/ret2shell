@@ -351,6 +351,9 @@ impl FixConfig {
       tester: self.tester.map(|tester| tester.desensitize()),
       tester_command: None,
       pull_secret: None,
+      // BITs2CTF fork (C4): hide the tester's success oracle from players.
+      result_env: String::new(),
+      success_value: String::new(),
       ..self
     }
   }
@@ -381,8 +384,234 @@ impl Default for KohConfig {
 
 impl KohConfig {
   pub fn desensitize(self) -> Self {
+    // BITs2CTF fork (C5): players get the hill target via the traffic mapper, not
+    // the raw agent infra — hide status url/path, agent/target ports, elo, key.
     Self {
       api_key: None,
+      status_url: None,
+      status_path: String::new(),
+      agent_port: None,
+      target_port: None,
+      elo: None,
+      ..self
+    }
+  }
+}
+
+// BITs2CTF fork: ISW (Internal Security Warfare) range-mode manifest (`isw.toml`).
+// Binds a challenge's dynamic flag to a guest-VM injection target inside a range.
+fn default_isw_mode() -> String {
+  "0644".to_owned()
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct IswConfig {
+  #[serde(default)]
+  pub enabled: bool,
+  /// name of the range template this challenge's flag belongs to.
+  #[serde(default)]
+  pub range_template: String,
+  /// logical VM within the range that holds this flag.
+  #[serde(default)]
+  pub vm: String,
+  /// absolute path inside the guest to inject the flag into.
+  #[serde(default)]
+  pub guest_path: String,
+  /// guest owner spec (e.g. "www-data:www-data" on linux, or a windows user).
+  #[serde(default)]
+  pub owner: Option<String>,
+  /// guest file mode (octal string, e.g. "0640").
+  #[serde(default = "default_isw_mode")]
+  pub mode: String,
+  /// whether this flag rotates each round (default: static for the whole game).
+  #[serde(default)]
+  pub rotate: bool,
+}
+
+impl Default for IswConfig {
+  fn default() -> Self {
+    Self {
+      enabled: false,
+      range_template: String::new(),
+      vm: String::new(),
+      guest_path: String::new(),
+      owner: None,
+      mode: default_isw_mode(),
+      rotate: false,
+    }
+  }
+}
+
+impl IswConfig {
+  pub fn desensitize(self) -> Self {
+    // players must not learn the flag's guest location; keep only the flags that
+    // control UI behaviour.
+    Self {
+      range_template: String::new(),
+      vm: String::new(),
+      guest_path: String::new(),
+      owner: None,
+      mode: String::new(),
+      ..self
+    }
+  }
+}
+
+// BITs2CTF fork: AWDP (Attack-and-Defense-Plus) — Jeopardy-style solve/fix with a
+// per-round persistent bonus. A team that solves/fixes in round R keeps earning the
+// (decayed) challenge score every round from R to the end (`awdp.toml`).
+fn default_awdp_round_secs() -> u64 {
+  300
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AwdpMode {
+  /// solved by submitting the flag (normal checker).
+  Solve,
+  /// solved by uploading a passing fix (requires `fix.toml`).
+  Fix,
+}
+
+fn default_awdp_mode() -> AwdpMode {
+  AwdpMode::Solve
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AwdpConfig {
+  #[serde(default)]
+  pub enabled: bool,
+  #[serde(default = "default_awdp_mode")]
+  pub mode: AwdpMode,
+  /// scored round length; a value of 300 means one scored round per 5 minutes.
+  #[serde(default = "default_awdp_round_secs")]
+  pub round_secs: u64,
+  /// total scored rounds; 0 means unlimited while the challenge is active.
+  #[serde(default)]
+  pub total_rounds: u32,
+}
+
+impl Default for AwdpConfig {
+  fn default() -> Self {
+    Self {
+      enabled: false,
+      mode: default_awdp_mode(),
+      round_secs: default_awdp_round_secs(),
+      total_rounds: 0,
+    }
+  }
+}
+
+impl AwdpConfig {
+  pub fn desensitize(self) -> Self {
+    // no secrets; nothing to strip.
+    self
+  }
+}
+
+// BITs2CTF fork: AWD (Attack-and-Defense) — each team gets its own machine (a k8s
+// pod) running one challenge, all interconnected. Each round the platform rotates a
+// fresh flag into every machine and runs an SLA service check; teams attack each
+// other's machines and submit the stolen flag (`awd.toml`).
+fn default_awd_round_secs() -> u64 {
+  300
+}
+
+fn default_awd_flag_path() -> String {
+  "/flag".to_owned()
+}
+
+fn default_awd_attack_reward() -> i32 {
+  100
+}
+
+fn default_awd_defense_reward() -> i32 {
+  50
+}
+
+fn default_awd_sla_reward() -> i32 {
+  30
+}
+
+fn default_awd_timeout_secs() -> u64 {
+  10
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AwdConfig {
+  #[serde(default)]
+  pub enabled: bool,
+  #[serde(default = "default_awd_round_secs")]
+  pub round_secs: u64,
+  #[serde(default)]
+  pub internet: bool,
+  #[serde(default)]
+  pub restricted: Option<bool>,
+  #[serde(default)]
+  pub privileged: Option<bool>,
+  /// the per-team machine image (one pod per team).
+  pub image: ChallengeImage,
+  #[serde(default)]
+  pub pull_secret: Option<String>,
+  /// absolute path inside each machine where the round flag is written.
+  #[serde(default = "default_awd_flag_path")]
+  pub flag_path: String,
+  /// SLA service check: command exec'd in the machine each round; exit 0 = healthy.
+  #[serde(default)]
+  pub check_command: Option<Vec<String>>,
+  #[serde(default = "default_awd_attack_reward")]
+  pub attack_reward: i32,
+  #[serde(default = "default_awd_defense_reward")]
+  pub defense_reward: i32,
+  #[serde(default = "default_awd_sla_reward")]
+  pub sla_reward: i32,
+  #[serde(default = "default_awd_timeout_secs")]
+  pub timeout_secs: u64,
+}
+
+impl Default for AwdConfig {
+  fn default() -> Self {
+    Self {
+      enabled: false,
+      round_secs: default_awd_round_secs(),
+      internet: false,
+      restricted: None,
+      privileged: None,
+      image: ChallengeImage {
+        name: String::new(),
+        tag: String::new(),
+        cpu: 0.5,
+        cpu_req: default_cpu_req(),
+        mem: "256Mi".to_owned(),
+        mem_req: default_mem_req(),
+        storage: None,
+        storage_req: default_storage_req(),
+        port: None,
+        #[allow(deprecated)]
+        service_type: None,
+        protocol: None,
+        app_protocol: None,
+        description: None,
+        restricted: None,
+      },
+      pull_secret: None,
+      flag_path: default_awd_flag_path(),
+      check_command: None,
+      attack_reward: default_awd_attack_reward(),
+      defense_reward: default_awd_defense_reward(),
+      sla_reward: default_awd_sla_reward(),
+      timeout_secs: default_awd_timeout_secs(),
+    }
+  }
+}
+
+impl AwdConfig {
+  pub fn desensitize(self) -> Self {
+    Self {
+      flag_path: String::new(),
+      check_command: None,
+      pull_secret: None,
+      image: self.image.desensitize(),
       ..self
     }
   }

@@ -1,0 +1,24 @@
+[package]
+description = "ISW (Internal Security Warfare) range manager for Ret2Shell - BITs2CTF fork."
+name        = "r2s-isw"
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+publish      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
+
+[dependencies]
+base64 = { workspace = true }
+# Fork-owned crate: enable rustls client-cert (mTLS) support on the shared reqwest.
+reqwest    = { workspace = true, features = ["rustls"] }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+thiserror  = { workspace = true }
+tokio      = { workspace = true }
+tracing    = { workspace = true }
+
+[lib]
+path = "src/lib.rs"

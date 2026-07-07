@@ -16,11 +16,17 @@ use crate::{
 };
 
 mod attachment;
+// BITs2CTF fork: AWD + AWDP challenge-kind routes.
+pub(crate) mod awd;
+pub(crate) mod awdp;
 mod checker;
-mod fix;
+// BITs2CTF fork: fix/koh exposed to crate so repo_sync can reuse their validators
+// (C1) and the router refactor (A5) can merge their sub-routers.
+pub(crate) mod fix;
 mod hint;
 mod instance;
-mod koh;
+pub(crate) mod isw;
+pub(crate) mod koh;
 mod resource;
 mod submission;
 
@@ -60,15 +66,12 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           "/checker",
           get(checker::get_checker_script).patch(checker::update_checker_script),
         )
-        .route(
-          "/fix",
-          patch(fix::update_fix_config).delete(fix::delete_fix_config),
-        )
-        .route(
-          "/koh/hill",
-          post(koh::start_koh_hill).delete(koh::stop_koh_hill),
-        )
-        .route("/koh/check", post(koh::check_koh_once))
+        // BITs2CTF fork (A5): fork challenge-kind admin routes as sub-routers.
+        .merge(fix::admin_router())
+        .merge(koh::admin_router())
+        .merge(isw::admin_router())
+        .merge(awd::admin_router())
+        .merge(awdp::admin_router())
         .route(
           "/hint",
           post(hint::create_challenge_hint).delete(hint::delete_challenge_hint),
@@ -89,19 +92,12 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/answer", get(resource::get_answer))
         .route("/file", get(attachment::get_player_attachment))
         .route("/env", get(instance::get_challenge_env_config))
-        .route("/fix", get(fix::get_fix_config))
-        .route(
-          "/koh",
-          get(koh::get_koh_status)
-            .patch(koh::update_koh_config)
-            .delete(koh::delete_koh_config),
-        )
-        .route("/koh/event", get(koh::get_koh_events))
-        .route("/koh/scoreboard", get(koh::get_koh_scoreboard))
-        .route(
-          "/fix/submit",
-          post(fix::submit_fix).route_layer(DefaultBodyLimit::max(1024 * 1024 * 1024)),
-        )
+        // BITs2CTF fork (A5): fork challenge-kind player routes as sub-routers.
+        .merge(fix::player_router())
+        .merge(koh::player_router())
+        .merge(isw::player_router())
+        .merge(awd::player_router())
+        .merge(awdp::player_router())
         .route(
           "/instance",
           post(instance::start_challenge_instance)

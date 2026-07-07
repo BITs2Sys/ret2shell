@@ -85,6 +85,7 @@ r2s-database = { path = "crates/database" }
 r2s-email    = { path = "crates/email" }
 r2s-engine   = { path = "crates/engine" }
 r2s-event    = { path = "crates/event" }
+r2s-isw      = { path = "crates/isw" }
 r2s-media    = { path = "crates/media" }
 r2s-migrator = { path = "crates/migrator" }
 r2s-oauth    = { path = "crates/oauth" }

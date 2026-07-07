@@ -12,10 +12,6 @@ pub mod game;
 pub mod hint;
 pub mod institute;
 pub mod ip;
-pub mod koh_award;
-pub mod koh_event;
-pub mod koh_identifier;
-pub mod koh_state;
 pub mod media;
 pub mod notification;
 pub mod oauth;
@@ -25,3 +21,12 @@ pub mod team;
 pub mod user;
 pub mod user2_ip;
 pub mod user2_team;
+
+// BITs2CTF fork: append-only entity registration (kept at end of file so upstream
+// `sea-orm-codegen` regeneration of the block above never conflicts with the fork).
+pub mod awd;
+pub mod isw;
+pub mod koh_award;
+pub mod koh_event;
+pub mod koh_identifier;
+pub mod koh_state;

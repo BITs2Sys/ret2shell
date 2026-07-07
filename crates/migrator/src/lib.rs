@@ -12,7 +12,7 @@ pub struct Migrator;
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
   fn migrations() -> Vec<Box<dyn MigrationTrait>> {
-    vec![
+    let mut migrations: Vec<Box<dyn MigrationTrait>> = vec![
       Box::new(migrations::m_20230101_000001_create_config::Migration),
       Box::new(migrations::m_20240101_000001_create_institute::Migration),
       Box::new(migrations::m_20240101_000002_create_user::Migration),
@@ -45,9 +45,22 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20250622_000001_create_game_hammer_policy::Migration),
       Box::new(migrations::m_20250721_000001_create_ip_time_info::Migration),
       Box::new(migrations::m_20260307_000001_game_lifecycle::Migration),
-      Box::new(migrations::m_20260703_000001_create_koh::Migration),
-    ]
+    ];
+    // BITs2CTF fork: append fork-owned migrations at the tail. They only CREATE
+    // new tables (FKs into existing ones), so ordering vs upstream stays safe.
+    migrations.extend(fork_migrations());
+    migrations
   }
+}
+
+/// BITs2CTF fork: fork-owned migrations, kept out of the upstream `migrations()`
+/// literal so pulling upstream never conflicts on that vec.
+fn fork_migrations() -> Vec<Box<dyn MigrationTrait>> {
+  vec![
+    Box::new(migrations::m_20260703_000001_create_koh::Migration),
+    Box::new(migrations::m_20260706_000001_create_isw::Migration),
+    Box::new(migrations::m_20260707_000001_create_awd::Migration),
+  ]
 }
 
 #[derive(Clone, Debug)]
