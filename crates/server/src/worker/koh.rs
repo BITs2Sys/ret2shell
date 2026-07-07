@@ -139,6 +139,10 @@ pub async fn check_once(
   {
     return Ok(());
   }
+  // KoH AgentHttp scoring is deliberately SAMPLE-BASED: each interval we check who holds
+  // the hill *now* and award that single tick. Ticks are not back-filled if a scan is
+  // delayed — the holder during an unsampled tick is unknown, so crediting the current
+  // holder for it would be wrong. The (challenge, tick) award stays idempotent.
   let tick = now.timestamp() / interval_secs as i64;
   let env_config = challenge_bucket.env().await?;
   if config.auto_start
@@ -408,7 +412,7 @@ async fn refresh_team_score<C>(
 ) -> Result<(), ResponseError>
 where
   C: ConnectionTrait, {
-  let Some(mut team) = team::get(db, team_id).await? else {
+  let Some(mut team) = team::get_for_update(db, team_id).await? else {
     return Err(ResponseError::NotFound("KoH team not found".to_owned()));
   };
   let score = team::calc_score(db, team.id).await?;

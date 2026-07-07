@@ -28,6 +28,7 @@ use crate::{
     FixSubmissionMeta, encode_fix_submission_meta, fix_upload_dir, fix_upload_path,
     is_fix_submission,
   },
+  worker::fix::FIX_CHECKER_INTERNAL_ERROR,
 };
 
 const LABEL_ALPHABET: [char; 62] = [
@@ -68,7 +69,9 @@ where
   )
   .await?
   {
-    if is_fix_submission(submission.content.as_deref()) {
+    if is_fix_submission(submission.content.as_deref())
+      && submission.result.as_deref() != Some(FIX_CHECKER_INTERNAL_ERROR)
+    {
       ids.insert(submission.id);
     }
   }
@@ -85,7 +88,9 @@ where
     )
     .await?
     {
-      if is_fix_submission(submission.content.as_deref()) {
+      if is_fix_submission(submission.content.as_deref())
+        && submission.result.as_deref() != Some(FIX_CHECKER_INTERNAL_ERROR)
+      {
         ids.insert(submission.id);
       }
     }
@@ -204,7 +209,7 @@ pub(super) async fn get_fix_config(
   let attempts_remaining = config
     .as_ref()
     .filter(|config| config.enabled)
-    .map(|config| (config.max_attempts as u64).saturating_sub(attempts_used));
+    .map(|config| (config.max_attempts.max(0) as u64).saturating_sub(attempts_used));
   let config = if is_game_admin!(token, game) {
     config
   } else {
@@ -281,6 +286,15 @@ pub(super) async fn submit_fix(
   } else {
     None
   };
+  // BITs2CTF fork: a teamed player outside the active window (game over / archived) has
+  // `store_team == None`, so their submissions would be counted per-user only — letting
+  // a team collectively bypass max_attempts. Such submissions don't score anyway, so
+  // reject them outright.
+  if team.is_some() && store_team.is_none() {
+    return Err(ResponseError::PreconditionFailed(
+      "fix submissions are closed for this game".to_owned(),
+    ));
+  }
   let challenge_bucket = super::get_challenge_bucket(bucket, &game, &challenge).await?;
   let Some(fix_config) = challenge_bucket.fix().await? else {
     return Err(ResponseError::PreconditionFailed(
@@ -299,7 +313,7 @@ pub(super) async fn submit_fix(
     ));
   }
   if count_fix_attempts(&db.conn, &game, &challenge, team.as_ref(), token.id).await?
-    >= fix_config.max_attempts as u64
+    >= fix_config.max_attempts.max(0) as u64
   {
     return Err(ResponseError::PreconditionFailed(
       "fix attempts exhausted".to_owned(),
@@ -359,7 +373,7 @@ pub(super) async fn submit_fix(
     ));
   }
   if count_fix_attempts(&txn, &game, &challenge, team.as_ref(), token.id).await?
-    >= fix_config.max_attempts as u64
+    >= fix_config.max_attempts.max(0) as u64
   {
     txn.rollback().await.ok();
     let _ = tokio::fs::remove_dir_all(&upload_dir).await;

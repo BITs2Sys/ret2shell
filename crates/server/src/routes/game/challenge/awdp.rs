@@ -76,7 +76,7 @@ async fn get_awdp_status(
     config,
     state: awdp_state::get(&state.db.conn, challenge.id).await?,
     solved: solve.is_some(),
-    solved_round: solve.map(|s| s.solved_round),
+    solved_round: solve.map(|s| s.solved_at.timestamp() / round_secs),
     round,
   }))
 }

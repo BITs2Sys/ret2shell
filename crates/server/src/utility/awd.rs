@@ -138,6 +138,27 @@ pub async fn provision(
     {
       continue;
     }
+    let deterministic = format!("ret2shell-awd-{}-{}", challenge.id, team.id);
+    // Reserve the slot atomically before touching k8s: the unique (challenge, team)
+    // index means a concurrent provision (or a re-run) loses this insert and is
+    // skipped, so exactly one call proceeds to create the pod.
+    let reservation = match awd_instance::create(
+      db,
+      awd_instance::Model {
+        id: 0,
+        created_at: chrono::Utc::now(),
+        challenge_id: challenge.id,
+        team_id: team.id,
+        pod_name: deterministic.clone(),
+        address: None,
+        status: "pending".to_owned(),
+      },
+    )
+    .await
+    {
+      Ok(instance) => instance,
+      Err(_) => continue, // another provision reserved this team's slot first
+    };
     let traffic = nanoid!(21, &LABEL_ALPHABET);
     let labels = BTreeMap::from([
       ("ret.sh.cn/awd".to_owned(), "true".to_owned()),
@@ -153,8 +174,7 @@ pub async fn provision(
       ("ret.sh.cn/challenge".to_owned(), challenge.name.clone()),
       ("ret.sh.cn/game".to_owned(), game.name.clone()),
     ]);
-    let deterministic = format!("ret2shell-awd-{}-{}", challenge.id, team.id);
-    let pod_name = match cluster
+    match cluster
       .create_awd_env(
         challenge.id,
         team.id,
@@ -167,38 +187,28 @@ pub async fn provision(
       )
       .await
     {
-      Ok(snapshot) => snapshot
-        .pod
-        .metadata
-        .name
-        .clone()
-        .unwrap_or(deterministic),
-      // a prior run may have orphaned this team's pod and/or service (deterministic
-      // name). Clear both — tolerating either being absent — so a re-run isn't
-      // permanently wedged on a stale object, then skip; the next provision recreates
-      // cleanly.
+      Ok(snapshot) => {
+        let pod_name = snapshot
+          .pod
+          .metadata
+          .name
+          .clone()
+          .unwrap_or_else(|| deterministic.clone());
+        let address = resolve_address(state, config, &pod_name).await;
+        awd_instance::update_state(db, reservation.id, "running", address)
+          .await
+          .ok();
+        created += 1;
+      }
+      // pod creation failed: release the reservation + clear any orphaned k8s object so
+      // a re-run recreates cleanly.
       Err(err) => {
         cluster.delete_service(&deterministic).await.ok();
         cluster.delete_pod(&deterministic).await.ok();
-        warn!(team = team.id, error = %err, "AWD provision failed; cleared any orphan, will retry on next provision");
-        continue;
+        awd_instance::delete_by_id(db, reservation.id).await.ok();
+        warn!(team = team.id, error = %err, "AWD provision failed; released reservation, will retry on next provision");
       }
-    };
-    let address = resolve_address(state, config, &pod_name).await;
-    awd_instance::create(
-      db,
-      awd_instance::Model {
-        id: 0,
-        created_at: chrono::Utc::now(),
-        challenge_id: challenge.id,
-        team_id: team.id,
-        pod_name,
-        address,
-        status: "running".to_owned(),
-      },
-    )
-    .await?;
-    created += 1;
+    }
   }
   info!(challenge_id = challenge.id, created, "AWD machines provisioned");
   Ok(created)
@@ -382,7 +392,10 @@ pub async fn verify_attack<C>(
 where
   C: ConnectionTrait, {
   let hash = sha256_hex(submitted.trim().as_bytes());
-  let state_round = match awd_state::get(db, challenge.id).await? {
+  // Lock awd_state so this attack serializes against the round worker's finalize +
+  // advance (round_tick Phase B), preventing a stale read from crediting an attack
+  // against a round whose defense was already scored.
+  let state_round = match awd_state::get_for_update(db, challenge.id).await? {
     Some(state) if state.last_round > 0 => state.last_round,
     // worker hasn't recorded a round yet: fall back to wall-clock.
     _ => chrono::Utc::now().timestamp() / config.round_secs.max(1) as i64,
@@ -390,6 +403,9 @@ where
   let Some(victim) = awd_round::find_by_hash(db, challenge.id, state_round, &hash).await? else {
     return Ok((false, "not a current-round flag".to_owned()));
   };
+  if victim.finalized {
+    return Ok((false, "this round has already been scored".to_owned()));
+  }
   let round = victim.round;
   if victim.team_id == attacker_team_id {
     return Ok((false, "cannot submit your own flag".to_owned()));
@@ -398,7 +414,14 @@ where
     return Ok((true, "already stolen this round".to_owned()));
   }
   let exploited = awd_steal::distinct_victim_count(db, challenge.id).await?;
-  let value = attack_value(config, challenge, exploited + 1);
+  // Count this victim toward the decay only if it is newly exploited — a victim already
+  // in the distinct set would otherwise be double-counted by the `+ 1`.
+  let count = if awd_steal::victim_exploited(db, challenge.id, victim.team_id).await? {
+    exploited
+  } else {
+    exploited + 1
+  };
+  let value = attack_value(config, challenge, count);
   let now = chrono::Utc::now();
   let extra = extra::create(
     db,
@@ -464,7 +487,7 @@ async fn refresh_team_score<C>(
 ) -> Result<(), ResponseError>
 where
   C: ConnectionTrait, {
-  let Some(mut team) = team::get(db, team_id).await? else {
+  let Some(mut team) = team::get_for_update(db, team_id).await? else {
     return Ok(());
   };
   let total = team::calc_score(db, team.id).await?;

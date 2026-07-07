@@ -46,6 +46,22 @@ pub(crate) fn validate_isw_config(config: &IswConfig) -> Result<(), ResponseErro
       "ISW guest flag path is required".to_owned(),
     ));
   }
+  // owner and guest_path are interpolated into guest shell commands (chown/chmod /
+  // cmd.exe) by the host agent; reject shell metacharacters so a config can't inject
+  // commands into a guest. (Backslash/parens are allowed for Windows paths.)
+  const FORBIDDEN: &[char] = &['\'', '"', '`', '$', ';', '&', '|', '\n', '\r', '<', '>'];
+  if config.guest_path.contains(FORBIDDEN) {
+    return Err(ResponseError::BadRequest(
+      "ISW guest path contains forbidden shell characters".to_owned(),
+    ));
+  }
+  if let Some(owner) = &config.owner
+    && owner.contains(FORBIDDEN)
+  {
+    return Err(ResponseError::BadRequest(
+      "ISW owner contains forbidden shell characters".to_owned(),
+    ));
+  }
   // `mode` is a chmod-style octal string injected into the guest; reject anything
   // that isn't 3-4 octal digits early rather than failing at inject time.
   let mode = config.mode.trim();

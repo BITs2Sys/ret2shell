@@ -212,6 +212,35 @@ where
   }
 }
 
+/// Every solved submission's `(team_id, created_at)` for a challenge, restricted to
+/// registered teams. Unlike `get_list` (which `distinct_on`'s to the LATEST row per
+/// team), this returns all rows so callers can compute the EARLIEST solve — required
+/// by round-based scoring (AWDP), where the first solve fixes the reward start.
+pub async fn solved_team_times<C>(
+  db: &C, challenge_id: i64,
+) -> Result<Vec<(i64, DateTime<Utc>)>, DbErr>
+where
+  C: ConnectionTrait, {
+  let rows: Vec<(Option<i64>, DateTime<Utc>)> = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Team.def())
+    .select_only()
+    .column(Column::TeamId)
+    .column(Column::CreatedAt)
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .filter(Column::Solved.eq(true))
+    .filter(Column::TeamId.is_not_null())
+    .filter(team::Column::State.gte(team::State::Hidden))
+    .into_tuple()
+    .all(db)
+    .await?;
+  Ok(
+    rows
+      .into_iter()
+      .filter_map(|(team_id, created_at)| Some((team_id?, created_at)))
+      .collect(),
+  )
+}
+
 #[allow(clippy::too_many_arguments)]
 pub async fn get_list_ex<C>(
   db: &C, only_solved: bool, with_content: bool, game_id: Option<i64>, challenge_id: Option<i64>,

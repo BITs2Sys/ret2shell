@@ -223,6 +223,18 @@ async fn finalize_status(
   state: &GlobalState, ctx: &RangeContext, results: &[FlagArmResult],
 ) -> Result<(), ResponseError> {
   let armed_ok = !results.is_empty() && results.iter().all(|r| r.ok);
+  // Distinguish "no isw.toml challenge targeted this template" (empty results) from a
+  // genuine inject failure, so the error state is actionable for admins.
+  let last_error = if results.is_empty() {
+    Some(format!(
+      "no enabled isw.toml challenge targets range template `{}`",
+      ctx.template.name
+    ))
+  } else if !armed_ok {
+    results.iter().find_map(|r| r.message.clone())
+  } else {
+    None
+  };
   isw_range::update_state(
     &state.db.conn,
     isw_range::Model {
@@ -235,10 +247,7 @@ async fn finalize_status(
       status: if armed_ok { "armed" } else { "error" }.to_owned(),
       armed_at: Some(chrono::Utc::now()),
       snapshot_name: ctx.range.snapshot_name.clone(),
-      last_error: results
-        .iter()
-        .find_map(|r| r.message.clone())
-        .filter(|_| !armed_ok),
+      last_error,
     },
   )
   .await?;
@@ -345,6 +354,16 @@ pub async fn provision_vpn(
     .await
     .map_err(|e| ResponseError::InternalServerError(e.to_string()))?;
   let config = build_wg_config(&resp, &address, &subnet);
+  // idempotency: revoke any prior peer(s) for this (range, team) so exactly one active
+  // peer/config exists and get_for_team returns the one we just handed out (repeated
+  // provisioning otherwise piles up duplicate rows with mismatched keys).
+  for existing in isw_vpn_peer::list_by_range(&state.db.conn, range_id).await? {
+    if existing.team_id == team_id && !existing.revoked {
+      isw_vpn_peer::set_revoked(&state.db.conn, existing.id, true)
+        .await
+        .ok();
+    }
+  }
   isw_vpn_peer::create(
     &state.db.conn,
     isw_vpn_peer::Model {
@@ -397,5 +416,11 @@ where
   let Some(flag) = isw_flag::get_current(db, assignment.range_id, challenge_id).await? else {
     return Ok(false);
   };
+  // Only score against a flag confirmed present in the guest by read-back hash. An
+  // unverified row (inject/revert failed) must not accept or reject real submissions —
+  // otherwise the phantom hash makes the challenge unsolvable.
+  if !flag.verified {
+    return Ok(false);
+  }
   Ok(sha256_hex(content.trim().as_bytes()) == flag.value_hash)
 }

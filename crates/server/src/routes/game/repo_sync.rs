@@ -685,6 +685,20 @@ async fn validate_manifests(challenge_bucket: &ChallengeBucket) -> anyhow::Resul
   if let Some(awdp) = challenge_bucket.awdp().await? {
     validate_awdp_config(&awdp)
       .map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;
+    // fix-mode AWDP is only solvable via an enabled fix.toml — enforce the same rule
+    // the REST update path applies on the git-push path too, so both reject it.
+    if awdp.enabled
+      && awdp.mode == r2s_config::cluster::AwdpMode::Fix
+      && !challenge_bucket
+        .fix()
+        .await?
+        .is_some_and(|fix| fix.enabled)
+    {
+      anyhow::bail!(
+        "{}: AWDP fix mode requires an enabled fix.toml",
+        challenge_bucket.name
+      );
+    }
   }
   if let Some(awd) = challenge_bucket.awd().await? {
     validate_awd_config(&awd).map_err(|err| anyhow::anyhow!("{}: {err}", challenge_bucket.name))?;

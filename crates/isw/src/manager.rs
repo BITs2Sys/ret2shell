@@ -1,7 +1,13 @@
 //! `IswManager` — builds per-host [`AgentClient`]s for the platform.
 //!
-//! Phase 1 skeleton: a shared `reqwest` client + bearer token. mTLS (client cert +
-//! pinned server fingerprint) is wired in Phase 2 alongside the agent's TLS listener.
+//! When `R2S_ISW_CA`/`CERT`/`KEY` are set the client speaks mTLS over https: it presents
+//! its client identity and validates the agent's cert against the shared CA **and** the
+//! standard TLS hostname (SAN) check — reqwest verifies the presented cert's SAN matches
+//! the connection host (`host.address`), so a host-agent whose cert is scoped to its own
+//! address cannot impersonate another host. Agent certs MUST therefore be issued
+//! address-scoped (SAN = the host's address); a future hardening will additionally pin
+//! `isw_host.fingerprint` for defence-in-depth. Without the TLS env vars it falls back to
+//! plain http (trusted-LAN / dev).
 
 use std::time::Duration;
 
@@ -19,8 +25,9 @@ pub struct IswManager {
 impl IswManager {
   /// Build a manager. Reads the shared agent bearer token from `R2S_ISW_TOKEN`.
   /// If `R2S_ISW_CA` + `R2S_ISW_CERT` + `R2S_ISW_KEY` (PEM file paths) are all set,
-  /// the client speaks **mTLS** (rustls, client identity, CA-pinned) over https;
-  /// otherwise it falls back to plain http (trusted-LAN / dev).
+  /// the client speaks **mTLS** (rustls, client identity, CA validation + TLS hostname
+  /// verification against the target host address) over https; otherwise it falls back
+  /// to plain http (trusted-LAN / dev).
   pub fn initialize() -> Result<Self, IswError> {
     let token = std::env::var("R2S_ISW_TOKEN").unwrap_or_default();
     let mut builder = reqwest::Client::builder()

@@ -60,6 +60,13 @@ pub async fn provision_peer(cfg: &VpnConfig, req: &VpnPeerRequest) -> Result<Vpn
   if !status.success() {
     return Err(anyhow!("wg set failed for interface {}", cfg.interface));
   }
+  // `wg set` is runtime-only; persist the peer to the interface config so it survives an
+  // interface restart / host reboot. Best-effort — a save failure must not fail
+  // provisioning (the peer is already live).
+  let _ = Command::new("wg-quick")
+    .args(["save", &cfg.interface])
+    .status()
+    .await;
   Ok(VpnPeerResponse {
     client_private_key: private,
     client_public_key: public,

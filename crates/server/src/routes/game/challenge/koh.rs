@@ -145,6 +145,16 @@ pub(crate) fn validate_koh_config(config: &KohConfig) -> Result<(), ResponseErro
       "KoH status path cannot be empty".to_owned(),
     ));
   }
+  // BITs2CTF fork: round-rank mode also needs a reachable status endpoint — an
+  // explicit status_url or a non-empty status_path — else the hill URL is degenerate.
+  if config.mode == KohMode::RoundRankHttp
+    && config.status_url.as_deref().unwrap_or("").trim().is_empty()
+    && config.status_path.trim().is_empty()
+  {
+    return Err(ResponseError::BadRequest(
+      "KoH round-rank mode requires a status URL or a status path".to_owned(),
+    ));
+  }
   Ok(())
 }
 
@@ -282,14 +292,25 @@ pub(super) async fn get_koh_status(
   } else {
     None
   };
-  let config = if is_game_admin!(token, game) {
+  let admin = is_game_admin!(token, game);
+  let config = if admin {
     config
   } else {
     config.map(KohConfig::desensitize)
   };
+  // BITs2CTF fork: `current_identifier` is the current holder's per-team bearer
+  // secret; never expose it to non-admins (leaking it lets another team plant it on
+  // the hill and be credited as owner). The owning team stays identifiable via
+  // `current_team_id`.
+  let mut koh = koh_state::get(&state.db.conn, challenge.id).await?;
+  if !admin
+    && let Some(state) = koh.as_mut()
+  {
+    state.current_identifier = None;
+  }
   Ok(Json(KohStatus {
     config,
-    state: koh_state::get(&state.db.conn, challenge.id).await?,
+    state: koh,
     identifier,
     target,
   }))
@@ -312,11 +333,12 @@ pub(super) async fn update_koh_config(
   // (challenge, tick) award idempotency. Reject such changes once awards exist.
   if let Some(previous) = challenge_bucket.koh().await?
     && (previous.interval_secs != config.interval_secs
-      || previous.round_secs != config.round_secs)
+      || previous.round_secs != config.round_secs
+      || previous.mode != config.mode)
     && koh_award::exists_for_challenge(&db.conn, challenge.id).await?
   {
     return Err(ResponseError::PreconditionFailed(
-      "cannot change KoH interval/round length after scoring has started".to_owned(),
+      "cannot change KoH interval/round length or mode after scoring has started".to_owned(),
     ));
   }
   challenge_bucket

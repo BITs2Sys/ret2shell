@@ -1,7 +1,7 @@
 //! `SeaORM` Entity for a per-team VPN peer into an ISW range network.
 
 use chrono::{DateTime, Utc, serde::ts_seconds};
-use sea_orm::{ActiveValue, IntoActiveModel, entity::prelude::*};
+use sea_orm::{ActiveValue, IntoActiveModel, QueryOrder, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -64,6 +64,8 @@ where
   Entity::find()
     .filter(Column::RangeId.eq(range_id))
     .filter(Column::TeamId.eq(team_id))
+    .filter(Column::Revoked.eq(false))
+    .order_by_desc(Column::CreatedAt)
     .one(db)
     .await
 }

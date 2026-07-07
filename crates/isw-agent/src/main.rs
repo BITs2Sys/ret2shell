@@ -196,6 +196,17 @@ fn free_mem_mb() -> i64 {
 
 // ---- handlers -------------------------------------------------------------
 
+/// Compare two `.vmx` paths tolerant of case / separator / symlink differences between
+/// what `vmrun list` prints and what the registry resolves, so a running VM isn't
+/// mis-reported as "off".
+fn same_vmx(a: &str, b: &str) -> bool {
+  let canon = |p: &str| std::fs::canonicalize(p).ok().map(|c| c.to_string_lossy().to_lowercase());
+  match (canon(a), canon(b)) {
+    (Some(x), Some(y)) => x == y,
+    _ => a.replace('\\', "/").to_lowercase() == b.replace('\\', "/").to_lowercase(),
+  }
+}
+
 async fn health(State(state): State<AppState>) -> Result<Json<HealthResponse>, AppError> {
   let running = state.vmrun.list_running().await.unwrap_or_default();
   let vms = state
@@ -205,7 +216,7 @@ async fn health(State(state): State<AppState>) -> Result<Json<HealthResponse>, A
     .filter_map(|name| {
       let entry = state.registry.get(&name)?;
       let vmx = state.registry.resolve_vmx(entry);
-      let power = if running.iter().any(|r| r == &vmx) {
+      let power = if running.iter().any(|r| same_vmx(r, &vmx)) {
         "on"
       } else {
         "off"
@@ -363,6 +374,11 @@ async fn do_inject(
   })
 }
 
+/// POSIX single-quote a value for safe interpolation into a `/bin/bash` command.
+fn sh_squote(value: &str) -> String {
+  format!("'{}'", value.replace('\'', "'\\''"))
+}
+
 /// Apply guest ownership/mode after injection (best effort; guest-OS specific).
 async fn apply_perms(
   state: &AppState, entry: &VmEntry, vmx: &str, req: &InjectRequest,
@@ -388,15 +404,19 @@ async fn apply_perms(
     }
     Ok(())
   } else {
+    // defense-in-depth: POSIX single-quote every interpolated value so a value that
+    // slipped past server-side validation still can't inject shell (the platform also
+    // rejects shell metacharacters in owner/guest_path at config time).
+    let path_q = sh_squote(&req.guest_path);
     let mut script = String::new();
     if let Some(owner) = &req.owner {
-      script.push_str(&format!("chown '{}' '{}'", owner, req.guest_path));
+      script.push_str(&format!("chown {} {}", sh_squote(owner), path_q));
     }
     if let Some(mode) = &req.mode {
       if !script.is_empty() {
         script.push_str(" && ");
       }
-      script.push_str(&format!("chmod '{}' '{}'", mode, req.guest_path));
+      script.push_str(&format!("chmod {} {}", sh_squote(mode), path_q));
     }
     if !script.is_empty() {
       let _ = state

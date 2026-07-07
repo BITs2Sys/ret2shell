@@ -92,6 +92,21 @@ where
   Ok(rows.len() as u64)
 }
 
+/// Whether a team has ever had its flag stolen for this challenge — i.e. whether it is
+/// already counted in the distinct-victim decay set.
+pub async fn victim_exploited<C>(db: &C, challenge_id: i64, victim: i64) -> Result<bool, DbErr>
+where
+  C: ConnectionTrait, {
+  Ok(
+    Entity::find()
+      .filter(Column::ChallengeId.eq(challenge_id))
+      .filter(Column::VictimTeamId.eq(victim))
+      .one(db)
+      .await?
+      .is_some(),
+  )
+}
+
 pub async fn get_list_ex<C>(db: &C, challenge_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
   C: ConnectionTrait, {

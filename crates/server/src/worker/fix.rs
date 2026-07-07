@@ -4,6 +4,11 @@
 //! `get_award_rate` stays in `game.rs` and is reused via `super::game`.
 #![allow(clippy::too_many_arguments)]
 
+/// Result string stamped on a fix submission whose tester never produced a verdict
+/// (pod launch / checker infra failure). Such submissions must NOT consume an attempt
+/// slot — the attempt-count query excludes them.
+pub(crate) const FIX_CHECKER_INTERNAL_ERROR: &str = "fix checker internal error, incorrect.";
+
 use std::collections::{BTreeMap, HashMap};
 use std::time::Duration;
 
@@ -134,7 +139,7 @@ pub(super) async fn fix_worker(
           submission::Model {
             id: submission.id,
             solved: Some(false),
-            result: Some("fix checker internal error, incorrect.".to_owned()),
+            result: Some(FIX_CHECKER_INTERNAL_ERROR.to_owned()),
             ..submission
           },
         )

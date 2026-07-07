@@ -223,6 +223,15 @@ where
   Entity::find_by_id(id).one(db).await
 }
 
+/// Row-locking read (`SELECT ... FOR UPDATE`) used by score-award workers so
+/// concurrent awards to the same team serialize on the team row instead of racing
+/// on the read-modify-write of `history` (which would drop entries).
+pub async fn get_for_update<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find_by_id(id).lock_exclusive().one(db).await
+}
+
 pub async fn get_ex<C>(db: &C, id: i64) -> Result<Option<ExModel>, DbErr>
 where
   C: ConnectionTrait, {

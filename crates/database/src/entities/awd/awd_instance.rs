@@ -85,3 +85,9 @@ where
     .await
     .map(|_| ())
 }
+
+pub async fn delete_by_id<C>(db: &C, id: i64) -> Result<(), DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}

@@ -34,7 +34,7 @@ enum AwdpSolve {
   CreatedAt,
   ChallengeId,
   TeamId,
-  SolvedRound,
+  SolvedAt,
 }
 
 #[derive(Iden)]
@@ -188,7 +188,11 @@ impl MigrationTrait for Migration {
             Team::Id,
             ForeignKeyAction::Cascade,
           ))
-          .col(ColumnDef::new(AwdpSolve::SolvedRound).big_integer().not_null())
+          .col(
+            ColumnDef::new(AwdpSolve::SolvedAt)
+              .timestamp_with_time_zone()
+              .not_null(),
+          )
           .to_owned(),
       )
       .await?;

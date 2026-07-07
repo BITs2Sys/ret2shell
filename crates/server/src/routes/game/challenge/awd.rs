@@ -92,9 +92,19 @@ async fn get_awd_status(
   } else {
     None
   };
+  // internal per-challenge operational detail (last_error) is admin-only.
+  let awd_state = awd_state::get(&state.db.conn, challenge.id).await?;
+  let awd_state = if admin {
+    awd_state
+  } else {
+    awd_state.map(|s| awd_state::Model {
+      last_error: None,
+      ..s
+    })
+  };
   Ok(Json(AwdStatus {
     config: config.map(|c| if admin { c } else { c.desensitize() }),
-    state: awd_state::get(&state.db.conn, challenge.id).await?,
+    state: awd_state,
     instance,
     round,
   }))
@@ -177,6 +187,15 @@ async fn teardown_awd(
 ) -> Result<impl IntoResponse, ResponseError> {
   if !is_game_admin!(token, game) {
     return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
+  // Teardown wipes awd_steal (the decay counter) but leaves earned score; allowing it
+  // mid-game would let teams re-farm at full value after a re-provision. Require the
+  // game be hidden/not-in-progress first.
+  if game.in_progress() {
+    return Err(ResponseError::PreconditionFailed(
+      "cannot tear down AWD machines while the game is in progress; hide the game first"
+        .to_owned(),
+    ));
   }
   awd::teardown(&state, challenge.id).await?;
   Ok(axum::http::StatusCode::NO_CONTENT)
