@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "队伍人数",
-        "placeholder": "请输入队伍人数",
+        "placeholder": "请输入队伍人数，0 表示不限制",
         "required": "队伍人数不能为空",
         "mustBeNumber": "队伍人数必须是数字",
         "mustBePositiveNumber": "队伍人数必须是正数",
-        "minimum": "人数不能少于 1",
+        "minimum": "人数不能少于 0",
         "maximum": "人数不能多于 99"
+      },
+      "envLimit": {
+        "label": "容器限制",
+        "placeholder": "留空则默认跟随队伍人数（无限制时为 1）",
+        "minimum": "容器限制不能少于 1",
+        "maximum": "容器限制不能多于 99"
       },
       "enableTeamAudit": {
         "label": "启用队伍审核",
@@ -2026,6 +2032,7 @@
     },
     "solo": "单人赛",
     "collab": "{{size}} 人组队赛",
+    "unlimited": "不限人数组队赛",
     "list": {
       "title": "队伍列表",
       "selectInstitute": "选择组织...",

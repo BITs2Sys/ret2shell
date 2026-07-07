@@ -30,8 +30,10 @@ pub mod m_20250330_000001_create_team_tag;
 pub mod m_20250622_000001_create_game_hammer_policy;
 pub mod m_20250721_000001_create_ip_time_info;
 pub mod m_20260307_000001_game_lifecycle;
+pub mod m_20260704_000001_game_env_limit;
+// BITs2CTF fork: fork-owned migration modules (append-only, keep at tail).
 pub mod m_20260703_000001_create_koh;
-// BITs2CTF fork: ISW range mode (append-only, keep at tail).
+// BITs2CTF fork: ISW range mode.
 pub mod m_20260706_000001_create_isw;
 // BITs2CTF fork: AWD + AWDP modes.
 pub mod m_20260707_000001_create_awd;
